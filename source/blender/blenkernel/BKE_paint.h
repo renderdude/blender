@@ -51,6 +51,7 @@ struct PaletteColor;
 struct Scene;
 struct StrokeCache;
 struct Sculpt;
+struct SculptSession;
 struct SubdivCCG;
 struct Tex;
 struct ToolSettings;
@@ -562,6 +563,8 @@ typedef struct SculptAttributePointers {
   SculptAttribute *dyntopo_node_id_face;
 } SculptAttributePointers;
 
+#ifdef __cplusplus
+
 typedef struct SculptSession {
   /* Mesh data (not copied) can come either directly from a Mesh, or from a MultiresDM */
   struct { /* Special handling for multires meshes */
@@ -575,8 +578,8 @@ typedef struct SculptSession {
 
   /* These are always assigned to base mesh data when using PBVH_FACES and PBVH_GRIDS. */
   float (*vert_positions)[3];
-  const int *poly_offsets;
-  const int *corner_verts;
+  blender::OffsetIndices<int> polys;
+  blender::Span<int> corner_verts;
 
   /* These contain the vertex and poly counts of the final mesh. */
   int totvert, totpoly;
@@ -756,6 +759,8 @@ typedef struct SculptSession {
   uchar last_automask_stroke_id;
   bool islands_valid; /* Is attrs.topology_island_key valid? */
 } SculptSession;
+
+#endif
 
 void BKE_sculptsession_free(struct Object *ob);
 void BKE_sculptsession_free_deformMats(struct SculptSession *ss);
