@@ -456,7 +456,7 @@ Mesh *MOD_solidify_nonmanifold_modifyMesh(ModifierData *md,
             if (!face_singularity[face]) {
               bool is_singularity = true;
               for (uint k = 0; k < orig_mpoly[face].totloop; k++) {
-                if (vm[orig_corner_verts[(uint(orig_mpoly[face].loopstart)) + k]] != v1) {
+                if (vm[orig_corner_verts[uint(orig_mpoly[face].loopstart) + k]] != v1) {
                   is_singularity = false;
                   break;
                 }
