@@ -453,8 +453,8 @@ Mesh *MOD_solidify_nonmanifold_modifyMesh(ModifierData *md,
             const uint face = edge_adj_faces[i]->faces[j];
             if (!face_singularity[face]) {
               bool is_singularity = true;
-              for (const int64_t corner : orig_polys[face]) {
-                if (vm[orig_corner_verts[corner]] != v1) {
+              for (const int vert : orig_corner_verts.slice(orig_polys[face])) {
+                if (vm[vert] != v1) {
                   is_singularity = false;
                   break;
                 }
