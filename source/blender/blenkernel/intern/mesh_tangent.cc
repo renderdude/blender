@@ -196,7 +196,7 @@ struct SGLSLMeshToTangent {
     if (face_as_quad_map) {
       lt = &looptri[face_as_quad_map[face_num]];
       if (polys[lt->poly].size() == 4) {
-        return polys[lt->poly][vert_num];
+        return uint(polys[lt->poly][vert_num]);
       }
       /* fall through to regular triangle */
     }

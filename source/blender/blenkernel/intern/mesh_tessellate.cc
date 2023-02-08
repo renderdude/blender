@@ -230,7 +230,7 @@ static void mesh_calc_tessellation_for_face_fn(void *__restrict userdata,
 {
   const TessellationUserData *data = static_cast<const TessellationUserData *>(userdata);
   TessellationUserTLS *tls_data = static_cast<TessellationUserTLS *>(tls->userdata_chunk);
-  const int tri_index = poly_to_tri_count(index, data->polys[index].start());
+  const int tri_index = poly_to_tri_count(index, int(data->polys[index].start()));
   mesh_calc_tessellation_for_face_impl(data->corner_verts,
                                        data->polys,
                                        data->positions,
@@ -247,7 +247,7 @@ static void mesh_calc_tessellation_for_face_with_normal_fn(void *__restrict user
 {
   const TessellationUserData *data = static_cast<const TessellationUserData *>(userdata);
   TessellationUserTLS *tls_data = static_cast<TessellationUserTLS *>(tls->userdata_chunk);
-  const int tri_index = poly_to_tri_count(index, data->polys[index].start());
+  const int tri_index = poly_to_tri_count(index, int(data->polys[index].start()));
   mesh_calc_tessellation_for_face_impl(data->corner_verts,
                                        data->polys,
                                        data->positions,

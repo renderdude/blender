@@ -213,17 +213,16 @@ void BKE_mesh_calc_edges_legacy(Mesh *me, const bool use_old)
   int totedge = 0;
   const Span<MVert> verts(static_cast<const MVert *>(CustomData_get_layer(&me->vdata, CD_MVERT)),
                           me->totvert);
-  MutableSpan<int> poly_offsets(me->mpoly, me->totvert);
 
   mesh_calc_edges_mdata(
       verts.data(),
       (MFace *)CustomData_get_layer(&me->fdata, CD_MFACE),
       static_cast<MLoop *>(CustomData_get_layer_for_write(&me->ldata, CD_MLOOP, me->totloop)),
-      polys.data(),
+      me->mpoly,
       verts.size(),
       me->totface,
       me->totloop,
-      polys.size(),
+      me->totpoly,
       use_old,
       &medge,
       &totedge);
@@ -2136,6 +2135,50 @@ void BKE_mesh_legacy_convert_loops_to_corners(Mesh *mesh)
   });
 
   CustomData_free_layers(&mesh->ldata, CD_MLOOP, mesh->totloop);
+}
+
+/** \} */
+
+/* -------------------------------------------------------------------- */
+/** \name Poly Offset Conversion
+ * \{ */
+
+MPoly *BKE_mesh_legacy_convert_offsets_to_polys(const Mesh *mesh,
+                                                blender::ResourceScope &temp_arrays_for_convert)
+{
+  using namespace blender;
+  const OffsetIndices polys = mesh->polys();
+  const Span<int> corner_verts = mesh->corner_verts();
+  const Span<int> corner_edges = mesh->corner_edges();
+
+  MutableSpan<MPoly> polys_legacy = temp_arrays_for_convert.construct<Array<MPoly>>(mesh->totpoly);
+
+  threading::parallel_for(polys_legacy.index_range(), 2048, [&](IndexRange range) {
+    for (const int i : range) {
+      polys_legacy[i].loopstart = polys[i].start();
+      polys_legacy[i].totloop = polys[i].size();
+    }
+  });
+
+  return polys_legacy.data();
+}
+
+void BKE_mesh_legacy_convert_polys_to_offsets(Mesh *mesh)
+{
+  /* TODO: Handle out of order loops. */
+  using namespace blender;
+  if (mesh->poly_offsets_data) {
+    return;
+  }
+  const Span<MPoly> legacy_polys(mesh->mpoly, mesh->totpoly);
+  BKE_mesh_poly_offsets_ensure(mesh);
+  MutableSpan<int> offsets = mesh->poly_offsets_for_write();
+
+  for (const int i : legacy_polys.index_range()) {
+    offsets[i] = legacy_polys[i].loopstart;
+  }
+
+  CustomData_free_layers(&mesh->pdata, CD_MPOLY, mesh->totpoly);
 }
 
 /** \} */

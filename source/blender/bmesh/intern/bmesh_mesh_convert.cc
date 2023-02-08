@@ -1080,7 +1080,7 @@ void BM_mesh_bm_to_me(Main *bmain, BMesh *bm, Mesh *me, const struct BMeshToMesh
       &me->ldata, CD_PROP_INT32, CD_CONSTRUCT, nullptr, me->totloop, ".corner_vert");
   CustomData_add_layer_named(
       &me->ldata, CD_PROP_INT32, CD_CONSTRUCT, nullptr, me->totloop, ".corner_edge");
-  BKE_mesh_ensure_poly_offsets(me);
+  BKE_mesh_poly_offsets_ensure(me);
   MutableSpan<float3> positions = me->vert_positions_for_write();
   MutableSpan<MEdge> medge = me->edges_for_write();
   MutableSpan<int> poly_offsets = me->poly_offsets_for_write();

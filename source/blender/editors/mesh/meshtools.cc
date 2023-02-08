@@ -102,7 +102,6 @@ static void join_mesh_single(Depsgraph *depsgraph,
   MEdge *medge = *medge_pp;
   int *corner_verts = *corner_verts_pp;
   int *corner_edges = *corner_edges_pp;
-  int *poly_offsets = *poly_offsets_pp;
 
   if (me->totvert) {
     /* standard data */
@@ -269,7 +268,7 @@ static void join_mesh_single(Depsgraph *depsgraph,
     }
 
     for (a = 0; a < me->totpoly; a++) {
-      *poly_offsets_pp += *loopofs;
+      poly_offsets_pp[a] += *loopofs;
     }
 
     /* Face maps. */

@@ -188,7 +188,7 @@ static Mesh *modifyMesh(ModifierData *md, const ModifierEvalContext *ctx, Mesh *
 
   int mpoly_index = 0;
   uint step;
-  uint i, j;
+  uint j;
   uint i1, i2;
   uint step_tot = use_render_params ? ltmd->render_steps : ltmd->steps;
   const bool do_flip = (ltmd->flag & MOD_SCREW_NORMAL_FLIP) != 0;
@@ -417,7 +417,7 @@ static Mesh *modifyMesh(ModifierData *md, const ModifierEvalContext *ctx, Mesh *
     }
 
     if (ltmd->flag & MOD_SCREW_UV_STRETCH_V) {
-      for (i = 0; i < totvert; i++) {
+      for (uint i = 0; i < totvert; i++) {
         const float v = dist_signed_squared_to_plane_v3(vert_positions_orig[i], uv_axis_plane);
         uv_v_minmax[0] = min_ff(v, uv_v_minmax[0]);
         uv_v_minmax[1] = max_ff(v, uv_v_minmax[1]);
@@ -435,7 +435,7 @@ static Mesh *modifyMesh(ModifierData *md, const ModifierEvalContext *ctx, Mesh *
   /* Copy the first set of edges */
   const MEdge *med_orig = medge_orig;
   med_new = medge_new;
-  for (i = 0; i < totedge; i++, med_orig++, med_new++) {
+  for (uint i = 0; i < totedge; i++, med_orig++, med_new++) {
     med_new->v1 = med_orig->v1;
     med_new->v2 = med_orig->v2;
     med_new->flag = med_orig->flag;
@@ -451,12 +451,12 @@ static Mesh *modifyMesh(ModifierData *md, const ModifierEvalContext *ctx, Mesh *
         MEM_malloc_arrayN(totvert, sizeof(*vert_loop_map), __func__));
     memset(vert_loop_map, 0xff, sizeof(*vert_loop_map) * totvert);
 
-    for (const int i : polys_orig.index_range()) {
-      for (const int corner : polys_orig[i]) {
+    for (const int64_t i : polys_orig.index_range()) {
+      for (const int64_t corner : polys_orig[i]) {
         const uint vert_i = uint(corner_verts_orig[corner]);
         const uint edge_i = uint(corner_edges_orig[corner]);
-        edge_poly_map[edge_i] = i;
-        vert_loop_map[vert_i] = corner;
+        edge_poly_map[edge_i] = uint(i);
+        vert_loop_map[vert_i] = uint(corner);
 
         /* also order edges based on faces */
         if (medge_new[edge_i].v1 != vert_i) {
@@ -486,7 +486,7 @@ static Mesh *modifyMesh(ModifierData *md, const ModifierEvalContext *ctx, Mesh *
 
       if (ob_axis != nullptr) {
         /* `mtx_tx` is initialized early on. */
-        for (i = 0; i < totvert; i++, vc++) {
+        for (uint i = 0; i < totvert; i++, vc++) {
           vc->co[0] = vert_positions_new[i][0] = vert_positions_orig[i][0];
           vc->co[1] = vert_positions_new[i][1] = vert_positions_orig[i][1];
           vc->co[2] = vert_positions_new[i][2] = vert_positions_orig[i][2];
@@ -504,7 +504,7 @@ static Mesh *modifyMesh(ModifierData *md, const ModifierEvalContext *ctx, Mesh *
         }
       }
       else {
-        for (i = 0; i < totvert; i++, vc++) {
+        for (uint i = 0; i < totvert; i++, vc++) {
           vc->co[0] = vert_positions_new[i][0] = vert_positions_orig[i][0];
           vc->co[1] = vert_positions_new[i][1] = vert_positions_orig[i][1];
           vc->co[2] = vert_positions_new[i][2] = vert_positions_orig[i][2];
@@ -522,7 +522,7 @@ static Mesh *modifyMesh(ModifierData *md, const ModifierEvalContext *ctx, Mesh *
       }
 
       /* this loop builds connectivity info for verts */
-      for (i = 0; i < totedge; i++, med_new++) {
+      for (uint i = 0; i < totedge; i++, med_new++) {
         vc = &vert_connect[med_new->v1];
 
         if (vc->v[0] == SV_UNUSED) { /* unused */
@@ -555,7 +555,7 @@ static Mesh *modifyMesh(ModifierData *md, const ModifierEvalContext *ctx, Mesh *
 
       /* find the first vert */
       vc = vert_connect;
-      for (i = 0; i < totvert; i++, vc++) {
+      for (uint i = 0; i < totvert; i++, vc++) {
         /* Now do search for connected verts, order all edges and flip them
          * so resulting faces are flipped the right way */
         vc_tot_linked = 0; /* count the number of linked verts for this loop */
@@ -734,7 +734,7 @@ static Mesh *modifyMesh(ModifierData *md, const ModifierEvalContext *ctx, Mesh *
     }
   }
   else {
-    for (i = 0; i < totvert; i++) {
+    for (uint i = 0; i < totvert; i++) {
       copy_v3_v3(vert_positions_new[i], vert_positions_orig[i]);
     }
   }
@@ -801,7 +801,7 @@ static Mesh *modifyMesh(ModifierData *md, const ModifierEvalContext *ctx, Mesh *
     /* last loop of edges, previous loop doesn't account for the last set of edges */
     const uint varray_stride = (step_tot - 1) * totvert;
 
-    for (i = 0; i < totvert; i++) {
+    for (uint i = 0; i < totvert; i++) {
       med_new->v1 = i;
       med_new->v2 = varray_stride + i;
       med_new->flag = ME_EDGEDRAW;
@@ -818,7 +818,7 @@ static Mesh *modifyMesh(ModifierData *md, const ModifierEvalContext *ctx, Mesh *
   const int *src_material_index = BKE_mesh_material_indices(mesh);
   int *dst_material_index = BKE_mesh_material_indices_for_write(result);
 
-  for (i = 0; i < totedge; i++, med_new_firstloop++) {
+  for (uint i = 0; i < totedge; i++, med_new_firstloop++) {
     const uint step_last = step_tot - (close ? 1 : 2);
     const uint mpoly_index_orig = totpoly ? edge_poly_map[i] : UINT_MAX;
     const bool has_mpoly_orig = (mpoly_index_orig != UINT_MAX);

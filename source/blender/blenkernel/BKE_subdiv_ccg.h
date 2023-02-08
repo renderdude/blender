@@ -12,6 +12,10 @@
 #include "BLI_sys_types.h"
 
 #ifdef __cplusplus
+#  include "BLI_offset_indices.hh"
+#endif
+
+#ifdef __cplusplus
 extern "C" {
 #endif
 

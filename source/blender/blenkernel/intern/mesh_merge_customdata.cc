@@ -116,10 +116,9 @@ void BKE_mesh_merge_customdata_for_apply_modifier(Mesh *me)
   struct MeshElemMap *vert_to_loop;
   BKE_mesh_vert_loop_map_create(&vert_to_loop,
                                 &vert_map_mem,
-                                BKE_mesh_poly_offsets(me),
+                                me->polys(),
                                 me->corner_verts().data(),
                                 me->totvert,
-                                me->totpoly,
                                 me->totloop);
 
   Vector<float2 *> mloopuv_layers;

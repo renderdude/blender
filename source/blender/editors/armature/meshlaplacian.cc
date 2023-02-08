@@ -1768,13 +1768,11 @@ void ED_mesh_deform_bind_callback(Object *object,
 {
   MeshDeformModifierData *mmd_orig = (MeshDeformModifierData *)BKE_modifier_get_original(
       object, &mmd->modifier);
-  MeshDeformBind mdb;
+  MeshDeformBind mdb{};
   int a;
 
   waitcursor(1);
   start_progress_bar();
-
-  memset(&mdb, 0, sizeof(MeshDeformBind));
 
   /* No need to support other kinds of mesh data as binding is a one-off action. */
   BKE_mesh_wrapper_ensure_mdata(cagemesh);

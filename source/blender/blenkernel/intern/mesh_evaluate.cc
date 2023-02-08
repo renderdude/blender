@@ -312,7 +312,6 @@ bool BKE_mesh_center_bounds(const Mesh *me, float r_cent[3])
 
 bool BKE_mesh_center_of_surface(const Mesh *me, float r_cent[3])
 {
-  int i = me->totpoly;
   float poly_area;
   float total_area = 0.0f;
   float poly_cent[3];
@@ -344,7 +343,6 @@ bool BKE_mesh_center_of_surface(const Mesh *me, float r_cent[3])
 
 bool BKE_mesh_center_of_volume(const Mesh *me, float r_cent[3])
 {
-  int i = me->totpoly;
   float poly_volume;
   float total_volume = 0.0f;
   float poly_cent[3];
@@ -595,12 +593,10 @@ void BKE_mesh_polygon_flip(const int poly_offset,
       poly_offset, poly_size, corner_verts, corner_edges, ldata, nullptr, mdisp, true);
 }
 
-void BKE_mesh_polys_flip(const blender::OffsetIndices<int> polys,
-                         int *corner_verts,
-                         int *corner_edges,
-                         CustomData *ldata,
-                         int totpoly)
+void BKE_mesh_polys_flip(
+    const int *poly_offsets, int *corner_verts, int *corner_edges, CustomData *ldata, int totpoly)
 {
+  const blender::OffsetIndices polys(blender::Span(poly_offsets, totpoly + 1));
   MDisps *mdisp = (MDisps *)CustomData_get_layer_for_write(ldata, CD_MDISPS, totpoly);
   for (const int i : polys.index_range()) {
     BKE_mesh_polygon_flip_ex(polys[i].start(),

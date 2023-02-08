@@ -93,7 +93,6 @@ void ED_draw_object_facemap(Depsgraph *depsgraph,
     GPUVertBufRaw pos_step;
     GPU_vertbuf_attr_get_raw_data(vbo_pos, pos_id, &pos_step);
 
-    int i;
     if (BKE_mesh_runtime_looptri_ensure(me)) {
       const MLoopTri *mlt = BKE_mesh_runtime_looptri_ensure(me);
       for (const int i : polys.index_range()) {

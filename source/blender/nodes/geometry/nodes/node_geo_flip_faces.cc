@@ -35,7 +35,7 @@ static void mesh_flip_faces(Mesh &mesh, const Field<bool> &selection_field)
 
   threading::parallel_for(selection.index_range(), 1024, [&](const IndexRange range) {
     for (const int i : selection.slice(range)) {
-      const IndexRange poly(polys[i].loopstart, polys[i].totloop);
+      const IndexRange poly = polys[i];
       int start = poly.start();
       for (const int j : IndexRange(poly.size() / 2)) {
         const int index1 = start + j + 1;
@@ -63,7 +63,7 @@ static void mesh_flip_faces(Mesh &mesh, const Field<bool> &selection_field)
             MutableSpan<T> dst_span = attribute.span.typed<T>();
             threading::parallel_for(selection.index_range(), 1024, [&](const IndexRange range) {
               for (const int i : selection.slice(range)) {
-                const IndexRange poly(polys[i].loopstart, polys[i].totloop);
+                const IndexRange poly = polys[i];
                 dst_span.slice(poly.drop_front(1)).reverse();
               }
             });

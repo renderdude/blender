@@ -271,7 +271,7 @@ static void sculpt_init_session(Main *bmain, Depsgraph *depsgraph, Scene *scene,
   if (ob->sculpt != nullptr) {
     BKE_sculptsession_free(ob);
   }
-  ob->sculpt = MEM_cnew<SculptSession>(__func__);
+  ob->sculpt = MEM_new<SculptSession>(__func__, SculptSession());
   ob->sculpt->mode_type = OB_MODE_SCULPT;
 
   /* Trigger evaluation of modifier stack to ensure

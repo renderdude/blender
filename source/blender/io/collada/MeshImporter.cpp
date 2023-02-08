@@ -456,7 +456,7 @@ void MeshImporter::allocate_poly_data(COLLADAFW::Mesh *collada_mesh, Mesh *me)
   if (total_poly_count > 0) {
     me->totpoly = total_poly_count;
     me->totloop = total_loop_count;
-    BKE_mesh_ensure_poly_offsets(me);
+    BKE_mesh_poly_offsets_ensure(me);
     CustomData_add_layer_named(
         &me->ldata, CD_PROP_INT32, CD_SET_DEFAULT, nullptr, me->totloop, ".corner_vert");
 

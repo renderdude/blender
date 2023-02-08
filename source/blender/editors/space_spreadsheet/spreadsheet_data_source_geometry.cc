@@ -194,14 +194,14 @@ std::unique_ptr<ColumnValues> GeometryDataSource::get_column_values(
       else if (domain_ == ATTR_DOMAIN_FACE) {
         if (STREQ(column_id.name, "Corner Start")) {
           return std::make_unique<ColumnValues>(
-              column_id.name, VArray<int>::ForFunc(polys.size(), [polys](int64_t index) {
-                return polys[index].loopstart;
+              column_id.name, VArray<int>::ForFunc(polys.ranges_num(), [polys](int64_t index) {
+                return polys[index].start();
               }));
         }
         if (STREQ(column_id.name, "Corner Size")) {
           return std::make_unique<ColumnValues>(
-              column_id.name, VArray<int>::ForFunc(polys.size(), [polys](int64_t index) {
-                return polys[index].totloop;
+              column_id.name, VArray<int>::ForFunc(polys.ranges_num(), [polys](int64_t index) {
+                return polys[index].size();
               }));
         }
       }

@@ -373,11 +373,9 @@ static void calculate_cone_faces(const ConeConfig &config,
                                  MutableSpan<int> corner_edges,
                                  MutableSpan<int> poly_sizes)
 {
-  int rings_poly_start = 0;
   int rings_loop_start = 0;
   if (config.top_has_center_vert) {
     poly_sizes.take_front(config.top_faces_len).fill(3);
-    rings_poly_start = config.circle_segments;
     rings_loop_start = config.circle_segments * 3;
 
     /* Top cone tip or center triangle fan in the fill. */
@@ -401,7 +399,6 @@ static void calculate_cone_faces(const ConeConfig &config,
   else if (config.fill_type == GEO_NODE_MESH_CIRCLE_FILL_NGON) {
     /* Center n-gon in the fill. */
     poly_sizes.first() = config.circle_segments;
-    rings_poly_start = 1;
     rings_loop_start = config.circle_segments;
 
     for (const int i : IndexRange(config.circle_segments)) {
@@ -413,7 +410,6 @@ static void calculate_cone_faces(const ConeConfig &config,
   /* Quads connect one edge ring to the next one. */
   poly_sizes.drop_front(config.top_faces_len).drop_back(config.bottom_faces_len).fill(4);
   for (const int i : IndexRange(config.tot_quad_rings)) {
-    const int this_ring_poly_start = rings_poly_start + i * config.circle_segments;
     const int this_ring_loop_start = rings_loop_start + i * config.circle_segments * 4;
     const int this_ring_vert_start = config.first_ring_verts_start + (i * config.circle_segments);
     const int next_ring_vert_start = this_ring_vert_start + config.circle_segments;
@@ -440,7 +436,6 @@ static void calculate_cone_faces(const ConeConfig &config,
     }
   }
 
-  const int bottom_poly_start = rings_poly_start + config.tot_quad_rings * config.circle_segments;
   const int bottom_loop_start = rings_loop_start +
                                 config.tot_quad_rings * config.circle_segments * 4;
 

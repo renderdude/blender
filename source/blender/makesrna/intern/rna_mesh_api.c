@@ -172,7 +172,7 @@ static void rna_Mesh_transform(Mesh *mesh, float mat[16], bool shape_keys)
 
 static void rna_Mesh_flip_normals(Mesh *mesh)
 {
-  BKE_mesh_poly_offsets_flip(BKE_mesh_poly_offsets(mesh),
+  BKE_mesh_polys_flip(BKE_mesh_poly_offsets(mesh),
                       BKE_mesh_corner_verts_for_write(mesh),
                       BKE_mesh_corner_edges_for_write(mesh),
                       &mesh->ldata,

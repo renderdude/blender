@@ -68,10 +68,7 @@ static float compute_volume(const float center[3],
                             float (*vertexCos)[3],
                             blender::OffsetIndices<int> polys,
                             const int *corner_verts);
-static LaplacianSystem *init_laplacian_system(int a_numEdges,
-                                              int a_numPolys,
-                                              int a_numLoops,
-                                              int a_numVerts);
+static LaplacianSystem *init_laplacian_system(int a_numEdges, int a_numLoops, int a_numVerts);
 static void delete_laplacian_system(LaplacianSystem *sys);
 static void fill_laplacian_matrix(LaplacianSystem *sys);
 static void init_data(ModifierData *md);
@@ -137,7 +134,6 @@ static float compute_volume(const float center[3],
                             const blender::OffsetIndices<int> polys,
                             const int *corner_verts)
 {
-  int i;
   float vol = 0.0f;
 
   for (const int i : polys.index_range()) {

@@ -385,7 +385,7 @@ const float (*BKE_mesh_vertex_normals_ensure(const Mesh *mesh))[3]
   blender::threading::isolate_task([&]() {
     Mesh &mesh_mutable = *const_cast<Mesh *>(mesh);
     const Span<float3> positions = mesh_mutable.vert_positions();
-    const OffsetIndices polys = mesh_mutable.polys();
+    const blender::OffsetIndices polys = mesh_mutable.polys();
     const Span<int> corner_verts = mesh_mutable.corner_verts();
 
     vert_normals = BKE_mesh_vertex_normals_for_write(&mesh_mutable);
@@ -395,7 +395,7 @@ const float (*BKE_mesh_vertex_normals_ensure(const Mesh *mesh))[3]
                                           positions.size(),
                                           corner_verts.data(),
                                           corner_verts.size(),
-                                          polys.data(),
+                                          polys,
                                           poly_normals,
                                           vert_normals);
 
@@ -1000,7 +1000,7 @@ static void split_loop_nor_fan_do(LoopSplitTaskDataCommon *common_data,
 
   const Span<float3> positions = common_data->positions;
   const Span<MEdge> edges = common_data->edges;
-  const OffsetIndices polys = common_data->polys;
+  const blender::OffsetIndices polys = common_data->polys;
   const Span<int> corner_verts = common_data->corner_verts;
   const Span<int> corner_edges = common_data->corner_edges;
   const Span<int2> edge_to_loops = common_data->edge_to_loops;

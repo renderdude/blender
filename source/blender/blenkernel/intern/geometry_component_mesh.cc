@@ -259,7 +259,7 @@ static GVArray adapt_mesh_domain_corner_to_face(const Mesh &mesh, const GVArray 
     if constexpr (!std::is_void_v<attribute_math::DefaultMixer<T>>) {
       if constexpr (std::is_same_v<T, bool>) {
         new_varray = VArray<T>::ForFunc(
-            polys.size(), [polys, varray = varray.typed<bool>()](const int face_index) {
+            polys.ranges_num(), [polys, varray = varray.typed<bool>()](const int face_index) {
               /* A face is selected if all of its corners were selected. */
               for (const int loop_index : polys[face_index]) {
                 if (!varray[loop_index]) {
@@ -271,7 +271,7 @@ static GVArray adapt_mesh_domain_corner_to_face(const Mesh &mesh, const GVArray 
       }
       else {
         new_varray = VArray<T>::ForFunc(
-            polys.size(), [polys, varray = varray.typed<T>()](const int face_index) {
+            polys.ranges_num(), [polys, varray = varray.typed<T>()](const int face_index) {
               T return_value;
               attribute_math::DefaultMixer<T> mixer({&return_value, 1});
               for (const int loop_index : polys[face_index]) {
@@ -592,9 +592,10 @@ void adapt_mesh_domain_edge_to_corner_impl(const Mesh &mesh,
   attribute_math::DefaultMixer<T> mixer(r_values);
 
   for (const int poly_index : polys.index_range()) {
+    const IndexRange poly = polys[poly_index];
 
     /* For every corner, mix the values from the adjacent edges on the face. */
-    for (const int loop_index : polys[poly_index]) {
+    for (const int loop_index : poly) {
       const int loop_index_prev = mesh_topology::poly_loop_prev(poly, loop_index);
       const int edge = corner_edges[loop_index];
       const int edge_prev = corner_edges[loop_index_prev];
@@ -714,7 +715,8 @@ static GVArray adapt_mesh_domain_edge_to_face(const Mesh &mesh, const GVArray &v
       if constexpr (std::is_same_v<T, bool>) {
         /* A face is selected if all of its edges are selected. */
         new_varray = VArray<bool>::ForFunc(
-            polys.size(), [corner_edges, polys, varray = varray.typed<T>()](const int face_index) {
+            polys.ranges_num(),
+            [corner_edges, polys, varray = varray.typed<T>()](const int face_index) {
               for (const int edge : corner_edges.slice(polys[face_index])) {
                 if (!varray[edge]) {
                   return false;
@@ -725,7 +727,8 @@ static GVArray adapt_mesh_domain_edge_to_face(const Mesh &mesh, const GVArray &v
       }
       else {
         new_varray = VArray<T>::ForFunc(
-            polys.size(), [corner_edges, polys, varray = varray.typed<T>()](const int face_index) {
+            polys.ranges_num(),
+            [corner_edges, polys, varray = varray.typed<T>()](const int face_index) {
               T return_value;
               attribute_math::DefaultMixer<T> mixer({&return_value, 1});
               for (const int edge : corner_edges.slice(polys[face_index])) {

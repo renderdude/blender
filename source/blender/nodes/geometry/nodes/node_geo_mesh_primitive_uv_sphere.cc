@@ -157,9 +157,6 @@ BLI_NOINLINE static void calculate_sphere_edge_indices(MutableSpan<MEdge> edges,
 
 BLI_NOINLINE static void calculate_sphere_faces(MutableSpan<int> poly_offsets, const int segments)
 {
-  int loop_index = 0;
-
-  MutableSpan<int> sizes = poly_offsets.drop_back(1);
   /* Add the triangles connected to the top vertex. */
   poly_offsets.take_front(segments).fill(3);
   /* Add the middle quads. */

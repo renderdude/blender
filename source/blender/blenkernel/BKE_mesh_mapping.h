@@ -8,6 +8,7 @@
 
 #ifdef __cplusplus
 #  include "BLI_array.hh"
+#  include "BLI_offset_indices.hh"
 #endif
 
 #ifdef __cplusplus
@@ -111,8 +112,13 @@ UvVertMap *BKE_mesh_uv_vert_map_create(blender::OffsetIndices<int> polys,
                                        const float limit[2],
                                        bool selected,
                                        bool use_winding);
+
+#endif
+
 UvMapVert *BKE_mesh_uv_vert_map_get_vert(UvVertMap *vmap, unsigned int v);
 void BKE_mesh_uv_vert_map_free(UvVertMap *vmap);
+
+#ifdef __cplusplus
 
 /**
  * Generates a map where the key is the vertex and the value
@@ -136,6 +142,9 @@ void BKE_mesh_vert_loop_map_create(MeshElemMap **r_map,
                                    const int *corner_verts,
                                    int totvert,
                                    int totloop);
+
+#endif
+
 /**
  * Generates a map where the key is the edge and the value
  * is a list of looptris that use that edge.
@@ -161,6 +170,9 @@ void BKE_mesh_vert_edge_map_create(
  */
 void BKE_mesh_vert_edge_vert_map_create(
     MeshElemMap **r_map, int **r_mem, const struct MEdge *medge, int totvert, int totedge);
+
+#ifdef __cplusplus
+
 /**
  * Generates a map where the key is the edge and the value is a list of loops that use that edge.
  * Loops indices of a same poly are contiguous and in winding order.

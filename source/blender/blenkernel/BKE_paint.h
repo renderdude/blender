@@ -915,6 +915,11 @@ bool BKE_object_attributes_active_color_fill(struct Object *ob,
                                              const float fill_color[4],
                                              bool only_selected);
 
+/** C accessor for #Object::sculpt::pbvh. */
+struct PBVH *BKE_object_sculpt_pbvh_get(struct Object *object);
+bool BKE_object_sculpt_use_dyntopo(const struct Object *object);
+void BKE_object_sculpt_dyntopo_smooth_shading_set(struct Object *object, bool value);
+
 /* paint_canvas.cc */
 
 /**

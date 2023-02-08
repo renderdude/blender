@@ -1415,7 +1415,7 @@ static void dynamicPaint_initAdjacencyData(DynamicPaintSurface *surface, const b
     int numOfEdges = mesh->totedge;
     int numOfPolys = mesh->totpoly;
     const MEdge *edges = BKE_mesh_edges(mesh);
-    const OffsetIndices polys = mesh->polys();
+    const blender::OffsetIndices polys = mesh->polys();
     const blender::Span<int> corner_verts = mesh->corner_verts();
 
     /* count number of edges per vertex */

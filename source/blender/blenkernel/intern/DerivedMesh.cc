@@ -1910,13 +1910,11 @@ static void mesh_init_origspace(Mesh *mesh)
 
   OrigSpaceLoop *lof_array = (OrigSpaceLoop *)CustomData_get_layer_for_write(
       &mesh->ldata, CD_ORIGSPACE_MLOOP, mesh->totloop);
-  const int numpoly = mesh->totpoly;
-  // const int numloop = mesh->totloop;
   const Span<float3> positions = mesh->vert_positions();
   const blender::OffsetIndices polys = mesh->polys();
   const Span<int> corner_verts = mesh->corner_verts();
 
-  int i, j, k;
+  int j, k;
 
   blender::Vector<blender::float2, 64> vcos_2d;
 
@@ -1970,7 +1968,7 @@ static void mesh_init_origspace(Mesh *mesh)
 
       /* Finally, transform all vcos_2d into ((0, 0), (1, 1))
        * square and assign them as origspace. */
-      for (j = 0; j < mp->totloop; j++, lof++) {
+      for (j = 0; j < poly.size(); j++, lof++) {
         add_v2_v2v2(lof->uv, vcos_2d[j], translate);
         mul_v2_v2(lof->uv, scale);
       }

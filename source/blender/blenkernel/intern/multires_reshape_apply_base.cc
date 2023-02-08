@@ -115,7 +115,6 @@ void multires_reshape_apply_base_refit_base_mesh(MultiresReshapeContext *reshape
 
       /* Set up poly, loops, and coords in order to call BKE_mesh_calc_poly_normal(). */
       blender::Array<int> poly_verts(poly.size());
-      int *poly_verts = static_cast<int *>(MEM_malloc_arrayN(poly.size(), sizeof(int), __func__));
       float(*fake_co)[3] = static_cast<float(*)[3]>(
           MEM_malloc_arrayN(poly.size(), sizeof(float[3]), __func__));
 

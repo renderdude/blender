@@ -2234,7 +2234,7 @@ void BKE_keyblock_mesh_calc_normals(const KeyBlock *kb,
   float(*positions)[3] = static_cast<float(*)[3]>(MEM_dupallocN(BKE_mesh_vert_positions(mesh)));
   BKE_keyblock_convert_to_mesh(kb, positions, mesh->totvert);
   const MEdge *edges = BKE_mesh_edges(mesh);
-  const OffsetIndices polys = mesh->polys();
+  const blender::OffsetIndices polys = mesh->polys();
   const blender::Span<int> corner_verts = mesh->corner_verts();
   const blender::Span<int> corner_edges = mesh->corner_edges();
 
@@ -2259,13 +2259,8 @@ void BKE_keyblock_mesh_calc_normals(const KeyBlock *kb,
   }
 
   if (poly_normals_needed) {
-    BKE_mesh_calc_normals_poly(positions,
-                               mesh->totvert,
-                               corner_verts.data(),
-                               mesh->totloop,
-                               polys,
-                               mesh->totpoly,
-                               poly_normals);
+    BKE_mesh_calc_normals_poly(
+        positions, mesh->totvert, corner_verts.data(), mesh->totloop, polys, poly_normals);
   }
   if (vert_normals_needed) {
     BKE_mesh_calc_normals_poly_and_vertex(positions,
@@ -2273,7 +2268,6 @@ void BKE_keyblock_mesh_calc_normals(const KeyBlock *kb,
                                           corner_verts.data(),
                                           mesh->totloop,
                                           polys,
-                                          mesh->totpoly,
                                           poly_normals,
                                           vert_normals);
   }
@@ -2295,7 +2289,6 @@ void BKE_keyblock_mesh_calc_normals(const KeyBlock *kb,
                                 mesh->totloop,
                                 polys,
                                 poly_normals,
-                                mesh->totpoly,
                                 (mesh->flag & ME_AUTOSMOOTH) != 0,
                                 mesh->smoothresh,
                                 sharp_edges,

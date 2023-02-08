@@ -1225,7 +1225,7 @@ static bool vgroup_normalize(Object *ob)
 static blender::Vector<int> getSurroundingVerts(Mesh *me, int vert)
 {
   int poly_index = 0;
-  const OffsetIndices polys = me->polys();
+  const blender::OffsetIndices polys = me->polys();
   const Span<int> corner_verts = me->corner_verts();
   int i = me->totpoly;
 

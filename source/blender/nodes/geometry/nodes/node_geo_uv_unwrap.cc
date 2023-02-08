@@ -68,7 +68,7 @@ static VArray<float3> construct_uv_gvarray(const Mesh &mesh,
   const Span<int> corner_verts = mesh.corner_verts();
 
   bke::MeshFieldContext face_context{mesh, ATTR_DOMAIN_FACE};
-  FieldEvaluator face_evaluator{face_context, polys.size()};
+  FieldEvaluator face_evaluator{face_context, polys.ranges_num()};
   face_evaluator.add(selection_field);
   face_evaluator.evaluate();
   const IndexMask selection = face_evaluator.get_evaluated_as_mask(0);

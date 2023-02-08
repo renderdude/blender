@@ -137,7 +137,7 @@ static void mesh_get_boundaries(Mesh *mesh, float *smooth_weights)
   uint8_t *boundaries = static_cast<uint8_t *>(
       MEM_calloc_arrayN(medge_num, sizeof(*boundaries), __func__));
 
-  for (const int i : polys.index_range()) {
+  for (const int64_t i : polys.index_range()) {
     for (const int edge : corner_edges.slice(polys[i])) {
       uint8_t *e_value = &boundaries[edge];
       *e_value |= uint8_t((*e_value) + 1);
@@ -445,8 +445,8 @@ static void calc_tangent_spaces(const Mesh *mesh,
 
   for (i = 0; i < mpoly_num; i++) {
     const blender::IndexRange poly = mpoly[i];
-    int next_corner = poly.start();
-    int term_corner = next_corner + poly.size();
+    int next_corner = int(poly.start());
+    int term_corner = next_corner + int(poly.size());
     int prev_corner = term_corner - 2;
     int curr_corner = term_corner - 1;
 

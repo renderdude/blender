@@ -426,7 +426,6 @@ static Mesh *arrayModifier_doArray(ArrayModifierData *amd,
 
   unit_m4(offset);
   const MEdge *src_edges = BKE_mesh_edges(mesh);
-  const blender::OffsetIndices src_polys = mesh->polys();
 
   if (amd->offset_type & MOD_ARR_OFF_CONST) {
     add_v3_v3(offset[3], amd->offset);

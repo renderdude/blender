@@ -183,7 +183,6 @@ static bool polygons_check_flip(int *corner_verts,
                                 float (*poly_normals)[3])
 {
   MDisps *mdisp = static_cast<MDisps *>(CustomData_get_layer_for_write(ldata, CD_MDISPS, totloop));
-  int i;
   bool flipped = false;
 
   for (const int i : polys.index_range()) {
@@ -544,7 +543,6 @@ static Mesh *normalEditModifier_do(NormalEditModifierData *enmd,
   const int verts_num = result->totvert;
   const int edges_num = result->totedge;
   const int loops_num = result->totloop;
-  const int polys_num = result->totpoly;
   const float(*positions)[3] = BKE_mesh_vert_positions(result);
   const MEdge *edges = BKE_mesh_edges(result);
   const OffsetIndices polys = result->polys();

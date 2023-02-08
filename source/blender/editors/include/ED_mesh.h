@@ -601,6 +601,10 @@ struct Mesh *ED_mesh_context(struct bContext *C);
  */
 void ED_mesh_split_faces(struct Mesh *mesh);
 
+void ED_mesh_calc_poly_normal_index(const struct Mesh *mesh, int poly_index, float r_no[3]);
+void ED_mesh_calc_poly_center_index(const struct Mesh *mesh, int poly_index, float r_center[3]);
+float ED_mesh_calc_poly_area_index(const struct Mesh *mesh, int poly_index);
+
 /* mesh backup */
 typedef struct BMBackup {
   struct BMesh *bmcopy;

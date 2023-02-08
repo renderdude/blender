@@ -103,7 +103,7 @@ static void free_mask_data(SubdivCCGMaskEvaluator *mask_evaluator)
 static int count_num_ptex_faces(const Mesh *mesh)
 {
   int num_ptex_faces = 0;
-  const OffsetIndices polys = mesh->polys();
+  const blender::OffsetIndices polys = mesh->polys();
   for (int poly_index = 0; poly_index < mesh->totpoly; poly_index++) {
     num_ptex_faces += (polys[poly_index].size() == 4) ? 1 : polys[poly_index].size();
   }
@@ -113,7 +113,7 @@ static int count_num_ptex_faces(const Mesh *mesh)
 static void mask_data_init_mapping(SubdivCCGMaskEvaluator *mask_evaluator, const Mesh *mesh)
 {
   GridPaintMaskData *data = static_cast<GridPaintMaskData *>(mask_evaluator->user_data);
-  const OffsetIndices polys = mesh->polys();
+  const blender::OffsetIndices polys = mesh->polys();
   const int num_ptex_faces = count_num_ptex_faces(mesh);
   /* Allocate memory. */
   data->ptex_poly_corner = static_cast<PolyCornerIndex *>(

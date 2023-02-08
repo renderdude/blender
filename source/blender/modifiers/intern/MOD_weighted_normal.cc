@@ -189,7 +189,6 @@ static void apply_weights_vertex_normal(WeightedNormalModifierData *wnmd,
   const int verts_num = wn_data->verts_num;
   const int edges_num = wn_data->edges_num;
   const int loops_num = wn_data->loops_num;
-  const int polys_num = wn_data->polys_num;
 
   const float(*positions)[3] = wn_data->vert_positions;
   const MEdge *medge = wn_data->medge;
@@ -254,7 +253,7 @@ static void apply_weights_vertex_normal(WeightedNormalModifierData *wnmd,
     /* In this first loop, we assign each WeightedNormalDataAggregateItem
      * to its smooth fan of loops (aka lnor space). */
     int item_index;
-    for (int mp_index = 0, item_index = 0; mp_index < polys_num; mp_index++) {
+    for (int mp_index = 0, item_index = 0; mp_index < polys.ranges_num(); mp_index++) {
 
       for (const int ml_index : polys[mp_index]) {
         if (BLI_BITMAP_TEST(done_loops, ml_index)) {
@@ -299,11 +298,11 @@ static void apply_weights_vertex_normal(WeightedNormalModifierData *wnmd,
 
   switch (mode) {
     case MOD_WEIGHTEDNORMAL_MODE_FACE:
-      for (int i = 0; i < polys_num; i++) {
+      for (const int i : polys.index_range()) {
         const int mp_index = mode_pair[i].index;
         const float mp_val = mode_pair[i].val;
 
-        for (const ml_index : polys[mp_index]) {
+        for (const int ml_index : polys[mp_index]) {
           const int mv_index = corner_verts[ml_index];
           WeightedNormalDataAggregateItem *item_data =
               keep_sharp ? static_cast<WeightedNormalDataAggregateItem *>(
@@ -462,14 +461,13 @@ static void apply_weights_vertex_normal(WeightedNormalModifierData *wnmd,
 static void wn_face_area(WeightedNormalModifierData *wnmd, WeightedNormalData *wn_data)
 {
   using namespace blender;
-  const int polys_num = wn_data->polys_num;
 
   const float(*positions)[3] = wn_data->vert_positions;
   const Span<int> corner_verts = wn_data->corner_verts;
   const blender::OffsetIndices polys = wn_data->polys;
 
   ModePair *face_area = static_cast<ModePair *>(
-      MEM_malloc_arrayN(size_t(polys_num), sizeof(*face_area), __func__));
+      MEM_malloc_arrayN(polys.ranges_num(), sizeof(*face_area), __func__));
 
   ModePair *f_area = face_area;
   for (const int i : polys.index_range()) {
@@ -477,7 +475,7 @@ static void wn_face_area(WeightedNormalModifierData *wnmd, WeightedNormalData *w
     f_area[i].index = i;
   }
 
-  qsort(face_area, polys_num, sizeof(*face_area), modepair_cmp_by_val_inverse);
+  qsort(face_area, polys.ranges_num(), sizeof(*face_area), modepair_cmp_by_val_inverse);
 
   wn_data->mode_pair = face_area;
   apply_weights_vertex_normal(wnmd, wn_data);
@@ -487,7 +485,6 @@ static void wn_corner_angle(WeightedNormalModifierData *wnmd, WeightedNormalData
 {
   using namespace blender;
   const int loops_num = wn_data->loops_num;
-  const int polys_num = wn_data->polys_num;
 
   const float(*positions)[3] = wn_data->vert_positions;
   const Span<int> corner_verts = wn_data->corner_verts;
@@ -522,7 +519,6 @@ static void wn_face_with_angle(WeightedNormalModifierData *wnmd, WeightedNormalD
 {
   using namespace blender;
   const int loops_num = wn_data->loops_num;
-  const int polys_num = wn_data->polys_num;
 
   const float(*positions)[3] = wn_data->vert_positions;
   const Span<int> corner_verts = wn_data->corner_verts;

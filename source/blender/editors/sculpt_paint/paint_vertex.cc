@@ -3332,8 +3332,8 @@ static void do_vpaint_brush_smear(bContext *C,
                   BLI_assert(ss->corner_verts[l_index] == v_index);
                   UNUSED_VARS_NDEBUG(l_index);
                   if (!use_face_sel || select_poly[p_index]) {
-                    for (const int v_other_index : ss->corner_verts.slice(ss->polys[p_index])) {
-                      const int v_other_index = ss->corner_verts[other_corner_i];
+                    for (const int corner : ss->polys[p_index]) {
+                      const int v_other_index = ss->corner_verts[corner];
                       if (v_other_index != v_index) {
                         const float3 &mv_other = &ss->vert_positions[v_other_index];
 
@@ -3352,7 +3352,7 @@ static void do_vpaint_brush_smear(bContext *C,
                           elem_index = v_other_index;
                         }
                         else {
-                          elem_index = mp->loopstart + k;
+                          elem_index = corner;
                         }
 
                         if (stroke_dot > stroke_dot_max) {

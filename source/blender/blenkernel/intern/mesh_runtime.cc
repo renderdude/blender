@@ -144,17 +144,17 @@ blender::Span<MLoopTri> Mesh::looptris() const
 {
   this->runtime->looptris_cache.ensure([&](blender::Array<MLoopTri> &r_data) {
     const Span<float3> positions = this->vert_positions();
-    const OffsetIndices polys = this->polys();
+    const blender::OffsetIndices polys = this->polys();
     const Span<int> corner_verts = this->corner_verts();
 
-    r_data.reinitialize(poly_to_tri_count(polys.size(), corner_verts.size()));
+    r_data.reinitialize(poly_to_tri_count(polys.ranges_num(), corner_verts.size()));
 
     if (BKE_mesh_poly_normals_are_dirty(this)) {
       BKE_mesh_recalc_looptri(corner_verts.data(),
                               polys.data(),
                               reinterpret_cast<const float(*)[3]>(positions.data()),
                               corner_verts.size(),
-                              polys.size(),
+                              polys.ranges_num(),
                               r_data.data());
     }
     else {
@@ -162,7 +162,7 @@ blender::Span<MLoopTri> Mesh::looptris() const
                                            polys.data(),
                                            reinterpret_cast<const float(*)[3]>(positions.data()),
                                            corner_verts.size(),
-                                           polys.size(),
+                                           polys.ranges_num(),
                                            r_data.data(),
                                            BKE_mesh_poly_normals_ensure(this));
     }
@@ -351,7 +351,7 @@ bool BKE_mesh_runtime_is_valid(Mesh *me_eval)
                                        me_eval->corner_edges_for_write().data(),
                                        me_eval->totloop,
                                        polys.data(),
-                                       polys.size(),
+                                       polys.ranges_num(),
                                        me_eval->deform_verts_for_write().data(),
                                        do_verbose,
                                        do_fixes,

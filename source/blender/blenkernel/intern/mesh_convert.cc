@@ -463,7 +463,6 @@ void BKE_mesh_to_curve_nurblist(const Mesh *me, ListBase *nurblist, const int ed
   const MEdge *med;
 
   int medge_len = me->totedge;
-  int mpoly_len = me->totpoly;
   int totedges = 0;
   int i;
 

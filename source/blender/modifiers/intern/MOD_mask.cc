@@ -509,10 +509,6 @@ static void add_interpolated_polys_to_new_mesh(const Mesh &src_mesh,
     const blender::IndexRange src_poly = src_polys[i_src];
     const int i_ml_src = src_poly.start();
     int i_ml_dst = new_loop_starts[i_dst];
-    const int mp_totloop = (i_dst + 1 < new_loop_starts.size() ? new_loop_starts[i_dst + 1] :
-                                                                 dst_mesh.totloop) -
-                           i_ml_dst;
-
     CustomData_copy_data(&src_mesh.pdata, &dst_mesh.pdata, i_src, i_dst, 1);
 
     dst_poly_offsets[i_dst] = i_ml_dst;

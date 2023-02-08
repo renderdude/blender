@@ -162,7 +162,7 @@ void BKE_mesh_ensure_skin_customdata(struct Mesh *me);
 struct Mesh *BKE_mesh_new_nomain(
     int verts_len, int edges_len, int tessface_len, int loops_len, int polys_len);
 /** Add poly offsets to describe faces to a new mesh. */
-void BKE_mesh_ensure_poly_offsets(struct Mesh *mesh);
+void BKE_mesh_poly_offsets_ensure(struct Mesh *mesh);
 struct Mesh *BKE_mesh_new_nomain_from_template(const struct Mesh *me_src,
                                                int verts_len,
                                                int edges_len,
@@ -780,20 +780,16 @@ void BKE_mesh_polygon_flip(int poly_offset,
                            struct CustomData *ldata,
                            int totloop);
 
-#ifdef __cplusplus
-
 /**
  * Flip (invert winding of) all polygons (used to inverse their normals).
  *
  * \note Invalidates tessellation, caller must handle that.
  */
-void BKE_mesh_polys_flip(blender::OffsetIndices<int> polys,
+void BKE_mesh_polys_flip(const int *poly_offsets,
                          int *corner_verts,
                          int *corner_edges,
                          struct CustomData *ldata,
                          int totpoly);
-
-#endif
 
 /* Merge verts. */
 /* Enum for merge_mode of #BKE_mesh_merge_verts.

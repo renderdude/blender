@@ -1000,7 +1000,7 @@ void BKE_pbvh_build_grids(PBVH *pbvh,
 
 PBVH *BKE_pbvh_new(PBVHType type)
 {
-  PBVH *pbvh = MEM_cnew<PBVH>(__func__);
+  PBVH *pbvh = MEM_new<PBVH>(__func__);
   pbvh->respect_hide = true;
   pbvh->draw_cache_invalid = true;
   pbvh->header.type = type;
@@ -1418,7 +1418,7 @@ static void pbvh_update_normals_accum_task_cb(void *__restrict userdata,
 
     for (int i = 0; i < totface; i++) {
       const MLoopTri *lt = &pbvh->looptri[faces[i]];
-      const uint vtri[3] = {
+      const int vtri[3] = {
           pbvh->corner_verts[lt->tri[0]],
           pbvh->corner_verts[lt->tri[1]],
           pbvh->corner_verts[lt->tri[2]],

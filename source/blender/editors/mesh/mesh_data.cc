@@ -1580,3 +1580,20 @@ void ED_mesh_split_faces(Mesh *mesh)
   const bke::AnonymousAttributePropagationInfo propagation_info;
   geometry::split_edges(*mesh, split_mask, propagation_info);
 }
+
+void ED_mesh_calc_poly_normal_index(const Mesh *mesh, const int poly_index, float r_no[3])
+{
+  BKE_mesh_calc_poly_normal(
+      mesh->corner_verts().slice(mesh->polys()[poly_index]), BKE_mesh_vert_positions(mesh), r_no);
+}
+void ED_mesh_calc_poly_center_index(const Mesh *mesh, const int poly_index, float r_center[3])
+{
+  BKE_mesh_calc_poly_center(mesh->corner_verts().slice(mesh->polys()[poly_index]),
+                            BKE_mesh_vert_positions(mesh),
+                            r_center);
+}
+float ED_mesh_calc_poly_area_index(const Mesh *mesh, const int poly_index)
+{
+  return BKE_mesh_calc_poly_area(mesh->corner_verts().slice(mesh->polys()[poly_index]),
+                                 BKE_mesh_vert_positions(mesh));
+}

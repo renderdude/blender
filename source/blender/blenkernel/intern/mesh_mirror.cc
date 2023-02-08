@@ -215,6 +215,7 @@ Mesh *BKE_mesh_mirror_apply_mirror_on_axis_for_modifier(MirrorModifierData *mmd,
   for (const int i : blender::IndexRange(maxPolys)) {
     poly_offsets[maxPolys + i] = poly_offsets[i] + maxLoops;
   }
+  const blender::OffsetIndices result_polys = result->polys();
 
   /* Copy custom-data to new geometry,
    * copy from itself because this data may have been created in the checks above. */
@@ -314,27 +315,26 @@ Mesh *BKE_mesh_mirror_apply_mirror_on_axis_for_modifier(MirrorModifierData *mmd,
   blender::MutableSpan<int> corner_edges = result->corner_edges_for_write();
   for (i = 0; i < maxPolys; i++) {
     int j, e;
-    const int poly_start = poly_offsets[maxPolys + i];
-    const int poly_size = poly_offsets[maxPolys + i + 1] - poly_start;
+    const blender::IndexRange poly = result_polys[maxPolys + i];
 
     /* reverse the loop, but we keep the first vertex in the face the same,
      * to ensure that quads are split the same way as on the other side */
-    CustomData_copy_data(&result->ldata, &result->ldata, poly_start, poly_start + maxLoops, 1);
+    CustomData_copy_data(&result->ldata, &result->ldata, poly.start(), poly.start() + maxLoops, 1);
 
-    for (j = 1; j < mp->totloop; j++) {
+    for (j = 1; j < poly.size(); j++) {
       CustomData_copy_data(&result->ldata,
                            &result->ldata,
-                           poly_start + j,
-                           poly_start + maxLoops + mp->totloop - j,
+                           poly.start() + j,
+                           poly.start() + maxLoops + poly.size() - j,
                            1);
     }
 
-    int *corner_edge_2 = &corner_edges[poly_start + maxLoops];
+    int *corner_edge_2 = &corner_edges[poly.start() + maxLoops];
     e = corner_edge_2[0];
-    for (j = 0; j < mp->totloop - 1; j++) {
+    for (j = 0; j < poly.size() - 1; j++) {
       corner_edge_2[j] = corner_edge_2[j + 1];
     }
-    corner_edge_2[mp->totloop - 1] = e;
+    corner_edge_2[poly.size() - 1] = e;
   }
 
   /* adjust mirrored loop vertex and edge indices */
@@ -429,15 +429,15 @@ Mesh *BKE_mesh_mirror_apply_mirror_on_axis_for_modifier(MirrorModifierData *mmd,
                                 clnors);
 
     /* mirroring has to account for loops being reversed in polys in second half */
-    mp = result_polys;
-    for (i = 0; i < maxPolys; i++, mp++) {
-      MPoly *mpmirror = result_polys + maxPolys + i;
+    for (i = 0; i < maxPolys; i++) {
+      const blender::IndexRange poly = result_polys[i];
+      const blender::IndexRange poly_mirror = result_polys[maxPolys + i];
       int j;
 
-      for (j = mp->loopstart; j < mp->loopstart + mp->totloop; j++) {
-        int mirrorj = mpmirror->loopstart;
-        if (j > mp->loopstart) {
-          mirrorj += mpmirror->totloop - (j - mp->loopstart);
+      for (j = poly.start(); j < poly.start() + poly.size(); j++) {
+        int mirrorj = poly_mirror.start();
+        if (j > poly.start()) {
+          mirrorj += poly_mirror.size() - (j - poly.start());
         }
         copy_v3_v3(loop_normals[mirrorj], loop_normals[j]);
         mul_m4_v3(mtx_nor, loop_normals[mirrorj]);

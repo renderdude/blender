@@ -4391,7 +4391,6 @@ static void project_paint_prepare_all_faces(ProjPaintState *ps,
         if (ps->do_backfacecull) {
           if (ps->do_mask_normal) {
             if (prev_poly != lt->poly) {
-              int iloop;
               bool culled = true;
               prev_poly = lt->poly;
               for (const int corner : ps->polys_eval[lt->poly]) {
@@ -5954,7 +5953,7 @@ void *paint_proj_new_stroke(bContext *C, Object *ob, const float mouse[2], int m
   bool is_multi_view = (ps_handle->ps_views_tot != 1);
 
   for (int i = 0; i < ps_handle->ps_views_tot; i++) {
-    ProjPaintState *ps = MEM_cnew<ProjPaintState>("ProjectionPaintState");
+    ProjPaintState *ps = MEM_new<ProjPaintState>(__func__, ProjPaintState());
     ps_handle->ps_views[i] = ps;
   }
 
