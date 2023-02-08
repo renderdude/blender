@@ -84,12 +84,11 @@ static void extract_sculpt_data_init(const MeshRenderData *mr,
     }
   }
   else {
-    int mp_loop = 0;
     for (int mp_index = 0; mp_index < mr->poly_len; mp_index++) {
-      for (const int l : mr->polys[mp_index]) {
+      for (const int corner : mr->polys[mp_index]) {
         float v_mask = 0.0f;
         if (cd_mask) {
-          v_mask = cd_mask[mr->corner_verts[mp_loop]];
+          v_mask = cd_mask[mr->corner_verts[corner]];
         }
         vbo_data->mask = v_mask;
 
@@ -103,7 +102,6 @@ static void extract_sculpt_data_init(const MeshRenderData *mr,
           }
         }
         copy_v3_v3_uchar(vbo_data->face_set_color, face_set_color);
-        mp_loop++;
         vbo_data++;
       }
     }

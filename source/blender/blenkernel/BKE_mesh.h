@@ -424,7 +424,7 @@ bool BKE_mesh_poly_normals_are_dirty(const struct Mesh *mesh);
 
 #ifdef __cplusplus
 
-void BKE_mesh_calc_poly_normal(Span<int> poly_verts,
+void BKE_mesh_calc_poly_normal(blender::Span<int> poly_verts,
                                const float (*vert_positions)[3],
                                float r_no[3]);
 

@@ -756,7 +756,7 @@ void RE_bake_pixels_populate(Mesh *me,
   MLoopTri *looptri = static_cast<MLoopTri *>(MEM_mallocN(sizeof(*looptri) * tottri, __func__));
 
   const float(*positions)[3] = BKE_mesh_vert_positions(me);
-  const OffsetIndices polys = me->polys();
+  const blender::OffsetIndices polys = me->polys();
   const blender::Span<int> corner_verts = me->corner_verts();
   BKE_mesh_recalc_looptri(
       corner_verts.data(), polys.data(), positions, me->totloop, me->totpoly, looptri);

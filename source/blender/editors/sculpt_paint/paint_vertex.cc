@@ -4117,22 +4117,18 @@ static void fill_mesh_face_or_corner_attribute(Mesh &mesh,
     if (use_face_sel && !select_poly[i]) {
       continue;
     }
-    const MPoly &poly = polys[i];
-
-    int j = 0;
-    do {
-      const int vidx = corner_verts[poly.loopstart + j];
-
-      if (!(use_vert_sel && !(select_vert[vidx]))) {
-        if (domain == ATTR_DOMAIN_CORNER) {
-          data[poly.loopstart + j] = value;
-        }
-        else {
-          data[vidx] = value;
-        }
+    for (const int corner : polys[i]) {
+      const int vert = corner_verts[corner];
+      if (use_vert_sel && !select_vert[vert]) {
+        continue;
       }
-      j++;
-    } while (j < poly.totloop);
+      if (domain == ATTR_DOMAIN_CORNER) {
+        data[corner] = value;
+      }
+      else {
+        data[vert] = value;
+      }
+    }
   }
 
   BKE_mesh_tessface_clear(&mesh);

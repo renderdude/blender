@@ -142,7 +142,7 @@ struct DerivedMesh {
   void (*copyEdgeArray)(DerivedMesh *dm, struct MEdge *r_edge);
   void (*copyCornerVertArray)(DerivedMesh *dm, int *r_corner_verts);
   void (*copyCornerEdgeArray)(DerivedMesh *dm, int *r_corner_edges);
-  void (*copyPolyArray)(DerivedMesh *dm, int *r_poly);
+  void (*copyPolyArray)(DerivedMesh *dm, int *r_poly_offsets);
 
   /** Return a pointer to the entire array of vert/edge/face custom data
    * from the derived mesh (this gives a pointer to the actual data, not

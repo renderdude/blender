@@ -108,9 +108,9 @@ static void extract_edge_fac_iter_poly_mesh(const MeshRenderData *mr,
                                             void *_data)
 {
   MeshExtract_EdgeFac_Data *data = static_cast<MeshExtract_EdgeFac_Data *>(_data);
+  const IndexRange poly = mr->polys[mp_index];
 
-  const int ml_index_end = mp->loopstart + mp->totloop;
-  for (int ml_index = mp->loopstart; ml_index < ml_index_end; ml_index += 1) {
+  for (const int ml_index : poly) {
     const int vert = mr->corner_verts[ml_index];
     const int edge = mr->corner_edges[ml_index];
 
@@ -126,8 +126,7 @@ static void extract_edge_fac_iter_poly_mesh(const MeshRenderData *mr,
       }
       if (data->edge_loop_count[edge] == 2) {
         /* Manifold */
-        const int ml_index_last = mp->totloop + mp->loopstart - 1;
-        const int ml_index_other = (ml_index == ml_index_last) ? mp->loopstart : (ml_index + 1);
+        const int ml_index_other = (ml_index == poly.last()) ? poly.start() : (ml_index + 1);
         const int vert_next = mr->corner_verts[ml_index_other];
         float ratio = loop_edge_factor_get(mr->poly_normals[mp_index],
                                            mr->vert_positions[vert],

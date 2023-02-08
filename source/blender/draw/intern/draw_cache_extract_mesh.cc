@@ -391,7 +391,7 @@ BLI_INLINE void extract_task_range_run_iter(const MeshRenderData *mr,
       stop = mr->tri_len;
       break;
     case MR_ITER_POLY:
-      range_data.elems = is_mesh ? mr->mpoly : (void *)mr->bm->ftable;
+      range_data.elems = is_mesh ? mr->polys.data() : (void *)mr->bm->ftable;
       func = is_mesh ? extract_range_iter_poly_mesh : extract_range_iter_poly_bm;
       stop = mr->poly_len;
       break;

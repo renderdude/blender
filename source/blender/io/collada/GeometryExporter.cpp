@@ -508,7 +508,7 @@ void GeometryExporter::createVertexColorSource(std::string geom_id, Mesh *me)
 
     const blender::OffsetIndices polys = me->polys();
     for (const int i : polys.index_range()) {
-      for (const corner : polys[i]) {
+      for (const int corner : polys[i]) {
         const MLoopCol *mlc = &mloopcol[corner];
         source.appendValues(mlc->r / 255.0f, mlc->g / 255.0f, mlc->b / 255.0f, mlc->a / 255.0f);
       }
@@ -563,7 +563,7 @@ void GeometryExporter::createTexcoordsSource(std::string geom_id, Mesh *me)
       source.prepareToAppendValues();
 
       for (const int i : polys.index_range()) {
-        for (const corner : polys[i]) {
+        for (const int corner : polys[i]) {
           source.appendValues(uv_map[corner][0], uv_map[corner][1]);
         }
       }

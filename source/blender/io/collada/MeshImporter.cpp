@@ -619,7 +619,6 @@ void MeshImporter::read_polys(COLLADAFW::Mesh *collada_mesh,
 
   MutableSpan<int> poly_offsets = me->poly_offsets_for_write();
   MutableSpan<int> corner_verts = me->corner_verts_for_write();
-  MutableSpan<int> poly_offsets = me->poly_offsets_for_write();
   int loop_index = 0;
   int poly_index = 0;
 

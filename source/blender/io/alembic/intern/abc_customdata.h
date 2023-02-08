@@ -73,7 +73,7 @@ struct CDStreamConfig {
   CDStreamConfig()
       : corner_verts(NULL),
         totloop(0),
-        mpoly(NULL),
+        poly_offsets(NULL),
         totpoly(0),
         totvert(0),
         pack_uvs(false),

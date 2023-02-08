@@ -10,6 +10,9 @@
 #include "BLI_bitmap.h"
 #include "BLI_compiler_compat.h"
 #include "BLI_ghash.h"
+#ifdef __cplusplus
+#  include "BLI_offset_indices.hh"
+#endif
 
 #include "bmesh.h"
 
@@ -36,6 +39,7 @@ struct PBVH;
 struct PBVHBatches;
 struct PBVHNode;
 struct PBVH_GPU_Args;
+struct SculptSession;
 struct SubdivCCG;
 struct TaskParallelSettings;
 struct Image;

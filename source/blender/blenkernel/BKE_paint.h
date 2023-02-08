@@ -767,7 +767,7 @@ void BKE_sculptsession_free_deformMats(struct SculptSession *ss);
 void BKE_sculptsession_free_vwpaint_data(struct SculptSession *ss);
 void BKE_sculptsession_bm_to_me(struct Object *ob, bool reorder);
 void BKE_sculptsession_bm_to_me_for_render(struct Object *object);
-int BKE_sculptsession_vertex_count(const SculptSession *ss);
+int BKE_sculptsession_vertex_count(const struct SculptSession *ss);
 
 /* Ensure an attribute layer exists. */
 SculptAttribute *BKE_sculpt_attribute_ensure(struct Object *ob,

@@ -65,7 +65,7 @@ struct MResolvePixelData {
   blender::OffsetIndices<int> polys;
   const int *material_indices;
   const bool *sharp_faces;
-  const int *corner_verts;
+  blender::Span<int> corner_verts;
   float (*mloopuv)[2];
   float uv_offset[2];
   const MLoopTri *mlooptri;
@@ -470,7 +470,6 @@ static void do_multires_bake(MultiresBakeRender *bkr,
     return;
   }
 
-  MultiresBakeThread *handles;
   MultiresBakeQueue queue;
 
   const float(*positions)[3] = (float(*)[3])dm->getVertArray(dm);
@@ -539,7 +538,7 @@ static void do_multires_bake(MultiresBakeRender *bkr,
     BLI_threadpool_init(&threads, do_multires_bake_thread, tot_thread);
   }
 
-  handles = MEM_cnew_array<MultiresBakeThread>(tot_thread, "do_multires_bake handles");
+  blender::Array<MultiresBakeThread> handles(tot_thread);
 
   init_ccgdm_arrays(bkr->hires_dm);
 
@@ -566,7 +565,7 @@ static void do_multires_bake(MultiresBakeRender *bkr,
     handle->data.mloopuv = mloopuv;
     BKE_image_get_tile_uv(ima, tile->tile_number, handle->data.uv_offset);
     handle->data.mlooptri = mlooptri;
-    handle->data.corner_verts = dm->getCornerVertArray(dm);
+    handle->data.corner_verts = {dm->getCornerVertArray(dm), dm->getNumLoops(dm)};
     handle->data.pvtangent = pvtangent;
     handle->data.precomputed_normals = poly_normals; /* don't strictly need this */
     handle->data.w = ibuf->x;
@@ -612,8 +611,6 @@ static void do_multires_bake(MultiresBakeRender *bkr,
   if (freeBakeData) {
     freeBakeData(bake_data);
   }
-
-  MEM_freeN(handles);
 
   BKE_id_free(nullptr, temp_mesh);
 }
@@ -1228,7 +1225,8 @@ static void apply_ao_callback(DerivedMesh *lores_dm,
                               const int y)
 {
   const MLoopTri *lt = lores_dm->getLoopTriArray(lores_dm) + tri_index;
-  MPoly *mpoly = lores_dm->getPolyArray(lores_dm) + lt->poly;
+  const int *poly_offsets = lores_dm->getPolyArray(lores_dm);
+  const blender::IndexRange poly(poly_offsets[lt->poly], poly_offsets[lt->poly+1] - poly_offsets[lt->poly]);
   float (*mloopuv)[2] = lores_dm->getLoopDataArray(lores_dm, CD_PROP_FLOAT2);
   MAOBakeData *ao_data = (MAOBakeData *)bake_data;
 
@@ -1244,10 +1242,10 @@ static void apply_ao_callback(DerivedMesh *lores_dm,
   /* ideally we would work on triangles only, however, we rely on quads to get orthogonal
    * coordinates for use in grid space (triangle barycentric is not orthogonal) */
   if (poly.size() == 4) {
-    st0 = mloopuv[mpoly->loopstart];
-    st1 = mloopuv[mpoly->loopstart + 1];
-    st2 = mloopuv[mpoly->loopstart + 2];
-    st3 = mloopuv[mpoly->loopstart + 3];
+    st0 = mloopuv[poly[0]];
+    st1 = mloopuv[poly[1]];
+    st2 = mloopuv[poly[2]];
+    st3 = mloopuv[poly[3]];
     resolve_quad_uv_v2(uv, st, st0, st1, st2, st3);
   }
   else {

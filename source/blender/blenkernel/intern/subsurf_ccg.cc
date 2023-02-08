@@ -230,11 +230,14 @@ static int getFaceIndex(
          (y - 1) * (gridSize - 2) + (x - 1);
 }
 
-static void get_face_uv_map_vert(
-    UvVertMap *vmap, MPoly *mpoly, int *poly_verts, int fi, CCGVertHDL *fverts)
+static void get_face_uv_map_vert(UvVertMap *vmap,
+                                 const blender::OffsetIndices<int> polys,
+                                 int *poly_verts,
+                                 int fi,
+                                 CCGVertHDL *fverts)
 {
   UvMapVert *v, *nv;
-  int j, nverts = mpoly[fi].totloop;
+  int j, nverts = polys[fi].size();
 
   for (j = 0; j < nverts; j++) {
     for (nv = v = BKE_mesh_uv_vert_map_get_vert(vmap, poly_verts[j]); v; v = v->next) {
@@ -246,7 +249,7 @@ static void get_face_uv_map_vert(
       }
     }
 
-    fverts[j] = POINTER_FROM_UINT(mpoly[nv->poly_index].loopstart + nv->loop_of_poly_index);
+    fverts[j] = POINTER_FROM_UINT(polys[nv->poly_index].start() + nv->loop_of_poly_index);
   }
 }
 
@@ -255,7 +258,7 @@ static int ss_sync_from_uv(CCGSubSurf *ss,
                            DerivedMesh *dm,
                            const float (*mloopuv)[2])
 {
-  MPoly *mpoly = dm->getPolyArray(dm);
+  const blender::OffsetIndices polys(blender::Span(dm->getPolyArray(dm), dm->getNumPolys(dm) + 1));
   int *corner_verts = dm->getCornerVertArray(dm);
   int totvert = dm->getNumVerts(dm);
   int totface = dm->getNumPolys(dm);
@@ -273,7 +276,7 @@ static int ss_sync_from_uv(CCGSubSurf *ss,
    * Also, initially intention is to treat merged vertices from mirror modifier as seams.
    * This fixes a very old regression (2.49 was correct here) */
   vmap = BKE_mesh_uv_vert_map_create(
-      mpoly, nullptr, nullptr, corner_verts, mloopuv, totface, totvert, limit, false, true);
+      polys, nullptr, nullptr, corner_verts, mloopuv, totface, totvert, limit, false, true);
   if (!vmap) {
     return 0;
   }
@@ -297,7 +300,7 @@ static int ss_sync_from_uv(CCGSubSurf *ss,
     for (v = BKE_mesh_uv_vert_map_get_vert(vmap, i); v; v = v->next) {
       if (v->separate) {
         CCGVert *ssv;
-        int loopid = mpoly[v->poly_index].loopstart + v->loop_of_poly_index;
+        int loopid = polys[v->poly_index].start() + v->loop_of_poly_index;
         CCGVertHDL vhdl = POINTER_FROM_INT(loopid);
 
         copy_v2_v2(uv, mloopuv[loopid]);
@@ -311,15 +314,15 @@ static int ss_sync_from_uv(CCGSubSurf *ss,
   eset = BLI_edgeset_new_ex(__func__, BLI_EDGEHASH_SIZE_GUESS_FROM_POLYS(totface));
 
   for (i = 0; i < totface; i++) {
-    MPoly *mp = &mpoly[i];
-    int nverts = mp->totloop;
+    const blender::IndexRange poly = polys[i];
+    int nverts = poly.size();
     int j, j_next;
     CCGFace *origf = ccgSubSurf_getFace(origss, POINTER_FROM_INT(i));
     /* uint *fv = &mp->v1; */
 
     fverts.reinitialize(nverts);
 
-    get_face_uv_map_vert(vmap, mpoly, &corner_verts[mp->loopstart], i, fverts.data());
+    get_face_uv_map_vert(vmap, polys, &corner_verts[poly.start()], i, fverts.data());
 
     for (j = 0, j_next = nverts - 1; j < nverts; j_next = j++) {
       uint v0 = POINTER_AS_UINT(fverts[j_next]);
@@ -327,7 +330,7 @@ static int ss_sync_from_uv(CCGSubSurf *ss,
 
       if (BLI_edgeset_add(eset, v0, v1)) {
         CCGEdge *e, *orige = ccgSubSurf_getFaceEdge(origf, j_next);
-        CCGEdgeHDL ehdl = POINTER_FROM_INT(mp->loopstart + j_next);
+        CCGEdgeHDL ehdl = POINTER_FROM_INT(poly.start() + j_next);
         float crease = ccgSubSurf_getEdgeCrease(orige);
 
         ccgSubSurf_syncEdge(ss, ehdl, fverts[j_next], fverts[j], crease, &e);
@@ -339,13 +342,13 @@ static int ss_sync_from_uv(CCGSubSurf *ss,
 
   /* create faces */
   for (i = 0; i < totface; i++) {
-    MPoly *mp = &mpoly[i];
-    int nverts = mp->totloop;
+    const blender::IndexRange poly = polys[i];
+    int nverts = poly.size();
     CCGFace *f;
 
     fverts.reinitialize(nverts);
 
-    get_face_uv_map_vert(vmap, mpoly, &corner_verts[mp->loopstart], i, fverts.data());
+    get_face_uv_map_vert(vmap, polys, &corner_verts[poly.start()], i, fverts.data());
     ccgSubSurf_syncFace(ss, POINTER_FROM_INT(i), nverts, fverts.data(), &f);
   }
 
@@ -541,7 +544,7 @@ static void ss_sync_ccg_from_derivedmesh(CCGSubSurf *ss,
   MEdge *medge = dm->getEdgeArray(dm);
   MEdge *me;
   int *corner_verts = dm->getCornerVertArray(dm);
-  MPoly *mpoly = dm->getPolyArray(dm), *mp;
+  const blender::OffsetIndices polys(blender::Span(dm->getPolyArray(dm), dm->getNumPolys(dm) + 1));
   int totvert = dm->getNumVerts(dm);
   int totedge = dm->getNumEdges(dm);
   int i, j;
@@ -578,23 +581,23 @@ static void ss_sync_ccg_from_derivedmesh(CCGSubSurf *ss,
     ((int *)ccgSubSurf_getEdgeUserData(ss, e))[1] = (index) ? *index++ : i;
   }
 
-  mp = mpoly;
   index = (int *)dm->getPolyDataArray(dm, CD_ORIGINDEX);
-  for (i = 0; i < dm->numPolyData; i++, mp++) {
+  for (i = 0; i < dm->numPolyData; i++) {
+    const blender::IndexRange poly = polys[i];
+
     CCGFace *f;
 
-    fverts.reinitialize(mp->totloop);
+    fverts.reinitialize(poly.size());
 
-    int corner = mp->loopstart;
-    for (j = 0; j < mp->totloop; j++, corner++) {
-      fverts[j] = POINTER_FROM_UINT(corner_verts[corner]);
+    for (j = 0; j < poly.size(); j++) {
+      fverts[j] = POINTER_FROM_UINT(corner_verts[poly[j]]);
     }
 
     /* This is very bad, means mesh is internally inconsistent.
      * it is not really possible to continue without modifying
      * other parts of code significantly to handle missing faces.
      * since this really shouldn't even be possible we just bail. */
-    if (ccgSubSurf_syncFace(ss, POINTER_FROM_INT(i), mp->totloop, fverts.data(), &f) ==
+    if (ccgSubSurf_syncFace(ss, POINTER_FROM_INT(i), poly.size(), fverts.data(), &f) ==
         eCCGError_InvalidValue) {
       static int hasGivenError = 0;
 
@@ -1125,7 +1128,7 @@ static void ccgDM_copyFinalCornerEdgeArray(DerivedMesh *dm, int *r_corner_edges)
       0, ccgSubSurf_getNumFaces(ss), &data, copyFinalLoopArray_task_cb, &settings);
 }
 
-static void ccgDM_copyFinalPolyArray(DerivedMesh *dm, MPoly *mpoly)
+static void ccgDM_copyFinalPolyArray(DerivedMesh *dm, int *r_poly_offsets)
 {
   CCGDerivedMesh *ccgdm = (CCGDerivedMesh *)dm;
   CCGSubSurf *ss = ccgdm->ss;
@@ -1143,17 +1146,14 @@ static void ccgDM_copyFinalPolyArray(DerivedMesh *dm, MPoly *mpoly)
     for (S = 0; S < numVerts; S++) {
       for (y = 0; y < gridSize - 1; y++) {
         for (x = 0; x < gridSize - 1; x++) {
-          MPoly *mp = &mpoly[i];
-
-          mp->loopstart = k;
-          mp->totloop = 4;
-
+          r_poly_offsets[i] = k;
           k += 4;
           i++;
         }
       }
     }
   }
+  r_poly_offsets[i] = k;
 }
 
 static void ccgDM_release(DerivedMesh *dm)

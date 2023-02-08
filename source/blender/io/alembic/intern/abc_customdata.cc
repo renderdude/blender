@@ -56,7 +56,6 @@ static void get_uvs(const CDStreamConfig &config,
     return;
   }
 
-  const int num_poly = config.totpoly;
   const OffsetIndices polys = config.mesh->polys();
   int *corner_verts = config.corner_verts;
 
