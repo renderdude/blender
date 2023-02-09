@@ -582,8 +582,22 @@ Array<Vector<int>> build_edge_to_loop_map(const Span<int> corner_edges, const in
   return map;
 }
 
+Array<Vector<int, 2>> build_edge_to_poly_map(const OffsetIndices<int> polys,
+                                             const Span<int> corner_edges,
+                                             const int edges_num)
+{
+  Array<Vector<int, 2>> map(edges_num);
+  for (const int64_t i : polys.index_range()) {
+    for (const int edge : corner_edges.slice(polys[i])) {
+      map[edge].append(int(i));
+    }
+  }
+  return map;
+}
+
 Vector<Vector<int>> build_edge_to_loop_map_resizable(const Span<int> corner_edges,
                                                      const int edges_num)
+
 {
   Vector<Vector<int>> map(edges_num);
   for (const int64_t i : corner_edges.index_range()) {

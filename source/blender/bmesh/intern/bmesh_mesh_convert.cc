@@ -113,14 +113,14 @@ using blender::StringRef;
 
 static char bm_edge_flag_from_mflag(const short mflag)
 {
-  return ((mflag & ME_SEAM) ? BM_ELEM_SEAM : 0) | ((mflag & ME_EDGEDRAW) ? BM_ELEM_DRAW : 0);
+  return ((mflag & ME_SEAM) ? BM_ELEM_SEAM : 0) | BM_ELEM_DRAW;
 }
 
 static short bm_edge_flag_to_mflag(const BMEdge *e)
 {
   const char hflag = e->head.hflag;
 
-  return ((hflag & BM_ELEM_SEAM) ? ME_SEAM : 0) | ((hflag & BM_ELEM_DRAW) ? ME_EDGEDRAW : 0);
+  return (hflag & BM_ELEM_SEAM) ? ME_SEAM : 0;
 }
 
 /* Static function for alloc (duplicate in modifiers_bmesh.c) */
@@ -857,7 +857,7 @@ static void bm_to_mesh_shape(BMesh *bm,
             ((keyi = BM_ELEM_CD_GET_INT(eve, cd_shape_keyindex_offset)) != ORIGINDEX_NONE) &&
             (keyi < currkey->totelem)) {
           /* Reconstruct keys via vertices original key indices.
-           * WARNING(@campbellbarton): `currkey->data` is known to be unreliable as the edit-mesh
+           * WARNING(@ideasman42): `currkey->data` is known to be unreliable as the edit-mesh
            * coordinates may be flushed back to the shape-key when exporting or rendering.
            * This is a last resort! If this branch is running as part of regular usage
            * it can be considered a bug. */
@@ -1435,15 +1435,6 @@ static void bm_to_mesh_edges(const BMesh &bm,
       dst_edge.v1 = BM_elem_index_get(src_edge.v1);
       dst_edge.v2 = BM_elem_index_get(src_edge.v2);
       dst_edge.flag = bm_edge_flag_to_mflag(&src_edge);
-
-      /* Handle this differently to editmode switching; only enable draw for single user
-       * edges rather than calculating angle. */
-      if ((dst_edge.flag & ME_EDGEDRAW) == 0) {
-        if (src_edge.l && src_edge.l == src_edge.l->radial_next) {
-          dst_edge.flag |= ME_EDGEDRAW;
-        }
-      }
-
       CustomData_from_bmesh_block(&bm.edata, &mesh.edata, src_edge.head.data, edge_i);
     }
     if (!select_edge.is_empty()) {

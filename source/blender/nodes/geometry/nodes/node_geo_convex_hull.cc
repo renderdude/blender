@@ -86,7 +86,6 @@ static Mesh *hull_from_bullet(const Mesh *mesh, Span<float3> coords)
       MEdge &edge = edges[edge_index];
       edge.v1 = v_from;
       edge.v2 = v_to;
-      edge.flag = ME_EDGEDRAW;
 
       /* Write edge index into both loops that have it. */
       int reverse_index = plConvexHullGetReversedLoopIndex(hull, i);
@@ -100,7 +99,6 @@ static Mesh *hull_from_bullet(const Mesh *mesh, Span<float3> coords)
     MEdge &edge = edges[0];
     edge.v1 = 0;
     edge.v2 = 1;
-    edge.flag = ME_EDGEDRAW;
     edge_index++;
   }
   BLI_assert(edge_index == edges_num);

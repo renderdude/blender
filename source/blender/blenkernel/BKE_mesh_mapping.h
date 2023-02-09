@@ -366,6 +366,9 @@ Array<Vector<int>> build_vert_to_poly_map(OffsetIndices<int> polys,
                                           int verts_num);
 Array<Vector<int>> build_vert_to_loop_map(Span<int> corner_verts, int verts_num);
 Array<Vector<int>> build_edge_to_loop_map(Span<int> corner_edges, int edges_num);
+Array<Vector<int, 2>> build_edge_to_poly_map(Span<MPoly> polys,
+                                             Span<int> corner_edges,
+                                             int edges_num);
 Vector<Vector<int>> build_edge_to_loop_map_resizable(Span<int> corner_edges, int edges_num);
 
 inline int poly_loop_prev(const IndexRange poly, int loop_i)

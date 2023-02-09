@@ -120,7 +120,7 @@ static void make_edges_mdata_extend(Mesh &mesh)
       BLI_edgehashIterator_getKey(ehi, &medge->v1, &medge->v2);
       BLI_edgehashIterator_setValue(ehi, POINTER_FROM_UINT(e_index));
 
-      medge->flag = ME_EDGEDRAW;
+      medge->flag = 0;
     }
     BLI_edgehashIterator_free(ehi);
 
@@ -227,7 +227,6 @@ static Mesh *mesh_nurbs_displist_to_mesh(const Curve *cu, const ListBase *dispba
         for (b = 1; b < dl->nr; b++) {
           edges[dst_edge].v1 = startvert + ofs + b - 1;
           edges[dst_edge].v2 = startvert + ofs + b;
-          edges[dst_edge].flag = ME_EDGEDRAW;
 
           dst_edge++;
         }
@@ -254,7 +253,6 @@ static Mesh *mesh_nurbs_displist_to_mesh(const Curve *cu, const ListBase *dispba
             else {
               edges[dst_edge].v2 = startvert + ofs + b + 1;
             }
-            edges[dst_edge].flag = ME_EDGEDRAW;
             dst_edge++;
           }
         }
@@ -655,14 +653,6 @@ void BKE_mesh_from_pointcloud(const PointCloud *pointcloud, Mesh *me)
   me->totvert = pointcloud->totpoint;
   CustomData_merge(
       &pointcloud->pdata, &me->vdata, CD_MASK_PROP_ALL, CD_DUPLICATE, pointcloud->totpoint);
-}
-
-void BKE_mesh_edges_set_draw_render(Mesh *mesh)
-{
-  MutableSpan<MEdge> edges = mesh->edges_for_write();
-  for (int i = 0; i < mesh->totedge; i++) {
-    edges[i].flag |= ME_EDGEDRAW;
-  }
 }
 
 void BKE_pointcloud_to_mesh(Main *bmain, Depsgraph *depsgraph, Scene * /*scene*/, Object *ob)
