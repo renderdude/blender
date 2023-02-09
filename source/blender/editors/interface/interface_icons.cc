@@ -1630,7 +1630,7 @@ static void icon_draw_cache_texture_flush_ex(GPUTexture *texture,
 
   GPUBatch *quad = GPU_batch_preset_quad();
   GPU_batch_set_shader(quad, shader);
-  GPU_batch_draw_instanced(quad, texture_draw_calls->calls);
+  GPU_batch_draw_instance_range(quad, 0, texture_draw_calls->calls);
 
   GPU_texture_unbind(texture);
   GPU_uniformbuf_unbind(ubo);
@@ -1890,7 +1890,7 @@ static void icon_draw_size(float x,
   }
   else if (di->type == ICON_TYPE_GEOM) {
 #ifdef USE_UI_TOOLBAR_HACK
-    /* TODO(@campbellbarton): scale icons up for toolbar,
+    /* TODO(@ideasman42): scale icons up for toolbar,
      * we need a way to detect larger buttons and do this automatic. */
     {
       float scale = float(ICON_DEFAULT_HEIGHT_TOOLBAR) / float(ICON_DEFAULT_HEIGHT);
@@ -1905,7 +1905,7 @@ static void icon_draw_size(float x,
     const bool geom_inverted = di->data.geom.inverted;
 
     /* This could re-generate often if rendered at different sizes in the one interface.
-     * TODO(@campbellbarton): support caching multiple sizes. */
+     * TODO(@ideasman42): support caching multiple sizes. */
     ImBuf *ibuf = di->data.geom.image_cache;
     if ((ibuf == nullptr) || (ibuf->x != w) || (ibuf->y != h) || (invert != geom_inverted)) {
       if (ibuf) {
