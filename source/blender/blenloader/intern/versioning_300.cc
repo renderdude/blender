@@ -3779,15 +3779,6 @@ void blo_do_versions_300(FileData *fd, Library * /*lib*/, Main *bmain)
     }
   }
 
-  if (!MAIN_VERSION_ATLEAST(bmain, 305, 1)) {
-    /* Reset edge visibility flag, since the base is meant to be "true" for original meshes. */
-    LISTBASE_FOREACH (Mesh *, mesh, &bmain->meshes) {
-      for (MEdge &edge : mesh->edges_for_write()) {
-        edge.flag |= ME_EDGEDRAW;
-      }
-    }
-  }
-
   if (!MAIN_VERSION_ATLEAST(bmain, 305, 2)) {
     LISTBASE_FOREACH (MovieClip *, clip, &bmain->movieclips) {
       MovieTracking *tracking = &clip->tracking;
@@ -3911,6 +3902,15 @@ void blo_do_versions_300(FileData *fd, Library * /*lib*/, Main *bmain)
    * \note Keep this message at the bottom of the function.
    */
   {
+    if (!DNA_struct_elem_find(fd->filesdna, "SceneEEVEE", "int", "shadow_pool_size")) {
+      LISTBASE_FOREACH (Scene *, scene, &bmain->scenes) {
+        scene->eevee.flag |= SCE_EEVEE_SHADOW_ENABLED;
+        scene->eevee.shadow_pool_size = 512;
+        scene->r.simplify_shadows = 1.0f;
+        scene->r.simplify_shadows_render = 1.0f;
+      }
+    }
+
     /* Keep this block, even when empty. */
   }
 }

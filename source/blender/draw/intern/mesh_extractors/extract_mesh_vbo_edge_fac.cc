@@ -60,15 +60,8 @@ static void extract_edge_fac_init(const MeshRenderData *mr,
 
   if (mr->extract_type == MR_EXTRACT_MESH) {
     data->edge_loop_count = MEM_cnew_array<uint8_t>(mr->edge_len, __func__);
-
-    /* HACK(@fclem): Detecting the need for edge render.
-     * We could have a flag in the mesh instead or check the modifier stack. */
-    const MEdge *med = mr->medge;
-    for (int e_index = 0; e_index < mr->edge_len; e_index++, med++) {
-      if ((med->flag & ME_EDGEDRAW) == 0) {
-        data->use_edge_render = true;
-        break;
-      }
+    if (!mr->me->runtime->subsurf_optimal_display_edges.is_empty()) {
+      data->use_edge_render = true;
     }
   }
   else {
@@ -109,6 +102,7 @@ static void extract_edge_fac_iter_poly_mesh(const MeshRenderData *mr,
                                             void *_data)
 {
   MeshExtract_EdgeFac_Data *data = static_cast<MeshExtract_EdgeFac_Data *>(_data);
+  const BitVector<> &optimal_display_edges = mr->me->runtime->subsurf_optimal_display_edges;
 
   const int ml_index_end = mp->loopstart + mp->totloop;
   for (int ml_index = mp->loopstart; ml_index < ml_index_end; ml_index += 1) {
@@ -116,8 +110,7 @@ static void extract_edge_fac_iter_poly_mesh(const MeshRenderData *mr,
     const int edge = mr->corner_edges[ml_index];
 
     if (data->use_edge_render) {
-      const MEdge *med = &mr->medge[edge];
-      data->vbo_data[ml_index] = (med->flag & ME_EDGEDRAW) ? 255 : 0;
+      data->vbo_data[ml_index] = optimal_display_edges[edge] ? 255 : 0;
     }
     else {
 

@@ -3550,7 +3550,8 @@ static bool do_mesh_box_select(ViewContext *vc,
   }
   if (ts->selectmode & SCE_SELECT_EDGE) {
     /* Does both use_zbuf and non-use_zbuf versions (need screen cos for both) */
-    struct BoxSelectUserData_ForMeshEdge cb_data {};
+    struct BoxSelectUserData_ForMeshEdge cb_data {
+    };
     cb_data.data = &data;
     cb_data.esel = use_zbuf ? esel : nullptr;
     cb_data.backbuf_offset = use_zbuf ? DRW_select_buffer_context_offset_for_object_elem(
@@ -3892,6 +3893,7 @@ static bool do_pose_box_select(bContext *C, ViewContext *vc, rcti *rect, const e
 
 static int view3d_box_select_exec(bContext *C, wmOperator *op)
 {
+  using namespace blender;
   Depsgraph *depsgraph = CTX_data_ensure_evaluated_depsgraph(C);
   ViewContext vc;
   rcti rect;
@@ -3954,6 +3956,19 @@ static int view3d_box_select_exec(bContext *C, wmOperator *op)
             WM_event_add_notifier(C, NC_GEOM | ND_SELECT, vc.obedit->data);
           }
           break;
+        case OB_CURVES: {
+          Curves &curves_id = *static_cast<Curves *>(vc.obact->data);
+          bke::CurvesGeometry &curves = curves_id.geometry.wrap();
+          changed = ed::curves::select_box(
+              vc, curves, eAttrDomain(curves_id.selection_domain), rect, sel_op);
+          if (changed) {
+            /* Use #ID_RECALC_GEOMETRY instead of #ID_RECALC_SELECT because it is handled as a
+             * generic attribute for now. */
+            DEG_id_tag_update(static_cast<ID *>(vc.obedit->data), ID_RECALC_GEOMETRY);
+            WM_event_add_notifier(C, NC_GEOM | ND_DATA, vc.obedit->data);
+          }
+          break;
+        }
         default:
           BLI_assert_msg(0, "box select on incorrect object type");
           break;
