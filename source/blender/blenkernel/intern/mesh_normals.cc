@@ -233,13 +233,12 @@ void BKE_mesh_calc_normals_poly(const float (*vert_positions)[3],
                                 const int *corner_verts,
                                 const int mloop_len,
                                 const blender::OffsetIndices<int> polys,
-                                int mpoly_len,
                                 float (*r_poly_normals)[3])
 {
   calculate_normals_poly({reinterpret_cast<const float3 *>(vert_positions), verts_num},
                          polys,
                          {corner_verts, mloop_len},
-                         {reinterpret_cast<float3 *>(r_poly_normals), mpoly_len});
+                         {reinterpret_cast<float3 *>(r_poly_normals), polys.ranges_num()});
 }
 
 /** \} */

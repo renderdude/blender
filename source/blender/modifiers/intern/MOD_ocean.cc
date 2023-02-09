@@ -354,7 +354,7 @@ static Mesh *doOcean(ModifierData *md, const ModifierEvalContext *ctx, Mesh *mes
   cfra_for_cache -= omd->bakestart; /* shift to 0 based */
 
   float(*positions)[3] = BKE_mesh_vert_positions_for_write(result);
-  const OffsetIndices polys = result->polys();
+  const blender::OffsetIndices polys = result->polys();
 
   /* Add vertex-colors before displacement: allows lookup based on position. */
 
@@ -381,7 +381,7 @@ static Mesh *doOcean(ModifierData *md, const ModifierEvalContext *ctx, Mesh *mes
 
     if (mloopcols) { /* unlikely to fail */
 
-      for (i = 0; i < polys_num; i++) {
+      for (const int i : polys.index_range()) {
         const blender::IndexRange poly = polys[i];
         const int *corner_vert = &corner_verts[poly.start()];
         MLoopCol *mlcol = &mloopcols[poly.start()];

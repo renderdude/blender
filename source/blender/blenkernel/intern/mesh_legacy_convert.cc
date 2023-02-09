@@ -2142,11 +2142,8 @@ MPoly *BKE_mesh_legacy_convert_offsets_to_polys(const Mesh *mesh,
 {
   using namespace blender;
   const OffsetIndices polys = mesh->polys();
-  const Span<int> corner_verts = mesh->corner_verts();
-  const Span<int> corner_edges = mesh->corner_edges();
 
   MutableSpan<MPoly> polys_legacy = temp_arrays_for_convert.construct<Array<MPoly>>(mesh->totpoly);
-
   threading::parallel_for(polys_legacy.index_range(), 2048, [&](IndexRange range) {
     for (const int i : range) {
       polys_legacy[i].loopstart = polys[i].start();

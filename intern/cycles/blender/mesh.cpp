@@ -885,9 +885,7 @@ static void attr_create_random_per_island(Scene *scene,
       const int *poly_offsets = static_cast<const int *>(b_mesh.polygons[0].ptr.data);
       BL::IntAttribute corner_verts = *find_corner_vert_attribute(b_mesh);
       for (int i = 0; i < polys_num; i++) {
-        const int poly_start = poly_offsets[i];
-        const int poly_size = poly_offsets[i + 1] - poly_start;
-        const int vert = corner_verts.data[poly_start].value();
+        const int vert = corner_verts.data[poly_offsets[i]].value();
         data[i] = hash_uint_to_float(vertices_sets.find(vert));
       }
     }

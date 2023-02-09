@@ -61,7 +61,7 @@ Subdiv *multires_reshape_create_subdiv(Depsgraph *depsgraph,
 
 static void context_zero(MultiresReshapeContext *reshape_context)
 {
-  memset(reshape_context, 0, sizeof(*reshape_context));
+  *reshape_context = {};
 }
 
 static void context_init_lookup(MultiresReshapeContext *reshape_context)

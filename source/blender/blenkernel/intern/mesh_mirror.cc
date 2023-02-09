@@ -389,7 +389,6 @@ Mesh *BKE_mesh_mirror_apply_mirror_on_axis_for_modifier(MirrorModifierData *mmd,
   if (ob->type == OB_MESH && (((Mesh *)ob->data)->flag & ME_AUTOSMOOTH) &&
       CustomData_has_layer(&result->ldata, CD_CUSTOMLOOPNORMAL)) {
     const int totloop = result->totloop;
-    const int totpoly = result->totpoly;
     float(*loop_normals)[3] = static_cast<float(*)[3]>(
         MEM_calloc_arrayN(size_t(totloop), sizeof(*loop_normals), __func__));
     CustomData *ldata = &result->ldata;

@@ -87,7 +87,6 @@ void BKE_mesh_calc_loop_tangent_single_ex(const float (*vert_positions)[3],
                                           const float (*loop_uvs)[2],
                                           const int /*numLoops*/,
                                           const blender::OffsetIndices<int> polys,
-                                          const int numPolys,
                                           ReportList *reports)
 {
   /* Compute Mikktspace's tangent normals. */
@@ -98,12 +97,12 @@ void BKE_mesh_calc_loop_tangent_single_ex(const float (*vert_positions)[3],
   mesh_to_tangent.luvs = loop_uvs;
   mesh_to_tangent.loop_normals = loop_normals;
   mesh_to_tangent.tangents = r_looptangent;
-  mesh_to_tangent.num_polys = numPolys;
+  mesh_to_tangent.num_polys = polys.ranges_num();
 
   mikk::Mikktspace<BKEMeshToTangent> mikk(mesh_to_tangent);
 
   /* First check we do have a tris/quads only mesh. */
-  for (int i = 0; i < numPolys; i++) {
+  for (const int64_t i : polys.index_range()) {
     if (polys[i].size() > 4) {
       BKE_report(
           reports, RPT_ERROR, "Tangent space can only be computed for tris/quads, aborting");
@@ -388,7 +387,6 @@ void BKE_mesh_calc_loop_tangent_step_0(const CustomData *loopData,
 
 void BKE_mesh_calc_loop_tangent_ex(const float (*vert_positions)[3],
                                    const blender::OffsetIndices<int> polys,
-                                   const uint mpoly_len,
                                    const int *corner_verts,
                                    const MLoopTri *looptri,
                                    const uint looptri_len,
@@ -455,7 +453,7 @@ void BKE_mesh_calc_loop_tangent_ex(const float (*vert_positions)[3],
     int *face_as_quad_map = nullptr;
 
     /* map faces to quads */
-    if (looptri_len != mpoly_len) {
+    if (looptri_len != uint(polys.ranges_num())) {
       /* Over allocate, since we don't know how many ngon or quads we have. */
 
       /* map fake face index to looptri */
@@ -578,7 +576,6 @@ void BKE_mesh_calc_loop_tangents(Mesh *me_eval,
   BKE_mesh_calc_loop_tangent_ex(
       BKE_mesh_vert_positions(me_eval),
       me_eval->polys(),
-      uint(me_eval->totpoly),
       me_eval->corner_verts().data(),
       BKE_mesh_runtime_looptri_ensure(me_eval),
       uint(BKE_mesh_runtime_looptri_len(me_eval)),

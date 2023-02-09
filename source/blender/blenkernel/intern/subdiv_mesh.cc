@@ -917,7 +917,7 @@ static void subdiv_mesh_poly(const SubdivForeachContext *foreach_context,
                              const int coarse_poly_index,
                              const int subdiv_poly_index,
                              const int start_loop_index,
-                             const int num_loops)
+                             const int /*num_loops*/)
 {
   BLI_assert(coarse_poly_index != ORIGINDEX_NONE);
   SubdivMeshContext *ctx = static_cast<SubdivMeshContext *>(foreach_context->user_data);
