@@ -1057,8 +1057,8 @@ static bool mesh_calc_islands_loop_poly_uv(const MEdge *edges,
 
       BLI_assert(edge_to_loops.count >= 2 && (edge_to_loops.count % 2) == 0);
 
-      const uint v1 = corner_verts[edge_to_loops.indices[0]];
-      const uint v2 = corner_verts[edge_to_loops.indices[1]];
+      const int v1 = corner_verts[edge_to_loops.indices[0]];
+      const int v2 = corner_verts[edge_to_loops.indices[1]];
       const float *uvco_v1 = luvs[edge_to_loops.indices[0]];
       const float *uvco_v2 = luvs[edge_to_loops.indices[1]];
       for (int i = 2; i < edge_to_loops.count; i += 2) {
