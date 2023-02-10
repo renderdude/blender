@@ -853,6 +853,8 @@ int *BKE_mesh_calc_smoothgroups(const int totedge,
 {
   int *poly_groups = nullptr;
 
+  auto poly_is_smooth = [&](const int i) { return !(sharp_faces && sharp_faces[i]); };
+
   auto poly_is_island_boundary_smooth = [&](const int poly_index,
                                             const int /*loop_index*/,
                                             const int edge_index,
@@ -860,13 +862,13 @@ int *BKE_mesh_calc_smoothgroups(const int totedge,
                                             const MeshElemMap &edge_poly_map_elem) {
     /* Edge is sharp if one of its polys is flat, or edge itself is sharp,
      * or edge is not used by exactly two polygons. */
-    if (!(sharp_faces && sharp_faces[poly_index]) && !(sharp_edges && sharp_edges[edge_index]) &&
+    if ((poly_is_smooth(poly_index)) && !(sharp_edges && sharp_edges[edge_index]) &&
         (edge_user_count == 2)) {
       /* In that case, edge appears to be smooth, but we need to check its other poly too. */
       const int other_poly_index = (poly_index == edge_poly_map_elem.indices[0]) ?
                                        edge_poly_map_elem.indices[1] :
                                        edge_poly_map_elem.indices[0];
-      return !(sharp_faces && sharp_faces[other_poly_index]);
+      return !poly_is_smooth(other_poly_index);
     }
     return true;
   };
