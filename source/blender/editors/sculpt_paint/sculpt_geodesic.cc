@@ -98,7 +98,6 @@ static float *SCULPT_geodesic_mesh_create(Object *ob,
   if (!ss->epmap) {
     BKE_mesh_edge_poly_map_create(&ss->epmap,
                                   &ss->epmap_mem,
-                                  edges,
                                   mesh->totedge,
                                   polys,
                                   mesh->totpoly,
