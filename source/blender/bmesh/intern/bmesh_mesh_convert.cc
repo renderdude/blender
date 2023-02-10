@@ -123,6 +123,21 @@ static short bm_edge_flag_to_mflag(const BMEdge *e)
   return (hflag & BM_ELEM_SEAM) ? ME_SEAM : 0;
 }
 
+bool BM_attribute_stored_in_bmesh_builtin(const StringRef name)
+{
+  return ELEM(name,
+              "position",
+              ".hide_vert",
+              ".hide_edge",
+              ".hide_poly",
+              ".select_vert",
+              ".select_edge",
+              ".select_poly",
+              "material_index",
+              "sharp_face",
+              "sharp_edge");
+}
+
 /* Static function for alloc (duplicate in modifiers_bmesh.c) */
 static BMFace *bm_face_create_from_mpoly(BMesh &bm,
                                          Span<MLoop> loops,
