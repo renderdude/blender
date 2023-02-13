@@ -117,7 +117,7 @@ struct DupliContext {
    * decisions. However, new code uses geometry instances in places that weren't using the dupli
    * system previously. To fix this, keep track of the last dupli generator type that wasn't a
    * geometry set instance.
-   * */
+   */
   Vector<short> *dupli_gen_type_stack;
 
   int persistent_id[MAX_DUPLI_RECUR];
@@ -1530,7 +1530,7 @@ static void make_duplis_particle_system(const DupliContext *ctx, ParticleSystem 
       }
 
       if (part->ren_as == PART_DRAW_GR) {
-        /* Prevent divide by zero below T28336. */
+        /* Prevent divide by zero below #28336. */
         if (totcollection == 0) {
           continue;
         }

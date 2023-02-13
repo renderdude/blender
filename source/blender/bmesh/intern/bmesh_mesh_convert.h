@@ -10,6 +10,16 @@
 #include "bmesh.h"
 
 #ifdef __cplusplus
+#  include "BLI_string_ref.hh"
+
+/**
+ * \return Whether attributes with the given name are stored in special flags or fields in BMesh
+ * rather than in the regular custom data blocks.
+ */
+bool BM_attribute_stored_in_bmesh_builtin(const blender::StringRef name);
+#endif
+
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -51,7 +61,7 @@ struct BMeshToMeshParams {
    *
    * This is needed when flushing changes from edit-mode into object mode,
    * so a second flush or edit-mode exit doesn't run with indices
-   * that have become invalid from updating the shape-key, see T71865.
+   * that have become invalid from updating the shape-key, see #71865.
    */
   bool update_shapekey_indices;
   /**

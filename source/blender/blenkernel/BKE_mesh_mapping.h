@@ -180,7 +180,6 @@ void BKE_mesh_vert_edge_vert_map_create(
  */
 void BKE_mesh_edge_loop_map_create(MeshElemMap **r_map,
                                    int **r_mem,
-                                   const struct MEdge *medge,
                                    int totedge,
                                    blender::OffsetIndices<int> polys,
                                    const int *corner_edges,
@@ -192,7 +191,6 @@ void BKE_mesh_edge_loop_map_create(MeshElemMap **r_map,
  */
 void BKE_mesh_edge_poly_map_create(MeshElemMap **r_map,
                                    int **r_mem,
-                                   const struct MEdge *medge,
                                    int totedge,
                                    blender::OffsetIndices<int> polys,
                                    const int *corner_edges,
@@ -329,8 +327,7 @@ bool BKE_mesh_calc_islands_loop_poly_uvmap(float (*vert_positions)[3],
  * starting at 1 (0 being used as 'invalid' flag).
  * Note it's callers's responsibility to MEM_freeN returned array.
  */
-int *BKE_mesh_calc_smoothgroups(const struct MEdge *medge,
-                                int totedge,
+int *BKE_mesh_calc_smoothgroups(int totedge,
                                 const int *poly_offsets,
                                 int totpoly,
                                 const int *corner_edges,

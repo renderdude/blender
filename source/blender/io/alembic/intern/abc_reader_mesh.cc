@@ -200,7 +200,7 @@ static void read_mpolys(CDStreamConfig &config, const AbcMeshData &mesh_data)
     poly_offsets[i] = loop_index;
 
     /* Polygons are always assumed to be smooth-shaded. If the Alembic mesh should be flat-shaded,
-     * this is encoded in custom loop normals. See T71246. */
+     * this is encoded in custom loop normals. See #71246. */
 
     /* NOTE: Alembic data is stored in the reverse order. */
     rev_loop_index = loop_index + (face_size - 1);
@@ -212,7 +212,7 @@ static void read_mpolys(CDStreamConfig &config, const AbcMeshData &mesh_data)
 
       if (f > 0 && vert == last_vertex_index) {
         /* This face is invalid, as it has consecutive loops from the same vertex. This is caused
-         * by invalid geometry in the Alembic file, such as in T76514. */
+         * by invalid geometry in the Alembic file, such as in #76514. */
         seen_invalid_geometry = true;
       }
       last_vertex_index = vert;
@@ -730,7 +730,7 @@ Mesh *AbcMeshReader::read_mesh(Mesh *existing_mesh,
   }
   else {
     /* If the face count changed (e.g. by triangulation), only read points.
-     * This prevents crash from T49813.
+     * This prevents crash from #49813.
      * TODO(kevin): perhaps find a better way to do this? */
     if (face_counts->size() != existing_mesh->totpoly ||
         face_indices->size() != existing_mesh->totloop) {
@@ -1063,7 +1063,7 @@ Mesh *AbcSubDReader::read_mesh(Mesh *existing_mesh,
   }
   else {
     /* If the face count changed (e.g. by triangulation), only read points.
-     * This prevents crash from T49813.
+     * This prevents crash from #49813.
      * TODO(kevin): perhaps find a better way to do this? */
     if (face_counts->size() != existing_mesh->totpoly ||
         face_indices->size() != existing_mesh->totloop) {
