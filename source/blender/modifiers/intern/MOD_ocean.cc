@@ -359,7 +359,6 @@ static Mesh *doOcean(ModifierData *md, const ModifierEvalContext *ctx, Mesh *mes
   /* Add vertex-colors before displacement: allows lookup based on position. */
 
   if (omd->flag & MOD_OCEAN_GENERATE_FOAM) {
-    const int polys_num = result->totpoly;
     const int loops_num = result->totloop;
     const blender::Span<int> corner_verts = result->corner_verts();
     MLoopCol *mloopcols = static_cast<MLoopCol *>(CustomData_add_layer_named(&result->ldata,
