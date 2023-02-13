@@ -49,7 +49,7 @@ static int primitive_get_other_uv_vertex(const MeshData &mesh_data,
                   corner_verts[looptri.tri[2]]));
   for (const int loop : looptri.tri) {
     const int vert = corner_verts[loop];
-    if (vert != v1 && vert != v2) {
+    if (!ELEM(vert, v1, v2)) {
       return vert;
     }
   }
