@@ -142,7 +142,7 @@ Mesh *USDShapeReader::read_mesh(struct Mesh *existing_mesh,
   }
 
   MutableSpan<MPoly> polys = active_mesh->polys_for_write();
-  MutableSpan<MLoop> loops = active_mesh->loops_for_write();
+  MutableSpan<int> corner_verts = active_mesh->corner_verts_for_write();
 
   const char should_smooth = prim_.IsA<pxr::UsdGeomCube>() ? 0 : ME_SMOOTH;
 
@@ -158,7 +158,7 @@ Mesh *USDShapeReader::read_mesh(struct Mesh *existing_mesh,
     poly.flag |= should_smooth;
 
     for (int f = 0; f < face_size; ++f, ++loop_index) {
-      loops[loop_index].v = face_indices[loop_index];
+      corner_verts[loop_index] = face_indices[loop_index];
     }
   }
 
