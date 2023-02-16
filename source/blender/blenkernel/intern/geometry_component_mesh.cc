@@ -1128,48 +1128,6 @@ class VertexGroupsAttributeProvider final : public DynamicAttributesProvider {
 };
 
 /**
- * This provider makes face normals available as a read-only float3 attribute.
- */
-class NormalAttributeProvider final : public BuiltinAttributeProvider {
- public:
-  NormalAttributeProvider()
-      : BuiltinAttributeProvider(
-            "normal", ATTR_DOMAIN_FACE, CD_PROP_FLOAT3, NonCreatable, Readonly, NonDeletable)
-  {
-  }
-
-  GVArray try_get_for_read(const void *owner) const final
-  {
-    const Mesh *mesh = static_cast<const Mesh *>(owner);
-    if (mesh == nullptr || mesh->totpoly == 0) {
-      return {};
-    }
-    return VArray<float3>::ForSpan({(float3 *)BKE_mesh_poly_normals_ensure(mesh), mesh->totpoly});
-  }
-
-  GAttributeWriter try_get_for_write(void * /*owner*/) const final
-  {
-    return {};
-  }
-
-  bool try_delete(void * /*owner*/) const final
-  {
-    return false;
-  }
-
-  bool try_create(void * /*owner*/, const AttributeInit & /*initializer*/) const final
-  {
-    return false;
-  }
-
-  bool exists(const void *owner) const final
-  {
-    const Mesh *mesh = static_cast<const Mesh *>(owner);
-    return mesh->totpoly != 0;
-  }
-};
-
-/**
  * In this function all the attribute providers for a mesh component are created. Most data in this
  * function is statically allocated, because it does not change over time.
  */
@@ -1212,21 +1170,17 @@ static ComponentAttributeProviders create_attribute_providers_for_mesh()
                                                  CD_PROP_FLOAT3,
                                                  CD_PROP_FLOAT3,
                                                  BuiltinAttributeProvider::NonCreatable,
-                                                 BuiltinAttributeProvider::Writable,
                                                  BuiltinAttributeProvider::NonDeletable,
                                                  point_access,
                                                  make_array_read_attribute<float3>,
                                                  make_array_write_attribute<float3>,
                                                  tag_component_positions_changed);
 
-  static NormalAttributeProvider normal;
-
   static BuiltinCustomDataLayerProvider id("id",
                                            ATTR_DOMAIN_POINT,
                                            CD_PROP_INT32,
                                            CD_PROP_INT32,
                                            BuiltinAttributeProvider::Creatable,
-                                           BuiltinAttributeProvider::Writable,
                                            BuiltinAttributeProvider::Deletable,
                                            point_access,
                                            make_array_read_attribute<int>,
@@ -1245,7 +1199,6 @@ static ComponentAttributeProviders create_attribute_providers_for_mesh()
                                                        CD_PROP_INT32,
                                                        CD_PROP_INT32,
                                                        BuiltinAttributeProvider::Creatable,
-                                                       BuiltinAttributeProvider::Writable,
                                                        BuiltinAttributeProvider::Deletable,
                                                        face_access,
                                                        make_array_read_attribute<int>,
@@ -1258,7 +1211,6 @@ static ComponentAttributeProviders create_attribute_providers_for_mesh()
                                                    CD_PROP_BOOL,
                                                    CD_PROP_BOOL,
                                                    BuiltinAttributeProvider::Creatable,
-                                                   BuiltinAttributeProvider::Writable,
                                                    BuiltinAttributeProvider::Deletable,
                                                    face_access,
                                                    make_array_read_attribute<bool>,
@@ -1270,7 +1222,6 @@ static ComponentAttributeProviders create_attribute_providers_for_mesh()
                                                    CD_PROP_BOOL,
                                                    CD_PROP_BOOL,
                                                    BuiltinAttributeProvider::Creatable,
-                                                   BuiltinAttributeProvider::Writable,
                                                    BuiltinAttributeProvider::Deletable,
                                                    edge_access,
                                                    make_array_read_attribute<bool>,
@@ -1283,7 +1234,6 @@ static ComponentAttributeProviders create_attribute_providers_for_mesh()
       CD_PROP_FLOAT,
       CD_CREASE,
       BuiltinAttributeProvider::Creatable,
-      BuiltinAttributeProvider::Writable,
       BuiltinAttributeProvider::Deletable,
       edge_access,
       make_array_read_attribute<float>,
@@ -1297,7 +1247,7 @@ static ComponentAttributeProviders create_attribute_providers_for_mesh()
   static CustomDataAttributeProvider face_custom_data(ATTR_DOMAIN_FACE, face_access);
 
   return ComponentAttributeProviders(
-      {&position, &id, &material_index, &sharp_face, &sharp_edge, &normal, &crease},
+      {&position, &id, &material_index, &sharp_face, &sharp_edge, &crease},
       {&corner_custom_data,
        &vertex_groups,
        &point_custom_data,
