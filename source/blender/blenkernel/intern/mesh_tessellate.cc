@@ -181,22 +181,22 @@ static void mesh_recalc_looptri__single_threaded(const int *corner_verts,
   uint tri_index = 0;
 
   if (poly_normals != nullptr) {
-    for (uint poly_index = 0; poly_index < uint(polys.ranges_num()); poly_index++) {
+    for (const int64_t i : polys.index_range()) {
       mesh_calc_tessellation_for_face_with_normal(corner_verts,
                                                   polys,
                                                   positions,
-                                                  poly_index,
+                                                  uint(i),
                                                   &mlooptri[tri_index],
                                                   &pf_arena,
-                                                  poly_normals[poly_index]);
-      tri_index += uint(polys[poly_index].size() - 2);
+                                                  poly_normals[i]);
+      tri_index += uint(polys[i].size() - 2);
     }
   }
   else {
-    for (uint poly_index = 0; poly_index < uint(polys.ranges_num()); poly_index++) {
+    for (const int64_t i : polys.index_range()) {
       mesh_calc_tessellation_for_face(
-          corner_verts, polys, positions, poly_index, &mlooptri[tri_index], &pf_arena);
-      tri_index += uint(polys[poly_index].size() - 2);
+          corner_verts, polys, positions, uint(i), &mlooptri[tri_index], &pf_arena);
+      tri_index += uint(polys[i].size() - 2);
     }
   }
 
@@ -326,7 +326,7 @@ void BKE_mesh_recalc_looptri_with_normals(const int *corner_verts,
                                           MLoopTri *mlooptri,
                                           const float (*poly_normals)[3])
 {
-  const blender::OffsetIndices<int> polys(blender::Span(poly_offsets, totpoly));
+  const blender::OffsetIndices<int> polys(blender::Span(poly_offsets, totpoly + 1));
   BLI_assert(poly_normals != nullptr);
   if (totloop < MESH_FACE_TESSELLATE_THREADED_LIMIT) {
     mesh_recalc_looptri__single_threaded(

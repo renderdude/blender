@@ -141,25 +141,17 @@ Mesh *USDShapeReader::read_mesh(struct Mesh *existing_mesh,
     return existing_mesh;
   }
 
-  MutableSpan<MPoly> polys = active_mesh->polys_for_write();
+  MutableSpan<int> poly_offsets = active_mesh->poly_offsets_for_write();
+  for (const int i : IndexRange(active_mesh->totpoly)) {
+    poly_offsets[i] = face_counts[i];
+  }
+  offset_indices::accumulate_counts_to_offsets(poly_offsets);
+
+  BKE_mesh_smooth_flag_set(active_mesh, !prim_.IsA<pxr::UsdGeomCube>());
+
   MutableSpan<int> corner_verts = active_mesh->corner_verts_for_write();
-
-  const char should_smooth = prim_.IsA<pxr::UsdGeomCube>() ? 0 : ME_SMOOTH;
-
-  int loop_index = 0;
-  for (int i = 0; i < face_counts.size(); i++) {
-    const int face_size = face_counts[i];
-
-    MPoly &poly = polys[i];
-    poly.loopstart = loop_index;
-    poly.totloop = face_size;
-
-    /* Don't smooth-shade cubes; we're not worrying about sharpness for Gprims. */
-    poly.flag |= should_smooth;
-
-    for (int f = 0; f < face_size; ++f, ++loop_index) {
-      corner_verts[loop_index] = face_indices[loop_index];
-    }
+  for (const int i : corner_verts.index_range()) {
+    corner_verts[i] = face_indices[i];
   }
 
   BKE_mesh_calc_edges(active_mesh, false, false);

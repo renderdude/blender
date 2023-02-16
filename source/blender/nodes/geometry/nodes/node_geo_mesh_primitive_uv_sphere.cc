@@ -153,12 +153,13 @@ BLI_NOINLINE static void calculate_sphere_edge_indices(MutableSpan<MEdge> edges,
 
 BLI_NOINLINE static void calculate_sphere_faces(MutableSpan<int> poly_offsets, const int segments)
 {
+  MutableSpan<int> poly_sizes = poly_offsets.drop_back(1);
   /* Add the triangles connected to the top vertex. */
-  poly_offsets.take_front(segments).fill(3);
+  poly_sizes.take_front(segments).fill(3);
   /* Add the middle quads. */
-  poly_offsets.drop_front(segments).drop_back(segments).fill(4);
+  poly_sizes.drop_front(segments).drop_back(segments).fill(4);
   /* Add the triangles connected to the bottom vertex. */
-  poly_offsets.take_back(segments).fill(3);
+  poly_sizes.take_back(segments).fill(3);
 
   offset_indices::accumulate_counts_to_offsets(poly_offsets);
 }

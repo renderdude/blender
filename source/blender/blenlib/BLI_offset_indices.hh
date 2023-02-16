@@ -48,7 +48,7 @@ template<typename T> class OffsetIndices {
   /** Return the total number of elements in the the referenced arrays. */
   T total_size() const
   {
-    return offsets_.last();
+    return offsets_.size() == 1 ? 0 : offsets_.last();
   }
 
   IndexRange index_range() const
@@ -59,7 +59,7 @@ template<typename T> class OffsetIndices {
   /** Return the number of ranges encoded by the offsets. */
   T ranges_num() const
   {
-    return offsets_.size() - 1;
+    return std::max(offsets_.size() - 1, 0L);
   }
 
   IndexRange operator[](const int64_t index) const

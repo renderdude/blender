@@ -158,6 +158,9 @@ static void mesh_copy_data(Main *bmain, ID *id_dst, const ID *id_src, const int 
   CustomData_copy(&mesh_src->edata, &mesh_dst->edata, mask.emask, alloc_type, mesh_dst->totedge);
   CustomData_copy(&mesh_src->ldata, &mesh_dst->ldata, mask.lmask, alloc_type, mesh_dst->totloop);
   CustomData_copy(&mesh_src->pdata, &mesh_dst->pdata, mask.pmask, alloc_type, mesh_dst->totpoly);
+  if (mesh_src->totpoly > 0) {
+    mesh_dst->poly_offsets_data = static_cast<int *>(MEM_dupallocN(mesh_src->poly_offsets_data));
+  }
   if (do_tessface) {
     CustomData_copy(&mesh_src->fdata, &mesh_dst->fdata, mask.fmask, alloc_type, mesh_dst->totface);
   }
@@ -899,6 +902,7 @@ static void mesh_clear_geometry(Mesh *mesh)
   CustomData_free(&mesh->fdata, mesh->totface);
   CustomData_free(&mesh->ldata, mesh->totloop);
   CustomData_free(&mesh->pdata, mesh->totpoly);
+  MEM_SAFE_FREE(mesh->poly_offsets_data);
 
   MEM_SAFE_FREE(mesh->mselect);
 

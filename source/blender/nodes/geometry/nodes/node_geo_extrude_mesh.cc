@@ -108,6 +108,8 @@ static void expand_mesh(Mesh &mesh,
     const int old_polys_num = mesh.totpoly;
     mesh.totpoly += poly_expand;
     CustomData_realloc(&mesh.pdata, old_polys_num, mesh.totpoly);
+    mesh.poly_offsets_data = static_cast<int *>(
+        MEM_reallocN(mesh.poly_offsets_data, sizeof(int) * (mesh.totpoly + 1)));
   }
   if (loop_expand != 0) {
     const int old_loops_num = mesh.totloop;
@@ -1101,8 +1103,7 @@ static void extrude_individual_mesh_faces(Mesh &mesh,
   MutableSpan<int> corner_edges = mesh.corner_edges_for_write();
 
   new_poly_offsets.fill(4);
-  offset_indices::accumulate_counts_to_offsets(new_poly_offsets,
-                                               poly_offsets[side_poly_range.one_before_start()]);
+  offset_indices::accumulate_counts_to_offsets(new_poly_offsets, orig_corner_verts.size());
   const OffsetIndices polys = mesh.polys();
 
   /* For every selected polygon, change it to use the new extruded vertices and the duplicate

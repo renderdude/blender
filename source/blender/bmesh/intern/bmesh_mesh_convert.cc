@@ -1122,6 +1122,14 @@ static void bmesh_block_copy_to_mesh_attributes(const Span<BMeshToMeshLayerInfo>
   }
 }
 
+static void mesh_free_geometry_no_edit_data(Mesh &mesh)
+{
+  EditMeshData *em = mesh.runtime->edit_data;
+  mesh.runtime->edit_data = nullptr;
+  BKE_mesh_clear_geometry(&mesh);
+  mesh.runtime->edit_data = em;
+}
+
 void BM_mesh_bm_to_me(Main *bmain, BMesh *bm, Mesh *me, const struct BMeshToMeshParams *params)
 {
   using namespace blender;
@@ -1137,14 +1145,7 @@ void BM_mesh_bm_to_me(Main *bmain, BMesh *bm, Mesh *me, const struct BMeshToMesh
 
   blender::Vector<int> ldata_layers_marked_nocopy;
 
-  /* Free custom data. */
-  CustomData_free(&me->vdata, me->totvert);
-  CustomData_free(&me->edata, me->totedge);
-  CustomData_free(&me->fdata, me->totface);
-  CustomData_free(&me->ldata, me->totloop);
-  CustomData_free(&me->pdata, me->totpoly);
-
-  BKE_mesh_runtime_clear_geometry(me);
+  mesh_free_geometry_no_edit_data(*me);
 
   /* Add new custom data. */
   me->totvert = bm->totvert;
@@ -1690,8 +1691,7 @@ void BM_mesh_bm_to_me_for_eval(BMesh *bm, Mesh *me, const CustomData_MeshMasks *
   /* Must be an empty mesh. */
   BLI_assert(me->totvert == 0);
   BLI_assert(cd_mask_extra == nullptr || (cd_mask_extra->vmask & CD_MASK_SHAPEKEY) == 0);
-  /* Just in case, clear the derived geometry caches from the input mesh. */
-  BKE_mesh_runtime_clear_geometry(me);
+  mesh_free_geometry_no_edit_data(*me);
 
   me->totvert = bm->totvert;
   me->totedge = bm->totedge;
@@ -1699,19 +1699,14 @@ void BM_mesh_bm_to_me_for_eval(BMesh *bm, Mesh *me, const CustomData_MeshMasks *
   me->totloop = bm->totloop;
   me->totpoly = bm->totface;
 
-  if (!CustomData_get_layer_named(&me->vdata, CD_PROP_FLOAT3, "position")) {
-    CustomData_add_layer_named(
-        &me->vdata, CD_PROP_FLOAT3, CD_CONSTRUCT, nullptr, bm->totvert, "position");
-  }
+  BKE_mesh_poly_offsets_ensure(me);
+  CustomData_add_layer_named(
+      &me->vdata, CD_PROP_FLOAT3, CD_CONSTRUCT, nullptr, bm->totvert, "position");
   CustomData_add_layer(&me->edata, CD_MEDGE, CD_CONSTRUCT, nullptr, bm->totedge);
-  if (!CustomData_get_layer_named(&me->ldata, CD_PROP_INT32, ".corner_vert")) {
-    CustomData_add_layer_named(
-        &me->ldata, CD_PROP_INT32, CD_CONSTRUCT, nullptr, bm->totloop, ".corner_vert");
-  }
-  if (!CustomData_get_layer_named(&me->ldata, CD_PROP_INT32, ".corner_edge")) {
-    CustomData_add_layer_named(
-        &me->ldata, CD_PROP_INT32, CD_CONSTRUCT, nullptr, bm->totloop, ".corner_edge");
-  }
+  CustomData_add_layer_named(
+      &me->ldata, CD_PROP_INT32, CD_CONSTRUCT, nullptr, bm->totloop, ".corner_vert");
+  CustomData_add_layer_named(
+      &me->ldata, CD_PROP_INT32, CD_CONSTRUCT, nullptr, bm->totloop, ".corner_edge");
 
   /* Don't process shape-keys, we only feed them through the modifier stack as needed,
    * e.g. for applying modifiers or the like. */

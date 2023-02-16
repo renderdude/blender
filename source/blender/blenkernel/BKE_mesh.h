@@ -1104,7 +1104,7 @@ inline blender::MutableSpan<MEdge> Mesh::edges_for_write()
 
 inline blender::OffsetIndices<int> Mesh::polys() const
 {
-  return blender::Span(BKE_mesh_poly_offsets(this), this->totpoly);
+  return blender::Span(BKE_mesh_poly_offsets(this), this->totpoly + 1);
 }
 inline blender::Span<int> Mesh::poly_offsets() const
 {
@@ -1112,7 +1112,7 @@ inline blender::Span<int> Mesh::poly_offsets() const
 }
 inline blender::MutableSpan<int> Mesh::poly_offsets_for_write()
 {
-  return {BKE_mesh_poly_offsets_for_write(this), this->totpoly};
+  return {BKE_mesh_poly_offsets_for_write(this), this->totpoly + 1};
 }
 
 inline blender::Span<int> Mesh::corner_verts() const
