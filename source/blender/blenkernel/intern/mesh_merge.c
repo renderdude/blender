@@ -23,6 +23,8 @@
 #include "BKE_mesh.h"
 #include "BKE_mesh_mapping.h"
 
+#if 0
+
 /**
  * Poly compare with vtargetmap
  * Function used by #BKE_mesh_merge_verts.
@@ -192,11 +194,15 @@ static bool poly_gset_compare_fn(const void *k1, const void *k2)
   return true;
 }
 
+#endif
+
 Mesh *BKE_mesh_merge_verts(Mesh *mesh,
                            const int *vtargetmap,
                            const int tot_vtargetmap,
                            const int merge_mode)
 {
+  return NULL;
+#if 0
   /* This was commented out back in 2013, see commit f45d8827bafe6b9eaf9de42f4054e9d84a21955d. */
   // #define USE_LOOPS
 
@@ -230,9 +236,9 @@ Mesh *BKE_mesh_merge_verts(Mesh *mesh,
   int *corner_verts = MEM_malloc_arrayN(totloop, sizeof(int), __func__);
   int *corner_edges = MEM_malloc_arrayN(totloop, sizeof(int), __func__);
   int *oldl = MEM_malloc_arrayN(totloop, sizeof(*oldl), __func__);
-#ifdef USE_LOOPS
+#  ifdef USE_LOOPS
   int *newl = MEM_malloc_arrayN(totloop, sizeof(*newl), __func__);
-#endif
+#  endif
   STACK_DECLARE(corner_verts);
   STACK_DECLARE(corner_edges);
   STACK_DECLARE(oldl);
@@ -438,7 +444,7 @@ Mesh *BKE_mesh_merge_verts(Mesh *mesh,
       const int orig_vert_i = src_corner_verts[mp->loopstart + j];
       const int orig_edge_i = src_corner_edges[mp->loopstart + j];
       const uint mlv = (vtargetmap[orig_vert_i] != -1) ? vtargetmap[orig_vert_i] : orig_vert_i;
-#ifndef NDEBUG
+#  ifndef NDEBUG
       {
         const int next_corner_vert = src_corner_verts[mp->loopstart + ((j + 1) % mp->totloop)];
         uint next_mlv = (vtargetmap[next_corner_vert] != -1) ? vtargetmap[next_corner_vert] :
@@ -448,7 +454,7 @@ Mesh *BKE_mesh_merge_verts(Mesh *mesh,
         uint v2 = (vtargetmap[med->v2] != -1) ? vtargetmap[med->v2] : med->v2;
         BLI_assert((mlv == v1 && next_mlv == v2) || (mlv == v2 && next_mlv == v1));
       }
-#endif
+#  endif
       /* A loop is only valid if its matching edge is,
        * and it's not reusing a vertex already used by this poly. */
       if (LIKELY((newe[orig_edge_i] != -1) && !BLI_BITMAP_TEST(vert_tag, mlv))) {
@@ -482,9 +488,9 @@ Mesh *BKE_mesh_merge_verts(Mesh *mesh,
           need_edge_from_last_valid_ml = false;
         }
 
-#ifdef USE_LOOPS
+#  ifdef USE_LOOPS
         newl[j + mp->loopstart] = STACK_SIZE(corner_verts);
-#endif
+#  endif
         STACK_PUSH(oldl, j + mp->loopstart);
         last_valid_corner_vert = STACK_PUSH_RET_PTR(corner_verts);
         last_valid_corner_edge = STACK_PUSH_RET_PTR(corner_edges);
@@ -640,9 +646,9 @@ Mesh *BKE_mesh_merge_verts(Mesh *mesh,
 
   MEM_freeN(newv);
   MEM_freeN(newe);
-#ifdef USE_LOOPS
+#  ifdef USE_LOOPS
   MEM_freeN(newl);
-#endif
+#  endif
 
   MEM_freeN(oldv);
   MEM_freeN(olde);
@@ -663,4 +669,5 @@ Mesh *BKE_mesh_merge_verts(Mesh *mesh,
   BKE_id_free(NULL, mesh);
 
   return result;
+#endif
 }
