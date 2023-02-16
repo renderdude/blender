@@ -479,9 +479,6 @@ static void extrude_mesh_edges(Mesh &mesh,
     }
     GSpanAttributeWriter attribute = attributes.lookup_or_add_for_write_span(
         id, meta_data.domain, meta_data.data_type);
-    if (!attribute) {
-      return true; /* Impossible to write the "normal" attribute. */
-    }
 
     attribute_math::convert_to_static_type(meta_data.data_type, [&](auto dummy) {
       using T = decltype(dummy);
@@ -878,9 +875,6 @@ static void extrude_mesh_face_regions(Mesh &mesh,
     }
     GSpanAttributeWriter attribute = attributes.lookup_or_add_for_write_span(
         id, meta_data.domain, meta_data.data_type);
-    if (!attribute) {
-      return true; /* Impossible to write the "normal" attribute. */
-    }
 
     attribute_math::convert_to_static_type(meta_data.data_type, [&](auto dummy) {
       using T = decltype(dummy);
@@ -1174,9 +1168,6 @@ static void extrude_individual_mesh_faces(Mesh &mesh,
     }
     GSpanAttributeWriter attribute = attributes.lookup_or_add_for_write_span(
         id, meta_data.domain, meta_data.data_type);
-    if (!attribute) {
-      return true; /* Impossible to write the "normal" attribute. */
-    }
 
     attribute_math::convert_to_static_type(meta_data.data_type, [&](auto dummy) {
       using T = decltype(dummy);
