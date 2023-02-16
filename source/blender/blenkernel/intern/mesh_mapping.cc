@@ -1050,7 +1050,7 @@ static bool mesh_calc_islands_loop_poly_uv(const MEdge *edges,
           }
         }
         else {
-          BLI_assert(loops[edge_to_loops.indices[i]].v == v2);
+          BLI_assert(corner_verts[edge_to_loops.indices[i]] == v2);
           UNUSED_VARS_NDEBUG(v2);
           if (!equals_v2v2(uvco_v2, luvs[edge_to_loops.indices[i]]) ||
               !equals_v2v2(uvco_v1, luvs[edge_to_loops.indices[i + 1]])) {

@@ -686,7 +686,7 @@ static ParamHandle *construct_param_handle_subsurfed(const Scene *scene,
     const blender::Span<int> poly_verts = subsurfedCornerVerts.slice(subsurfedPolys[i]);
 
     /* We will not check for v4 here. Sub-surface faces always have 4 vertices. */
-    BLI_assert(mpoly->totloop == 4);
+    BLI_assert(poly_verts.size() == 4);
     key = (ParamKey)i;
     vkeys[0] = (ParamKey)poly_verts[0];
     vkeys[1] = (ParamKey)poly_verts[1];

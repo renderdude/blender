@@ -353,7 +353,7 @@ bool BKE_mesh_runtime_is_valid(Mesh *me_eval)
                                        me_eval->corner_edges_for_write().data(),
                                        me_eval->totloop,
                                        polys.data(),
-                                       polys.ranges_num(),
+                                       me_eval->totpoly,
                                        me_eval->deform_verts_for_write().data(),
                                        do_verbose,
                                        do_fixes,

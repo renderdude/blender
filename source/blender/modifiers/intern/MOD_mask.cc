@@ -601,7 +601,6 @@ static void add_interpolated_polys_to_new_mesh(const Mesh &src_mesh,
       last_index = index;
       v_loop_in_mask_last = v_loop_in_mask;
     }
-    BLI_assert(dst_poly_offsets[i_dst] + mp_dst.totloop == i_ml_dst);
   }
   BLI_assert(edge_index == dst_mesh.totedge);
 }

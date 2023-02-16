@@ -204,7 +204,7 @@ static void mesh_recalc_looptri__single_threaded(const int *corner_verts,
     BLI_memarena_free(pf_arena);
     pf_arena = nullptr;
   }
-  BLI_assert(tri_index == uint(poly_to_tri_count(totpoly, totloop)));
+  BLI_assert(tri_index == uint(poly_to_tri_count(polys.ranges_num(), totloop)));
   UNUSED_VARS_NDEBUG(totloop);
 }
 

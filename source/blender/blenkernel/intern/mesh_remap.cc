@@ -1425,7 +1425,7 @@ void BKE_mesh_remap_calc_loops_from_mesh(const int mode,
 
       for (const int64_t i : polys_src.index_range()) {
         BKE_mesh_calc_poly_center(
-            corner_verts_src.slice(polys_src[i]), positions_src, poly_cents_src[pidx_src]);
+            corner_verts_src.slice(polys_src[i]), positions_src, poly_cents_src[i]);
       }
     }
 
