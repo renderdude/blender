@@ -360,6 +360,9 @@ static void mesh_blend_read_data(BlendDataReader *reader, ID *id)
   if (mesh->poly_offsets_data) {
     BLO_read_int32_array(reader, mesh->totpoly + 1, &mesh->poly_offsets_data);
   }
+  else {
+    BLO_read_data_address(reader, &mesh->mpoly);
+  }
 
   CustomData_blend_read(reader, &mesh->vdata, mesh->totvert);
   CustomData_blend_read(reader, &mesh->edata, mesh->totedge);

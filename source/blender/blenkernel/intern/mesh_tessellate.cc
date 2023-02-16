@@ -307,7 +307,7 @@ void BKE_mesh_recalc_looptri(const int *corner_verts,
                              int totpoly,
                              MLoopTri *mlooptri)
 {
-  const blender::OffsetIndices<int> polys(blender::Span(poly_offsets, totpoly));
+  const blender::OffsetIndices<int> polys(blender::Span(poly_offsets, totpoly + 1));
   if (totloop < MESH_FACE_TESSELLATE_THREADED_LIMIT) {
     mesh_recalc_looptri__single_threaded(
         corner_verts, polys, vert_positions, totloop, mlooptri, nullptr);

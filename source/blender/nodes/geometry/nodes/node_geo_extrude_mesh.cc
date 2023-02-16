@@ -116,6 +116,7 @@ static void expand_mesh(Mesh &mesh,
     mesh.totloop += loop_expand;
     CustomData_realloc(&mesh.ldata, old_loops_num, mesh.totloop);
   }
+  mesh.poly_offsets_for_write().last() = mesh.totloop;
 }
 
 static CustomData &get_customdata(Mesh &mesh, const eAttrDomain domain)
@@ -412,8 +413,7 @@ static void extrude_mesh_edges(Mesh &mesh,
   MutableSpan<int> new_corner_edges = corner_edges.slice(new_loop_range);
 
   new_poly_offsets.fill(4);
-  offset_indices::accumulate_counts_to_offsets(new_poly_offsets,
-                                               poly_offsets[new_poly_range.one_before_start()]);
+  offset_indices::accumulate_counts_to_offsets(new_poly_offsets, orig_loop_size);
   const OffsetIndices polys = mesh.polys();
 
   for (const int i : connect_edges.index_range()) {
@@ -638,6 +638,7 @@ static void extrude_mesh_face_regions(Mesh &mesh,
   const Span<MEdge> orig_edges = mesh.edges();
   const OffsetIndices orig_polys = mesh.polys();
   const Span<int> orig_corner_verts = mesh.corner_verts();
+  const int orig_loop_size = orig_corner_verts.size();
 
   const bke::MeshFieldContext poly_context{mesh, ATTR_DOMAIN_FACE};
   FieldEvaluator poly_evaluator{poly_context, mesh.totpoly};
@@ -776,8 +777,7 @@ static void extrude_mesh_face_regions(Mesh &mesh,
 
   /* Initialize the new side polygons. */
   new_poly_offsets.fill(4);
-  offset_indices::accumulate_counts_to_offsets(new_poly_offsets,
-                                               poly_offsets[side_poly_range.one_before_start()]);
+  offset_indices::accumulate_counts_to_offsets(new_poly_offsets, orig_loop_size);
   const OffsetIndices polys = mesh.polys();
 
   /* Initialize the edges that form the sides of the extrusion. */
@@ -1050,6 +1050,7 @@ static void extrude_individual_mesh_faces(Mesh &mesh,
   const int orig_edge_size = mesh.totedge;
   const OffsetIndices orig_polys = mesh.polys();
   const Span<int> orig_corner_verts = mesh.corner_verts();
+  const int orig_loop_size = orig_corner_verts.size();
 
   /* Use a mesh for the result of the evaluation because the mesh is reallocated before
    * the vertices are moved, and the evaluated result might reference an attribute. */
@@ -1079,7 +1080,7 @@ static void extrude_individual_mesh_faces(Mesh &mesh,
   const IndexRange duplicate_edge_range = connect_edge_range.after(extrude_corner_size);
   /* Each edge selected for extrusion is extruded into a single face. */
   const IndexRange side_poly_range{orig_polys.ranges_num(), duplicate_edge_range.size()};
-  const IndexRange side_loop_range{orig_corner_verts.size(), side_poly_range.size() * 4};
+  const IndexRange side_loop_range{orig_loop_size, side_poly_range.size() * 4};
 
   expand_mesh(mesh,
               new_vert_range.size(),
@@ -1097,7 +1098,7 @@ static void extrude_individual_mesh_faces(Mesh &mesh,
   MutableSpan<int> corner_edges = mesh.corner_edges_for_write();
 
   new_poly_offsets.fill(4);
-  offset_indices::accumulate_counts_to_offsets(new_poly_offsets, orig_corner_verts.size());
+  offset_indices::accumulate_counts_to_offsets(new_poly_offsets, orig_loop_size);
   const OffsetIndices polys = mesh.polys();
 
   /* For every selected polygon, change it to use the new extruded vertices and the duplicate

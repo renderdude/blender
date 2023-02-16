@@ -1468,8 +1468,7 @@ Mesh *BKE_mball_polygonize(Depsgraph *depsgraph, Scene *scene, Object *ob)
   process.co = nullptr;
 
   mesh->totpoly = int(process.curindex);
-  mesh->poly_offsets_data = static_cast<int *>(
-      MEM_malloc_arrayN(size_t(mesh->totpoly + 1), sizeof(int), __func__));
+  BKE_mesh_poly_offsets_ensure(mesh);
   int *corner_verts = static_cast<int *>(CustomData_add_layer_named(
       &mesh->ldata, CD_PROP_INT32, CD_CONSTRUCT, nullptr, mesh->totpoly * 4, ".corner_vert"));
 
