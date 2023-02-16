@@ -1540,8 +1540,13 @@ void ED_mesh_split_faces(Mesh *mesh)
   const Span<int> corner_verts = mesh->corner_verts();
   const Span<int> corner_edges = mesh->corner_edges();
   const float split_angle = (mesh->flag & ME_AUTOSMOOTH) != 0 ? mesh->smoothresh : float(M_PI);
+  const bke::AttributeAccessor attributes = mesh->attributes();
+  const VArray<bool> mesh_sharp_edges = attributes.lookup_or_default<bool>(
+      "sharp_edge", ATTR_DOMAIN_EDGE, false);
 
-  Array<bool> sharp_edges(mesh->totedge, false);
+  Array<bool> sharp_edges(mesh->totedge);
+  mesh_sharp_edges.materialize(sharp_edges);
+
   BKE_edges_sharp_from_angle_set(mesh->totedge,
                                  corner_verts.data(),
                                  corner_edges.data(),
