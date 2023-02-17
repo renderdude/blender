@@ -265,6 +265,9 @@ static void mesh_blend_write(BlendWriter *writer, ID *id, const void *id_address
                                       ".hide_poly",
                                       "position",
                                       "material_index",
+                                      "sharp_edge",
+                                      "sharp_face",
+                                      ".sculpt_face_set",
                                       ".select_vert",
                                       ".select_edge",
                                       ".select_poly"});
@@ -273,12 +276,15 @@ static void mesh_blend_write(BlendWriter *writer, ID *id, const void *id_address
           mesh, temp_arrays_for_legacy_format, vert_layers);
       mesh->mloop = BKE_mesh_legacy_convert_corners_to_loops(
           mesh, temp_arrays_for_legacy_format, loop_layers);
-      mesh->mpoly = BKE_mesh_legacy_convert_offsets_to_polys(mesh, temp_arrays_for_legacy_format);
+
+      MutableSpan<MPoly> legacy_polys = BKE_mesh_legacy_convert_offsets_to_polys(
+          mesh, temp_arrays_for_legacy_format, poly_layers);
       mesh->poly_offsets_data = nullptr;
-      BKE_mesh_legacy_convert_hide_layers_to_flags(mesh);
-      BKE_mesh_legacy_convert_selection_layers_to_flags(mesh);
-      BKE_mesh_legacy_convert_material_indices_to_mpoly(mesh);
-      BKE_mesh_legacy_sharp_faces_to_flags(mesh);
+
+      BKE_mesh_legacy_convert_hide_layers_to_flags(mesh, legacy_polys);
+      BKE_mesh_legacy_convert_selection_layers_to_flags(mesh, legacy_polys);
+      BKE_mesh_legacy_convert_material_indices_to_mpoly(mesh, legacy_polys);
+      BKE_mesh_legacy_sharp_faces_to_flags(mesh, legacy_polys);
       BKE_mesh_legacy_bevel_weight_from_layers(mesh);
       BKE_mesh_legacy_edge_crease_from_layers(mesh);
       BKE_mesh_legacy_sharp_edges_to_flags(mesh);
@@ -297,11 +303,19 @@ static void mesh_blend_write(BlendWriter *writer, ID *id, const void *id_address
     CustomData_blend_write_prepare(mesh->ldata, loop_layers, names_to_skip);
     CustomData_blend_write_prepare(mesh->pdata, poly_layers, names_to_skip);
 
-    BLO_write_int32_array(writer, mesh->totpoly + 1, mesh->poly_offsets_data);
-
     if (!BLO_write_is_undo(writer)) {
+      /* #CustomData expects the layers to be sorted in increasing order based on type. */
+      std::stable_sort(
+          poly_layers.begin(),
+          poly_layers.end(),
+          [](const CustomDataLayer &a, const CustomDataLayer &b) { return a.type < b.type; });
+
       BKE_mesh_legacy_convert_uvs_to_struct(mesh, temp_arrays_for_legacy_format, loop_layers);
       BKE_mesh_legacy_face_set_from_generic(poly_layers);
+    }
+
+    if (mesh->poly_offsets_data) {
+      BLO_write_int32_array(writer, mesh->totpoly + 1, mesh->poly_offsets_data);
     }
   }
 
@@ -357,12 +371,7 @@ static void mesh_blend_read_data(BlendDataReader *reader, ID *id)
 
   BLO_read_list(reader, &mesh->vertex_group_names);
 
-  if (mesh->poly_offsets_data) {
-    BLO_read_int32_array(reader, mesh->totpoly + 1, &mesh->poly_offsets_data);
-  }
-  else {
-    BLO_read_data_address(reader, &mesh->mpoly);
-  }
+  BLO_read_int32_array(reader, mesh->totpoly + 1, &mesh->poly_offsets_data);
 
   CustomData_blend_read(reader, &mesh->vdata, mesh->totvert);
   CustomData_blend_read(reader, &mesh->edata, mesh->totedge);

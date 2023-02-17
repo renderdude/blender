@@ -1222,21 +1222,20 @@ void BKE_mesh_tessface_ensure(struct Mesh *mesh)
 /** \name Sharp Edge Conversion
  * \{ */
 
-void BKE_mesh_legacy_sharp_faces_to_flags(Mesh *mesh)
+void BKE_mesh_legacy_sharp_faces_to_flags(Mesh *mesh, blender::MutableSpan<MPoly> legacy_polys)
 {
   using namespace blender;
-  MutableSpan<MPoly> polys(mesh->mpoly, mesh->totpoly);
   if (const bool *sharp_faces = static_cast<const bool *>(
           CustomData_get_layer_named(&mesh->pdata, CD_PROP_BOOL, "sharp_face"))) {
-    threading::parallel_for(polys.index_range(), 4096, [&](const IndexRange range) {
+    threading::parallel_for(legacy_polys.index_range(), 4096, [&](const IndexRange range) {
       for (const int i : range) {
-        SET_FLAG_FROM_TEST(polys[i].flag_legacy, !sharp_faces[i], ME_SMOOTH);
+        SET_FLAG_FROM_TEST(legacy_polys[i].flag_legacy, !sharp_faces[i], ME_SMOOTH);
       }
     });
   }
   else {
-    for (const int i : polys.index_range()) {
-      polys[i].flag_legacy |= ME_SMOOTH;
+    for (const int i : legacy_polys.index_range()) {
+      legacy_polys[i].flag_legacy |= ME_SMOOTH;
     }
   }
 }
@@ -1249,7 +1248,8 @@ void BKE_mesh_legacy_sharp_faces_from_flags(Mesh *mesh)
   if (attributes.contains("sharp_face")) {
     return;
   }
-  const Span<MPoly> polys(mesh->mpoly, mesh->totpoly);
+  const Span<MPoly> polys(static_cast<const MPoly *>(CustomData_get_layer(&mesh->pdata, CD_MPOLY)),
+                          mesh->totpoly);
   if (std::any_of(polys.begin(), polys.end(), [](const MPoly &poly) {
         return !(poly.flag_legacy & ME_SMOOTH);
       })) {
@@ -1473,7 +1473,8 @@ void BKE_mesh_legacy_sharp_edges_from_flags(Mesh *mesh)
 /** \name Hide Attribute and Legacy Flag Conversion
  * \{ */
 
-void BKE_mesh_legacy_convert_hide_layers_to_flags(Mesh *mesh)
+void BKE_mesh_legacy_convert_hide_layers_to_flags(Mesh *mesh,
+                                                  blender::MutableSpan<MPoly> legacy_polys)
 {
   using namespace blender;
   using namespace blender::bke;
@@ -1497,12 +1498,11 @@ void BKE_mesh_legacy_convert_hide_layers_to_flags(Mesh *mesh)
     }
   });
 
-  MutableSpan<MPoly> polys(mesh->mpoly, mesh->totpoly);
   const VArray<bool> hide_poly = attributes.lookup_or_default<bool>(
       ".hide_poly", ATTR_DOMAIN_FACE, false);
-  threading::parallel_for(polys.index_range(), 4096, [&](IndexRange range) {
+  threading::parallel_for(legacy_polys.index_range(), 4096, [&](IndexRange range) {
     for (const int i : range) {
-      SET_FLAG_FROM_TEST(polys[i].flag_legacy, hide_poly[i], ME_HIDE);
+      SET_FLAG_FROM_TEST(legacy_polys[i].flag_legacy, hide_poly[i], ME_HIDE);
     }
   });
 }
@@ -1543,7 +1543,8 @@ void BKE_mesh_legacy_convert_flags_to_hide_layers(Mesh *mesh)
     hide_edge.finish();
   }
 
-  const Span<MPoly> polys(mesh->mpoly, mesh->totpoly);
+  const Span<MPoly> polys(static_cast<const MPoly *>(CustomData_get_layer(&mesh->pdata, CD_MPOLY)),
+                          mesh->totpoly);
   if (std::any_of(polys.begin(), polys.end(), [](const MPoly &poly) {
         return poly.flag_legacy & ME_HIDE;
       })) {
@@ -1564,17 +1565,17 @@ void BKE_mesh_legacy_convert_flags_to_hide_layers(Mesh *mesh)
 /** \name Material Index Conversion
  * \{ */
 
-void BKE_mesh_legacy_convert_material_indices_to_mpoly(Mesh *mesh)
+void BKE_mesh_legacy_convert_material_indices_to_mpoly(Mesh *mesh,
+                                                       blender::MutableSpan<MPoly> legacy_polys)
 {
   using namespace blender;
   using namespace blender::bke;
   const AttributeAccessor attributes = mesh->attributes();
-  MutableSpan<MPoly> polys(mesh->mpoly, mesh->totpoly);
   const VArray<int> material_indices = attributes.lookup_or_default<int>(
       "material_index", ATTR_DOMAIN_FACE, 0);
-  threading::parallel_for(polys.index_range(), 4096, [&](IndexRange range) {
+  threading::parallel_for(legacy_polys.index_range(), 4096, [&](IndexRange range) {
     for (const int i : range) {
-      polys[i].mat_nr_legacy = material_indices[i];
+      legacy_polys[i].mat_nr_legacy = material_indices[i];
     }
   });
 }
@@ -1587,7 +1588,8 @@ void BKE_mesh_legacy_convert_mpoly_to_material_indices(Mesh *mesh)
   if (!mesh->mpoly || attributes.contains("material_index")) {
     return;
   }
-  const Span<MPoly> polys(mesh->mpoly, mesh->totpoly);
+  const Span<MPoly> polys(static_cast<const MPoly *>(CustomData_get_layer(&mesh->pdata, CD_MPOLY)),
+                          mesh->totpoly);
   if (std::any_of(
           polys.begin(), polys.end(), [](const MPoly &poly) { return poly.mat_nr_legacy != 0; })) {
     SpanAttributeWriter<int> material_indices = attributes.lookup_or_add_for_write_only_span<int>(
@@ -1786,7 +1788,8 @@ void BKE_mesh_legacy_convert_uvs_to_generic(Mesh *mesh)
 /** \name Selection Attribute and Legacy Flag Conversion
  * \{ */
 
-void BKE_mesh_legacy_convert_selection_layers_to_flags(Mesh *mesh)
+void BKE_mesh_legacy_convert_selection_layers_to_flags(Mesh *mesh,
+                                                       blender::MutableSpan<MPoly> legacy_polys)
 {
   using namespace blender;
   using namespace blender::bke;
@@ -1810,12 +1813,11 @@ void BKE_mesh_legacy_convert_selection_layers_to_flags(Mesh *mesh)
     }
   });
 
-  MutableSpan<MPoly> polys(mesh->mpoly, mesh->totpoly);
   const VArray<bool> select_poly = attributes.lookup_or_default<bool>(
       ".select_poly", ATTR_DOMAIN_FACE, false);
-  threading::parallel_for(polys.index_range(), 4096, [&](IndexRange range) {
+  threading::parallel_for(legacy_polys.index_range(), 4096, [&](IndexRange range) {
     for (const int i : range) {
-      SET_FLAG_FROM_TEST(polys[i].flag_legacy, select_poly[i], ME_FACE_SEL);
+      SET_FLAG_FROM_TEST(legacy_polys[i].flag_legacy, select_poly[i], ME_FACE_SEL);
     }
   });
 }
@@ -1857,7 +1859,8 @@ void BKE_mesh_legacy_convert_flags_to_selection_layers(Mesh *mesh)
     select_edge.finish();
   }
 
-  const Span<MPoly> polys(mesh->mpoly, mesh->totpoly);
+  const Span<MPoly> polys(static_cast<const MPoly *>(CustomData_get_layer(&mesh->pdata, CD_MPOLY)),
+                          mesh->totpoly);
   if (std::any_of(polys.begin(), polys.end(), [](const MPoly &poly) {
         return poly.flag_legacy & ME_FACE_SEL;
       })) {
@@ -2137,8 +2140,10 @@ void BKE_mesh_legacy_convert_loops_to_corners(Mesh *mesh)
 /** \name Poly Offset Conversion
  * \{ */
 
-MPoly *BKE_mesh_legacy_convert_offsets_to_polys(const Mesh *mesh,
-                                                blender::ResourceScope &temp_arrays_for_convert)
+blender::MutableSpan<MPoly> BKE_mesh_legacy_convert_offsets_to_polys(
+    const Mesh *mesh,
+    blender::ResourceScope &temp_arrays_for_convert,
+    blender::Vector<CustomDataLayer, 16> &poly_layers_to_write)
 {
   using namespace blender;
   const OffsetIndices polys = mesh->polys();
@@ -2151,7 +2156,12 @@ MPoly *BKE_mesh_legacy_convert_offsets_to_polys(const Mesh *mesh,
     }
   });
 
-  return polys_legacy.data();
+  CustomDataLayer layer{};
+  layer.type = CD_MPOLY;
+  layer.data = polys_legacy.data();
+  poly_layers_to_write.append(layer);
+
+  return polys_legacy;
 }
 
 void BKE_mesh_legacy_convert_polys_to_offsets(Mesh *mesh)
@@ -2161,12 +2171,13 @@ void BKE_mesh_legacy_convert_polys_to_offsets(Mesh *mesh)
   if (mesh->poly_offsets_data) {
     return;
   }
-  const Span<MPoly> legacy_polys(mesh->mpoly, mesh->totpoly);
+  const Span<MPoly> polys(static_cast<const MPoly *>(CustomData_get_layer(&mesh->pdata, CD_MPOLY)),
+                          mesh->totpoly);
   BKE_mesh_poly_offsets_ensure(mesh);
   MutableSpan<int> offsets = mesh->poly_offsets_for_write();
 
-  for (const int i : legacy_polys.index_range()) {
-    offsets[i] = legacy_polys[i].loopstart;
+  for (const int i : polys.index_range()) {
+    offsets[i] = polys[i].loopstart;
   }
 
   CustomData_free_layers(&mesh->pdata, CD_MPOLY, mesh->totpoly);
