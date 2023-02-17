@@ -144,13 +144,16 @@ static Mesh *create_circle_mesh(const float radius,
 
   /* Create corners and faces. */
   if (fill_type == GEO_NODE_MESH_CIRCLE_FILL_NGON) {
-    poly_offsets.first() = corner_verts.size();
+    poly_offsets.first() = 0;
+    poly_offsets.last() = mesh->totloop;
 
     std::iota(corner_verts.begin(), corner_verts.end(), 0);
     std::iota(corner_edges.begin(), corner_edges.end(), 0);
   }
   else if (fill_type == GEO_NODE_MESH_CIRCLE_FILL_TRIANGLE_FAN) {
-    poly_offsets.fill(3);
+    for (const int i : poly_offsets.index_range()) {
+      poly_offsets[i] = i * 3;
+    }
     for (const int i : IndexRange(verts_num)) {
       corner_verts[3 * i] = i;
       corner_edges[3 * i] = i;
@@ -162,8 +165,6 @@ static Mesh *create_circle_mesh(const float radius,
       corner_edges[3 * i + 2] = verts_num + i;
     }
   }
-
-  offset_indices::accumulate_counts_to_offsets(poly_offsets);
 
   return mesh;
 }

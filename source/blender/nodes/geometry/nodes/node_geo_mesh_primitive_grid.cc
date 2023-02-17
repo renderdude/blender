@@ -61,8 +61,11 @@ Mesh *create_grid_mesh(const int verts_x,
   MutableSpan<int> corner_edges = mesh->corner_edges_for_write();
   BKE_mesh_smooth_flag_set(mesh, false);
 
-  poly_offsets.fill(4);
-  offset_indices::accumulate_counts_to_offsets(poly_offsets);
+  threading::parallel_for(poly_offsets.index_range(), 4096, [poly_offsets](IndexRange range) {
+    for (const int i : range) {
+      poly_offsets[i] = i * 4;
+    }
+  });
 
   {
     const float dx = edges_x == 0 ? 0.0f : size_x / edges_x;
