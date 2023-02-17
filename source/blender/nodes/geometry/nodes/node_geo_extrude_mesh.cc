@@ -110,6 +110,7 @@ static void expand_mesh(Mesh &mesh,
     CustomData_realloc(&mesh.pdata, old_polys_num, mesh.totpoly);
     mesh.poly_offsets_data = static_cast<int *>(
         MEM_reallocN(mesh.poly_offsets_data, sizeof(int) * (mesh.totpoly + 1)));
+    mesh.poly_offsets_for_write().last() = mesh.totloop + loop_expand;
   }
   if (loop_expand != 0) {
     const int old_loops_num = mesh.totloop;
