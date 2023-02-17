@@ -1108,10 +1108,16 @@ inline blender::OffsetIndices<int> Mesh::polys() const
 }
 inline blender::Span<int> Mesh::poly_offsets() const
 {
+  if (this->totpoly == 0) {
+    return {};
+  }
   return {BKE_mesh_poly_offsets(this), this->totpoly};
 }
 inline blender::MutableSpan<int> Mesh::poly_offsets_for_write()
 {
+  if (this->totpoly == 0) {
+    return {};
+  }
   return {BKE_mesh_poly_offsets_for_write(this), this->totpoly + 1};
 }
 
