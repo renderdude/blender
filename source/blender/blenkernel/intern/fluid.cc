@@ -3377,7 +3377,7 @@ static Mesh *create_smoke_geometry(FluidDomainSettings *fds, Mesh *orgmesh, Obje
 
   result = BKE_mesh_new_nomain(num_verts, 0, 0, num_faces * 4, num_faces);
   float(*positions)[3] = BKE_mesh_vert_positions_for_write(result);
-  blender::MutableSpan<int> poly_offsets = me->poly_offsets_for_write();
+  blender::MutableSpan<int> poly_offsets = result->poly_offsets_for_write();
   corner_verts = result->corner_verts_for_write().data();
 
   if (num_verts) {
@@ -3421,9 +3421,8 @@ static Mesh *create_smoke_geometry(FluidDomainSettings *fds, Mesh *orgmesh, Obje
     co[1] = max[1];
     co[2] = min[2];
 
-    blender::MutableSpan<int> poly_offsets = me->poly_offsets_for_write();
     poly_offsets.fill(4);
-    offset_indices::accumulate_counts_to_offsets(poly_offsets);
+    blender::offset_indices::accumulate_counts_to_offsets(poly_offsets);
 
     /* Create faces. */
     /* Top side. */
