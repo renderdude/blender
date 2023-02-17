@@ -116,7 +116,6 @@ static void expand_mesh(Mesh &mesh,
     mesh.totloop += loop_expand;
     CustomData_realloc(&mesh.ldata, old_loops_num, mesh.totloop);
   }
-  mesh.poly_offsets_for_write().last() = mesh.totloop;
 }
 
 static CustomData &get_customdata(Mesh &mesh, const eAttrDomain domain)
