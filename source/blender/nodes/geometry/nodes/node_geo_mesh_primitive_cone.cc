@@ -404,7 +404,8 @@ static void calculate_cone_faces(const ConeConfig &config,
   }
 
   /* Quads connect one edge ring to the next one. */
-  poly_sizes.drop_front(config.top_faces_len).drop_back(config.bottom_faces_len).fill(4);
+  const int ring_poly_size = (config.top_is_point || config.bottom_is_point) ? 3 : 4;
+  poly_sizes.slice(config.side_faces_start, config.side_faces_len).fill(ring_poly_size);
   for (const int i : IndexRange(config.tot_quad_rings)) {
     const int this_ring_loop_start = rings_loop_start + i * config.circle_segments * 4;
     const int this_ring_vert_start = config.first_ring_verts_start + (i * config.circle_segments);
