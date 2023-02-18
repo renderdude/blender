@@ -102,7 +102,7 @@ static void extract_edge_fac_iter_poly_mesh(const MeshRenderData *mr,
 {
   MeshExtract_EdgeFac_Data *data = static_cast<MeshExtract_EdgeFac_Data *>(_data);
   const IndexRange poly = mr->polys[mp_index];
-  const BitVector<> &optimal_display_edges = mr->me->runtime->subsurf_optimal_display_edges;
+  const BitSpan optimal_display_edges = mr->me->runtime->subsurf_optimal_display_edges;
 
   for (const int ml_index : poly) {
     const int vert = mr->corner_verts[ml_index];

@@ -312,7 +312,7 @@ void BKE_mesh_foreach_mapped_subdiv_face_center(
                                       BKE_mesh_vertex_normals_ensure(mesh) :
                                       nullptr;
   const int *index = static_cast<const int *>(CustomData_get_layer(&mesh->pdata, CD_ORIGINDEX));
-  const blender::BitVector<> &facedot_tags = mesh->runtime->subsurf_face_dot_tags;
+  const blender::BitSpan facedot_tags = mesh->runtime->subsurf_face_dot_tags;
 
   if (index) {
     for (const int i : polys.index_range()) {

@@ -550,7 +550,7 @@ static void extract_edituv_fdots_iter_poly_mesh(const MeshRenderData *mr,
   const bool mp_select = (efa) ? BM_elem_flag_test_bool(efa, BM_ELEM_SELECT) : false;
 
   if (mr->use_subsurf_fdots) {
-    const BitVector<> &facedot_tags = mr->me->runtime->subsurf_face_dot_tags;
+    const BitSpan facedot_tags = mr->me->runtime->subsurf_face_dot_tags;
 
     for (const int ml_index : mr->polys[mp_index]) {
       const int vert = mr->corner_verts[ml_index];
