@@ -1111,7 +1111,7 @@ inline blender::Span<int> Mesh::poly_offsets() const
   if (this->totpoly == 0) {
     return {};
   }
-  return {BKE_mesh_poly_offsets(this), this->totpoly};
+  return {BKE_mesh_poly_offsets(this), this->totpoly + 1};
 }
 inline blender::MutableSpan<int> Mesh::poly_offsets_for_write()
 {
