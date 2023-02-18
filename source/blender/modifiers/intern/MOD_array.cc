@@ -279,6 +279,7 @@ static void mesh_merge_transform(Mesh *result,
   MEdge *me;
   float(*result_positions)[3] = BKE_mesh_vert_positions_for_write(result);
   MEdge *result_edges = BKE_mesh_edges_for_write(result);
+  const blender::Span<int> cap_poly_offsets = cap_mesh->poly_offsets();
   blender::MutableSpan<int> result_poly_offsets = result->poly_offsets_for_write();
   blender::MutableSpan<int> result_corner_verts = result->corner_verts_for_write();
   blender::MutableSpan<int> result_corner_edges = result->corner_edges_for_write();
@@ -316,7 +317,7 @@ static void mesh_merge_transform(Mesh *result,
 
   /* adjust cap poly loopstart indices */
   for (i = 0; i < cap_npolys; i++) {
-    result_poly_offsets[cap_polys_index + i] += cap_loops_index;
+    result_poly_offsets[cap_polys_index + i] = cap_poly_offsets[i] + cap_loops_index;
   }
 
   /* adjust cap loop vertex and edge indices */
@@ -554,7 +555,7 @@ static Mesh *arrayModifier_doArray(ArrayModifierData *amd,
   if (!CustomData_has_layer(&mesh->edata, CD_MEDGE)) {
     memcpy(result_edges, src_edges, sizeof(MEdge) * mesh->totedge);
   }
-  result_poly_offsets.take_front(mesh->totpoly).copy_from(mesh->poly_offsets());
+  result_poly_offsets.take_front(mesh->totpoly).copy_from(mesh->poly_offsets().drop_back(1));
 
   /* Remember first chunk, in case of cap merge */
   first_chunk_start = 0;
@@ -602,7 +603,7 @@ static Mesh *arrayModifier_doArray(ArrayModifierData *amd,
     }
 
     for (i = 0; i < chunk_npolys; i++) {
-      result_poly_offsets[c * chunk_npolys + i] += c * chunk_nloops;
+      result_poly_offsets[c * chunk_npolys + i] = result_poly_offsets[i] + c * chunk_nloops;
     }
 
     /* adjust loop vertex and edge indices */
