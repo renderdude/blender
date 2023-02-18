@@ -210,12 +210,6 @@ Mesh *BKE_mesh_mirror_apply_mirror_on_axis_for_modifier(MirrorModifierData *mmd,
   if (!CustomData_has_layer(&mesh->edata, CD_MEDGE)) {
     memcpy(BKE_mesh_edges_for_write(result), BKE_mesh_edges(mesh), sizeof(MEdge) * mesh->totedge);
   }
-  blender::MutableSpan<int> poly_offsets = result->poly_offsets_for_write();
-  poly_offsets.take_front(maxPolys).copy_from(mesh->poly_offsets().drop_back(1));
-  for (const int i : blender::IndexRange(maxPolys)) {
-    poly_offsets[maxPolys + i] = poly_offsets[i] + maxLoops;
-  }
-  const blender::OffsetIndices result_polys = result->polys();
 
   /* Copy custom-data to new geometry,
    * copy from itself because this data may have been created in the checks above. */
@@ -311,30 +305,34 @@ Mesh *BKE_mesh_mirror_apply_mirror_on_axis_for_modifier(MirrorModifierData *mmd,
     me->v2 += maxVerts;
   }
 
+  blender::MutableSpan<int> poly_offsets = result->poly_offsets_for_write();
+  poly_offsets.take_front(maxPolys).copy_from(mesh->poly_offsets().drop_back(1));
+  for (const int i : blender::IndexRange(maxPolys)) {
+    poly_offsets[maxPolys + i] = poly_offsets[i] + maxLoops;
+  }
+  const blender::OffsetIndices result_polys = result->polys();
+
   /* adjust mirrored poly loopstart indices, and reverse loop order (normals) */
   blender::MutableSpan<int> corner_edges = result->corner_edges_for_write();
   for (i = 0; i < maxPolys; i++) {
     int j, e;
-    const blender::IndexRange poly = result_polys[maxPolys + i];
+    const blender::IndexRange poly = result_polys[i];
+    const blender::IndexRange poly_mirror = result_polys[maxPolys + i];
 
     /* reverse the loop, but we keep the first vertex in the face the same,
      * to ensure that quads are split the same way as on the other side */
     CustomData_copy_data(&result->ldata, &result->ldata, poly.start(), poly.start() + maxLoops, 1);
 
     for (j = 1; j < poly.size(); j++) {
-      CustomData_copy_data(&result->ldata,
-                           &result->ldata,
-                           poly.start() + j,
-                           poly.start() + maxLoops + poly.size() - j,
-                           1);
+      CustomData_copy_data(&result->ldata, &result->ldata, poly[j], poly_mirror.last(j), 1);
     }
 
     int *corner_edge_2 = &corner_edges[poly.start() + maxLoops];
     e = corner_edge_2[0];
-    for (j = 0; j < poly.size() - 1; j++) {
+    for (j = 0; j < poly_mirror.size() - 1; j++) {
       corner_edge_2[j] = corner_edge_2[j + 1];
     }
-    corner_edge_2[poly.size() - 1] = e;
+    corner_edge_2[poly_mirror.size() - 1] = e;
   }
 
   /* adjust mirrored loop vertex and edge indices */
