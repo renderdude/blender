@@ -1661,7 +1661,9 @@ static void bm_to_mesh_faces(const BMesh &bm,
       }
     }
   });
-  dst_poly_offsets.last() = bm.totloop;
+  if (bm.totface > 0) {
+    dst_poly_offsets.last() = bm.totloop;
+  }
 }
 
 static void bm_to_mesh_loops(const BMesh &bm, const Span<const BMLoop *> bm_loops, Mesh &mesh)
