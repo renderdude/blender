@@ -755,7 +755,7 @@ static Mesh *imesh_to_mesh(IMesh *im, MeshesToIMeshInfo &mim)
                          dst_material_indices.span);
     copy_or_interp_loop_attributes(result,
                                    f,
-                                   IndexRange(dst_poly_offsets[fi], orig_poly.size()),
+                                   IndexRange(dst_poly_offsets[fi], f->size()),
                                    orig_poly,
                                    orig_me,
                                    orig_me_index,
@@ -768,11 +768,10 @@ static Mesh *imesh_to_mesh(IMesh *im, MeshesToIMeshInfo &mim)
   BKE_mesh_calc_edges(result, false, false);
   merge_edge_customdata_layers(result, mim);
 
-  const OffsetIndices dst_polys = result->polys();
-
   /* Now that the MEdges are populated, we can copy over the required attributes and custom layers.
    */
   MutableSpan<MEdge> edges = result->edges_for_write();
+  const OffsetIndices dst_polys = result->polys();
   const Span<int> dst_corner_edges = result->corner_edges();
   for (int fi : im->face_index_range()) {
     const Face *f = im->face(fi);

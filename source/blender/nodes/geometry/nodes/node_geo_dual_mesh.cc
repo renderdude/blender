@@ -912,15 +912,17 @@ static Mesh *calc_dual_mesh(const Mesh &src_mesh,
                       mesh_out->attributes_for_write());
 
   mesh_out->vert_positions_for_write().copy_from(vertex_positions);
-  MutableSpan<MEdge> dst_edges = mesh_out->edges_for_write();
-  MutableSpan<int> dst_poly_offsets = mesh_out->poly_offsets_for_write();
-  dst_poly_offsets.drop_back(1).copy_from(loop_lengths);
-  offset_indices::accumulate_counts_to_offsets(dst_poly_offsets);
+  mesh_out->edges_for_write().copy_from(new_edges);
+
+  if (mesh_out->totpoly > 0) {
+    MutableSpan<int> dst_poly_offsets = mesh_out->poly_offsets_for_write();
+    dst_poly_offsets.drop_back(1).copy_from(loop_lengths);
+    offset_indices::accumulate_counts_to_offsets(dst_poly_offsets);
+  }
 
   mesh_out->corner_verts_for_write().copy_from(loops);
   mesh_out->corner_edges_for_write().copy_from(loop_edges);
 
-  dst_edges.copy_from(new_edges);
   return mesh_out;
 }
 
