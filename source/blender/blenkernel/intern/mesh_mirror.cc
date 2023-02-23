@@ -201,22 +201,6 @@ Mesh *BKE_mesh_mirror_apply_mirror_on_axis_for_modifier(MirrorModifierData *mmd,
   CustomData_copy_data(&mesh->ldata, &result->ldata, 0, 0, maxLoops);
   CustomData_copy_data(&mesh->pdata, &result->pdata, 0, 0, maxPolys);
 
-  /* Subdivision-surface for eg won't have mesh data in the custom-data arrays.
-   * Now add position/#MEdge/#MPoly layers. */
-  if (BKE_mesh_vert_positions(mesh) != nullptr) {
-    memcpy(BKE_mesh_vert_positions_for_write(result),
-           BKE_mesh_vert_positions(mesh),
-           sizeof(float[3]) * mesh->totvert);
-  }
-  if (!CustomData_has_layer(&mesh->edata, CD_MEDGE)) {
-    memcpy(BKE_mesh_edges_for_write(result), BKE_mesh_edges(mesh), sizeof(MEdge) * mesh->totedge);
-  }
-  if (!CustomData_has_layer(&mesh->pdata, CD_MPOLY)) {
-    result->corner_verts_for_write().copy_from(mesh->corner_verts());
-    result->corner_edges_for_write().copy_from(mesh->corner_edges());
-    memcpy(BKE_mesh_polys_for_write(result), BKE_mesh_polys(mesh), sizeof(MPoly) * mesh->totpoly);
-  }
-
   /* Copy custom-data to new geometry,
    * copy from itself because this data may have been created in the checks above. */
   CustomData_copy_data(&result->vdata, &result->vdata, 0, maxVerts, maxVerts);
@@ -305,14 +289,14 @@ Mesh *BKE_mesh_mirror_apply_mirror_on_axis_for_modifier(MirrorModifierData *mmd,
   }
 
   /* adjust mirrored edge vertex indices */
-  me = BKE_mesh_edges_for_write(result) + maxEdges;
+  me = result->edges_for_write().data() + maxEdges;
   for (i = 0; i < maxEdges; i++, me++) {
     me->v1 += maxVerts;
     me->v2 += maxVerts;
   }
 
   /* adjust mirrored poly loopstart indices, and reverse loop order (normals) */
-  mp = BKE_mesh_polys_for_write(result) + maxPolys;
+  mp = result->polys_for_write().data() + maxPolys;
   blender::MutableSpan<int> corner_edges = result->corner_edges_for_write();
   for (i = 0; i < maxPolys; i++, mp++) {
     int j, e;
@@ -413,13 +397,13 @@ Mesh *BKE_mesh_mirror_apply_mirror_on_axis_for_modifier(MirrorModifierData *mmd,
     BKE_mesh_normals_loop_split(BKE_mesh_vert_positions(result),
                                 BKE_mesh_vertex_normals_ensure(result),
                                 result->totvert,
-                                BKE_mesh_edges(result),
+                                result->edges().data(),
                                 result->totedge,
                                 result->corner_verts().data(),
                                 result->corner_edges().data(),
                                 loop_normals,
                                 totloop,
-                                BKE_mesh_polys(result),
+                                result->polys().data(),
                                 BKE_mesh_poly_normals_ensure(result),
                                 totpoly,
                                 true,
@@ -430,16 +414,15 @@ Mesh *BKE_mesh_mirror_apply_mirror_on_axis_for_modifier(MirrorModifierData *mmd,
                                 clnors);
 
     /* mirroring has to account for loops being reversed in polys in second half */
-    MPoly *result_polys = BKE_mesh_polys_for_write(result);
-    mp = result_polys;
-    for (i = 0; i < maxPolys; i++, mp++) {
-      MPoly *mpmirror = result_polys + maxPolys + i;
+    blender::MutableSpan<MPoly> result_polys = result->polys_for_write();
+    for (i = 0; i < maxPolys; i++) {
+      const int mirror_i = maxPolys + i;
       int j;
 
       for (j = mp->loopstart; j < mp->loopstart + mp->totloop; j++) {
-        int mirrorj = mpmirror->loopstart;
+        int mirrorj = result_polys[mirror_i].loopstart;
         if (j > mp->loopstart) {
-          mirrorj += mpmirror->totloop - (j - mp->loopstart);
+          mirrorj += result_polys[mirror_i].totloop - (j - mp->loopstart);
         }
         copy_v3_v3(loop_normals[mirrorj], loop_normals[j]);
         mul_m4_v3(mtx_nor, loop_normals[mirrorj]);

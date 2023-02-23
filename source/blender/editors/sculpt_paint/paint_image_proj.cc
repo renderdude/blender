@@ -414,17 +414,17 @@ struct ProjPaintState {
 
   const float (*vert_positions_eval)[3];
   const float (*vert_normals)[3];
-  const MEdge *medge_eval;
-  const MPoly *mpoly_eval;
+  blender::Span<MEdge> edges_eval;
+  blender::Span<MPoly> polys_eval;
+  blender::Span<int> corner_verts_eval;
   const bool *select_poly_eval;
   const int *material_indices;
-  const int *corner_verts_eval;
   const MLoopTri *mlooptri_eval;
 
   const float (*mloopuv_stencil_eval)[2];
 
   /**
-   * \note These UV layers are aligned to \a mpoly_eval
+   * \note These UV layers are aligned to \a polys_eval
    * but each pointer references the start of the layer,
    * so a loop indirection is needed as well.
    */
@@ -1721,7 +1721,7 @@ static float project_paint_uvpixel_mask(const ProjPaintState *ps,
   if (ps->do_mask_normal) {
     const MLoopTri *lt = &ps->mlooptri_eval[tri_index];
     const int lt_vtri[3] = {PS_LOOPTRI_AS_VERT_INDEX_3(ps, lt)};
-    const MPoly *mp = &ps->mpoly_eval[lt->poly];
+    const MPoly *mp = &ps->polys_eval[lt->poly];
     float no[3], angle_cos;
 
     if (mp->flag & ME_SMOOTH) {
@@ -3878,7 +3878,6 @@ static void proj_paint_state_screen_coords_init(ProjPaintState *ps, const int di
 
 static void proj_paint_state_cavity_init(ProjPaintState *ps)
 {
-  const MEdge *me;
   float *cavities;
   int a;
 
@@ -3890,14 +3889,15 @@ static void proj_paint_state_cavity_init(ProjPaintState *ps)
         MEM_mallocN(sizeof(float) * ps->totvert_eval, "ProjectPaint Cavities"));
     cavities = ps->cavities;
 
-    for (a = 0, me = ps->medge_eval; a < ps->totedge_eval; a++, me++) {
+    for (const int64_t i : ps->edges_eval.index_range()) {
+      const MEdge &edge = ps->edges_eval[i];
       float e[3];
-      sub_v3_v3v3(e, ps->vert_positions_eval[me->v1], ps->vert_positions_eval[me->v2]);
+      sub_v3_v3v3(e, ps->vert_positions_eval[edge.v1], ps->vert_positions_eval[edge.v2]);
       normalize_v3(e);
-      add_v3_v3(edges[me->v2], e);
-      counter[me->v2]++;
-      sub_v3_v3(edges[me->v1], e);
-      counter[me->v1]++;
+      add_v3_v3(edges[edge.v2], e);
+      counter[edge.v2]++;
+      sub_v3_v3(edges[edge.v1], e);
+      counter[edge.v1]++;
     }
     for (a = 0; a < ps->totvert_eval; a++) {
       if (counter[a] > 0) {
@@ -4072,11 +4072,9 @@ static bool proj_paint_state_mesh_eval_init(const bContext *C, ProjPaintState *p
 
   ps->vert_positions_eval = BKE_mesh_vert_positions(ps->me_eval);
   ps->vert_normals = BKE_mesh_vertex_normals_ensure(ps->me_eval);
-  if (ps->do_mask_cavity) {
-    ps->medge_eval = BKE_mesh_edges(ps->me_eval);
-  }
-  ps->corner_verts_eval = ps->me_eval->corner_verts().data();
-  ps->mpoly_eval = BKE_mesh_polys(ps->me_eval);
+  ps->edges_eval = ps->me_eval->edges();
+  ps->polys_eval = ps->me_eval->polys();
+  ps->corner_verts_eval = ps->me_eval->corner_verts();
   ps->select_poly_eval = (const bool *)CustomData_get_layer_named(
       &ps->me_eval->pdata, CD_PROP_BOOL, ".select_poly");
   ps->material_indices = (const int *)CustomData_get_layer_named(
@@ -4391,7 +4389,7 @@ static void project_paint_prepare_all_faces(ProjPaintState *ps,
             if (prev_poly != lt->poly) {
               int iloop;
               bool culled = true;
-              const MPoly *poly = ps->mpoly_eval + lt->poly;
+              const MPoly *poly = &ps->polys_eval[lt->poly];
               int poly_loops = poly->totloop;
               prev_poly = lt->poly;
               for (iloop = 0; iloop < poly_loops; iloop++) {
@@ -5955,7 +5953,7 @@ void *paint_proj_new_stroke(bContext *C, Object *ob, const float mouse[2], int m
   bool is_multi_view = (ps_handle->ps_views_tot != 1);
 
   for (int i = 0; i < ps_handle->ps_views_tot; i++) {
-    ProjPaintState *ps = MEM_cnew<ProjPaintState>("ProjectionPaintState");
+    ProjPaintState *ps = MEM_new<ProjPaintState>("ProjectionPaintState");
     ps_handle->ps_views[i] = ps;
   }
 
@@ -6021,8 +6019,7 @@ void *paint_proj_new_stroke(bContext *C, Object *ob, const float mouse[2], int m
 
 fail:
   for (int i = 0; i < ps_handle->ps_views_tot; i++) {
-    ProjPaintState *ps = ps_handle->ps_views[i];
-    MEM_freeN(ps);
+    MEM_delete(ps_handle->ps_views[i]);
   }
   MEM_freeN(ps_handle);
   return nullptr;

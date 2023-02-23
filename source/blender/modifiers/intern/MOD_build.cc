@@ -70,20 +70,18 @@ static Mesh *modifyMesh(ModifierData *md, const ModifierEvalContext *ctx, Mesh *
   GHash *edgeHash2 = BLI_ghash_int_new("build ed apply gh");
 
   const int vert_src_num = mesh->totvert;
-  const int edge_src_num = mesh->totedge;
-  const int poly_src_num = mesh->totpoly;
-  const MEdge *medge_src = BKE_mesh_edges(mesh);
-  const MPoly *mpoly_src = BKE_mesh_polys(mesh);
-  const int *corner_verts_src = mesh->corner_verts().data();
-  const int *corner_edges_src = mesh->corner_edges().data();
+  const blender::Span<MEdge> edges_src = mesh->edges();
+  const blender::Span<MPoly> polys_src = mesh->polys();
+  const blender::Span<int> corner_verts_src = mesh->corner_verts();
+  const blender::Span<int> corner_edges_src = mesh->corner_edges();
 
   int *vertMap = static_cast<int *>(MEM_malloc_arrayN(vert_src_num, sizeof(int), __func__));
-  int *edgeMap = static_cast<int *>(MEM_malloc_arrayN(edge_src_num, sizeof(int), __func__));
-  int *faceMap = static_cast<int *>(MEM_malloc_arrayN(poly_src_num, sizeof(int), __func__));
+  int *edgeMap = static_cast<int *>(MEM_malloc_arrayN(edges_src.size(), sizeof(int), __func__));
+  int *faceMap = static_cast<int *>(MEM_malloc_arrayN(polys_src.size(), sizeof(int), __func__));
 
   range_vn_i(vertMap, vert_src_num, 0);
-  range_vn_i(edgeMap, edge_src_num, 0);
-  range_vn_i(faceMap, poly_src_num, 0);
+  range_vn_i(edgeMap, edges_src.size(), 0);
+  range_vn_i(faceMap, polys_src.size(), 0);
 
   Scene *scene = DEG_get_input_scene(ctx->depsgraph);
   frac = (BKE_scene_ctime_get(scene) - bmd->start) / bmd->length;
@@ -92,8 +90,8 @@ static Mesh *modifyMesh(ModifierData *md, const ModifierEvalContext *ctx, Mesh *
     frac = 1.0f - frac;
   }
 
-  faces_dst_num = poly_src_num * frac;
-  edges_dst_num = edge_src_num * frac;
+  faces_dst_num = polys_src.size() * frac;
+  edges_dst_num = edges_src.size() * frac;
 
   /* if there's at least one face, build based on faces */
   if (faces_dst_num) {
@@ -101,13 +99,13 @@ static Mesh *modifyMesh(ModifierData *md, const ModifierEvalContext *ctx, Mesh *
     uintptr_t hash_num, hash_num_alt;
 
     if (bmd->flag & MOD_BUILD_FLAG_RANDOMIZE) {
-      BLI_array_randomize(faceMap, sizeof(*faceMap), poly_src_num, bmd->seed);
+      BLI_array_randomize(faceMap, sizeof(*faceMap), polys_src.size(), bmd->seed);
     }
 
     /* get the set of all vert indices that will be in the final mesh,
      * mapped to the new indices
      */
-    mpoly = mpoly_src;
+    mpoly = polys_src.data();
     hash_num = 0;
     for (i = 0; i < faces_dst_num; i++) {
       mp = mpoly + faceMap[i];
@@ -129,8 +127,8 @@ static Mesh *modifyMesh(ModifierData *md, const ModifierEvalContext *ctx, Mesh *
      */
     hash_num = 0;
     hash_num_alt = 0;
-    for (i = 0; i < edge_src_num; i++, hash_num_alt++) {
-      const MEdge *me = medge_src + i;
+    for (i = 0; i < edges_src.size(); i++, hash_num_alt++) {
+      const MEdge *me = edges_src.data() + i;
 
       if (BLI_ghash_haskey(vertHash, POINTER_FROM_INT(me->v1)) &&
           BLI_ghash_haskey(vertHash, POINTER_FROM_INT(me->v2))) {
@@ -146,13 +144,13 @@ static Mesh *modifyMesh(ModifierData *md, const ModifierEvalContext *ctx, Mesh *
     uintptr_t hash_num;
 
     if (bmd->flag & MOD_BUILD_FLAG_RANDOMIZE) {
-      BLI_array_randomize(edgeMap, sizeof(*edgeMap), edge_src_num, bmd->seed);
+      BLI_array_randomize(edgeMap, sizeof(*edgeMap), edges_src.size(), bmd->seed);
     }
 
     /* get the set of all vert indices that will be in the final mesh,
      * mapped to the new indices
      */
-    medge = medge_src;
+    medge = edges_src.data();
     hash_num = 0;
     BLI_assert(hash_num == BLI_ghash_len(vertHash));
     for (i = 0; i < edges_dst_num; i++) {
@@ -196,8 +194,8 @@ static Mesh *modifyMesh(ModifierData *md, const ModifierEvalContext *ctx, Mesh *
   /* now we know the number of verts, edges and faces, we can create the mesh. */
   result = BKE_mesh_new_nomain_from_template(
       mesh, BLI_ghash_len(vertHash), BLI_ghash_len(edgeHash), 0, loops_dst_num, faces_dst_num);
-  MEdge *result_edges = BKE_mesh_edges_for_write(result);
-  MPoly *result_polys = BKE_mesh_polys_for_write(result);
+  blender::MutableSpan<MEdge> result_edges = result->edges_for_write();
+  blender::MutableSpan<MPoly> result_polys = result->polys_for_write();
   blender::MutableSpan<int> result_corner_verts = result->corner_verts_for_write();
   blender::MutableSpan<int> result_corner_edges = result->corner_edges_for_write();
 
@@ -214,7 +212,7 @@ static Mesh *modifyMesh(ModifierData *md, const ModifierEvalContext *ctx, Mesh *
     MEdge *dest;
     int oldIndex = POINTER_AS_INT(BLI_ghash_lookup(edgeHash, POINTER_FROM_INT(i)));
 
-    source = medge_src[oldIndex];
+    source = edges_src[oldIndex];
     dest = &result_edges[i];
 
     source.v1 = POINTER_AS_INT(BLI_ghash_lookup(vertHash, POINTER_FROM_INT(source.v1)));
@@ -224,7 +222,7 @@ static Mesh *modifyMesh(ModifierData *md, const ModifierEvalContext *ctx, Mesh *
     *dest = source;
   }
 
-  mpoly_dst = result_polys;
+  mpoly_dst = result_polys.data();
 
   /* copy the faces across, remapping indices */
   k = 0;
@@ -232,7 +230,7 @@ static Mesh *modifyMesh(ModifierData *md, const ModifierEvalContext *ctx, Mesh *
     const MPoly *source;
     MPoly *dest;
 
-    source = mpoly_src + faceMap[i];
+    source = &polys_src[faceMap[i]];
     dest = mpoly_dst + i;
     CustomData_copy_data(&mesh->pdata, &result->pdata, faceMap[i], i, 1);
 

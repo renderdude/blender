@@ -151,7 +151,7 @@ void BKE_mesh_calc_loop_tangent_single(Mesh *mesh,
                                        loop_normals,
                                        reinterpret_cast<const float(*)[2]>(uv_map.data()),
                                        mesh->totloop,
-                                       BKE_mesh_polys(mesh),
+                                       mesh->polys().data(),
                                        mesh->totpoly,
                                        reports);
 }
@@ -577,7 +577,7 @@ void BKE_mesh_calc_loop_tangents(Mesh *me_eval,
   short tangent_mask = 0;
   BKE_mesh_calc_loop_tangent_ex(
       BKE_mesh_vert_positions(me_eval),
-      BKE_mesh_polys(me_eval),
+      me_eval->polys().data(),
       uint(me_eval->totpoly),
       me_eval->corner_verts().data(),
       BKE_mesh_runtime_looptri_ensure(me_eval),

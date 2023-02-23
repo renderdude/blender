@@ -121,21 +121,22 @@ void BKE_mesh_foreach_mapped_edge(
   }
   else {
     const float(*positions)[3] = BKE_mesh_vert_positions(mesh);
-    const MEdge *med = BKE_mesh_edges(mesh);
+    const blender::Span<MEdge> edges = mesh->edges();
     const int *index = static_cast<const int *>(CustomData_get_layer(&mesh->edata, CD_ORIGINDEX));
 
     if (index) {
-      for (int i = 0; i < mesh->totedge; i++, med++) {
+      for (const int i : edges.index_range()) {
+
         const int orig = *index++;
         if (orig == ORIGINDEX_NONE) {
           continue;
         }
-        func(userData, orig, positions[med->v1], positions[med->v2]);
+        func(userData, orig, positions[edges[i].v1], positions[edges[i].v2]);
       }
     }
     else if (mesh->totedge == tot_edges) {
-      for (int i = 0; i < mesh->totedge; i++, med++) {
-        func(userData, i, positions[med->v1], positions[med->v2]);
+      for (const int i : edges.index_range()) {
+        func(userData, i, positions[edges[i].v1], positions[edges[i].v2]);
       }
     }
   }
@@ -191,20 +192,18 @@ void BKE_mesh_foreach_mapped_loop(Mesh *mesh,
                                         nullptr;
 
     const float(*positions)[3] = BKE_mesh_vert_positions(mesh);
+    const blender::Span<MPoly> polys = mesh->polys();
     const Span<int> corner_verts = mesh->corner_verts();
-    const MPoly *mp = BKE_mesh_polys(mesh);
     const int *v_index = static_cast<const int *>(
         CustomData_get_layer(&mesh->vdata, CD_ORIGINDEX));
     const int *f_index = static_cast<const int *>(
         CustomData_get_layer(&mesh->pdata, CD_ORIGINDEX));
-    int p_idx, i;
 
     if (v_index || f_index) {
-      for (p_idx = 0; p_idx < mesh->totpoly; p_idx++, mp++) {
-        for (i = 0; i < mp->totloop; i++) {
-          const int vert = corner_verts[i];
+      for (const int poly_i : polys.index_range()) {
+        for (const int vert : corner_verts.slice(polys[poly_i].loopstart, polys[poly_i].totloop)) {
           const int v_idx = v_index ? v_index[vert] : vert;
-          const int f_idx = f_index ? f_index[p_idx] : p_idx;
+          const int f_idx = f_index ? f_index[poly_i] : poly_i;
           const float *no = loop_normals ? *loop_normals++ : nullptr;
           if (ELEM(ORIGINDEX_NONE, v_idx, f_idx)) {
             continue;
@@ -214,12 +213,12 @@ void BKE_mesh_foreach_mapped_loop(Mesh *mesh,
       }
     }
     else {
-      for (p_idx = 0; p_idx < mesh->totpoly; p_idx++, mp++) {
-        for (i = 0; i < mp->totloop; i++) {
-          const int vert = corner_verts[i];
-          const int f_idx = p_idx;
+      for (const int poly_i : polys.index_range()) {
+        for (const int vert : corner_verts.slice(polys[poly_i].loopstart, polys[poly_i].totloop)) {
+          const int v_idx = vert;
+          const int f_idx = poly_i;
           const float *no = loop_normals ? *loop_normals++ : nullptr;
-          func(userData, vert, f_idx, positions[vert], no);
+          func(userData, v_idx, f_idx, positions[vert], no);
         }
       }
     }
@@ -268,32 +267,32 @@ void BKE_mesh_foreach_mapped_face_center(
   }
   else {
     const float(*positions)[3] = BKE_mesh_vert_positions(mesh);
-    const MPoly *mp = BKE_mesh_polys(mesh);
-    const Span<int> corner_verts = mesh->corner_verts();
+    const blender::Span<MPoly> polys = mesh->polys();
+    const blender::Span<int> corner_verts = mesh->corner_verts();
     float _no_buf[3];
     float *no = (flag & MESH_FOREACH_USE_NORMAL) ? _no_buf : nullptr;
     const int *index = static_cast<const int *>(CustomData_get_layer(&mesh->pdata, CD_ORIGINDEX));
 
     if (index) {
-      for (int i = 0; i < mesh->totpoly; i++, mp++) {
+      for (const int i : polys.index_range()) {
         const int orig = *index++;
         if (orig == ORIGINDEX_NONE) {
           continue;
         }
         float cent[3];
-        BKE_mesh_calc_poly_center(mp, &corner_verts[mp->loopstart], positions, cent);
+        BKE_mesh_calc_poly_center(&polys[i], &corner_verts[polys[i].loopstart], positions, cent);
         if (flag & MESH_FOREACH_USE_NORMAL) {
-          BKE_mesh_calc_poly_normal(mp, &corner_verts[mp->loopstart], positions, no);
+          BKE_mesh_calc_poly_normal(&polys[i], &corner_verts[polys[i].loopstart], positions, no);
         }
         func(userData, orig, cent, no);
       }
     }
     else {
-      for (int i = 0; i < mesh->totpoly; i++, mp++) {
+      for (const int i : polys.index_range()) {
         float cent[3];
-        BKE_mesh_calc_poly_center(mp, &corner_verts[mp->loopstart], positions, cent);
+        BKE_mesh_calc_poly_center(&polys[i], &corner_verts[polys[i].loopstart], positions, cent);
         if (flag & MESH_FOREACH_USE_NORMAL) {
-          BKE_mesh_calc_poly_normal(mp, &corner_verts[mp->loopstart], positions, no);
+          BKE_mesh_calc_poly_normal(&polys[i], &corner_verts[polys[i].loopstart], positions, no);
         }
         func(userData, i, cent, no);
       }
@@ -308,7 +307,7 @@ void BKE_mesh_foreach_mapped_subdiv_face_center(
     MeshForeachFlag flag)
 {
   const float(*positions)[3] = BKE_mesh_vert_positions(mesh);
-  const MPoly *mp = BKE_mesh_polys(mesh);
+  const blender::Span<MPoly> polys = mesh->polys();
   const blender::Span<int> corner_verts = mesh->corner_verts();
   const float(*vert_normals)[3] = (flag & MESH_FOREACH_USE_NORMAL) ?
                                       BKE_mesh_vertex_normals_ensure(mesh) :
@@ -317,13 +316,12 @@ void BKE_mesh_foreach_mapped_subdiv_face_center(
   const blender::BitSpan facedot_tags = mesh->runtime->subsurf_face_dot_tags;
 
   if (index) {
-    for (int i = 0; i < mesh->totpoly; i++, mp++) {
+    for (const int i : polys.index_range()) {
       const int orig = *index++;
       if (orig == ORIGINDEX_NONE) {
         continue;
       }
-      for (int j = 0; j < mp->totloop; j++) {
-        const int vert = corner_verts[mp->loopstart + j];
+      for (const int vert : corner_verts.slice(polys[i].loopstart, polys[i].totloop)) {
         if (facedot_tags[vert]) {
           func(userData,
                orig,
@@ -334,9 +332,8 @@ void BKE_mesh_foreach_mapped_subdiv_face_center(
     }
   }
   else {
-    for (int i = 0; i < mesh->totpoly; i++, mp++) {
-      for (int j = 0; j < mp->totloop; j++) {
-        const int vert = corner_verts[mp->loopstart + j];
+    for (const int i : polys.index_range()) {
+      for (const int vert : corner_verts.slice(polys[i].loopstart, polys[i].totloop)) {
         if (facedot_tags[vert]) {
           func(userData,
                i,

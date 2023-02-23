@@ -978,8 +978,8 @@ static bool bake_targets_init_vertex_colors(Main *bmain,
   return true;
 }
 
-static int find_original_loop(const MPoly *orig_polys,
-                              const int *orig_corner_verts,
+static int find_original_loop(const blender::Span<MPoly> orig_polys,
+                              const blender::Span<int> orig_corner_verts,
                               const int *vert_origindex,
                               const int *poly_origindex,
                               const int poly_eval,
@@ -995,8 +995,8 @@ static int find_original_loop(const MPoly *orig_polys,
   }
 
   /* Find matching loop with original vertex in original polygon. */
-  const MPoly *mpoly_orig = orig_polys + poly_orig;
-  const int *poly_verts_orig = orig_corner_verts + mpoly_orig->loopstart;
+  const MPoly *mpoly_orig = &orig_polys[poly_orig];
+  const int *poly_verts_orig = &orig_corner_verts[mpoly_orig->loopstart];
   for (int j = 0; j < mpoly_orig->totloop; ++j) {
     if (poly_verts_orig[j] == vert_orig) {
       return mpoly_orig->loopstart + j;
@@ -1035,7 +1035,7 @@ static void bake_targets_populate_pixels_color_attributes(BakeTargets *targets,
 
   const blender::Span<int> corner_verts = me_eval->corner_verts();
   BKE_mesh_recalc_looptri(corner_verts.data(),
-                          BKE_mesh_polys(me_eval),
+                          me_eval->polys().data(),
                           BKE_mesh_vert_positions(me_eval),
                           me_eval->totloop,
                           me_eval->totpoly,
@@ -1046,7 +1046,7 @@ static void bake_targets_populate_pixels_color_attributes(BakeTargets *targets,
       CustomData_get_layer(&me_eval->vdata, CD_ORIGINDEX));
   const int *poly_origindex = static_cast<const int *>(
       CustomData_get_layer(&me_eval->pdata, CD_ORIGINDEX));
-  const MPoly *orig_polys = BKE_mesh_polys(me);
+  const blender::Span<MPoly> orig_polys = me->polys();
   const blender::Span<int> orig_corner_verts = me->corner_verts();
 
   for (int i = 0; i < tottri; i++) {
@@ -1059,7 +1059,7 @@ static void bake_targets_populate_pixels_color_attributes(BakeTargets *targets,
       /* Map back to original loop if there are modifiers. */
       if (vert_origindex != nullptr && poly_origindex != nullptr) {
         l = find_original_loop(
-            orig_polys, orig_corner_verts.data(), vert_origindex, poly_origindex, lt->poly, v);
+            orig_polys, orig_corner_verts, vert_origindex, poly_origindex, lt->poly, v);
         if (l == ORIGINDEX_NONE || l >= me->totloop) {
           continue;
         }

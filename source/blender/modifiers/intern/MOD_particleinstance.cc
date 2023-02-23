@@ -314,12 +314,12 @@ static Mesh *modifyMesh(ModifierData *md, const ModifierEvalContext *ctx, Mesh *
 
   result = BKE_mesh_new_nomain_from_template(mesh, maxvert, maxedge, 0, maxloop, maxpoly);
 
-  const MPoly *orig_mpoly = BKE_mesh_polys(mesh);
+  const blender::Span<MPoly> orig_polys = mesh->polys();
   const blender::Span<int> orig_corner_verts = mesh->corner_verts();
   const blender::Span<int> orig_corner_edges = mesh->corner_edges();
   float(*positions)[3] = BKE_mesh_vert_positions_for_write(result);
-  MEdge *edges = BKE_mesh_edges_for_write(result);
-  MPoly *mpoly = BKE_mesh_polys_for_write(result);
+  blender::MutableSpan<MEdge> edges = result->edges_for_write();
+  blender::MutableSpan<MPoly> polys = result->polys_for_write();
   blender::MutableSpan<int> corner_verts = result->corner_verts_for_write();
   blender::MutableSpan<int> corner_edges = result->corner_edges_for_write();
 
@@ -479,8 +479,8 @@ static Mesh *modifyMesh(ModifierData *md, const ModifierEvalContext *ctx, Mesh *
     /* create polys and loops */
     for (k = 0; k < totpoly; k++) {
 
-      const MPoly *inMP = orig_mpoly + k;
-      MPoly *mp = mpoly + p_skip * totpoly + k;
+      const MPoly *inMP = &orig_polys[k];
+      MPoly *mp = &polys[p_skip * totpoly + k];
 
       CustomData_copy_data(&mesh->pdata, &result->pdata, k, p_skip * totpoly + k, 1);
       *mp = *inMP;

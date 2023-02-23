@@ -127,31 +127,27 @@ static void mesh_get_weights(const MDeformVert *dvert,
 
 static void mesh_get_boundaries(Mesh *mesh, float *smooth_weights)
 {
-  const MEdge *medge = BKE_mesh_edges(mesh);
-  const MPoly *mpoly = BKE_mesh_polys(mesh);
+  const blender::Span<MEdge> edges = mesh->edges();
+  const blender::Span<MPoly> polys = mesh->polys();
   const blender::Span<int> corner_edges = mesh->corner_edges();
-
-  const uint mpoly_num = uint(mesh->totpoly);
-  const uint medge_num = uint(mesh->totedge);
 
   /* Flag boundary edges so only boundaries are set to 1. */
   uint8_t *boundaries = static_cast<uint8_t *>(
-      MEM_calloc_arrayN(medge_num, sizeof(*boundaries), __func__));
+      MEM_calloc_arrayN(size_t(edges.size()), sizeof(*boundaries), __func__));
 
-  for (uint i = 0; i < mpoly_num; i++) {
-    const MPoly *p = &mpoly[i];
-    const int totloop = p->totloop;
+  for (const int64_t i : polys.index_range()) {
+    const int totloop = polys[i].totloop;
     int j;
     for (j = 0; j < totloop; j++) {
-      uint8_t *e_value = &boundaries[corner_edges[p->loopstart + j]];
+      uint8_t *e_value = &boundaries[corner_edges[polys[i].loopstart + j]];
       *e_value |= uint8_t((*e_value) + 1);
     }
   }
 
-  for (uint i = 0; i < medge_num; i++) {
+  for (const int64_t i : edges.index_range()) {
     if (boundaries[i] == 1) {
-      smooth_weights[medge[i].v1] = 0.0f;
-      smooth_weights[medge[i].v2] = 0.0f;
+      smooth_weights[edges[i].v1] = 0.0f;
+      smooth_weights[edges[i].v2] = 0.0f;
     }
   }
 
@@ -174,7 +170,7 @@ static void smooth_iter__simple(CorrectiveSmoothModifierData *csmd,
   uint i;
 
   const uint edges_num = uint(mesh->totedge);
-  const MEdge *edges = BKE_mesh_edges(mesh);
+  const blender::Span<MEdge> edges = mesh->edges();
 
   struct SmoothingData_Simple {
     float delta[3];
@@ -252,7 +248,7 @@ static void smooth_iter__length_weight(CorrectiveSmoothModifierData *csmd,
   /* NOTE: the way this smoothing method works, its approx half as strong as the simple-smooth,
    * and 2.0 rarely spikes, double the value for consistent behavior. */
   const float lambda = csmd->lambda * 2.0f;
-  const MEdge *edges = BKE_mesh_edges(mesh);
+  const blender::Span<MEdge> edges = mesh->edges();
   uint i;
 
   struct SmoothingData_Weighted {
@@ -437,18 +433,16 @@ static void calc_tangent_spaces(const Mesh *mesh,
                                 float *r_tangent_weights,
                                 float *r_tangent_weights_per_vertex)
 {
-  const uint mpoly_num = uint(mesh->totpoly);
   const uint mvert_num = uint(mesh->totvert);
-  const MPoly *mpoly = BKE_mesh_polys(mesh);
+  const blender::Span<MPoly> polys = mesh->polys();
   blender::Span<int> corner_verts = mesh->corner_verts();
-  uint i;
 
   if (r_tangent_weights_per_vertex != nullptr) {
     copy_vn_fl(r_tangent_weights_per_vertex, int(mvert_num), 0.0f);
   }
 
-  for (i = 0; i < mpoly_num; i++) {
-    const MPoly *mp = &mpoly[i];
+  for (const int64_t i : polys.index_range()) {
+    const MPoly *mp = &polys[i];
     int next_corner = mp->loopstart;
     int term_corner = next_corner + mp->totloop;
     int prev_corner = term_corner - 2;
@@ -521,34 +515,33 @@ static void calc_deltas(CorrectiveSmoothModifierData *csmd,
                         const float (*rest_coords)[3],
                         uint verts_num)
 {
-  blender::Span<int> corner_verts = mesh->corner_verts();
-  const uint loops_num = uint(mesh->totloop);
+  const blender::Span<int> corner_verts = mesh->corner_verts();
 
   float(*smooth_vertex_coords)[3] = static_cast<float(*)[3]>(MEM_dupallocN(rest_coords));
 
   uint l_index;
 
   float(*tangent_spaces)[3][3] = static_cast<float(*)[3][3]>(
-      MEM_malloc_arrayN(loops_num, sizeof(float[3][3]), __func__));
+      MEM_malloc_arrayN(size_t(corner_verts.size()), sizeof(float[3][3]), __func__));
 
-  if (csmd->delta_cache.deltas_num != loops_num) {
+  if (csmd->delta_cache.deltas_num != uint(corner_verts.size())) {
     MEM_SAFE_FREE(csmd->delta_cache.deltas);
   }
 
   /* allocate deltas if they have not yet been allocated, otherwise we will just write over them */
   if (!csmd->delta_cache.deltas) {
-    csmd->delta_cache.deltas_num = loops_num;
+    csmd->delta_cache.deltas_num = uint(corner_verts.size());
     csmd->delta_cache.deltas = static_cast<float(*)[3]>(
-        MEM_malloc_arrayN(loops_num, sizeof(float[3]), __func__));
+        MEM_malloc_arrayN(size_t(corner_verts.size()), sizeof(float[3]), __func__));
   }
 
   smooth_verts(csmd, mesh, dvert, defgrp_index, smooth_vertex_coords, verts_num);
 
   calc_tangent_spaces(mesh, smooth_vertex_coords, tangent_spaces, nullptr, nullptr);
 
-  copy_vn_fl(&csmd->delta_cache.deltas[0][0], int(loops_num) * 3, 0.0f);
+  copy_vn_fl(&csmd->delta_cache.deltas[0][0], int(corner_verts.size()) * 3, 0.0f);
 
-  for (l_index = 0; l_index < loops_num; l_index++) {
+  for (l_index = 0; l_index < corner_verts.size(); l_index++) {
     const int v_index = corner_verts[l_index];
     float delta[3];
     sub_v3_v3v3(delta, rest_coords[v_index], smooth_vertex_coords[v_index]);
@@ -581,7 +574,6 @@ static void correctivesmooth_modifier_do(ModifierData *md,
        (((ID *)ob->data)->recalc & ID_RECALC_ALL));
 
   blender::Span<int> corner_verts = mesh->corner_verts();
-  const uint loops_num = uint(mesh->totloop);
 
   bool use_only_smooth = (csmd->flag & MOD_CORRECTIVESMOOTH_ONLY_SMOOTH) != 0;
   const MDeformVert *dvert = nullptr;
@@ -646,7 +638,7 @@ static void correctivesmooth_modifier_do(ModifierData *md,
   }
 
   /* check to see if our deltas are still valid */
-  if (!csmd->delta_cache.deltas || (csmd->delta_cache.deltas_num != loops_num) ||
+  if (!csmd->delta_cache.deltas || (csmd->delta_cache.deltas_num != corner_verts.size()) ||
       force_delta_cache_update) {
     const float(*rest_coords)[3];
     bool is_rest_coords_alloc = false;
@@ -695,21 +687,20 @@ static void correctivesmooth_modifier_do(ModifierData *md,
   smooth_verts(csmd, mesh, dvert, defgrp_index, vertexCos, verts_num);
 
   {
-    uint l_index;
 
     const float scale = csmd->scale;
 
     float(*tangent_spaces)[3][3] = static_cast<float(*)[3][3]>(
-        MEM_malloc_arrayN(loops_num, sizeof(float[3][3]), __func__));
+        MEM_malloc_arrayN(size_t(corner_verts.size()), sizeof(float[3][3]), __func__));
     float *tangent_weights = static_cast<float *>(
-        MEM_malloc_arrayN(loops_num, sizeof(float), __func__));
+        MEM_malloc_arrayN(size_t(corner_verts.size()), sizeof(float), __func__));
     float *tangent_weights_per_vertex = static_cast<float *>(
         MEM_malloc_arrayN(verts_num, sizeof(float), __func__));
 
     calc_tangent_spaces(
         mesh, vertexCos, tangent_spaces, tangent_weights, tangent_weights_per_vertex);
 
-    for (l_index = 0; l_index < loops_num; l_index++) {
+    for (const int64_t l_index : corner_verts.index_range()) {
       const int v_index = corner_verts[l_index];
       const float weight = tangent_weights[l_index] / tangent_weights_per_vertex[v_index];
       if (UNLIKELY(!(weight > 0.0f))) {
