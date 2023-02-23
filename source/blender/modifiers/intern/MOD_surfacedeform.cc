@@ -69,10 +69,11 @@ struct SDefBindCalcData {
   const SDefEdgePolys *edge_polys;
   SDefVert *bind_verts;
   const MLoopTri *looptri;
+  blender::Span<MEdge> edges;
   blender::OffsetIndices<int> polys;
-  const MEdge *medge;
-  const int *corner_verts;
-  const int *corner_edges;
+  blender::Span<int> corner_verts;
+  blender::Span<int> corner_edges;
+
   /** Coordinates to bind to, transformed into local space (compatible with `vertexCos`). */
   float (*targetCos)[3];
   /** Coordinates to bind (reference to the modifiers input argument). */
@@ -386,7 +387,7 @@ BLI_INLINE uint nearestVert(SDefBindCalcData *const data, const float point_co[3
 
   for (int i = 0; i < poly.size(); i++) {
     const int edge_i = data->corner_edges[poly.start() + i];
-    edge = &data->medge[edge_i];
+    edge = &data->edges[edge_i];
     dist = dist_squared_to_line_segment_v3(
         point_co, data->targetCos[edge->v1], data->targetCos[edge->v2]);
 
@@ -396,7 +397,7 @@ BLI_INLINE uint nearestVert(SDefBindCalcData *const data, const float point_co[3
     }
   }
 
-  edge = &data->medge[index];
+  edge = &data->edges[index];
   if (len_squared_v3v3(point_co, data->targetCos[edge->v1]) <
       len_squared_v3v3(point_co, data->targetCos[edge->v2])) {
     return edge->v1;
@@ -1167,8 +1168,10 @@ static bool surfacedeformBind(Object *ob,
 {
   BVHTreeFromMesh treeData = {nullptr};
   const float(*positions)[3] = BKE_mesh_vert_positions(target);
+  const blender::Span<MEdge> edges = target->edges();
   const blender::OffsetIndices polys = target->polys();
-  const MEdge *medge = BKE_mesh_edges(target);
+  const blender::Span<int> corner_verts = target->corner_verts();
+  const blender::Span<int> corner_edges = target->corner_edges();
   uint tedges_num = target->totedge;
   int adj_result;
 
@@ -1214,8 +1217,8 @@ static bool surfacedeformBind(Object *ob,
   }
 
   adj_result = buildAdjacencyMap(polys,
-                                 medge,
-                                 target->corner_edges().data(),
+                                 edges.data(),
+                                 corner_edges.data(),
                                  target_polys_num,
                                  tedges_num,
                                  vert_edges,
@@ -1247,9 +1250,9 @@ static bool surfacedeformBind(Object *ob,
   data.vert_edges = vert_edges;
   data.edge_polys = edge_polys;
   data.polys = polys;
-  data.medge = medge;
-  data.corner_verts = target->corner_verts().data();
-  data.corner_edges = target->corner_edges().data();
+  data.edges = edges;
+  data.corner_verts = corner_verts;
+  data.corner_edges = corner_edges;
   data.looptri = BKE_mesh_runtime_looptri_ensure(target);
   data.targetCos = static_cast<float(*)[3]>(
       MEM_malloc_arrayN(target_verts_num, sizeof(float[3]), "SDefTargetBindVertArray"));

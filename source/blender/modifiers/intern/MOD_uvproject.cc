@@ -96,7 +96,7 @@ static Mesh *uvprojectModifier_do(UVProjectModifierData *umd,
 {
   using namespace blender;
   float(*coords)[3], (*co)[3];
-  int i, verts_num, polys_num, loops_num;
+  int i, verts_num;
   Projector projectors[MOD_UVPROJECT_MAXPROJECTORS];
   int projectors_num = 0;
   char uvname[MAX_CUSTOMDATA_LAYER_NAME];
@@ -181,11 +181,11 @@ static Mesh *uvprojectModifier_do(UVProjectModifierData *umd,
     mul_mat3_m4_v3(projectors[i].ob->object_to_world, projectors[i].normal);
   }
 
-  polys_num = mesh->totpoly;
-  loops_num = mesh->totloop;
+  const blender::OffsetIndices polys = mesh->polys();
+  const Span<int> corner_verts = mesh->corner_verts();
 
-  float(*mloop_uv)[2] = static_cast<float(*)[2]>(
-      CustomData_get_layer_named_for_write(&mesh->ldata, CD_PROP_FLOAT2, uvname, loops_num));
+  float(*mloop_uv)[2] = static_cast<float(*)[2]>(CustomData_get_layer_named_for_write(
+      &mesh->ldata, CD_PROP_FLOAT2, uvname, corner_verts.size()));
 
   coords = BKE_mesh_vert_coords_alloc(mesh, &verts_num);
 
@@ -201,11 +201,8 @@ static Mesh *uvprojectModifier_do(UVProjectModifierData *umd,
     }
   }
 
-  const OffsetIndices polys = mesh->polys();
-  const Span<int> corner_verts = mesh->corner_verts();
-
   /* apply coords as UVs */
-  for (i = 0; i < polys_num; i++) {
+  for (const int i : polys.index_range()) {
     const blender::IndexRange poly = polys[i];
     if (projectors_num == 1) {
       if (projectors[0].uci) {

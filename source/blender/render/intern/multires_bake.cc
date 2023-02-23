@@ -487,18 +487,10 @@ static void do_multires_bake(MultiresBakeRender *bkr,
   memcpy(temp_mesh->vert_positions_for_write().data(),
          positions,
          temp_mesh->totvert * sizeof(float[3]));
-  memcpy(BKE_mesh_edges_for_write(temp_mesh),
-         dm->getEdgeArray(dm),
-         temp_mesh->totedge * sizeof(MEdge));
-  memcpy(temp_mesh->poly_offsets_for_write().data(),
-         dm->getPolyArray(dm),
-         (temp_mesh->totpoly + 1) * sizeof(int));
-  memcpy(temp_mesh->corner_verts_for_write().data(),
-         dm->getCornerVertArray(dm),
-         temp_mesh->totloop * sizeof(int));
-  memcpy(temp_mesh->corner_edges_for_write().data(),
-         dm->getCornerEdgeArray(dm),
-         temp_mesh->totloop * sizeof(int));
+  temp_mesh->edges_for_write().copy_from({dm->getEdgeArray(dm), temp_mesh->totedge});
+  temp_mesh->poly_offsets_for_write().copy_from({dm->getPolyArray(dm), temp_mesh->totpoly + 1});
+  temp_mesh->corner_verts_for_write().copy_from({dm->getCornerVertArray(dm), temp_mesh->totloop});
+  temp_mesh->corner_edges_for_write().copy_from({dm->getCornerEdgeArray(dm), temp_mesh->totloop});
   const float(*vert_normals)[3] = BKE_mesh_vertex_normals_ensure(temp_mesh);
   const float(*poly_normals)[3] = BKE_mesh_poly_normals_ensure(temp_mesh);
 

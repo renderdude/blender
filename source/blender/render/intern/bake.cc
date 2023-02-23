@@ -463,7 +463,7 @@ static TriTessFace *mesh_calc_tri_tessface(Mesh *me, bool tangent, Mesh *me_eval
   float no[3];
 
   const float(*positions)[3] = BKE_mesh_vert_positions(me);
-  const OffsetIndices polys = me->polys();
+  const blender::OffsetIndices polys = me->polys();
   const blender::Span<int> corner_verts = me->corner_verts();
   const bke::AttributeAccessor attributes = me->attributes();
   const VArray<bool> sharp_faces = attributes.lookup_or_default<bool>(

@@ -545,7 +545,7 @@ MeshRenderData *mesh_render_data_create(Object *object,
     mr->tri_len = poly_to_tri_count(mr->poly_len, mr->loop_len);
 
     mr->vert_positions = mr->me->vert_positions().data();
-    mr->medge = BKE_mesh_edges(mr->me);
+    mr->medge = mr->me->edges().data();
     mr->polys = mr->me->polys();
     mr->corner_verts = mr->me->corner_verts().data();
     mr->corner_edges = mr->me->corner_edges().data();

@@ -1607,9 +1607,9 @@ float *BKE_key_evaluate_object_ex(
     switch (GS(obdata->name)) {
       case ID_ME: {
         Mesh *mesh = (Mesh *)obdata;
-        const float(*positions)[3] = BKE_mesh_vert_positions_for_write(mesh);
         const int totvert = min_ii(tot, mesh->totvert);
-        memcpy(out, positions, sizeof(float[3]) * totvert);
+        mesh->vert_positions_for_write().take_front(totvert).copy_from(
+            {reinterpret_cast<const blender::float3 *>(out), totvert});
         break;
       }
       case ID_LT: {
@@ -2233,7 +2233,7 @@ void BKE_keyblock_mesh_calc_normals(const KeyBlock *kb,
 
   float(*positions)[3] = static_cast<float(*)[3]>(MEM_dupallocN(BKE_mesh_vert_positions(mesh)));
   BKE_keyblock_convert_to_mesh(kb, positions, mesh->totvert);
-  const MEdge *edges = BKE_mesh_edges(mesh);
+  const blender::Span<MEdge> edges = mesh->edges();
   const blender::OffsetIndices polys = mesh->polys();
   const blender::Span<int> corner_verts = mesh->corner_verts();
   const blender::Span<int> corner_edges = mesh->corner_edges();
@@ -2260,20 +2260,20 @@ void BKE_keyblock_mesh_calc_normals(const KeyBlock *kb,
 
   if (poly_normals_needed) {
     BKE_mesh_calc_normals_poly(
-        positions, mesh->totvert, corner_verts.data(), mesh->totloop, polys, poly_normals);
+        positions, mesh->totvert, corner_verts.data(), corner_verts.size(), polys, poly_normals);
   }
   if (vert_normals_needed) {
     BKE_mesh_calc_normals_poly_and_vertex(positions,
                                           mesh->totvert,
                                           corner_verts.data(),
-                                          mesh->totloop,
+                                          corner_verts.size(),
                                           polys,
                                           poly_normals,
                                           vert_normals);
   }
   if (loop_normals_needed) {
     short(*clnors)[2] = static_cast<short(*)[2]>(CustomData_get_layer_for_write(
-        &mesh->ldata, CD_CUSTOMLOOPNORMAL, mesh->totloop)); /* May be nullptr. */
+        &mesh->ldata, CD_CUSTOMLOOPNORMAL, corner_verts.size())); /* May be nullptr. */
     const bool *sharp_edges = static_cast<const bool *>(
         CustomData_get_layer_named(&mesh->edata, CD_PROP_BOOL, "sharp_edge"));
     const bool *sharp_faces = static_cast<const bool *>(
@@ -2281,12 +2281,12 @@ void BKE_keyblock_mesh_calc_normals(const KeyBlock *kb,
     BKE_mesh_normals_loop_split(positions,
                                 vert_normals,
                                 mesh->totvert,
-                                edges,
+                                edges.data(),
                                 mesh->totedge,
                                 corner_verts.data(),
                                 corner_edges.data(),
                                 r_loop_normals,
-                                mesh->totloop,
+                                corner_verts.size(),
                                 polys,
                                 poly_normals,
                                 (mesh->flag & ME_AUTOSMOOTH) != 0,

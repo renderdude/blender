@@ -835,6 +835,7 @@ static bool cloth_from_object(
 
 static void cloth_from_mesh(ClothModifierData *clmd, const Object *ob, Mesh *mesh)
 {
+  const blender::Span<int> corner_verts = mesh->corner_verts();
   const MLoopTri *looptri = BKE_mesh_runtime_looptri_ensure(mesh);
   const uint mvert_num = mesh->totvert;
   const uint looptri_num = BKE_mesh_runtime_looptri_len(mesh);
@@ -868,9 +869,9 @@ static void cloth_from_mesh(ClothModifierData *clmd, const Object *ob, Mesh *mes
     return;
   }
   BKE_mesh_runtime_verttri_from_looptri(
-      clmd->clothObject->tri, mesh->corner_verts().data(), looptri, looptri_num);
+      clmd->clothObject->tri, corner_verts.data(), looptri, looptri_num);
 
-  clmd->clothObject->edges = BKE_mesh_edges(mesh);
+  clmd->clothObject->edges = mesh->edges().data();
 
   /* Free the springs since they can't be correct if the vertices
    * changed.
@@ -1288,7 +1289,7 @@ void cloth_parallel_transport_hair_frame(float mat[3][3],
 /* Add a shear and a bend spring between two verts within a poly. */
 static bool cloth_add_shear_bend_spring(ClothModifierData *clmd,
                                         LinkNodePair *edgelist,
-                                        const int *corner_verts,
+                                        const blender::Span<int> corner_verts,
                                         const blender::OffsetIndices<int> polys,
                                         int i,
                                         int j,
@@ -1340,7 +1341,7 @@ static bool cloth_add_shear_bend_spring(ClothModifierData *clmd,
       return false;
     }
 
-    tmp_corner = corner_verts + polys[i].start();
+    tmp_corner = &corner_verts[polys[i].start()];
 
     for (x = 0; x < spring->la; x++) {
       spring->pa[x] = tmp_corner[j + x];
@@ -1475,7 +1476,7 @@ static bool cloth_build_springs(ClothModifierData *clmd, Mesh *mesh)
   uint numedges = uint(mesh->totedge);
   uint numpolys = uint(mesh->totpoly);
   float shrink_factor;
-  const MEdge *medge = BKE_mesh_edges(mesh);
+  const blender::Span<MEdge> edges = mesh->edges();
   const OffsetIndices polys = mesh->polys();
   const Span<int> corner_verts = mesh->corner_verts();
   const Span<int> corner_edges = mesh->corner_edges();
@@ -1609,7 +1610,7 @@ static bool cloth_build_springs(ClothModifierData *clmd, Mesh *mesh)
     spring = (ClothSpring *)MEM_callocN(sizeof(ClothSpring), "cloth spring");
 
     if (spring) {
-      spring_verts_ordered_set(spring, medge[i].v1, medge[i].v2);
+      spring_verts_ordered_set(spring, edges[i].v1, edges[i].v2);
       if (clmd->sim_parms->flags & CLOTH_SIMSETTINGS_FLAG_SEW && loose_edges.count > 0 &&
           loose_edges.is_loose_bits[i]) {
         /* handle sewing (loose edges will be pulled together) */
@@ -1617,7 +1618,7 @@ static bool cloth_build_springs(ClothModifierData *clmd, Mesh *mesh)
         spring->lin_stiffness = 1.0f;
         spring->type = CLOTH_SPRING_TYPE_SEWING;
 
-        BLI_edgeset_insert(cloth->sew_edge_graph, medge[i].v1, medge[i].v2);
+        BLI_edgeset_insert(cloth->sew_edge_graph, edges[i].v1, edges[i].v2);
       }
       else {
         shrink_factor = cloth_shrink_factor(clmd, cloth->verts, spring->ij, spring->kl);
@@ -1673,7 +1674,7 @@ static bool cloth_build_springs(ClothModifierData *clmd, Mesh *mesh)
       if (polys.size(i) > 3) {
         for (int j = 1; j < polys.size(i) - 1; j++) {
           if (j > 1) {
-            if (cloth_add_shear_bend_spring(clmd, edgelist, corner_verts.data(), polys, i, 0, j)) {
+            if (cloth_add_shear_bend_spring(clmd, edgelist, corner_verts, polys, i, 0, j)) {
               shear_springs++;
 
               if (clmd->sim_parms->bending_model == CLOTH_BENDING_ANGULAR) {
@@ -1687,7 +1688,7 @@ static bool cloth_build_springs(ClothModifierData *clmd, Mesh *mesh)
           }
 
           for (int k = j + 2; k < polys.size(i); k++) {
-            if (cloth_add_shear_bend_spring(clmd, edgelist, corner_verts.data(), polys, i, j, k)) {
+            if (cloth_add_shear_bend_spring(clmd, edgelist, corner_verts, polys, i, j, k)) {
               shear_springs++;
 
               if (clmd->sim_parms->bending_model == CLOTH_BENDING_ANGULAR) {
@@ -1891,7 +1892,7 @@ static bool cloth_build_springs(ClothModifierData *clmd, Mesh *mesh)
 
   /* insert other near springs in edgeset AFTER bending springs are calculated (for selfcolls) */
   for (int i = 0; i < numedges; i++) { /* struct springs */
-    BLI_edgeset_add(edgeset, medge[i].v1, medge[i].v2);
+    BLI_edgeset_add(edgeset, edges[i].v1, edges[i].v2);
   }
 
   for (int i = 0; i < numpolys; i++) { /* edge springs */

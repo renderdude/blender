@@ -546,12 +546,8 @@ static void sculpt_face_sets_init_flood_fill(Object *ob, const FaceSetsFloodFill
   const Span<int> corner_edges = mesh->corner_edges();
 
   if (!ss->epmap) {
-    BKE_mesh_edge_poly_map_create(&ss->epmap,
-                                  &ss->epmap_mem,
-                                  edges.size(),
-                                  polys,
-                                  corner_edges.data(),
-                                  corner_edges.size());
+    BKE_mesh_edge_poly_map_create(
+        &ss->epmap, &ss->epmap_mem, edges.size(), polys, corner_edges.data(), corner_edges.size());
   }
 
   int next_face_set = 1;
@@ -1103,7 +1099,7 @@ static void sculpt_face_set_grow(Object *ob,
   const OffsetIndices polys = mesh->polys();
   const Span<int> corner_verts = mesh->corner_verts();
 
-  for (int p = 0; p < mesh->totpoly; p++) {
+  for (const int p : polys.index_range()) {
     if (!modify_hidden && prev_face_sets[p] <= 0) {
       continue;
     }
@@ -1132,7 +1128,7 @@ static void sculpt_face_set_shrink(Object *ob,
   Mesh *mesh = BKE_mesh_from_object(ob);
   const OffsetIndices polys = mesh->polys();
   const Span<int> corner_verts = mesh->corner_verts();
-  for (int p = 0; p < mesh->totpoly; p++) {
+  for (const int p : polys.index_range()) {
     if (!modify_hidden && prev_face_sets[p] <= 0) {
       continue;
     }

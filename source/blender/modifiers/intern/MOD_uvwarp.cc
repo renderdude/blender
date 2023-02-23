@@ -194,8 +194,7 @@ static Mesh *modifyMesh(ModifierData *md, const ModifierEvalContext *ctx, Mesh *
   CustomData_validate_layer_name(&mesh->ldata, CD_PROP_FLOAT2, umd->uvlayer_name, uvname);
 
   const blender::OffsetIndices polys = mesh->polys();
-  polys_num = mesh->totpoly;
-  loops_num = mesh->totloop;
+  const blender::Span<int> corner_verts = mesh->corner_verts();
 
   float(*mloopuv)[2] = static_cast<float(*)[2]>(
       CustomData_get_layer_named_for_write(&mesh->ldata, CD_PROP_FLOAT2, uvname, loops_num));
@@ -203,7 +202,7 @@ static Mesh *modifyMesh(ModifierData *md, const ModifierEvalContext *ctx, Mesh *
 
   UVWarpData data{};
   data.polys = polys;
-  data.corner_verts = mesh->corner_verts();
+  data.corner_verts = corner_verts;
   data.mloopuv = mloopuv;
   data.dvert = dvert;
   data.defgrp_index = defgrp_index;

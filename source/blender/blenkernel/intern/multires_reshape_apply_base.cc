@@ -34,8 +34,9 @@ void multires_reshape_apply_base_update_mesh_coords(MultiresReshapeContext *resh
   /* Update the context in case the vertices were duplicated. */
   reshape_context->base_positions = base_positions;
 
-  const int *corner_verts = reshape_context->base_corner_verts;
-  for (int loop_index = 0; loop_index < base_mesh->totloop; ++loop_index) {
+  const blender::Span<int> corner_verts = reshape_context->base_corner_verts;
+  for (const int loop_index : corner_verts.index_range()) {
+
     GridCoord grid_coord;
     grid_coord.grid_index = loop_index;
     grid_coord.u = 1.0f;
@@ -74,9 +75,8 @@ void multires_reshape_apply_base_refit_base_mesh(MultiresReshapeContext *reshape
   BKE_mesh_vert_poly_map_create(&pmap,
                                 &pmap_mem,
                                 reshape_context->base_polys,
-                                reshape_context->base_corner_verts,
-                                base_mesh->totvert,
-                                base_mesh->totloop);
+                                reshape_context->base_corner_verts.data(),
+                                base_mesh->totvert);
 
   float(*origco)[3] = static_cast<float(*)[3]>(
       MEM_calloc_arrayN(base_mesh->totvert, sizeof(float[3]), __func__));

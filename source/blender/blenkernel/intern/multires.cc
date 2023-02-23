@@ -187,11 +187,11 @@ static void multires_output_hidden_to_ccgdm(CCGDerivedMesh *ccgdm, Mesh *me, int
   const MDisps *mdisps = static_cast<const MDisps *>(CustomData_get_layer(&me->ldata, CD_MDISPS));
   BLI_bitmap **grid_hidden = ccgdm->gridHidden;
   int *gridOffset;
-  int i, j;
+  int j;
 
   gridOffset = ccgdm->dm.getGridOffset(&ccgdm->dm);
 
-  for (i = 0; i < me->totpoly; i++) {
+  for (const int i : polys.index_range()) {
     for (j = 0; j < polys[i].size(); j++) {
       int g = gridOffset[i] + j;
       const MDisps *md = &mdisps[g];
@@ -488,11 +488,11 @@ static int get_levels_from_disps(Object *ob)
 {
   Mesh *me = static_cast<Mesh *>(ob->data);
   const blender::OffsetIndices polys = me->polys();
-  int i, j, totlvl = 0;
+  int j, totlvl = 0;
 
   const MDisps *mdisp = static_cast<const MDisps *>(CustomData_get_layer(&me->ldata, CD_MDISPS));
 
-  for (i = 0; i < me->totpoly; i++) {
+  for (const int i : polys.index_range()) {
     const MDisps *md = mdisp + polys[i].start();
 
     for (j = 0; j < polys[i].size(); j++, md++) {
@@ -675,9 +675,9 @@ static void multires_del_higher(MultiresModifierData *mmd, Object *ob, int lvl)
     if (lvl > 0) {
       int nsize = multires_side_tot[lvl];
       int hsize = multires_side_tot[mmd->totlvl];
-      int i, j;
+      int j;
 
-      for (i = 0; i < me->totpoly; i++) {
+      for (const int i : polys.index_range()) {
         for (j = 0; j < polys[i].size(); j++) {
           int g = polys[i].start() + j;
           MDisps *mdisp = &mdisps[g];
@@ -1554,8 +1554,8 @@ void multiresModifier_ensure_external_read(struct Mesh *mesh, const MultiresModi
 
 /***************** Multires interpolation stuff *****************/
 
-int mdisp_rot_face_to_crn(const int face_size,
-     const int face_side, const float u, const float v, float *x, float *y)
+int mdisp_rot_face_to_crn(
+    const int face_size, const int face_side, const float u, const float v, float *x, float *y)
 {
   const float offset = face_side * 0.5f - 0.5f;
   int S = 0;

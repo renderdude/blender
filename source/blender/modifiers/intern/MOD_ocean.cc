@@ -154,8 +154,8 @@ static bool dependsOnNormals(ModifierData *md)
 
 struct GenerateOceanGeometryData {
   float (*vert_positions)[3];
-  int *poly_offsets;
-  int *corner_verts;
+  blender::MutableSpan<int> poly_offsets;
+  blender::MutableSpan<int> corner_verts;
   float (*mloopuvs)[2];
 
   int res_x, res_y;
@@ -261,8 +261,8 @@ static Mesh *generate_ocean_geometry(OceanModifierData *omd, Mesh *mesh_orig, co
   BKE_mesh_copy_parameters_for_eval(result, mesh_orig);
 
   gogd.vert_positions = BKE_mesh_vert_positions_for_write(result);
-  gogd.poly_offsets = result->poly_offsets_for_write().data();
-  gogd.corner_verts = result->corner_verts_for_write().data();
+  gogd.poly_offsets = result->poly_offsets_for_write();
+  gogd.corner_verts = result->corner_verts_for_write();
 
   TaskParallelSettings settings;
   BLI_parallel_range_settings_defaults(&settings);
@@ -359,13 +359,12 @@ static Mesh *doOcean(ModifierData *md, const ModifierEvalContext *ctx, Mesh *mes
   /* Add vertex-colors before displacement: allows lookup based on position. */
 
   if (omd->flag & MOD_OCEAN_GENERATE_FOAM) {
-    const int loops_num = result->totloop;
     const blender::Span<int> corner_verts = result->corner_verts();
     MLoopCol *mloopcols = static_cast<MLoopCol *>(CustomData_add_layer_named(&result->ldata,
                                                                              CD_PROP_BYTE_COLOR,
                                                                              CD_SET_DEFAULT,
                                                                              nullptr,
-                                                                             loops_num,
+                                                                             corner_verts.size(),
                                                                              omd->foamlayername));
 
     MLoopCol *mloopcols_spray = nullptr;
@@ -374,7 +373,7 @@ static Mesh *doOcean(ModifierData *md, const ModifierEvalContext *ctx, Mesh *mes
                                                                            CD_PROP_BYTE_COLOR,
                                                                            CD_SET_DEFAULT,
                                                                            nullptr,
-                                                                           loops_num,
+                                                                           corner_verts.size(),
                                                                            omd->spraylayername));
     }
 

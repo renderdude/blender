@@ -1868,7 +1868,7 @@ struct EdgeNeighborData {
   LineartEdgeNeighbor *edge_nabr;
   LineartAdjacentEdge *adj_e;
   const MLoopTri *mlooptri;
-  const int *corner_verts;
+  blender::Span<int> corner_verts;
 };
 
 static void lineart_edge_neighbor_init_task(void *__restrict userdata,
@@ -1879,7 +1879,7 @@ static void lineart_edge_neighbor_init_task(void *__restrict userdata,
   LineartAdjacentEdge *adj_e = &en_data->adj_e[i];
   const MLoopTri *looptri = &en_data->mlooptri[i / 3];
   LineartEdgeNeighbor *edge_nabr = &en_data->edge_nabr[i];
-  const int *corner_verts = en_data->corner_verts;
+  const blender::Span<int> corner_verts = en_data->corner_verts;
 
   adj_e->e = i;
   adj_e->v1 = corner_verts[looptri->tri[i % 3]];
@@ -1930,7 +1930,7 @@ static LineartEdgeNeighbor *lineart_build_edge_neighbor(Mesh *me, int total_edge
   en_data.adj_e = adj_e;
   en_data.edge_nabr = edge_nabr;
   en_data.mlooptri = BKE_mesh_runtime_looptri_ensure(me);
-  en_data.corner_verts = me->corner_verts().data();
+  en_data.corner_verts = me->corner_verts();
 
   BLI_task_parallel_range(0, total_edges, &en_data, lineart_edge_neighbor_init_task, &en_settings);
 

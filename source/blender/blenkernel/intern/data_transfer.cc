@@ -250,6 +250,98 @@ int BKE_object_data_transfer_dttype_to_srcdst_index(const int dtdata_type)
 
 /* ********** */
 
+/**
+ * When transfering color attributes, also transfer the active color attribute string.
+ * If a match can't be found, use the first color layer that can be found (to ensure a valid string
+ * is set).
+ */
+static void data_transfer_mesh_attributes_transfer_active_color_string(
+    Mesh *mesh_dst, Mesh *mesh_src, const eAttrDomainMask mask_domain, const int data_type)
+{
+  if (mesh_dst->active_color_attribute) {
+    return;
+  }
+
+  const char *active_color_src = BKE_id_attributes_active_color_name(&mesh_src->id);
+
+  if ((data_type == CD_PROP_COLOR) &&
+      !BKE_id_attribute_search(
+          &mesh_src->id, active_color_src, CD_MASK_PROP_COLOR, ATTR_DOMAIN_MASK_COLOR)) {
+    return;
+  }
+  else if ((data_type == CD_PROP_BYTE_COLOR) &&
+           !BKE_id_attribute_search(
+               &mesh_src->id, active_color_src, CD_MASK_PROP_BYTE_COLOR, ATTR_DOMAIN_MASK_COLOR)) {
+    return;
+  }
+
+  if ((data_type == CD_PROP_COLOR) &&
+      BKE_id_attribute_search(
+          &mesh_dst->id, active_color_src, CD_MASK_PROP_COLOR, ATTR_DOMAIN_MASK_COLOR)) {
+    mesh_dst->active_color_attribute = BLI_strdup(active_color_src);
+  }
+  else if ((data_type == CD_PROP_BYTE_COLOR) &&
+           BKE_id_attribute_search(
+               &mesh_dst->id, active_color_src, CD_MASK_PROP_BYTE_COLOR, ATTR_DOMAIN_MASK_COLOR)) {
+    mesh_dst->active_color_attribute = BLI_strdup(active_color_src);
+  }
+  else {
+    CustomDataLayer *first_color_layer = BKE_id_attribute_from_index(
+        &mesh_dst->id, 0, mask_domain, CD_MASK_COLOR_ALL);
+    if (first_color_layer != nullptr) {
+      mesh_dst->active_color_attribute = BLI_strdup(first_color_layer->name);
+    }
+  }
+}
+
+/**
+ * When transfering color attributes, also transfer the default color attribute string.
+ * If a match cant be found, use the first color layer that can be found (to ensure a valid string
+ * is set).
+ */
+static void data_transfer_mesh_attributes_transfer_default_color_string(
+    Mesh *mesh_dst, Mesh *mesh_src, const eAttrDomainMask mask_domain, const int data_type)
+{
+  if (mesh_dst->default_color_attribute) {
+    return;
+  }
+
+  const char *default_color_src = BKE_id_attributes_default_color_name(&mesh_src->id);
+
+  if ((data_type == CD_PROP_COLOR) &&
+      !BKE_id_attribute_search(
+          &mesh_src->id, default_color_src, CD_MASK_PROP_COLOR, ATTR_DOMAIN_MASK_COLOR)) {
+    return;
+  }
+  else if ((data_type == CD_PROP_BYTE_COLOR) && !BKE_id_attribute_search(&mesh_src->id,
+                                                                         default_color_src,
+                                                                         CD_MASK_PROP_BYTE_COLOR,
+                                                                         ATTR_DOMAIN_MASK_COLOR)) {
+    return;
+  }
+
+  if ((data_type == CD_PROP_COLOR) &&
+      BKE_id_attribute_search(
+          &mesh_dst->id, default_color_src, CD_MASK_PROP_COLOR, ATTR_DOMAIN_MASK_COLOR)) {
+    mesh_dst->default_color_attribute = BLI_strdup(default_color_src);
+  }
+  else if ((data_type == CD_PROP_BYTE_COLOR) && BKE_id_attribute_search(&mesh_dst->id,
+                                                                        default_color_src,
+                                                                        CD_MASK_PROP_BYTE_COLOR,
+                                                                        ATTR_DOMAIN_MASK_COLOR)) {
+    mesh_dst->default_color_attribute = BLI_strdup(default_color_src);
+  }
+  else {
+    CustomDataLayer *first_color_layer = BKE_id_attribute_from_index(
+        &mesh_dst->id, 0, mask_domain, CD_MASK_COLOR_ALL);
+    if (first_color_layer != nullptr) {
+      mesh_dst->default_color_attribute = BLI_strdup(first_color_layer->name);
+    }
+  }
+}
+
+/* ********** */
+
 /* Generic pre/post processing, only used by custom loop normals currently. */
 
 static void data_transfer_dtdata_type_preprocess(Mesh *me_src,
@@ -262,10 +354,10 @@ static void data_transfer_dtdata_type_preprocess(Mesh *me_src,
 
     const float(*positions_dst)[3] = BKE_mesh_vert_positions(me_dst);
     const int num_verts_dst = me_dst->totvert;
-    const MEdge *edges_dst = BKE_mesh_edges(me_dst);
-    const int num_edges_dst = me_dst->totedge;
+    const blender::Span<MEdge> edges_dst = me_dst->edges();
     const blender::OffsetIndices polys_dst = me_dst->polys();
-    const int num_loops_dst = me_dst->totloop;
+    const blender::Span<int> corner_verts_dst = me_dst->corner_verts();
+    const blender::Span<int> corner_edges_dst = me_dst->corner_edges();
     CustomData *ldata_dst = &me_dst->ldata;
 
     const bool use_split_nors_dst = (me_dst->flag & ME_AUTOSMOOTH) != 0;
@@ -284,8 +376,8 @@ static void data_transfer_dtdata_type_preprocess(Mesh *me_src,
         CustomData_get_layer_for_write(ldata_dst, CD_NORMAL, me_dst->totloop));
     const bool do_loop_nors_dst = (loop_nors_dst == nullptr);
     if (do_loop_nors_dst) {
-      loop_nors_dst = static_cast<float(*)[3]>(
-          CustomData_add_layer(ldata_dst, CD_NORMAL, CD_SET_DEFAULT, nullptr, num_loops_dst));
+      loop_nors_dst = static_cast<float(*)[3]>(CustomData_add_layer(
+          ldata_dst, CD_NORMAL, CD_SET_DEFAULT, nullptr, corner_verts_dst.size()));
       CustomData_set_layer_flag(ldata_dst, CD_NORMAL, CD_FLAG_TEMPORARY);
     }
     if (dirty_nors_dst || do_loop_nors_dst) {
@@ -296,12 +388,12 @@ static void data_transfer_dtdata_type_preprocess(Mesh *me_src,
       BKE_mesh_normals_loop_split(positions_dst,
                                   BKE_mesh_vertex_normals_ensure(me_dst),
                                   num_verts_dst,
-                                  edges_dst,
-                                  num_edges_dst,
-                                  me_dst->corner_verts().data(),
-                                  me_dst->corner_edges().data(),
+                                  edges_dst.data(),
+                                  edges_dst.size(),
+                                  corner_verts_dst.data(),
+                                  corner_edges_dst.data(),
                                   loop_nors_dst,
-                                  num_loops_dst,
+                                  corner_verts_dst.size(),
                                   polys_dst,
                                   BKE_mesh_poly_normals_ensure(me_dst),
                                   use_split_nors_dst,
@@ -331,9 +423,10 @@ static void data_transfer_dtdata_type_postprocess(Object * /*ob_src*/,
     /* Bake edited destination loop normals into custom normals again. */
     const float(*positions_dst)[3] = BKE_mesh_vert_positions(me_dst);
     const int num_verts_dst = me_dst->totvert;
-    MEdge *edges_dst = BKE_mesh_edges_for_write(me_dst);
-    const int num_edges_dst = me_dst->totedge;
+    const blender::Span<MEdge> edges_dst = me_dst->edges();
     const OffsetIndices polys_dst = me_dst->polys();
+    const blender::Span<int> corner_verts_dst = me_dst->corner_verts_for_write();
+    const blender::Span<int> corner_edges_dst = me_dst->corner_edges_for_write();
     const int num_loops_dst = me_dst->totloop;
     CustomData *ldata_dst = &me_dst->ldata;
 
@@ -356,12 +449,12 @@ static void data_transfer_dtdata_type_postprocess(Object * /*ob_src*/,
     BKE_mesh_normals_loop_custom_set(positions_dst,
                                      BKE_mesh_vertex_normals_ensure(me_dst),
                                      num_verts_dst,
-                                     edges_dst,
-                                     num_edges_dst,
-                                     me_dst->corner_verts().data(),
-                                     me_dst->corner_edges().data(),
+                                     edges_dst.data(),
+                                     edges_dst.size(),
+                                     corner_verts_dst.data(),
+                                     corner_edges_dst.data(),
                                      loop_nors_dst,
-                                     num_loops_dst,
+                                     corner_verts_dst.size(),
                                      polys_dst,
                                      poly_nors_dst,
                                      static_cast<const bool *>(CustomData_get_layer_named(
@@ -1120,6 +1213,14 @@ void BKE_object_data_transfer_layout(struct Depsgraph *depsgraph,
                                            fromlayers,
                                            tolayers,
                                            nullptr);
+      /* Make sure we have active/defaut color layers if none existed before.
+       * Use the active/defaut from src (if it was transferred), otherwise the first. */
+      if (ELEM(cddata_type, CD_PROP_COLOR, CD_PROP_BYTE_COLOR)) {
+        data_transfer_mesh_attributes_transfer_active_color_string(
+            me_dst, me_src, ATTR_DOMAIN_MASK_POINT, cddata_type);
+        data_transfer_mesh_attributes_transfer_default_color_string(
+            me_dst, me_src, ATTR_DOMAIN_MASK_POINT, cddata_type);
+      }
     }
     if (DT_DATATYPE_IS_EDGE(dtdata_type)) {
       const int num_elem_dst = me_dst->totedge;
@@ -1160,6 +1261,14 @@ void BKE_object_data_transfer_layout(struct Depsgraph *depsgraph,
                                            fromlayers,
                                            tolayers,
                                            nullptr);
+      /* Make sure we have active/defaut color layers if none existed before.
+       * Use the active/defaut from src (if it was transferred), otherwise the first. */
+      if (ELEM(cddata_type, CD_PROP_COLOR, CD_PROP_BYTE_COLOR)) {
+        data_transfer_mesh_attributes_transfer_active_color_string(
+            me_dst, me_src, ATTR_DOMAIN_MASK_CORNER, cddata_type);
+        data_transfer_mesh_attributes_transfer_default_color_string(
+            me_dst, me_src, ATTR_DOMAIN_MASK_CORNER, cddata_type);
+      }
     }
     if (DT_DATATYPE_IS_POLY(dtdata_type)) {
       const int num_elem_dst = me_dst->totpoly;
@@ -1395,13 +1504,12 @@ bool BKE_object_data_transfer_ex(struct Depsgraph *depsgraph,
     if (DT_DATATYPE_IS_EDGE(dtdata_type)) {
       const float(*positions_dst)[3] = BKE_mesh_vert_positions_for_write(me_dst);
       const int num_verts_dst = me_dst->totvert;
-      const MEdge *edges_dst = BKE_mesh_edges(me_dst);
-      const int num_edges_dst = me_dst->totedge;
+      const blender::Span<MEdge> edges_dst = me_dst->edges();
 
       if (!geom_map_init[EDATA]) {
         const int num_edges_src = me_src->totedge;
 
-        if ((map_edge_mode == MREMAP_MODE_TOPOLOGY) && (num_edges_dst != num_edges_src)) {
+        if ((map_edge_mode == MREMAP_MODE_TOPOLOGY) && (edges_dst.size() != num_edges_src)) {
           BKE_report(reports,
                      RPT_ERROR,
                      "Source and destination meshes do not have the same amount of edges, "
@@ -1415,7 +1523,7 @@ bool BKE_object_data_transfer_ex(struct Depsgraph *depsgraph,
                      "None of the 'Face' mappings can be used in this case");
           continue;
         }
-        if (ELEM(0, num_edges_dst, num_edges_src)) {
+        if (ELEM(0, edges_dst.size(), num_edges_src)) {
           BKE_report(
               reports,
               RPT_ERROR,
@@ -1429,8 +1537,8 @@ bool BKE_object_data_transfer_ex(struct Depsgraph *depsgraph,
                                             ray_radius,
                                             positions_dst,
                                             num_verts_dst,
-                                            edges_dst,
-                                            num_edges_dst,
+                                            edges_dst.data(),
+                                            edges_dst.size(),
                                             dirty_nors_dst,
                                             me_src,
                                             me_dst,
@@ -1440,9 +1548,14 @@ bool BKE_object_data_transfer_ex(struct Depsgraph *depsgraph,
 
       if (mdef && vg_idx != -1 && !weights[EDATA]) {
         weights[EDATA] = static_cast<float *>(
-            MEM_mallocN(sizeof(*weights[EDATA]) * size_t(num_edges_dst), __func__));
-        BKE_defvert_extract_vgroup_to_edgeweights(
-            mdef, vg_idx, num_verts_dst, edges_dst, num_edges_dst, invert_vgroup, weights[EDATA]);
+            MEM_mallocN(sizeof(*weights[EDATA]) * size_t(edges_dst.size()), __func__));
+        BKE_defvert_extract_vgroup_to_edgeweights(mdef,
+                                                  vg_idx,
+                                                  num_verts_dst,
+                                                  edges_dst.data(),
+                                                  edges_dst.size(),
+                                                  invert_vgroup,
+                                                  weights[EDATA]);
       }
 
       if (data_transfer_layersmapping_generate(&lay_map,
@@ -1455,7 +1568,7 @@ bool BKE_object_data_transfer_ex(struct Depsgraph *depsgraph,
                                                mix_mode,
                                                mix_factor,
                                                weights[EDATA],
-                                               num_edges_dst,
+                                               edges_dst.size(),
                                                use_create,
                                                use_delete,
                                                fromlayers,
@@ -1476,12 +1589,10 @@ bool BKE_object_data_transfer_ex(struct Depsgraph *depsgraph,
     if (DT_DATATYPE_IS_LOOP(dtdata_type)) {
       const float(*positions_dst)[3] = BKE_mesh_vert_positions(me_dst);
       const int num_verts_dst = me_dst->totvert;
-      const MEdge *edges_dst = BKE_mesh_edges(me_dst);
-      const int num_edges_dst = me_dst->totedge;
+      const blender::Span<MEdge> edges_dst = me_dst->edges();
       const blender::OffsetIndices polys_dst = me_dst->polys();
-      const int *corner_verts_dst = me_dst->corner_verts().data();
-      const int *corner_edges_dst = me_dst->corner_edges().data();
-      const int num_loops_dst = me_dst->totloop;
+      const blender::Span<int> corner_verts_dst = me_dst->corner_verts();
+      const blender::Span<int> corner_edges_dst = me_dst->corner_edges();
       CustomData *ldata_dst = &me_dst->ldata;
 
       MeshRemapIslandsCalc island_callback = data_transfer_get_loop_islands_generator(cddata_type);
@@ -1489,7 +1600,8 @@ bool BKE_object_data_transfer_ex(struct Depsgraph *depsgraph,
       if (!geom_map_init[LDATA]) {
         const int num_loops_src = me_src->totloop;
 
-        if ((map_loop_mode == MREMAP_MODE_TOPOLOGY) && (num_loops_dst != num_loops_src)) {
+        if ((map_loop_mode == MREMAP_MODE_TOPOLOGY) &&
+            (corner_verts_dst.size() != num_loops_src)) {
           BKE_report(reports,
                      RPT_ERROR,
                      "Source and destination meshes do not have the same amount of face corners, "
@@ -1503,7 +1615,7 @@ bool BKE_object_data_transfer_ex(struct Depsgraph *depsgraph,
                      "None of the 'Edge' mappings can be used in this case");
           continue;
         }
-        if (ELEM(0, num_loops_dst, num_loops_src)) {
+        if (ELEM(0, corner_verts_dst.size(), num_loops_src)) {
           BKE_report(
               reports,
               RPT_ERROR,
@@ -1518,11 +1630,11 @@ bool BKE_object_data_transfer_ex(struct Depsgraph *depsgraph,
                                             me_dst,
                                             positions_dst,
                                             num_verts_dst,
-                                            edges_dst,
-                                            num_edges_dst,
-                                            corner_verts_dst,
-                                            corner_edges_dst,
-                                            num_loops_dst,
+                                            edges_dst.data(),
+                                            edges_dst.size(),
+                                            corner_verts_dst.data(),
+                                            corner_edges_dst.data(),
+                                            corner_verts_dst.size(),
                                             polys_dst,
                                             ldata_dst,
                                             (me_dst->flag & ME_AUTOSMOOTH) != 0,
@@ -1537,12 +1649,12 @@ bool BKE_object_data_transfer_ex(struct Depsgraph *depsgraph,
 
       if (mdef && vg_idx != -1 && !weights[LDATA]) {
         weights[LDATA] = static_cast<float *>(
-            MEM_mallocN(sizeof(*weights[LDATA]) * size_t(num_loops_dst), __func__));
+            MEM_mallocN(sizeof(*weights[LDATA]) * size_t(corner_verts_dst.size()), __func__));
         BKE_defvert_extract_vgroup_to_loopweights(mdef,
                                                   vg_idx,
                                                   num_verts_dst,
-                                                  corner_verts_dst,
-                                                  num_loops_dst,
+                                                  corner_verts_dst.data(),
+                                                  corner_verts_dst.size(),
                                                   invert_vgroup,
                                                   weights[LDATA]);
       }
@@ -1557,7 +1669,7 @@ bool BKE_object_data_transfer_ex(struct Depsgraph *depsgraph,
                                                mix_mode,
                                                mix_factor,
                                                weights[LDATA],
-                                               num_loops_dst,
+                                               corner_verts_dst.size(),
                                                use_create,
                                                use_delete,
                                                fromlayers,
@@ -1579,8 +1691,7 @@ bool BKE_object_data_transfer_ex(struct Depsgraph *depsgraph,
       const float(*positions_dst)[3] = BKE_mesh_vert_positions(me_dst);
       const int num_verts_dst = me_dst->totvert;
       const blender::OffsetIndices polys_dst = me_dst->polys();
-      const int *corner_verts_dst = me_dst->corner_verts().data();
-      const int num_loops_dst = me_dst->totloop;
+      const blender::Span<int> corner_verts_dst = me_dst->corner_verts();
 
       if (!geom_map_init[PDATA]) {
         const int num_polys_src = me_src->totpoly;
@@ -1613,7 +1724,7 @@ bool BKE_object_data_transfer_ex(struct Depsgraph *depsgraph,
                                             ray_radius,
                                             me_dst,
                                             positions_dst,
-                                            corner_verts_dst,
+                                            corner_verts_dst.data(),
                                             polys_dst,
                                             me_src,
                                             &geom_map[PDATA]);
@@ -1626,8 +1737,8 @@ bool BKE_object_data_transfer_ex(struct Depsgraph *depsgraph,
         BKE_defvert_extract_vgroup_to_polyweights(mdef,
                                                   vg_idx,
                                                   num_verts_dst,
-                                                  corner_verts_dst,
-                                                  num_loops_dst,
+                                                  corner_verts_dst.data(),
+                                                  corner_verts_dst.size(),
                                                   polys_dst,
                                                   invert_vgroup,
                                                   weights[PDATA]);

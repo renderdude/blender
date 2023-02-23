@@ -420,15 +420,13 @@ void BKE_remesh_reproject_vertex_paint(Mesh *target, const Mesh *source)
                                       &source_lmap_mem,
                                       source->polys(),
                                       source->corner_verts().data(),
-                                      source->totvert,
-                                      source->totloop);
+                                      source->totvert);
 
         BKE_mesh_vert_loop_map_create(&target_lmap,
                                       &target_lmap_mem,
                                       target->polys(),
                                       target->corner_verts().data(),
-                                      target->totvert,
-                                      target->totloop);
+                                      target->totvert);
       }
 
       blender::threading::parallel_for(

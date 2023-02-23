@@ -12,6 +12,7 @@
 #include "BLI_utildefines.h"
 
 #include "BLI_math.h"
+#include "BLI_span.hh"
 
 #include "BLT_translation.h"
 
@@ -45,6 +46,10 @@
 
 #include "DEG_depsgraph.h"
 #include "DEG_depsgraph_query.h"
+
+#include "GEO_mesh_merge_by_distance.hh"
+
+using namespace blender;
 
 static void initData(ModifierData *md)
 {
@@ -277,9 +282,9 @@ static void mesh_merge_transform(Mesh *result,
   int *index_orig;
   int i;
   MEdge *me;
-  float(*result_positions)[3] = BKE_mesh_vert_positions_for_write(result);
-  MEdge *result_edges = BKE_mesh_edges_for_write(result);
   const blender::Span<int> cap_poly_offsets = cap_mesh->poly_offsets();
+  float(*result_positions)[3] = BKE_mesh_vert_positions_for_write(result);
+  blender::MutableSpan<MEdge> result_edges = result->edges_for_write();
   blender::MutableSpan<int> result_poly_offsets = result->poly_offsets_for_write();
   blender::MutableSpan<int> result_corner_verts = result->corner_verts_for_write();
   blender::MutableSpan<int> result_corner_edges = result->corner_edges_for_write();
@@ -309,7 +314,7 @@ static void mesh_merge_transform(Mesh *result,
   }
 
   /* adjust cap edge vertex indices */
-  me = result_edges + cap_edges_index;
+  me = &result_edges[cap_edges_index];
   for (i = 0; i < cap_nedges; i++, me++) {
     me->v1 += cap_verts_index;
     me->v2 += cap_verts_index;
@@ -426,7 +431,6 @@ static Mesh *arrayModifier_doArray(ArrayModifierData *amd,
   /* Build up offset array, accumulating all settings options. */
 
   unit_m4(offset);
-  const MEdge *src_edges = BKE_mesh_edges(mesh);
 
   if (amd->offset_type & MOD_ARR_OFF_CONST) {
     add_v3_v3(offset[3], amd->offset);
@@ -533,7 +537,7 @@ static Mesh *arrayModifier_doArray(ArrayModifierData *amd,
   result = BKE_mesh_new_nomain_from_template(
       mesh, result_nverts, result_nedges, 0, result_nloops, result_npolys);
   float(*result_positions)[3] = BKE_mesh_vert_positions_for_write(result);
-  MEdge *result_edges = BKE_mesh_edges_for_write(result);
+  blender::MutableSpan<MEdge> result_edges = result->edges_for_write();
   blender::MutableSpan<int> result_poly_offsets = result->poly_offsets_for_write();
   blender::MutableSpan<int> result_corner_verts = result->corner_verts_for_write();
   blender::MutableSpan<int> result_corner_edges = result->corner_edges_for_write();
@@ -550,11 +554,6 @@ static Mesh *arrayModifier_doArray(ArrayModifierData *amd,
   CustomData_copy_data(&mesh->ldata, &result->ldata, 0, 0, chunk_nloops);
   CustomData_copy_data(&mesh->pdata, &result->pdata, 0, 0, chunk_npolys);
 
-  /* Subdivision-surface for eg won't have mesh data in the custom-data arrays.
-   * Now add #position/#MEdge layers. */
-  if (!CustomData_has_layer(&mesh->edata, CD_MEDGE)) {
-    memcpy(result_edges, src_edges, sizeof(MEdge) * mesh->totedge);
-  }
   result_poly_offsets.take_front(mesh->totpoly).copy_from(mesh->poly_offsets().drop_back(1));
 
   /* Remember first chunk, in case of cap merge */
@@ -596,7 +595,7 @@ static Mesh *arrayModifier_doArray(ArrayModifierData *amd,
     }
 
     /* adjust edge vertex indices */
-    me = result_edges + c * chunk_nedges;
+    me = &result_edges[c * chunk_nedges];
     for (i = 0; i < chunk_nedges; i++, me++) {
       me->v1 += c * chunk_nverts;
       me->v2 += c * chunk_nverts;
@@ -760,7 +759,7 @@ static Mesh *arrayModifier_doArray(ArrayModifierData *amd,
       if (new_i != -1) {
         /* We have to follow chains of doubles
          * (merge start/end especially is likely to create some),
-         * those are not supported at all by BKE_mesh_merge_verts! */
+         * those are not supported at all by `geometry::mesh_merge_verts`! */
         while (!ELEM(full_doubles_map[new_i], -1, new_i)) {
           new_i = full_doubles_map[new_i];
         }
@@ -774,8 +773,10 @@ static Mesh *arrayModifier_doArray(ArrayModifierData *amd,
       }
     }
     if (tot_doubles > 0) {
-      result = BKE_mesh_merge_verts(
-          result, full_doubles_map, tot_doubles, MESH_MERGE_VERTS_DUMP_IF_EQUAL);
+      Mesh *tmp = result;
+      result = geometry::mesh_merge_verts(
+          *tmp, MutableSpan<int>{full_doubles_map, result->totvert}, tot_doubles);
+      BKE_id_free(NULL, tmp);
     }
     MEM_freeN(full_doubles_map);
   }

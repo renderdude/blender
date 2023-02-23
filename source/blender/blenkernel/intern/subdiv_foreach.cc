@@ -69,10 +69,10 @@ BLI_INLINE int ptex_face_resolution_get(const IndexRange poly, int resolution)
 
 struct SubdivForeachTaskContext {
   const Mesh *coarse_mesh;
-  const MEdge *coarse_edges;
+  blender::Span<MEdge> coarse_edges;
   blender::OffsetIndices<int> coarse_polys;
-  const int *coarse_corner_verts;
-  const int *coarse_corner_edges;
+  blender::Span<int> coarse_corner_verts;
+  blender::Span<int> coarse_corner_edges;
   const SubdivToMeshSettings *settings;
   /* Callbacks. */
   const SubdivForeachContext *foreach_context;
@@ -1809,10 +1809,10 @@ bool BKE_subdiv_foreach_subdiv_geometry(Subdiv *subdiv,
 {
   SubdivForeachTaskContext ctx = {0};
   ctx.coarse_mesh = coarse_mesh;
-  ctx.coarse_edges = BKE_mesh_edges(coarse_mesh);
+  ctx.coarse_edges = coarse_mesh->edges();
   ctx.coarse_polys = coarse_mesh->polys();
-  ctx.coarse_corner_verts = coarse_mesh->corner_verts().data();
-  ctx.coarse_corner_edges = coarse_mesh->corner_edges().data();
+  ctx.coarse_corner_verts = coarse_mesh->corner_verts();
+  ctx.coarse_corner_edges = coarse_mesh->corner_edges();
   ctx.settings = mesh_settings;
   ctx.foreach_context = context;
   subdiv_foreach_ctx_init(subdiv, &ctx);

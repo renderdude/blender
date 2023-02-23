@@ -1227,45 +1227,56 @@ static void sculpt_gesture_trim_geometry_generate(SculptGestureContext *sgcontex
   /* Write the front face triangle indices. */
   blender::MutableSpan<int> poly_offsets = trim_operation->mesh->poly_offsets_for_write();
   blender::MutableSpan<int> corner_verts = trim_operation->mesh->corner_verts_for_write();
-  poly_offsets.fill(3);
-  blender::offset_indices::accumulate_counts_to_offsets(poly_offsets);
-  int corner_i = 0;
-  for (int i = 0; i < tot_tris_face; i++, corner_i += 3) {
-    corner_verts[corner_i + 0] = r_tris[i][0];
-    corner_verts[corner_i + 1] = r_tris[i][1];
-    corner_verts[corner_i + 2] = r_tris[i][2];
+  int poly_index = 0;
+  int loop_index = 0;
+  for (int i = 0; i < tot_tris_face; i++) {
+    poly_offsets[poly_index] = loop_index;
+    corner_verts[loop_index + 0] = r_tris[i][0];
+    corner_verts[loop_index + 1] = r_tris[i][1];
+    corner_verts[loop_index + 2] = r_tris[i][2];
+    poly_index++;
+    loop_index += 3;
   }
 
   /* Write the back face triangle indices. */
-  for (int i = 0; i < tot_tris_face; i++, corner_i += 3) {
-    corner_verts[corner_i + 0] = r_tris[i][0] + tot_screen_points;
-    corner_verts[corner_i + 1] = r_tris[i][1] + tot_screen_points;
-    corner_verts[corner_i + 2] = r_tris[i][2] + tot_screen_points;
+  for (int i = 0; i < tot_tris_face; i++) {
+    poly_offsets[poly_index] = loop_index;
+    corner_verts[loop_index + 0] = r_tris[i][0] + tot_screen_points;
+    corner_verts[loop_index + 1] = r_tris[i][1] + tot_screen_points;
+    corner_verts[loop_index + 2] = r_tris[i][2] + tot_screen_points;
+    poly_index++;
+    loop_index += 3;
   }
 
   MEM_freeN(r_tris);
 
   /* Write the indices for the lateral triangles. */
-  for (int i = 0; i < tot_screen_points; i++, corner_i += 3) {
+  for (int i = 0; i < tot_screen_points; i++) {
+    poly_offsets[poly_index] = loop_index;
     int current_index = i;
     int next_index = current_index + 1;
     if (next_index >= tot_screen_points) {
       next_index = 0;
     }
-    corner_verts[corner_i + 0] = next_index + tot_screen_points;
-    corner_verts[corner_i + 1] = next_index;
-    corner_verts[corner_i + 2] = current_index;
+    corner_verts[loop_index + 0] = next_index + tot_screen_points;
+    corner_verts[loop_index + 1] = next_index;
+    corner_verts[loop_index + 2] = current_index;
+    poly_index++;
+    loop_index += 3;
   }
 
-  for (int i = 0; i < tot_screen_points; i++, corner_i += 3) {
+  for (int i = 0; i < tot_screen_points; i++) {
+    poly_offsets[poly_index] = loop_index;
     int current_index = i;
     int next_index = current_index + 1;
     if (next_index >= tot_screen_points) {
       next_index = 0;
     }
-    corner_verts[corner_i + 0] = current_index;
-    corner_verts[corner_i + 1] = current_index + tot_screen_points;
-    corner_verts[corner_i + 2] = next_index + tot_screen_points;
+    corner_verts[loop_index + 0] = current_index;
+    corner_verts[loop_index + 1] = current_index + tot_screen_points;
+    corner_verts[loop_index + 2] = next_index + tot_screen_points;
+    poly_index++;
+    loop_index += 3;
   }
 
   BKE_mesh_calc_edges(trim_operation->mesh, false, false);

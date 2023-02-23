@@ -74,7 +74,7 @@ struct LaplacianSystem {
 
   struct HeatWeighting {
     const MLoopTri *mlooptri;
-    const int *corner_verts; /* needed to find vertices by index */
+    blender::Span<int> corner_verts; /* needed to find vertices by index */
     int verts_num;
     int tris_num;
     float (*verts)[3];        /* vertex coordinates */
@@ -205,7 +205,7 @@ static LaplacianSystem *laplacian_system_construct_begin(int verts_num, int face
 {
   LaplacianSystem *sys;
 
-  sys = MEM_cnew<LaplacianSystem>(__func__);
+  sys = MEM_new<LaplacianSystem>(__func__);
 
   sys->verts = static_cast<float **>(
       MEM_callocN(sizeof(float *) * verts_num, "LaplacianSystemVerts"));
@@ -323,7 +323,7 @@ static void laplacian_system_delete(LaplacianSystem *sys)
   }
 
   EIG_linear_solver_delete(sys->context);
-  MEM_freeN(sys);
+  MEM_delete(sys);
 }
 
 void laplacian_begin_solve(LaplacianSystem *sys, int index)
@@ -382,7 +382,7 @@ static void bvh_callback(void *userdata, int index, const BVHTreeRay *ray, BVHTr
 {
   BVHCallbackUserData *data = (struct BVHCallbackUserData *)userdata;
   const MLoopTri *lt = &data->sys->heat.mlooptri[index];
-  const int *corner_verts = data->sys->heat.corner_verts;
+  const blender::Span<int> corner_verts = data->sys->heat.corner_verts;
   float(*verts)[3] = data->sys->heat.verts;
   const float *vtri_co[3];
   float dist_test;
@@ -414,7 +414,7 @@ static void bvh_callback(void *userdata, int index, const BVHTreeRay *ray, BVHTr
 static void heat_ray_tree_create(LaplacianSystem *sys)
 {
   const MLoopTri *looptri = sys->heat.mlooptri;
-  const int *corner_verts = sys->heat.corner_verts;
+  const blender::Span<int> corner_verts = sys->heat.corner_verts;
   float(*verts)[3] = sys->heat.verts;
   int tris_num = sys->heat.tris_num;
   int verts_num = sys->heat.verts_num;
@@ -581,7 +581,7 @@ static void heat_calc_vnormals(LaplacianSystem *sys)
 static void heat_laplacian_create(LaplacianSystem *sys)
 {
   const MLoopTri *mlooptri = sys->heat.mlooptri, *lt;
-  const int *corner_verts = sys->heat.corner_verts;
+  const blender::Span<int> corner_verts = sys->heat.corner_verts;
   int tris_num = sys->heat.tris_num;
   int verts_num = sys->heat.verts_num;
   int a;
@@ -709,7 +709,7 @@ void heat_bone_weighting(Object *ob,
       corner_verts.data(), polys.data(), vert_positions, me->totloop, me->totpoly, mlooptri);
 
   sys->heat.mlooptri = mlooptri;
-  sys->heat.corner_verts = corner_verts.data();
+  sys->heat.corner_verts = corner_verts;
   sys->heat.verts_num = me->totvert;
   sys->heat.verts = verts;
   sys->heat.root = root;
@@ -927,7 +927,7 @@ typedef struct MeshDeformBind {
   /* avoid DM function calls during intersections */
   struct {
     blender::OffsetIndices<int> polys;
-    const int *corner_verts;
+    blender::Span<int> corner_verts;
     const MLoopTri *looptri;
     const float (*poly_nors)[3];
   } cagemesh_cache;
@@ -958,7 +958,7 @@ static void harmonic_ray_callback(void *userdata,
 {
   MeshRayCallbackData *data = static_cast<MeshRayCallbackData *>(userdata);
   MeshDeformBind *mdb = data->mdb;
-  const int *corner_verts = mdb->cagemesh_cache.corner_verts;
+  const blender::Span<int> corner_verts = mdb->cagemesh_cache.corner_verts;
   const MLoopTri *looptri = mdb->cagemesh_cache.looptri, *lt;
   const float(*poly_nors)[3] = mdb->cagemesh_cache.poly_nors;
   MeshDeformIsect *isec = data->isec;
@@ -1033,7 +1033,7 @@ static MDefBoundIsect *meshdeform_ray_tree_intersect(MeshDeformBind *mdb,
                               harmonic_ray_callback,
                               &data,
                               BVH_RAYCAST_WATERTIGHT) != -1) {
-    const int *corner_verts = mdb->cagemesh_cache.corner_verts;
+    const blender::Span<int> corner_verts = mdb->cagemesh_cache.corner_verts;
     const MLoopTri *lt = &mdb->cagemesh_cache.looptri[hit.index];
     const blender::IndexRange poly = mdb->cagemesh_cache.polys[lt->poly];
     const float(*cagecos)[3] = mdb->cagecos;
@@ -1226,8 +1226,8 @@ static float meshdeform_boundary_phi(const MeshDeformBind *mdb,
                                      const MDefBoundIsect *isect,
                                      int cagevert)
 {
-  const int *corner_verts = mdb->cagemesh_cache.corner_verts;
   const blender::IndexRange poly = mdb->cagemesh_cache.polys[isect->poly_index];
+  const blender::Span<int> corner_verts = mdb->cagemesh_cache.corner_verts;
 
   for (int i = 0; i < poly.size(); i++) {
     if (corner_verts[poly[i]] == cagevert) {
@@ -1631,7 +1631,7 @@ static void harmonic_coordinates_bind(MeshDeformModifierData *mmd, MeshDeformBin
   {
     Mesh *me = mdb->cagemesh;
     mdb->cagemesh_cache.polys = me->polys();
-    mdb->cagemesh_cache.corner_verts = me->corner_verts().data();
+    mdb->cagemesh_cache.corner_verts = me->corner_verts();
     mdb->cagemesh_cache.looptri = BKE_mesh_runtime_looptri_ensure(me);
     mdb->cagemesh_cache.poly_nors = BKE_mesh_poly_normals_ensure(me);
   }

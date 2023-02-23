@@ -203,7 +203,7 @@ class MeshFairingContext : public FairingContext {
     corner_verts_ = mesh->corner_verts();
     corner_edges_ = mesh->corner_edges();
     BKE_mesh_vert_loop_map_create(
-        &vlmap_, &vlmap_mem_, polys_, corner_verts_.data(), mesh->totvert, mesh->totloop);
+        &vlmap_, &vlmap_mem_, polys_, corner_verts_.data(), mesh->totvert);
 
     /* Deformation coords. */
     co_.reserve(mesh->totvert);

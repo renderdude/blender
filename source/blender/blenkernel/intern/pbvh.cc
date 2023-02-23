@@ -939,8 +939,7 @@ void BKE_pbvh_build_grids(PBVH *pbvh,
   /* Find maximum number of grids per face. */
   int max_grids = 1;
   const blender::OffsetIndices polys = me->polys();
-
-  for (int i = 0; i < me->totpoly; i++) {
+  for (const int i : polys.index_range()) {
     max_grids = max_ii(max_grids, polys[i].size());
   }
 
@@ -956,7 +955,7 @@ void BKE_pbvh_build_grids(PBVH *pbvh,
   pbvh->pdata = &me->pdata;
 
   pbvh->polys = polys;
-  pbvh->corner_verts = BKE_mesh_corner_verts(me);
+  pbvh->corner_verts = me->corner_verts().data();
 
   /* We also need the base mesh for PBVH draw. */
   pbvh->mesh = me;
@@ -3870,7 +3869,7 @@ void BKE_pbvh_sync_visibility_from_verts(PBVH *pbvh, Mesh *mesh)
           &mesh->pdata, CD_PROP_BOOL, ".hide_poly", mesh->totpoly));
 
       bool delete_hide_poly = true;
-      for (int face_index = 0; face_index < mesh->totpoly; face_index++) {
+      for (const int face_index : polys.index_range()) {
         const blender::IndexRange poly = polys[face_index];
         bool hidden = false;
 

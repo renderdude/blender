@@ -129,8 +129,7 @@ void BKE_mesh_vert_poly_map_create(MeshElemMap **r_map,
                                    int **r_mem,
                                    blender::OffsetIndices<int> polys,
                                    const int *corner_verts,
-                                   int totvert,
-                                   int totloop);
+                                   int totvert);
 /**
  * Generates a map where the key is the vertex and the value
  * is a list of loops that use that vertex as a corner.
@@ -140,8 +139,7 @@ void BKE_mesh_vert_loop_map_create(MeshElemMap **r_map,
                                    int **r_mem,
                                    blender::OffsetIndices<int> polys,
                                    const int *corner_verts,
-                                   int totvert,
-                                   int totloop);
+                                   int totvert);
 
 #endif
 
@@ -268,7 +266,6 @@ typedef bool (*MeshRemapIslandsCalc)(const float (*vert_positions)[3],
                                      const struct MEdge *edges,
                                      int totedge,
                                      blender::OffsetIndices<int> polys,
-                                     int totpoly,
                                      const int *corner_verts,
                                      const int *corner_edges,
                                      int totloop,
@@ -286,7 +283,6 @@ bool BKE_mesh_calc_islands_loop_poly_edgeseam(const float (*vert_positions)[3],
                                               const struct MEdge *edges,
                                               int totedge,
                                               blender::OffsetIndices<int> polys,
-                                              int totpoly,
                                               const int *corner_verts,
                                               const int *corner_edges,
                                               int totloop,

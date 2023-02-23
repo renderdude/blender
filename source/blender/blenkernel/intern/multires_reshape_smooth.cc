@@ -849,19 +849,18 @@ static void geometry_init_loose_information(MultiresReshapeSmoothContext *reshap
   const MultiresReshapeContext *reshape_context = reshape_smooth_context->reshape_context;
   const Mesh *base_mesh = reshape_context->base_mesh;
   const blender::OffsetIndices base_polys = reshape_context->base_polys;
-  const int *base_corner_edges = reshape_context->base_corner_edges;
+  const blender::Span<int> base_corner_edges = reshape_context->base_corner_edges;
 
   reshape_smooth_context->non_loose_base_edge_map = BLI_BITMAP_NEW(base_mesh->totedge,
                                                                    "non_loose_base_edge_map");
 
   int num_used_edges = 0;
-  for (int poly_index = 0; poly_index < base_mesh->totpoly; ++poly_index) {
-    for (const int corner : base_polys[poly_index]) {
-      const int edge_i = base_corner_edges[corner];
-      if (!BLI_BITMAP_TEST_BOOL(reshape_smooth_context->non_loose_base_edge_map, edge_i)) {
-        BLI_BITMAP_ENABLE(reshape_smooth_context->non_loose_base_edge_map, edge_i);
+  for (const int poly_index : base_polys.index_range()) {
+    for (const int edge : base_corner_edges.slice(base_polys[poly_index])) {
+      if (!BLI_BITMAP_TEST_BOOL(reshape_smooth_context->non_loose_base_edge_map, edge)) {
+        BLI_BITMAP_ENABLE(reshape_smooth_context->non_loose_base_edge_map, edge);
 
-        const float crease = get_effective_crease(reshape_smooth_context, edge_i);
+        const float crease = get_effective_crease(reshape_smooth_context, edge);
         if (crease > 0.0f) {
           ++num_used_edges;
         }

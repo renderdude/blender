@@ -193,7 +193,7 @@ static ShrinkwrapBoundaryData *shrinkwrap_build_boundary_data(Mesh *mesh)
 {
   using namespace blender;
   const float(*positions)[3] = BKE_mesh_vert_positions(mesh);
-  const MEdge *medge = BKE_mesh_edges(mesh);
+  const blender::Span<MEdge> edges = mesh->edges();
   const Span<int> corner_verts = mesh->corner_verts();
   const Span<int> corner_edges = mesh->corner_edges();
 
@@ -243,12 +243,12 @@ static ShrinkwrapBoundaryData *shrinkwrap_build_boundary_data(Mesh *mesh)
                                                     "ShrinkwrapBoundaryData::looptri_is_boundary");
 
   for (int i = 0; i < totlooptri; i++) {
-    int edges[3];
+    int real_edges[3];
     BKE_mesh_looptri_get_real_edges(
-        medge, corner_verts.data(), corner_edges.data(), &mlooptri[i], edges);
+        edges.data(), corner_verts.data(), corner_edges.data(), &mlooptri[i], real_edges);
 
     for (int j = 0; j < 3; j++) {
-      if (edges[j] >= 0 && edge_mode[edges[j]]) {
+      if (real_edges[j] >= 0 && edge_mode[real_edges[j]]) {
         BLI_BITMAP_ENABLE(looptri_has_boundary, i);
         break;
       }
@@ -263,7 +263,7 @@ static ShrinkwrapBoundaryData *shrinkwrap_build_boundary_data(Mesh *mesh)
 
   for (int i = 0; i < mesh->totedge; i++) {
     if (edge_mode[i]) {
-      const MEdge *edge = &medge[i];
+      const MEdge *edge = &edges[i];
 
       vert_boundary_id[edge->v1] = 1;
       vert_boundary_id[edge->v2] = 1;
@@ -288,7 +288,7 @@ static ShrinkwrapBoundaryData *shrinkwrap_build_boundary_data(Mesh *mesh)
 
   for (int i = 0; i < mesh->totedge; i++) {
     if (edge_mode[i]) {
-      const MEdge *edge = &medge[i];
+      const MEdge *edge = &edges[i];
 
       float dir[3];
       sub_v3_v3v3(dir, positions[edge->v2], positions[edge->v1]);

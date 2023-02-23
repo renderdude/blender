@@ -73,13 +73,10 @@ void ED_draw_object_facemap(Depsgraph *depsgraph,
     const blender::OffsetIndices polys = me->polys();
     const blender::Span<int> corner_verts = me->corner_verts();
 
-    int mpoly_len = me->totpoly;
-    int mloop_len = me->totloop;
-
     facemap_data = static_cast<const int *>(CustomData_get_layer(&me->pdata, CD_FACEMAP));
 
     /* Make a batch and free it each time for now. */
-    const int looptris_len = poly_to_tri_count(mpoly_len, mloop_len);
+    const int looptris_len = poly_to_tri_count(polys.ranges_num(), corner_verts.size());
     const int vbo_len_capacity = looptris_len * 3;
     int vbo_len_used = 0;
 

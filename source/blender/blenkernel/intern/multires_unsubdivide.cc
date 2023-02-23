@@ -964,7 +964,7 @@ static void multires_unsubdivide_prepare_original_bmesh_for_extract(
  * necessary.
  */
 static bool multires_unsubdivide_flip_grid_x_axis(const blender::OffsetIndices<int> polys,
-                                                  const int *corner_verts,
+                                                  const blender::Span<int> corner_verts,
                                                   int poly_index,
                                                   int loop,
                                                   int v_x)
@@ -1080,11 +1080,8 @@ static void multires_unsubdivide_extract_grids(MultiresUnsubdivideContext *conte
 
           /* Check the orientation of the loops in case that is needed to flip the x and y axis
            * when extracting the grid. */
-          const bool flip_grid = multires_unsubdivide_flip_grid_x_axis(polys,
-                                                                       corner_verts.data(),
-                                                                       base_mesh_face_index,
-                                                                       base_mesh_loop_index,
-                                                                       corner_x_index);
+          const bool flip_grid = multires_unsubdivide_flip_grid_x_axis(
+              polys, corner_verts, base_mesh_face_index, base_mesh_loop_index, corner_x_index);
 
           /* Extract the grid for that loop. */
           context->base_mesh_grids[base_mesh_loop_index].grid_index = base_mesh_loop_index;

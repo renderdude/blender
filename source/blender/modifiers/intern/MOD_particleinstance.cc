@@ -318,7 +318,7 @@ static Mesh *modifyMesh(ModifierData *md, const ModifierEvalContext *ctx, Mesh *
   const blender::Span<int> orig_corner_verts = mesh->corner_verts();
   const blender::Span<int> orig_corner_edges = mesh->corner_edges();
   float(*positions)[3] = BKE_mesh_vert_positions_for_write(result);
-  MEdge *edges = BKE_mesh_edges_for_write(result);
+  blender::MutableSpan<MEdge> edges = result->edges_for_write();
   blender::MutableSpan<int> poly_offsets = result->poly_offsets_for_write();
   blender::MutableSpan<int> corner_verts = result->corner_verts_for_write();
   blender::MutableSpan<int> corner_edges = result->corner_edges_for_write();
