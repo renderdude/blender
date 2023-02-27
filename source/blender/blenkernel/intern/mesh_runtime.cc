@@ -124,7 +124,9 @@ const blender::bke::LooseEdgeCache &Mesh::loose_edges() const
         count--;
       }
     }
-
+    if (count == 0) {
+      loose_edges.clear_and_shrink();
+    }
     r_data.count = count;
   });
 
@@ -135,7 +137,7 @@ void Mesh::loose_edges_tag_none() const
 {
   using namespace blender::bke;
   this->runtime->loose_edges_cache.ensure([&](LooseEdgeCache &r_data) {
-    r_data.is_loose_bits.resize(0);
+    r_data.is_loose_bits.clear_and_shrink();
     r_data.count = 0;
   });
 }
@@ -252,7 +254,7 @@ void BKE_mesh_tag_edges_split(struct Mesh *mesh)
   }
 }
 
-void BKE_mesh_tag_coords_changed(Mesh *mesh)
+void BKE_mesh_tag_positions_changed(Mesh *mesh)
 {
   BKE_mesh_normals_tag_dirty(mesh);
   free_bvh_cache(*mesh->runtime);
@@ -260,7 +262,7 @@ void BKE_mesh_tag_coords_changed(Mesh *mesh)
   mesh->runtime->bounds_cache.tag_dirty();
 }
 
-void BKE_mesh_tag_coords_changed_uniformly(Mesh *mesh)
+void BKE_mesh_tag_positions_changed_uniformly(Mesh *mesh)
 {
   /* The normals and triangulation didn't change, since all verts moved by the same amount. */
   free_bvh_cache(*mesh->runtime);
@@ -326,6 +328,8 @@ bool BKE_mesh_runtime_is_valid(Mesh *me_eval)
   MutableSpan<float3> positions = me_eval->vert_positions_for_write();
   MutableSpan<MEdge> edges = me_eval->edges_for_write();
   MutableSpan<int> polys = me_eval->poly_offsets_for_write();
+  MutableSpan<int> corner_verts = me_eval->corner_verts_for_write();
+  MutableSpan<int> corner_edges = me_eval->corner_verts_for_write();
 
   is_valid &= BKE_mesh_validate_all_customdata(
       &me_eval->vdata,
@@ -349,9 +353,9 @@ bool BKE_mesh_runtime_is_valid(Mesh *me_eval)
                                        static_cast<MFace *>(CustomData_get_layer_for_write(
                                            &me_eval->fdata, CD_MFACE, me_eval->totface)),
                                        me_eval->totface,
-                                       me_eval->corner_verts_for_write().data(),
-                                       me_eval->corner_edges_for_write().data(),
-                                       me_eval->totloop,
+                                       corner_verts.data(),
+                                       corner_edges.data(),
+                                       corner_verts.size(),
                                        polys.data(),
                                        me_eval->totpoly,
                                        me_eval->deform_verts_for_write().data(),

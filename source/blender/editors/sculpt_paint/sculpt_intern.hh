@@ -1903,13 +1903,14 @@ void SCULPT_ensure_valid_pivot(const Object *ob, Scene *scene);
 /* Ensures vertex island keys exist and are valid. */
 void SCULPT_topology_islands_ensure(Object *ob);
 
-/* Mark vertex island keys as invalid.  Call when adding or hiding
- * geometry.
+/**
+ * Mark vertex island keys as invalid.
+ * Call when adding or hiding geometry.
  */
 void SCULPT_topology_islands_invalidate(struct SculptSession *ss);
 
-/* Get vertex island key.*/
-int SCULPT_vertex_island_get(struct SculptSession *ss, PBVHVertRef vertex);
+/** Get vertex island key. */
+int SCULPT_vertex_island_get(SculptSession *ss, PBVHVertRef vertex);
 
 /** \} */
 

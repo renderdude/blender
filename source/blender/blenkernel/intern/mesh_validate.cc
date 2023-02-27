@@ -304,8 +304,8 @@ bool BKE_mesh_validate_arrays(Mesh *mesh,
   }
 
   const float(*vert_normals)[3] = nullptr;
-  if (!BKE_mesh_vertex_normals_are_dirty(mesh)) {
-    vert_normals = BKE_mesh_vertex_normals_ensure(mesh);
+  if (!BKE_mesh_vert_normals_are_dirty(mesh)) {
+    vert_normals = BKE_mesh_vert_normals_ensure(mesh);
   }
 
   for (i = 0; i < totvert; i++) {
@@ -1082,6 +1082,8 @@ bool BKE_mesh_validate(Mesh *me, const bool do_verbose, const bool cddata_check_
   MutableSpan<float3> positions = me->vert_positions_for_write();
   MutableSpan<MEdge> edges = me->edges_for_write();
   MutableSpan<int> poly_offsets = me->poly_offsets_for_write();
+  MutableSpan<int> corner_verts = me->corner_verts_for_write();
+  MutableSpan<int> corner_edges = me->corner_edges_for_write();
 
   BKE_mesh_validate_arrays(
       me,
@@ -1091,9 +1093,9 @@ bool BKE_mesh_validate(Mesh *me, const bool do_verbose, const bool cddata_check_
       edges.size(),
       (MFace *)CustomData_get_layer_for_write(&me->fdata, CD_MFACE, me->totface),
       me->totface,
-      me->corner_verts_for_write().data(),
-      me->corner_edges_for_write().data(),
-      me->totloop,
+      corner_verts.data(),
+      corner_edges.data(),
+      corner_verts.size(),
       poly_offsets.data(),
       me->totpoly,
       me->deform_verts_for_write().data(),
@@ -1134,6 +1136,8 @@ bool BKE_mesh_is_valid(Mesh *me)
   MutableSpan<float3> positions = me->vert_positions_for_write();
   MutableSpan<MEdge> edges = me->edges_for_write();
   MutableSpan<int> poly_offsets = me->poly_offsets_for_write();
+  MutableSpan<int> corner_verts = me->corner_verts_for_write();
+  MutableSpan<int> corner_edges = me->corner_edges_for_write();
 
   is_valid &= BKE_mesh_validate_arrays(
       me,
@@ -1143,9 +1147,9 @@ bool BKE_mesh_is_valid(Mesh *me)
       edges.size(),
       (MFace *)CustomData_get_layer_for_write(&me->fdata, CD_MFACE, me->totface),
       me->totface,
-      me->corner_verts_for_write().data(),
-      me->corner_edges_for_write().data(),
-      me->totloop,
+      corner_verts.data(),
+      corner_edges.data(),
+      corner_verts.size(),
       poly_offsets.data(),
       me->totpoly,
       me->deform_verts_for_write().data(),

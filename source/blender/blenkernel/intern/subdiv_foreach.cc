@@ -5,7 +5,7 @@
  * \ingroup bke
  */
 
-#include "BKE_subdiv_foreach.h"
+#include "BKE_subdiv_foreach.hh"
 
 #include "atomic_ops.h"
 
@@ -20,7 +20,7 @@
 #include "BKE_key.h"
 #include "BKE_mesh.h"
 #include "BKE_subdiv.h"
-#include "BKE_subdiv_mesh.h"
+#include "BKE_subdiv_mesh.hh"
 
 #include "MEM_guardedalloc.h"
 
@@ -170,15 +170,6 @@ static void subdiv_foreach_ctx_count(SubdivForeachTaskContext *ctx)
   for (int poly_index = 0; poly_index < coarse_mesh->totpoly; poly_index++) {
     const IndexRange coarse_poly = ctx->coarse_polys[poly_index];
     const int num_ptex_faces_per_poly = num_ptex_faces_per_poly_get(coarse_poly);
-    for (int corner = 0; corner < coarse_poly.size(); corner++) {
-      const int coarse_edge = ctx->coarse_corner_edges[coarse_poly[corner]];
-      const bool is_edge_used = BLI_BITMAP_TEST_BOOL(ctx->coarse_edges_used_map, coarse_edge);
-      /* Edges which aren't counted yet. */
-      if (!is_edge_used) {
-        BLI_BITMAP_ENABLE(ctx->coarse_edges_used_map, coarse_edge);
-        ctx->num_subdiv_vertices += num_subdiv_vertices_per_coarse_edge;
-      }
-    }
     /* Inner vertices of polygon. */
     if (num_ptex_faces_per_poly == 1) {
       ctx->num_subdiv_vertices += num_inner_vertices_per_quad;
@@ -200,12 +191,10 @@ static void subdiv_foreach_ctx_count(SubdivForeachTaskContext *ctx)
                                   num_polys_per_ptex_get(no_quad_patch_resolution);
     }
   }
-  /* Calculate extra vertices created by loose edges. */
-  for (int edge_index = 0; edge_index < coarse_mesh->totedge; edge_index++) {
-    if (!BLI_BITMAP_TEST_BOOL(ctx->coarse_edges_used_map, edge_index)) {
-      ctx->num_subdiv_vertices += num_subdiv_vertices_per_coarse_edge;
-    }
-  }
+
+  /* Add vertices used by outer edges on subdivided faces and loose edges. */
+  ctx->num_subdiv_vertices += num_subdiv_vertices_per_coarse_edge * coarse_mesh->totedge;
+
   ctx->num_subdiv_loops = ctx->num_subdiv_polygons * 4;
 }
 
@@ -273,8 +262,6 @@ static void subdiv_foreach_ctx_init(Subdiv *subdiv, SubdivForeachTaskContext *ct
   subdiv_foreach_ctx_init_offsets(ctx);
   /* Calculate number of geometry in the result subdivision mesh. */
   subdiv_foreach_ctx_count(ctx);
-  /* Re-set maps which were used at this step. */
-  BLI_bitmap_set_all(ctx->coarse_edges_used_map, false, coarse_mesh->totedge);
   ctx->face_ptex_offset = BKE_subdiv_face_ptex_offset_get(subdiv);
 }
 

@@ -570,7 +570,7 @@ void BKE_mesh_remap_calc_verts_from_mesh(const int mode,
       const blender::OffsetIndices polys_src = me_src->polys();
       const blender::Span<int> corner_verts_src = me_src->corner_verts();
       float(*vcos_src)[3] = BKE_mesh_vert_coords_alloc(me_src, nullptr);
-      const float(*vert_normals_dst)[3] = BKE_mesh_vertex_normals_ensure(me_dst);
+      const float(*vert_normals_dst)[3] = BKE_mesh_vert_normals_ensure(me_dst);
 
       size_t tmp_buff_size = MREMAP_DEFAULT_BUFSIZE;
       float(*vcos)[3] = static_cast<float(*)[3]>(
@@ -936,7 +936,7 @@ void BKE_mesh_remap_calc_edges_from_mesh(const int mode,
 
       BKE_bvhtree_from_mesh_get(&treedata, me_src, BVHTREE_FROM_EDGES, 2);
 
-      const float(*vert_normals_dst)[3] = BKE_mesh_vertex_normals_ensure(me_dst);
+      const float(*vert_normals_dst)[3] = BKE_mesh_vert_normals_ensure(me_dst);
 
       for (i = 0; i < numedges_dst; i++) {
         /* For each dst edge, we sample some rays from it (interpolated from its vertices)
@@ -1359,7 +1359,7 @@ void BKE_mesh_remap_calc_loops_from_mesh(const int mode,
           const bool *sharp_faces = static_cast<const bool *>(
               CustomData_get_layer_named(&mesh_dst->pdata, CD_PROP_BOOL, "sharp_face"));
           BKE_mesh_normals_loop_split(vert_positions_dst,
-                                      BKE_mesh_vertex_normals_ensure(mesh_dst),
+                                      BKE_mesh_vert_normals_ensure(mesh_dst),
                                       numverts_dst,
                                       edges_dst,
                                       numedges_dst,

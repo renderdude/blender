@@ -1015,12 +1015,14 @@ bool BKE_gpencil_stroke_smooth_point(bGPDstroke *gps,
     return false;
   }
 
-  /* Overview of the algorithm here and in the following smooth functions:
-   *  The smooth functions return the new attribute in question for a single point.
-   *  The result is stored in r_gps->points[point_index], while the data is read from gps.
-   *  To get a correct result, duplicate the stroke point data and read from the copy,
-   *  while writing to the real stroke. Not doing that will result in acceptable, but
-   *  asymmetric results.
+  /* - Overview of the algorithm here and in the following smooth functions:
+   *
+   *   The smooth functions return the new attribute in question for a single point.
+   *   The result is stored in r_gps->points[point_index], while the data is read from gps.
+   *   To get a correct result, duplicate the stroke point data and read from the copy,
+   *   while writing to the real stroke. Not doing that will result in acceptable, but
+   *   asymmetric results.
+   *
    * This algorithm works as long as all points are being smoothed. If there is
    * points that should not get smoothed, use the old repeat smooth pattern with
    * the parameter "iterations" set to 1 or 2. (2 matches the old algorithm).
@@ -2495,7 +2497,7 @@ static void gpencil_generate_edgeloops(Object *ob,
   const Span<float3> vert_positions = me->vert_positions();
   const Span<MEdge> edges = me->edges();
   const Span<MDeformVert> dverts = me->deform_verts();
-  const float(*vert_normals)[3] = BKE_mesh_vertex_normals_ensure(me);
+  const float(*vert_normals)[3] = BKE_mesh_vert_normals_ensure(me);
 
   /* Arrays for all edge vertices (forward and backward) that form a edge loop.
    * This is reused for each edge-loop to create gpencil stroke. */
@@ -2774,10 +2776,10 @@ bool BKE_gpencil_convert_mesh(Main *bmain,
 
       /* Add points to strokes. */
       for (int j = 0; j < poly.size(); j++) {
-        const int vert_i = corner_verts[poly[j]];
+        const int vert = corner_verts[poly[j]];
 
         bGPDspoint *pt = &gps_fill->points[j];
-        copy_v3_v3(&pt->x, positions[vert_i]);
+        copy_v3_v3(&pt->x, positions[vert]);
         mul_m4_v3(matrix, &pt->x);
         pt->pressure = 1.0f;
         pt->strength = 1.0f;
@@ -2785,7 +2787,7 @@ bool BKE_gpencil_convert_mesh(Main *bmain,
         /* Copy vertex groups from mesh. Assuming they already exist in the same order. */
         if (use_vgroups && !dverts.is_empty()) {
           MDeformVert *dv = &gps_fill->dvert[j];
-          const MDeformVert *src_dv = &dverts[vert_i];
+          const MDeformVert *src_dv = &dverts[vert];
           dv->totweight = src_dv->totweight;
           dv->dw = (MDeformWeight *)MEM_callocN(sizeof(MDeformWeight) * dv->totweight,
                                                 "gp_fill_dverts_dw");
@@ -3237,7 +3239,7 @@ bGPDstroke *BKE_gpencil_stroke_delete_tagged_points(bGPdata *gpd,
 
         pts = new_stroke->points;
         for (j = 0; j < new_stroke->totpoints; j++, pts++) {
-          /* Some points have time = 0, so check to not get negative time values.*/
+          /* Some points have time = 0, so check to not get negative time values. */
           pts->time = max_ff(pts->time - delta, 0.0f);
           /* set flag for select again later */
           if (select == true) {

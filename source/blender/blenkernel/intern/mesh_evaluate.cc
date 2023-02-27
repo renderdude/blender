@@ -646,8 +646,8 @@ void BKE_mesh_flush_hidden_from_verts(Mesh *me)
       ".hide_poly", ATTR_DOMAIN_FACE);
   for (const int i : polys.index_range()) {
     const Span<int> poly_verts = corner_verts.slice(polys[i]);
-    hide_poly.span[i] = std::any_of(poly_verts.begin(), poly_verts.end(), [&](const int vert_i) {
-      return hide_vert_span[vert_i];
+    hide_poly.span[i] = std::any_of(poly_verts.begin(), poly_verts.end(), [&](const int vert) {
+      return hide_vert_span[vert];
     });
   }
   hide_poly.finish();
@@ -746,9 +746,8 @@ static void mesh_flush_select_from_verts(const Span<MEdge> edges,
   for (const int i : polys.index_range()) {
     if (!hide_poly[i]) {
       const Span<int> poly_verts = corner_verts.slice(polys[i]);
-      select_poly[i] = std::all_of(poly_verts.begin(), poly_verts.end(), [&](const int vert_i) {
-        return select_vert[vert_i];
-      });
+      select_poly[i] = std::all_of(
+          poly_verts.begin(), poly_verts.end(), [&](const int vert) { return select_vert[vert]; });
     }
   }
 }

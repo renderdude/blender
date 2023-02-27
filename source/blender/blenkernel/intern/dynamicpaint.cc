@@ -1828,7 +1828,7 @@ static void dynamicPaint_applySurfaceDisplace(DynamicPaintSurface *surface, Mesh
     DynamicPaintModifierApplyData data;
     data.surface = surface;
     data.vert_positions = BKE_mesh_vert_positions_for_write(result);
-    data.vert_normals = BKE_mesh_vertex_normals_ensure(result);
+    data.vert_normals = BKE_mesh_vert_normals_ensure(result);
 
     TaskParallelSettings settings;
     BLI_parallel_range_settings_defaults(&settings);
@@ -2027,20 +2027,20 @@ static Mesh *dynamicPaint_Modifier_apply(DynamicPaintModifierData *pmd, Object *
             DynamicPaintModifierApplyData data{};
             data.surface = surface;
             data.vert_positions = BKE_mesh_vert_positions_for_write(result);
-            data.vert_normals = BKE_mesh_vertex_normals_ensure(result);
+            data.vert_normals = BKE_mesh_vert_normals_ensure(result);
 
             TaskParallelSettings settings;
             BLI_parallel_range_settings_defaults(&settings);
             settings.use_threading = (sData->total_points > 1000);
             BLI_task_parallel_range(
                 0, sData->total_points, &data, dynamic_paint_apply_surface_wave_cb, &settings);
-            BKE_mesh_tag_coords_changed(result);
+            BKE_mesh_tag_positions_changed(result);
           }
 
           /* displace */
           if (surface->type == MOD_DPAINT_SURFACE_T_DISPLACE) {
             dynamicPaint_applySurfaceDisplace(surface, result);
-            BKE_mesh_tag_coords_changed(result);
+            BKE_mesh_tag_positions_changed(result);
           }
         }
       }
@@ -4291,7 +4291,7 @@ static bool dynamicPaint_paintMesh(Depsgraph *depsgraph,
 
     mesh = BKE_mesh_copy_for_eval(brush_mesh, false);
     float(*positions)[3] = BKE_mesh_vert_positions_for_write(mesh);
-    const float(*vert_normals)[3] = BKE_mesh_vertex_normals_ensure(mesh);
+    const float(*vert_normals)[3] = BKE_mesh_vert_normals_ensure(mesh);
     mlooptri = BKE_mesh_runtime_looptri_ensure(mesh);
     const blender::Span<int> corner_verts = mesh->corner_verts();
     numOfVerts = mesh->totvert;
@@ -6152,7 +6152,7 @@ static bool dynamicPaint_generateBakeData(DynamicPaintSurface *surface,
   data.surface = surface;
   data.ob = ob;
   data.positions = positions;
-  data.vert_normals = BKE_mesh_vertex_normals_ensure(mesh);
+  data.vert_normals = BKE_mesh_vert_normals_ensure(mesh);
   data.canvas_verts = canvas_verts;
   data.do_velocity_data = do_velocity_data;
   data.new_bdata = new_bdata;
