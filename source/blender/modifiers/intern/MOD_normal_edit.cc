@@ -341,7 +341,7 @@ static void normalEditModifier_do_radial(NormalEditModifierData *enmd,
   }
 
   BKE_mesh_normals_loop_custom_set(vert_positions,
-                                   BKE_mesh_vertex_normals_ensure(mesh),
+                                   BKE_mesh_vert_normals_ensure(mesh),
                                    verts_num,
                                    medge,
                                    edges_num,
@@ -466,7 +466,7 @@ static void normalEditModifier_do_directional(NormalEditModifierData *enmd,
   }
 
   BKE_mesh_normals_loop_custom_set(positions,
-                                   BKE_mesh_vertex_normals_ensure(mesh),
+                                   BKE_mesh_vert_normals_ensure(mesh),
                                    verts_num,
                                    medge,
                                    edges_num,
@@ -560,7 +560,7 @@ static Mesh *normalEditModifier_do(NormalEditModifierData *enmd,
 
   CustomData *ldata = &result->ldata;
 
-  const float(*vert_normals)[3] = BKE_mesh_vertex_normals_ensure(result);
+  const float(*vert_normals)[3] = BKE_mesh_vert_normals_ensure(result);
   const float(*poly_normals)[3] = BKE_mesh_poly_normals_ensure(result);
 
   bke::MutableAttributeAccessor attributes = result->attributes_for_write();

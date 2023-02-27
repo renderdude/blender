@@ -492,7 +492,7 @@ static void do_multires_bake(MultiresBakeRender *bkr,
   temp_mesh->polys_for_write().copy_from({dm->getPolyArray(dm), temp_mesh->totpoly});
   temp_mesh->corner_verts_for_write().copy_from({dm->getCornerVertArray(dm), temp_mesh->totloop});
   temp_mesh->corner_edges_for_write().copy_from({dm->getCornerEdgeArray(dm), temp_mesh->totloop});
-  const float(*vert_normals)[3] = BKE_mesh_vertex_normals_ensure(temp_mesh);
+  const float(*vert_normals)[3] = BKE_mesh_vert_normals_ensure(temp_mesh);
   const float(*poly_normals)[3] = BKE_mesh_poly_normals_ensure(temp_mesh);
 
   if (require_tangent) {
