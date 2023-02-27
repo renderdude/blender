@@ -938,7 +938,7 @@ Mesh *BKE_mesh_add(Main *bmain, const char *name)
 }
 
 /* Custom data layer functions; those assume that totXXX are set correctly. */
-static void mesh_ensure_cdlayers_primary(Mesh *mesh, bool do_tessface)
+static void mesh_ensure_cdlayers_primary(Mesh *mesh)
 {
   if (!CustomData_get_layer_named(&mesh->vdata, CD_PROP_FLOAT3, "position")) {
     CustomData_add_layer_named(
@@ -958,14 +958,9 @@ static void mesh_ensure_cdlayers_primary(Mesh *mesh, bool do_tessface)
   if (!CustomData_get_layer(&mesh->pdata, CD_MPOLY)) {
     CustomData_add_layer(&mesh->pdata, CD_MPOLY, CD_SET_DEFAULT, nullptr, mesh->totpoly);
   }
-
-  if (do_tessface && !CustomData_get_layer(&mesh->fdata, CD_MFACE)) {
-    CustomData_add_layer(&mesh->fdata, CD_MFACE, CD_SET_DEFAULT, nullptr, mesh->totface);
-  }
 }
 
-Mesh *BKE_mesh_new_nomain(
-    int verts_len, int edges_len, int tessface_len, int loops_len, int polys_len)
+Mesh *BKE_mesh_new_nomain(int verts_len, int edges_len, int loops_len, int polys_len)
 {
   Mesh *mesh = (Mesh *)BKE_libblock_alloc(
       nullptr, ID_ME, BKE_idtype_idcode_to_name(ID_ME), LIB_ID_CREATE_LOCALIZE);
@@ -980,11 +975,10 @@ Mesh *BKE_mesh_new_nomain(
 
   mesh->totvert = verts_len;
   mesh->totedge = edges_len;
-  mesh->totface = tessface_len;
   mesh->totloop = loops_len;
   mesh->totpoly = polys_len;
 
-  mesh_ensure_cdlayers_primary(mesh, true);
+  mesh_ensure_cdlayers_primary(mesh);
 
   return mesh;
 }
@@ -1080,7 +1074,10 @@ Mesh *BKE_mesh_new_nomain_from_template_ex(const Mesh *me_src,
 
   /* The destination mesh should at least have valid primary CD layers,
    * even in cases where the source mesh does not. */
-  mesh_ensure_cdlayers_primary(me_dst, do_tessface);
+  mesh_ensure_cdlayers_primary(me_dst);
+  if (do_tessface && !CustomData_get_layer(&me_dst->fdata, CD_MFACE)) {
+    CustomData_add_layer(&me_dst->fdata, CD_MFACE, CD_SET_DEFAULT, nullptr, me_dst->totface);
+  }
 
   /* Expect that normals aren't copied at all, since the destination mesh is new. */
   BLI_assert(BKE_mesh_vertex_normals_are_dirty(me_dst));
@@ -1088,15 +1085,11 @@ Mesh *BKE_mesh_new_nomain_from_template_ex(const Mesh *me_src,
   return me_dst;
 }
 
-Mesh *BKE_mesh_new_nomain_from_template(const Mesh *me_src,
-                                        int verts_len,
-                                        int edges_len,
-                                        int tessface_len,
-                                        int loops_len,
-                                        int polys_len)
+Mesh *BKE_mesh_new_nomain_from_template(
+    const Mesh *me_src, int verts_len, int edges_len, int loops_len, int polys_len)
 {
   return BKE_mesh_new_nomain_from_template_ex(
-      me_src, verts_len, edges_len, tessface_len, loops_len, polys_len, CD_MASK_EVERYTHING);
+      me_src, verts_len, edges_len, 0, loops_len, polys_len, CD_MASK_EVERYTHING);
 }
 
 void BKE_mesh_eval_delete(struct Mesh *mesh_eval)
