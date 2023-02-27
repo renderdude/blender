@@ -900,7 +900,6 @@ static void subdiv_mesh_loop(const SubdivForeachContext *foreach_context,
   subdiv_mesh_ensure_loop_interpolation(ctx, tls, coarse_poly, coarse_corner);
   subdiv_interpolate_loop_data(ctx, subdiv_loop_index, &tls->loop_interpolation, u, v);
   subdiv_eval_uv_layer(ctx, subdiv_loop_index, ptex_face_index, u, v);
-
   ctx->subdiv_corner_verts[subdiv_loop_index] = subdiv_vertex_index;
   ctx->subdiv_corner_edges[subdiv_loop_index] = subdiv_edge_index;
 }

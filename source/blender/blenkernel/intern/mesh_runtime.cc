@@ -328,6 +328,8 @@ bool BKE_mesh_runtime_is_valid(Mesh *me_eval)
   MutableSpan<float3> positions = me_eval->vert_positions_for_write();
   MutableSpan<MEdge> edges = me_eval->edges_for_write();
   MutableSpan<MPoly> polys = me_eval->polys_for_write();
+  MutableSpan<int> corner_verts = me_eval->corner_verts_for_write();
+  MutableSpan<int> corner_edges = me_eval->corner_verts_for_write();
 
   is_valid &= BKE_mesh_validate_all_customdata(
       &me_eval->vdata,
@@ -351,9 +353,9 @@ bool BKE_mesh_runtime_is_valid(Mesh *me_eval)
                                        static_cast<MFace *>(CustomData_get_layer_for_write(
                                            &me_eval->fdata, CD_MFACE, me_eval->totface)),
                                        me_eval->totface,
-                                       me_eval->corner_verts_for_write().data(),
-                                       me_eval->corner_edges_for_write().data(),
-                                       me_eval->totloop,
+                                       corner_verts.data(),
+                                       corner_edges.data(),
+                                       corner_verts.size(),
                                        polys.data(),
                                        polys.size(),
                                        me_eval->deform_verts_for_write().data(),

@@ -2776,10 +2776,10 @@ bool BKE_gpencil_convert_mesh(Main *bmain,
 
       /* Add points to strokes. */
       for (int j = 0; j < mp->totloop; j++) {
-        const int vert_i = corner_verts[mp->loopstart + j];
+        const int vert = corner_verts[mp->loopstart + j];
 
         bGPDspoint *pt = &gps_fill->points[j];
-        copy_v3_v3(&pt->x, positions[vert_i]);
+        copy_v3_v3(&pt->x, positions[vert]);
         mul_m4_v3(matrix, &pt->x);
         pt->pressure = 1.0f;
         pt->strength = 1.0f;
@@ -2787,7 +2787,7 @@ bool BKE_gpencil_convert_mesh(Main *bmain,
         /* Copy vertex groups from mesh. Assuming they already exist in the same order. */
         if (use_vgroups && !dverts.is_empty()) {
           MDeformVert *dv = &gps_fill->dvert[j];
-          const MDeformVert *src_dv = &dverts[vert_i];
+          const MDeformVert *src_dv = &dverts[vert];
           dv->totweight = src_dv->totweight;
           dv->dw = (MDeformWeight *)MEM_callocN(sizeof(MDeformWeight) * dv->totweight,
                                                 "gp_fill_dverts_dw");

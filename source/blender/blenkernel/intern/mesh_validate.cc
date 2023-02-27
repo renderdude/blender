@@ -1076,6 +1076,8 @@ bool BKE_mesh_validate(Mesh *me, const bool do_verbose, const bool cddata_check_
   MutableSpan<float3> positions = me->vert_positions_for_write();
   MutableSpan<MEdge> edges = me->edges_for_write();
   MutableSpan<MPoly> polys = me->polys_for_write();
+  MutableSpan<int> corner_verts = me->corner_verts_for_write();
+  MutableSpan<int> corner_edges = me->corner_edges_for_write();
 
   BKE_mesh_validate_arrays(
       me,
@@ -1085,9 +1087,9 @@ bool BKE_mesh_validate(Mesh *me, const bool do_verbose, const bool cddata_check_
       edges.size(),
       (MFace *)CustomData_get_layer_for_write(&me->fdata, CD_MFACE, me->totface),
       me->totface,
-      me->corner_verts_for_write().data(),
-      me->corner_edges_for_write().data(),
-      me->totloop,
+      corner_verts.data(),
+      corner_edges.data(),
+      corner_verts.size(),
       polys.data(),
       polys.size(),
       me->deform_verts_for_write().data(),
@@ -1128,6 +1130,8 @@ bool BKE_mesh_is_valid(Mesh *me)
   MutableSpan<float3> positions = me->vert_positions_for_write();
   MutableSpan<MEdge> edges = me->edges_for_write();
   MutableSpan<MPoly> polys = me->polys_for_write();
+  MutableSpan<int> corner_verts = me->corner_verts_for_write();
+  MutableSpan<int> corner_edges = me->corner_edges_for_write();
 
   is_valid &= BKE_mesh_validate_arrays(
       me,
@@ -1137,9 +1141,9 @@ bool BKE_mesh_is_valid(Mesh *me)
       edges.size(),
       (MFace *)CustomData_get_layer_for_write(&me->fdata, CD_MFACE, me->totface),
       me->totface,
-      me->corner_verts_for_write().data(),
-      me->corner_edges_for_write().data(),
-      me->totloop,
+      corner_verts.data(),
+      corner_edges.data(),
+      corner_verts.size(),
       polys.data(),
       polys.size(),
       me->deform_verts_for_write().data(),

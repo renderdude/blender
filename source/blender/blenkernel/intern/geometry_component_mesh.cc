@@ -224,7 +224,7 @@ static GVArray adapt_mesh_domain_corner_to_point(const Mesh &mesh, const GVArray
     using T = decltype(dummy);
     if constexpr (!std::is_void_v<attribute_math::DefaultMixer<T>>) {
       /* We compute all interpolated values at once, because for this interpolation, one has to
-       * iterate over all corners anyway. */
+       * iterate over all loops anyway. */
       adapt_mesh_domain_corner_to_point_impl<T>(
           mesh, varray.typed<T>(), values.as_mutable_span().typed<T>());
     }
