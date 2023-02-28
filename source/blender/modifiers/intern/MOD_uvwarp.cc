@@ -210,8 +210,8 @@ static Mesh *modifyMesh(ModifierData *md, const ModifierEvalContext *ctx, Mesh *
 
   TaskParallelSettings settings;
   BLI_parallel_range_settings_defaults(&settings);
-  settings.use_threading = (polys.size() > 1000);
-  BLI_task_parallel_range(0, polys.size(), &data, uv_warp_compute, &settings);
+  settings.use_threading = (polys.ranges_num() > 1000);
+  BLI_task_parallel_range(0, polys.ranges_num(), &data, uv_warp_compute, &settings);
 
   mesh->runtime->is_original_bmesh = false;
 
