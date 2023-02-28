@@ -1009,6 +1009,7 @@ Mesh *BKE_mesh_new_nomain(int verts_len, int edges_len, int loops_len, int polys
   mesh->totpoly = polys_len;
 
   mesh_ensure_cdlayers_primary(mesh);
+  BKE_mesh_poly_offsets_ensure(mesh);
 
   return mesh;
 }
