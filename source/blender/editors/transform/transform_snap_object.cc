@@ -1431,7 +1431,7 @@ struct Nearest2dUserData {
       const MEdge *edge; /* only used for #BVHTreeFromMeshEdges */
       const int *corner_verts;
       const int *corner_edges;
-      const MLoopTri *looptri;
+      const MLoopTri *looptris;
     };
   };
 
@@ -1483,7 +1483,7 @@ static void cb_mlooptri_edges_get(const int index, const Nearest2dUserData *data
   const MEdge *medge = data->edge;
   const int *corner_verts = data->corner_verts;
   const int *corner_edges = data->corner_edges;
-  const MLoopTri *lt = &data->looptri[index];
+  const MLoopTri *lt = &data->looptris[index];
   for (int j = 2, j_next = 0; j_next < 3; j = j_next++) {
     const MEdge *ed = &medge[corner_edges[lt->tri[j]]];
     const int tri_edge[2] = {corner_verts[lt->tri[j]], corner_verts[lt->tri[j_next]]};
@@ -1500,7 +1500,7 @@ static void cb_mlooptri_edges_get(const int index, const Nearest2dUserData *data
 static void cb_mlooptri_verts_get(const int index, const Nearest2dUserData *data, int r_v_index[3])
 {
   const int *corner_verts = data->corner_verts;
-  const MLoopTri *looptri = &data->looptri[index];
+  const MLoopTri *looptri = &data->looptris[index];
 
   r_v_index[0] = corner_verts[looptri->tri[0]];
   r_v_index[1] = corner_verts[looptri->tri[1]];
@@ -1722,7 +1722,7 @@ static void nearest2d_data_init_mesh(const Mesh *mesh,
   r_nearest2d->edge = mesh->edges().data();
   r_nearest2d->corner_verts = mesh->corner_verts().data();
   r_nearest2d->corner_edges = mesh->corner_edges().data();
-  r_nearest2d->looptri = BKE_mesh_runtime_looptri_ensure(mesh);
+  r_nearest2d->looptris = mesh->looptris().data();
 
   r_nearest2d->is_persp = is_persp;
   r_nearest2d->use_backface_culling = use_backface_culling;

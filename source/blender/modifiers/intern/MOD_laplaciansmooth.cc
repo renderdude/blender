@@ -62,14 +62,6 @@ struct LaplacianSystem {
   float vert_centroid[3];
 };
 
-static void delete_laplacian_system(LaplacianSystem *sys);
-static void fill_laplacian_matrix(LaplacianSystem *sys);
-static void init_data(ModifierData *md);
-static void init_laplacian_matrix(LaplacianSystem *sys);
-static void memset_laplacian_system(LaplacianSystem *sys, int val);
-static void volume_preservation(LaplacianSystem *sys, float vini, float vend, short flag);
-static void validate_solution(LaplacianSystem *sys, short flag, float lambda, float lambda_border);
-
 static void delete_laplacian_system(LaplacianSystem *sys)
 {
   MEM_SAFE_FREE(sys->eweights);
@@ -198,7 +190,7 @@ static void init_laplacian_matrix(LaplacianSystem *sys)
 
   const blender::Span<int> corner_verts = sys->corner_verts;
 
-  for (i = 0; i < sys->polys.size(); i++) {
+  for (const int i : sys->polys.index_range()) {
     const MPoly *mp = &sys->polys[i];
     int corner_next = mp->loopstart;
     int corner_term = corner_next + mp->totloop;
@@ -255,7 +247,7 @@ static void fill_laplacian_matrix(LaplacianSystem *sys)
 
   const blender::Span<int> corner_verts = sys->corner_verts;
 
-  for (i = 0; i < sys->polys.size(); i++) {
+  for (const int i : sys->polys.index_range()) {
     const MPoly *mp = &sys->polys[i];
     int corner_next = mp->loopstart;
     int corner_term = corner_next + mp->totloop;

@@ -68,11 +68,11 @@ struct SDefBindCalcData {
   const SDefAdjacencyArray *vert_edges;
   const SDefEdgePolys *edge_polys;
   SDefVert *bind_verts;
-  const MLoopTri *looptri;
   blender::Span<MEdge> edges;
   blender::Span<MPoly> polys;
   blender::Span<int> corner_verts;
   blender::Span<int> corner_edges;
+  blender::Span<MLoopTri> looptris;
 
   /** Coordinates to bind to, transformed into local space (compatible with `vertexCos`). */
   float (*targetCos)[3];
@@ -394,7 +394,7 @@ BLI_INLINE uint nearestVert(SDefBindCalcData *const data, const float point_co[3
   BLI_bvhtree_find_nearest(
       data->treeData->tree, t_point, &nearest, data->treeData->nearest_callback, data->treeData);
 
-  poly = &data->polys[data->looptri[nearest.index].poly];
+  poly = &data->polys[data->looptris[nearest.index].poly];
 
   for (int i = 0; i < poly->totloop; i++) {
     const int edge_i = data->corner_edges[poly->loopstart + i];
@@ -1266,7 +1266,7 @@ static bool surfacedeformBind(Object *ob,
   data.edges = edges;
   data.corner_verts = corner_verts;
   data.corner_edges = corner_edges;
-  data.looptri = BKE_mesh_runtime_looptri_ensure(target);
+  data.looptris = target->looptris();
   data.targetCos = static_cast<float(*)[3]>(
       MEM_malloc_arrayN(target_verts_num, sizeof(float[3]), "SDefTargetBindVertArray"));
   data.bind_verts = smd_orig->verts;

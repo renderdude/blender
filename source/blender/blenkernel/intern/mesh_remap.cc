@@ -1254,8 +1254,6 @@ void BKE_mesh_remap_calc_loops_from_mesh(const int mode,
   const float full_weight = 1.0f;
   const float max_dist_sq = max_dist * max_dist;
 
-  int i;
-
   BLI_assert(mode & MREMAP_MODE_LOOP);
   BLI_assert((islands_precision_src >= 0.0f) && (islands_precision_src <= 1.0f));
 
@@ -1264,7 +1262,7 @@ void BKE_mesh_remap_calc_loops_from_mesh(const int mode,
   if (mode == MREMAP_MODE_TOPOLOGY) {
     /* In topology mapping, we assume meshes are identical, islands included! */
     BLI_assert(numloops_dst == me_src->totloop);
-    for (i = 0; i < numloops_dst; i++) {
+    for (int i = 0; i < numloops_dst; i++) {
       mesh_remap_item_define(r_map, i, FLT_MAX, 0, 1, &i, &full_weight);
     }
   }
@@ -1314,8 +1312,7 @@ void BKE_mesh_remap_calc_loops_from_mesh(const int mode,
     const blender::Span<MPoly> polys_src = me_src->polys();
     const blender::Span<int> corner_verts_src = me_src->corner_verts();
     const blender::Span<int> corner_edges_src = me_src->corner_edges();
-    const MLoopTri *looptri_src = nullptr;
-    int num_looptri_src = 0;
+    blender::Span<MLoopTri> looptris_src;
 
     size_t buff_size_interp = MREMAP_DEFAULT_BUFSIZE;
     float(*vcos_interp)[3] = nullptr;
@@ -1510,7 +1507,7 @@ void BKE_mesh_remap_calc_loops_from_mesh(const int mode,
           MeshElemMap *isld = island_store.islands[tindex];
           int num_verts_active = 0;
           verts_active.fill(false);
-          for (i = 0; i < isld->count; i++) {
+          for (int i = 0; i < isld->count; i++) {
             const MPoly &poly = polys_src[isld->indices[i]];
             for (lidx_src = poly.loopstart; lidx_src < poly.loopstart + poly.totloop; lidx_src++) {
               const int vidx_src = corner_verts_src[lidx_src];
@@ -1537,16 +1534,14 @@ void BKE_mesh_remap_calc_loops_from_mesh(const int mode,
     }
     else { /* We use polygons. */
       if (use_islands) {
-        /* bvhtree here uses looptri faces... */
-        looptri_src = BKE_mesh_runtime_looptri_ensure(me_src);
-        num_looptri_src = BKE_mesh_runtime_looptri_len(me_src);
-        blender::BitVector<> looptri_active(num_looptri_src);
+        looptris_src = me_src->looptris();
+        blender::BitVector<> looptri_active(looptris_src.size());
 
         for (tindex = 0; tindex < num_trees; tindex++) {
           int num_looptri_active = 0;
           looptri_active.fill(false);
-          for (i = 0; i < num_looptri_src; i++) {
-            const MPoly &poly = polys_src[looptri_src[i].poly];
+          for (const int64_t i : looptris_src.index_range()) {
+            const MPoly &poly = polys_src[looptris_src[i].poly];
             if (island_store.items_to_islands[poly.loopstart] == tindex) {
               looptri_active[i].set();
               num_looptri_active++;
@@ -1555,8 +1550,8 @@ void BKE_mesh_remap_calc_loops_from_mesh(const int mode,
           bvhtree_from_mesh_looptri_ex(&treedata[tindex],
                                        positions_src,
                                        corner_verts_src.data(),
-                                       looptri_src,
-                                       num_looptri_src,
+                                       looptris_src.data(),
+                                       int(looptris_src.size()),
                                        looptri_active,
                                        num_looptri_active,
                                        0.0,
@@ -1640,7 +1635,7 @@ void BKE_mesh_remap_calc_loops_from_mesh(const int mode,
                 vert_to_refelem_map_src = vert_to_poly_map_src;
               }
 
-              for (i = vert_to_refelem_map_src[nearest.index].count; i--;) {
+              for (int i = vert_to_refelem_map_src[nearest.index].count; i--;) {
                 const int index_src = vert_to_refelem_map_src[nearest.index].indices[i];
                 BLI_assert(index_src != -1);
                 const float dot = dot_v3v3(nors_src[index_src], *nor_dst);
@@ -1884,7 +1879,7 @@ void BKE_mesh_remap_calc_loops_from_mesh(const int mode,
                    */
                   int last_valid_pidx_isld_src = -1;
                   /* Note we go backward here, from dest to src poly. */
-                  for (i = as_solution.steps - 1; i--;) {
+                  for (int i = as_solution.steps - 1; i--;) {
                     BLI_AStarGNLink *as_link = as_solution.prev_links[pidx_isld_src];
                     const int eidx = POINTER_AS_INT(as_link->custom_data);
                     pidx_isld_src = as_solution.prev_nodes[pidx_isld_src];
@@ -1975,7 +1970,7 @@ void BKE_mesh_remap_calc_loops_from_mesh(const int mode,
                    */
                   int last_valid_pidx_isld_src = -1;
                   /* Note we go backward here, from dest to src poly. */
-                  for (i = as_solution.steps - 1; i--;) {
+                  for (int i = as_solution.steps - 1; i--;) {
                     BLI_AStarGNLink *as_link = as_solution.prev_links[pidx_isld_src];
                     int eidx = POINTER_AS_INT(as_link->custom_data);
 
@@ -2010,14 +2005,14 @@ void BKE_mesh_remap_calc_loops_from_mesh(const int mode,
                                                             &poly_to_looptri_map_src_buff,
                                                             polys_src.data(),
                                                             int(polys_src.size()),
-                                                            looptri_src,
-                                                            num_looptri_src);
+                                                            looptris_src.data(),
+                                                            int(looptris_src.size()));
                     }
 
                     for (j = poly_to_looptri_map_src[pidx_src].count; j--;) {
                       float h[3];
                       const MLoopTri *lt =
-                          &looptri_src[poly_to_looptri_map_src[pidx_src].indices[j]];
+                          &looptris_src[poly_to_looptri_map_src[pidx_src].indices[j]];
                       float dist_sq;
 
                       closest_on_tri_to_point_v3(h,
