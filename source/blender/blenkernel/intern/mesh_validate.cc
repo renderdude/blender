@@ -42,6 +42,8 @@ using blender::Span;
 
 static CLG_LogRef LOG = {"bke.mesh"};
 
+void strip_loose_polysloops(Mesh *me, blender::BitSpan polys_to_remove);
+
 /* -------------------------------------------------------------------- */
 /** \name Internal functions
  * \{ */
@@ -237,12 +239,7 @@ bool BKE_mesh_validate_arrays(Mesh *mesh,
     free_flag.polyloops = do_fixes; \
   } \
   (void)0
-#define REMOVE_POLY_TAG(_mp) \
-  { \
-    *_mp = (*_mp * -1); \
-    free_flag.polyloops = do_fixes; \
-  } \
-  (void)0
+  blender::BitVector<> polys_to_remove(totpoly);
 
   blender::bke::AttributeWriter<int> material_indices =
       mesh->attributes_for_write().lookup_for_write<int>("material_index");
@@ -758,7 +755,7 @@ bool BKE_mesh_validate_arrays(Mesh *mesh,
        */
       if (sp->invalid) {
         if (do_fixes) {
-          REMOVE_POLY_TAG(&poly_offsets[sp->index]);
+          polys_to_remove[sp->index].set();
           /* DO NOT REMOVE ITS LOOPS!!!
            * As already invalid polys are at the end of the SortPoly list, the loops they
            * were the only users have already been tagged as "to remove" during previous
@@ -789,7 +786,7 @@ bool BKE_mesh_validate_arrays(Mesh *mesh,
                     prev_end,
                     sp->index);
           if (do_fixes) {
-            REMOVE_POLY_TAG(&poly_offsets[sp->index]);
+            polys_to_remove[sp->index].set();
             /* DO NOT REMOVE ITS LOOPS!!!
              * They might be used by some next, valid poly!
              * Just not updating prev_end/prev_sp vars is enough to ensure the loops
@@ -875,7 +872,7 @@ bool BKE_mesh_validate_arrays(Mesh *mesh,
     }
 
     if (free_flag.polyloops) {
-      BKE_mesh_strip_loose_polysloops(mesh);
+      strip_loose_polysloops(mesh, polys_to_remove);
     }
 
     if (free_flag.edges) {
@@ -1222,7 +1219,7 @@ void BKE_mesh_strip_loose_faces(Mesh *me)
   }
 }
 
-void BKE_mesh_strip_loose_polysloops(Mesh *me)
+void strip_loose_polysloops(Mesh *me, blender::BitSpan polys_to_remove)
 {
   MutableSpan<int> poly_offsets = me->poly_offsets_for_write();
   MutableSpan<int> corner_edges = me->corner_edges_for_write();
@@ -1233,16 +1230,19 @@ void BKE_mesh_strip_loose_polysloops(Mesh *me)
 
   for (a = b = 0; a < me->totpoly; a++) {
     bool invalid = false;
-    int i = poly_offsets[a];
-    int size = poly_offsets[a + 1] - i;
-    int stop = i + size;
+    int start = poly_offsets[a];
+    int size = poly_offsets[a + 1] - start;
+    int stop = start + size;
 
-    if (stop > me->totloop || stop < i || size < 0) {
+    if (polys_to_remove[a]) {
+      invalid = true;
+    }
+    else if (stop > me->totloop || stop < start || size < 0) {
       invalid = true;
     }
     else {
       /* If one of the poly's loops is invalid, the whole poly is invalid! */
-      if (corner_edges.slice(i, size).as_span().contains(INVALID_LOOP_EDGE_MARKER)) {
+      if (corner_edges.slice(start, size).as_span().contains(INVALID_LOOP_EDGE_MARKER)) {
         invalid = true;
       }
     }

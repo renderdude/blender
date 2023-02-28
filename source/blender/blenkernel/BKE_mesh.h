@@ -892,14 +892,6 @@ bool BKE_mesh_validate_all_customdata(struct CustomData *vdata,
                                       bool *r_change);
 
 void BKE_mesh_strip_loose_faces(struct Mesh *me);
-/**
- * Works on both loops and polys!
- *
- * \note It won't try to guess which loops of an invalid poly to remove!
- * this is the work of the caller, to mark those loops.
- * See e.g. #BKE_mesh_validate_arrays().
- */
-void BKE_mesh_strip_loose_polysloops(struct Mesh *me);
 void BKE_mesh_strip_loose_edges(struct Mesh *me);
 
 /**
