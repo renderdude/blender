@@ -36,12 +36,11 @@ static void mesh_flip_faces(Mesh &mesh, const Field<bool> &selection_field)
   threading::parallel_for(selection.index_range(), 1024, [&](const IndexRange range) {
     for (const int i : selection.slice(range)) {
       const IndexRange poly = polys[i];
-      int start = poly.start();
       for (const int j : IndexRange(poly.size() / 2)) {
-        const int index1 = start + j + 1;
-        const int index2 = start + poly.size() - j - 1;
-        std::swap(corner_verts[index1], corner_verts[index2]);
-        std::swap(corner_edges[index1 - 1], corner_edges[index2]);
+        const int a = poly[j + 1];
+        const int b = poly.last(j);
+        std::swap(corner_verts[a], corner_verts[b]);
+        std::swap(corner_edges[a - 1], corner_edges[b]);
       }
     }
   });
@@ -52,24 +51,23 @@ static void mesh_flip_faces(Mesh &mesh, const Field<bool> &selection_field)
         if (meta_data.data_type == CD_PROP_STRING) {
           return true;
         }
+        if (meta_data.domain != ATTR_DOMAIN_CORNER) {
+          return true;
+        }
         if (ELEM(attribute_id.name(), ".corner_vert", ".corner_edge")) {
           return true;
         }
-        if (meta_data.domain == ATTR_DOMAIN_CORNER) {
-          GSpanAttributeWriter attribute = attributes.lookup_or_add_for_write_span(
-              attribute_id, ATTR_DOMAIN_CORNER, meta_data.data_type);
-          attribute_math::convert_to_static_type(meta_data.data_type, [&](auto dummy) {
-            using T = decltype(dummy);
-            MutableSpan<T> dst_span = attribute.span.typed<T>();
-            threading::parallel_for(selection.index_range(), 1024, [&](const IndexRange range) {
-              for (const int i : selection.slice(range)) {
-                const IndexRange poly = polys[i];
-                dst_span.slice(poly.drop_front(1)).reverse();
-              }
-            });
+        GSpanAttributeWriter attribute = attributes.lookup_for_write_span(attribute_id);
+        attribute_math::convert_to_static_type(meta_data.data_type, [&](auto dummy) {
+          using T = decltype(dummy);
+          MutableSpan<T> dst_span = attribute.span.typed<T>();
+          threading::parallel_for(selection.index_range(), 1024, [&](const IndexRange range) {
+            for (const int i : selection.slice(range)) {
+              dst_span.slice(polys[i].drop_front(1)).reverse();
+            }
           });
-          attribute.finish();
-        }
+        });
+        attribute.finish();
         return true;
       });
 }

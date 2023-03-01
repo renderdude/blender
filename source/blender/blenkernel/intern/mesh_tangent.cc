@@ -572,13 +572,14 @@ void BKE_mesh_calc_loop_tangents(Mesh *me_eval,
                                  int tangent_names_len)
 {
   /* TODO(@ideasman42): store in Mesh.runtime to avoid recalculation. */
+  const blender::Span<MLoopTri> looptris = me_eval->looptris();
   short tangent_mask = 0;
   BKE_mesh_calc_loop_tangent_ex(
       BKE_mesh_vert_positions(me_eval),
       me_eval->polys(),
       me_eval->corner_verts().data(),
-      BKE_mesh_runtime_looptri_ensure(me_eval),
-      uint(BKE_mesh_runtime_looptri_len(me_eval)),
+      looptris.data(),
+      uint(looptris.size()),
       static_cast<const bool *>(
           CustomData_get_layer_named(&me_eval->pdata, CD_PROP_BOOL, "sharp_face")),
       &me_eval->ldata,

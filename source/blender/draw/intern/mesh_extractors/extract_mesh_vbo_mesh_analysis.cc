@@ -213,12 +213,12 @@ static void statvis_calc_thickness(const MeshRenderData *mr, float *r_thickness)
     BVHTreeFromMesh treeData = {nullptr};
 
     BVHTree *tree = BKE_bvhtree_from_mesh_get(&treeData, mr->me, BVHTREE_FROM_LOOPTRI, 4);
-    const MLoopTri *mlooptri = mr->mlooptri;
-    for (int i = 0; i < mr->tri_len; i++, mlooptri++) {
-      const int index = mlooptri->poly;
-      const float *cos[3] = {mr->vert_positions[mr->corner_verts[mlooptri->tri[0]]],
-                             mr->vert_positions[mr->corner_verts[mlooptri->tri[1]]],
-                             mr->vert_positions[mr->corner_verts[mlooptri->tri[2]]]};
+    const Span<MLoopTri> looptris = mr->looptris;
+    for (const int i : looptris.index_range()) {
+      const int index = looptris[i].poly;
+      const float *cos[3] = {mr->vert_positions[mr->corner_verts[looptris[i].tri[0]]],
+                             mr->vert_positions[mr->corner_verts[looptris[i].tri[1]]],
+                             mr->vert_positions[mr->corner_verts[looptris[i].tri[2]]]};
       float ray_co[3];
       float ray_no[3];
 
@@ -259,7 +259,7 @@ static void statvis_calc_thickness(const MeshRenderData *mr, float *r_thickness)
 struct BVHTree_OverlapData {
   const float3 *positions;
   const int *corner_verts;
-  const MLoopTri *mlooptri;
+  Span<MLoopTri> looptris;
   float epsilon;
 };
 
@@ -267,8 +267,8 @@ static bool bvh_overlap_cb(void *userdata, int index_a, int index_b, int /*threa
 {
   struct BVHTree_OverlapData *data = static_cast<struct BVHTree_OverlapData *>(userdata);
 
-  const MLoopTri *tri_a = &data->mlooptri[index_a];
-  const MLoopTri *tri_b = &data->mlooptri[index_b];
+  const MLoopTri *tri_a = &data->looptris[index_a];
+  const MLoopTri *tri_b = &data->looptris[index_b];
 
   if (UNLIKELY(tri_a->poly == tri_b->poly)) {
     return false;
@@ -342,15 +342,15 @@ static void statvis_calc_intersect(const MeshRenderData *mr, float *r_intersect)
     struct BVHTree_OverlapData data = {nullptr};
     data.positions = mr->vert_positions;
     data.corner_verts = mr->corner_verts;
-    data.mlooptri = mr->mlooptri;
+    data.looptris = mr->looptris;
     data.epsilon = BLI_bvhtree_get_epsilon(tree);
 
     BVHTreeOverlap *overlap = BLI_bvhtree_overlap_self(tree, &overlap_len, bvh_overlap_cb, &data);
     if (overlap) {
       for (int i = 0; i < overlap_len; i++) {
 
-        for (const IndexRange f_hit : {mr->polys[mr->mlooptri[overlap[i].indexA].poly],
-                                       mr->polys[mr->mlooptri[overlap[i].indexB].poly]}) {
+        for (const IndexRange f_hit : {mr->polys[mr->looptris[overlap[i].indexA].poly],
+                                       mr->polys[mr->looptris[overlap[i].indexB].poly]}) {
           int l_index = f_hit.start();
           for (int k = 0; k < f_hit.size(); k++, l_index++) {
             r_intersect[l_index] = 1.0f;

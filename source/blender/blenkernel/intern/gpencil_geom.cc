@@ -493,7 +493,13 @@ bool BKE_gpencil_stroke_sample(bGPdata *gpd,
   copy_v3_v3(&pt2->x, last_coord);
   new_pt[i].pressure = pt[0].pressure;
   new_pt[i].strength = pt[0].strength;
-  memcpy(new_pt[i].vert_color, pt[0].vert_color, sizeof(float[4]));
+  copy_v3_v3(&pt2->x, last_coord);
+  new_pt[i].pressure = pt[0].pressure;
+  new_pt[i].strength = pt[0].strength;
+  new_pt[i].uv_fac = pt[0].uv_fac;
+  new_pt[i].uv_rot = pt[0].uv_rot;
+  copy_v2_v2(new_pt[i].uv_fill, pt[0].uv_fill);
+  copy_v4_v4(new_pt[i].vert_color, pt[0].vert_color);
   if (select) {
     new_pt[i].flag |= GP_SPOINT_SELECT;
   }
@@ -2266,7 +2272,7 @@ void BKE_gpencil_stroke_subdivide(bGPdata *gpd, bGPDstroke *gps, int level, int 
       pt_final->uv_fac = interpf(pt->uv_fac, next->uv_fac, 0.5f);
       interp_v4_v4v4(pt_final->uv_fill, pt->uv_fill, next->uv_fill, 0.5f);
       CLAMP(pt_final->strength, GPENCIL_STRENGTH_MIN, 1.0f);
-      pt_final->time = interpf(pt->time, next->time, 0.5f);
+      pt_final->time = 0;
       pt_final->runtime.pt_orig = nullptr;
       pt_final->flag = 0;
       interp_v4_v4v4(pt_final->vert_color, pt->vert_color, next->vert_color, 0.5f);
@@ -2490,6 +2496,7 @@ static void gpencil_generate_edgeloops(Object *ob,
                                        const bool use_seams,
                                        const bool use_vgroups)
 {
+  using namespace blender;
   Mesh *me = (Mesh *)ob->data;
   if (me->totedge == 0) {
     return;
@@ -2498,6 +2505,9 @@ static void gpencil_generate_edgeloops(Object *ob,
   const Span<MEdge> edges = me->edges();
   const Span<MDeformVert> dverts = me->deform_verts();
   const float(*vert_normals)[3] = BKE_mesh_vert_normals_ensure(me);
+  const bke::AttributeAccessor attributes = me->attributes();
+  const VArray<bool> uv_seams = attributes.lookup_or_default<bool>(
+      ".uv_seam", ATTR_DOMAIN_EDGE, false);
 
   /* Arrays for all edge vertices (forward and backward) that form a edge loop.
    * This is reused for each edge-loop to create gpencil stroke. */
@@ -2523,7 +2533,7 @@ static void gpencil_generate_edgeloops(Object *ob,
     sub_v3_v3v3(gped->vec, vert_positions[ed->v1], vert_positions[ed->v2]);
 
     /* If use seams, mark as done if not a seam. */
-    if ((use_seams) && ((ed->flag & ME_SEAM) == 0)) {
+    if ((use_seams) && !uv_seams[i]) {
       gped->flag = 1;
     }
   }

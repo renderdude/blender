@@ -1068,7 +1068,7 @@ static void version_geometry_nodes_extrude_smooth_propagation(bNodeTree &ntree)
   }
 }
 
-void do_versions_after_linking_300(Main *bmain, ReportList * /*reports*/)
+void do_versions_after_linking_300(FileData * /*fd*/, Main *bmain)
 {
   if (MAIN_VERSION_ATLEAST(bmain, 300, 0) && !MAIN_VERSION_ATLEAST(bmain, 300, 1)) {
     /* Set zero user text objects to have a fake user. */

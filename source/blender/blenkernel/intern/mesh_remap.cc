@@ -1306,8 +1306,7 @@ void BKE_mesh_remap_calc_loops_from_mesh(const int mode,
     const blender::OffsetIndices polys_src = me_src->polys();
     const blender::Span<int> corner_verts_src = me_src->corner_verts();
     const blender::Span<int> corner_edges_src = me_src->corner_edges();
-    const MLoopTri *looptri_src = nullptr;
-    int num_looptri_src = 0;
+    blender::Span<MLoopTri> looptris_src;
 
     size_t buff_size_interp = MREMAP_DEFAULT_BUFSIZE;
     float(*vcos_interp)[3] = nullptr;
@@ -1432,10 +1431,13 @@ void BKE_mesh_remap_calc_loops_from_mesh(const int mode,
 
     /* First, generate the islands, if possible. */
     if (gen_islands_src) {
+      const bool *uv_seams = static_cast<const bool *>(
+          CustomData_get_layer_named(&me_src->edata, CD_PROP_BOOL, ".uv_seam"));
       use_islands = gen_islands_src(positions_src,
                                     num_verts_src,
                                     edges_src.data(),
                                     int(edges_src.size()),
+                                    uv_seams,
                                     polys_src,
                                     corner_verts_src.data(),
                                     corner_edges_src.data(),
@@ -1516,17 +1518,15 @@ void BKE_mesh_remap_calc_loops_from_mesh(const int mode,
     }
     else { /* We use polygons. */
       if (use_islands) {
-        /* bvhtree here uses looptri faces... */
-        looptri_src = BKE_mesh_runtime_looptri_ensure(me_src);
-        num_looptri_src = BKE_mesh_runtime_looptri_len(me_src);
-        blender::BitVector<> looptri_active(num_looptri_src);
+        looptris_src = me_src->looptris();
+        blender::BitVector<> looptri_active(looptris_src.size());
 
         for (tindex = 0; tindex < num_trees; tindex++) {
           int num_looptri_active = 0;
           looptri_active.fill(false);
-          for (int i = 0; i < num_looptri_src; i++) {
-            const blender::IndexRange poly_src = polys_src[looptri_src[i].poly];
-            if (island_store.items_to_islands[poly_src.start()] == tindex) {
+          for (const int64_t i : looptris_src.index_range()) {
+            const blender::IndexRange poly = polys_src[looptris_src[i].poly];
+            if (island_store.items_to_islands[poly.start()] == tindex) {
               looptri_active[i].set();
               num_looptri_active++;
             }
@@ -1534,8 +1534,8 @@ void BKE_mesh_remap_calc_loops_from_mesh(const int mode,
           bvhtree_from_mesh_looptri_ex(&treedata[tindex],
                                        positions_src,
                                        corner_verts_src.data(),
-                                       looptri_src,
-                                       num_looptri_src,
+                                       looptris_src.data(),
+                                       int(looptris_src.size()),
                                        looptri_active,
                                        num_looptri_active,
                                        0.0,
@@ -1986,14 +1986,14 @@ void BKE_mesh_remap_calc_loops_from_mesh(const int mode,
                       BKE_mesh_origindex_map_create_looptri(&poly_to_looptri_map_src,
                                                             &poly_to_looptri_map_src_buff,
                                                             polys_src,
-                                                            looptri_src,
-                                                            num_looptri_src);
+                                                            looptris_src.data(),
+                                                            int(looptris_src.size()));
                     }
 
                     for (j = poly_to_looptri_map_src[pidx_src].count; j--;) {
                       float h[3];
                       const MLoopTri *lt =
-                          &looptri_src[poly_to_looptri_map_src[pidx_src].indices[j]];
+                          &looptris_src[poly_to_looptri_map_src[pidx_src].indices[j]];
                       float dist_sq;
 
                       closest_on_tri_to_point_v3(h,

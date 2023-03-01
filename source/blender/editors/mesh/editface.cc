@@ -223,11 +223,12 @@ static void build_poly_connections(blender::AtomicDisjointSet &islands,
                                    const bool skip_seams = true)
 {
   using namespace blender;
-  const Span<MEdge> edges = mesh.edges();
   const OffsetIndices polys = mesh.polys();
   const Span<int> corner_edges = mesh.corner_edges();
 
-  bke::MutableAttributeAccessor attributes = mesh.attributes_for_write();
+  const bke::AttributeAccessor attributes = mesh.attributes();
+  const VArray<bool> uv_seams = attributes.lookup_or_default<bool>(
+      ".uv_seam", ATTR_DOMAIN_EDGE, false);
   const VArray<bool> hide_poly = attributes.lookup_or_default<bool>(
       ".hide_poly", ATTR_DOMAIN_FACE, false);
 
@@ -242,7 +243,7 @@ static void build_poly_connections(blender::AtomicDisjointSet &islands,
 
       for (const int poly_loop_index : poly_edges.index_range()) {
         const int outer_edge = poly_edges[poly_loop_index];
-        if (skip_seams && (edges[outer_edge].flag & ME_SEAM) != 0) {
+        if (skip_seams && uv_seams[outer_edge]) {
           continue;
         }
 
@@ -251,7 +252,7 @@ static void build_poly_connections(blender::AtomicDisjointSet &islands,
           if (outer_edge == inner_edge) {
             continue;
           }
-          if (skip_seams && (edges[inner_edge].flag & ME_SEAM) != 0) {
+          if (skip_seams && uv_seams[inner_edge]) {
             continue;
           }
           islands.join(inner_edge, outer_edge);
@@ -276,13 +277,15 @@ static void paintface_select_linked_faces(Mesh &mesh,
   const Span<int> corner_edges = mesh.corner_edges();
 
   bke::MutableAttributeAccessor attributes = mesh.attributes_for_write();
+  const VArray<bool> uv_seams = attributes.lookup_or_default<bool>(
+      ".uv_seam", ATTR_DOMAIN_EDGE, false);
   bke::SpanAttributeWriter<bool> select_poly = attributes.lookup_or_add_for_write_span<bool>(
       ".select_poly", ATTR_DOMAIN_FACE);
 
   Set<int> selected_roots;
   for (const int i : face_indices) {
     for (const int edge : corner_edges.slice(polys[i])) {
-      if ((edges[edge].flag & ME_SEAM) != 0) {
+      if (uv_seams[edge]) {
         continue;
       }
       const int root = islands.find_root(edge);
