@@ -1441,8 +1441,6 @@ static void customdata_weld(
   int src_i, dest_i;
   int j;
 
-  short flag = 0;
-
   /* interpolates a layer at a time */
   dest_i = 0;
   for (src_i = 0; src_i < source->totlayer; src_i++) {
@@ -1464,10 +1462,7 @@ static void customdata_weld(
     if (dest->layers[dest_i].type == type) {
       void *src_data = source->layers[src_i].data;
       if (type == CD_MEDGE) {
-        for (j = 0; j < count; j++) {
-          MEdge *me_src = &((MEdge *)src_data)[src_indices[j]];
-          flag |= me_src->flag;
-        }
+        /* Pass. */
       }
       else if (CustomData_layer_has_interp(dest, dest_i)) {
         /* Already calculated.
@@ -1500,8 +1495,7 @@ static void customdata_weld(
     CustomDataLayer *layer_dst = &dest->layers[dest_i];
     const int type = layer_dst->type;
     if (type == CD_MEDGE) {
-      MEdge *me = &((MEdge *)layer_dst->data)[dest_index];
-      me->flag = flag;
+      /* Pass. */
     }
     else if (CustomData_layer_has_interp(dest, dest_i)) {
       /* Already calculated. */
