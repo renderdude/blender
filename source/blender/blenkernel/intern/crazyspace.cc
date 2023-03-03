@@ -193,12 +193,12 @@ void BKE_crazyspace_set_quats_mesh(Mesh *me,
   const Span<int> corner_verts = me->corner_verts();
 
   for (int i = 0; i < me->totpoly; i++) {
-    const MPoly *poly = &polys[i];
-    const int *corner_vert_next = &corner_verts[poly->loopstart];
-    const int *corner_vert_curr = &corner_vert_next[poly->totloop - 1];
-    const int *corner_vert_prev = &corner_vert_next[poly->totloop - 2];
+    const MPoly &poly = polys[i];
+    const int *corner_vert_next = &corner_verts[poly.loopstart];
+    const int *corner_vert_curr = &corner_vert_next[poly.totloop - 1];
+    const int *corner_vert_prev = &corner_vert_next[poly.totloop - 2];
 
-    for (int j = 0; j < poly->totloop; j++) {
+    for (int j = 0; j < poly.totloop; j++) {
       if (!BLI_BITMAP_TEST(vert_tag, *corner_vert_curr)) {
         const float *co_prev, *co_curr, *co_next; /* orig */
         const float *vd_prev, *vd_curr, *vd_next; /* deform */

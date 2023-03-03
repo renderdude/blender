@@ -1785,13 +1785,13 @@ static eSnapMode snap_mesh_polygon(SnapObjectContext *sctx,
                              params->use_backface_culling,
                              &nearest2d);
 
-    const MPoly *poly = &mesh->polys()[sctx->ret.index];
+    const MPoly &poly = mesh->polys()[sctx->ret.index];
 
     if (sctx->runtime.snap_to_flag & SCE_SNAP_MODE_EDGE) {
       elem = SCE_SNAP_MODE_EDGE;
       BLI_assert(nearest2d.edge != nullptr);
-      const int *poly_edges = &nearest2d.corner_edges[poly->loopstart];
-      for (int i = poly->totloop; i--;) {
+      const int *poly_edges = &nearest2d.corner_edges[poly.loopstart];
+      for (int i = poly.totloop; i--;) {
         cb_snap_edge(&nearest2d,
                      poly_edges[i],
                      &neasrest_precalc,
@@ -1802,8 +1802,8 @@ static eSnapMode snap_mesh_polygon(SnapObjectContext *sctx,
     }
     else {
       elem = SCE_SNAP_MODE_VERTEX;
-      const int *poly_verts = &nearest2d.corner_verts[poly->loopstart];
-      for (int i = poly->totloop; i--;) {
+      const int *poly_verts = &nearest2d.corner_verts[poly.loopstart];
+      for (int i = poly.totloop; i--;) {
         cb_snap_vert(&nearest2d,
                      poly_verts[i],
                      &neasrest_precalc,

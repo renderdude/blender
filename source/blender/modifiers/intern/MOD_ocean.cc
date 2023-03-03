@@ -191,17 +191,15 @@ static void generate_ocean_geometry_polys(void *__restrict userdata,
   for (x = 0; x < gogd->res_x; x++) {
     const int fi = y * gogd->res_x + x;
     const int vi = y * (gogd->res_x + 1) + x;
-    MPoly *poly = &gogd->polys[fi];
 
     gogd->corner_verts[fi * 4 + 0] = vi;
     gogd->corner_verts[fi * 4 + 1] = vi + 1;
     gogd->corner_verts[fi * 4 + 2] = vi + 1 + gogd->res_x + 1;
     gogd->corner_verts[fi * 4 + 3] = vi + gogd->res_x + 1;
 
-    poly->loopstart = fi * 4;
-    poly->totloop = 4;
-
-    poly->flag |= ME_SMOOTH;
+    gogd->polys[fi].loopstart = fi * 4;
+    gogd->polys[fi].totloop = 4;
+    gogd->polys[fi].flag |= ME_SMOOTH;
   }
 }
 

@@ -1117,15 +1117,15 @@ void BKE_defvert_extract_vgroup_to_polyweights(const MDeformVert *dvert,
         dvert, defgroup, verts_num, invert_vgroup, tmp_weights);
 
     while (i--) {
-      const MPoly *poly = &polys[i];
-      const int *corner_vert = &corner_verts[poly->loopstart];
-      int j = poly->totloop;
+      const MPoly &poly = polys[i];
+      const int *corner_vert = &corner_verts[poly.loopstart];
+      int j = poly.totloop;
       float w = 0.0f;
 
       for (; j--; corner_vert++) {
         w += tmp_weights[*corner_vert];
       }
-      r_weights[i] = w / float(poly->totloop);
+      r_weights[i] = w / float(poly.totloop);
     }
 
     MEM_freeN(tmp_weights);

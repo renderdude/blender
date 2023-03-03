@@ -82,8 +82,6 @@ static CLG_LogRef LOG = {"bke.mesh_convert"};
 static void make_edges_mdata_extend(Mesh &mesh)
 {
   int totedge = mesh.totedge;
-  const MPoly *poly;
-  int i;
 
   const Span<MPoly> polys = mesh.polys();
   const Span<int> corner_verts = mesh.corner_verts();
@@ -124,11 +122,12 @@ static void make_edges_mdata_extend(Mesh &mesh)
     }
     BLI_edgehashIterator_free(ehi);
 
-    for (i = 0, poly = polys.data(); i < mesh.totpoly; i++, poly++) {
-      int corner = poly->loopstart;
-      int corner_prev = poly->loopstart + (poly->totloop - 1);
+    for (const int i : polys.index_range()) {
+      const MPoly &poly = polys[i];
+      int corner = poly.loopstart;
+      int corner_prev = poly.loopstart + (poly.totloop - 1);
       int j;
-      for (j = 0; j < poly->totloop; j++, corner++) {
+      for (j = 0; j < poly.totloop; j++, corner++) {
         /* lookup hashed edge index */
         corner_edges[corner_prev] = POINTER_AS_UINT(
             BLI_edgehash_lookup(eh, corner_verts[corner_prev], corner_verts[corner]));
@@ -459,13 +458,7 @@ void BKE_mesh_to_curve_nurblist(const Mesh *me, ListBase *nurblist, const int ed
   const Span<MPoly> polys = me->polys();
   const Span<int> corner_edges = me->corner_edges();
 
-  const MEdge *edge;
-  const MPoly *poly;
-
-  int edges_len = me->totedge;
-  int polys_len = me->totpoly;
   int totedges = 0;
-  int i;
 
   /* only to detect edge polylines */
   int *edge_users;
@@ -473,20 +466,20 @@ void BKE_mesh_to_curve_nurblist(const Mesh *me, ListBase *nurblist, const int ed
   ListBase edges = {nullptr, nullptr};
 
   /* get boundary edges */
-  edge_users = (int *)MEM_calloc_arrayN(edges_len, sizeof(int), __func__);
-  for (i = 0, poly = polys.data(); i < polys_len; i++, poly++) {
+  edge_users = (int *)MEM_calloc_arrayN(mesh_edges.size(), sizeof(int), __func__);
+  for (const int i : polys.index_range()) {
+    const MPoly &poly = polys[i];
     int j;
-    for (j = 0; j < poly->totloop; j++) {
-      edge_users[corner_edges[poly->loopstart + j]]++;
+    for (j = 0; j < poly.totloop; j++) {
+      edge_users[corner_edges[poly.loopstart + j]]++;
     }
   }
 
   /* create edges from all faces (so as to find edges not in any faces) */
-  edge = mesh_edges.data();
-  for (i = 0; i < edges_len; i++, edge++) {
+  for (const int i : mesh_edges.index_range()) {
     if (edge_users[i] == edge_users_test) {
       EdgeLink *edl = MEM_cnew<EdgeLink>("EdgeLink");
-      edl->edge = edge;
+      edl->edge = &mesh_edges[i];
 
       BLI_addtail(&edges, edl);
       totedges++;
@@ -519,7 +512,7 @@ void BKE_mesh_to_curve_nurblist(const Mesh *me, ListBase *nurblist, const int ed
         while (edl) {
           EdgeLink *edl_prev = edl->prev;
 
-          edge = (MEdge *)edl->edge;
+          const MEdge *edge = (MEdge *)edl->edge;
 
           if (edge->v1 == endVert) {
             endVert = edge->v2;
@@ -574,17 +567,18 @@ void BKE_mesh_to_curve_nurblist(const Mesh *me, ListBase *nurblist, const int ed
         /* create new 'nurb' within the curve */
         nu = MEM_new<Nurb>("MeshNurb", blender::dna::shallow_zero_initialize());
 
-        nu->pntsu = totpoly;
+        nu->pntsu = polys.size();
         nu->pntsv = 1;
         nu->orderu = 4;
         nu->flagu = CU_NURB_ENDPOINT | (closed ? CU_NURB_CYCLIC : 0); /* endpoint */
         nu->resolu = 12;
 
-        nu->bp = (BPoint *)MEM_calloc_arrayN(totpoly, sizeof(BPoint), "bpoints");
+        nu->bp = (BPoint *)MEM_calloc_arrayN(polys.size(), sizeof(BPoint), "bpoints");
 
         /* add points */
         vl = (VertLink *)polyline.first;
-        for (i = 0, bp = nu->bp; i < totpoly; i++, bp++, vl = (VertLink *)vl->next) {
+        int i;
+        for (i = 0, bp = nu->bp; i < polys.size(); i++, bp++, vl = (VertLink *)vl->next) {
           copy_v3_v3(bp->vec, positions[vl->index]);
           bp->f1 = SELECT;
           bp->radius = bp->weight = 1.0;

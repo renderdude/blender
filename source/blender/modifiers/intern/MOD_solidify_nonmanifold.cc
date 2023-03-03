@@ -393,12 +393,12 @@ Mesh *MOD_solidify_nonmanifold_modifyMesh(ModifierData *md,
               if (k != i && edge_adj_faces_len[k] > 0 &&
                   (ELEM(vm[orig_edges[k].v1], v1, v2) != ELEM(vm[orig_edges[k].v2], v1, v2))) {
                 for (uint j = 0; j < edge_adj_faces[k]->faces_len && can_merge; j++) {
-                  const MPoly *poly = &orig_polys[edge_adj_faces[k]->faces[j]];
+                  const MPoly &poly = orig_polys[edge_adj_faces[k]->faces[j]];
                   uint changes = 0;
-                  int cur = poly->totloop - 1;
-                  for (int next = 0; next < poly->totloop && changes <= 2; next++) {
-                    uint cur_v = vm[orig_corner_verts[poly->loopstart + cur]];
-                    uint next_v = vm[orig_corner_verts[poly->loopstart + next]];
+                  int cur = poly.totloop - 1;
+                  for (int next = 0; next < poly.totloop && changes <= 2; next++) {
+                    uint cur_v = vm[orig_corner_verts[poly.loopstart + cur]];
+                    uint next_v = vm[orig_corner_verts[poly.loopstart + next]];
                     changes += (ELEM(cur_v, v1, v2) != ELEM(next_v, v1, v2));
                     cur = next;
                   }

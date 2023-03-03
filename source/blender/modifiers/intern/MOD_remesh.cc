@@ -120,13 +120,11 @@ static void dualcon_add_quad(void *output_v, const int vert_indices[4])
   BLI_assert(output->curface < mesh->totpoly);
   UNUSED_VARS_NDEBUG(mesh);
 
-  int *corner_verts = output->corner_verts;
-  MPoly *cur_poly = &output->polys[output->curface];
+  output->polys[output->curface].loopstart = output->curface * 4;
+  output->polys[output->curface].totloop = 4;
 
-  cur_poly->loopstart = output->curface * 4;
-  cur_poly->totloop = 4;
   for (i = 0; i < 4; i++) {
-    corner_verts[output->curface * 4 + i] = vert_indices[i];
+    output->corner_verts[output->curface * 4 + i] = vert_indices[i];
   }
 
   output->curface++;

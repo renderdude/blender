@@ -2015,22 +2015,22 @@ int BKE_sculpt_mask_layers_ensure(Depsgraph *depsgraph,
     /* if vertices already have mask, copy into multires data */
     if (paint_mask) {
       for (i = 0; i < me->totpoly; i++) {
-        const MPoly *poly = &polys[i];
+        const MPoly &poly = polys[i];
         float avg = 0;
 
         /* mask center */
-        for (j = 0; j < poly->totloop; j++) {
-          const int vert_i = corner_verts[poly->loopstart + j];
+        for (j = 0; j < poly.totloop; j++) {
+          const int vert_i = corner_verts[poly.loopstart + j];
           avg += paint_mask[vert_i];
         }
-        avg /= float(poly->totloop);
+        avg /= float(poly.totloop);
 
         /* fill in multires mask corner */
-        for (j = 0; j < poly->totloop; j++) {
-          GridPaintMask *gpm = &gmask[poly->loopstart + j];
-          const int vert_i = corner_verts[poly->loopstart + j];
-          const int prev = ME_POLY_LOOP_PREV(poly, j);
-          const int next = ME_POLY_LOOP_NEXT(poly, j);
+        for (j = 0; j < poly.totloop; j++) {
+          GridPaintMask *gpm = &gmask[poly.loopstart + j];
+          const int vert_i = corner_verts[poly.loopstart + j];
+          const int prev = ME_POLY_LOOP_PREV(&poly, j);
+          const int next = ME_POLY_LOOP_NEXT(&poly, j);
 
           gpm->data[0] = avg;
           gpm->data[1] = (paint_mask[vert_i] + paint_mask[corner_verts[next]]) * 0.5f;

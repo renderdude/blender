@@ -1481,10 +1481,10 @@ void BKE_mesh_normals_loop_split(const float (*vert_positions)[3],
     int poly_index;
 
     for (poly_index = 0; poly_index < numPolys; poly_index++) {
-      const MPoly *poly = &polys[poly_index];
-      int ml_index = poly->loopstart;
-      const int ml_index_end = ml_index + poly->totloop;
-      const bool is_poly_flat = ((poly->flag & ME_SMOOTH) == 0);
+      const MPoly &poly = polys[poly_index];
+      int ml_index = poly.loopstart;
+      const int ml_index_end = ml_index + poly.totloop;
+      const bool is_poly_flat = ((poly.flag & ME_SMOOTH) == 0);
 
       for (; ml_index < ml_index_end; ml_index++) {
         if (is_poly_flat) {
@@ -1744,9 +1744,8 @@ static void mesh_normals_loop_custom_set(const float (*positions)[3],
            * previous loop's face and current's one as sharp.
            * We know those two loops do not point to the same edge,
            * since we do not allow reversed winding in a same smooth fan. */
-          const MPoly *poly = &polys[loop_to_poly[lidx]];
-          const int mlp = (lidx == poly->loopstart) ? poly->loopstart + poly->totloop - 1 :
-                                                      lidx - 1;
+          const MPoly &poly = polys[loop_to_poly[lidx]];
+          const int mlp = (lidx == poly.loopstart) ? poly.loopstart + poly.totloop - 1 : lidx - 1;
           const int edge = corner_edges[lidx];
           const int edge_p = corner_edges[mlp];
           const int prev_edge = corner_edges[corner_prev];
@@ -1770,9 +1769,8 @@ static void mesh_normals_loop_custom_set(const float (*positions)[3],
         float *nor = r_custom_loop_normals[lidx];
 
         if (dot_v3v3(org_nor, nor) < LNOR_SPACE_TRIGO_THRESHOLD) {
-          const MPoly *poly = &polys[loop_to_poly[lidx]];
-          const int mlp = (lidx == poly->loopstart) ? poly->loopstart + poly->totloop - 1 :
-                                                      lidx - 1;
+          const MPoly &poly = polys[loop_to_poly[lidx]];
+          const int mlp = (lidx == poly.loopstart) ? poly.loopstart + poly.totloop - 1 : lidx - 1;
           const int edge = corner_edges[lidx];
           const int edge_p = corner_edges[mlp];
           const int prev_edge = corner_edges[corner_prev];

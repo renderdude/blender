@@ -238,10 +238,10 @@ class MeshFairingContext : public FairingContext {
                                   float r_adj_prev[3]) override
   {
     const int vert = corner_verts_[loop];
-    const MPoly *poly = &polys[loop_to_poly_map_[loop]];
-    const int corner = poly_find_loop_from_vert(poly, &corner_verts_[poly->loopstart], vert);
-    copy_v3_v3(r_adj_next, co_[corner_verts_[ME_POLY_LOOP_NEXT(poly, corner)]]);
-    copy_v3_v3(r_adj_prev, co_[corner_verts_[ME_POLY_LOOP_PREV(poly, corner)]]);
+    const MPoly &poly = polys[loop_to_poly_map_[loop]];
+    const int corner = poly_find_loop_from_vert(&poly, &corner_verts_[poly.loopstart], vert);
+    copy_v3_v3(r_adj_next, co_[corner_verts_[ME_POLY_LOOP_NEXT(&poly, corner)]]);
+    copy_v3_v3(r_adj_prev, co_[corner_verts_[ME_POLY_LOOP_PREV(&poly, corner)]]);
   }
 
   int other_vertex_index_from_loop(const int loop, const uint v) override
@@ -454,7 +454,7 @@ static void prefair_and_fair_verts(FairingContext *fairing_context,
                                    bool *affected_verts,
                                    const eMeshFairingDepth depth)
 {
-  /* Prefair. */
+  /* Pre-fair. */
   UniformVertexWeight *uniform_vertex_weights = new UniformVertexWeight(fairing_context);
   UniformLoopWeight *uniform_loop_weights = new UniformLoopWeight();
   fairing_context->fair_verts(affected_verts, depth, uniform_vertex_weights, uniform_loop_weights);

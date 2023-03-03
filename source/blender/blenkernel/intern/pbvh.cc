@@ -1411,9 +1411,9 @@ static void pbvh_update_normals_accum_task_cb(void *__restrict userdata,
 
       /* Face normal and mask */
       if (lt->poly != mpoly_prev) {
-        const MPoly *poly = &pbvh->polys[lt->poly];
+        const MPoly &poly = pbvh->polys[lt->poly];
         BKE_mesh_calc_poly_normal(
-            poly, &pbvh->corner_verts[poly->loopstart], pbvh->vert_positions, fn);
+            &poly, &pbvh->corner_verts[poly.loopstart], pbvh->vert_positions, fn);
         mpoly_prev = lt->poly;
       }
 
@@ -3715,7 +3715,7 @@ static void pbvh_face_iter_step(PBVHFaceIter *fd, bool do_step)
       }
 
       fd->last_face_index_ = face_index;
-      const MPoly *poly = fd->polys_ + face_index;
+      const MPoly &poly = fd->polys_[face_index];
 
       fd->face.i = fd->index = face_index;
 
@@ -3726,17 +3726,17 @@ static void pbvh_face_iter_step(PBVHFaceIter *fd, bool do_step)
         fd->hide = fd->hide_poly_ + face_index;
       }
 
-      pbvh_face_iter_verts_reserve(fd, poly->totloop);
+      pbvh_face_iter_verts_reserve(fd, poly.totloop);
 
       const int grid_area = fd->subdiv_key_.grid_area;
 
-      for (int i = 0; i < poly->totloop; i++) {
+      for (int i = 0; i < poly.totloop; i++) {
         if (fd->pbvh_type_ == PBVH_GRIDS) {
           /* Grid corners. */
-          fd->verts[i].i = (poly->loopstart + i) * grid_area + grid_area - 1;
+          fd->verts[i].i = (poly.loopstart + i) * grid_area + grid_area - 1;
         }
         else {
-          fd->verts[i].i = fd->corner_verts_[poly->loopstart + i];
+          fd->verts[i].i = fd->corner_verts_[poly.loopstart + i];
         }
       }
       break;

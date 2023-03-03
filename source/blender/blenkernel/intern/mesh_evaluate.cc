@@ -801,20 +801,18 @@ void BKE_mesh_calc_relative_deform(const MPoly *polys,
                                    const float (*vert_cos_org)[3],
                                    float (*vert_cos_new)[3])
 {
-  const MPoly *poly;
-  int i;
-
   int *vert_accum = (int *)MEM_calloc_arrayN(size_t(totvert), sizeof(*vert_accum), __func__);
 
   memset(vert_cos_new, '\0', sizeof(*vert_cos_new) * size_t(totvert));
 
-  for (i = 0, poly = polys; i < totpoly; i++, poly++) {
-    const int *poly_verts = &corner_verts[poly->loopstart];
+  for (const int i : blender::IndexRange(totpoly)) {
+    const MPoly &poly = polys[i];
+    const int *poly_verts = &corner_verts[poly.loopstart];
 
-    for (int j = 0; j < poly->totloop; j++) {
-      const int v_prev = poly_verts[(poly->totloop + (j - 1)) % poly->totloop];
+    for (int j = 0; j < poly.totloop; j++) {
+      const int v_prev = poly_verts[(poly.totloop + (j - 1)) % poly.totloop];
       const int v_curr = poly_verts[j];
-      const int v_next = poly_verts[(j + 1) % poly->totloop];
+      const int v_next = poly_verts[(j + 1) % poly.totloop];
 
       float tvec[3];
 
@@ -832,7 +830,7 @@ void BKE_mesh_calc_relative_deform(const MPoly *polys,
     }
   }
 
-  for (i = 0; i < totvert; i++) {
+  for (int i = 0; i < totvert; i++) {
     if (vert_accum[i]) {
       mul_v3_fl(vert_cos_new[i], 1.0f / float(vert_accum[i]));
     }

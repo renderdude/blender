@@ -442,9 +442,9 @@ static void calc_tangent_spaces(const Mesh *mesh,
   }
 
   for (const int64_t i : polys.index_range()) {
-    const MPoly *poly = &polys[i];
-    int next_corner = poly->loopstart;
-    int term_corner = next_corner + poly->totloop;
+    const MPoly &poly = polys[i];
+    int next_corner = poly.loopstart;
+    int term_corner = next_corner + poly.totloop;
     int prev_corner = term_corner - 2;
     int curr_corner = term_corner - 1;
 

@@ -252,7 +252,6 @@ bool BKE_mesh_validate_arrays(Mesh *mesh,
   blender::MutableVArraySpan<int> material_indices_span(material_indices.varray);
 
   MEdge *edge;
-  MPoly *poly;
   uint i, j;
   int *v;
 
@@ -563,7 +562,9 @@ bool BKE_mesh_validate_arrays(Mesh *mesh,
     SortPoly *prev_sp, *sp = sort_polys;
     int prev_end;
 
-    for (i = 0, poly = polys; i < totpoly; i++, poly++, sp++) {
+    for (const int64_t i : blender::IndexRange(totpoly)) {
+      const MPoly &poly = polys[i];
+
       sp->index = i;
 
       /* Material index, isolated from other tests here. While large indices are clamped,
@@ -576,22 +577,22 @@ bool BKE_mesh_validate_arrays(Mesh *mesh,
         }
       }
 
-      if (poly->loopstart < 0 || poly->totloop < 3) {
+      if (poly.loopstart < 0 || poly.totloop < 3) {
         /* Invalid loop data. */
         PRINT_ERR("\tPoly %u is invalid (loopstart: %d, totloop: %d)",
                   sp->index,
-                  poly->loopstart,
-                  poly->totloop);
+                  poly.loopstart,
+                  poly.totloop);
         sp->invalid = true;
       }
-      else if (poly->loopstart + poly->totloop > totloop) {
+      else if (poly.loopstart + poly.totloop > totloop) {
         /* Invalid loop data. */
         PRINT_ERR(
             "\tPoly %u uses loops out of range "
             "(loopstart: %d, loopend: %d, max number of loops: %u)",
             sp->index,
-            poly->loopstart,
-            poly->loopstart + poly->totloop - 1,
+            poly.loopstart,
+            poly.loopstart + poly.totloop - 1,
             totloop - 1);
         sp->invalid = true;
       }
@@ -599,14 +600,14 @@ bool BKE_mesh_validate_arrays(Mesh *mesh,
         /* Poly itself is valid, for now. */
         int v1, v2; /* v1 is prev loop vert idx, v2 is current loop one. */
         sp->invalid = false;
-        sp->verts = v = (int *)MEM_mallocN(sizeof(int) * poly->totloop, "Vert idx of SortPoly");
-        sp->numverts = poly->totloop;
-        sp->loopstart = poly->loopstart;
+        sp->verts = v = (int *)MEM_mallocN(sizeof(int) * poly.totloop, "Vert idx of SortPoly");
+        sp->numverts = poly.totloop;
+        sp->loopstart = poly.loopstart;
 
         /* Ideally we would only have to do that once on all vertices
          * before we start checking each poly, but several polys can use same vert,
          * so we have to ensure here all verts of current poly are cleared. */
-        for (j = 0; j < poly->totloop; j++) {
+        for (j = 0; j < poly.totloop; j++) {
           const int vert = corner_verts[sp->loopstart + j];
           if (vert < totvert) {
             BLI_BITMAP_DISABLE(vert_tag, vert);
@@ -614,7 +615,7 @@ bool BKE_mesh_validate_arrays(Mesh *mesh,
         }
 
         /* Test all poly's loops' vert idx. */
-        for (j = 0; j < poly->totloop; j++, v++) {
+        for (j = 0; j < poly.totloop; j++, v++) {
           const int vert = corner_verts[sp->loopstart + j];
           if (vert >= totvert) {
             /* Invalid vert idx. */
@@ -622,7 +623,7 @@ bool BKE_mesh_validate_arrays(Mesh *mesh,
             sp->invalid = true;
           }
           else if (BLI_BITMAP_TEST(vert_tag, vert)) {
-            PRINT_ERR("\tPoly %u has duplicated vert reference at corner (%u)", i, j);
+            PRINT_ERR("\tPoly %u has duplicated vert reference at corner (%u)", uint(i), j);
             sp->invalid = true;
           }
           else {
@@ -632,16 +633,17 @@ bool BKE_mesh_validate_arrays(Mesh *mesh,
         }
 
         if (sp->invalid) {
+          sp++;
           continue;
         }
 
         /* Test all poly's loops. */
-        for (j = 0; j < poly->totloop; j++) {
+        for (j = 0; j < poly.totloop; j++) {
           const int corner = sp->loopstart + j;
           const int vert = corner_verts[corner];
           const int edge_i = corner_edges[corner];
           v1 = vert;
-          v2 = corner_verts[sp->loopstart + (j + 1) % poly->totloop];
+          v2 = corner_verts[sp->loopstart + (j + 1) % poly.totloop];
           if (!BLI_edgehash_haskey(edge_hash, v1, v2)) {
             /* Edge not existing. */
             PRINT_ERR("\tPoly %u needs missing edge (%d, %d)", sp->index, v1, v2);
@@ -665,7 +667,7 @@ bool BKE_mesh_validate_arrays(Mesh *mesh,
                         corner_edges[corner]);
             }
             else {
-              PRINT_ERR("\tLoop %d has invalid edge reference (%d)", corner, edge);
+              PRINT_ERR("\tLoop %d has invalid edge reference (%d)", corner, edge_i);
               sp->invalid = true;
             }
           }
@@ -689,7 +691,7 @@ bool BKE_mesh_validate_arrays(Mesh *mesh,
                     corner_edges[corner]);
               }
               else {
-                PRINT_ERR("\tPoly %u has invalid edge reference (%d)", sp->index, edge);
+                PRINT_ERR("\tPoly %u has invalid edge reference (%d)", sp->index, edge_i);
                 sp->invalid = true;
               }
             }
@@ -701,6 +703,7 @@ bool BKE_mesh_validate_arrays(Mesh *mesh,
           qsort(sp->verts, sp->numverts, sizeof(int), int_cmp);
         }
       }
+      sp++;
     }
 
     MEM_freeN(vert_tag);
@@ -1224,31 +1227,31 @@ void mesh_strip_polysloops(Mesh *me)
   MutableSpan<MPoly> polys = me->polys_for_write();
   MutableSpan<int> corner_edges = me->corner_edges_for_write();
 
-  MPoly *poly;
   int a, b;
   /* New loops idx! */
   int *new_idx = (int *)MEM_mallocN(sizeof(int) * me->totloop, __func__);
 
-  for (a = b = 0, poly = polys.data(); a < me->totpoly; a++, poly++) {
+  for (a = b = 0; a < me->totpoly; a++) {
+    const MPoly &poly = polys[a];
     bool invalid = false;
-    int i = poly->loopstart;
-    int stop = i + poly->totloop;
+    int i = poly.loopstart;
+    int stop = i + poly.totloop;
 
-    if (stop > me->totloop || stop < i || poly->loopstart < 0) {
+    if (stop > me->totloop || stop < i || poly.loopstart < 0) {
       invalid = true;
     }
     else {
       /* If one of the poly's loops is invalid, the whole poly is invalid! */
-      if (corner_edges.slice(poly->loopstart, poly->totloop)
+      if (corner_edges.slice(poly.loopstart, poly.totloop)
               .as_span()
               .contains(INVALID_LOOP_EDGE_MARKER)) {
         invalid = true;
       }
     }
 
-    if (poly->totloop >= 3 && !invalid) {
+    if (poly.totloop >= 3 && !invalid) {
       if (a != b) {
-        memcpy(&polys[b], poly, sizeof(polys[b]));
+        memcpy(&polys[b], &poly, sizeof(polys[b]));
         CustomData_copy_data(&me->pdata, &me->pdata, a, b, 1);
       }
       b++;

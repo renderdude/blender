@@ -1993,16 +1993,16 @@ static void adjacet_vertices_index_from_adjacent_edge(const SubdivCCG *subdiv_cc
 {
   const int grid_size_1 = subdiv_ccg->grid_size - 1;
   const int poly_index = BKE_subdiv_ccg_grid_to_face_index(subdiv_ccg, coord->grid_index);
-  const MPoly *poly = &polys[poly_index];
+  const MPoly &poly = polys[poly_index];
   *r_v1 = corner_verts[coord->grid_index];
 
-  const int corner = poly_find_loop_from_vert(poly, &corner_verts[poly->loopstart], *r_v1);
+  const int corner = poly_find_loop_from_vert(&poly, &corner_verts[poly.loopstart], *r_v1);
   if (coord->x == grid_size_1) {
-    const int next = ME_POLY_LOOP_NEXT(poly, corner);
+    const int next = ME_POLY_LOOP_NEXT(&poly, corner);
     *r_v2 = corner_verts[next];
   }
   if (coord->y == grid_size_1) {
-    const int prev = ME_POLY_LOOP_PREV(poly, corner);
+    const int prev = ME_POLY_LOOP_PREV(&poly, corner);
     *r_v2 = corner_verts[prev];
   }
 }

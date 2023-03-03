@@ -671,7 +671,7 @@ static ParamHandle *construct_param_handle_subsurfed(const Scene *scene,
 
   /* Prepare and feed faces to the solver */
   for (const int i : subsurf_polys.index_range()) {
-    const MPoly *poly = &subsurf_polys[i];
+    const MPoly &poly = subsurf_polys[i];
     ParamKey key, vkeys[4];
     bool pin[4], select[4];
     const float *co[4];
@@ -690,10 +690,10 @@ static ParamHandle *construct_param_handle_subsurfed(const Scene *scene,
       }
     }
 
-    const int *poly_corner_verts = &subsurf_corner_verts[poly->loopstart];
+    const int *poly_corner_verts = &subsurf_corner_verts[poly.loopstart];
 
     /* We will not check for v4 here. Sub-surface faces always have 4 vertices. */
-    BLI_assert(poly->totloop == 4);
+    BLI_assert(poly.totloop == 4);
     key = (ParamKey)i;
     vkeys[0] = (ParamKey)poly_corner_verts[0];
     vkeys[1] = (ParamKey)poly_corner_verts[1];
@@ -2828,20 +2828,20 @@ static void uv_map_mirror(BMFace *efa,
   }
 }
 
-/** Store a face and it's current branch on the generalized atan2 function.
+/**
+ * Store a face and it's current branch on the generalized atan2 function.
  *
- * In complex analysis, we can generalize the arctangent function
+ * In complex analysis, we can generalize the `arctangent` function
  * into a multi-valued function that is "almost everywhere continuous"
  * in the complex plane.
  *
  * The downside is that we need to keep track of which "branch" of the
  * multi-valued function we are currently on.
  *
- * \note Even though atan2(a+bi, c+di) is now (multiply) defined for all
+ * \note Even though `atan2(a+bi, c+di)` is now (multiply) defined for all
  * complex inputs, we will only evaluate it with `b==0` and `d==0`.
  */
-
-struct uv_face_branch {
+struct UV_FaceBranch {
   BMFace *efa;
   float branch;
 };
@@ -2850,7 +2850,7 @@ struct uv_face_branch {
  *
  * Heuristics are used in #uv_map_mirror to improve winding.
  *
- * if `fan` is true, faces with UVs at the pole have corrections appled to fan the UVs.
+ * if `fan` is true, faces with UVs at the pole have corrections applied to fan the UVs.
  *
  * if `use_seams` is true, the unwrapping will flood fill across the mesh, using
  * seams to mark boundaries, and #BM_ELEM_TAG to prevent revisiting faces.
@@ -2871,12 +2871,12 @@ static float uv_sphere_project(const Scene *scene,
     return max_u;
   }
 
-  /* Similar to BM_mesh_calc_face_groups with added connectivity information. */
-  blender::Vector<uv_face_branch> stack;
+  /* Similar to #BM_mesh_calc_face_groups with added connectivity information. */
+  blender::Vector<UV_FaceBranch> stack;
   stack.append({efa_init, branch_init});
 
   while (stack.size()) {
-    uv_face_branch face_branch = stack.pop_last();
+    UV_FaceBranch face_branch = stack.pop_last();
     BMFace *efa = face_branch.efa;
 
     if (use_seams) {
@@ -3050,12 +3050,12 @@ static float uv_cylinder_project(const Scene *scene,
 
   /* Similar to BM_mesh_calc_face_groups with added connectivity information. */
 
-  blender::Vector<uv_face_branch> stack;
+  blender::Vector<UV_FaceBranch> stack;
 
   stack.append({efa_init, branch_init});
 
   while (stack.size()) {
-    uv_face_branch face_branch = stack.pop_last();
+    UV_FaceBranch face_branch = stack.pop_last();
     BMFace *efa = face_branch.efa;
 
     if (use_seams) {

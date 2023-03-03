@@ -97,9 +97,9 @@ static void uv_warp_compute(void *__restrict userdata,
 {
   const UVWarpData *data = static_cast<const UVWarpData *>(userdata);
 
-  const MPoly *poly = &data->polys[i];
-  const int *poly_verts = &data->corner_verts[poly->loopstart];
-  float(*mluv)[2] = &data->mloopuv[poly->loopstart];
+  const MPoly &poly = data->polys[i];
+  const int *poly_verts = &data->corner_verts[poly.loopstart];
+  float(*mluv)[2] = &data->mloopuv[poly.loopstart];
 
   const MDeformVert *dvert = data->dvert;
   const int defgrp_index = data->defgrp_index;
@@ -109,7 +109,7 @@ static void uv_warp_compute(void *__restrict userdata,
   int l;
 
   if (dvert) {
-    for (l = 0; l < poly->totloop; l++, mluv++) {
+    for (l = 0; l < poly.totloop; l++, mluv++) {
       const int vert_i = poly_verts[l];
       float uv[2];
       const float weight = data->invert_vgroup ?
@@ -121,7 +121,7 @@ static void uv_warp_compute(void *__restrict userdata,
     }
   }
   else {
-    for (l = 0; l < poly->totloop; l++, mluv++) {
+    for (l = 0; l < poly.totloop; l++, mluv++) {
       uv_warp_from_mat4_pair(*mluv, *mluv, warp_mat);
     }
   }

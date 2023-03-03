@@ -135,9 +135,9 @@ static void get_face_vertices(const OpenSubdiv_Converter *converter,
                               int *manifold_face_vertices)
 {
   ConverterStorage *storage = static_cast<ConverterStorage *>(converter->user_data);
-  const MPoly *poly = &storage->polys[manifold_face_index];
-  for (int i = 0; i < poly->totloop; i++) {
-    const int vert = storage->corner_verts[poly->loopstart + i];
+  const MPoly &poly = storage->polys[manifold_face_index];
+  for (int i = 0; i < poly.totloop; i++) {
+    const int vert = storage->corner_verts[poly.loopstart + i];
     manifold_face_vertices[i] = storage->manifold_vertex_index[vert];
   }
 }
@@ -231,8 +231,8 @@ static void precalc_uv_layer(const OpenSubdiv_Converter *converter, const int la
       if (uv_vert->separate) {
         storage->num_uv_coordinates++;
       }
-      const MPoly *poly = &storage->polys[uv_vert->poly_index];
-      const int global_loop_index = poly->loopstart + uv_vert->loop_of_poly_index;
+      const MPoly &poly = storage->polys[uv_vert->poly_index];
+      const int global_loop_index = poly.loopstart + uv_vert->loop_of_poly_index;
       storage->loop_uv_indices[global_loop_index] = storage->num_uv_coordinates;
       uv_vert = uv_vert->next;
     }
@@ -259,8 +259,8 @@ static int get_face_corner_uv_index(const OpenSubdiv_Converter *converter,
                                     const int corner)
 {
   ConverterStorage *storage = static_cast<ConverterStorage *>(converter->user_data);
-  const MPoly *poly = &storage->polys[face_index];
-  return storage->loop_uv_indices[poly->loopstart + corner];
+  const MPoly &poly = storage->polys[face_index];
+  return storage->loop_uv_indices[poly.loopstart + corner];
 }
 
 static void free_user_data(const OpenSubdiv_Converter *converter)
@@ -362,9 +362,9 @@ static void initialize_manifold_indices(ConverterStorage *storage)
   BLI_bitmap *vert_used_map = BLI_BITMAP_NEW(mesh->totvert, "vert used map");
   BLI_bitmap *edge_used_map = BLI_BITMAP_NEW(mesh->totedge, "edge used map");
   for (int poly_index = 0; poly_index < mesh->totpoly; poly_index++) {
-    const MPoly *poly = &polys[poly_index];
-    for (int i = 0; i < poly->totloop; i++) {
-      const int corner = poly->loopstart + i;
+    const MPoly &poly = polys[poly_index];
+    for (int i = 0; i < poly.totloop; i++) {
+      const int corner = poly.loopstart + i;
       BLI_BITMAP_ENABLE(vert_used_map, corner_verts[corner]);
       BLI_BITMAP_ENABLE(edge_used_map, corner_edges[corner]);
     }
