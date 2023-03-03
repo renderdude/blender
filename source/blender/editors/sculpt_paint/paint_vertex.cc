@@ -1982,11 +1982,11 @@ static void do_wpaint_brush_blur_task_cb_ex(void *__restrict userdata,
         float weight_final = 0.0f;
         for (int j = 0; j < gmap->vert_to_poly[v_index].count; j++) {
           const int p_index = gmap->vert_to_poly[v_index].indices[j];
-          const MPoly *mp = &ss->mpoly[p_index];
+          const MPoly *poly = &ss->polys[p_index];
 
-          total_hit_loops += mp->totloop;
-          for (int k = 0; k < mp->totloop; k++) {
-            const int l_index = mp->loopstart + k;
+          total_hit_loops += poly->totloop;
+          for (int k = 0; k < poly->totloop; k++) {
+            const int l_index = poly->loopstart + k;
             const int vert_i = ss->corner_verts[l_index];
             weight_final += data->wpd->precomputed_weight[vert_i];
           }
@@ -2096,9 +2096,9 @@ static void do_wpaint_brush_smear_task_cb_ex(void *__restrict userdata,
             float weight_final = 0.0;
             for (int j = 0; j < gmap->vert_to_poly[v_index].count; j++) {
               const int p_index = gmap->vert_to_poly[v_index].indices[j];
-              const MPoly *mp = &ss->mpoly[p_index];
-              for (int k = 0; k < mp->totloop; k++) {
-                const int other_corner_i = mp->loopstart + k;
+              const MPoly *poly = &ss->polys[p_index];
+              for (int k = 0; k < poly->totloop; k++) {
+                const int other_corner_i = poly->loopstart + k;
                 const int v_other_index = ss->corner_verts[other_corner_i];
                 if (v_other_index != v_index) {
                   const float3 &mv_other = ss->vert_positions[v_other_index];
@@ -3034,11 +3034,11 @@ static void do_vpaint_brush_blur_loops(bContext *C,
 
               for (int j = 0; j < gmap->vert_to_poly[v_index].count; j++) {
                 int p_index = gmap->vert_to_poly[v_index].indices[j];
-                const MPoly *mp = &ss->mpoly[p_index];
+                const MPoly *poly = &ss->polys[p_index];
                 if (!use_face_sel || select_poly[p_index]) {
-                  total_hit_loops += mp->totloop;
-                  for (int k = 0; k < mp->totloop; k++) {
-                    const uint l_index = mp->loopstart + k;
+                  total_hit_loops += poly->totloop;
+                  for (int k = 0; k < poly->totloop; k++) {
+                    const uint l_index = poly->loopstart + k;
                     Color *col = lcol + l_index;
 
                     /* Color is squared to compensate the sqrt color encoding. */
@@ -3179,11 +3179,11 @@ static void do_vpaint_brush_blur_verts(bContext *C,
 
               for (int j = 0; j < gmap->vert_to_poly[v_index].count; j++) {
                 int p_index = gmap->vert_to_poly[v_index].indices[j];
-                const MPoly *mp = &ss->mpoly[p_index];
+                const MPoly *poly = &ss->polys[p_index];
                 if (!use_face_sel || select_poly[p_index]) {
-                  total_hit_loops += mp->totloop;
-                  for (int k = 0; k < mp->totloop; k++) {
-                    const uint l_index = mp->loopstart + k;
+                  total_hit_loops += poly->totloop;
+                  for (int k = 0; k < poly->totloop; k++) {
+                    const uint l_index = poly->loopstart + k;
                     const uint v_index = ss->corner_verts[l_index];
 
                     Color *col = lcol + v_index;
@@ -3342,10 +3342,10 @@ static void do_vpaint_brush_smear(bContext *C,
                   const int l_index = gmap->vert_to_loop[v_index].indices[j];
                   BLI_assert(ss->corner_verts[l_index] == v_index);
                   UNUSED_VARS_NDEBUG(l_index);
-                  const MPoly *mp = &ss->mpoly[p_index];
+                  const MPoly *poly = &ss->polys[p_index];
                   if (!use_face_sel || select_poly[p_index]) {
-                    for (int k = 0; k < mp->totloop; k++) {
-                      const int other_corner_i = mp->loopstart + k;
+                    for (int k = 0; k < poly->totloop; k++) {
+                      const int other_corner_i = poly->loopstart + k;
                       const int v_other_index = ss->corner_verts[other_corner_i];
                       if (v_other_index != v_index) {
                         const float3 &mv_other = &ss->vert_positions[v_other_index];
@@ -3365,7 +3365,7 @@ static void do_vpaint_brush_smear(bContext *C,
                           elem_index = v_other_index;
                         }
                         else {
-                          elem_index = mp->loopstart + k;
+                          elem_index = poly->loopstart + k;
                         }
 
                         if (stroke_dot > stroke_dot_max) {

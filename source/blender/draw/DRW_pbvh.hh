@@ -37,7 +37,7 @@ struct PBVH_GPU_Args {
   const float (*vert_positions)[3];
   blender::Span<int> corner_verts;
   blender::Span<int> corner_edges;
-  const MPoly *mpoly;
+  const MPoly *polys;
   int mesh_verts_num, mesh_faces_num, mesh_grids_num;
   CustomData *vdata, *ldata, *pdata;
   const float (*vert_normals)[3];

@@ -182,10 +182,9 @@ static float *SCULPT_geodesic_mesh_create(Object *ob,
           if (ss->hide_poly && ss->hide_poly[poly]) {
             continue;
           }
-          const MPoly *mpoly = &polys[poly];
 
-          for (int loop_index = 0; loop_index < mpoly->totloop; loop_index++) {
-            const int v_other = corner_verts[loop_index + mpoly->loopstart];
+          for (int loop_index = 0; loop_index < polys[poly].totloop; loop_index++) {
+            const int v_other = corner_verts[loop_index + polys[poly].loopstart];
             if (ELEM(v_other, v1, v2)) {
               continue;
             }

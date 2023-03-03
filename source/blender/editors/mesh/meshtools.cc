@@ -99,10 +99,10 @@ static void join_mesh_single(Depsgraph *depsgraph,
 
   Mesh *me = static_cast<Mesh *>(ob_src->data);
   float3 *vert_positions = *vert_positions_pp;
-  MEdge *medge = *medge_pp;
+  MEdge *edge = *medge_pp;
   int *corner_verts = *corner_verts_pp;
   int *corner_edges = *corner_edges_pp;
-  MPoly *mpoly = *mpoly_pp;
+  MPoly *poly = *mpoly_pp;
 
   if (me->totvert) {
     /* standard data */
@@ -209,9 +209,9 @@ static void join_mesh_single(Depsgraph *depsgraph,
     CustomData_merge(&me->edata, edata, CD_MASK_MESH.emask, CD_SET_DEFAULT, totedge);
     CustomData_copy_data_named(&me->edata, edata, 0, *edgeofs, me->totedge);
 
-    for (a = 0; a < me->totedge; a++, medge++) {
-      medge->v1 += *vertofs;
-      medge->v2 += *vertofs;
+    for (a = 0; a < me->totedge; a++, edge++) {
+      edge->v1 += *vertofs;
+      edge->v2 += *vertofs;
     }
   }
 
@@ -268,8 +268,8 @@ static void join_mesh_single(Depsgraph *depsgraph,
       }
     }
 
-    for (a = 0; a < me->totpoly; a++, mpoly++) {
-      mpoly->loopstart += *loopofs;
+    for (a = 0; a < me->totpoly; a++, poly++) {
+      poly->loopstart += *loopofs;
     }
 
     /* Face maps. */
@@ -336,8 +336,8 @@ int ED_mesh_join_objects_exec(bContext *C, wmOperator *op)
   Object *ob = CTX_data_active_object(C);
   Material **matar = nullptr, *ma;
   Mesh *me;
-  MEdge *medge = nullptr;
-  MPoly *mpoly = nullptr;
+  MEdge *edge = nullptr;
+  MPoly *polys = nullptr;
   Key *key, *nkey = nullptr;
   float imat[4][4];
   int a, b, totcol, totmat = 0, totedge = 0, totvert = 0;
@@ -587,12 +587,12 @@ int ED_mesh_join_objects_exec(bContext *C, wmOperator *op)
 
   float3 *vert_positions = (float3 *)CustomData_add_layer_named(
       &vdata, CD_PROP_FLOAT3, CD_SET_DEFAULT, nullptr, totvert, "position");
-  medge = (MEdge *)CustomData_add_layer(&edata, CD_MEDGE, CD_SET_DEFAULT, nullptr, totedge);
+  edge = (MEdge *)CustomData_add_layer(&edata, CD_MEDGE, CD_SET_DEFAULT, nullptr, totedge);
   int *corner_verts = (int *)CustomData_add_layer_named(
       &ldata, CD_PROP_INT32, CD_CONSTRUCT, nullptr, totloop, ".corner_vert");
   int *corner_edges = (int *)CustomData_add_layer_named(
       &ldata, CD_PROP_INT32, CD_CONSTRUCT, nullptr, totloop, ".corner_edge");
-  mpoly = (MPoly *)CustomData_add_layer(&pdata, CD_MPOLY, CD_SET_DEFAULT, nullptr, totpoly);
+  polys = (MPoly *)CustomData_add_layer(&pdata, CD_MPOLY, CD_SET_DEFAULT, nullptr, totpoly);
 
   vertofs = 0;
   edgeofs = 0;
@@ -615,10 +615,10 @@ int ED_mesh_join_objects_exec(bContext *C, wmOperator *op)
                    ob,
                    imat,
                    &vert_positions,
-                   &medge,
+                   &edge,
                    &corner_verts,
                    &corner_edges,
-                   &mpoly,
+                   &polys,
                    &vdata,
                    &edata,
                    &ldata,
@@ -650,10 +650,10 @@ int ED_mesh_join_objects_exec(bContext *C, wmOperator *op)
                        ob_iter,
                        imat,
                        &vert_positions,
-                       &medge,
+                       &edge,
                        &corner_verts,
                        &corner_edges,
-                       &mpoly,
+                       &polys,
                        &vdata,
                        &edata,
                        &ldata,
@@ -1231,16 +1231,16 @@ static void ed_mesh_pick_face_vert__mpoly_find(
     ARegion *region,
     const float mval[2],
     /* mesh data (evaluated) */
-    const MPoly *mp,
+    const MPoly *poly,
     const Span<float3> vert_positions,
     const int *corner_verts,
     /* return values */
     float *r_len_best,
     int *r_v_idx_best)
 {
-  for (int j = mp->totloop; j--;) {
+  for (int j = poly->totloop; j--;) {
     float sco[2];
-    const int v_idx = corner_verts[mp->loopstart + j];
+    const int v_idx = corner_verts[poly->loopstart + j];
     if (ED_view3d_project_float_object(region, vert_positions[v_idx], sco, V3D_PROJ_TEST_NOP) ==
         V3D_PROJ_RET_OK) {
       const float len_test = len_manhattan_v2v2(mval, sco);

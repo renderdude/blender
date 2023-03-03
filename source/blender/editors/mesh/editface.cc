@@ -274,7 +274,6 @@ static void paintface_select_linked_faces(Mesh &mesh,
   build_poly_connections(islands, mesh);
 
   const Span<MPoly> polys = mesh.polys();
-  const Span<MEdge> edges = mesh.edges();
   const Span<int> corner_edges = mesh.corner_edges();
 
   bke::MutableAttributeAccessor attributes = mesh.attributes_for_write();

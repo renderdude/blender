@@ -470,28 +470,28 @@ static Mesh *modifyMesh(ModifierData *md, const ModifierEvalContext *ctx, Mesh *
 
     /* Create edges and adjust edge vertex indices. */
     CustomData_copy_data(&mesh->edata, &result->edata, 0, p_skip * totedge, totedge);
-    MEdge *me = &edges[p_skip * totedge];
-    for (k = 0; k < totedge; k++, me++) {
-      me->v1 += p_skip * totvert;
-      me->v2 += p_skip * totvert;
+    MEdge *edge = &edges[p_skip * totedge];
+    for (k = 0; k < totedge; k++, edge++) {
+      edge->v1 += p_skip * totvert;
+      edge->v2 += p_skip * totvert;
     }
 
     /* create polys and loops */
     for (k = 0; k < totpoly; k++) {
 
       const MPoly *inMP = &orig_polys[k];
-      MPoly *mp = &polys[p_skip * totpoly + k];
+      MPoly *poly = &polys[p_skip * totpoly + k];
 
       CustomData_copy_data(&mesh->pdata, &result->pdata, k, p_skip * totpoly + k, 1);
-      *mp = *inMP;
-      mp->loopstart += p_skip * totloop;
+      *poly = *inMP;
+      poly->loopstart += p_skip * totloop;
 
       {
         int orig_corner_i = inMP->loopstart;
-        int dst_corner_i = mp->loopstart;
-        int j = mp->totloop;
+        int dst_corner_i = poly->loopstart;
+        int j = poly->totloop;
 
-        CustomData_copy_data(&mesh->ldata, &result->ldata, inMP->loopstart, mp->loopstart, j);
+        CustomData_copy_data(&mesh->ldata, &result->ldata, inMP->loopstart, poly->loopstart, j);
         for (; j; j--, orig_corner_i++, dst_corner_i++) {
           corner_verts[dst_corner_i] = orig_corner_verts[orig_corner_i] + (p_skip * totvert);
           corner_edges[dst_corner_i] = orig_corner_edges[orig_corner_i] + (p_skip * totedge);

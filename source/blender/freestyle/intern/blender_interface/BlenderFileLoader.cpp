@@ -389,9 +389,9 @@ static bool testEdgeMark(Mesh *me, const FreestyleEdge *fed, const MLoopTri *lt,
 
   const int corner = lt->tri[i];
   const int corner_next = lt->tri[(i + 1) % 3];
-  const MEdge *medge = &edges[corner_edges[corner]];
+  const MEdge *edge = &edges[corner_edges[corner]];
 
-  if (!ELEM(corner_verts[corner_next], medge->v1, medge->v2)) {
+  if (!ELEM(corner_verts[corner_next], edge->v1, edge->v2)) {
     /* Not an edge in the original mesh before triangulation. */
     return false;
   }
@@ -522,7 +522,7 @@ void BlenderFileLoader::insertShapeNode(Object *ob, Mesh *me, int id)
   // by the near and far view planes.
   for (int a = 0; a < tottri; a++) {
     const MLoopTri *lt = &mlooptri[a];
-    const MPoly *mp = &mesh_polys[lt->poly];
+    const MPoly *poly = &mesh_polys[lt->poly];
     Material *mat = BKE_object_material_get(ob, material_indices[lt->poly] + 1);
 
     copy_v3_v3(v1, vert_positions[corner_verts[lt->tri[0]]]);
@@ -537,7 +537,7 @@ void BlenderFileLoader::insertShapeNode(Object *ob, Mesh *me, int id)
     v2[2] += _z_offset;
     v3[2] += _z_offset;
 
-    if (_smooth && (mp->flag & ME_SMOOTH) && lnors) {
+    if (_smooth && (poly->flag & ME_SMOOTH) && lnors) {
       copy_v3_v3(n1, lnors[lt->tri[0]]);
       copy_v3_v3(n2, lnors[lt->tri[1]]);
       copy_v3_v3(n3, lnors[lt->tri[2]]);

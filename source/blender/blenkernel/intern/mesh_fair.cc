@@ -198,13 +198,13 @@ class MeshFairingContext : public FairingContext {
     totloop_ = mesh->totloop;
 
     MutableSpan<float3> positions = mesh->vert_positions_for_write();
-    medge_ = mesh->edges();
-    mpoly_ = mesh->polys();
+    edges_ = mesh->edges();
+    polys = mesh->polys();
     corner_verts_ = mesh->corner_verts();
     corner_edges_ = mesh->corner_edges();
     BKE_mesh_vert_loop_map_create(&vlmap_,
                                   &vlmap_mem_,
-                                  mpoly_.data(),
+                                  polys.data(),
                                   corner_verts_.data(),
                                   mesh->totvert,
                                   mesh->totpoly,
@@ -223,7 +223,7 @@ class MeshFairingContext : public FairingContext {
       }
     }
 
-    loop_to_poly_map_ = blender::bke::mesh_topology::build_loop_to_poly_map(mpoly_,
+    loop_to_poly_map_ = blender::bke::mesh_topology::build_loop_to_poly_map(polys,
                                                                             corner_verts_.size());
   }
 
@@ -238,27 +238,27 @@ class MeshFairingContext : public FairingContext {
                                   float r_adj_prev[3]) override
   {
     const int vert = corner_verts_[loop];
-    const MPoly *p = &mpoly_[loop_to_poly_map_[loop]];
-    const int corner = poly_find_loop_from_vert(p, &corner_verts_[p->loopstart], vert);
-    copy_v3_v3(r_adj_next, co_[corner_verts_[ME_POLY_LOOP_NEXT(p, corner)]]);
-    copy_v3_v3(r_adj_prev, co_[corner_verts_[ME_POLY_LOOP_PREV(p, corner)]]);
+    const MPoly *poly = &polys[loop_to_poly_map_[loop]];
+    const int corner = poly_find_loop_from_vert(poly, &corner_verts_[poly->loopstart], vert);
+    copy_v3_v3(r_adj_next, co_[corner_verts_[ME_POLY_LOOP_NEXT(poly, corner)]]);
+    copy_v3_v3(r_adj_prev, co_[corner_verts_[ME_POLY_LOOP_PREV(poly, corner)]]);
   }
 
   int other_vertex_index_from_loop(const int loop, const uint v) override
   {
-    const MEdge *e = &medge_[corner_edges_[loop]];
-    if (e->v1 == v) {
-      return e->v2;
+    const MEdge *edge = &edges_[corner_edges_[loop]];
+    if (edge->v1 == v) {
+      return edge->v2;
     }
-    return e->v1;
+    return edge->v1;
   }
 
  protected:
   Mesh *mesh_;
   Span<int> corner_verts_;
   Span<int> corner_edges_;
-  Span<MPoly> mpoly_;
-  Span<MEdge> medge_;
+  Span<MPoly> polys;
+  Span<MEdge> edges_;
   Array<int> loop_to_poly_map_;
 };
 

@@ -32,7 +32,7 @@ struct CDStreamConfig {
   int *corner_verts;
   int totloop;
 
-  MPoly *mpoly;
+  MPoly *polys;
   int totpoly;
 
   float3 *positions;
@@ -74,7 +74,7 @@ struct CDStreamConfig {
   CDStreamConfig()
       : corner_verts(NULL),
         totloop(0),
-        mpoly(NULL),
+        polys(NULL),
         totpoly(0),
         totvert(0),
         pack_uvs(false),

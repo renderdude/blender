@@ -967,19 +967,19 @@ static void multires_unsubdivide_prepare_original_bmesh_for_extract(
  */
 static bool multires_unsubdivide_flip_grid_x_axis(const blender::Span<MPoly> polys,
                                                   const blender::Span<int> corner_verts,
-                                                  int poly,
+                                                  int poly_index,
                                                   int loop,
                                                   int v_x)
 {
-  const MPoly *p = &polys[poly];
+  const MPoly *poly = &polys[poly_index];
 
-  const int v_first = corner_verts[p->loopstart];
-  if ((loop == (p->loopstart + (p->totloop - 1))) && v_first == v_x) {
+  const int v_first = corner_verts[poly->loopstart];
+  if ((loop == (poly->loopstart + (poly->totloop - 1))) && v_first == v_x) {
     return true;
   }
 
   int next_l_index = loop + 1;
-  if (next_l_index < p->loopstart + p->totloop) {
+  if (next_l_index < poly->loopstart + poly->totloop) {
     const int v_next = corner_verts[next_l_index];
     if (v_next == v_x) {
       return true;

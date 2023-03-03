@@ -1696,7 +1696,7 @@ static void sculpt_update_object(
     /* These are assigned to the base mesh in Multires. This is needed because Face Sets operators
      * and tools use the Face Sets data from the base mesh when Multires is active. */
     ss->vert_positions = BKE_mesh_vert_positions_for_write(me);
-    ss->mpoly = me->polys().data();
+    ss->polys = me->polys().data();
     ss->corner_verts = me->corner_verts().data();
   }
   else {
@@ -1704,7 +1704,7 @@ static void sculpt_update_object(
     ss->totpoly = me->totpoly;
     ss->totfaces = me->totpoly;
     ss->vert_positions = BKE_mesh_vert_positions_for_write(me);
-    ss->mpoly = me->polys().data();
+    ss->polys = me->polys().data();
     ss->corner_verts = me->corner_verts().data();
     ss->multires.active = false;
     ss->multires.modifier = nullptr;
@@ -2015,22 +2015,22 @@ int BKE_sculpt_mask_layers_ensure(Depsgraph *depsgraph,
     /* if vertices already have mask, copy into multires data */
     if (paint_mask) {
       for (i = 0; i < me->totpoly; i++) {
-        const MPoly *p = &polys[i];
+        const MPoly *poly = &polys[i];
         float avg = 0;
 
         /* mask center */
-        for (j = 0; j < p->totloop; j++) {
-          const int vert_i = corner_verts[p->loopstart + j];
+        for (j = 0; j < poly->totloop; j++) {
+          const int vert_i = corner_verts[poly->loopstart + j];
           avg += paint_mask[vert_i];
         }
-        avg /= float(p->totloop);
+        avg /= float(poly->totloop);
 
         /* fill in multires mask corner */
-        for (j = 0; j < p->totloop; j++) {
-          GridPaintMask *gpm = &gmask[p->loopstart + j];
-          const int vert_i = corner_verts[p->loopstart + j];
-          const int prev = ME_POLY_LOOP_PREV(p, j);
-          const int next = ME_POLY_LOOP_NEXT(p, j);
+        for (j = 0; j < poly->totloop; j++) {
+          GridPaintMask *gpm = &gmask[poly->loopstart + j];
+          const int vert_i = corner_verts[poly->loopstart + j];
+          const int prev = ME_POLY_LOOP_PREV(poly, j);
+          const int next = ME_POLY_LOOP_NEXT(poly, j);
 
           gpm->data[0] = avg;
           gpm->data[1] = (paint_mask[vert_i] + paint_mask[corner_verts[next]]) * 0.5f;

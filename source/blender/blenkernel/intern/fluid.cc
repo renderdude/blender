@@ -938,7 +938,7 @@ struct ObstaclesFromDMData {
   FluidEffectorSettings *fes;
 
   const float (*vert_positions)[3];
-  const int *corner_verts;
+  blender::Span<int> corner_verts;
   blender::Span<MLoopTri> looptris;
 
   BVHTreeFromMesh *tree;
@@ -973,7 +973,7 @@ static void obstacles_from_mesh_task_cb(void *__restrict userdata,
       /* Calculate object velocities. Result in bb->velocity. */
       update_velocities(data->fes,
                         data->vert_positions,
-                        data->corner_verts,
+                        data->corner_verts.data(),
                         data->looptris.data(),
                         bb->velocity,
                         index,
@@ -1072,7 +1072,7 @@ static void obstacles_from_mesh(Object *coll_ob,
       ObstaclesFromDMData data{};
       data.fes = fes;
       data.vert_positions = positions;
-      data.corner_verts = corner_verts.data();
+      data.corner_verts = corner_verts;
       data.looptris = looptris;
       data.tree = &tree_data;
       data.bb = bb;
@@ -1981,7 +1981,7 @@ struct EmitFromDMData {
 
   const float (*vert_positions)[3];
   const float (*vert_normals)[3];
-  const int *corner_verts;
+  blender::Span<int> corner_verts;
   blender::Span<MLoopTri> looptris;
   const float (*mloopuv)[2];
   const MDeformVert *dvert;
@@ -2015,7 +2015,7 @@ static void emit_from_mesh_task_cb(void *__restrict userdata,
         sample_mesh(data->ffs,
                     data->vert_positions,
                     data->vert_normals,
-                    data->corner_verts,
+                    data->corner_verts.data(),
                     data->looptris.data(),
                     data->mloopuv,
                     bb->influence,
@@ -2142,7 +2142,7 @@ static void emit_from_mesh(
       data.ffs = ffs;
       data.vert_positions = positions;
       data.vert_normals = vert_normals;
-      data.corner_verts = corner_verts.data();
+      data.corner_verts = corner_verts;
       data.looptris = looptris;
       data.mloopuv = mloopuv;
       data.dvert = dvert;
@@ -3208,8 +3208,6 @@ static Mesh *create_liquid_geometry(FluidDomainSettings *fds,
                                     Object *ob)
 {
   Mesh *me;
-  MPoly *mpolys;
-  int *corner_verts;
   float min[3];
   float max[3];
   float size[3];
@@ -3217,11 +3215,9 @@ static Mesh *create_liquid_geometry(FluidDomainSettings *fds,
 
   /* Assign material + flags to new mesh.
    * If there are no faces in original mesh, keep materials and flags unchanged. */
-  MPoly *mpoly;
   MPoly mp_example = {0};
-  mpoly = BKE_mesh_polys_for_write(orgmesh);
-  if (mpoly) {
-    mp_example = *mpoly;
+  if (MPoly *polys = BKE_mesh_polys_for_write(orgmesh)) {
+    mp_example = *polys;
   }
 
   const int *orig_material_indices = BKE_mesh_material_indices(orgmesh);
@@ -3252,8 +3248,8 @@ static Mesh *create_liquid_geometry(FluidDomainSettings *fds,
     return nullptr;
   }
   float(*positions)[3] = BKE_mesh_vert_positions_for_write(me);
-  mpolys = BKE_mesh_polys_for_write(me);
-  corner_verts = me->corner_verts_for_write().data();
+  blender::MutableSpan<MPoly> polys = me->polys_for_write();
+  blender::MutableSpan<int> corner_verts = me->corner_verts_for_write();
 
   /* Get size (dimension) but considering scaling. */
   copy_v3_v3(cell_size_scaled, fds->cell_size);
@@ -3339,17 +3335,17 @@ static Mesh *create_liquid_geometry(FluidDomainSettings *fds,
   int *material_indices = BKE_mesh_material_indices_for_write(me);
 
   /* Loop for triangles. */
-  for (i = 0; i < num_faces; i++, mpolys++, corner_verts += 3) {
+  for (const int i : polys.index_range()) {
     /* Initialize from existing face. */
     material_indices[i] = mp_mat_nr;
-    mpolys->flag = mp_flag;
+    polys[i].flag = mp_flag;
 
-    mpolys->loopstart = i * 3;
-    mpolys->totloop = 3;
+    polys[i].loopstart = i * 3;
+    polys[i].totloop = 3;
 
-    corner_verts[0] = manta_liquid_get_triangle_x_at(fds->fluid, i);
-    corner_verts[1] = manta_liquid_get_triangle_y_at(fds->fluid, i);
-    corner_verts[2] = manta_liquid_get_triangle_z_at(fds->fluid, i);
+    corner_verts[i * 3 + 0] = manta_liquid_get_triangle_x_at(fds->fluid, i);
+    corner_verts[i * 3 + 1] = manta_liquid_get_triangle_y_at(fds->fluid, i);
+    corner_verts[i * 3 + 2] = manta_liquid_get_triangle_z_at(fds->fluid, i);
 #  ifdef DEBUG_PRINT
     /* Debugging: Print mesh faces. */
     printf("mloops[0].v: %d, mloops[1].v: %d, mloops[2].v: %d\n",
@@ -3367,12 +3363,10 @@ static Mesh *create_liquid_geometry(FluidDomainSettings *fds,
 static Mesh *create_smoke_geometry(FluidDomainSettings *fds, Mesh *orgmesh, Object *ob)
 {
   Mesh *result;
-  MPoly *mpolys;
-  int *corner_verts;
   float min[3];
   float max[3];
   float *co;
-  MPoly *mp;
+  MPoly *poly;
   int *corner_vert;
 
   int num_verts = 8;
@@ -3387,8 +3381,8 @@ static Mesh *create_smoke_geometry(FluidDomainSettings *fds, Mesh *orgmesh, Obje
 
   result = BKE_mesh_new_nomain(num_verts, 0, num_faces * 4, num_faces);
   float(*positions)[3] = BKE_mesh_vert_positions_for_write(result);
-  mpolys = BKE_mesh_polys_for_write(result);
-  corner_verts = result->corner_verts_for_write().data();
+  blender::MutableSpan<MPoly> polys = result->polys_for_write();
+  blender::MutableSpan<int> corner_verts = result->corner_verts_for_write();
 
   if (num_verts) {
     /* Volume bounds. */
@@ -3433,55 +3427,55 @@ static Mesh *create_smoke_geometry(FluidDomainSettings *fds, Mesh *orgmesh, Obje
 
     /* Create faces. */
     /* Top side. */
-    mp = &mpolys[0];
+    poly = &polys[0];
     corner_vert = &corner_verts[0 * 4];
-    mp->loopstart = 0 * 4;
-    mp->totloop = 4;
+    poly->loopstart = 0 * 4;
+    poly->totloop = 4;
     corner_vert[0] = 0;
     corner_vert[1] = 1;
     corner_vert[2] = 2;
     corner_vert[3] = 3;
     /* Right side. */
-    mp = &mpolys[1];
+    poly = &polys[1];
     corner_vert = &corner_verts[1 * 4];
-    mp->loopstart = 1 * 4;
-    mp->totloop = 4;
+    poly->loopstart = 1 * 4;
+    poly->totloop = 4;
     corner_vert[0] = 2;
     corner_vert[1] = 1;
     corner_vert[2] = 5;
     corner_vert[3] = 6;
     /* Bottom side. */
-    mp = &mpolys[2];
+    poly = &polys[2];
     corner_vert = &corner_verts[2 * 4];
-    mp->loopstart = 2 * 4;
-    mp->totloop = 4;
+    poly->loopstart = 2 * 4;
+    poly->totloop = 4;
     corner_vert[0] = 7;
     corner_vert[1] = 6;
     corner_vert[2] = 5;
     corner_vert[3] = 4;
     /* Left side. */
-    mp = &mpolys[3];
+    poly = &polys[3];
     corner_vert = &corner_verts[3 * 4];
-    mp->loopstart = 3 * 4;
-    mp->totloop = 4;
+    poly->loopstart = 3 * 4;
+    poly->totloop = 4;
     corner_vert[0] = 0;
     corner_vert[1] = 3;
     corner_vert[2] = 7;
     corner_vert[3] = 4;
     /* Front side. */
-    mp = &mpolys[4];
+    poly = &polys[4];
     corner_vert = &corner_verts[4 * 4];
-    mp->loopstart = 4 * 4;
-    mp->totloop = 4;
+    poly->loopstart = 4 * 4;
+    poly->totloop = 4;
     corner_vert[0] = 3;
     corner_vert[1] = 2;
     corner_vert[2] = 6;
     corner_vert[3] = 7;
     /* Back side. */
-    mp = &mpolys[5];
+    poly = &polys[5];
     corner_vert = &corner_verts[5 * 4];
-    mp->loopstart = 5 * 4;
-    mp->totloop = 4;
+    poly->loopstart = 5 * 4;
+    poly->totloop = 4;
     corner_vert[0] = 1;
     corner_vert[1] = 0;
     corner_vert[2] = 4;

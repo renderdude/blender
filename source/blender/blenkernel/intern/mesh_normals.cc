@@ -165,12 +165,12 @@ bool BKE_mesh_poly_normals_are_dirty(const Mesh *mesh)
  * polygon See Graphics Gems for
  * computing newell normal.
  */
-static void mesh_calc_ngon_normal(const MPoly *mpoly,
+static void mesh_calc_ngon_normal(const MPoly *poly,
                                   const int *poly_verts,
                                   const float (*positions)[3],
                                   float r_normal[3])
 {
-  const int nverts = mpoly->totloop;
+  const int nverts = poly->totloop;
   const float *v_prev = positions[poly_verts[nverts - 1]];
   const float *v_curr;
 
@@ -188,21 +188,21 @@ static void mesh_calc_ngon_normal(const MPoly *mpoly,
   }
 }
 
-void BKE_mesh_calc_poly_normal(const MPoly *mpoly,
+void BKE_mesh_calc_poly_normal(const MPoly *poly,
                                const int *poly_verts,
                                const float (*vert_positions)[3],
                                float r_no[3])
 {
-  if (mpoly->totloop > 4) {
-    mesh_calc_ngon_normal(mpoly, poly_verts, vert_positions, r_no);
+  if (poly->totloop > 4) {
+    mesh_calc_ngon_normal(poly, poly_verts, vert_positions, r_no);
   }
-  else if (mpoly->totloop == 3) {
+  else if (poly->totloop == 3) {
     normal_tri_v3(r_no,
                   vert_positions[poly_verts[0]],
                   vert_positions[poly_verts[1]],
                   vert_positions[poly_verts[2]]);
   }
-  else if (mpoly->totloop == 4) {
+  else if (poly->totloop == 4) {
     normal_quad_v3(r_no,
                    vert_positions[poly_verts[0]],
                    vert_positions[poly_verts[1]],
@@ -237,14 +237,14 @@ void BKE_mesh_calc_normals_poly(const float (*vert_positions)[3],
                                 const int verts_num,
                                 const int *corner_verts,
                                 const int mloop_len,
-                                const MPoly *mpoly,
-                                int mpoly_len,
+                                const MPoly *polys,
+                                int polys_len,
                                 float (*r_poly_normals)[3])
 {
   calculate_normals_poly({reinterpret_cast<const float3 *>(vert_positions), verts_num},
-                         {mpoly, mpoly_len},
+                         {polys, polys_len},
                          {corner_verts, mloop_len},
-                         {reinterpret_cast<float3 *>(r_poly_normals), mpoly_len});
+                         {reinterpret_cast<float3 *>(r_poly_normals), polys_len});
 }
 
 /** \} */
@@ -350,15 +350,15 @@ void BKE_mesh_calc_normals_poly_and_vertex(const float (*vert_positions)[3],
                                            const int mvert_len,
                                            const int *corner_verts,
                                            const int mloop_len,
-                                           const MPoly *mpoly,
-                                           const int mpoly_len,
+                                           const MPoly *polys,
+                                           const int polys_len,
                                            float (*r_poly_normals)[3],
                                            float (*r_vert_normals)[3])
 {
   calculate_normals_poly_and_vert({reinterpret_cast<const float3 *>(vert_positions), mvert_len},
-                                  {mpoly, mpoly_len},
+                                  {polys, polys_len},
                                   {corner_verts, mloop_len},
-                                  {reinterpret_cast<float3 *>(r_poly_normals), mpoly_len},
+                                  {reinterpret_cast<float3 *>(r_poly_normals), polys_len},
                                   {reinterpret_cast<float3 *>(r_vert_normals), mvert_len});
 }
 
@@ -761,7 +761,7 @@ struct LoopSplitTaskData {
   int ml_curr_index;
   /** Also used a flag to switch between single or fan process! */
   int ml_prev_index;
-  int mp_index;
+  int poly_index;
 
   Type flag;
 };
@@ -864,7 +864,7 @@ void BKE_edges_sharp_from_angle_set(const int numEdges,
                                     const int *corner_verts,
                                     const int *corner_edges,
                                     const int numLoops,
-                                    const MPoly *mpolys,
+                                    const MPoly *polys,
                                     const float (*poly_normals)[3],
                                     const int numPolys,
                                     const float split_angle,
@@ -881,10 +881,10 @@ void BKE_edges_sharp_from_angle_set(const int numEdges,
   Array<int2> edge_to_loops(numEdges, int2(0));
 
   /* Simple mapping from a loop to its polygon index. */
-  const Array<int> loop_to_poly = mesh_topology::build_loop_to_poly_map({mpolys, numPolys},
+  const Array<int> loop_to_poly = mesh_topology::build_loop_to_poly_map({polys, numPolys},
                                                                         numLoops);
 
-  mesh_edges_sharp_tag({mpolys, numPolys},
+  mesh_edges_sharp_tag({polys, numPolys},
                        {corner_verts, numLoops},
                        {corner_edges, numLoops},
                        loop_to_poly,
@@ -955,19 +955,19 @@ static void split_loop_nor_single_do(LoopSplitTaskDataCommon *common_data, LoopS
   MLoopNorSpace *lnor_space = data->lnor_space;
   const int ml_curr_index = data->ml_curr_index;
   const int ml_prev_index = data->ml_prev_index;
-  const int mp_index = data->mp_index;
+  const int poly_index = data->poly_index;
 
   /* Simple case (both edges around that vertex are sharp in current polygon),
    * this loop just takes its poly normal.
    */
-  loop_normals[ml_curr_index] = poly_normals[mp_index];
+  loop_normals[ml_curr_index] = poly_normals[poly_index];
 
 #if 0
   printf("BASIC: handling loop %d / edge %d / vert %d / poly %d\n",
          ml_curr_index,
          loops[ml_curr_index].e,
          loops[ml_curr_index].v,
-         mp_index);
+         poly_index);
 #endif
 
   /* If needed, generate this (simple!) lnor space. */
@@ -1020,7 +1020,7 @@ static void split_loop_nor_fan_do(LoopSplitTaskDataCommon *common_data,
 #endif
   const int ml_curr_index = data->ml_curr_index;
   const int ml_prev_index = data->ml_prev_index;
-  const int mp_index = data->mp_index;
+  const int poly_index = data->poly_index;
 
   /* Sigh! we have to fan around current vertex, until we find the other non-smooth edge,
    * and accumulate face normals into the vertex!
@@ -1051,7 +1051,7 @@ static void split_loop_nor_fan_do(LoopSplitTaskDataCommon *common_data,
    */
   int mlfan_curr_index = ml_prev_index;
   int mlfan_vert_index = ml_curr_index;
-  int mpfan_curr_index = mp_index;
+  int mpfan_curr_index = poly_index;
 
   BLI_assert(mlfan_curr_index >= 0);
   BLI_assert(mlfan_vert_index >= 0);
@@ -1242,7 +1242,7 @@ static void loop_split_worker(TaskPool *__restrict pool, void *taskdata)
  */
 static bool loop_split_generator_check_cyclic_smooth_fan(const Span<int> corner_verts,
                                                          const Span<int> corner_edges,
-                                                         const Span<MPoly> mpolys,
+                                                         const Span<MPoly> polys,
                                                          const Span<int2> edge_to_loops,
                                                          const Span<int> loop_to_poly,
                                                          const int *e2l_prev,
@@ -1276,7 +1276,7 @@ static bool loop_split_generator_check_cyclic_smooth_fan(const Span<int> corner_
   while (true) {
     /* Find next loop of the smooth fan. */
     loop_manifold_fan_around_vert_next(corner_verts,
-                                       mpolys,
+                                       polys,
                                        loop_to_poly,
                                        e2lfan_curr,
                                        mv_pivot_index,
@@ -1340,8 +1340,8 @@ static void loop_split_generator(TaskPool *pool, LoopSplitTaskDataCommon *common
   /* We now know edges that can be smoothed (with their vector, and their two loops),
    * and edges that will be hard! Now, time to generate the normals.
    */
-  for (const int mp_index : polys.index_range()) {
-    const MPoly &poly = polys[mp_index];
+  for (const int poly_index : polys.index_range()) {
+    const MPoly &poly = polys[poly_index];
 
     for (const int ml_curr_index : IndexRange(poly.loopstart, poly.totloop)) {
       const int ml_prev_index = mesh_topology::poly_loop_prev(poly, ml_curr_index);
@@ -1349,9 +1349,9 @@ static void loop_split_generator(TaskPool *pool, LoopSplitTaskDataCommon *common
 #if 0
       printf("Checking loop %d / edge %u / vert %u (sharp edge: %d, skiploop: %d)",
              ml_curr_index,
-             loops[ml_curr_index].e,
-             loops[ml_curr_index].v,
-             IS_EDGE_SHARP(edge_to_loops[loops[ml_curr_index].e]),
+             corner_edges[ml_curr_index],
+             corner_verts[ml_curr_index],
+             IS_EDGE_SHARP(edge_to_loops[corner_edges[ml_curr_index]]),
              skip_loops[ml_curr_index]);
 #endif
 
@@ -1376,7 +1376,7 @@ static void loop_split_generator(TaskPool *pool, LoopSplitTaskDataCommon *common
                                             skip_loops,
                                             ml_curr_index,
                                             ml_prev_index,
-                                            mp_index))) {
+                                            poly_index))) {
         // printf("SKIPPING!\n");
       }
       else {
@@ -1401,7 +1401,7 @@ static void loop_split_generator(TaskPool *pool, LoopSplitTaskDataCommon *common
           data->ml_curr_index = ml_curr_index;
           data->ml_prev_index = ml_prev_index;
           data->flag = LoopSplitTaskData::Type::Single;
-          data->mp_index = mp_index;
+          data->poly_index = poly_index;
           if (lnors_spacearr) {
             data->lnor_space = BKE_lnor_space_create(lnors_spacearr);
           }
@@ -1417,7 +1417,7 @@ static void loop_split_generator(TaskPool *pool, LoopSplitTaskDataCommon *common
           data->ml_curr_index = ml_curr_index;
           data->ml_prev_index = ml_prev_index;
           data->flag = LoopSplitTaskData::Type::Fan;
-          data->mp_index = mp_index;
+          data->poly_index = poly_index;
           if (lnors_spacearr) {
             data->lnor_space = BKE_lnor_space_create(lnors_spacearr);
           }
@@ -1449,13 +1449,13 @@ static void loop_split_generator(TaskPool *pool, LoopSplitTaskDataCommon *common
 void BKE_mesh_normals_loop_split(const float (*vert_positions)[3],
                                  const float (*vert_normals)[3],
                                  const int numVerts,
-                                 const MEdge *medges,
+                                 const MEdge *edges,
                                  const int numEdges,
                                  const int *corner_verts,
                                  const int *corner_edges,
                                  float (*r_loop_normals)[3],
                                  const int numLoops,
-                                 const MPoly *mpolys,
+                                 const MPoly *polys,
                                  const float (*poly_normals)[3],
                                  const int numPolys,
                                  const bool use_split_normals,
@@ -1478,17 +1478,17 @@ void BKE_mesh_normals_loop_split(const float (*vert_positions)[3],
      * since we may want to use loop_normals even when mesh's 'autosmooth' is disabled
      * (see e.g. mesh mapping code). As usual, we could handle that on case-by-case basis,
      * but simpler to keep it well confined here. */
-    int mp_index;
+    int poly_index;
 
-    for (mp_index = 0; mp_index < numPolys; mp_index++) {
-      const MPoly *mp = &mpolys[mp_index];
-      int ml_index = mp->loopstart;
-      const int ml_index_end = ml_index + mp->totloop;
-      const bool is_poly_flat = ((mp->flag & ME_SMOOTH) == 0);
+    for (poly_index = 0; poly_index < numPolys; poly_index++) {
+      const MPoly *poly = &polys[poly_index];
+      int ml_index = poly->loopstart;
+      const int ml_index_end = ml_index + poly->totloop;
+      const bool is_poly_flat = ((poly->flag & ME_SMOOTH) == 0);
 
       for (; ml_index < ml_index_end; ml_index++) {
         if (is_poly_flat) {
-          copy_v3_v3(r_loop_normals[ml_index], poly_normals[mp_index]);
+          copy_v3_v3(r_loop_normals[ml_index], poly_normals[poly_index]);
         }
         else {
           copy_v3_v3(r_loop_normals[ml_index], vert_normals[corner_verts[ml_index]]);
@@ -1521,7 +1521,7 @@ void BKE_mesh_normals_loop_split(const float (*vert_positions)[3],
     loop_to_poly = {loop_to_poly_map, numLoops};
   }
   else {
-    local_loop_to_poly_map = mesh_topology::build_loop_to_poly_map({mpolys, numPolys}, numLoops);
+    local_loop_to_poly_map = mesh_topology::build_loop_to_poly_map({polys, numPolys}, numLoops);
     loop_to_poly = local_loop_to_poly_map;
   }
 
@@ -1542,16 +1542,14 @@ void BKE_mesh_normals_loop_split(const float (*vert_positions)[3],
     BKE_lnor_spacearr_init(r_lnors_spacearr, numLoops, MLNOR_SPACEARR_LOOP_INDEX);
   }
 
-  const Span<MPoly> polys(mpolys, numPolys);
-
   /* Init data common to all tasks. */
   LoopSplitTaskDataCommon common_data;
   common_data.lnors_spacearr = r_lnors_spacearr;
   common_data.loop_normals = {reinterpret_cast<float3 *>(r_loop_normals), numLoops};
   common_data.clnors_data = {reinterpret_cast<short2 *>(clnors_data), clnors_data ? numLoops : 0};
   common_data.positions = {reinterpret_cast<const float3 *>(vert_positions), numVerts};
-  common_data.edges = {medges, numEdges};
-  common_data.polys = polys;
+  common_data.edges = {edges, numEdges};
+  common_data.polys = {polys, numPolys};
   common_data.corner_verts = {corner_verts, numLoops};
   common_data.corner_edges = {corner_edges, numLoops};
   common_data.edge_to_loops = edge_to_loops;
@@ -1561,7 +1559,7 @@ void BKE_mesh_normals_loop_split(const float (*vert_positions)[3],
 
   /* Pre-populate all loop normals as if their verts were all smooth.
    * This way we don't have to compute those later! */
-  threading::parallel_for(polys.index_range(), 1024, [&](const IndexRange range) {
+  threading::parallel_for(IndexRange(numPolys), 1024, [&](const IndexRange range) {
     for (const int poly_i : range) {
       const MPoly &poly = polys[poly_i];
       for (const int loop_i : IndexRange(poly.loopstart, poly.totloop)) {
@@ -1571,7 +1569,7 @@ void BKE_mesh_normals_loop_split(const float (*vert_positions)[3],
   });
 
   /* This first loop check which edges are actually smooth, and compute edge vectors. */
-  mesh_edges_sharp_tag(polys,
+  mesh_edges_sharp_tag({polys, numPolys},
                        {corner_verts, numLoops},
                        {corner_edges, numLoops},
                        loop_to_poly,
@@ -1619,13 +1617,13 @@ void BKE_mesh_normals_loop_split(const float (*vert_positions)[3],
 static void mesh_normals_loop_custom_set(const float (*positions)[3],
                                          const float (*vert_normals)[3],
                                          const int numVerts,
-                                         const MEdge *medges,
+                                         const MEdge *edges,
                                          const int numEdges,
                                          const int *corner_verts,
                                          const int *corner_edges,
                                          float (*r_custom_loop_normals)[3],
                                          const int numLoops,
-                                         const MPoly *mpolys,
+                                         const MPoly *polys,
                                          const float (*poly_normals)[3],
                                          const int numPolys,
                                          MutableSpan<bool> sharp_edges,
@@ -1644,7 +1642,7 @@ static void mesh_normals_loop_custom_set(const float (*positions)[3],
   BitVector<> done_loops(numLoops, false);
   float(*loop_normals)[3] = (float(*)[3])MEM_calloc_arrayN(
       size_t(numLoops), sizeof(*loop_normals), __func__);
-  const Array<int> loop_to_poly = mesh_topology::build_loop_to_poly_map({mpolys, numPolys},
+  const Array<int> loop_to_poly = mesh_topology::build_loop_to_poly_map({polys, numPolys},
                                                                         numLoops);
   /* In this case we always consider split nors as ON,
    * and do not want to use angle to define smooth fans! */
@@ -1657,13 +1655,13 @@ static void mesh_normals_loop_custom_set(const float (*positions)[3],
   BKE_mesh_normals_loop_split(positions,
                               vert_normals,
                               numVerts,
-                              medges,
+                              edges,
                               numEdges,
                               corner_verts,
                               corner_edges,
                               loop_normals,
                               numLoops,
-                              mpolys,
+                              polys,
                               poly_normals,
                               numPolys,
                               use_split_normals,
@@ -1746,8 +1744,9 @@ static void mesh_normals_loop_custom_set(const float (*positions)[3],
            * previous loop's face and current's one as sharp.
            * We know those two loops do not point to the same edge,
            * since we do not allow reversed winding in a same smooth fan. */
-          const MPoly *mp = &mpolys[loop_to_poly[lidx]];
-          const int mlp = (lidx == mp->loopstart) ? mp->loopstart + mp->totloop - 1 : lidx - 1;
+          const MPoly *poly = &polys[loop_to_poly[lidx]];
+          const int mlp = (lidx == poly->loopstart) ? poly->loopstart + poly->totloop - 1 :
+                                                      lidx - 1;
           const int edge = corner_edges[lidx];
           const int edge_p = corner_edges[mlp];
           const int prev_edge = corner_edges[corner_prev];
@@ -1771,8 +1770,9 @@ static void mesh_normals_loop_custom_set(const float (*positions)[3],
         float *nor = r_custom_loop_normals[lidx];
 
         if (dot_v3v3(org_nor, nor) < LNOR_SPACE_TRIGO_THRESHOLD) {
-          const MPoly *mp = &mpolys[loop_to_poly[lidx]];
-          const int mlp = (lidx == mp->loopstart) ? mp->loopstart + mp->totloop - 1 : lidx - 1;
+          const MPoly *poly = &polys[loop_to_poly[lidx]];
+          const int mlp = (lidx == poly->loopstart) ? poly->loopstart + poly->totloop - 1 :
+                                                      lidx - 1;
           const int edge = corner_edges[lidx];
           const int edge_p = corner_edges[mlp];
           const int prev_edge = corner_edges[corner_prev];
@@ -1786,13 +1786,13 @@ static void mesh_normals_loop_custom_set(const float (*positions)[3],
     BKE_mesh_normals_loop_split(positions,
                                 vert_normals,
                                 numVerts,
-                                medges,
+                                edges,
                                 numEdges,
                                 corner_verts,
                                 corner_edges,
                                 loop_normals,
                                 numLoops,
-                                mpolys,
+                                polys,
                                 poly_normals,
                                 numPolys,
                                 use_split_normals,
@@ -1865,13 +1865,13 @@ static void mesh_normals_loop_custom_set(const float (*positions)[3],
 void BKE_mesh_normals_loop_custom_set(const float (*vert_positions)[3],
                                       const float (*vert_normals)[3],
                                       const int numVerts,
-                                      const MEdge *medges,
+                                      const MEdge *edges,
                                       const int numEdges,
                                       const int *corner_verts,
                                       const int *corner_edges,
                                       float (*r_custom_loop_normals)[3],
                                       const int numLoops,
-                                      const MPoly *mpolys,
+                                      const MPoly *polys,
                                       const float (*poly_normals)[3],
                                       const int numPolys,
                                       bool *sharp_edges,
@@ -1880,13 +1880,13 @@ void BKE_mesh_normals_loop_custom_set(const float (*vert_positions)[3],
   mesh_normals_loop_custom_set(vert_positions,
                                vert_normals,
                                numVerts,
-                               medges,
+                               edges,
                                numEdges,
                                corner_verts,
                                corner_edges,
                                r_custom_loop_normals,
                                numLoops,
-                               mpolys,
+                               polys,
                                poly_normals,
                                numPolys,
                                {sharp_edges, numEdges},
@@ -1898,12 +1898,12 @@ void BKE_mesh_normals_loop_custom_from_verts_set(const float (*vert_positions)[3
                                                  const float (*vert_normals)[3],
                                                  float (*r_custom_vert_normals)[3],
                                                  const int numVerts,
-                                                 const MEdge *medges,
+                                                 const MEdge *edges,
                                                  const int numEdges,
                                                  const int *corner_verts,
                                                  const int *corner_edges,
                                                  const int numLoops,
-                                                 const MPoly *mpolys,
+                                                 const MPoly *polys,
                                                  const float (*poly_normals)[3],
                                                  const int numPolys,
                                                  bool *sharp_edges,
@@ -1912,13 +1912,13 @@ void BKE_mesh_normals_loop_custom_from_verts_set(const float (*vert_positions)[3
   mesh_normals_loop_custom_set(vert_positions,
                                vert_normals,
                                numVerts,
-                               medges,
+                               edges,
                                numEdges,
                                corner_verts,
                                corner_edges,
                                r_custom_vert_normals,
                                numLoops,
-                               mpolys,
+                               polys,
                                poly_normals,
                                numPolys,
                                {sharp_edges, numEdges},

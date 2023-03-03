@@ -118,11 +118,11 @@ static float compute_volume(const float center[3],
   float vol = 0.0f;
 
   for (const int i : polys.index_range()) {
-    const MPoly *mp = &polys[i];
-    int corner_first = mp->loopstart;
+    const MPoly *poly = &polys[i];
+    int corner_first = poly->loopstart;
     int corner_prev = corner_first + 1;
     int corner_curr = corner_first + 2;
-    int corner_term = corner_first + mp->totloop;
+    int corner_term = corner_first + poly->totloop;
 
     for (; corner_curr != corner_term; corner_prev = corner_curr, corner_curr++) {
       vol += volume_tetrahedron_signed_v3(center,
@@ -191,9 +191,9 @@ static void init_laplacian_matrix(LaplacianSystem *sys)
   const blender::Span<int> corner_verts = sys->corner_verts;
 
   for (const int i : sys->polys.index_range()) {
-    const MPoly *mp = &sys->polys[i];
-    int corner_next = mp->loopstart;
-    int corner_term = corner_next + mp->totloop;
+    const MPoly *poly = &sys->polys[i];
+    int corner_next = poly->loopstart;
+    int corner_term = corner_next + poly->totloop;
     int corner_prev = corner_term - 2;
     int corner_curr = corner_term - 1;
 
@@ -248,9 +248,9 @@ static void fill_laplacian_matrix(LaplacianSystem *sys)
   const blender::Span<int> corner_verts = sys->corner_verts;
 
   for (const int i : sys->polys.index_range()) {
-    const MPoly *mp = &sys->polys[i];
-    int corner_next = mp->loopstart;
-    int corner_term = corner_next + mp->totloop;
+    const MPoly *poly = &sys->polys[i];
+    int corner_next = poly->loopstart;
+    int corner_term = corner_next + poly->totloop;
     int corner_prev = corner_term - 2;
     int corner_curr = corner_term - 1;
 

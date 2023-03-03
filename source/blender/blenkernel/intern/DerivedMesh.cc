@@ -109,17 +109,17 @@ static float *dm_getVertArray(DerivedMesh *dm)
 
 static MEdge *dm_getEdgeArray(DerivedMesh *dm)
 {
-  MEdge *medge = (MEdge *)CustomData_get_layer_for_write(
+  MEdge *edge = (MEdge *)CustomData_get_layer_for_write(
       &dm->edgeData, CD_MEDGE, dm->getNumEdges(dm));
 
-  if (!medge) {
-    medge = (MEdge *)CustomData_add_layer(
+  if (!edge) {
+    edge = (MEdge *)CustomData_add_layer(
         &dm->edgeData, CD_MEDGE, CD_SET_DEFAULT, nullptr, dm->getNumEdges(dm));
     CustomData_set_layer_flag(&dm->edgeData, CD_MEDGE, CD_FLAG_TEMPORARY);
-    dm->copyEdgeArray(dm, medge);
+    dm->copyEdgeArray(dm, edge);
   }
 
-  return medge;
+  return edge;
 }
 
 static int *dm_getCornerVertArray(DerivedMesh *dm)
@@ -1923,16 +1923,16 @@ static void mesh_init_origspace(Mesh *mesh)
   const Span<MPoly> polys = mesh->polys();
   const Span<int> corner_verts = mesh->corner_verts();
 
-  const MPoly *mp = polys.data();
+  const MPoly *poly = polys.data();
   int i, j, k;
 
   blender::Vector<blender::float2, 64> vcos_2d;
 
-  for (i = 0; i < numpoly; i++, mp++) {
-    OrigSpaceLoop *lof = lof_array + mp->loopstart;
+  for (i = 0; i < numpoly; i++, poly++) {
+    OrigSpaceLoop *lof = lof_array + poly->loopstart;
 
-    if (ELEM(mp->totloop, 3, 4)) {
-      for (j = 0; j < mp->totloop; j++, lof++) {
+    if (ELEM(poly->totloop, 3, 4)) {
+      for (j = 0; j < poly->totloop; j++, lof++) {
         copy_v2_v2(lof->uv, default_osf[j]);
       }
     }
@@ -1943,15 +1943,15 @@ static void mesh_init_origspace(Mesh *mesh)
       float min[2] = {FLT_MAX, FLT_MAX}, max[2] = {-FLT_MAX, -FLT_MAX};
       float translate[2], scale[2];
 
-      BKE_mesh_calc_poly_normal(mp,
-                                &corner_verts[mp->loopstart],
+      BKE_mesh_calc_poly_normal(poly,
+                                &corner_verts[poly->loopstart],
                                 reinterpret_cast<const float(*)[3]>(positions.data()),
                                 p_nor);
       axis_dominant_v3_to_m3(mat, p_nor);
 
-      vcos_2d.resize(mp->totloop);
-      for (j = 0; j < mp->totloop; j++) {
-        mul_v3_m3v3(co, mat, positions[corner_verts[mp->loopstart + j]]);
+      vcos_2d.resize(poly->totloop);
+      for (j = 0; j < poly->totloop; j++) {
+        mul_v3_m3v3(co, mat, positions[corner_verts[poly->loopstart + j]]);
         copy_v2_v2(vcos_2d[j], co);
 
         for (k = 0; k < 2; k++) {
@@ -1979,7 +1979,7 @@ static void mesh_init_origspace(Mesh *mesh)
 
       /* Finally, transform all vcos_2d into ((0, 0), (1, 1))
        * square and assign them as origspace. */
-      for (j = 0; j < mp->totloop; j++, lof++) {
+      for (j = 0; j < poly->totloop; j++, lof++) {
         add_v2_v2v2(lof->uv, vcos_2d[j], translate);
         mul_v2_v2(lof->uv, scale);
       }

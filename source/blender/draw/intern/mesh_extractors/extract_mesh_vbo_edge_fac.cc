@@ -97,15 +97,15 @@ static void extract_edge_fac_iter_poly_bm(const MeshRenderData *mr,
 }
 
 static void extract_edge_fac_iter_poly_mesh(const MeshRenderData *mr,
-                                            const MPoly *mp,
-                                            const int mp_index,
+                                            const MPoly *poly,
+                                            const int poly_index,
                                             void *_data)
 {
   MeshExtract_EdgeFac_Data *data = static_cast<MeshExtract_EdgeFac_Data *>(_data);
   const BitSpan optimal_display_edges = mr->me->runtime->subsurf_optimal_display_edges;
 
-  const int ml_index_end = mp->loopstart + mp->totloop;
-  for (int ml_index = mp->loopstart; ml_index < ml_index_end; ml_index += 1) {
+  const int ml_index_end = poly->loopstart + poly->totloop;
+  for (int ml_index = poly->loopstart; ml_index < ml_index_end; ml_index += 1) {
     const int vert = mr->corner_verts[ml_index];
     const int edge = mr->corner_edges[ml_index];
 
@@ -120,10 +120,10 @@ static void extract_edge_fac_iter_poly_mesh(const MeshRenderData *mr,
       }
       if (data->edge_loop_count[edge] == 2) {
         /* Manifold */
-        const int ml_index_last = mp->totloop + mp->loopstart - 1;
-        const int ml_index_other = (ml_index == ml_index_last) ? mp->loopstart : (ml_index + 1);
+        const int ml_index_last = poly->totloop + poly->loopstart - 1;
+        const int ml_index_other = (ml_index == ml_index_last) ? poly->loopstart : (ml_index + 1);
         const int vert_next = mr->corner_verts[ml_index_other];
-        float ratio = loop_edge_factor_get(mr->poly_normals[mp_index],
+        float ratio = loop_edge_factor_get(mr->poly_normals[poly_index],
                                            mr->vert_positions[vert],
                                            mr->vert_normals[vert],
                                            mr->vert_positions[vert_next]);
@@ -148,7 +148,7 @@ static void extract_edge_fac_iter_ledge_bm(const MeshRenderData *mr,
 }
 
 static void extract_edge_fac_iter_ledge_mesh(const MeshRenderData *mr,
-                                             const MEdge * /*med*/,
+                                             const MEdge * /*edge*/,
                                              const int ledge_index,
                                              void *_data)
 {
