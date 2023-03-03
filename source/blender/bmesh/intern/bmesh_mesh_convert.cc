@@ -463,11 +463,11 @@ void BM_mesh_bm_from_me(BMesh *bm, const Mesh *me, const struct BMeshFromMeshPar
     bm->elem_index_dirty &= ~BM_VERT; /* Added in order, clear dirty flag. */
   }
 
-  const Span<MEdge> medge = me->edges();
+  const Span<MEdge> edges = me->edges();
   Array<BMEdge *> etable(me->totedge);
-  for (const int i : medge.index_range()) {
+  for (const int i : edges.index_range()) {
     BMEdge *e = etable[i] = BM_edge_create(
-        bm, vtable[medge[i].v1], vtable[medge[i].v2], nullptr, BM_CREATE_SKIP_CD);
+        bm, vtable[edges[i].v1], vtable[edges[i].v2], nullptr, BM_CREATE_SKIP_CD);
     BM_elem_index_set(e, i); /* set_ok */
 
     e->head.hflag = 0;
@@ -1246,7 +1246,7 @@ void BM_mesh_bm_to_me(Main *bmain, BMesh *bm, Mesh *me, const struct BMeshToMesh
       &me->ldata, CD_PROP_INT32, CD_CONSTRUCT, nullptr, me->totloop, ".corner_edge");
   BKE_mesh_poly_offsets_ensure(me);
   MutableSpan<float3> positions = me->vert_positions_for_write();
-  MutableSpan<MEdge> medge = me->edges_for_write();
+  MutableSpan<MEdge> edges = me->edges_for_write();
   MutableSpan<int> poly_offsets = me->poly_offsets_for_write();
   MutableSpan<int> corner_verts = me->corner_verts_for_write();
   MutableSpan<int> corner_edges = me->corner_edges_for_write();
@@ -1285,8 +1285,8 @@ void BM_mesh_bm_to_me(Main *bmain, BMesh *bm, Mesh *me, const struct BMeshToMesh
 
   i = 0;
   BM_ITER_MESH (e, &iter, bm, BM_EDGES_OF_MESH) {
-    medge[i].v1 = BM_elem_index_get(e->v1);
-    medge[i].v2 = BM_elem_index_get(e->v2);
+    edges[i].v1 = BM_elem_index_get(e->v1);
+    edges[i].v2 = BM_elem_index_get(e->v2);
 
     if (BM_elem_flag_test(e, BM_ELEM_SEAM)) {
       need_uv_seam = true;

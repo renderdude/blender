@@ -198,7 +198,7 @@ class MeshFairingContext : public FairingContext {
     totloop_ = mesh->totloop;
 
     MutableSpan<float3> positions = mesh->vert_positions_for_write();
-    medge_ = mesh->edges();
+    edges_ = mesh->edges();
     polys_ = mesh->polys();
     corner_verts_ = mesh->corner_verts();
     corner_edges_ = mesh->corner_edges();
@@ -240,11 +240,11 @@ class MeshFairingContext : public FairingContext {
 
   int other_vertex_index_from_loop(const int loop, const uint v) override
   {
-    const MEdge *e = &medge_[corner_edges_[loop]];
-    if (e->v1 == v) {
-      return e->v2;
+    const MEdge *edge = &edges_[corner_edges_[loop]];
+    if (edge->v1 == v) {
+      return edge->v2;
     }
-    return e->v1;
+    return edge->v1;
   }
 
  protected:
@@ -252,7 +252,7 @@ class MeshFairingContext : public FairingContext {
   Span<int> corner_verts_;
   Span<int> corner_edges_;
   blender::OffsetIndices<int> polys_;
-  Span<MEdge> medge_;
+  Span<MEdge> edges_;
   Array<int> loop_to_poly_map_;
 };
 
@@ -448,7 +448,7 @@ static void prefair_and_fair_verts(FairingContext *fairing_context,
                                    bool *affected_verts,
                                    const eMeshFairingDepth depth)
 {
-  /* Prefair. */
+  /* Pre-fair. */
   UniformVertexWeight *uniform_vertex_weights = new UniformVertexWeight(fairing_context);
   UniformLoopWeight *uniform_loop_weights = new UniformLoopWeight();
   fairing_context->fair_verts(affected_verts, depth, uniform_vertex_weights, uniform_loop_weights);

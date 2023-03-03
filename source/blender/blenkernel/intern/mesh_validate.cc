@@ -43,6 +43,7 @@ using blender::Span;
 static CLG_LogRef LOG = {"bke.mesh"};
 
 void strip_loose_polysloops(Mesh *me, blender::BitSpan polys_to_remove);
+void mesh_strip_edges(Mesh *me);
 
 /* -------------------------------------------------------------------- */
 /** \name Internal functions
@@ -211,7 +212,7 @@ static int search_polyloop_cmp(const void *v1, const void *v2)
 bool BKE_mesh_validate_arrays(Mesh *mesh,
                               float (*vert_positions)[3],
                               uint totvert,
-                              MEdge *medges,
+                              MEdge *edges,
                               uint totedge,
                               MFace *mfaces,
                               uint totface,
@@ -252,7 +253,7 @@ bool BKE_mesh_validate_arrays(Mesh *mesh,
   }
 #endif
 
-  MEdge *me;
+  MEdge *edge;
   uint i, j;
   int *v;
 
@@ -346,36 +347,36 @@ bool BKE_mesh_validate_arrays(Mesh *mesh,
     }
   }
 
-  for (i = 0, me = medges; i < totedge; i++, me++) {
+  for (i = 0, edge = edges; i < totedge; i++, edge++) {
     bool remove = false;
 
-    if (me->v1 == me->v2) {
-      PRINT_ERR("\tEdge %u: has matching verts, both %u", i, me->v1);
+    if (edge->v1 == edge->v2) {
+      PRINT_ERR("\tEdge %u: has matching verts, both %u", i, edge->v1);
       remove = do_fixes;
     }
-    if (me->v1 >= totvert) {
-      PRINT_ERR("\tEdge %u: v1 index out of range, %u", i, me->v1);
+    if (edge->v1 >= totvert) {
+      PRINT_ERR("\tEdge %u: v1 index out of range, %u", i, edge->v1);
       remove = do_fixes;
     }
-    if (me->v2 >= totvert) {
-      PRINT_ERR("\tEdge %u: v2 index out of range, %u", i, me->v2);
+    if (edge->v2 >= totvert) {
+      PRINT_ERR("\tEdge %u: v2 index out of range, %u", i, edge->v2);
       remove = do_fixes;
     }
 
-    if ((me->v1 != me->v2) && BLI_edgehash_haskey(edge_hash, me->v1, me->v2)) {
+    if ((edge->v1 != edge->v2) && BLI_edgehash_haskey(edge_hash, edge->v1, edge->v2)) {
       PRINT_ERR("\tEdge %u: is a duplicate of %d",
                 i,
-                POINTER_AS_INT(BLI_edgehash_lookup(edge_hash, me->v1, me->v2)));
+                POINTER_AS_INT(BLI_edgehash_lookup(edge_hash, edge->v1, edge->v2)));
       remove = do_fixes;
     }
 
     if (remove == false) {
-      if (me->v1 != me->v2) {
-        BLI_edgehash_insert(edge_hash, me->v1, me->v2, POINTER_FROM_INT(i));
+      if (edge->v1 != edge->v2) {
+        BLI_edgehash_insert(edge_hash, edge->v1, edge->v2, POINTER_FROM_INT(i));
       }
     }
     else {
-      REMOVE_EDGE_TAG(me);
+      REMOVE_EDGE_TAG(edge);
     }
   }
 
@@ -563,7 +564,7 @@ bool BKE_mesh_validate_arrays(Mesh *mesh,
     SortPoly *prev_sp, *sp = sort_polys;
     int prev_end;
 
-    for (i = 0; i < totpoly; i++, sp++) {
+    for (const int64_t i : blender::IndexRange(totpoly)) {
       const int poly_start = poly_offsets[i];
       const int poly_size = poly_offsets[i + 1] - poly_start;
       sp->index = i;
@@ -622,7 +623,7 @@ bool BKE_mesh_validate_arrays(Mesh *mesh,
             sp->invalid = true;
           }
           else if (BLI_BITMAP_TEST(vert_tag, vert)) {
-            PRINT_ERR("\tPoly %u has duplicated vert reference at corner (%u)", i, j);
+            PRINT_ERR("\tPoly %u has duplicated vert reference at corner (%u)", uint(i), j);
             sp->invalid = true;
           }
           else {
@@ -632,6 +633,7 @@ bool BKE_mesh_validate_arrays(Mesh *mesh,
         }
 
         if (sp->invalid) {
+          sp++;
           continue;
         }
 
@@ -639,7 +641,7 @@ bool BKE_mesh_validate_arrays(Mesh *mesh,
         for (j = 0; j < poly_size; j++) {
           const int corner = sp->loopstart + j;
           const int vert = corner_verts[corner];
-          const int edge = corner_edges[corner];
+          const int edge_i = corner_edges[corner];
           v1 = vert;
           v2 = corner_verts[sp->loopstart + (j + 1) % poly_size];
           if (!BLI_edgehash_haskey(edge_hash, v1, v2)) {
@@ -652,11 +654,11 @@ bool BKE_mesh_validate_arrays(Mesh *mesh,
               sp->invalid = true;
             }
           }
-          else if (edge >= totedge) {
+          else if (edge_i >= totedge) {
             /* Invalid edge idx.
              * We already know from previous text that a valid edge exists, use it (if allowed)! */
             if (do_fixes) {
-              int prev_e = edge;
+              int prev_e = edge_i;
               corner_edges[corner] = POINTER_AS_INT(BLI_edgehash_lookup(edge_hash, v1, v2));
               fix_flag.loops_edge = true;
               PRINT_ERR("\tLoop %d has invalid edge reference (%d), fixed using edge %d",
@@ -665,19 +667,19 @@ bool BKE_mesh_validate_arrays(Mesh *mesh,
                         corner_edges[corner]);
             }
             else {
-              PRINT_ERR("\tLoop %d has invalid edge reference (%d)", corner, edge);
+              PRINT_ERR("\tLoop %d has invalid edge reference (%d)", corner, edge_i);
               sp->invalid = true;
             }
           }
           else {
-            me = &medges[edge];
-            if (IS_REMOVED_EDGE(me) ||
-                !((me->v1 == v1 && me->v2 == v2) || (me->v1 == v2 && me->v2 == v1))) {
+            edge = &edges[edge_i];
+            if (IS_REMOVED_EDGE(edge) ||
+                !((edge->v1 == v1 && edge->v2 == v2) || (edge->v1 == v2 && edge->v2 == v1))) {
               /* The pointed edge is invalid (tagged as removed, or vert idx mismatch),
                * and we already know from previous test that a valid one exists,
                * use it (if allowed)! */
               if (do_fixes) {
-                int prev_e = edge;
+                int prev_e = edge_i;
                 corner_edges[corner] = POINTER_AS_INT(BLI_edgehash_lookup(edge_hash, v1, v2));
                 fix_flag.loops_edge = true;
                 PRINT_ERR(
@@ -685,11 +687,11 @@ bool BKE_mesh_validate_arrays(Mesh *mesh,
                     "%d",
                     sp->index,
                     prev_e,
-                    IS_REMOVED_EDGE(me),
+                    IS_REMOVED_EDGE(edge),
                     corner_edges[corner]);
               }
               else {
-                PRINT_ERR("\tPoly %u has invalid edge reference (%d)", sp->index, edge);
+                PRINT_ERR("\tPoly %u has invalid edge reference (%d)", sp->index, edge_i);
                 sp->invalid = true;
               }
             }
@@ -701,6 +703,7 @@ bool BKE_mesh_validate_arrays(Mesh *mesh,
           qsort(sp->verts, sp->numverts, sizeof(int), int_cmp);
         }
       }
+      sp++;
     }
 
     MEM_freeN(vert_tag);
@@ -876,7 +879,7 @@ bool BKE_mesh_validate_arrays(Mesh *mesh,
     }
 
     if (free_flag.edges) {
-      BKE_mesh_strip_loose_edges(mesh);
+      mesh_strip_edges(mesh);
     }
 
     if (recalc_flag.edges) {
@@ -1289,7 +1292,7 @@ void strip_loose_polysloops(Mesh *me, blender::BitSpan polys_to_remove)
   MEM_freeN(new_idx);
 }
 
-void BKE_mesh_strip_loose_edges(Mesh *me)
+void mesh_strip_edges(Mesh *me)
 {
   MEdge *e;
   int a, b;
@@ -1359,13 +1362,13 @@ void BKE_mesh_calc_edges_tessface(Mesh *mesh)
   CustomData_add_layer(&edgeData, CD_MEDGE, CD_SET_DEFAULT, nullptr, numEdges);
   CustomData_add_layer(&edgeData, CD_ORIGINDEX, CD_SET_DEFAULT, nullptr, numEdges);
 
-  MEdge *med = (MEdge *)CustomData_get_layer_for_write(&edgeData, CD_MEDGE, mesh->totedge);
+  MEdge *ege = (MEdge *)CustomData_get_layer_for_write(&edgeData, CD_MEDGE, mesh->totedge);
   int *index = (int *)CustomData_get_layer_for_write(&edgeData, CD_ORIGINDEX, mesh->totedge);
 
   EdgeSetIterator *ehi = BLI_edgesetIterator_new(eh);
   for (int i = 0; BLI_edgesetIterator_isDone(ehi) == false;
-       BLI_edgesetIterator_step(ehi), i++, med++, index++) {
-    BLI_edgesetIterator_getKey(ehi, &med->v1, &med->v2);
+       BLI_edgesetIterator_step(ehi), i++, ege++, index++) {
+    BLI_edgesetIterator_getKey(ehi, &ege->v1, &ege->v2);
     *index = ORIGINDEX_NONE;
   }
   BLI_edgesetIterator_free(ehi);

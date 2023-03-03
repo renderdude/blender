@@ -154,11 +154,11 @@ static void extract_edituv_stretch_angle_iter_poly_bm(const MeshRenderData *mr,
 }
 
 static void extract_edituv_stretch_angle_iter_poly_mesh(const MeshRenderData *mr,
-                                                        const int mp_index,
+                                                        const int poly_index,
                                                         void *_data)
 {
   MeshExtract_StretchAngle_Data *data = static_cast<MeshExtract_StretchAngle_Data *>(_data);
-  const IndexRange poly = mr->polys[mp_index];
+  const IndexRange poly = mr->polys[poly_index];
 
   const int ml_index_end = poly.start() + poly.size();
   for (int ml_index = poly.start(); ml_index < ml_index_end; ml_index += 1) {

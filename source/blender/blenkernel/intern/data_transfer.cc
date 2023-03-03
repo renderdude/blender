@@ -427,7 +427,7 @@ static void data_transfer_dtdata_type_postprocess(Object * /*ob_src*/,
     const OffsetIndices polys_dst = me_dst->polys();
     const blender::Span<int> corner_verts_dst = me_dst->corner_verts_for_write();
     const blender::Span<int> corner_edges_dst = me_dst->corner_edges_for_write();
-    const int num_loops_dst = me_dst->totloop;
+
     CustomData *ldata_dst = &me_dst->ldata;
 
     const float(*poly_nors_dst)[3] = BKE_mesh_poly_normals_ensure(me_dst);
@@ -438,7 +438,7 @@ static void data_transfer_dtdata_type_postprocess(Object * /*ob_src*/,
 
     if (!custom_nors_dst) {
       custom_nors_dst = static_cast<short(*)[2]>(CustomData_add_layer(
-          ldata_dst, CD_CUSTOMLOOPNORMAL, CD_SET_DEFAULT, nullptr, num_loops_dst));
+          ldata_dst, CD_CUSTOMLOOPNORMAL, CD_SET_DEFAULT, nullptr, corner_verts_dst.size()));
     }
 
     bke::MutableAttributeAccessor attributes = me_dst->attributes_for_write();

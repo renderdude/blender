@@ -1207,7 +1207,6 @@ static void make_child_duplis_faces_from_mesh(const DupliContext *ctx,
   const float2 *mloopuv = fdd->mloopuv;
   const int totface = fdd->totface;
   const bool use_scale = fdd->params.use_scale;
-  int a;
 
   float child_imat[4][4];
 
@@ -1216,7 +1215,7 @@ static void make_child_duplis_faces_from_mesh(const DupliContext *ctx,
   mul_m4_m4m4(child_imat, inst_ob->world_to_object, ctx->object->object_to_world);
   const float scale_fac = ctx->object->instance_faces_scale;
 
-  for (a = 0; a < totface; a++) {
+  for (const int a : blender::IndexRange(totface)) {
     const blender::IndexRange poly = fdd->polys[a];
     const Span<int> poly_verts = fdd->corner_verts.slice(poly);
     DupliObject *dob = face_dupli_from_mesh(fdd->params.ctx,
@@ -1326,9 +1325,8 @@ static void make_duplis_faces(const DupliContext *ctx)
   }
 }
 
-static const DupliGenerator gen_dupli_faces = {
-    /*type*/ OB_DUPLIFACES,
-    /*make_duplis*/ make_duplis_faces};
+static const DupliGenerator gen_dupli_faces = {/*type*/ OB_DUPLIFACES,
+                                               /*make_duplis*/ make_duplis_faces};
 
 /** \} */
 
@@ -1675,9 +1673,8 @@ static void make_duplis_particles(const DupliContext *ctx)
   }
 }
 
-static const DupliGenerator gen_dupli_particles = {
-    /*type*/ OB_DUPLIPARTS,
-    /*make_duplis*/ make_duplis_particles};
+static const DupliGenerator gen_dupli_particles = {/*type*/ OB_DUPLIPARTS,
+                                                   /*make_duplis*/ make_duplis_particles};
 
 /** \} */
 

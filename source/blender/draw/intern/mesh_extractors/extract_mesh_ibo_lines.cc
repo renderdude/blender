@@ -50,12 +50,14 @@ static void extract_lines_iter_poly_bm(const MeshRenderData * /*mr*/,
   } while ((l_iter = l_iter->next) != l_first);
 }
 
-static void extract_lines_iter_poly_mesh(const MeshRenderData *mr, const int mp_index, void *data)
+static void extract_lines_iter_poly_mesh(const MeshRenderData *mr,
+                                         const int poly_index,
+                                         void *data)
 {
   GPUIndexBufBuilder *elb = static_cast<GPUIndexBufBuilder *>(data);
-  const IndexRange poly = mr->polys[mp_index];
+  const IndexRange poly = mr->polys[poly_index];
   /* Using poly & loop iterator would complicate accessing the adjacent loop. */
-  const int *e_origindex = (mr->edit_bmesh) ? mr->e_origindex : nullptr;
+  const int *e_origindex = (mr->hide_unmapped_edges) ? mr->e_origindex : nullptr;
   if (mr->use_hide || (e_origindex != nullptr)) {
     const int ml_index_last = poly.last();
     int ml_index = ml_index_last, ml_index_next = poly.start();
@@ -99,15 +101,15 @@ static void extract_lines_iter_ledge_bm(const MeshRenderData *mr,
 }
 
 static void extract_lines_iter_ledge_mesh(const MeshRenderData *mr,
-                                          const MEdge *med,
+                                          const MEdge *edge,
                                           const int ledge_index,
                                           void *data)
 {
   GPUIndexBufBuilder *elb = static_cast<GPUIndexBufBuilder *>(data);
   const int l_index_offset = mr->edge_len + ledge_index;
   const int e_index = mr->ledges[ledge_index];
-  const int *e_origindex = (mr->edit_bmesh) ? mr->e_origindex : nullptr;
-  if (!((mr->use_hide && mr->hide_edge && mr->hide_edge[med - mr->medge]) ||
+  const int *e_origindex = (mr->hide_unmapped_edges) ? mr->e_origindex : nullptr;
+  if (!((mr->use_hide && mr->hide_edge && mr->hide_edge[edge - mr->edges.data()]) ||
         ((e_origindex) && (e_origindex[e_index] == ORIGINDEX_NONE)))) {
     const int l_index = mr->loop_len + ledge_index * 2;
     GPU_indexbuf_set_line_verts(elb, l_index_offset, l_index, l_index + 1);
@@ -180,8 +182,8 @@ static void extract_lines_loose_geom_subdiv(const DRWSubdivCache *subdiv_cache,
 
   switch (mr->extract_type) {
     case MR_EXTRACT_MESH: {
-      const int *e_origindex = (mr->edit_bmesh) ? mr->e_origindex : nullptr;
-      if (mr->e_origindex == nullptr) {
+      const int *e_origindex = (mr->hide_unmapped_edges) ? mr->e_origindex : nullptr;
+      if (e_origindex == nullptr) {
         const bool *hide_edge = mr->hide_edge;
         if (hide_edge) {
           for (DRWSubdivLooseEdge edge : loose_edges) {

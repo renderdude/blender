@@ -389,9 +389,9 @@ static bool testEdgeMark(Mesh *me, const FreestyleEdge *fed, const MLoopTri *lt,
 
   const int corner = lt->tri[i];
   const int corner_next = lt->tri[(i + 1) % 3];
-  const MEdge *medge = &edges[corner_edges[corner]];
+  const MEdge *edge = &edges[corner_edges[corner]];
 
-  if (!ELEM(corner_verts[corner_next], medge->v1, medge->v2)) {
+  if (!ELEM(corner_verts[corner_next], edge->v1, edge->v2)) {
     /* Not an edge in the original mesh before triangulation. */
     return false;
   }

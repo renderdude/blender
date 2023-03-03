@@ -111,13 +111,13 @@ static void make_edges_mdata_extend(Mesh &mesh)
     CustomData_realloc(&mesh.edata, totedge, totedge + totedge_new);
     mesh.totedge += totedge_new;
     MutableSpan<MEdge> edges = mesh.edges_for_write();
-    MEdge *medge = &edges[totedge];
+    MEdge *edge = &edges[totedge];
 
     EdgeHashIterator *ehi;
     uint e_index = totedge;
     for (ehi = BLI_edgehashIterator_new(eh); BLI_edgehashIterator_isDone(ehi) == false;
-         BLI_edgehashIterator_step(ehi), ++medge, e_index++) {
-      BLI_edgehashIterator_getKey(ehi, &medge->v1, &medge->v2);
+         BLI_edgehashIterator_step(ehi), ++edge, e_index++) {
+      BLI_edgehashIterator_getKey(ehi, &edge->v1, &edge->v2);
       BLI_edgehashIterator_setValue(ehi, POINTER_FROM_UINT(e_index));
     }
     BLI_edgehashIterator_free(ehi);
@@ -456,11 +456,7 @@ void BKE_mesh_to_curve_nurblist(const Mesh *me, ListBase *nurblist, const int ed
   const blender::OffsetIndices polys = me->polys();
   const Span<int> corner_edges = me->corner_edges();
 
-  const MEdge *med;
-
-  int medge_len = me->totedge;
   int totedges = 0;
-  int i;
 
   /* only to detect edge polylines */
   int *edge_users;
@@ -468,7 +464,7 @@ void BKE_mesh_to_curve_nurblist(const Mesh *me, ListBase *nurblist, const int ed
   ListBase edges = {nullptr, nullptr};
 
   /* get boundary edges */
-  edge_users = (int *)MEM_calloc_arrayN(medge_len, sizeof(int), __func__);
+  edge_users = (int *)MEM_calloc_arrayN(mesh_edges.size(), sizeof(int), __func__);
   for (const int i : polys.index_range()) {
     for (const int edge : corner_edges.slice(polys[i])) {
       edge_users[edge]++;
@@ -476,11 +472,10 @@ void BKE_mesh_to_curve_nurblist(const Mesh *me, ListBase *nurblist, const int ed
   }
 
   /* create edges from all faces (so as to find edges not in any faces) */
-  med = mesh_edges.data();
-  for (i = 0; i < medge_len; i++, med++) {
+  for (const int i : mesh_edges.index_range()) {
     if (edge_users[i] == edge_users_test) {
       EdgeLink *edl = MEM_cnew<EdgeLink>("EdgeLink");
-      edl->edge = med;
+      edl->edge = &mesh_edges[i];
 
       BLI_addtail(&edges, edl);
       totedges++;
@@ -495,9 +490,9 @@ void BKE_mesh_to_curve_nurblist(const Mesh *me, ListBase *nurblist, const int ed
       ListBase polyline = {nullptr, nullptr}; /* store a list of VertLink's */
       bool closed = false;
       int totpoly = 0;
-      MEdge *med_current = (MEdge *)((EdgeLink *)edges.last)->edge;
-      uint startVert = med_current->v1;
-      uint endVert = med_current->v2;
+      MEdge *edge_current = (MEdge *)((EdgeLink *)edges.last)->edge;
+      uint startVert = edge_current->v1;
+      uint endVert = edge_current->v2;
       bool ok = true;
 
       appendPolyLineVert(&polyline, startVert);
@@ -513,34 +508,34 @@ void BKE_mesh_to_curve_nurblist(const Mesh *me, ListBase *nurblist, const int ed
         while (edl) {
           EdgeLink *edl_prev = edl->prev;
 
-          med = (MEdge *)edl->edge;
+          const MEdge *edge = (MEdge *)edl->edge;
 
-          if (med->v1 == endVert) {
-            endVert = med->v2;
-            appendPolyLineVert(&polyline, med->v2);
+          if (edge->v1 == endVert) {
+            endVert = edge->v2;
+            appendPolyLineVert(&polyline, edge->v2);
             totpoly++;
             BLI_freelinkN(&edges, edl);
             totedges--;
             ok = true;
           }
-          else if (med->v2 == endVert) {
-            endVert = med->v1;
+          else if (edge->v2 == endVert) {
+            endVert = edge->v1;
             appendPolyLineVert(&polyline, endVert);
             totpoly++;
             BLI_freelinkN(&edges, edl);
             totedges--;
             ok = true;
           }
-          else if (med->v1 == startVert) {
-            startVert = med->v2;
+          else if (edge->v1 == startVert) {
+            startVert = edge->v2;
             prependPolyLineVert(&polyline, startVert);
             totpoly++;
             BLI_freelinkN(&edges, edl);
             totedges--;
             ok = true;
           }
-          else if (med->v2 == startVert) {
-            startVert = med->v1;
+          else if (edge->v2 == startVert) {
+            startVert = edge->v1;
             prependPolyLineVert(&polyline, startVert);
             totpoly++;
             BLI_freelinkN(&edges, edl);
@@ -568,17 +563,18 @@ void BKE_mesh_to_curve_nurblist(const Mesh *me, ListBase *nurblist, const int ed
         /* create new 'nurb' within the curve */
         nu = MEM_new<Nurb>("MeshNurb", blender::dna::shallow_zero_initialize());
 
-        nu->pntsu = totpoly;
+        nu->pntsu = polys.ranges_num();
         nu->pntsv = 1;
         nu->orderu = 4;
         nu->flagu = CU_NURB_ENDPOINT | (closed ? CU_NURB_CYCLIC : 0); /* endpoint */
         nu->resolu = 12;
 
-        nu->bp = (BPoint *)MEM_calloc_arrayN(totpoly, sizeof(BPoint), "bpoints");
+        nu->bp = (BPoint *)MEM_calloc_arrayN(polys.ranges_num(), sizeof(BPoint), "bpoints");
 
         /* add points */
         vl = (VertLink *)polyline.first;
-        for (i = 0, bp = nu->bp; i < totpoly; i++, bp++, vl = (VertLink *)vl->next) {
+        int i;
+        for (i = 0, bp = nu->bp; i < polys.ranges_num(); i++, bp++, vl = (VertLink *)vl->next) {
           copy_v3_v3(bp->vec, positions[vl->index]);
           bp->f1 = SELECT;
           bp->radius = bp->weight = 1.0;

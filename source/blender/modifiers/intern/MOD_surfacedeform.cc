@@ -290,18 +290,15 @@ static void freeAdjacencyMap(SDefAdjacencyArray *const vert_edges,
 }
 
 static int buildAdjacencyMap(const blender::OffsetIndices<int> polys,
-                             const MEdge *edge,
-                             const int *const corner_edges,
-                             const uint polys_num,
-                             const uint edges_num,
+                             const blender::Span<MEdge> edges,
+                             const blender::Span<int> corner_edges,
                              SDefAdjacencyArray *const vert_edges,
                              SDefAdjacency *adj,
                              SDefEdgePolys *const edge_polys)
 {
   /* Find polygons adjacent to edges. */
-  for (int i = 0; i < polys_num; i++) {
-    for (const int corner : polys[i]) {
-      const int edge_i = corner_edges[corner];
+  for (const int i : polys.index_range()) {
+    for (const int edge_i : corner_edges.slice(polys[i])) {
       if (edge_polys[edge_i].num == 0) {
         edge_polys[edge_i].polys[0] = i;
         edge_polys[edge_i].polys[1] = -1;
@@ -318,17 +315,18 @@ static int buildAdjacencyMap(const blender::OffsetIndices<int> polys,
   }
 
   /* Find edges adjacent to vertices */
-  for (int i = 0; i < edges_num; i++, edge++) {
-    adj->next = vert_edges[edge->v1].first;
+  for (const int i : edges.index_range()) {
+    const MEdge &edge = edges[i];
+    adj->next = vert_edges[edge.v1].first;
     adj->index = i;
-    vert_edges[edge->v1].first = adj;
-    vert_edges[edge->v1].num += edge_polys[i].num;
+    vert_edges[edge.v1].first = adj;
+    vert_edges[edge.v1].num += edge_polys[i].num;
     adj++;
 
-    adj->next = vert_edges[edge->v2].first;
+    adj->next = vert_edges[edge.v2].first;
     adj->index = i;
-    vert_edges[edge->v2].first = adj;
-    vert_edges[edge->v2].num += edge_polys[i].num;
+    vert_edges[edge.v2].first = adj;
+    vert_edges[edge.v2].num += edge_polys[i].num;
     adj++;
   }
 
@@ -1226,14 +1224,7 @@ static bool surfacedeformBind(Object *ob,
     return false;
   }
 
-  adj_result = buildAdjacencyMap(polys,
-                                 edges.data(),
-                                 corner_edges.data(),
-                                 target_polys_num,
-                                 tedges_num,
-                                 vert_edges,
-                                 adj_array,
-                                 edge_polys);
+  adj_result = buildAdjacencyMap(polys, edges, corner_edges, vert_edges, adj_array, edge_polys);
 
   if (adj_result == MOD_SDEF_BIND_RESULT_NONMANY_ERR) {
     BKE_modifier_set_error(

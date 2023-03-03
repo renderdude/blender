@@ -108,11 +108,11 @@ struct WeightedNormalData {
  */
 static bool check_item_poly_strength(WeightedNormalData *wn_data,
                                      WeightedNormalDataAggregateItem *item_data,
-                                     const int mp_index)
+                                     const int poly_index)
 {
   BLI_assert(wn_data->poly_strength != nullptr);
 
-  const int mp_strength = wn_data->poly_strength[mp_index];
+  const int mp_strength = wn_data->poly_strength[poly_index];
 
   if (mp_strength > item_data->curr_strength) {
     item_data->curr_strength = mp_strength;
@@ -128,7 +128,7 @@ static void aggregate_item_normal(WeightedNormalModifierData *wnmd,
                                   WeightedNormalData *wn_data,
                                   WeightedNormalDataAggregateItem *item_data,
                                   const int mv_index,
-                                  const int mp_index,
+                                  const int poly_index,
                                   const float curr_val,
                                   const bool use_face_influence)
 {
@@ -151,7 +151,7 @@ static void aggregate_item_normal(WeightedNormalModifierData *wnmd,
     return;
   }
 
-  if (use_face_influence && !check_item_poly_strength(wn_data, item_data, mp_index)) {
+  if (use_face_influence && !check_item_poly_strength(wn_data, item_data, poly_index)) {
     return;
   }
 
@@ -176,7 +176,7 @@ static void aggregate_item_normal(WeightedNormalModifierData *wnmd,
                                       cached_inverse_powers_of_weight[loops_num] :
                                       1.0f / powf(weight, loops_num);
 
-  madd_v3_v3fl(item_data->normal, poly_normals[mp_index], curr_val * inverted_n_weight);
+  madd_v3_v3fl(item_data->normal, poly_normals[poly_index], curr_val * inverted_n_weight);
 }
 
 static void apply_weights_vertex_normal(WeightedNormalModifierData *wnmd,
@@ -292,10 +292,10 @@ static void apply_weights_vertex_normal(WeightedNormalModifierData *wnmd,
   switch (mode) {
     case MOD_WEIGHTEDNORMAL_MODE_FACE:
       for (const int i : polys.index_range()) {
-        const int mp_index = mode_pair[i].index;
+        const int poly_index = mode_pair[i].index;
         const float mp_val = mode_pair[i].val;
 
-        for (const int ml_index : polys[mp_index]) {
+        for (const int ml_index : polys[poly_index]) {
           const int mv_index = corner_verts[ml_index];
           WeightedNormalDataAggregateItem *item_data =
               keep_sharp ? static_cast<WeightedNormalDataAggregateItem *>(
@@ -303,7 +303,7 @@ static void apply_weights_vertex_normal(WeightedNormalModifierData *wnmd,
                            &items_data[mv_index];
 
           aggregate_item_normal(
-              wnmd, wn_data, item_data, mv_index, mp_index, mp_val, use_face_influence);
+              wnmd, wn_data, item_data, mv_index, poly_index, mp_val, use_face_influence);
         }
       }
       break;
@@ -313,7 +313,7 @@ static void apply_weights_vertex_normal(WeightedNormalModifierData *wnmd,
         const int ml_index = mode_pair[i].index;
         const float ml_val = mode_pair[i].val;
 
-        const int mp_index = loop_to_poly[ml_index];
+        const int poly_index = loop_to_poly[ml_index];
         const int mv_index = corner_verts[ml_index];
         WeightedNormalDataAggregateItem *item_data =
             keep_sharp ? static_cast<WeightedNormalDataAggregateItem *>(
@@ -321,7 +321,7 @@ static void apply_weights_vertex_normal(WeightedNormalModifierData *wnmd,
                          &items_data[mv_index];
 
         aggregate_item_normal(
-            wnmd, wn_data, item_data, mv_index, mp_index, ml_val, use_face_influence);
+            wnmd, wn_data, item_data, mv_index, poly_index, ml_val, use_face_influence);
       }
       break;
     default:

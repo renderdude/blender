@@ -272,7 +272,6 @@ static void paintface_select_linked_faces(Mesh &mesh,
   AtomicDisjointSet islands(mesh.totedge);
   build_poly_connections(islands, mesh);
 
-  const Span<MEdge> edges = mesh.edges();
   const OffsetIndices polys = mesh.polys();
   const Span<int> corner_edges = mesh.corner_edges();
 

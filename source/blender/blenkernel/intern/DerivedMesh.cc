@@ -109,17 +109,17 @@ static float *dm_getVertArray(DerivedMesh *dm)
 
 static MEdge *dm_getEdgeArray(DerivedMesh *dm)
 {
-  MEdge *medge = (MEdge *)CustomData_get_layer_for_write(
+  MEdge *edge = (MEdge *)CustomData_get_layer_for_write(
       &dm->edgeData, CD_MEDGE, dm->getNumEdges(dm));
 
-  if (!medge) {
-    medge = (MEdge *)CustomData_add_layer(
+  if (!edge) {
+    edge = (MEdge *)CustomData_add_layer(
         &dm->edgeData, CD_MEDGE, CD_SET_DEFAULT, nullptr, dm->getNumEdges(dm));
     CustomData_set_layer_flag(&dm->edgeData, CD_MEDGE, CD_FLAG_TEMPORARY);
-    dm->copyEdgeArray(dm, medge);
+    dm->copyEdgeArray(dm, edge);
   }
 
-  return medge;
+  return edge;
 }
 
 static int *dm_getCornerVertArray(DerivedMesh *dm)

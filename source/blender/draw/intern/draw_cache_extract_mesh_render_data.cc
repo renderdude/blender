@@ -96,8 +96,7 @@ static void mesh_render_data_loose_geom_mesh(const MeshRenderData *mr, MeshBuffe
   }
 
   /* Tag verts as not loose. */
-  const Span<MEdge> edges(mr->medge, mr->edge_len);
-  for (const MEdge &edge : edges) {
+  for (const MEdge &edge : mr->edges) {
     BLI_BITMAP_ENABLE(lvert_map, edge.v1);
     BLI_BITMAP_ENABLE(lvert_map, edge.v2);
   }
@@ -357,9 +356,9 @@ void mesh_render_data_update_normals(MeshRenderData *mr, const eMRDataType data_
 
   if (mr->extract_type != MR_EXTRACT_BMESH) {
     /* Mesh */
-    mr->vert_normals = BKE_mesh_vert_normals_ensure(mr->me);
+    mr->vert_normals = mr->me->vert_normals();
     if (data_flag & (MR_DATA_POLY_NOR | MR_DATA_LOOP_NOR | MR_DATA_TAN_LOOP_NOR)) {
-      mr->poly_normals = BKE_mesh_poly_normals_ensure(mr->me);
+      mr->poly_normals = mr->me->poly_normals();
     }
     if (((data_flag & MR_DATA_LOOP_NOR) && is_auto_smooth) || (data_flag & MR_DATA_TAN_LOOP_NOR)) {
       mr->loop_normals = static_cast<float(*)[3]>(
@@ -368,17 +367,17 @@ void mesh_render_data_update_normals(MeshRenderData *mr, const eMRDataType data_
           CustomData_get_layer_for_write(&mr->me->ldata, CD_CUSTOMLOOPNORMAL, mr->me->totloop));
       const bool *sharp_edges = static_cast<const bool *>(
           CustomData_get_layer_named(&mr->me->edata, CD_PROP_BOOL, "sharp_edge"));
-      BKE_mesh_normals_loop_split(reinterpret_cast<const float(*)[3]>(mr->vert_positions),
-                                  mr->vert_normals,
-                                  mr->vert_len,
-                                  mr->medge,
-                                  mr->edge_len,
-                                  mr->corner_verts,
-                                  mr->corner_edges,
+      BKE_mesh_normals_loop_split(reinterpret_cast<const float(*)[3]>(mr->vert_positions.data()),
+                                  reinterpret_cast<const float(*)[3]>(mr->vert_normals.data()),
+                                  mr->vert_positions.size(),
+                                  mr->edges.data(),
+                                  mr->edges.size(),
+                                  mr->corner_verts.data(),
+                                  mr->corner_edges.data(),
                                   mr->loop_normals,
                                   mr->loop_len,
                                   mr->polys,
-                                  mr->poly_normals,
+                                  reinterpret_cast<const float(*)[3]>(mr->poly_normals.data()),
                                   is_auto_smooth,
                                   split_angle,
                                   sharp_edges,
@@ -458,6 +457,9 @@ MeshRenderData *mesh_render_data_create(Object *object,
     mr->me = (do_final) ? editmesh_eval_final : editmesh_eval_cage;
     mr->edit_data = is_mode_active ? mr->me->runtime->edit_data : nullptr;
 
+    /* If there is no distinct cage, hide unmapped edges that can't be selected. */
+    mr->hide_unmapped_edges = !do_final || editmesh_eval_final == editmesh_eval_cage;
+
     if (mr->edit_data) {
       EditMeshData *emd = mr->edit_data;
       if (emd->vertexCos) {
@@ -520,6 +522,7 @@ MeshRenderData *mesh_render_data_create(Object *object,
     mr->me = me;
     mr->edit_bmesh = nullptr;
     mr->extract_type = MR_EXTRACT_MESH;
+    mr->hide_unmapped_edges = false;
 
     if (is_paint_mode && mr->me) {
       mr->v_origindex = static_cast<const int *>(
@@ -544,11 +547,11 @@ MeshRenderData *mesh_render_data_create(Object *object,
     mr->poly_len = mr->me->totpoly;
     mr->tri_len = poly_to_tri_count(mr->poly_len, mr->loop_len);
 
-    mr->vert_positions = mr->me->vert_positions().data();
-    mr->medge = mr->me->edges().data();
+    mr->vert_positions = mr->me->vert_positions();
+    mr->edges = mr->me->edges();
     mr->polys = mr->me->polys();
-    mr->corner_verts = mr->me->corner_verts().data();
-    mr->corner_edges = mr->me->corner_edges().data();
+    mr->corner_verts = mr->me->corner_verts();
+    mr->corner_edges = mr->me->corner_edges();
 
     mr->v_origindex = static_cast<const int *>(CustomData_get_layer(&mr->me->vdata, CD_ORIGINDEX));
     mr->e_origindex = static_cast<const int *>(CustomData_get_layer(&mr->me->edata, CD_ORIGINDEX));

@@ -392,7 +392,7 @@ static void copy_vert_attributes(Mesh *dest_mesh,
 /* Similar to copy_vert_attributes but for poly attributes. */
 static void copy_poly_attributes(Mesh *dest_mesh,
                                  const Mesh *orig_me,
-                                 int mp_index,
+                                 int poly_index,
                                  int index_in_orig_me,
                                  Span<short> material_remap,
                                  MutableSpan<int> dst_material_indices)
@@ -405,7 +405,7 @@ static void copy_poly_attributes(Mesh *dest_mesh,
     int target_layer_i = CustomData_get_named_layer_index(target_cd, ty, name);
     if (target_layer_i != -1) {
       CustomData_copy_data_layer(
-          source_cd, target_cd, source_layer_i, target_layer_i, index_in_orig_me, mp_index, 1);
+          source_cd, target_cd, source_layer_i, target_layer_i, index_in_orig_me, poly_index, 1);
     }
   }
 
@@ -415,12 +415,12 @@ static void copy_poly_attributes(Mesh *dest_mesh,
   const int src_index = src_material_indices[index_in_orig_me];
   if (material_remap.index_range().contains(src_index)) {
     const int remapped_index = material_remap[src_index];
-    dst_material_indices[mp_index] = remapped_index >= 0 ? remapped_index : src_index;
+    dst_material_indices[poly_index] = remapped_index >= 0 ? remapped_index : src_index;
   }
   else {
-    dst_material_indices[mp_index] = src_index;
+    dst_material_indices[poly_index] = src_index;
   }
-  BLI_assert(dst_material_indices[mp_index] >= 0);
+  BLI_assert(dst_material_indices[poly_index] >= 0);
 }
 
 /* Similar to copy_vert_attributes but for edge attributes. */
@@ -446,13 +446,13 @@ static void copy_edge_attributes(Mesh *dest_mesh,
 }
 
 /**
- * For #IMesh face `f`, with corresponding output Mesh poly `mp`,
+ * For #IMesh face `f`, with corresponding output Mesh poly `poly`,
  * where the original Mesh poly is `orig_poly`, coming from the Mesh
  * `orig_me`, which has index `orig_me_index` in `mim`:
  * fill in the `orig_loops` Array with corresponding indices of MLoops from `orig_me`
  * where they have the same start and end vertices; for cases where that is
  * not true, put -1 in the `orig_loops` slot.
- * For now, we only try to do this if `mp` and `orig_poly` have the same size.
+ * For now, we only try to do this if `poly` and `orig_poly` have the same size.
  * Return the number of non-null MLoops filled in.
  */
 static int fill_orig_loops(const Face *f,
@@ -555,7 +555,7 @@ static void get_poly2d_cos(const Mesh *me,
   }
 }
 
-/* For the loops of `mp`, see if the face is unchanged from `orig_poly`, and if so,
+/* For the loops of `poly`, see if the face is unchanged from `orig_poly`, and if so,
  * copy the Loop attributes from corresponding loops to corresponding loops.
  * Otherwise, interpolate the Loop attributes in the face `orig_poly`. */
 static void copy_or_interp_loop_attributes(Mesh *dest_mesh,

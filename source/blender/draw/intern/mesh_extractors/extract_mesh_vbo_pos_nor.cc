@@ -82,13 +82,13 @@ static void extract_pos_nor_iter_poly_bm(const MeshRenderData *mr,
 }
 
 static void extract_pos_nor_iter_poly_mesh(const MeshRenderData *mr,
-                                           const int mp_index,
+                                           const int poly_index,
                                            void *_data)
 {
   MeshExtract_PosNor_Data *data = static_cast<MeshExtract_PosNor_Data *>(_data);
-  const bool poly_hidden = mr->hide_poly && mr->hide_poly[mp_index];
+  const bool poly_hidden = mr->hide_poly && mr->hide_poly[poly_index];
 
-  for (const int ml_index : mr->polys[mp_index]) {
+  for (const int ml_index : mr->polys[poly_index]) {
     const int vert_i = mr->corner_verts[ml_index];
     PosNorLoop *vert = &data->vbo_data[ml_index];
     const bool vert_hidden = mr->hide_vert && mr->hide_vert[vert_i];
@@ -124,17 +124,17 @@ static void extract_pos_nor_iter_ledge_bm(const MeshRenderData *mr,
 }
 
 static void extract_pos_nor_iter_ledge_mesh(const MeshRenderData *mr,
-                                            const MEdge *med,
+                                            const MEdge *edge,
                                             const int ledge_index,
                                             void *_data)
 {
   MeshExtract_PosNor_Data *data = static_cast<MeshExtract_PosNor_Data *>(_data);
   const int ml_index = mr->loop_len + ledge_index * 2;
   PosNorLoop *vert = &data->vbo_data[ml_index];
-  copy_v3_v3(vert[0].pos, mr->vert_positions[med->v1]);
-  copy_v3_v3(vert[1].pos, mr->vert_positions[med->v2]);
-  vert[0].nor = data->normals[med->v1].low;
-  vert[1].nor = data->normals[med->v2].low;
+  copy_v3_v3(vert[0].pos, mr->vert_positions[edge->v1]);
+  copy_v3_v3(vert[1].pos, mr->vert_positions[edge->v2]);
+  vert[0].nor = data->normals[edge->v1].low;
+  vert[1].nor = data->normals[edge->v2].low;
 }
 
 static void extract_pos_nor_iter_lvert_bm(const MeshRenderData *mr,
@@ -454,13 +454,13 @@ static void extract_pos_nor_hq_iter_poly_bm(const MeshRenderData *mr,
 }
 
 static void extract_pos_nor_hq_iter_poly_mesh(const MeshRenderData *mr,
-                                              const int mp_index,
+                                              const int poly_index,
                                               void *_data)
 {
   MeshExtract_PosNorHQ_Data *data = static_cast<MeshExtract_PosNorHQ_Data *>(_data);
-  const bool poly_hidden = mr->hide_poly && mr->hide_poly[mp_index];
+  const bool poly_hidden = mr->hide_poly && mr->hide_poly[poly_index];
 
-  for (const int ml_index : mr->polys[mp_index]) {
+  for (const int ml_index : mr->polys[poly_index]) {
     const int vert_i = mr->corner_verts[ml_index];
 
     const bool vert_hidden = mr->hide_vert && mr->hide_vert[vert_i];
@@ -499,18 +499,18 @@ static void extract_pos_nor_hq_iter_ledge_bm(const MeshRenderData *mr,
 }
 
 static void extract_pos_nor_hq_iter_ledge_mesh(const MeshRenderData *mr,
-                                               const MEdge *med,
+                                               const MEdge *edge,
                                                const int ledge_index,
                                                void *_data)
 {
   MeshExtract_PosNorHQ_Data *data = static_cast<MeshExtract_PosNorHQ_Data *>(_data);
   const int ml_index = mr->loop_len + ledge_index * 2;
   PosNorHQLoop *vert = &data->vbo_data[ml_index];
-  copy_v3_v3(vert[0].pos, mr->vert_positions[med->v1]);
-  copy_v3_v3(vert[1].pos, mr->vert_positions[med->v2]);
-  copy_v3_v3_short(vert[0].nor, data->normals[med->v1].high);
+  copy_v3_v3(vert[0].pos, mr->vert_positions[edge->v1]);
+  copy_v3_v3(vert[1].pos, mr->vert_positions[edge->v2]);
+  copy_v3_v3_short(vert[0].nor, data->normals[edge->v1].high);
   vert[0].nor[3] = 0;
-  copy_v3_v3_short(vert[1].nor, data->normals[med->v2].high);
+  copy_v3_v3_short(vert[1].nor, data->normals[edge->v2].high);
   vert[1].nor[3] = 0;
 }
 

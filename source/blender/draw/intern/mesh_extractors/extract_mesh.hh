@@ -49,6 +49,7 @@ struct MeshRenderData {
   bool use_hide;
   bool use_subsurf_fdots;
   bool use_final_mesh;
+  bool hide_unmapped_edges;
 
   /** Use for #MeshStatVis calculation which use world-space coords. */
   float obmat[4][4];
@@ -74,11 +75,11 @@ struct MeshRenderData {
   int freestyle_face_ofs;
   /** Mesh */
   Mesh *me;
-  const blender::float3 *vert_positions;
-  const MEdge *medge;
-  const int *corner_verts;
-  const int *corner_edges;
+  blender::Span<blender::float3> vert_positions;
+  blender::Span<MEdge> edges;
   blender::OffsetIndices<int> polys;
+  blender::Span<int> corner_verts;
+  blender::Span<int> corner_edges;
   BMVert *eve_act;
   BMEdge *eed_act;
   BMFace *efa_act;
@@ -86,8 +87,8 @@ struct MeshRenderData {
   /* The triangulation of #Mesh polygons, owned by the mesh. */
   blender::Span<MLoopTri> looptris;
   const int *material_indices;
-  const float (*vert_normals)[3];
-  const float (*poly_normals)[3];
+  blender::Span<blender::float3> vert_normals;
+  blender::Span<blender::float3> poly_normals;
   const bool *hide_vert;
   const bool *hide_edge;
   const bool *hide_poly;
@@ -255,13 +256,13 @@ using ExtractPolyBMeshFn = void(const MeshRenderData *mr,
                                 const BMFace *f,
                                 int f_index,
                                 void *data);
-using ExtractPolyMeshFn = void(const MeshRenderData *mr, int mp_index, void *data);
+using ExtractPolyMeshFn = void(const MeshRenderData *mr, int poly_index, void *data);
 using ExtractLEdgeBMeshFn = void(const MeshRenderData *mr,
                                  const BMEdge *eed,
                                  int ledge_index,
                                  void *data);
 using ExtractLEdgeMeshFn = void(const MeshRenderData *mr,
-                                const MEdge *med,
+                                const MEdge *edge,
                                 int ledge_index,
                                 void *data);
 using ExtractLVertBMeshFn = void(const MeshRenderData *mr,

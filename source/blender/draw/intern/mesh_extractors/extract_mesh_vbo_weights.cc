@@ -133,11 +133,11 @@ static void extract_weights_iter_poly_bm(const MeshRenderData * /*mr*/,
 }
 
 static void extract_weights_iter_poly_mesh(const MeshRenderData *mr,
-                                           const int mp_index,
+                                           const int poly_index,
                                            void *_data)
 {
   MeshExtract_Weight_Data *data = static_cast<MeshExtract_Weight_Data *>(_data);
-  for (const int ml_index : mr->polys[mp_index]) {
+  for (const int ml_index : mr->polys[poly_index]) {
     const int vert = mr->corner_verts[ml_index];
     if (data->dvert != nullptr) {
       const MDeformVert *dvert = &data->dvert[vert];

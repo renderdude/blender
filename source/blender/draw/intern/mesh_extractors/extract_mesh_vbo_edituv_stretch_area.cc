@@ -75,17 +75,17 @@ static void compute_area_ratio(const MeshRenderData *mr,
   else {
     BLI_assert(mr->extract_type == MR_EXTRACT_MESH);
     const float2 *uv_data = (const float2 *)CustomData_get_layer(&mr->me->ldata, CD_PROP_FLOAT2);
-    const Span<int> corner_verts(mr->corner_verts, mr->loop_len);
-    for (int mp_index = 0; mp_index < mr->poly_len; mp_index++) {
-      const IndexRange poly = mr->polys[mp_index];
+    for (int poly_index = 0; poly_index < mr->poly_len; poly_index++) {
+      const IndexRange poly = mr->polys[poly_index];
 
       float area = BKE_mesh_calc_poly_area(
-          corner_verts.slice(poly), reinterpret_cast<const float(*)[3]>(mr->vert_positions));
+          mr->corner_verts.slice(poly),
+          reinterpret_cast<const float(*)[3]>(mr->vert_positions.data()));
       float uvarea = area_poly_v2(reinterpret_cast<const float(*)[2]>(&uv_data[poly.start()]),
                                   poly.size());
       tot_area += area;
       tot_uv_area += uvarea;
-      r_area_ratio[mp_index] = area_ratio_get(area, uvarea);
+      r_area_ratio[poly_index] = area_ratio_get(area, uvarea);
     }
   }
 
@@ -117,9 +117,9 @@ static void extract_edituv_stretch_area_finish(const MeshRenderData *mr,
   }
   else {
     BLI_assert(mr->extract_type == MR_EXTRACT_MESH);
-    for (int mp_index = 0; mp_index < mr->poly_len; mp_index++) {
-      for (const int l_index : mr->polys[mp_index]) {
-        loop_stretch[l_index] = area_ratio[mp_index];
+    for (int poly_index = 0; poly_index < mr->poly_len; poly_index++) {
+      for (const int l_index : mr->polys[poly_index]) {
+        loop_stretch[l_index] = area_ratio[poly_index];
       }
     }
   }

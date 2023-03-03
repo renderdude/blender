@@ -94,7 +94,7 @@ static void mesh_calc_edges_mdata(const MVert * /*allvert*/,
 {
   const MPoly *mpoly;
   const MFace *mface;
-  MEdge *medge, *med;
+  MEdge *edges, *edge;
   EdgeHash *hash;
   struct EdgeSort *edsort, *ed;
   int a, totedge = 0;
@@ -148,20 +148,20 @@ static void mesh_calc_edges_mdata(const MVert * /*allvert*/,
   }
   totedge_final++;
 
-  medge = (MEdge *)MEM_callocN(sizeof(MEdge) * totedge_final, __func__);
+  edges = (MEdge *)MEM_callocN(sizeof(MEdge) * totedge_final, __func__);
 
-  for (a = totedge, med = medge, ed = edsort; a > 1; a--, ed++) {
+  for (a = totedge, edge = edges, ed = edsort; a > 1; a--, ed++) {
     /* edge is unique when it differs from next edge, or is last */
     if (ed->v1 != (ed + 1)->v1 || ed->v2 != (ed + 1)->v2) {
-      med->v1 = ed->v1;
-      med->v2 = ed->v2;
+      edge->v1 = ed->v1;
+      edge->v2 = ed->v2;
 
       /* order is swapped so extruding this edge as a surface won't flip face normals
        * with cyclic curves */
       if (ed->v1 + 1 != ed->v2) {
-        std::swap(med->v1, med->v2);
+        std::swap(edge->v1, edge->v2);
       }
-      med++;
+      edge++;
     }
     else {
       /* Equal edge, merge the draw-flag. */
@@ -169,15 +169,15 @@ static void mesh_calc_edges_mdata(const MVert * /*allvert*/,
     }
   }
   /* last edge */
-  med->v1 = ed->v1;
-  med->v2 = ed->v2;
+  edge->v1 = ed->v1;
+  edge->v2 = ed->v2;
 
   MEM_freeN(edsort);
 
   /* set edge members of mloops */
   hash = BLI_edgehash_new_ex(__func__, totedge_final);
-  for (edge_index = 0, med = medge; edge_index < totedge_final; edge_index++, med++) {
-    BLI_edgehash_insert(hash, med->v1, med->v2, POINTER_FROM_UINT(edge_index));
+  for (edge_index = 0, edge = edges; edge_index < totedge_final; edge_index++, edge++) {
+    BLI_edgehash_insert(hash, edge->v1, edge->v2, POINTER_FROM_UINT(edge_index));
   }
 
   mpoly = allpoly;
@@ -197,14 +197,14 @@ static void mesh_calc_edges_mdata(const MVert * /*allvert*/,
 
   BLI_edgehash_free(hash, nullptr);
 
-  *r_medge = medge;
+  *r_medge = edges;
   *r_totedge = totedge_final;
 }
 
 void BKE_mesh_calc_edges_legacy(Mesh *me)
 {
   using namespace blender;
-  MEdge *medge;
+  MEdge *edges;
   int totedge = 0;
   const Span<MVert> verts(static_cast<const MVert *>(CustomData_get_layer(&me->vdata, CD_MVERT)),
                           me->totvert);
@@ -218,7 +218,7 @@ void BKE_mesh_calc_edges_legacy(Mesh *me)
       me->totface,
       me->totloop,
       me->totpoly,
-      &medge,
+      &edges,
       &totedge);
 
   if (totedge == 0) {
@@ -227,7 +227,7 @@ void BKE_mesh_calc_edges_legacy(Mesh *me)
     return;
   }
 
-  medge = (MEdge *)CustomData_add_layer(&me->edata, CD_MEDGE, CD_ASSIGN, medge, totedge);
+  edges = (MEdge *)CustomData_add_layer(&me->edata, CD_MEDGE, CD_ASSIGN, edges, totedge);
   me->totedge = totedge;
 
   BKE_mesh_tag_topology_changed(me);
@@ -418,15 +418,15 @@ static void convert_mfaces_to_mpolys(ID *id,
                                      int totface_i,
                                      int totloop_i,
                                      int totpoly_i,
-                                     MEdge *medge,
+                                     MEdge *edges,
                                      MFace *mface,
                                      int *r_totloop,
                                      int *r_totpoly)
 {
   MFace *mf;
   MLoop *ml, *mloop;
-  MPoly *mp, *mpoly;
-  MEdge *me;
+  MPoly *poly, *mpoly;
+  MEdge *edge;
   EdgeHash *eh;
   int numTex, numCol;
   int i, j, totloop, totpoly, *polyindex;
@@ -475,13 +475,13 @@ static void convert_mfaces_to_mpolys(ID *id,
   eh = BLI_edgehash_new_ex(__func__, uint(totedge_i));
 
   /* build edge hash */
-  me = medge;
-  for (i = 0; i < totedge_i; i++, me++) {
-    BLI_edgehash_insert(eh, me->v1, me->v2, POINTER_FROM_UINT(i));
+  edge = edges;
+  for (i = 0; i < totedge_i; i++, edge++) {
+    BLI_edgehash_insert(eh, edge->v1, edge->v2, POINTER_FROM_UINT(i));
 
     /* unrelated but avoid having the FGON flag enabled,
      * so we can reuse it later for something else */
-    me->flag_legacy &= ~ME_FGON;
+    edge->flag_legacy &= ~ME_FGON;
   }
 
   polyindex = (int *)CustomData_get_layer(fdata, CD_ORIGINDEX);
@@ -489,11 +489,11 @@ static void convert_mfaces_to_mpolys(ID *id,
   j = 0; /* current loop index */
   ml = mloop;
   mf = mface;
-  mp = mpoly;
-  for (i = 0; i < totface_i; i++, mf++, mp++) {
-    mp->loopstart = j;
+  poly = mpoly;
+  for (i = 0; i < totface_i; i++, mf++, poly++) {
+    poly->loopstart = j;
 
-    mp->totloop = mf->v4 ? 4 : 3;
+    poly->totloop = mf->v4 ? 4 : 3;
 
     material_indices[i] = mf->mat_nr;
     sharp_faces[i] = (mf->flag & ME_SMOOTH) == 0;
@@ -520,7 +520,7 @@ static void convert_mfaces_to_mpolys(ID *id,
 #undef ML
 
     bm_corners_to_loops_ex(
-        id, fdata, totface_i, ldata, mface, totloop, i, mp->loopstart, numTex, numCol);
+        id, fdata, totface_i, ldata, mface, totloop, i, poly->loopstart, numTex, numCol);
 
     if (polyindex) {
       *polyindex = i;

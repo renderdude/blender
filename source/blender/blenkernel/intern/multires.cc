@@ -1627,8 +1627,8 @@ int mdisp_rot_face_to_crn(
     int minS, i;
     float mindist = FLT_MAX;
 
-    for (i = 0; i < mpoly->totloop; i++) {
-      float len = len_v3v3(nullptr, positions[corner_verts[mpoly->loopstart + i]]);
+    for (i = 0; i < poly->totloop; i++) {
+      float len = len_v3v3(nullptr, positions[corner_verts[poly->loopstart + i]]);
       if (len < mindist) {
         mindist = len;
         minS = i;

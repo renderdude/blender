@@ -568,7 +568,6 @@ static int count_mesh_quads(Mesh *me)
 {
   int result = 0;
   const int *poly_offsets = BKE_mesh_poly_offsets(me);
-
   if (poly_offsets) {
     for (int i = 0; i < me->totpoly; i++) {
       const int poly_size = poly_offsets[i + 1] - poly_offsets[i];
@@ -584,8 +583,6 @@ static void add_mesh_quad_diag_springs(Object *ob)
 {
   Mesh *me = ob->data;
   // BodyPoint *bp; /* UNUSED */
-  int a;
-
   if (ob->soft) {
     int nofquads;
     // float s_shear = ob->soft->shearstiff*ob->soft->shearstiff;
@@ -601,10 +598,9 @@ static void add_mesh_quad_diag_springs(Object *ob)
                                         sizeof(BodySpring) * (ob->soft->totspring + nofquads * 2));
 
       /* fill the tail */
-      a = 0;
       bs = &ob->soft->bspring[ob->soft->totspring];
       // bp = ob->soft->bpoint; /* UNUSED */
-      for (a = me->totpoly; a > 0; a--) {
+      for (int a = 0; a < me->totpoly; a++) {
         const int poly_size = poly_offsets[a + 1] - poly_offsets[a];
         if (poly_size == 4) {
           bs->v1 = corner_verts[poly_offsets[a] + 0];
@@ -2665,7 +2661,7 @@ static void mesh_to_softbody(Object *ob)
 {
   SoftBody *sb;
   Mesh *me = ob->data;
-  const MEdge *medge = BKE_mesh_edges(me);
+  const MEdge *edge = BKE_mesh_edges(me);
   BodyPoint *bp;
   BodySpring *bs;
   int a, totedge;
@@ -2720,11 +2716,11 @@ static void mesh_to_softbody(Object *ob)
 
   /* but we only optionally add body edge springs */
   if (ob->softflag & OB_SB_EDGES) {
-    if (medge) {
+    if (edge) {
       bs = sb->bspring;
-      for (a = me->totedge; a > 0; a--, medge++, bs++) {
-        bs->v1 = medge->v1;
-        bs->v2 = medge->v2;
+      for (a = me->totedge; a > 0; a--, edge++, bs++) {
+        bs->v1 = edge->v1;
+        bs->v2 = edge->v2;
         bs->springtype = SB_EDGE;
       }
 

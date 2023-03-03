@@ -530,22 +530,22 @@ void BKE_mesh_remap_calc_verts_from_mesh(const int mode,
 
         if (mesh_remap_bvhtree_query_nearest(
                 &treedata, &nearest, tmp_co, max_dist_sq, &hit_dist)) {
-          const MEdge *me = &edges_src[nearest.index];
-          const float *v1cos = vcos_src[me->v1];
-          const float *v2cos = vcos_src[me->v2];
+          const MEdge *edge = &edges_src[nearest.index];
+          const float *v1cos = vcos_src[edge->v1];
+          const float *v2cos = vcos_src[edge->v2];
 
           if (mode == MREMAP_MODE_VERT_EDGE_NEAREST) {
             const float dist_v1 = len_squared_v3v3(tmp_co, v1cos);
             const float dist_v2 = len_squared_v3v3(tmp_co, v2cos);
-            const int index = int((dist_v1 > dist_v2) ? me->v2 : me->v1);
+            const int index = int((dist_v1 > dist_v2) ? edge->v2 : edge->v1);
             mesh_remap_item_define(r_map, i, hit_dist, 0, 1, &index, &full_weight);
           }
           else if (mode == MREMAP_MODE_VERT_EDGEINTERP_NEAREST) {
             int indices[2];
             float weights[2];
 
-            indices[0] = int(me->v1);
-            indices[1] = int(me->v2);
+            indices[0] = int(edge->v1);
+            indices[1] = int(edge->v2);
 
             /* Weight is inverse of point factor here... */
             weights[0] = line_point_factor_v3(tmp_co, v2cos, v1cos);
@@ -791,8 +791,8 @@ void BKE_mesh_remap_calc_edges_from_mesh(const int mode,
           k = vert_to_edge_src_map[vidx_src].count;
 
           for (; k--; eidx_src++) {
-            const MEdge *e_src = &edges_src[*eidx_src];
-            const float *other_co_src = vcos_src[BKE_mesh_edge_other_vert(e_src, vidx_src)];
+            const MEdge *edge_src = &edges_src[*eidx_src];
+            const float *other_co_src = vcos_src[BKE_mesh_edge_other_vert(edge_src, vidx_src)];
             const float *other_co_dst =
                 vert_positions_dst[BKE_mesh_edge_other_vert(e_dst, int(vidx_dst))];
             const float totdist = first_dist + len_v3v3(other_co_src, other_co_dst);
@@ -898,9 +898,9 @@ void BKE_mesh_remap_calc_edges_from_mesh(const int mode,
           int best_eidx_src = -1;
 
           for (; nloops--; corner_edge_src++) {
-            const MEdge *med_src = &edges_src[*corner_edge_src];
-            float *co1_src = vcos_src[med_src->v1];
-            float *co2_src = vcos_src[med_src->v2];
+            const MEdge *edge_src = &edges_src[*corner_edge_src];
+            float *co1_src = vcos_src[edge_src->v1];
+            float *co2_src = vcos_src[edge_src->v2];
             float co_src[3];
             float dist_sq;
 
@@ -941,7 +941,7 @@ void BKE_mesh_remap_calc_edges_from_mesh(const int mode,
       for (i = 0; i < numedges_dst; i++) {
         /* For each dst edge, we sample some rays from it (interpolated from its vertices)
          * and use their hits to interpolate from source edges. */
-        const MEdge *me = &edges_dst[i];
+        const MEdge *edge = &edges_dst[i];
         float v1_co[3], v2_co[3];
         float v1_no[3], v2_no[3];
 
@@ -954,11 +954,11 @@ void BKE_mesh_remap_calc_edges_from_mesh(const int mode,
         int sources_num = 0;
         int j;
 
-        copy_v3_v3(v1_co, vert_positions_dst[me->v1]);
-        copy_v3_v3(v2_co, vert_positions_dst[me->v2]);
+        copy_v3_v3(v1_co, vert_positions_dst[edge->v1]);
+        copy_v3_v3(v2_co, vert_positions_dst[edge->v2]);
 
-        copy_v3_v3(v1_no, vert_normals_dst[me->v1]);
-        copy_v3_v3(v2_no, vert_normals_dst[me->v2]);
+        copy_v3_v3(v1_no, vert_normals_dst[edge->v1]);
+        copy_v3_v3(v2_no, vert_normals_dst[edge->v2]);
 
         /* We do our transform here, allows to interpolate from normals already in src space. */
         if (space_transform) {
@@ -1161,7 +1161,6 @@ static void mesh_island_to_astar_graph(MeshIslandStore *islands,
     }
 
     for (const int edge : corner_edges.slice(polys[pidx])) {
-
       if (BLI_BITMAP_TEST(done_edges, edge)) {
         continue;
       }

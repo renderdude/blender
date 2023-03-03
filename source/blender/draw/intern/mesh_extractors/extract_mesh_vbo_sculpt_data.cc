@@ -84,8 +84,8 @@ static void extract_sculpt_data_init(const MeshRenderData *mr,
     }
   }
   else {
-    for (int mp_index = 0; mp_index < mr->poly_len; mp_index++) {
-      for (const int corner : mr->polys[mp_index]) {
+    for (int poly_index = 0; poly_index < mr->poly_len; poly_index++) {
+      for (const int corner : mr->polys[poly_index]) {
         float v_mask = 0.0f;
         if (cd_mask) {
           v_mask = cd_mask[mr->corner_verts[corner]];
@@ -94,7 +94,7 @@ static void extract_sculpt_data_init(const MeshRenderData *mr,
 
         uchar face_set_color[4] = {UCHAR_MAX, UCHAR_MAX, UCHAR_MAX, UCHAR_MAX};
         if (cd_face_set) {
-          const int face_set_id = cd_face_set[mp_index];
+          const int face_set_id = cd_face_set[poly_index];
           /* Skip for the default color Face Set to render it white. */
           if (face_set_id != mr->me->face_sets_color_default) {
             BKE_paint_face_set_overlay_color_get(
@@ -171,11 +171,11 @@ static void extract_sculpt_data_init_subdiv(const DRWSubdivCache *subdiv_cache,
   int *subdiv_loop_poly_index = subdiv_cache->subdiv_loop_poly_index;
 
   for (uint i = 0; i < subdiv_cache->num_subdiv_loops; i++) {
-    const int mp_index = subdiv_loop_poly_index[i];
+    const int poly_index = subdiv_loop_poly_index[i];
 
     uchar face_set_color[4] = {UCHAR_MAX, UCHAR_MAX, UCHAR_MAX, UCHAR_MAX};
     if (cd_face_set) {
-      const int face_set_id = cd_face_set[mp_index];
+      const int face_set_id = cd_face_set[poly_index];
       /* Skip for the default color Face Set to render it white. */
       if (face_set_id != coarse_mesh->face_sets_color_default) {
         BKE_paint_face_set_overlay_color_get(

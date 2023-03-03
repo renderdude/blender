@@ -97,11 +97,11 @@ static void extract_edge_fac_iter_poly_bm(const MeshRenderData *mr,
 }
 
 static void extract_edge_fac_iter_poly_mesh(const MeshRenderData *mr,
-                                            const int mp_index,
+                                            const int poly_index,
                                             void *_data)
 {
   MeshExtract_EdgeFac_Data *data = static_cast<MeshExtract_EdgeFac_Data *>(_data);
-  const IndexRange poly = mr->polys[mp_index];
+  const IndexRange poly = mr->polys[poly_index];
   const BitSpan optimal_display_edges = mr->me->runtime->subsurf_optimal_display_edges;
 
   for (const int ml_index : poly) {
@@ -121,7 +121,7 @@ static void extract_edge_fac_iter_poly_mesh(const MeshRenderData *mr,
         /* Manifold */
         const int ml_index_other = (ml_index == poly.last()) ? poly.start() : (ml_index + 1);
         const int vert_next = mr->corner_verts[ml_index_other];
-        float ratio = loop_edge_factor_get(mr->poly_normals[mp_index],
+        float ratio = loop_edge_factor_get(mr->poly_normals[poly_index],
                                            mr->vert_positions[vert],
                                            mr->vert_normals[vert],
                                            mr->vert_positions[vert_next]);
@@ -146,7 +146,7 @@ static void extract_edge_fac_iter_ledge_bm(const MeshRenderData *mr,
 }
 
 static void extract_edge_fac_iter_ledge_mesh(const MeshRenderData *mr,
-                                             const MEdge * /*med*/,
+                                             const MEdge * /*edge*/,
                                              const int ledge_index,
                                              void *_data)
 {
@@ -221,23 +221,23 @@ static void extract_edge_fac_init_subdiv(const DRWSubdivCache *subdiv_cache,
 
   /* Create a temporary buffer for the edge original indices if it was not requested. */
   const bool has_edge_idx = edge_idx != nullptr;
-  GPUVertBuf *loop_edge_idx = nullptr;
+  GPUVertBuf *loop_edge_draw_flag = nullptr;
   if (has_edge_idx) {
-    loop_edge_idx = edge_idx;
+    loop_edge_draw_flag = edge_idx;
   }
   else {
-    loop_edge_idx = GPU_vertbuf_calloc();
+    loop_edge_draw_flag = GPU_vertbuf_calloc();
     draw_subdiv_init_origindex_buffer(
-        loop_edge_idx,
-        static_cast<int *>(GPU_vertbuf_get_data(subdiv_cache->edges_orig_index)),
+        loop_edge_draw_flag,
+        static_cast<int *>(GPU_vertbuf_get_data(subdiv_cache->edges_draw_flag)),
         subdiv_cache->num_subdiv_loops,
         0);
   }
 
-  draw_subdiv_build_edge_fac_buffer(subdiv_cache, pos_nor, loop_edge_idx, vbo);
+  draw_subdiv_build_edge_fac_buffer(subdiv_cache, pos_nor, loop_edge_draw_flag, vbo);
 
   if (!has_edge_idx) {
-    GPU_vertbuf_discard(loop_edge_idx);
+    GPU_vertbuf_discard(loop_edge_draw_flag);
   }
 }
 

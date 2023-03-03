@@ -221,9 +221,9 @@ Mesh *MOD_solidify_nonmanifold_modifyMesh(ModifierData *md,
       const blender::IndexRange &poly = orig_polys[i];
       /* Make normals for faces without area (should really be avoided though). */
       if (len_squared_v3(poly_nors[i]) < 0.5f) {
-        const MEdge *e = &orig_edges[orig_corner_edges[poly.start()]];
+        const MEdge *edge = &orig_edges[orig_corner_edges[poly.start()]];
         float edgedir[3];
-        sub_v3_v3v3(edgedir, orig_vert_positions[e->v2], orig_vert_positions[e->v1]);
+        sub_v3_v3v3(edgedir, orig_vert_positions[edge->v2], orig_vert_positions[edge->v1]);
         if (fabsf(edgedir[2]) < fabsf(edgedir[1])) {
           poly_nors[i][2] = 1.0f;
         }
@@ -367,11 +367,11 @@ Mesh *MOD_solidify_nonmanifold_modifyMesh(ModifierData *md,
       uint *combined_verts = static_cast<uint *>(
           MEM_calloc_arrayN(verts_num, sizeof(*combined_verts), __func__));
 
-      const MEdge *ed = orig_edges.data();
-      for (uint i = 0; i < edges_num; i++, ed++) {
+      const MEdge *edge = orig_edges.data();
+      for (uint i = 0; i < edges_num; i++, edge++) {
         if (edge_adj_faces_len[i] > 0) {
-          uint v1 = vm[ed->v1];
-          uint v2 = vm[ed->v2];
+          uint v1 = vm[edge->v1];
+          uint v2 = vm[edge->v2];
           if (v1 == v2) {
             continue;
           }
@@ -443,10 +443,10 @@ Mesh *MOD_solidify_nonmanifold_modifyMesh(ModifierData *md,
         }
       }
       /* remove zero faces in a second pass */
-      ed = orig_edges.data();
-      for (uint i = 0; i < edges_num; i++, ed++) {
-        const uint v1 = vm[ed->v1];
-        const uint v2 = vm[ed->v2];
+      edge = orig_edges.data();
+      for (uint i = 0; i < edges_num; i++, edge++) {
+        const uint v1 = vm[edge->v1];
+        const uint v2 = vm[edge->v2];
         if (v1 == v2 && edge_adj_faces[i]) {
           /* Remove polys. */
           for (uint j = 0; j < edge_adj_faces[i]->faces_len; j++) {
@@ -487,10 +487,10 @@ Mesh *MOD_solidify_nonmanifold_modifyMesh(ModifierData *md,
 
     /* Create vert_adj_edges for verts. */
     {
-      const MEdge *ed = orig_edges.data();
-      for (uint i = 0; i < edges_num; i++, ed++) {
+      const MEdge *edge = orig_edges.data();
+      for (uint i = 0; i < edges_num; i++, edge++) {
         if (edge_adj_faces_len[i] > 0) {
-          const uint vs[2] = {vm[ed->v1], vm[ed->v2]};
+          const uint vs[2] = {vm[edge->v1], vm[edge->v2]};
           uint invalid_edge_index = 0;
           bool invalid_edge_reversed = false;
           for (uint j = 0; j < 2; j++) {
@@ -607,10 +607,10 @@ Mesh *MOD_solidify_nonmanifold_modifyMesh(ModifierData *md,
 
     /* Filter duplicate polys. */
     {
-      const MEdge *ed = orig_edges.data();
+      const MEdge *edge = orig_edges.data();
       /* Iterate over edges and only check the faces around an edge for duplicates
        * (performance optimization). */
-      for (uint i = 0; i < edges_num; i++, ed++) {
+      for (uint i = 0; i < edges_num; i++, edge++) {
         if (edge_adj_faces_len[i] > 0) {
           const OldEdgeFaceRef *adj_faces = edge_adj_faces[i];
           uint adj_len = adj_faces->faces_len;
@@ -719,10 +719,10 @@ Mesh *MOD_solidify_nonmanifold_modifyMesh(ModifierData *md,
 
     /* Create #NewEdgeRef array. */
     {
-      const MEdge *ed = orig_edges.data();
-      for (uint i = 0; i < edges_num; i++, ed++) {
-        const uint v1 = vm[ed->v1];
-        const uint v2 = vm[ed->v2];
+      const MEdge *edge = orig_edges.data();
+      for (uint i = 0; i < edges_num; i++, edge++) {
+        const uint v1 = vm[edge->v1];
+        const uint v2 = vm[edge->v2];
         if (edge_adj_faces_len[i] > 0) {
           if (LIKELY(orig_edge_lengths[i] > FLT_EPSILON)) {
             sub_v3_v3v3(edgedir, orig_mvert_co[v2], orig_mvert_co[v1]);
@@ -1793,8 +1793,9 @@ Mesh *MOD_solidify_nonmanifold_modifyMesh(ModifierData *md,
               float tmp[3];
               int k;
               for (k = 1; k + 1 < g->edges_len; k++, edge_ptr++) {
-                const MEdge *e = &orig_edges[(*edge_ptr)->old_edge];
-                sub_v3_v3v3(tmp, orig_mvert_co[vm[e->v1] == i ? e->v2 : e->v1], orig_mvert_co[i]);
+                const MEdge *edge = &orig_edges[(*edge_ptr)->old_edge];
+                sub_v3_v3v3(
+                    tmp, orig_mvert_co[vm[edge->v1] == i ? edge->v2 : edge->v1], orig_mvert_co[i]);
                 add_v3_v3(move_nor, tmp);
               }
               if (k == 1) {

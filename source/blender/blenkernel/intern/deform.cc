@@ -1059,9 +1059,9 @@ void BKE_defvert_extract_vgroup_to_edgeweights(const MDeformVert *dvert,
         dvert, defgroup, verts_num, invert_vgroup, tmp_weights);
 
     while (i--) {
-      const MEdge *me = &edges[i];
+      const MEdge *edge = &edges[i];
 
-      r_weights[i] = (tmp_weights[me->v1] + tmp_weights[me->v2]) * 0.5f;
+      r_weights[i] = (tmp_weights[edge->v1] + tmp_weights[edge->v2]) * 0.5f;
     }
 
     MEM_freeN(tmp_weights);

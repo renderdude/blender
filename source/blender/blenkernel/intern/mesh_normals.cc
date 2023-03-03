@@ -751,7 +751,7 @@ struct LoopSplitTaskData {
   int ml_curr_index;
   /** Also used a flag to switch between single or fan process! */
   int ml_prev_index;
-  int mp_index;
+  int poly_index;
 
   Type flag;
 };
@@ -948,19 +948,19 @@ static void split_loop_nor_single_do(LoopSplitTaskDataCommon *common_data, LoopS
   MLoopNorSpace *lnor_space = data->lnor_space;
   const int ml_curr_index = data->ml_curr_index;
   const int ml_prev_index = data->ml_prev_index;
-  const int mp_index = data->mp_index;
+  const int poly_index = data->poly_index;
 
   /* Simple case (both edges around that vertex are sharp in current polygon),
    * this loop just takes its poly normal.
    */
-  loop_normals[ml_curr_index] = poly_normals[mp_index];
+  loop_normals[ml_curr_index] = poly_normals[poly_index];
 
 #if 0
   printf("BASIC: handling loop %d / edge %d / vert %d / poly %d\n",
          ml_curr_index,
          loops[ml_curr_index].e,
          loops[ml_curr_index].v,
-         mp_index);
+         poly_index);
 #endif
 
   /* If needed, generate this (simple!) lnor space. */
@@ -1013,7 +1013,7 @@ static void split_loop_nor_fan_do(LoopSplitTaskDataCommon *common_data,
 #endif
   const int ml_curr_index = data->ml_curr_index;
   const int ml_prev_index = data->ml_prev_index;
-  const int mp_index = data->mp_index;
+  const int poly_index = data->poly_index;
 
   /* Sigh! we have to fan around current vertex, until we find the other non-smooth edge,
    * and accumulate face normals into the vertex!
@@ -1044,7 +1044,7 @@ static void split_loop_nor_fan_do(LoopSplitTaskDataCommon *common_data,
    */
   int mlfan_curr_index = ml_prev_index;
   int mlfan_vert_index = ml_curr_index;
-  int mpfan_curr_index = mp_index;
+  int mpfan_curr_index = poly_index;
 
   BLI_assert(mlfan_curr_index >= 0);
   BLI_assert(mlfan_vert_index >= 0);
@@ -1333,8 +1333,8 @@ static void loop_split_generator(TaskPool *pool, LoopSplitTaskDataCommon *common
   /* We now know edges that can be smoothed (with their vector, and their two loops),
    * and edges that will be hard! Now, time to generate the normals.
    */
-  for (const int mp_index : polys.index_range()) {
-    const IndexRange poly = polys[mp_index];
+  for (const int poly_index : polys.index_range()) {
+    const IndexRange poly = polys[poly_index];
 
     for (const int ml_curr_index : poly) {
       const int ml_prev_index = mesh_topology::poly_loop_prev(poly, ml_curr_index);
@@ -1342,9 +1342,9 @@ static void loop_split_generator(TaskPool *pool, LoopSplitTaskDataCommon *common
 #if 0
       printf("Checking loop %d / edge %u / vert %u (sharp edge: %d, skiploop: %d)",
              ml_curr_index,
-             loops[ml_curr_index].e,
-             loops[ml_curr_index].v,
-             IS_EDGE_SHARP(edge_to_loops[loops[ml_curr_index].e]),
+             corner_edges[ml_curr_index],
+             corner_verts[ml_curr_index],
+             IS_EDGE_SHARP(edge_to_loops[corner_edges[ml_curr_index]]),
              skip_loops[ml_curr_index]);
 #endif
 
@@ -1369,7 +1369,7 @@ static void loop_split_generator(TaskPool *pool, LoopSplitTaskDataCommon *common
                                             skip_loops,
                                             ml_curr_index,
                                             ml_prev_index,
-                                            mp_index))) {
+                                            poly_index))) {
         // printf("SKIPPING!\n");
       }
       else {
@@ -1394,7 +1394,7 @@ static void loop_split_generator(TaskPool *pool, LoopSplitTaskDataCommon *common
           data->ml_curr_index = ml_curr_index;
           data->ml_prev_index = ml_prev_index;
           data->flag = LoopSplitTaskData::Type::Single;
-          data->mp_index = mp_index;
+          data->poly_index = poly_index;
           if (lnors_spacearr) {
             data->lnor_space = BKE_lnor_space_create(lnors_spacearr);
           }
@@ -1410,7 +1410,7 @@ static void loop_split_generator(TaskPool *pool, LoopSplitTaskDataCommon *common
           data->ml_curr_index = ml_curr_index;
           data->ml_prev_index = ml_prev_index;
           data->flag = LoopSplitTaskData::Type::Fan;
-          data->mp_index = mp_index;
+          data->poly_index = poly_index;
           if (lnors_spacearr) {
             data->lnor_space = BKE_lnor_space_create(lnors_spacearr);
           }
@@ -1442,7 +1442,7 @@ static void loop_split_generator(TaskPool *pool, LoopSplitTaskDataCommon *common
 void BKE_mesh_normals_loop_split(const float (*vert_positions)[3],
                                  const float (*vert_normals)[3],
                                  const int numVerts,
-                                 const MEdge *medges,
+                                 const MEdge *edges,
                                  const int numEdges,
                                  const int *corner_verts,
                                  const int *corner_edges,
@@ -1471,13 +1471,13 @@ void BKE_mesh_normals_loop_split(const float (*vert_positions)[3],
      * since we may want to use loop_normals even when mesh's 'autosmooth' is disabled
      * (see e.g. mesh mapping code). As usual, we could handle that on case-by-case basis,
      * but simpler to keep it well confined here. */
-    int mp_index;
+    int poly_index;
 
-    for (mp_index = 0; mp_index < polys.ranges_num(); mp_index++) {
-      const bool is_poly_flat = sharp_faces && sharp_faces[mp_index];
-      for (const int corner : polys[mp_index]) {
+    for (poly_index = 0; poly_index < polys.ranges_num(); poly_index++) {
+      const bool is_poly_flat = sharp_faces && sharp_faces[poly_index];
+      for (const int corner : polys[poly_index]) {
         if (is_poly_flat) {
-          copy_v3_v3(r_loop_normals[corner], poly_normals[mp_index]);
+          copy_v3_v3(r_loop_normals[corner], poly_normals[poly_index]);
         }
         else {
           copy_v3_v3(r_loop_normals[corner], vert_normals[corner_verts[corner]]);
@@ -1537,7 +1537,7 @@ void BKE_mesh_normals_loop_split(const float (*vert_positions)[3],
   common_data.loop_normals = {reinterpret_cast<float3 *>(r_loop_normals), numLoops};
   common_data.clnors_data = {reinterpret_cast<short2 *>(clnors_data), clnors_data ? numLoops : 0};
   common_data.positions = {reinterpret_cast<const float3 *>(vert_positions), numVerts};
-  common_data.edges = {medges, numEdges};
+  common_data.edges = {edges, numEdges};
   common_data.polys = polys;
   common_data.corner_verts = {corner_verts, numLoops};
   common_data.corner_edges = {corner_edges, numLoops};
@@ -1606,7 +1606,7 @@ void BKE_mesh_normals_loop_split(const float (*vert_positions)[3],
 static void mesh_normals_loop_custom_set(const float (*positions)[3],
                                          const float (*vert_normals)[3],
                                          const int numVerts,
-                                         const MEdge *medges,
+                                         const MEdge *edges,
                                          const int numEdges,
                                          const int *corner_verts,
                                          const int *corner_edges,
@@ -1643,7 +1643,7 @@ static void mesh_normals_loop_custom_set(const float (*positions)[3],
   BKE_mesh_normals_loop_split(positions,
                               vert_normals,
                               numVerts,
-                              medges,
+                              edges,
                               numEdges,
                               corner_verts,
                               corner_edges,
@@ -1772,7 +1772,7 @@ static void mesh_normals_loop_custom_set(const float (*positions)[3],
     BKE_mesh_normals_loop_split(positions,
                                 vert_normals,
                                 numVerts,
-                                medges,
+                                edges,
                                 numEdges,
                                 corner_verts,
                                 corner_edges,
@@ -1851,7 +1851,7 @@ static void mesh_normals_loop_custom_set(const float (*positions)[3],
 void BKE_mesh_normals_loop_custom_set(const float (*vert_positions)[3],
                                       const float (*vert_normals)[3],
                                       const int numVerts,
-                                      const MEdge *medges,
+                                      const MEdge *edges,
                                       const int numEdges,
                                       const int *corner_verts,
                                       const int *corner_edges,
@@ -1866,7 +1866,7 @@ void BKE_mesh_normals_loop_custom_set(const float (*vert_positions)[3],
   mesh_normals_loop_custom_set(vert_positions,
                                vert_normals,
                                numVerts,
-                               medges,
+                               edges,
                                numEdges,
                                corner_verts,
                                corner_edges,
@@ -1884,7 +1884,7 @@ void BKE_mesh_normals_loop_custom_from_verts_set(const float (*vert_positions)[3
                                                  const float (*vert_normals)[3],
                                                  float (*r_custom_vert_normals)[3],
                                                  const int numVerts,
-                                                 const MEdge *medges,
+                                                 const MEdge *edges,
                                                  const int numEdges,
                                                  const int *corner_verts,
                                                  const int *corner_edges,
@@ -1898,7 +1898,7 @@ void BKE_mesh_normals_loop_custom_from_verts_set(const float (*vert_positions)[3
   mesh_normals_loop_custom_set(vert_positions,
                                vert_normals,
                                numVerts,
-                               medges,
+                               edges,
                                numEdges,
                                corner_verts,
                                corner_edges,

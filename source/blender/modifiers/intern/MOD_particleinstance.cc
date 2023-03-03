@@ -470,10 +470,10 @@ static Mesh *modifyMesh(ModifierData *md, const ModifierEvalContext *ctx, Mesh *
 
     /* Create edges and adjust edge vertex indices. */
     CustomData_copy_data(&mesh->edata, &result->edata, 0, p_skip * totedge, totedge);
-    MEdge *me = &edges[p_skip * totedge];
-    for (k = 0; k < totedge; k++, me++) {
-      me->v1 += p_skip * totvert;
-      me->v2 += p_skip * totvert;
+    MEdge *edge = &edges[p_skip * totedge];
+    for (k = 0; k < totedge; k++, edge++) {
+      edge->v1 += p_skip * totvert;
+      edge->v2 += p_skip * totvert;
     }
 
     /* create polys and loops */

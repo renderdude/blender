@@ -38,30 +38,30 @@ static void extract_fdots_iter_poly_bm(const MeshRenderData * /*mr*/,
 }
 
 static void extract_fdots_iter_poly_mesh(const MeshRenderData *mr,
-                                         const int mp_index,
+                                         const int poly_index,
                                          void *_userdata)
 {
-  const bool hidden = mr->use_hide && mr->hide_poly && mr->hide_poly[mp_index];
+  const bool hidden = mr->use_hide && mr->hide_poly && mr->hide_poly[poly_index];
 
   GPUIndexBufBuilder *elb = static_cast<GPUIndexBufBuilder *>(_userdata);
   if (mr->use_subsurf_fdots) {
     const BitSpan facedot_tags = mr->me->runtime->subsurf_face_dot_tags;
 
-    for (const int ml_index : mr->polys[mp_index]) {
+    for (const int ml_index : mr->polys[poly_index]) {
       const int vert = mr->corner_verts[ml_index];
       if (facedot_tags[vert] && !hidden) {
-        GPU_indexbuf_set_point_vert(elb, mp_index, mp_index);
+        GPU_indexbuf_set_point_vert(elb, poly_index, poly_index);
         return;
       }
     }
-    GPU_indexbuf_set_point_restart(elb, mp_index);
+    GPU_indexbuf_set_point_restart(elb, poly_index);
   }
   else {
     if (!hidden) {
-      GPU_indexbuf_set_point_vert(elb, mp_index, mp_index);
+      GPU_indexbuf_set_point_vert(elb, poly_index, poly_index);
     }
     else {
-      GPU_indexbuf_set_point_restart(elb, mp_index);
+      GPU_indexbuf_set_point_restart(elb, poly_index);
     }
   }
 }

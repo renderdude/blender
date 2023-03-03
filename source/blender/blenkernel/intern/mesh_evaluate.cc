@@ -110,7 +110,7 @@ float BKE_mesh_calc_area(const Mesh *me)
 }
 
 static float UNUSED_FUNCTION(mesh_calc_poly_volume_centroid)(const blender::IndexRange poly,
-                                                             const int *corner_verts,
+                                                             const int *poly_verts,
                                                              const float (*positions)[3],
                                                              float r_cent[3])
 {
@@ -119,11 +119,11 @@ static float UNUSED_FUNCTION(mesh_calc_poly_volume_centroid)(const blender::Inde
 
   zero_v3(r_cent);
 
-  v_pivot = positions[corner_verts[0]];
-  v_step1 = positions[corner_verts[1]];
+  v_pivot = positions[poly_verts[0]];
+  v_step1 = positions[poly_verts[1]];
 
   for (int i = 2; i < poly.size(); i++) {
-    const float *v_step2 = positions[corner_verts[i]];
+    const float *v_step2 = positions[poly_verts[i]];
 
     /* Calculate the 6x volume of the tetrahedron formed by the 3 vertices
      * of the triangle and the origin as the fourth vertex */
@@ -798,7 +798,6 @@ void BKE_mesh_calc_relative_deform(const int *poly_offsets,
                                    float (*vert_cos_new)[3])
 {
   const blender::OffsetIndices<int> polys(blender::Span(poly_offsets, totpoly + 1));
-  int i;
 
   int *vert_accum = (int *)MEM_calloc_arrayN(size_t(totvert), sizeof(*vert_accum), __func__);
 
@@ -829,7 +828,7 @@ void BKE_mesh_calc_relative_deform(const int *poly_offsets,
     }
   }
 
-  for (i = 0; i < totvert; i++) {
+  for (int i = 0; i < totvert; i++) {
     if (vert_accum[i]) {
       mul_v3_fl(vert_cos_new[i], 1.0f / float(vert_accum[i]));
     }

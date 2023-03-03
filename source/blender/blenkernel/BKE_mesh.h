@@ -604,7 +604,7 @@ void BKE_lnor_space_custom_normal_to_data(const MLoopNorSpace *lnor_space,
 void BKE_mesh_normals_loop_split(const float (*vert_positions)[3],
                                  const float (*vert_normals)[3],
                                  int numVerts,
-                                 const struct MEdge *medges,
+                                 const struct MEdge *edges,
                                  int numEdges,
                                  const int *corner_verts,
                                  const int *corner_edges,
@@ -623,7 +623,7 @@ void BKE_mesh_normals_loop_split(const float (*vert_positions)[3],
 void BKE_mesh_normals_loop_custom_set(const float (*vert_positions)[3],
                                       const float (*vert_normals)[3],
                                       int numVerts,
-                                      const struct MEdge *medges,
+                                      const struct MEdge *edges,
                                       int numEdges,
                                       const int *corner_verts,
                                       const int *corner_edges,
@@ -638,7 +638,7 @@ void BKE_mesh_normals_loop_custom_from_verts_set(const float (*vert_positions)[3
                                                  const float (*vert_normals)[3],
                                                  float (*r_custom_vert_normals)[3],
                                                  int numVerts,
-                                                 const struct MEdge *medges,
+                                                 const struct MEdge *edges,
                                                  int numEdges,
                                                  const int *corner_verts,
                                                  const int *corner_edges,
@@ -751,10 +751,12 @@ void BKE_mesh_calc_volume(const float (*vert_positions)[3],
 void BKE_mesh_mdisp_flip(struct MDisps *md, bool use_loop_mdisp_flip);
 
 /**
- * Flip (invert winding of) the given \a mpoly, i.e. reverse order of its loops
+ * Flip (invert winding of) the given \a poly, i.e. reverse order of its loops
  * (keeping the same vertex as 'start point').
  *
- * \param mpoly: the polygon to flip.
+ * \param poly: the polygon to flip.
+ * \param mloop: the full loops array.
+ * \param ldata: the loops custom data.
  */
 void BKE_mesh_polygon_flip_ex(int poly_offset,
                               int poly_size,
@@ -861,7 +863,7 @@ bool BKE_mesh_validate_material_indices(struct Mesh *me);
 bool BKE_mesh_validate_arrays(struct Mesh *me,
                               float (*vert_positions)[3],
                               unsigned int totvert,
-                              struct MEdge *medges,
+                              struct MEdge *edges,
                               unsigned int totedge,
                               struct MFace *mfaces,
                               unsigned int totface,
@@ -892,7 +894,6 @@ bool BKE_mesh_validate_all_customdata(struct CustomData *vdata,
                                       bool *r_change);
 
 void BKE_mesh_strip_loose_faces(struct Mesh *me);
-void BKE_mesh_strip_loose_edges(struct Mesh *me);
 
 /**
  * Calculate edges from polygons.
@@ -934,7 +935,7 @@ void BKE_mesh_debug_print(const struct Mesh *me) ATTR_NONNULL(1);
 
 /**
  * \return The material index for each polygon. May be null.
- * \note In C++ code, prefer using the attribute API (#MutableAttributeAccessor)/
+ * \note In C++ code, prefer using the attribute API (#AttributeAccessor).
  */
 BLI_INLINE const int *BKE_mesh_material_indices(const Mesh *mesh)
 {
@@ -943,7 +944,7 @@ BLI_INLINE const int *BKE_mesh_material_indices(const Mesh *mesh)
 
 /**
  * \return The material index for each polygon. Create the layer if it doesn't exist.
- * \note In C++ code, prefer using the attribute API (#MutableAttributeAccessor)/
+ * \note In C++ code, prefer using the attribute API (#MutableAttributeAccessor).
  */
 BLI_INLINE int *BKE_mesh_material_indices_for_write(Mesh *mesh)
 {

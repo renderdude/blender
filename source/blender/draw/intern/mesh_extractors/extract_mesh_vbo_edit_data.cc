@@ -145,15 +145,15 @@ static void extract_edit_data_iter_poly_bm(const MeshRenderData *mr,
 }
 
 static void extract_edit_data_iter_poly_mesh(const MeshRenderData *mr,
-                                             const int mp_index,
+                                             const int poly_index,
                                              void *_data)
 {
   EditLoopData *vbo_data = *(EditLoopData **)_data;
 
-  for (const int ml_index : mr->polys[mp_index]) {
+  for (const int ml_index : mr->polys[poly_index]) {
     EditLoopData *data = vbo_data + ml_index;
     memset(data, 0x0, sizeof(*data));
-    BMFace *efa = bm_original_face_get(mr, mp_index);
+    BMFace *efa = bm_original_face_get(mr, poly_index);
     BMVert *eve = bm_original_vert_get(mr, mr->corner_verts[ml_index]);
     BMEdge *eed = bm_original_edge_get(mr, mr->corner_edges[ml_index]);
     if (efa) {
@@ -183,7 +183,7 @@ static void extract_edit_data_iter_ledge_bm(const MeshRenderData *mr,
 }
 
 static void extract_edit_data_iter_ledge_mesh(const MeshRenderData *mr,
-                                              const MEdge *med,
+                                              const MEdge *edge,
                                               const int ledge_index,
                                               void *_data)
 {
@@ -192,8 +192,8 @@ static void extract_edit_data_iter_ledge_mesh(const MeshRenderData *mr,
   memset(data, 0x0, sizeof(*data) * 2);
   const int e_index = mr->ledges[ledge_index];
   BMEdge *eed = bm_original_edge_get(mr, e_index);
-  BMVert *eve1 = bm_original_vert_get(mr, med->v1);
-  BMVert *eve2 = bm_original_vert_get(mr, med->v2);
+  BMVert *eve1 = bm_original_vert_get(mr, edge->v1);
+  BMVert *eve2 = bm_original_vert_get(mr, edge->v2);
   if (eed) {
     mesh_render_data_edge_flag(mr, eed, &data[0]);
     data[1] = data[0];

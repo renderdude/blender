@@ -69,22 +69,22 @@ static void extract_fdots_uv_iter_poly_bm(const MeshRenderData * /*mr*/,
 }
 
 static void extract_fdots_uv_iter_poly_mesh(const MeshRenderData *mr,
-                                            const int mp_index,
+                                            const int poly_index,
                                             void *_data)
 {
   MeshExtract_FdotUV_Data *data = static_cast<MeshExtract_FdotUV_Data *>(_data);
   const BitSpan facedot_tags = mr->me->runtime->subsurf_face_dot_tags;
 
-  for (const int ml_index : mr->polys[mp_index]) {
+  for (const int ml_index : mr->polys[poly_index]) {
     const int vert = mr->corner_verts[ml_index];
     if (mr->use_subsurf_fdots) {
       if (facedot_tags[vert]) {
-        copy_v2_v2(data->vbo_data[mp_index], data->uv_data[ml_index]);
+        copy_v2_v2(data->vbo_data[poly_index], data->uv_data[ml_index]);
       }
     }
     else {
-      float w = 1.0f / float(mr->polys[mp_index].size());
-      madd_v2_v2fl(data->vbo_data[mp_index], data->uv_data[ml_index], w);
+      float w = 1.0f / float(mr->polys[poly_index].size());
+      madd_v2_v2fl(data->vbo_data[poly_index], data->uv_data[ml_index], w);
     }
   }
 }

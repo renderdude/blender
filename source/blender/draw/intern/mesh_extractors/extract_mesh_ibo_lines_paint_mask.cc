@@ -36,11 +36,11 @@ static void extract_lines_paint_mask_init(const MeshRenderData *mr,
 }
 
 static void extract_lines_paint_mask_iter_poly_mesh(const MeshRenderData *mr,
-                                                    const int mp_index,
+                                                    const int poly_index,
                                                     void *_data)
 {
   MeshExtract_LinePaintMask_Data *data = static_cast<MeshExtract_LinePaintMask_Data *>(_data);
-  const IndexRange poly = mr->polys[mp_index];
+  const IndexRange poly = mr->polys[poly_index];
 
   const int ml_index_end = poly.start() + poly.size();
   for (int ml_index = poly.start(); ml_index < ml_index_end; ml_index += 1) {
@@ -51,7 +51,7 @@ static void extract_lines_paint_mask_iter_poly_mesh(const MeshRenderData *mr,
 
       const int ml_index_last = poly.size() + poly.start() - 1;
       const int ml_index_other = (ml_index == ml_index_last) ? poly.start() : (ml_index + 1);
-      if (mr->select_poly && mr->select_poly[mp_index]) {
+      if (mr->select_poly && mr->select_poly[poly_index]) {
         if (BLI_BITMAP_TEST_AND_SET_ATOMIC(data->select_map, e_index)) {
           /* Hide edge as it has more than 2 selected loop. */
           GPU_indexbuf_set_line_restart(&data->elb, e_index);

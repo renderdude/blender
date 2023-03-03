@@ -96,11 +96,11 @@ static void statvis_calc_overhang(const MeshRenderData *mr, float *r_overhang)
     }
   }
   else {
-    for (int mp_index = 0, l_index = 0; mp_index < mr->poly_len; mp_index++) {
-      float fac = angle_normalized_v3v3(mr->poly_normals[mp_index], dir) / float(M_PI);
+    for (const int poly_i : mr->polys.index_range()) {
+      float fac = angle_normalized_v3v3(mr->poly_normals[poly_i], dir) / float(M_PI);
       fac = overhang_remap(fac, min, max, minmax_irange);
-      for (int i = 0; i < mr->polys[mp_index].size(); i++, l_index++) {
-        r_overhang[l_index] = fac;
+      for (const int loop_i : mr->polys[poly_i]) {
+        r_overhang[loop_i] = fac;
       }
     }
   }
@@ -246,19 +246,19 @@ static void statvis_calc_thickness(const MeshRenderData *mr, float *r_thickness)
       }
     }
 
-    for (int mp_index = 0, l_index = 0; mp_index < mr->poly_len; mp_index++) {
-      float fac = face_dists[mp_index];
+    for (const int poly_i : mr->polys.index_range()) {
+      float fac = face_dists[poly_i];
       fac = thickness_remap(fac, min, max, minmax_irange);
-      for (int i = 0; i < mr->polys[mp_index].size(); i++, l_index++) {
-        r_thickness[l_index] = fac;
+      for (const int loop_i : mr->polys[poly_i]) {
+        r_thickness[loop_i] = fac;
       }
     }
   }
 }
 
 struct BVHTree_OverlapData {
-  const float3 *positions;
-  const int *corner_verts;
+  Span<float3> positions;
+  Span<int> corner_verts;
   Span<MLoopTri> looptris;
   float epsilon;
 };
@@ -339,7 +339,7 @@ static void statvis_calc_intersect(const MeshRenderData *mr, float *r_intersect)
 
     BVHTree *tree = BKE_bvhtree_from_mesh_get(&treeData, mr->me, BVHTREE_FROM_LOOPTRI, 4);
 
-    struct BVHTree_OverlapData data = {nullptr};
+    struct BVHTree_OverlapData data = {};
     data.positions = mr->vert_positions;
     data.corner_verts = mr->corner_verts;
     data.looptris = mr->looptris;
@@ -435,12 +435,12 @@ static void statvis_calc_distort(const MeshRenderData *mr, float *r_distort)
     }
   }
   else {
-    for (int mp_index = 0, l_index = 0; mp_index < mr->poly_len; mp_index++) {
-      const IndexRange poly = mr->polys[mp_index];
+    for (const int poly_index : mr->polys.index_range()) {
+      const IndexRange poly = mr->polys[poly_index];
       float fac = -1.0f;
 
       if (poly.size() > 3) {
-        const float *f_no = mr->poly_normals[mp_index];
+        const float *f_no = mr->poly_normals[poly_index];
         fac = 0.0f;
 
         for (int i = 1; i <= poly.size(); i++) {
@@ -462,8 +462,8 @@ static void statvis_calc_distort(const MeshRenderData *mr, float *r_distort)
       }
 
       fac = distort_remap(fac, min, max, minmax_irange);
-      for (int i = 0; i < poly.size(); i++, l_index++) {
-        r_distort[l_index] = fac;
+      for (const int corner : poly) {
+        r_distort[corner] = fac;
       }
     }
   }
@@ -524,8 +524,8 @@ static void statvis_calc_sharp(const MeshRenderData *mr, float *r_sharp)
 
     EdgeHash *eh = BLI_edgehash_new_ex(__func__, mr->edge_len);
 
-    for (int mp_index = 0; mp_index < mr->poly_len; mp_index++) {
-      const IndexRange poly = mr->polys[mp_index];
+    for (int poly_index = 0; poly_index < mr->poly_len; poly_index++) {
+      const IndexRange poly = mr->polys[poly_index];
       for (int i = 0; i < poly.size(); i++) {
         const int vert_curr = mr->corner_verts[poly.start() + (i + 0) % poly.size()];
         const int vert_next = mr->corner_verts[poly.start() + (i + 1) % poly.size()];
@@ -533,12 +533,12 @@ static void statvis_calc_sharp(const MeshRenderData *mr, float *r_sharp)
         void **pval;
         bool value_is_init = BLI_edgehash_ensure_p(eh, vert_curr, vert_next, &pval);
         if (!value_is_init) {
-          *pval = (void *)mr->poly_normals[mp_index];
+          *pval = (void *)&mr->poly_normals[poly_index];
           /* non-manifold edge, yet... */
           continue;
         }
         if (*pval != nullptr) {
-          const float *f1_no = mr->poly_normals[mp_index];
+          const float *f1_no = mr->poly_normals[poly_index];
           const float *f2_no = static_cast<const float *>(*pval);
           angle = angle_normalized_v3v3(f1_no, f2_no);
           angle = is_edge_convex_v3(

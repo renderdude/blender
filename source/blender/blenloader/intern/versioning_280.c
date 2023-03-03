@@ -1616,7 +1616,7 @@ void do_versions_after_linking_280(FileData *fd, Main *bmain)
      * which exact version fully deprecated tessfaces, so think we can keep that one here, no
      * harm to be expected anyway for being over-conservative. */
     for (Mesh *me = bmain->meshes.first; me != NULL; me = me->id.next) {
-      /* Check if we need to convert mfaces to mpolys. */
+      /* Check if we need to convert mfaces to polys. */
       if (me->totface && !me->totpoly) {
         /* temporarily switch main so that reading from
          * external CustomData works */
@@ -2987,7 +2987,7 @@ void blo_do_versions_280(FileData *fd, Library *UNUSED(lib), Main *bmain)
             enum { V3D_OCCLUDE_WIRE = (1 << 14) };
             View3D *v3d = (View3D *)sl;
             if (v3d->flag2 & V3D_OCCLUDE_WIRE) {
-              v3d->overlay.edit_flag |= V3D_OVERLAY_EDIT_OCCLUDE_WIRE;
+              v3d->overlay.edit_flag |= V3D_OVERLAY_EDIT_RETOPOLOGY;
               v3d->flag2 &= ~V3D_OCCLUDE_WIRE;
             }
           }

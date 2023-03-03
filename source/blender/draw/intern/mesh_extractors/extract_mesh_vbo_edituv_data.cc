@@ -70,16 +70,16 @@ static void extract_edituv_data_iter_poly_bm(const MeshRenderData *mr,
 }
 
 static void extract_edituv_data_iter_poly_mesh(const MeshRenderData *mr,
-                                               const int mp_index,
+                                               const int poly_index,
                                                void *_data)
 {
   MeshExtract_EditUVData_Data *data = static_cast<MeshExtract_EditUVData_Data *>(_data);
-  const IndexRange poly = mr->polys[mp_index];
+  const IndexRange poly = mr->polys[poly_index];
   const int ml_index_end = poly.start() + poly.size();
   for (int ml_index = poly.start(); ml_index < ml_index_end; ml_index += 1) {
     EditLoopData *eldata = &data->vbo_data[ml_index];
     memset(eldata, 0x0, sizeof(*eldata));
-    BMFace *efa = bm_original_face_get(mr, mp_index);
+    BMFace *efa = bm_original_face_get(mr, poly_index);
     if (efa) {
       BMVert *eve = bm_original_vert_get(mr, mr->corner_verts[ml_index]);
       BMEdge *eed = bm_original_edge_get(mr, mr->corner_edges[ml_index]);

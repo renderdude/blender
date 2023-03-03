@@ -1546,13 +1546,13 @@ int poly_get_adj_loops_from_vert(const blender::Span<int> poly_verts, int vert, 
   return corner;
 }
 
-int BKE_mesh_edge_other_vert(const MEdge *e, int v)
+int BKE_mesh_edge_other_vert(const MEdge *edge, int v)
 {
-  if (e->v1 == v) {
-    return e->v2;
+  if (edge->v1 == v) {
+    return edge->v2;
   }
-  if (e->v2 == v) {
-    return e->v1;
+  if (edge->v2 == v) {
+    return edge->v1;
   }
 
   return -1;
@@ -1569,12 +1569,13 @@ void BKE_mesh_looptri_get_real_edges(const MEdge *edges,
     const int corner_2 = tri->tri[i_next];
     const int vert_1 = corner_verts[corner_1];
     const int vert_2 = corner_verts[corner_2];
-    const int edge = corner_edges[corner_1];
-    const MEdge *e = &edges[edge];
+    const int edge_i = corner_edges[corner_1];
+    const MEdge *edge = &edges[edge_i];
 
-    bool is_real = (vert_1 == e->v1 && vert_2 == e->v2) || (vert_1 == e->v2 && vert_2 == e->v1);
+    bool is_real = (vert_1 == edge->v1 && vert_2 == edge->v2) ||
+                   (vert_1 == edge->v2 && vert_2 == edge->v1);
 
-    r_edges[i] = is_real ? edge : -1;
+    r_edges[i] = is_real ? edge_i : -1;
   }
 }
 

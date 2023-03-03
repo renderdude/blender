@@ -161,13 +161,13 @@ void BKE_mesh_vert_looptri_map_create(MeshElemMap **r_map,
  * The lists are allocated from one memory pool.
  */
 void BKE_mesh_vert_edge_map_create(
-    MeshElemMap **r_map, int **r_mem, const struct MEdge *medge, int totvert, int totedge);
+    MeshElemMap **r_map, int **r_mem, const struct MEdge *edges, int totvert, int totedge);
 /**
  * A version of #BKE_mesh_vert_edge_map_create that references connected vertices directly
  * (not their edges).
  */
 void BKE_mesh_vert_edge_vert_map_create(
-    MeshElemMap **r_map, int **r_mem, const struct MEdge *medge, int totvert, int totedge);
+    MeshElemMap **r_map, int **r_mem, const struct MEdge *edges, int totvert, int totedge);
 
 #ifdef __cplusplus
 

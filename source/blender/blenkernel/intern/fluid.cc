@@ -938,7 +938,7 @@ struct ObstaclesFromDMData {
   FluidEffectorSettings *fes;
 
   const float (*vert_positions)[3];
-  const int *corner_verts;
+  blender::Span<int> corner_verts;
   blender::Span<MLoopTri> looptris;
 
   BVHTreeFromMesh *tree;
@@ -973,7 +973,7 @@ static void obstacles_from_mesh_task_cb(void *__restrict userdata,
       /* Calculate object velocities. Result in bb->velocity. */
       update_velocities(data->fes,
                         data->vert_positions,
-                        data->corner_verts,
+                        data->corner_verts.data(),
                         data->looptris.data(),
                         bb->velocity,
                         index,
@@ -1072,7 +1072,7 @@ static void obstacles_from_mesh(Object *coll_ob,
       ObstaclesFromDMData data{};
       data.fes = fes;
       data.vert_positions = positions;
-      data.corner_verts = corner_verts.data();
+      data.corner_verts = corner_verts;
       data.looptris = looptris;
       data.tree = &tree_data;
       data.bb = bb;
@@ -1981,7 +1981,7 @@ struct EmitFromDMData {
 
   const float (*vert_positions)[3];
   const float (*vert_normals)[3];
-  const int *corner_verts;
+  blender::Span<int> corner_verts;
   blender::Span<MLoopTri> looptris;
   const float (*mloopuv)[2];
   const MDeformVert *dvert;
@@ -2015,7 +2015,7 @@ static void emit_from_mesh_task_cb(void *__restrict userdata,
         sample_mesh(data->ffs,
                     data->vert_positions,
                     data->vert_normals,
-                    data->corner_verts,
+                    data->corner_verts.data(),
                     data->looptris.data(),
                     data->mloopuv,
                     bb->influence,
@@ -2142,7 +2142,7 @@ static void emit_from_mesh(
       data.ffs = ffs;
       data.vert_positions = positions;
       data.vert_normals = vert_normals;
-      data.corner_verts = corner_verts.data();
+      data.corner_verts = corner_verts;
       data.looptris = looptris;
       data.mloopuv = mloopuv;
       data.dvert = dvert;
@@ -3208,7 +3208,6 @@ static Mesh *create_liquid_geometry(FluidDomainSettings *fds,
                                     Object *ob)
 {
   Mesh *me;
-  int *corner_verts;
   float min[3];
   float max[3];
   float size[3];
@@ -3242,7 +3241,7 @@ static Mesh *create_liquid_geometry(FluidDomainSettings *fds,
   }
   float(*positions)[3] = BKE_mesh_vert_positions_for_write(me);
   blender::MutableSpan<int> poly_offsets = me->poly_offsets_for_write();
-  corner_verts = me->corner_verts_for_write().data();
+  blender::MutableSpan<int> corner_verts = me->corner_verts_for_write();
 
   const bool is_sharp = orgmesh->attributes().lookup_or_default<bool>(
       "sharp_face", ATTR_DOMAIN_FACE, false)[0];
@@ -3332,15 +3331,15 @@ static Mesh *create_liquid_geometry(FluidDomainSettings *fds,
   int *material_indices = BKE_mesh_material_indices_for_write(me);
 
   /* Loop for triangles. */
-  for (i = 0; i < num_faces; i++, corner_verts += 3) {
+  for (const int i : poly_offsets.index_range().drop_back(1)) {
     /* Initialize from existing face. */
     material_indices[i] = mp_mat_nr;
 
     poly_offsets[i] = i * 3;
 
-    corner_verts[0] = manta_liquid_get_triangle_x_at(fds->fluid, i);
-    corner_verts[1] = manta_liquid_get_triangle_y_at(fds->fluid, i);
-    corner_verts[2] = manta_liquid_get_triangle_z_at(fds->fluid, i);
+    corner_verts[i * 3 + 0] = manta_liquid_get_triangle_x_at(fds->fluid, i);
+    corner_verts[i * 3 + 1] = manta_liquid_get_triangle_y_at(fds->fluid, i);
+    corner_verts[i * 3 + 2] = manta_liquid_get_triangle_z_at(fds->fluid, i);
 #  ifdef DEBUG_PRINT
     /* Debugging: Print mesh faces. */
     printf("mloops[0].v: %d, mloops[1].v: %d, mloops[2].v: %d\n",
@@ -3358,7 +3357,6 @@ static Mesh *create_liquid_geometry(FluidDomainSettings *fds,
 static Mesh *create_smoke_geometry(FluidDomainSettings *fds, Mesh *orgmesh, Object *ob)
 {
   Mesh *result;
-  int *corner_verts;
   float min[3];
   float max[3];
   float *co;
@@ -3377,7 +3375,7 @@ static Mesh *create_smoke_geometry(FluidDomainSettings *fds, Mesh *orgmesh, Obje
   result = BKE_mesh_new_nomain(num_verts, 0, num_faces * 4, num_faces);
   float(*positions)[3] = BKE_mesh_vert_positions_for_write(result);
   blender::MutableSpan<int> poly_offsets = result->poly_offsets_for_write();
-  corner_verts = result->corner_verts_for_write().data();
+  blender::MutableSpan<int> corner_verts = result->corner_verts_for_write();
 
   if (num_verts) {
     /* Volume bounds. */

@@ -46,7 +46,6 @@ UvVertMap *BKE_mesh_uv_vert_map_create(const blender::OffsetIndices<int> polys,
 
   UvVertMap *vmap;
   UvMapVert *buf;
-  uint a;
   int i, totuv, nverts;
 
   BLI_buffer_declare_static(vec2f, tf_uv_buf, BLI_BUFFER_NOP, 32);
@@ -54,7 +53,7 @@ UvVertMap *BKE_mesh_uv_vert_map_create(const blender::OffsetIndices<int> polys,
   totuv = 0;
 
   /* generate UvMapVert array */
-  for (a = 0; a < totpoly; a++) {
+  for (const int64_t a : polys.index_range()) {
     if (!selected || (!(hide_poly && hide_poly[a]) && (select_poly && select_poly[a]))) {
       totuv += polys.size(a);
     }
@@ -78,7 +77,7 @@ UvVertMap *BKE_mesh_uv_vert_map_create(const blender::OffsetIndices<int> polys,
     winding = static_cast<bool *>(MEM_callocN(sizeof(*winding) * totpoly, "winding"));
   }
 
-  for (a = 0; a < totpoly; a++) {
+  for (const int64_t a : polys.index_range()) {
     if (!selected || (!(hide_poly && hide_poly[a]) && (select_poly && select_poly[a]))) {
       float(*tf_uv)[2] = nullptr;
 
@@ -92,7 +91,7 @@ UvVertMap *BKE_mesh_uv_vert_map_create(const blender::OffsetIndices<int> polys,
 
       for (i = 0; i < nverts; i++) {
         buf->loop_of_poly_index = ushort(i);
-        buf->poly_index = a;
+        buf->poly_index = uint(a);
         buf->separate = false;
         buf->next = vmap->vert[corner_verts[poly[i]]];
         vmap->vert[corner_verts[poly[i]]] = buf;
@@ -111,7 +110,7 @@ UvVertMap *BKE_mesh_uv_vert_map_create(const blender::OffsetIndices<int> polys,
   }
 
   /* sort individual uvs for each vert */
-  for (a = 0; a < totvert; a++) {
+  for (uint a = 0; a < totvert; a++) {
     UvMapVert *newvlist = nullptr, *vlist = vmap->vert[a];
     UvMapVert *iterv, *v, *lastv, *next;
     const float *uv, *uv2;
@@ -296,7 +295,7 @@ void BKE_mesh_vert_looptri_map_create(MeshElemMap **r_map,
 }
 
 void BKE_mesh_vert_edge_map_create(
-    MeshElemMap **r_map, int **r_mem, const MEdge *medge, int totvert, int totedge)
+    MeshElemMap **r_map, int **r_mem, const MEdge *edges, int totvert, int totedge)
 {
   MeshElemMap *map = MEM_cnew_array<MeshElemMap>(size_t(totvert), __func__);
   int *indices = static_cast<int *>(MEM_mallocN(sizeof(int[2]) * size_t(totedge), __func__));
@@ -306,8 +305,8 @@ void BKE_mesh_vert_edge_map_create(
 
   /* Count number of edges for each vertex */
   for (i = 0; i < totedge; i++) {
-    map[medge[i].v1].count++;
-    map[medge[i].v2].count++;
+    map[edges[i].v1].count++;
+    map[edges[i].v2].count++;
   }
 
   /* Assign indices mem */
@@ -321,7 +320,7 @@ void BKE_mesh_vert_edge_map_create(
 
   /* Find the users */
   for (i = 0; i < totedge; i++) {
-    const uint v[2] = {medge[i].v1, medge[i].v2};
+    const uint v[2] = {edges[i].v1, edges[i].v2};
 
     map[v[0]].indices[map[v[0]].count] = i;
     map[v[1]].indices[map[v[1]].count] = i;
@@ -335,7 +334,7 @@ void BKE_mesh_vert_edge_map_create(
 }
 
 void BKE_mesh_vert_edge_vert_map_create(
-    MeshElemMap **r_map, int **r_mem, const MEdge *medge, int totvert, int totedge)
+    MeshElemMap **r_map, int **r_mem, const MEdge *edges, int totvert, int totedge)
 {
   MeshElemMap *map = MEM_cnew_array<MeshElemMap>(size_t(totvert), __func__);
   int *indices = static_cast<int *>(MEM_mallocN(sizeof(int[2]) * size_t(totedge), __func__));
@@ -345,8 +344,8 @@ void BKE_mesh_vert_edge_vert_map_create(
 
   /* Count number of edges for each vertex */
   for (i = 0; i < totedge; i++) {
-    map[medge[i].v1].count++;
-    map[medge[i].v2].count++;
+    map[edges[i].v1].count++;
+    map[edges[i].v2].count++;
   }
 
   /* Assign indices mem */
@@ -360,7 +359,7 @@ void BKE_mesh_vert_edge_vert_map_create(
 
   /* Find the users */
   for (i = 0; i < totedge; i++) {
-    const uint v[2] = {medge[i].v1, medge[i].v2};
+    const uint v[2] = {edges[i].v1, edges[i].v2};
 
     map[v[0]].indices[map[v[0]].count] = int(v[1]);
     map[v[1]].indices[map[v[1]].count] = int(v[0]);
@@ -428,7 +427,7 @@ void BKE_mesh_edge_poly_map_create(MeshElemMap **r_map,
   int *index_step;
 
   /* count face users */
-  for (int i = 0; i < totloop; i++) {
+  for (const int64_t i : blender::IndexRange(totloop)) {
     map[corner_edges[i]].count++;
   }
 
@@ -1164,7 +1163,7 @@ bool BKE_mesh_calc_islands_loop_poly_edgeseam(const float (*vert_positions)[3],
                                               const int totloop,
                                               MeshIslandStore *r_island_store)
 {
-  UNUSED_VARS(vert_positions, totvert);
+  UNUSED_VARS(vert_positions, totvert, edges);
   return mesh_calc_islands_loop_poly_uv(
       totedge, uv_seams, polys, corner_verts, corner_edges, totloop, nullptr, r_island_store);
 }

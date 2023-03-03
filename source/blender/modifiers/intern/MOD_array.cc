@@ -283,7 +283,7 @@ static void mesh_merge_transform(Mesh *result,
   using namespace blender;
   int *index_orig;
   int i;
-  MEdge *me;
+  MEdge *edge;
   const blender::Span<int> cap_poly_offsets = cap_mesh->poly_offsets();
   float(*result_positions)[3] = BKE_mesh_vert_positions_for_write(result);
   blender::MutableSpan<MEdge> result_edges = result->edges_for_write();
@@ -316,10 +316,10 @@ static void mesh_merge_transform(Mesh *result,
   }
 
   /* adjust cap edge vertex indices */
-  me = &result_edges[cap_edges_index];
-  for (i = 0; i < cap_nedges; i++, me++) {
-    me->v1 += cap_verts_index;
-    me->v2 += cap_verts_index;
+  edge = &result_edges[cap_edges_index];
+  for (i = 0; i < cap_nedges; i++, edge++) {
+    edge->v1 += cap_verts_index;
+    edge->v2 += cap_verts_index;
   }
 
   /* adjust cap poly loopstart indices */
@@ -374,7 +374,7 @@ static Mesh *arrayModifier_doArray(ArrayModifierData *amd,
                                    const ModifierEvalContext *ctx,
                                    const Mesh *mesh)
 {
-  MEdge *me;
+  MEdge *edge;
   int i, j, c, count;
   float length = amd->length;
   /* offset matrix */
@@ -608,10 +608,10 @@ static Mesh *arrayModifier_doArray(ArrayModifierData *amd,
     }
 
     /* adjust edge vertex indices */
-    me = &result_edges[c * chunk_nedges];
-    for (i = 0; i < chunk_nedges; i++, me++) {
-      me->v1 += c * chunk_nverts;
-      me->v2 += c * chunk_nverts;
+    edge = &result_edges[c * chunk_nedges];
+    for (i = 0; i < chunk_nedges; i++, edge++) {
+      edge->v1 += c * chunk_nverts;
+      edge->v2 += c * chunk_nverts;
     }
 
     for (i = 0; i < chunk_npolys; i++) {

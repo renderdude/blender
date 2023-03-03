@@ -69,11 +69,11 @@ static void extract_points_iter_poly_bm(const MeshRenderData * /*mr*/,
 }
 
 static void extract_points_iter_poly_mesh(const MeshRenderData *mr,
-                                          const int mp_index,
+                                          const int poly_index,
                                           void *_userdata)
 {
   GPUIndexBufBuilder *elb = static_cast<GPUIndexBufBuilder *>(_userdata);
-  for (const int ml_index : mr->polys[mp_index]) {
+  for (const int ml_index : mr->polys[poly_index]) {
     vert_set_mesh(elb, mr, mr->corner_verts[ml_index], ml_index);
   }
 }
@@ -89,13 +89,13 @@ static void extract_points_iter_ledge_bm(const MeshRenderData *mr,
 }
 
 static void extract_points_iter_ledge_mesh(const MeshRenderData *mr,
-                                           const MEdge *med,
+                                           const MEdge *edge,
                                            const int ledge_index,
                                            void *_userdata)
 {
   GPUIndexBufBuilder *elb = static_cast<GPUIndexBufBuilder *>(_userdata);
-  vert_set_mesh(elb, mr, med->v1, mr->loop_len + (ledge_index * 2));
-  vert_set_mesh(elb, mr, med->v2, mr->loop_len + (ledge_index * 2) + 1);
+  vert_set_mesh(elb, mr, edge->v1, mr->loop_len + (ledge_index * 2));
+  vert_set_mesh(elb, mr, edge->v2, mr->loop_len + (ledge_index * 2) + 1);
 }
 
 static void extract_points_iter_lvert_bm(const MeshRenderData *mr,

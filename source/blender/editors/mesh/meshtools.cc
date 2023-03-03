@@ -99,7 +99,7 @@ static void join_mesh_single(Depsgraph *depsgraph,
 
   Mesh *me = static_cast<Mesh *>(ob_src->data);
   float3 *vert_positions = *vert_positions_pp;
-  MEdge *medge = *medge_pp;
+  MEdge *edge = *medge_pp;
   int *corner_verts = *corner_verts_pp;
   int *corner_edges = *corner_edges_pp;
 
@@ -208,9 +208,9 @@ static void join_mesh_single(Depsgraph *depsgraph,
     CustomData_merge(&me->edata, edata, CD_MASK_MESH.emask, CD_SET_DEFAULT, totedge);
     CustomData_copy_data_named(&me->edata, edata, 0, *edgeofs, me->totedge);
 
-    for (a = 0; a < me->totedge; a++, medge++) {
-      medge->v1 += *vertofs;
-      medge->v2 += *vertofs;
+    for (a = 0; a < me->totedge; a++, edge++) {
+      edge->v1 += *vertofs;
+      edge->v2 += *vertofs;
     }
   }
 
@@ -267,8 +267,8 @@ static void join_mesh_single(Depsgraph *depsgraph,
       }
     }
 
-    for (a = 0; a < me->totpoly; a++) {
-      poly_offsets_pp[a] += *loopofs;
+    for (const int i : blender::IndexRange(me->totpoly)) {
+      poly_offsets_pp[i] += *loopofs;
     }
 
     /* Face maps. */
@@ -335,7 +335,7 @@ int ED_mesh_join_objects_exec(bContext *C, wmOperator *op)
   Object *ob = CTX_data_active_object(C);
   Material **matar = nullptr, *ma;
   Mesh *me;
-  MEdge *medge = nullptr;
+  MEdge *edge = nullptr;
   Key *key, *nkey = nullptr;
   float imat[4][4];
   int a, b, totcol, totmat = 0, totedge = 0, totvert = 0;
@@ -585,7 +585,7 @@ int ED_mesh_join_objects_exec(bContext *C, wmOperator *op)
 
   float3 *vert_positions = (float3 *)CustomData_add_layer_named(
       &vdata, CD_PROP_FLOAT3, CD_SET_DEFAULT, nullptr, totvert, "position");
-  medge = (MEdge *)CustomData_add_layer(&edata, CD_MEDGE, CD_SET_DEFAULT, nullptr, totedge);
+  edge = (MEdge *)CustomData_add_layer(&edata, CD_MEDGE, CD_SET_DEFAULT, nullptr, totedge);
   int *corner_verts = (int *)CustomData_add_layer_named(
       &ldata, CD_PROP_INT32, CD_CONSTRUCT, nullptr, totloop, ".corner_vert");
   int *corner_edges = (int *)CustomData_add_layer_named(
@@ -613,7 +613,7 @@ int ED_mesh_join_objects_exec(bContext *C, wmOperator *op)
                    ob,
                    imat,
                    &vert_positions,
-                   &medge,
+                   &edge,
                    &corner_verts,
                    &corner_edges,
                    &poly_offsets,
@@ -648,7 +648,7 @@ int ED_mesh_join_objects_exec(bContext *C, wmOperator *op)
                        ob_iter,
                        imat,
                        &vert_positions,
-                       &medge,
+                       &edge,
                        &corner_verts,
                        &corner_edges,
                        &poly_offsets,
