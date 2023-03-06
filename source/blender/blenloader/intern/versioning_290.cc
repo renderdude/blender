@@ -817,10 +817,12 @@ void blo_do_versions_290(FileData *fd, Library * /*lib*/, Main *bmain)
   if (MAIN_VERSION_ATLEAST(bmain, 290, 2) && MAIN_VERSION_OLDER(bmain, 291, 1)) {
     /* In this range, the extrude manifold could generate meshes with degenerated face. */
     LISTBASE_FOREACH (Mesh *, me, &bmain->meshes) {
-      for (const MPoly *mp = me->mpoly, *mp_end = mp + me->totpoly; mp < mp_end; mp++) {
-        if (mp->totloop == 2) {
+      const MPoly *polys = static_cast<const MPoly *>(CustomData_get_layer(&me->pdata, CD_MPOLY));
+      for (const int i : blender::IndexRange(me->totpoly)) {
+        if (polys[i].totloop == 2) {
           bool changed;
           BKE_mesh_legacy_convert_loops_to_corners(me);
+          BKE_mesh_legacy_convert_polys_to_offsets(me);
           BKE_mesh_validate_arrays(
               me,
               BKE_mesh_vert_positions_for_write(me),
