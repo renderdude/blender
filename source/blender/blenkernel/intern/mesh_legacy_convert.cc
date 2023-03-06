@@ -2220,20 +2220,57 @@ blender::MutableSpan<MPoly> BKE_mesh_legacy_convert_offsets_to_polys(
   return polys_legacy;
 }
 
+static bool poly_loops_orders_match(const Span<MPoly> polys)
+{
+  for (const int i : polys.index_range().drop_back(1)) {
+    if (polys[i].loopstart > polys[i + 1].loopstart) {
+      return true;
+    }
+  }
+  return false;
+}
+
 void BKE_mesh_legacy_convert_polys_to_offsets(Mesh *mesh)
 {
-  /* TODO: Handle out of order loops. */
   using namespace blender;
   if (mesh->poly_offsets_data) {
     return;
   }
   const Span<MPoly> polys(static_cast<const MPoly *>(CustomData_get_layer(&mesh->pdata, CD_MPOLY)),
                           mesh->totpoly);
+
   BKE_mesh_poly_offsets_ensure(mesh);
   MutableSpan<int> offsets = mesh->poly_offsets_for_write();
 
-  for (const int i : polys.index_range()) {
-    offsets[i] = polys[i].loopstart;
+  if (poly_loops_orders_match(polys)) {
+    for (const int i : polys.index_range()) {
+      offsets[i] = polys[i].loopstart;
+    }
+  }
+  else {
+    /* Reorder mesh polygons to match the order of their loops. */
+    Array<int> orig_indices(polys.size());
+    std::iota(orig_indices.begin(), orig_indices.end(), 0);
+    std::stable_sort(orig_indices.begin(), orig_indices.end(), [polys](const int a, const int b) {
+      return polys[a].loopstart < polys[b].loopstart;
+    });
+    CustomData old_poly_data = mesh->pdata;
+    CustomData_reset(&mesh->pdata);
+    CustomData_copy(&old_poly_data, &mesh->pdata, CD_MASK_MESH.lmask, CD_CONSTRUCT, mesh->totloop);
+
+    int offset = 0;
+    for (const int i : orig_indices.index_range()) {
+      offsets[i] = offset;
+      offset += polys[orig_indices[i]].totloop;
+    }
+
+    threading::parallel_for(orig_indices.index_range(), 1024, [&](const IndexRange range) {
+      for (const int i : range) {
+        CustomData_copy_data(&old_poly_data, &mesh->pdata, orig_indices[i], i, 1);
+      }
+    });
+
+    CustomData_free(&old_poly_data, mesh->totloop);
   }
 
   CustomData_free_layers(&mesh->pdata, CD_MPOLY, mesh->totpoly);
