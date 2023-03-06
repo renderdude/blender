@@ -50,8 +50,6 @@ Mesh *convert_ply_to_mesh(PlyData &data, Mesh *mesh, const PLYImportParams &para
     BKE_mesh_poly_offsets_ensure(mesh);
     CustomData_add_layer_named(
         &mesh->ldata, CD_PROP_INT32, CD_CONSTRUCT, nullptr, mesh->totloop, ".corner_vert");
-    CustomData_add_layer_named(
-        &mesh->ldata, CD_PROP_INT32, CD_CONSTRUCT, nullptr, mesh->totloop, ".corner_edge");
     MutableSpan<int> poly_offsets = mesh->poly_offsets_for_write();
     MutableSpan<int> corner_verts = mesh->corner_verts_for_write();
 
