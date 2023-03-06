@@ -48,7 +48,8 @@ Mesh *convert_ply_to_mesh(PlyData &data, Mesh *mesh, const PLYImportParams &para
       mesh->totloop += data.faces[i].size();
     }
     CustomData_add_layer(&mesh->pdata, CD_MPOLY, CD_SET_DEFAULT, nullptr, mesh->totpoly);
-    CustomData_add_layer(&mesh->ldata, CD_MLOOP, CD_SET_DEFAULT, nullptr, mesh->totloop);
+    CustomData_add_layer_named(
+        &mesh->ldata, CD_PROP_INT32, CD_CONSTRUCT, nullptr, mesh->totloop, ".corner_vert");
     MutableSpan<MPoly> polys = mesh->polys_for_write();
     MutableSpan<int> corner_verts = mesh->corner_verts_for_write();
 
