@@ -273,7 +273,7 @@ static int ss_sync_from_uv(CCGSubSurf *ss,
    * Also, initially intention is to treat merged vertices from mirror modifier as seams.
    * This fixes a very old regression (2.49 was correct here) */
   vmap = BKE_mesh_uv_vert_map_create(
-      polys, nullptr, nullptr, corner_verts, mloopuv, totface, totvert, limit, false, true);
+      polys, nullptr, nullptr, corner_verts, mloopuv, totvert, limit, false, true);
   if (!vmap) {
     return 0;
   }

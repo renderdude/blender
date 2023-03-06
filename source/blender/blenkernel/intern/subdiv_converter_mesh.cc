@@ -204,7 +204,6 @@ static void precalc_uv_layer(const OpenSubdiv_Converter *converter, const int la
   const Mesh *mesh = storage->mesh;
   const float(*mloopuv)[2] = static_cast<const float(*)[2]>(
       CustomData_get_layer_n(&mesh->ldata, CD_PROP_FLOAT2, layer_index));
-  const int num_poly = mesh->totpoly;
   const int num_vert = mesh->totvert;
   const float limit[2] = {STD_UV_CONNECT_LIMIT, STD_UV_CONNECT_LIMIT};
   /* Initialize memory required for the operations. */
@@ -218,7 +217,6 @@ static void precalc_uv_layer(const OpenSubdiv_Converter *converter, const int la
       (const bool *)CustomData_get_layer_named(&mesh->pdata, CD_PROP_BOOL, ".select_poly"),
       storage->corner_verts.data(),
       mloopuv,
-      num_poly,
       num_vert,
       limit,
       false,

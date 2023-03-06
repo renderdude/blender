@@ -97,10 +97,10 @@ void load_plydata(PlyData &plyData, Depsgraph *depsgraph, const PLYExportParams 
                      BKE_object_get_pre_modified_mesh(&export_object_eval_);
 
     bool force_triangulation = false;
-    for (const MPoly poly : mesh->polys()) {
-      if (poly.totloop > 255) {
+    const OffsetIndices polys = mesh->polys();
+    for (const int i : polys.index_range()) {
+      if (polys[i].size() > 255) {
         force_triangulation = true;
-        break;
       }
     }
 
@@ -122,8 +122,8 @@ void load_plydata(PlyData &plyData, Depsgraph *depsgraph, const PLYExportParams 
     /* Load faces into plyData. */
     int loop_offset = 0;
     const Span<int> corner_verts = mesh->corner_verts();
-    for (const MPoly &poly : mesh->polys()) {
-      const Span<int> mesh_poly_verts = corner_verts.slice(poly.loopstart, poly.totloop);
+    for (const int i : polys.index_range()) {
+      const Span<int> mesh_poly_verts = corner_verts.slice(polys[i]);
       Array<uint32_t> poly_verts(mesh_poly_verts.size());
 
       for (int i = 0; i < mesh_poly_verts.size(); ++i) {
@@ -228,7 +228,7 @@ Map<UV_vertex_key, int> generate_vertex_map(const Mesh *mesh,
 
   Map<UV_vertex_key, int> vertex_map;
 
-  const Span<MPoly> polys = mesh->polys();
+  const OffsetIndices polys = mesh->polys();
   const Span<int> corner_verts = mesh->corner_verts();
   const int totvert = mesh->totvert;
 
@@ -243,12 +243,11 @@ Map<UV_vertex_key, int> generate_vertex_map(const Mesh *mesh,
   }
 
   const float limit[2] = {STD_UV_CONNECT_LIMIT, STD_UV_CONNECT_LIMIT};
-  UvVertMap *uv_vert_map = BKE_mesh_uv_vert_map_create(polys.data(),
+  UvVertMap *uv_vert_map = BKE_mesh_uv_vert_map_create(polys,
                                                        nullptr,
                                                        nullptr,
                                                        corner_verts.data(),
                                                        reinterpret_cast<const float(*)[2]>(uv_map),
-                                                       uint(polys.size()),
                                                        totvert,
                                                        limit,
                                                        false,
@@ -264,7 +263,7 @@ Map<UV_vertex_key, int> generate_vertex_map(const Mesh *mesh,
 
     for (; uv_vert; uv_vert = uv_vert->next) {
       /* Store UV vertex coordinates. */
-      const int loopstart = polys[uv_vert->poly_index].loopstart;
+      const int loopstart = polys[uv_vert->poly_index].start();
       float2 vert_uv_coords(uv_map[loopstart + uv_vert->loop_of_poly_index]);
       UV_vertex_key key = UV_vertex_key(vert_uv_coords, vertex_index);
       vertex_map.add(key, int(vertex_map.size()));

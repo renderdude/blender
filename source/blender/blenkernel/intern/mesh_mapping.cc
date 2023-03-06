@@ -36,7 +36,6 @@ UvVertMap *BKE_mesh_uv_vert_map_create(const blender::OffsetIndices<int> polys,
                                        const bool *select_poly,
                                        const int *corner_verts,
                                        const float (*mloopuv)[2],
-                                       uint totpoly,
                                        uint totvert,
                                        const float limit[2],
                                        const bool selected,
@@ -74,7 +73,8 @@ UvVertMap *BKE_mesh_uv_vert_map_create(const blender::OffsetIndices<int> polys,
 
   bool *winding = nullptr;
   if (use_winding) {
-    winding = static_cast<bool *>(MEM_callocN(sizeof(*winding) * totpoly, "winding"));
+    winding = static_cast<bool *>(
+        MEM_calloc_arrayN(sizeof(*winding), size_t(polys.ranges_num()), "winding"));
   }
 
   for (const int64_t a : polys.index_range()) {

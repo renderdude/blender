@@ -47,9 +47,12 @@ Mesh *convert_ply_to_mesh(PlyData &data, Mesh *mesh, const PLYImportParams &para
       /* Add number of loops from the vertex indices in the face. */
       mesh->totloop += data.faces[i].size();
     }
-    CustomData_add_layer(&mesh->pdata, CD_MPOLY, CD_SET_DEFAULT, nullptr, mesh->totpoly);
-    CustomData_add_layer(&mesh->ldata, CD_MLOOP, CD_SET_DEFAULT, nullptr, mesh->totloop);
-    MutableSpan<MPoly> polys = mesh->polys_for_write();
+    BKE_mesh_poly_offsets_ensure(mesh);
+    CustomData_add_layer_named(
+        &mesh->ldata, CD_PROP_INT32, CD_CONSTRUCT, nullptr, mesh->totloop, ".corner_vert");
+    CustomData_add_layer_named(
+        &mesh->ldata, CD_PROP_INT32, CD_CONSTRUCT, nullptr, mesh->totloop, ".corner_edge");
+    MutableSpan<int> poly_offsets = mesh->poly_offsets_for_write();
     MutableSpan<int> corner_verts = mesh->corner_verts_for_write();
 
     int offset = 0;
@@ -57,8 +60,7 @@ Mesh *convert_ply_to_mesh(PlyData &data, Mesh *mesh, const PLYImportParams &para
     for (int i = 0; i < mesh->totpoly; i++) {
       int size = int(data.faces[i].size());
       /* Set the index from where this face starts and specify the amount of edges it has. */
-      polys[i].loopstart = offset;
-      polys[i].totloop = size;
+      poly_offsets[i] = offset;
 
       for (int j = 0; j < size; j++) {
         /* Set the vertex index of the loop to the one in PlyData. */

@@ -307,7 +307,6 @@ void OBJMesh::store_uv_coords_and_indices()
       nullptr,
       mesh_corner_verts_.data(),
       reinterpret_cast<const float(*)[2]>(uv_map.data()),
-      mesh_polys_.ranges_num(),
       totvert,
       limit,
       false,
