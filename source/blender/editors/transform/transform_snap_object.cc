@@ -1789,7 +1789,7 @@ static eSnapMode snap_mesh_polygon(SnapObjectContext *sctx,
 
     if (sctx->runtime.snap_to_flag & SCE_SNAP_MODE_EDGE) {
       elem = SCE_SNAP_MODE_EDGE;
-      BLI_assert(nearest2d.edge != nullptr);
+      BLI_assert(nearest2d.edges != nullptr);
       const int *poly_edges = &nearest2d.corner_edges[poly.loopstart];
       for (int i = poly.totloop; i--;) {
         cb_snap_edge(&nearest2d,
