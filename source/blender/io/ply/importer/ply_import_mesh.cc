@@ -50,7 +50,7 @@ Mesh *convert_ply_to_mesh(PlyData &data, Mesh *mesh, const PLYImportParams &para
     CustomData_add_layer(&mesh->pdata, CD_MPOLY, CD_SET_DEFAULT, nullptr, mesh->totpoly);
     CustomData_add_layer(&mesh->ldata, CD_MLOOP, CD_SET_DEFAULT, nullptr, mesh->totloop);
     MutableSpan<MPoly> polys = mesh->polys_for_write();
-    MutableSpan<MLoop> loops = mesh->loops_for_write();
+    MutableSpan<int> corner_verts = mesh->corner_verts_for_write();
 
     int offset = 0;
     /* Iterate over amount of faces. */
@@ -62,7 +62,7 @@ Mesh *convert_ply_to_mesh(PlyData &data, Mesh *mesh, const PLYImportParams &para
 
       for (int j = 0; j < size; j++) {
         /* Set the vertex index of the loop to the one in PlyData. */
-        loops[offset + j].v = data.faces[i][j];
+        corner_verts[offset + j] = data.faces[i][j];
       }
       offset += size;
     }
