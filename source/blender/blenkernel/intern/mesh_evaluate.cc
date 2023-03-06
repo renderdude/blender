@@ -49,7 +49,7 @@ static void mesh_calc_ngon_center(const MPoly *poly,
   zero_v3(cent);
 
   for (int i = 0; i < poly->totloop; i++) {
-    madd_v3_v3fl(cent, positions[*(poly_verts++)], w);
+    madd_v3_v3fl(cent, positions[poly_verts[i]], w);
   }
 }
 
@@ -602,11 +602,8 @@ void BKE_mesh_polys_flip(
     const MPoly *polys, int *corner_verts, int *corner_edges, CustomData *ldata, int totpoly)
 {
   MDisps *mdisp = (MDisps *)CustomData_get_layer_for_write(ldata, CD_MDISPS, totpoly);
-  const MPoly *mp;
-  int i;
-
-  for (mp = polys, i = 0; i < totpoly; mp++, i++) {
-    BKE_mesh_polygon_flip_ex(mp, corner_verts, corner_edges, ldata, nullptr, mdisp, true);
+  for (const int i : blender::IndexRange(totpoly)) {
+    BKE_mesh_polygon_flip_ex(&polys[i], corner_verts, corner_edges, ldata, nullptr, mdisp, true);
   }
 }
 

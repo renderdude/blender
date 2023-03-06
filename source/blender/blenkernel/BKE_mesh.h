@@ -689,10 +689,10 @@ void BKE_mesh_calc_poly_angles(const struct MPoly *poly,
                                float angles[]);
 
 void BKE_mesh_poly_edgehash_insert(struct EdgeHash *ehash,
-                                   const struct MPoly *mp,
+                                   const struct MPoly *poly,
                                    const int *corner_verts);
 void BKE_mesh_poly_edgebitmap_insert(unsigned int *edge_bitmap,
-                                     const struct MPoly *mp,
+                                     const struct MPoly *poly,
                                      const int *poly_edges);
 
 bool BKE_mesh_center_median(const struct Mesh *me, float r_cent[3]);

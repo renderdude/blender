@@ -858,12 +858,11 @@ static void geometry_init_loose_information(MultiresReshapeSmoothContext *reshap
   int num_used_edges = 0;
   for (const int poly_index : base_polys.index_range()) {
     const MPoly &base_poly = base_polys[poly_index];
-    for (int corner = 0; corner < base_poly.totloop; corner++) {
-      const int edge_i = base_corner_edges[base_poly.loopstart + corner];
-      if (!BLI_BITMAP_TEST_BOOL(reshape_smooth_context->non_loose_base_edge_map, edge_i)) {
-        BLI_BITMAP_ENABLE(reshape_smooth_context->non_loose_base_edge_map, edge_i);
+    for (const int edge : base_corner_edges.slice(base_poly.loopstart, base_poly.totloop)) {
+      if (!BLI_BITMAP_TEST_BOOL(reshape_smooth_context->non_loose_base_edge_map, edge)) {
+        BLI_BITMAP_ENABLE(reshape_smooth_context->non_loose_base_edge_map, edge);
 
-        const float crease = get_effective_crease(reshape_smooth_context, edge_i);
+        const float crease = get_effective_crease(reshape_smooth_context, edge);
         if (crease > 0.0f) {
           ++num_used_edges;
         }
