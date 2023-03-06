@@ -213,7 +213,7 @@ void BKE_mesh_calc_edges_legacy(Mesh *me)
       verts.data(),
       (MFace *)CustomData_get_layer(&me->fdata, CD_MFACE),
       static_cast<MLoop *>(CustomData_get_layer_for_write(&me->ldata, CD_MLOOP, me->totloop)),
-      me->mpoly,
+      static_cast<const MPoly *>(CustomData_get_layer(&me->pdata, CD_MPOLY)),
       verts.size(),
       me->totface,
       me->totloop,
