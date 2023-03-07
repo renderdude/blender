@@ -297,7 +297,7 @@ Mesh *BKE_mesh_mirror_apply_mirror_on_axis_for_modifier(MirrorModifierData *mmd,
     result_edges[i].v2 += src_verts_num;
   }
 
-  result_poly_offsets.take_front(src_polys_num).copy_from(mesh->poly_offsets());
+  result_poly_offsets.take_front(src_polys_num).copy_from(mesh->poly_offsets().drop_back(1));
   for (const int i : src_polys.index_range()) {
     result_poly_offsets[src_polys_num + i] = src_polys[i].start() + src_loops_num;
   }
