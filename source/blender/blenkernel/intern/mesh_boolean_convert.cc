@@ -164,6 +164,7 @@ const IndexRange MeshesToIMeshInfo::input_mpoly_for_orig_index(int orig_index,
   const OffsetIndices polys = me->polys();
   int index_in_mesh = orig_index - mesh_poly_offset[orig_mesh_index];
   BLI_assert(0 <= index_in_mesh && index_in_mesh < me->totpoly);
+  const IndexRange poly = polys[index_in_mesh];
   if (r_orig_mesh) {
     *r_orig_mesh = me;
   }
@@ -173,7 +174,7 @@ const IndexRange MeshesToIMeshInfo::input_mpoly_for_orig_index(int orig_index,
   if (r_index_in_orig_mesh) {
     *r_index_in_orig_mesh = index_in_mesh;
   }
-  return polys[index_in_mesh];
+  return poly;
 }
 
 /* Given an index of an original vertex in the `IMesh`, find out the input
