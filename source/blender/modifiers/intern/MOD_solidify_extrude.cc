@@ -241,15 +241,14 @@ Mesh *MOD_solidify_extrude_modifyMesh(ModifierData *md, const ModifierEvalContex
       edge_users[eidx] = INVALID_UNUSED;
     }
 
-    for (const int i : orig_polys.index_range()) {
-      const blender::IndexRange orig_poly = orig_polys[i];
-
+    for (const int64_t i : orig_polys.index_range()) {
+      const blender::IndexRange poly = orig_polys[i];
       int j;
 
-      int corner_i_prev = orig_poly.start() + (orig_poly.size() - 1);
+      int corner_i_prev = poly.last();
 
-      for (j = 0; j < orig_poly.size(); j++) {
-        const int corner_i = orig_poly.start() + j;
+      for (j = 0; j < poly.size(); j++) {
+        const int corner_i = poly[j];
         const int vert_i = orig_corner_verts[corner_i];
         const int prev_vert_i = orig_corner_verts[corner_i_prev];
         /* add edge user */
@@ -349,6 +348,10 @@ Mesh *MOD_solidify_extrude_modifyMesh(ModifierData *md, const ModifierEvalContex
 
     CustomData_copy_data(&mesh->pdata, &result->pdata, 0, 0, int(polys_num));
     CustomData_copy_data(&mesh->pdata, &result->pdata, 0, int(polys_num), int(polys_num));
+    poly_offsets.take_front(polys_num).copy_from(mesh->poly_offsets().drop_back(1));
+    for (const int i : orig_polys.index_range()) {
+      poly_offsets[polys_num + i] = orig_polys[i].start() + mesh->totloop;
+    }
   }
   else {
     int i, j;
@@ -378,6 +381,7 @@ Mesh *MOD_solidify_extrude_modifyMesh(ModifierData *md, const ModifierEvalContex
     /* will be created later */
     CustomData_copy_data(&mesh->ldata, &result->ldata, 0, 0, int(loops_num));
     CustomData_copy_data(&mesh->pdata, &result->pdata, 0, 0, int(polys_num));
+    poly_offsets.take_front(polys_num).copy_from(mesh->poly_offsets().drop_back(1));
   }
 
   float *result_edge_bweight = nullptr;
@@ -411,37 +415,32 @@ Mesh *MOD_solidify_extrude_modifyMesh(ModifierData *md, const ModifierEvalContex
   /* flip normals */
 
   if (do_shell) {
-    uint i;
-
-    /* TODO: FACE-GENERIC: This isn't quite right and probably needs more attention. */
-    int poly_index = polys_num;
-    for (i = 0; i < mesh->totpoly; i++, poly_index++) {
-      const int loop_start = poly_offsets[poly_index];
-      const int poly_size = poly_offsets[poly_index + 1] - loop_start;
-      const int loop_end = loop_start - 1;
+    for (const int64_t i : blender::IndexRange(mesh->totpoly)) {
+      const blender::IndexRange poly = orig_polys[i];
+      const int loop_end = poly.size() - 1;
       int e;
       int j;
 
       /* reverses the loop direction (corner verts as well as custom-data)
        * Corner edges also need to be corrected too, done in a separate loop below. */
-      const int corner_2 = loop_start + mesh->totloop;
+      const int corner_2 = poly.start() + mesh->totloop;
 #if 0
-      for (j = 0; j < poly_size; j++) {
+      for (j = 0; j < poly.size(); j++) {
         CustomData_copy_data(&mesh->ldata,
                              &result->ldata,
-                             loop_start + j,
-                             loop_start + (loop_end - j) + mesh->totloop,
+                             poly.start() + j,
+                             poly.start() + (loop_end - j) + mesh->totloop,
                              1);
       }
 #else
       /* slightly more involved, keep the first vertex the same for the copy,
        * ensures the diagonals in the new face match the original. */
       j = 0;
-      for (int j_prev = loop_end; j < poly_size; j_prev = j++) {
+      for (int j_prev = loop_end; j < poly.size(); j_prev = j++) {
         CustomData_copy_data(&mesh->ldata,
                              &result->ldata,
-                             loop_start + j,
-                             loop_start + (loop_end - j_prev) + mesh->totloop,
+                             poly.start() + j,
+                             poly.start() + (loop_end - j_prev) + mesh->totloop,
                              1);
       }
 #endif
@@ -457,9 +456,7 @@ Mesh *MOD_solidify_extrude_modifyMesh(ModifierData *md, const ModifierEvalContex
       }
       corner_edges[corner_2 + loop_end] = e;
 
-      poly_offsets[i] += mesh->totloop;
-
-      for (j = 0; j < poly_size; j++) {
+      for (j = 0; j < poly.size(); j++) {
         corner_verts[corner_2 + j] += verts_num;
         corner_edges[corner_2 + j] += edges_num;
       }
@@ -515,9 +512,10 @@ Mesh *MOD_solidify_extrude_modifyMesh(ModifierData *md, const ModifierEvalContex
         edge_user_pairs[eidx][0] = INVALID_UNUSED;
         edge_user_pairs[eidx][1] = INVALID_UNUSED;
       }
-      for (const int i : orig_polys.index_range()) {
-        int prev_corner_i = orig_polys[i].last();
-        for (const int corner_i : orig_polys[i]) {
+      for (const int64_t i : orig_polys.index_range()) {
+        const blender::IndexRange poly = orig_polys[i];
+        int prev_corner_i = poly.last();
+        for (const int corner_i : poly) {
           const int vert_i = orig_corner_verts[corner_i];
           const int prev_vert_i = orig_corner_verts[prev_corner_i];
           /* add edge user */
@@ -714,7 +712,7 @@ Mesh *MOD_solidify_extrude_modifyMesh(ModifierData *md, const ModifierEvalContex
       }
     }
 
-    for (i = 0; i < polys_num; i++) {
+    for (const int64_t i : blender::IndexRange(polys_num)) {
       const blender::IndexRange poly = orig_polys[i];
       /* #BKE_mesh_calc_poly_angles logic is inlined here */
       float nor_prev[3];
@@ -815,7 +813,7 @@ Mesh *MOD_solidify_extrude_modifyMesh(ModifierData *md, const ModifierEvalContex
         edge_user_pairs[eidx][0] = INVALID_UNUSED;
         edge_user_pairs[eidx][1] = INVALID_UNUSED;
       }
-      for (i = 0; i < polys_num; i++) {
+      for (const int i : orig_polys.index_range()) {
         const blender::IndexRange poly = orig_polys[i];
         int prev_corner_i = poly.start() + poly.size() - 1;
         for (int j = 0; j < poly.size(); j++) {
@@ -1068,11 +1066,11 @@ Mesh *MOD_solidify_extrude_modifyMesh(ModifierData *md, const ModifierEvalContex
     }
 
     /* faces */
-    int new_poly_index = polys_num * stride;
-    int *new_corner_verts = &corner_verts[loops_num * stride];
-    int *new_corner_edges = &corner_edges[loops_num * stride];
+    int new_poly_index = int(polys_num * stride);
+    blender::MutableSpan<int> new_corner_verts = corner_verts.drop_front(loops_num * stride);
+    blender::MutableSpan<int> new_corner_edges = corner_edges.drop_front(loops_num * stride);
     j = 0;
-    for (i = 0; i < newPolys; i++, new_poly_index++) {
+    for (i = 0; i < newPolys; i++) {
       uint eidx = new_edge_arr[i];
       uint pidx = edge_users[eidx];
       int k1, k2;
@@ -1092,10 +1090,7 @@ Mesh *MOD_solidify_extrude_modifyMesh(ModifierData *md, const ModifierEvalContex
       CustomData_copy_data(
           &mesh->pdata, &result->pdata, int(pidx), int((polys_num * stride) + i), 1);
 
-      /* notice we use 'old_poly_size' which is later overwritten,
-       * we could lookup the original face but there's no point since this is a copy
-       * and will have the same value, just take care when changing order of assignment */
-      const int old_poly_size = poly_offsets[new_poly_index + 1] - poly_offsets[new_poly_index];
+      const int old_poly_size = orig_polys[i].size();
       poly_offsets[new_poly_index] = int(j + (loops_num * stride));
 
       /* prev loop */
