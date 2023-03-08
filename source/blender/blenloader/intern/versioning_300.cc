@@ -76,6 +76,7 @@
 #include "readfile.h"
 
 #include "SEQ_channels.h"
+#include "SEQ_effects.h"
 #include "SEQ_iterator.h"
 #include "SEQ_retiming.h"
 #include "SEQ_sequencer.h"
@@ -384,7 +385,7 @@ static void assert_sorted_ids(Main *bmain)
 static void move_vertex_group_names_to_object_data(Main *bmain)
 {
   LISTBASE_FOREACH (Object *, object, &bmain->objects) {
-    if (ELEM(object->type, OB_MESH, OB_LATTICE, OB_GPENCIL)) {
+    if (ELEM(object->type, OB_MESH, OB_LATTICE, OB_GPENCIL_LEGACY)) {
       ListBase *new_defbase = BKE_object_defgroup_list_mutable(object);
 
       /* Choose the longest vertex group name list among all linked duplicates. */
@@ -1043,7 +1044,7 @@ void do_versions_after_linking_300(FileData * /*fd*/, Main *bmain)
   if (!MAIN_VERSION_ATLEAST(bmain, 300, 33)) {
     /* This was missing from #move_vertex_group_names_to_object_data. */
     LISTBASE_FOREACH (Object *, object, &bmain->objects) {
-      if (ELEM(object->type, OB_MESH, OB_LATTICE, OB_GPENCIL)) {
+      if (ELEM(object->type, OB_MESH, OB_LATTICE, OB_GPENCIL_LEGACY)) {
         /* This uses the fact that the active vertex group index starts counting at 1. */
         if (BKE_object_defgroup_active_index_get(object) == 0) {
           BKE_object_defgroup_active_index_set(object, object->actdef);
@@ -1634,6 +1635,16 @@ static bool version_merge_still_offsets(Sequence *seq, void * /*user_data*/)
 static bool version_fix_delete_flag(Sequence *seq, void * /*user_data*/)
 {
   seq->flag &= ~SEQ_FLAG_DELETE;
+  return true;
+}
+
+static bool version_set_seq_single_frame_content(Sequence *seq, void * /*user_data*/)
+{
+  if ((seq->len == 1) &&
+      (seq->type == SEQ_TYPE_IMAGE ||
+       ((seq->type & SEQ_TYPE_EFFECT) && SEQ_effect_get_num_inputs(seq->type) == 0))) {
+    seq->flag |= SEQ_SINGLE_FRAME_CONTENT;
+  }
   return true;
 }
 
@@ -2336,7 +2347,7 @@ void blo_do_versions_300(FileData *fd, Library * /*lib*/, Main *bmain)
             }
           }
         }
-        if (ob->type == OB_GPENCIL) {
+        if (ob->type == OB_GPENCIL_LEGACY) {
           LISTBASE_FOREACH (GpencilModifierData *, md, &ob->greasepencil_modifiers) {
             if (md->type == eGpencilModifierType_Lineart) {
               LineartGpencilModifierData *lmd = (LineartGpencilModifierData *)md;
@@ -2531,7 +2542,7 @@ void blo_do_versions_300(FileData *fd, Library * /*lib*/, Main *bmain)
     if (!DNA_struct_elem_find(
             fd->filesdna, "LineartGpencilModifierData", "bool", "use_crease_on_smooth")) {
       LISTBASE_FOREACH (Object *, ob, &bmain->objects) {
-        if (ob->type == OB_GPENCIL) {
+        if (ob->type == OB_GPENCIL_LEGACY) {
           LISTBASE_FOREACH (GpencilModifierData *, md, &ob->greasepencil_modifiers) {
             if (md->type == eGpencilModifierType_Lineart) {
               LineartGpencilModifierData *lmd = (LineartGpencilModifierData *)md;
@@ -4027,6 +4038,14 @@ void blo_do_versions_300(FileData *fd, Library * /*lib*/, Main *bmain)
       }
     }
 
+    /* Use `SEQ_SINGLE_FRAME_CONTENT` flag instead of weird function to check if strip has multiple
+     * frames. */
+    LISTBASE_FOREACH (Scene *, scene, &bmain->scenes) {
+      Editing *ed = SEQ_editing_get(scene);
+      if (ed != nullptr) {
+        SEQ_for_each_callback(&ed->seqbase, version_set_seq_single_frame_content, nullptr);
+      }
+    }
     /* Keep this block, even when empty. */
   }
 }
