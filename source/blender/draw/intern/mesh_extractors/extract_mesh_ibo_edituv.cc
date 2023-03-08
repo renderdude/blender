@@ -223,12 +223,11 @@ static void extract_edituv_lines_iter_poly_mesh(const MeshRenderData *mr,
   }
 
   for (int ml_index = poly->loopstart; ml_index < ml_index_end; ml_index += 1) {
-    const int edge_i = mr->corner_edges[ml_index];
+    const int edge = mr->corner_edges[ml_index];
 
     const int ml_index_last = poly->totloop + poly->loopstart - 1;
     const int ml_index_next = (ml_index == ml_index_last) ? poly->loopstart : (ml_index + 1);
-    const bool real_edge = (mr->e_origindex == nullptr ||
-                            mr->e_origindex[edge_i] != ORIGINDEX_NONE);
+    const bool real_edge = (mr->e_origindex == nullptr || mr->e_origindex[edge] != ORIGINDEX_NONE);
     edituv_edge_add(data, mp_hidden || !real_edge, mp_select, ml_index, ml_index_next);
   }
 }
@@ -401,9 +400,9 @@ static void extract_edituv_points_iter_poly_mesh(const MeshRenderData *mr,
 
   const int ml_index_end = poly->loopstart + poly->totloop;
   for (int ml_index = poly->loopstart; ml_index < ml_index_end; ml_index += 1) {
-    const int vert_i = mr->corner_verts[ml_index];
+    const int vert = mr->corner_verts[ml_index];
 
-    const bool real_vert = !mr->v_origindex || mr->v_origindex[vert_i] != ORIGINDEX_NONE;
+    const bool real_vert = !mr->v_origindex || mr->v_origindex[vert] != ORIGINDEX_NONE;
     edituv_point_add(data, mp_hidden || !real_vert, mp_select, ml_index);
   }
 }

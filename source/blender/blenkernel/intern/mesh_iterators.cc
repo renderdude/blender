@@ -151,7 +151,7 @@ void BKE_mesh_foreach_mapped_loop(Mesh *mesh,
                                   void *userData,
                                   MeshForeachFlag flag)
 {
-  using namespace blender;
+
   /* We can't use `dm->getLoopDataLayout(dm)` here,
    * we want to always access `dm->loopData`, `EditDerivedBMesh` would
    * return loop data from BMesh itself. */
@@ -193,7 +193,7 @@ void BKE_mesh_foreach_mapped_loop(Mesh *mesh,
 
     const float(*positions)[3] = BKE_mesh_vert_positions(mesh);
     const blender::Span<MPoly> polys = mesh->polys();
-    const Span<int> corner_verts = mesh->corner_verts();
+    const blender::Span<int> corner_verts = mesh->corner_verts();
     const int *v_index = static_cast<const int *>(
         CustomData_get_layer(&mesh->vdata, CD_ORIGINDEX));
     const int *f_index = static_cast<const int *>(
@@ -231,7 +231,6 @@ void BKE_mesh_foreach_mapped_face_center(
     void *userData,
     MeshForeachFlag flag)
 {
-  using namespace blender;
   if (mesh->edit_mesh != nullptr && mesh->runtime->edit_data != nullptr) {
     BMEditMesh *em = mesh->edit_mesh;
     BMesh *bm = em->bm;

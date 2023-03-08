@@ -102,12 +102,10 @@ static void add_polygon_edges_to_hash_maps(Mesh *mesh,
   threading::parallel_for_each(edge_maps, [&](EdgeMap &edge_map) {
     const int task_index = &edge_map - edge_maps.data();
     for (const MPoly &poly : polys) {
-      const IndexRange corners(poly.loopstart, poly.totloop);
-      int corner_prev = corners.last();
-      for (const int next_corner : corners) {
+      const Span<int> poly_verts = corner_verts.slice(poly.loopstart, poly.totloop);
+      int vert_prev = poly_verts.last();
+      for (const int vert : poly_verts) {
         /* Can only be the same when the mesh data is invalid. */
-        const int vert = corner_verts[next_corner];
-        const int vert_prev = corner_verts[corner_prev];
         if (vert_prev != vert) {
           OrderedEdge ordered_edge{vert_prev, vert};
           /* Only add the edge when it belongs into this map. */
@@ -115,7 +113,7 @@ static void add_polygon_edges_to_hash_maps(Mesh *mesh,
             edge_map.lookup_or_add(ordered_edge, {nullptr});
           }
         }
-        corner_prev = next_corner;
+        vert_prev = vert;
       }
     }
   });
