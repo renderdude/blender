@@ -471,8 +471,9 @@ static void get_topology(struct Mesh *mesh,
     const IndexRange poly = polys[i];
     loop_counts.push_back(poly.size());
 
-    for (const int vert : corner_verts.slice(poly)) {
-      poly_verts.push_back(vert);
+    int corner = poly.start() + (poly.size() - 1);
+    for (int j = 0; j < poly.size(); j++, corner--) {
+      poly_verts.push_back(corner_verts[corner]);
     }
   }
 }

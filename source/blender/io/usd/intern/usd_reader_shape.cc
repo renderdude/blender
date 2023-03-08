@@ -148,6 +148,7 @@ Mesh *USDShapeReader::read_mesh(struct Mesh *existing_mesh,
   }
   offset_indices::accumulate_counts_to_offsets(poly_offsets);
 
+  /* Don't smooth-shade cubes; we're not worrying about sharpness for Gprims. */
   BKE_mesh_smooth_flag_set(active_mesh, !prim_.IsA<pxr::UsdGeomCube>());
 
   MutableSpan<int> corner_verts = active_mesh->corner_verts_for_write();

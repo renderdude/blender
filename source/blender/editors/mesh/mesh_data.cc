@@ -1494,8 +1494,8 @@ void ED_mesh_split_faces(Mesh *mesh)
   threading::parallel_for(polys.index_range(), 1024, [&](const IndexRange range) {
     for (const int poly_i : range) {
       if (sharp_faces && sharp_faces[poly_i]) {
-        for (const int edge_i : corner_edges.slice(polys[poly_i])) {
-          sharp_edges[edge_i] = true;
+        for (const int edge : corner_edges.slice(polys[poly_i])) {
+          sharp_edges[edge] = true;
         }
       }
     }

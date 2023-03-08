@@ -142,6 +142,7 @@ static void transfer_attributes(
   attribute_ids.remove("position");
   attribute_ids.remove(".corner_vert");
   attribute_ids.remove(".corner_edge");
+  attribute_ids.remove("sharp_face");
   attribute_ids.remove_if([&](const AttributeIDRef &id) {
     return id.is_anonymous() && !propagation_info.propagate(id.anonymous_id());
   });

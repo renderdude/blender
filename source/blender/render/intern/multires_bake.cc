@@ -64,8 +64,8 @@ struct MResolvePixelData {
   const float (*vert_normals)[3];
   blender::OffsetIndices<int> polys;
   const int *material_indices;
-  const bool *sharp_faces;
   blender::Span<int> corner_verts;
+  const bool *sharp_faces;
   float (*mloopuv)[2];
   float uv_offset[2];
   const MLoopTri *mlooptri;

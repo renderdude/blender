@@ -346,6 +346,7 @@ struct PBVHBatches {
 
         if (sharp_faces && sharp_faces[tri->poly]) {
           smooth = true;
+          const MPoly &poly = args->polys[tri->poly];
           BKE_mesh_calc_poly_normal(
               args->corner_verts.slice(args->polys[tri->poly]), args->vert_positions, fno);
           normal_float_to_short_v3(no, fno);

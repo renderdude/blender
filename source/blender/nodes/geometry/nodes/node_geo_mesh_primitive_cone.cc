@@ -681,14 +681,13 @@ Mesh *create_cylinder_or_cone_mesh(const float radius_top,
   MutableSpan<float3> positions = mesh->vert_positions_for_write();
   MutableSpan<MEdge> edges = mesh->edges_for_write();
   MutableSpan<int> poly_offsets = mesh->poly_offsets_for_write();
+  MutableSpan<int> corner_verts = mesh->corner_verts_for_write();
+  MutableSpan<int> corner_edges = mesh->corner_edges_for_write();
   BKE_mesh_smooth_flag_set(mesh, false);
 
   calculate_cone_verts(config, positions);
   calculate_cone_edges(config, edges);
-  calculate_cone_faces(config,
-                       mesh->corner_verts_for_write(),
-                       mesh->corner_edges_for_write(),
-                       poly_offsets.drop_back(1));
+  calculate_cone_faces(config, corner_verts, corner_edges, poly_offsets.drop_back(1));
   offset_indices::accumulate_counts_to_offsets(poly_offsets);
   if (attribute_outputs.uv_map_id) {
     calculate_cone_uvs(config, mesh, attribute_outputs.uv_map_id.get());

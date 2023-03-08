@@ -941,6 +941,11 @@ static void version_geometry_nodes_primitive_uv_maps(bNodeTree &ntree)
   }
 }
 
+/**
+ * When extruding from loose edges, the extrude geometry node used to create flat faces due to the
+ * default of the old "shade_smooth" attribute. Since the "false" value has changed with the
+ * "sharp_face" attribute, add nodes to propagate the new attribute in its inverted "smooth" form.
+ */
 static void version_geometry_nodes_extrude_smooth_propagation(bNodeTree &ntree)
 {
   using namespace blender;
