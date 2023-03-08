@@ -77,6 +77,7 @@ typedef struct ShrinkwrapTreeData {
   const float (*vert_normals)[3];
   const int *corner_edges;
   const float (*poly_normals)[3];
+  const bool *sharp_faces;
   const float (*clnors)[3];
   ShrinkwrapBoundaryData *boundary;
 } ShrinkwrapTreeData;

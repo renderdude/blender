@@ -897,16 +897,6 @@ static void tag_component_positions_changed(void *owner)
   }
 }
 
-static bool get_shade_smooth(const MPoly &poly)
-{
-  return poly.flag & ME_SMOOTH;
-}
-
-static void set_shade_smooth(MPoly &poly, bool value)
-{
-  SET_FLAG_FROM_TEST(poly.flag, value, ME_SMOOTH);
-}
-
 static float get_crease(const float &crease)
 {
   return crease;
@@ -1230,17 +1220,16 @@ static ComponentAttributeProviders create_attribute_providers_for_mesh()
                                                     nullptr,
                                                     AttributeValidator{&int_index_clamp});
 
-  static BuiltinCustomDataLayerProvider shade_smooth(
-      "shade_smooth",
-      ATTR_DOMAIN_FACE,
-      CD_PROP_BOOL,
-      CD_MPOLY,
-      BuiltinAttributeProvider::NonCreatable,
-      BuiltinAttributeProvider::NonDeletable,
-      face_access,
-      make_derived_read_attribute<MPoly, bool, get_shade_smooth>,
-      make_derived_write_attribute<MPoly, bool, get_shade_smooth, set_shade_smooth>,
-      nullptr);
+  static BuiltinCustomDataLayerProvider sharp_face("sharp_face",
+                                                   ATTR_DOMAIN_FACE,
+                                                   CD_PROP_BOOL,
+                                                   CD_PROP_BOOL,
+                                                   BuiltinAttributeProvider::Creatable,
+                                                   BuiltinAttributeProvider::Deletable,
+                                                   face_access,
+                                                   make_array_read_attribute<bool>,
+                                                   make_array_write_attribute<bool>,
+                                                   nullptr);
 
   static BuiltinCustomDataLayerProvider sharp_edge("sharp_edge",
                                                    ATTR_DOMAIN_EDGE,
@@ -1276,7 +1265,7 @@ static ComponentAttributeProviders create_attribute_providers_for_mesh()
                                       &corner_edge,
                                       &id,
                                       &material_index,
-                                      &shade_smooth,
+                                      &sharp_face,
                                       &sharp_edge,
                                       &crease},
                                      {&corner_custom_data,

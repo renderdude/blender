@@ -1480,7 +1480,6 @@ Mesh *BKE_mball_polygonize(Depsgraph *depsgraph, Scene *scene, Object *ob)
     const int count = indices[2] != indices[3] ? 4 : 3;
     polys[i].loopstart = loop_offset;
     polys[i].totloop = count;
-    polys[i].flag = ME_SMOOTH;
 
     corner_verts[loop_offset] = indices[0];
     corner_verts[loop_offset + 1] = indices[1];

@@ -403,6 +403,7 @@ Mesh *create_cuboid_mesh(const float3 &size,
   MutableSpan<float3> positions = mesh->vert_positions_for_write();
   MutableSpan<MPoly> polys = mesh->polys_for_write();
   MutableSpan<int> corner_verts = mesh->corner_verts_for_write();
+  BKE_mesh_smooth_flag_set(mesh, false);
 
   calculate_positions(config, positions);
 

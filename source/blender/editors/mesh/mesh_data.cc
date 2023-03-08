@@ -799,12 +799,15 @@ static int mesh_customdata_custom_splitnormals_add_exec(bContext *C, wmOperator 
       bke::MutableAttributeAccessor attributes = me->attributes_for_write();
       bke::SpanAttributeWriter<bool> sharp_edges = attributes.lookup_or_add_for_write_span<bool>(
           "sharp_edge", ATTR_DOMAIN_EDGE);
+      const bool *sharp_faces = static_cast<const bool *>(
+          CustomData_get_layer_named(&me->pdata, CD_PROP_BOOL, "sharp_face"));
       BKE_edges_sharp_from_angle_set(me->totedge,
                                      me->corner_verts().data(),
                                      me->corner_edges().data(),
                                      me->totloop,
                                      polys.data(),
                                      BKE_mesh_poly_normals_ensure(me),
+                                     sharp_faces,
                                      polys.size(),
                                      me->smoothresh,
                                      sharp_edges.span.data());
@@ -1474,6 +1477,8 @@ void ED_mesh_split_faces(Mesh *mesh)
   const bke::AttributeAccessor attributes = mesh->attributes();
   const VArray<bool> mesh_sharp_edges = attributes.lookup_or_default<bool>(
       "sharp_edge", ATTR_DOMAIN_EDGE, false);
+  const bool *sharp_faces = static_cast<const bool *>(
+      CustomData_get_layer_named(&mesh->pdata, CD_PROP_BOOL, "sharp_face"));
 
   Array<bool> sharp_edges(mesh->totedge);
   mesh_sharp_edges.materialize(sharp_edges);
@@ -1484,6 +1489,7 @@ void ED_mesh_split_faces(Mesh *mesh)
                                  corner_verts.size(),
                                  polys.data(),
                                  BKE_mesh_poly_normals_ensure(mesh),
+                                 sharp_faces,
                                  polys.size(),
                                  split_angle,
                                  sharp_edges.data());
@@ -1491,9 +1497,9 @@ void ED_mesh_split_faces(Mesh *mesh)
   threading::parallel_for(polys.index_range(), 1024, [&](const IndexRange range) {
     for (const int poly_i : range) {
       const MPoly &poly = polys[poly_i];
-      if (!(poly.flag & ME_SMOOTH)) {
-        for (const int edge_i : corner_edges.slice(poly.loopstart, poly.totloop)) {
-          sharp_edges[edge_i] = true;
+      if (sharp_faces && sharp_faces[poly_i]) {
+        for (const int edge : corner_edges.slice(poly.loopstart, poly.totloop)) {
+          sharp_edges[edge] = true;
         }
       }
     }

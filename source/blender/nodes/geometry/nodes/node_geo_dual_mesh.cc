@@ -142,6 +142,7 @@ static void transfer_attributes(
   attribute_ids.remove("position");
   attribute_ids.remove(".corner_vert");
   attribute_ids.remove(".corner_edge");
+  attribute_ids.remove("sharp_face");
   attribute_ids.remove_if([&](const AttributeIDRef &id) {
     return id.is_anonymous() && !propagation_info.propagate(id.anonymous_id());
   });
@@ -900,6 +901,7 @@ static Mesh *calc_dual_mesh(const Mesh &src_mesh,
   }
   Mesh *mesh_out = BKE_mesh_new_nomain(
       vert_positions.size(), new_edges.size(), loops.size(), loop_lengths.size());
+  BKE_mesh_smooth_flag_set(mesh_out, false);
 
   transfer_attributes(vertex_types,
                       keep_boundaries,

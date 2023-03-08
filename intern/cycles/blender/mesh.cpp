@@ -910,6 +910,23 @@ static std::optional<BL::IntAttribute> find_material_index_attribute(BL::Mesh b_
   return std::nullopt;
 }
 
+static std::optional<BL::BoolAttribute> find_sharp_face_attribute(BL::Mesh b_mesh)
+{
+  for (BL::Attribute &b_attribute : b_mesh.attributes) {
+    if (b_attribute.domain() != BL::Attribute::domain_FACE) {
+      continue;
+    }
+    if (b_attribute.data_type() != BL::Attribute::data_type_BOOLEAN) {
+      continue;
+    }
+    if (b_attribute.name() != "sharp_face") {
+      continue;
+    }
+    return BL::BoolAttribute{b_attribute};
+  }
+  return std::nullopt;
+}
+
 static void create_mesh(Scene *scene,
                         Mesh *mesh,
                         BL::Mesh &b_mesh,
@@ -1000,16 +1017,22 @@ static void create_mesh(Scene *scene,
     return 0;
   };
 
+  std::optional<BL::BoolAttribute> sharp_faces = find_sharp_face_attribute(b_mesh);
+  auto get_face_sharp = [&](const int poly_index) -> bool {
+    if (sharp_faces) {
+      return sharp_faces->data[poly_index].value();
+    }
+    return false;
+  };
+
   /* create faces */
-  const MPoly *polys = static_cast<const MPoly *>(b_mesh.polygons[0].ptr.data);
   if (!subdivision) {
     for (BL::MeshLoopTriangle &t : b_mesh.loop_triangles) {
       const int poly_index = t.polygon_index();
-      const MPoly &b_poly = polys[poly_index];
       int3 vi = get_int3(t.vertices());
 
       int shader = get_material_index(poly_index);
-      bool smooth = (b_poly.flag & ME_SMOOTH) || use_loop_normals;
+      bool smooth = !get_face_sharp(poly_index) || use_loop_normals;
 
       if (use_loop_normals) {
         BL::Array<float, 9> loop_normals = t.split_normals();
@@ -1029,13 +1052,14 @@ static void create_mesh(Scene *scene,
   else {
     vector<int> vi;
 
+    const MPoly *polys = static_cast<const MPoly *>(b_mesh.polygons[0].ptr.data);
     std::optional<BL::IntAttribute> corner_verts = find_corner_vert_attribute(b_mesh);
 
     for (int i = 0; i < numfaces; i++) {
       const MPoly &b_poly = polys[i];
       int n = b_poly.totloop;
       int shader = get_material_index(i);
-      bool smooth = (b_poly.flag & ME_SMOOTH) || use_loop_normals;
+      bool smooth = !get_face_sharp(i) || use_loop_normals;
 
       vi.resize(n);
       for (int i = 0; i < n; i++) {
