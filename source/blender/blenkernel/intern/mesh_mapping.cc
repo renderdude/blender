@@ -1102,11 +1102,11 @@ static bool mesh_calc_islands_loop_poly_uv(const int totedge,
       memset(edge_border_count, 0, sizeof(*edge_border_count) * size_t(totedge));
     }
 
-    for (int p_idx = 0; p_idx < polys.ranges_num(); p_idx++) {
+    for (const int64_t p_idx : polys.index_range()) {
       if (poly_groups[p_idx] != grp_idx) {
         continue;
       }
-      poly_indices[num_pidx++] = p_idx;
+      poly_indices[num_pidx++] = int(p_idx);
       for (const int64_t corner : polys[p_idx]) {
         const int edge_i = corner_edges[corner];
         loop_indices[num_lidx++] = int(corner);

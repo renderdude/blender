@@ -2224,10 +2224,10 @@ static bool poly_loops_orders_match(const Span<MPoly> polys)
 {
   for (const int i : polys.index_range().drop_back(1)) {
     if (polys[i].loopstart > polys[i + 1].loopstart) {
-      return true;
+      return false;
     }
   }
-  return false;
+  return true;
 }
 
 void BKE_mesh_legacy_convert_polys_to_offsets(Mesh *mesh)

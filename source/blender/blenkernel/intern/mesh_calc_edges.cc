@@ -102,8 +102,9 @@ static void add_polygon_edges_to_hash_maps(Mesh *mesh,
   threading::parallel_for_each(edge_maps, [&](EdgeMap &edge_map) {
     const int task_index = &edge_map - edge_maps.data();
     for (const int i : polys.index_range()) {
-      int corner_prev = polys[i].last();
-      for (const int next_corner : polys[i]) {
+      const IndexRange poly = polys[i];
+      int corner_prev = poly.last();
+      for (const int next_corner : poly) {
         /* Can only be the same when the mesh data is invalid. */
         const int vert = corner_verts[next_corner];
         const int vert_prev = corner_verts[corner_prev];
@@ -163,8 +164,9 @@ static void update_edge_indices_in_poly_loops(Mesh *mesh,
   MutableSpan<int> corner_edges = mesh->corner_edges_for_write();
   threading::parallel_for(IndexRange(mesh->totpoly), 100, [&](IndexRange range) {
     for (const int poly_index : range) {
-      int prev_corner = polys[poly_index].last();
-      for (const int next_corner : polys[poly_index]) {
+      const IndexRange poly = polys[poly_index];
+      int prev_corner = poly.last();
+      for (const int next_corner : poly) {
         const int vert = corner_verts[next_corner];
         const int vert_prev = corner_verts[prev_corner];
 

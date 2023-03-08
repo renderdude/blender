@@ -761,7 +761,7 @@ struct LoopSplitTaskDataCommon {
   Span<MEdge> edges;
   Span<int> corner_verts;
   Span<int> corner_edges;
-  blender::OffsetIndices<int> polys = {};
+  blender::OffsetIndices<int> polys;
   Span<int2> edge_to_loops;
   Span<int> loop_to_poly;
   Span<float3> poly_normals;
@@ -1463,9 +1463,8 @@ void BKE_mesh_normals_loop_split(const float (*vert_positions)[3],
      * since we may want to use loop_normals even when mesh's 'autosmooth' is disabled
      * (see e.g. mesh mapping code). As usual, we could handle that on case-by-case basis,
      * but simpler to keep it well confined here. */
-    int poly_index;
+    for (const int poly_index : polys.index_range()) {
 
-    for (poly_index = 0; poly_index < polys.ranges_num(); poly_index++) {
       const bool is_poly_flat = sharp_faces && sharp_faces[poly_index];
       for (const int corner : polys[poly_index]) {
         if (is_poly_flat) {

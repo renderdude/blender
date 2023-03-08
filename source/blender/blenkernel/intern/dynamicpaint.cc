@@ -1430,8 +1430,8 @@ static void dynamicPaint_initAdjacencyData(DynamicPaintSurface *surface, const b
     /* also add number of vertices to temp_data
      * to locate points on "mesh edge" */
     for (int i = 0; i < numOfPolys; i++) {
-      for (const int corner : polys[i]) {
-        temp_data[corner_verts[corner]]++;
+      for (const int vert : corner_verts.slice(polys[i])) {
+        temp_data[vert]++;
       }
     }
 

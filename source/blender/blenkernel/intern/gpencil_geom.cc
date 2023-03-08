@@ -2755,7 +2755,7 @@ bool BKE_gpencil_convert_mesh(Main *bmain,
     const VArray<int> mesh_material_indices = me_eval->attributes().lookup_or_default<int>(
         "material_index", ATTR_DOMAIN_FACE, 0);
     for (i = 0; i < polys_len; i++) {
-      const blender::IndexRange poly = polys[i];
+      const IndexRange poly = polys[i];
 
       /* Find material. */
       int mat_idx = 0;

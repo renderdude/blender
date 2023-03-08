@@ -1307,8 +1307,7 @@ static bool cloth_add_shear_bend_spring(ClothModifierData *clmd,
     return false;
   }
 
-  spring_verts_ordered_set(
-      spring, corner_verts[polys[i].start() + j], corner_verts[polys[i].start() + k]);
+  spring_verts_ordered_set(spring, corner_verts[polys[i][j]], corner_verts[polys[i][k]]);
 
   shrink_factor = cloth_shrink_factor(clmd, cloth->verts, spring->ij, spring->kl);
   spring->restlen = len_v3v3(cloth->verts[spring->kl].xrest, cloth->verts[spring->ij].xrest) *
@@ -1670,8 +1669,8 @@ static bool cloth_build_springs(ClothModifierData *clmd, Mesh *mesh)
     for (int i = 0; i < numpolys; i++) {
       /* Shear springs. */
       /* Triangle faces already have shear springs due to structural geometry. */
-      if (polys.size(i) > 3) {
-        for (int j = 1; j < polys.size(i) - 1; j++) {
+      if (polys[i].size() > 3) {
+        for (int j = 1; j < polys[i].size() - 1; j++) {
           if (j > 1) {
             if (cloth_add_shear_bend_spring(clmd, edgelist, corner_verts, polys, i, 0, j)) {
               shear_springs++;
@@ -1686,7 +1685,7 @@ static bool cloth_build_springs(ClothModifierData *clmd, Mesh *mesh)
             }
           }
 
-          for (int k = j + 2; k < polys.size(i); k++) {
+          for (int k = j + 2; k < polys[i].size(); k++) {
             if (cloth_add_shear_bend_spring(clmd, edgelist, corner_verts, polys, i, j, k)) {
               shear_springs++;
 
@@ -1704,7 +1703,7 @@ static bool cloth_build_springs(ClothModifierData *clmd, Mesh *mesh)
 
       /* Angular bending springs along struct springs. */
       if (clmd->sim_parms->bending_model == CLOTH_BENDING_ANGULAR) {
-        for (int j = 0; j < polys.size(i); j++) {
+        for (int j = 0; j < polys[i].size(); j++) {
           const int edge_i = corner_edges[polys[i][j]];
           BendSpringRef *curr_ref = &spring_ref[edge_i];
           curr_ref->polys++;
@@ -1720,7 +1719,7 @@ static bool cloth_build_springs(ClothModifierData *clmd, Mesh *mesh)
             spring->type |= CLOTH_SPRING_TYPE_BENDING;
 
             spring->la = polys[curr_ref->index].size();
-            spring->lb = polys.size(i);
+            spring->lb = polys[i].size();
 
             if (!cloth_bend_set_poly_vert_array(
                     &spring->pa, spring->la, &corner_verts[polys[curr_ref->index].start()]) ||
