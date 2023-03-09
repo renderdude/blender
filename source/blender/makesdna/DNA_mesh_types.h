@@ -226,8 +226,9 @@ typedef struct Mesh {
   blender::MutableSpan<blender::float3> vert_positions_for_write();
   /**
    * Array of edges, containing vertex indices. For simple triangle or quad meshes, edges could be
-   * calculated from the #MPoly and "corner edge" arrays, however, edges need to be stored explicitly to
-   * edge domain attributes and to support loose edges that aren't connected to faces.
+   * calculated from the #MPoly and "corner edge" arrays, however, edges need to be stored
+   * explicitly to edge domain attributes and to support loose edges that aren't connected to
+   * faces.
    */
   blender::Span<MEdge> edges() const;
   /** Write access to edge data. */
