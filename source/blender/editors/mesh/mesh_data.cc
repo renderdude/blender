@@ -1230,6 +1230,12 @@ static void mesh_add_loops(Mesh *mesh, int len)
   mesh->ldata = ldata;
 
   mesh->totloop = totloop;
+
+  /* Keep the last poly offset up to date with the loop total (they must be the same). We have
+   * to be careful here though, since the mesh may not be in a valid state at this point. */
+  if (mesh->poly_offsets_data) {
+    mesh->poly_offsets_for_write().last() = mesh->totloop;
+  }
 }
 
 static void mesh_add_polys(Mesh *mesh, int len)
@@ -1248,8 +1254,8 @@ static void mesh_add_polys(Mesh *mesh, int len)
   CustomData_copy(&mesh->pdata, &pdata, CD_MASK_MESH.pmask, CD_SET_DEFAULT, totpoly);
   CustomData_copy_data(&mesh->pdata, &pdata, 0, 0, mesh->totpoly);
 
-  /* TODO: Fill new data and make sure RNA API can deal set enough things. */
-  mesh->poly_offsets_data = static_cast<int *>(MEM_reallocN(mesh->poly_offsets_data, totpoly + 1));
+  mesh->poly_offsets_data = static_cast<int *>(
+      MEM_reallocN(mesh->poly_offsets_data, sizeof(int) * (totpoly + 1)));
 
   CustomData_free(&mesh->pdata, mesh->totpoly);
   mesh->pdata = pdata;
@@ -1257,6 +1263,9 @@ static void mesh_add_polys(Mesh *mesh, int len)
   BKE_mesh_runtime_clear_cache(mesh);
 
   mesh->totpoly = totpoly;
+  /* Update the last offset, which may not be set elsewhere and must be the same as the number of
+   * face corners. */
+  mesh->poly_offsets_for_write().last() = mesh->totloop;
 
   bke::MutableAttributeAccessor attributes = mesh->attributes_for_write();
   bke::SpanAttributeWriter<bool> select_poly = attributes.lookup_or_add_for_write_span<bool>(
