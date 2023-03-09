@@ -76,7 +76,7 @@ static void join_mesh_single(Depsgraph *depsgraph,
                              MEdge **medge_pp,
                              int **corner_verts_pp,
                              int **corner_edges_pp,
-                             int **poly_offsets_pp,
+                             int *all_poly_offsets,
                              CustomData *vdata,
                              CustomData *edata,
                              CustomData *ldata,
@@ -267,8 +267,10 @@ static void join_mesh_single(Depsgraph *depsgraph,
       }
     }
 
+    const Span<int> src_poly_offsets = me->poly_offsets();
+    int *poly_offsets = all_poly_offsets + *polyofs;
     for (const int i : blender::IndexRange(me->totpoly)) {
-      poly_offsets_pp[i] += *loopofs;
+      all_poly_offsets[i] = src_poly_offsets[i] + *loopofs;
     }
 
     /* Face maps. */
@@ -298,7 +300,6 @@ static void join_mesh_single(Depsgraph *depsgraph,
   *corner_verts_pp += me->totloop;
   *corner_edges_pp += me->totloop;
   *polyofs += me->totpoly;
-  *poly_offsets_pp += me->totpoly;
 }
 
 /* Face Sets IDs are a sparse sequence, so this function offsets all the IDs by face_set_offset and
@@ -591,6 +592,7 @@ int ED_mesh_join_objects_exec(bContext *C, wmOperator *op)
   int *corner_edges = (int *)CustomData_add_layer_named(
       &ldata, CD_PROP_INT32, CD_CONSTRUCT, nullptr, totloop, ".corner_edge");
   int *poly_offsets = static_cast<int *>(MEM_malloc_arrayN(totpoly + 1, sizeof(int), __func__));
+  poly_offsets[totpoly] = totloop;
 
   vertofs = 0;
   edgeofs = 0;
@@ -616,7 +618,7 @@ int ED_mesh_join_objects_exec(bContext *C, wmOperator *op)
                    &edge,
                    &corner_verts,
                    &corner_edges,
-                   &poly_offsets,
+                   poly_offsets,
                    &vdata,
                    &edata,
                    &ldata,
@@ -651,7 +653,7 @@ int ED_mesh_join_objects_exec(bContext *C, wmOperator *op)
                        &edge,
                        &corner_verts,
                        &corner_edges,
-                       &poly_offsets,
+                       poly_offsets,
                        &vdata,
                        &edata,
                        &ldata,
