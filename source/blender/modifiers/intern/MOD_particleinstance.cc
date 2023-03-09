@@ -481,15 +481,15 @@ static Mesh *modifyMesh(ModifierData *md, const ModifierEvalContext *ctx, Mesh *
       const blender::IndexRange in_poly = orig_polys[k];
 
       CustomData_copy_data(&mesh->pdata, &result->pdata, k, p_skip * totpoly + k, 1);
-      poly_offsets[p_skip * totpoly + k] += p_skip * totloop;
-      const int dst_poly_offset = poly_offsets[p_skip * totpoly + k];
+      const int dst_poly_start = in_poly.start() + p_skip * totloop;
+      poly_offsets[p_skip * totpoly + k] = dst_poly_start;
 
       {
         int orig_corner_i = in_poly.start();
-        int dst_corner_i = dst_poly_offset;
+        int dst_corner_i = dst_poly_start;
         int j = in_poly.size();
 
-        CustomData_copy_data(&mesh->ldata, &result->ldata, in_poly.start(), dst_poly_offset, j);
+        CustomData_copy_data(&mesh->ldata, &result->ldata, in_poly.start(), dst_poly_start, j);
         for (; j; j--, orig_corner_i++, dst_corner_i++) {
           corner_verts[dst_corner_i] = orig_corner_verts[orig_corner_i] + (p_skip * totvert);
           corner_edges[dst_corner_i] = orig_corner_edges[orig_corner_i] + (p_skip * totedge);
