@@ -146,7 +146,7 @@ struct SculptUndoNodeGeometry {
   CustomData edata;
   CustomData ldata;
   CustomData pdata;
-  /* TODO: Store poly offsets? */
+  int *poly_offsets_data;
   int totvert;
   int totedge;
   int totloop;

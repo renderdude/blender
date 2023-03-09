@@ -1333,6 +1333,7 @@ void BM_mesh_bm_to_me(Main *bmain, BMesh *bm, Mesh *me, const struct BMeshToMesh
   CustomData_free(&me->fdata, me->totface);
   CustomData_free(&me->ldata, me->totloop);
   CustomData_free(&me->pdata, me->totpoly);
+  MEM_SAFE_FREE(me->poly_offsets_data);
 
   BKE_mesh_runtime_clear_geometry(me);
 

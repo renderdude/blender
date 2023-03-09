@@ -685,6 +685,8 @@ int ED_mesh_join_objects_exec(bContext *C, wmOperator *op)
   CustomData_free(&me->edata, me->totedge);
   CustomData_free(&me->ldata, me->totloop);
   CustomData_free(&me->pdata, me->totpoly);
+  MEM_SAFE_FREE(me->poly_offsets_data);
+  me->poly_offsets_data = poly_offsets;
 
   me->totvert = totvert;
   me->totedge = totedge;
