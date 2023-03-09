@@ -344,7 +344,6 @@ struct PBVHBatches {
         last_poly = tri->poly;
         flat = sharp_faces && sharp_faces[tri->poly];
         if (flat) {
-          const MPoly &poly = args->polys[tri->poly];
           float fno[3];
           BKE_mesh_calc_poly_normal(
               args->corner_verts.slice(args->polys[tri->poly]), args->vert_positions, fno);

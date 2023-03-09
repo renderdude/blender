@@ -266,8 +266,8 @@ void BKE_mesh_foreach_mapped_face_center(
   }
   else {
     const float(*positions)[3] = BKE_mesh_vert_positions(mesh);
-    const OffsetIndices polys = mesh->polys();
-    const Span<int> corner_verts = mesh->corner_verts();
+    const blender::OffsetIndices polys = mesh->polys();
+    const blender::Span<int> corner_verts = mesh->corner_verts();
     float _no_buf[3];
     float *no = (flag & MESH_FOREACH_USE_NORMAL) ? _no_buf : nullptr;
     const int *index = static_cast<const int *>(CustomData_get_layer(&mesh->pdata, CD_ORIGINDEX));
