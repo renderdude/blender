@@ -992,6 +992,10 @@ static void execute_realize_mesh_task(const RealizeInstancesOptions &options,
   threading::parallel_for(src_corner_verts.index_range(), 1024, [&](const IndexRange loop_range) {
     for (const int i : loop_range) {
       dst_corner_verts[i] = src_corner_verts[i] + task.start_indices.vertex;
+    }
+  });
+  threading::parallel_for(src_corner_edges.index_range(), 1024, [&](const IndexRange loop_range) {
+    for (const int i : loop_range) {
       dst_corner_edges[i] = src_corner_edges[i] + task.start_indices.edge;
     }
   });

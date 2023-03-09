@@ -258,17 +258,17 @@ static void mesh_blend_write(BlendWriter *writer, ID *id, const void *id_address
     Set<std::string> names_to_skip;
     if (!BLO_write_is_undo(writer)) {
       /* When converting to the old mesh format, don't save redundant attributes. */
-      names_to_skip.add_multiple_new({".hide_vert",
+      names_to_skip.add_multiple_new({"position",
+                                      ".hide_vert",
                                       ".hide_edge",
                                       ".hide_poly",
-                                      "position",
-                                      "material_index",
-                                      "sharp_edge",
-                                      "sharp_face",
-                                      ".sculpt_face_set",
+                                      ".uv_seam",
                                       ".select_vert",
                                       ".select_edge",
-                                      ".select_poly"});
+                                      ".select_poly",
+                                      "material_index",
+                                      "sharp_face",
+                                      "sharp_edge"});
 
       mesh->mvert = BKE_mesh_legacy_convert_positions_to_verts(
           mesh, temp_arrays_for_legacy_format, vert_layers);
@@ -1594,6 +1594,11 @@ bool BKE_mesh_minmax(const Mesh *me, float r_min[3], float r_max[3])
   copy_v3_v3(r_max, math::max(bounds.max, float3(r_max)));
 
   return true;
+}
+
+void Mesh::bounds_set_eager(const blender::Bounds<float3> &bounds)
+{
+  this->runtime->bounds_cache.ensure([&](blender::Bounds<float3> &r_data) { r_data = bounds; });
 }
 
 void BKE_mesh_transform(Mesh *me, const float mat[4][4], bool do_keys)

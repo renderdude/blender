@@ -1476,9 +1476,9 @@ struct EdgeFeatData {
   Object *ob_eval; /* For evaluated materials. */
   const int *material_indices;
   blender::Span<MEdge> edges;
+  blender::OffsetIndices<int> polys;
   blender::Span<int> corner_verts;
   blender::Span<int> corner_edges;
-  blender::OffsetIndices<int> polys;
   blender::Span<MLoopTri> looptris;
   LineartTriangle *tri_array;
   blender::VArray<bool> sharp_edges;
@@ -2069,8 +2069,8 @@ static void lineart_geometry_object_load(LineartObjectInfo *ob_info,
   TriData tri_data;
   tri_data.ob_info = ob_info;
   tri_data.positions = me->vert_positions();
-  tri_data.corner_verts = me->corner_verts();
   tri_data.looptris = looptris;
+  tri_data.corner_verts = me->corner_verts();
   tri_data.material_indices = material_indices;
   tri_data.vert_arr = la_v_arr;
   tri_data.tri_arr = la_tri_arr;
