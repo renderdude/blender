@@ -1128,9 +1128,8 @@ void BKE_mesh_nomain_to_mesh(Mesh *mesh_src, Mesh *mesh_dst, Object *ob)
   CustomData_copy(&mesh_src->edata, &mesh_dst->edata, mask.emask, CD_ASSIGN, mesh_src->totedge);
   CustomData_copy(&mesh_src->pdata, &mesh_dst->pdata, mask.pmask, CD_ASSIGN, mesh_src->totpoly);
   CustomData_copy(&mesh_src->ldata, &mesh_dst->ldata, mask.lmask, CD_ASSIGN, mesh_src->totloop);
-  if (mesh_src->totpoly > 0) {
-    mesh_dst->poly_offsets_data = static_cast<int *>(MEM_dupallocN(mesh_src->poly_offsets_data));
-  }
+  mesh_dst->poly_offsets_data = static_cast<int *>(mesh_src->poly_offsets_data);
+  mesh_src->poly_offsets_data = nullptr;
 
   /* Make sure active/default color attribute (names) are brought over. */
   if (mesh_src->active_color_attribute) {
