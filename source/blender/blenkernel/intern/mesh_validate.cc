@@ -1283,10 +1283,13 @@ void strip_loose_polysloops(Mesh *me, blender::BitSpan polys_to_remove)
     me->totloop = b;
   }
 
+  poly_offsets[me->totpoly] = me->totloop;
+
   /* And now, update polys' start loop index. */
   /* NOTE: At this point, there should never be any poly using a striped loop! */
-  for (const int i : poly_offsets.index_range()) {
+  for (const int i : blender::IndexRange(me->totpoly)) {
     poly_offsets[i] = new_idx[poly_offsets[i]];
+    BLI_assert(poly_offsets[i] >= 0);
   }
 
   MEM_freeN(new_idx);
