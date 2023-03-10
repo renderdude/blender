@@ -270,7 +270,7 @@ static void join_mesh_single(Depsgraph *depsgraph,
     const Span<int> src_poly_offsets = me->poly_offsets();
     int *poly_offsets = all_poly_offsets + *polyofs;
     for (const int i : blender::IndexRange(me->totpoly)) {
-      all_poly_offsets[i] = src_poly_offsets[i] + *loopofs;
+      poly_offsets[i] = src_poly_offsets[i] + *loopofs;
     }
 
     /* Face maps. */
