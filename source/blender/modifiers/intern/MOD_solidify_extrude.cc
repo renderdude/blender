@@ -1090,7 +1090,7 @@ Mesh *MOD_solidify_extrude_modifyMesh(ModifierData *md, const ModifierEvalContex
       CustomData_copy_data(
           &mesh->pdata, &result->pdata, int(pidx), int((polys_num * stride) + i), 1);
 
-      const int old_poly_size = orig_polys[i].size();
+      const int old_poly_size = orig_polys[pidx].size();
       poly_offsets[new_poly_index] = int(j + (loops_num * stride));
 
       /* prev loop */
