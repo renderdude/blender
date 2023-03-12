@@ -24,7 +24,6 @@ struct DMFlagMat;
 struct Mesh;
 struct MLoopTri;
 struct CustomData;
-struct MLoop;
 struct MPoly;
 struct SubdivCCG;
 struct BMesh;

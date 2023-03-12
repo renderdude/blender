@@ -21,7 +21,7 @@
 #include "BLI_linklist.h"
 #include "BLI_linklist_stack.h"
 #include "BLI_math.h"
-#include "BLI_math_vector_types.hh"
+#include "BLI_math_vector.hh"
 #include "BLI_memarena.h"
 #include "BLI_span.hh"
 #include "BLI_stack.h"
@@ -34,7 +34,7 @@
 #include "BKE_customdata.h"
 #include "BKE_editmesh_cache.h"
 #include "BKE_global.h"
-#include "BKE_mesh.h"
+#include "BKE_mesh.hh"
 #include "BKE_mesh_mapping.h"
 
 #include "atomic_ops.h"
@@ -158,6 +158,8 @@ bool BKE_mesh_poly_normals_are_dirty(const Mesh *mesh)
 /** \name Mesh Normal Calculation (Polygons)
  * \{ */
 
+namespace blender::bke::mesh {
+
 /*
  * COMPUTE POLY NORMAL
  *
@@ -165,86 +167,76 @@ bool BKE_mesh_poly_normals_are_dirty(const Mesh *mesh)
  * polygon See Graphics Gems for
  * computing newell normal.
  */
-static void mesh_calc_ngon_normal(const MPoly *poly,
-                                  const int *poly_verts,
-                                  const float (*positions)[3],
-                                  float r_normal[3])
+static float3 normal_calc_ngon(const Span<float3> vert_positions, const Span<int> poly_verts)
 {
-  const int nverts = poly->totloop;
-  const float *v_prev = positions[poly_verts[nverts - 1]];
-  const float *v_curr;
-
-  zero_v3(r_normal);
+  float3 normal(0);
 
   /* Newell's Method */
-  for (int i = 0; i < nverts; i++) {
-    v_curr = positions[poly_verts[i]];
-    add_newell_cross_v3_v3v3(r_normal, v_prev, v_curr);
+  const float *v_prev = vert_positions[poly_verts.last()];
+  for (const int i : poly_verts.index_range()) {
+    const float *v_curr = vert_positions[poly_verts[i]];
+    add_newell_cross_v3_v3v3(normal, v_prev, v_curr);
     v_prev = v_curr;
   }
 
-  if (UNLIKELY(normalize_v3(r_normal) == 0.0f)) {
-    r_normal[2] = 1.0f; /* other axis set to 0.0 */
+  if (UNLIKELY(normalize_v3(normal) == 0.0f)) {
+    normal[2] = 1.0f; /* other axis set to 0.0 */
   }
+
+  return normal;
 }
 
-void BKE_mesh_calc_poly_normal(const MPoly *poly,
-                               const int *poly_verts,
-                               const float (*vert_positions)[3],
-                               float r_no[3])
+float3 poly_normal_calc(const Span<float3> vert_positions, const Span<int> poly_verts)
 {
-  if (poly->totloop > 4) {
-    mesh_calc_ngon_normal(poly, poly_verts, vert_positions, r_no);
+  if (poly_verts.size() > 4) {
+    return normal_calc_ngon(vert_positions, poly_verts);
   }
-  else if (poly->totloop == 3) {
-    normal_tri_v3(r_no,
-                  vert_positions[poly_verts[0]],
-                  vert_positions[poly_verts[1]],
-                  vert_positions[poly_verts[2]]);
+  if (poly_verts.size() == 3) {
+    return math::normal_tri(vert_positions[poly_verts[0]],
+                            vert_positions[poly_verts[1]],
+                            vert_positions[poly_verts[2]]);
   }
-  else if (poly->totloop == 4) {
-    normal_quad_v3(r_no,
+  if (poly_verts.size() == 4) {
+    float3 normal;
+    normal_quad_v3(normal,
                    vert_positions[poly_verts[0]],
                    vert_positions[poly_verts[1]],
                    vert_positions[poly_verts[2]],
                    vert_positions[poly_verts[3]]);
+    return normal;
   }
-  else { /* horrible, two sided face! */
-    r_no[0] = 0.0;
-    r_no[1] = 0.0;
-    r_no[2] = 1.0;
-  }
+  /* horrible, two sided face! */
+  return float3(0);
 }
 
-static void calculate_normals_poly(const Span<float3> positions,
-                                   const Span<MPoly> polys,
-                                   const Span<int> corner_verts,
-                                   MutableSpan<float3> poly_normals)
+}  // namespace blender::bke::mesh
+
+void BKE_mesh_calc_poly_normal(const int *poly_verts,
+                               const int poly_size,
+                               const float (*vert_positions)[3],
+                               const int verts_num,
+                               float r_no[3])
 {
-  using namespace blender;
+  copy_v3_v3(r_no,
+             blender::bke::mesh::poly_normal_calc(
+                 {reinterpret_cast<const blender::float3 *>(vert_positions), verts_num},
+                 {poly_verts, poly_size}));
+}
+
+namespace blender::bke::mesh {
+
+void normals_calc_polys(const Span<float3> positions,
+                        const Span<MPoly> polys,
+                        const Span<int> corner_verts,
+                        MutableSpan<float3> poly_normals)
+{
   threading::parallel_for(polys.index_range(), 1024, [&](const IndexRange range) {
-    for (const int poly_i : range) {
-      const MPoly &poly = polys[poly_i];
-      BKE_mesh_calc_poly_normal(&poly,
-                                &corner_verts[poly.loopstart],
-                                reinterpret_cast<const float(*)[3]>(positions.data()),
-                                poly_normals[poly_i]);
+    for (const int i : range) {
+      const MPoly &poly = polys[i];
+      poly_normals[i] = poly_normal_calc(positions,
+                                         corner_verts.slice(poly.loopstart, poly.totloop));
     }
   });
-}
-
-void BKE_mesh_calc_normals_poly(const float (*vert_positions)[3],
-                                const int verts_num,
-                                const int *corner_verts,
-                                const int mloop_len,
-                                const MPoly *polys,
-                                int polys_len,
-                                float (*r_poly_normals)[3])
-{
-  calculate_normals_poly({reinterpret_cast<const float3 *>(vert_positions), verts_num},
-                         {polys, polys_len},
-                         {corner_verts, mloop_len},
-                         {reinterpret_cast<float3 *>(r_poly_normals), polys_len});
 }
 
 /** \} */
@@ -256,13 +248,12 @@ void BKE_mesh_calc_normals_poly(const float (*vert_positions)[3],
  * meshes can slow down high-poly meshes. For details on performance, see D11993.
  * \{ */
 
-static void calculate_normals_poly_and_vert(const Span<float3> positions,
-                                            const Span<MPoly> polys,
-                                            const Span<int> corner_verts,
-                                            MutableSpan<float3> poly_normals,
-                                            MutableSpan<float3> vert_normals)
+void normals_calc_poly_vert(const Span<float3> positions,
+                            const Span<MPoly> polys,
+                            const Span<int> corner_verts,
+                            MutableSpan<float3> poly_normals,
+                            MutableSpan<float3> vert_normals)
 {
-  using namespace blender;
 
   /* Zero the vertex normal array for accumulation. */
   {
@@ -281,7 +272,7 @@ static void calculate_normals_poly_and_vert(const Span<float3> positions,
         const int i_end = poly.totloop - 1;
 
         /* Polygon Normal and edge-vector. */
-        /* Inline version of #BKE_mesh_calc_poly_normal, also does edge-vectors. */
+        /* Inline version of #poly_normal_calc, also does edge-vectors. */
         {
           zero_v3(pnor);
           /* Newell's Method */
@@ -346,21 +337,7 @@ static void calculate_normals_poly_and_vert(const Span<float3> positions,
   }
 }
 
-void BKE_mesh_calc_normals_poly_and_vertex(const float (*vert_positions)[3],
-                                           const int mvert_len,
-                                           const int *corner_verts,
-                                           const int mloop_len,
-                                           const MPoly *polys,
-                                           const int polys_len,
-                                           float (*r_poly_normals)[3],
-                                           float (*r_vert_normals)[3])
-{
-  calculate_normals_poly_and_vert({reinterpret_cast<const float3 *>(vert_positions), mvert_len},
-                                  {polys, polys_len},
-                                  {corner_verts, mloop_len},
-                                  {reinterpret_cast<float3 *>(r_poly_normals), polys_len},
-                                  {reinterpret_cast<float3 *>(r_vert_normals), mvert_len});
-}
+}  // namespace blender::bke::mesh
 
 /** \} */
 
@@ -397,15 +374,12 @@ const float (*BKE_mesh_vert_normals_ensure(const Mesh *mesh))[3]
 
     vert_normals = BKE_mesh_vert_normals_for_write(&mesh_mutable);
     poly_normals = BKE_mesh_poly_normals_for_write(&mesh_mutable);
-
-    BKE_mesh_calc_normals_poly_and_vertex(reinterpret_cast<const float(*)[3]>(positions.data()),
-                                          positions.size(),
-                                          corner_verts.data(),
-                                          corner_verts.size(),
-                                          polys.data(),
-                                          polys.size(),
-                                          poly_normals,
-                                          vert_normals);
+    blender::bke::mesh::normals_calc_poly_vert(
+        positions,
+        polys,
+        corner_verts,
+        {reinterpret_cast<float3 *>(poly_normals), mesh->totpoly},
+        {reinterpret_cast<float3 *>(vert_normals), mesh->totvert});
 
     BKE_mesh_vert_normals_clear_dirty(&mesh_mutable);
     BKE_mesh_poly_normals_clear_dirty(&mesh_mutable);
@@ -441,14 +415,8 @@ const float (*BKE_mesh_poly_normals_ensure(const Mesh *mesh))[3]
     const Span<int> corner_verts = mesh_mutable.corner_verts();
 
     poly_normals = BKE_mesh_poly_normals_for_write(&mesh_mutable);
-
-    BKE_mesh_calc_normals_poly(reinterpret_cast<const float(*)[3]>(positions.data()),
-                               positions.size(),
-                               corner_verts.data(),
-                               corner_verts.size(),
-                               polys.data(),
-                               polys.size(),
-                               poly_normals);
+    blender::bke::mesh::normals_calc_polys(
+        positions, polys, corner_verts, {reinterpret_cast<float3 *>(poly_normals), mesh->totvert});
 
     BKE_mesh_poly_normals_clear_dirty(&mesh_mutable);
   });
@@ -789,6 +757,8 @@ struct LoopSplitTaskDataCommon {
 /* See comment about edge_to_loops below. */
 #define IS_EDGE_SHARP(_e2l) ELEM((_e2l)[1], INDEX_UNSET, INDEX_INVALID)
 
+namespace blender::bke::mesh {
+
 static void mesh_edges_sharp_tag(const Span<MPoly> polys,
                                  const Span<int> corner_verts,
                                  const Span<int> corner_edges,
@@ -801,7 +771,6 @@ static void mesh_edges_sharp_tag(const Span<MPoly> polys,
                                  MutableSpan<int2> edge_to_loops,
                                  MutableSpan<bool> r_sharp_edges)
 {
-  using namespace blender;
   const float split_angle_cos = check_angle ? cosf(split_angle) : -1.0f;
   auto poly_is_smooth = [&](const int poly_i) {
     return sharp_faces.is_empty() || !sharp_faces[poly_i];
@@ -862,42 +831,37 @@ static void mesh_edges_sharp_tag(const Span<MPoly> polys,
   }
 }
 
-void BKE_edges_sharp_from_angle_set(const int numEdges,
-                                    const int *corner_verts,
-                                    const int *corner_edges,
-                                    const int numLoops,
-                                    const MPoly *polys,
-                                    const float (*poly_normals)[3],
-                                    const bool *sharp_faces,
-                                    const int numPolys,
-                                    const float split_angle,
-                                    bool *sharp_edges)
+void edges_sharp_from_angle_set(const Span<MPoly> polys,
+                                const Span<int> corner_verts,
+                                const Span<int> corner_edges,
+                                const Span<float3> poly_normals,
+                                const bool *sharp_faces,
+                                const float split_angle,
+                                MutableSpan<bool> sharp_edges)
 {
-  using namespace blender;
-  using namespace blender::bke;
   if (split_angle >= float(M_PI)) {
     /* Nothing to do! */
     return;
   }
 
-  /* Mapping edge -> loops. See #BKE_mesh_normals_loop_split for details. */
-  Array<int2> edge_to_loops(numEdges, int2(0));
+  /* Mapping edge -> loops. See #bke::mesh::normals_calc_loop for details. */
+  Array<int2> edge_to_loops(sharp_edges.size(), int2(0));
 
   /* Simple mapping from a loop to its polygon index. */
-  const Array<int> loop_to_poly = mesh_topology::build_loop_to_poly_map({polys, numPolys},
-                                                                        numLoops);
+  const Array<int> loop_to_poly = mesh_topology::build_loop_to_poly_map(polys,
+                                                                        corner_verts.size());
 
-  mesh_edges_sharp_tag({polys, numPolys},
-                       {corner_verts, numLoops},
-                       {corner_edges, numLoops},
+  mesh_edges_sharp_tag(polys,
+                       corner_verts,
+                       corner_edges,
                        loop_to_poly,
-                       {reinterpret_cast<const float3 *>(poly_normals), numPolys},
-                       Span<bool>(sharp_faces, sharp_faces ? numPolys : 0),
-                       Span<bool>(sharp_edges, numEdges),
+                       poly_normals,
+                       Span<bool>(sharp_faces, sharp_faces ? polys.size() : 0),
+                       sharp_edges,
                        true,
                        split_angle,
                        edge_to_loops,
-                       {sharp_edges, numEdges});
+                       sharp_edges);
 }
 
 static void loop_manifold_fan_around_vert_next(const Span<int> corner_verts,
@@ -1312,8 +1276,6 @@ static bool loop_split_generator_check_cyclic_smooth_fan(const Span<int> corner_
 
 static void loop_split_generator(TaskPool *pool, LoopSplitTaskDataCommon *common_data)
 {
-  using namespace blender;
-  using namespace blender::bke;
   MLoopNorSpaceArray *lnors_spacearr = common_data->lnors_spacearr;
 
   const Span<int> corner_verts = common_data->corner_verts;
@@ -1450,28 +1412,22 @@ static void loop_split_generator(TaskPool *pool, LoopSplitTaskDataCommon *common
   }
 }
 
-void BKE_mesh_normals_loop_split(const float (*vert_positions)[3],
-                                 const float (*vert_normals)[3],
-                                 const int numVerts,
-                                 const MEdge *edges,
-                                 const int numEdges,
-                                 const int *corner_verts,
-                                 const int *corner_edges,
-                                 float (*r_loop_normals)[3],
-                                 const int numLoops,
-                                 const MPoly *polys,
-                                 const float (*poly_normals)[3],
-                                 const int numPolys,
-                                 const bool use_split_normals,
-                                 const float split_angle,
-                                 const bool *sharp_edges,
-                                 const bool *sharp_faces,
-                                 const int *loop_to_poly_map,
-                                 MLoopNorSpaceArray *r_lnors_spacearr,
-                                 short (*clnors_data)[2])
+void normals_calc_loop(const Span<float3> vert_positions,
+                       const Span<MEdge> edges,
+                       const Span<MPoly> polys,
+                       const Span<int> corner_verts,
+                       const Span<int> corner_edges,
+                       const Span<int> loop_to_poly_map,
+                       const Span<float3> vert_normals,
+                       const Span<float3> poly_normals,
+                       const bool *sharp_edges,
+                       const bool *sharp_faces,
+                       bool use_split_normals,
+                       float split_angle,
+                       short (*clnors_data)[2],
+                       MLoopNorSpaceArray *r_lnors_spacearr,
+                       MutableSpan<float3> r_loop_normals)
 {
-  using namespace blender;
-  using namespace blender::bke;
   /* For now this is not supported.
    * If we do not use split normals, we do not generate anything fancy! */
   BLI_assert(use_split_normals || !(r_lnors_spacearr));
@@ -1483,12 +1439,10 @@ void BKE_mesh_normals_loop_split(const float (*vert_positions)[3],
      * since we may want to use loop_normals even when mesh's 'autosmooth' is disabled
      * (see e.g. mesh mapping code). As usual, we could handle that on case-by-case basis,
      * but simpler to keep it well confined here. */
-    int poly_index;
-
-    for (poly_index = 0; poly_index < numPolys; poly_index++) {
-      const MPoly &poly = polys[poly_index];
-      int ml_index = poly.loopstart;
-      const int ml_index_end = ml_index + poly.totloop;
+    for (const int poly_index : polys.index_range()) {
+      const MPoly *poly = &polys[poly_index];
+      int ml_index = poly->loopstart;
+      const int ml_index_end = ml_index + poly->totloop;
       const bool is_poly_flat = sharp_faces && sharp_faces[poly_index];
 
       for (; ml_index < ml_index_end; ml_index++) {
@@ -1517,17 +1471,17 @@ void BKE_mesh_normals_loop_split(const float (*vert_positions)[3],
    * However, if needed, we can store the negated value of loop index instead of INDEX_INVALID
    * to retrieve the real value later in code).
    * Note also that loose edges always have both values set to 0! */
-  Array<int2> edge_to_loops(numEdges, int2(0));
+  Array<int2> edge_to_loops(edges.size(), int2(0));
 
   /* Simple mapping from a loop to its polygon index. */
   Span<int> loop_to_poly;
   Array<int> local_loop_to_poly_map;
-  if (loop_to_poly_map) {
-    loop_to_poly = {loop_to_poly_map, numLoops};
+  if (loop_to_poly_map.is_empty()) {
+    local_loop_to_poly_map = mesh_topology::build_loop_to_poly_map(polys, corner_verts.size());
+    loop_to_poly = local_loop_to_poly_map;
   }
   else {
-    local_loop_to_poly_map = mesh_topology::build_loop_to_poly_map({polys, numPolys}, numLoops);
-    loop_to_poly = local_loop_to_poly_map;
+    loop_to_poly = loop_to_poly_map;
   }
 
   /* When using custom loop normals, disable the angle feature! */
@@ -1544,27 +1498,28 @@ void BKE_mesh_normals_loop_split(const float (*vert_positions)[3],
     r_lnors_spacearr = &_lnors_spacearr;
   }
   if (r_lnors_spacearr) {
-    BKE_lnor_spacearr_init(r_lnors_spacearr, numLoops, MLNOR_SPACEARR_LOOP_INDEX);
+    BKE_lnor_spacearr_init(r_lnors_spacearr, corner_verts.size(), MLNOR_SPACEARR_LOOP_INDEX);
   }
 
   /* Init data common to all tasks. */
   LoopSplitTaskDataCommon common_data;
   common_data.lnors_spacearr = r_lnors_spacearr;
-  common_data.loop_normals = {reinterpret_cast<float3 *>(r_loop_normals), numLoops};
-  common_data.clnors_data = {reinterpret_cast<short2 *>(clnors_data), clnors_data ? numLoops : 0};
-  common_data.positions = {reinterpret_cast<const float3 *>(vert_positions), numVerts};
-  common_data.edges = {edges, numEdges};
-  common_data.polys = {polys, numPolys};
-  common_data.corner_verts = {corner_verts, numLoops};
-  common_data.corner_edges = {corner_edges, numLoops};
+  common_data.loop_normals = r_loop_normals;
+  common_data.clnors_data = {reinterpret_cast<short2 *>(clnors_data),
+                             clnors_data ? corner_verts.size() : 0};
+  common_data.positions = vert_positions;
+  common_data.edges = edges;
+  common_data.polys = polys;
+  common_data.corner_verts = corner_verts;
+  common_data.corner_edges = corner_edges;
   common_data.edge_to_loops = edge_to_loops;
   common_data.loop_to_poly = loop_to_poly;
-  common_data.poly_normals = {reinterpret_cast<const float3 *>(poly_normals), numPolys};
-  common_data.vert_normals = {reinterpret_cast<const float3 *>(vert_normals), numVerts};
+  common_data.poly_normals = poly_normals;
+  common_data.vert_normals = vert_normals;
 
   /* Pre-populate all loop normals as if their verts were all smooth.
    * This way we don't have to compute those later! */
-  threading::parallel_for(IndexRange(numPolys), 1024, [&](const IndexRange range) {
+  threading::parallel_for(polys.index_range(), 1024, [&](const IndexRange range) {
     for (const int poly_i : range) {
       const MPoly &poly = polys[poly_i];
       for (const int loop_i : IndexRange(poly.loopstart, poly.totloop)) {
@@ -1574,19 +1529,19 @@ void BKE_mesh_normals_loop_split(const float (*vert_positions)[3],
   });
 
   /* This first loop check which edges are actually smooth, and compute edge vectors. */
-  mesh_edges_sharp_tag({polys, numPolys},
-                       {corner_verts, numLoops},
-                       {corner_edges, numLoops},
+  mesh_edges_sharp_tag(polys,
+                       corner_verts,
+                       corner_edges,
                        loop_to_poly,
-                       {reinterpret_cast<const float3 *>(poly_normals), numPolys},
-                       Span<bool>(sharp_faces, sharp_faces ? numPolys : 0),
-                       Span<bool>(sharp_edges, sharp_edges ? numEdges : 0),
+                       poly_normals,
+                       Span<bool>(sharp_faces, sharp_faces ? polys.size() : 0),
+                       Span<bool>(sharp_edges, sharp_edges ? edges.size() : 0),
                        check_angle,
                        split_angle,
                        edge_to_loops,
                        {});
 
-  if (numLoops < LOOP_SPLIT_TASK_BLOCK_SIZE * 8) {
+  if (corner_verts.size() < LOOP_SPLIT_TASK_BLOCK_SIZE * 8) {
     /* Not enough loops to be worth the whole threading overhead. */
     loop_split_generator(nullptr, &common_data);
   }
@@ -1620,37 +1575,30 @@ void BKE_mesh_normals_loop_split(const float (*vert_positions)[3],
  * r_custom_loop_normals is expected to have normalized normals, or zero ones,
  * in which case they will be replaced by default loop/vertex normal.
  */
-static void mesh_normals_loop_custom_set(const float (*positions)[3],
-                                         const float (*vert_normals)[3],
-                                         const int numVerts,
-                                         const MEdge *edges,
-                                         const int numEdges,
-                                         const int *corner_verts,
-                                         const int *corner_edges,
-                                         float (*r_custom_loop_normals)[3],
-                                         const int numLoops,
-                                         const MPoly *polys,
-                                         const float (*poly_normals)[3],
+
+static void mesh_normals_loop_custom_set(Span<float3> positions,
+                                         Span<MEdge> edges,
+                                         Span<MPoly> polys,
+                                         Span<int> corner_verts,
+                                         Span<int> corner_edges,
+                                         Span<float3> vert_normals,
+                                         Span<float3> poly_normals,
                                          const bool *sharp_faces,
-                                         const int numPolys,
+                                         const bool use_vertices,
+                                         MutableSpan<float3> r_custom_loop_normals,
                                          MutableSpan<bool> sharp_edges,
-                                         short (*r_clnors_data)[2],
-                                         const bool use_vertices)
+                                         short (*r_clnors_data)[2])
 {
-  using namespace blender;
-  using namespace blender::bke;
-  /* We *may* make that poor #BKE_mesh_normals_loop_split() even more complex by making it handling
-   * that feature too, would probably be more efficient in absolute.
-   * However, this function *is not* performance-critical, since it is mostly expected to be called
-   * by io add-ons when importing custom normals, and modifier
-   * (and perhaps from some editing tools later?).
-   * So better to keep some simplicity here, and just call #BKE_mesh_normals_loop_split() twice! */
+  /* We *may* make that poor #bke::mesh::normals_calc_loop() even more complex by making it
+   * handling that feature too, would probably be more efficient in absolute. However, this
+   * function *is not* performance-critical, since it is mostly expected to be called by io add-ons
+   * when importing custom normals, and modifier (and perhaps from some editing tools later?). So
+   * better to keep some simplicity here, and just call #bke::mesh::normals_calc_loop() twice! */
   MLoopNorSpaceArray lnors_spacearr = {nullptr};
-  BitVector<> done_loops(numLoops, false);
-  float(*loop_normals)[3] = (float(*)[3])MEM_calloc_arrayN(
-      size_t(numLoops), sizeof(*loop_normals), __func__);
-  const Array<int> loop_to_poly = mesh_topology::build_loop_to_poly_map({polys, numPolys},
-                                                                        numLoops);
+  BitVector<> done_loops(corner_verts.size(), false);
+  Array<float3> loop_normals(corner_verts.size());
+  const Array<int> loop_to_poly = mesh_topology::build_loop_to_poly_map(polys,
+                                                                        corner_verts.size());
   /* In this case we always consider split nors as ON,
    * and do not want to use angle to define smooth fans! */
   const bool use_split_normals = true;
@@ -1659,36 +1607,32 @@ static void mesh_normals_loop_custom_set(const float (*positions)[3],
   BLI_SMALLSTACK_DECLARE(clnors_data, short *);
 
   /* Compute current lnor spacearr. */
-  BKE_mesh_normals_loop_split(positions,
-                              vert_normals,
-                              numVerts,
-                              edges,
-                              numEdges,
-                              corner_verts,
-                              corner_edges,
-                              loop_normals,
-                              numLoops,
-                              polys,
-                              poly_normals,
-                              numPolys,
-                              use_split_normals,
-                              split_angle,
-                              sharp_edges.data(),
-                              sharp_faces,
-                              loop_to_poly.data(),
-                              &lnors_spacearr,
-                              nullptr);
+  normals_calc_loop(positions,
+                    edges,
+                    polys,
+                    corner_verts,
+                    corner_edges,
+                    loop_to_poly,
+                    vert_normals,
+                    poly_normals,
+                    sharp_edges.data(),
+                    sharp_faces,
+                    use_split_normals,
+                    split_angle,
+                    r_clnors_data,
+                    &lnors_spacearr,
+                    loop_normals);
 
   /* Set all given zero vectors to their default value. */
   if (use_vertices) {
-    for (int i = 0; i < numVerts; i++) {
+    for (const int i : positions.index_range()) {
       if (is_zero_v3(r_custom_loop_normals[i])) {
         copy_v3_v3(r_custom_loop_normals[i], vert_normals[i]);
       }
     }
   }
   else {
-    for (int i = 0; i < numLoops; i++) {
+    for (const int i : corner_verts.index_range()) {
       if (is_zero_v3(r_custom_loop_normals[i])) {
         copy_v3_v3(r_custom_loop_normals[i], loop_normals[i]);
       }
@@ -1699,7 +1643,7 @@ static void mesh_normals_loop_custom_set(const float (*positions)[3],
 
   /* Now, check each current smooth fan (one lnor space per smooth fan!),
    * and if all its matching custom loop_normals are not (enough) equal, add sharp edges as needed.
-   * This way, next time we run BKE_mesh_normals_loop_split(), we'll get lnor spacearr/smooth fans
+   * This way, next time we run bke::mesh::normals_calc_loop(), we'll get lnor spacearr/smooth fans
    * matching given custom loop_normals.
    * Note this code *will never* unsharp edges! And quite obviously,
    * when we set custom normals per vertices, running this is absolutely useless. */
@@ -1707,7 +1651,7 @@ static void mesh_normals_loop_custom_set(const float (*positions)[3],
     done_loops.fill(true);
   }
   else {
-    for (int i = 0; i < numLoops; i++) {
+    for (const int i : corner_verts.index_range()) {
       if (!lnors_spacearr.lspacearr[i]) {
         /* This should not happen in theory, but in some rare case (probably ugly geometry)
          * we can get some nullptr loopspacearr at this point. :/
@@ -1725,7 +1669,7 @@ static void mesh_normals_loop_custom_set(const float (*positions)[3],
       /* Notes:
        * - In case of mono-loop smooth fan, we have nothing to do.
        * - Loops in this linklist are ordered (in reversed order compared to how they were
-       *   discovered by BKE_mesh_normals_loop_split(), but this is not a problem).
+       *   discovered by bke::mesh::normals_calc_loop(), but this is not a problem).
        *   Which means if we find a mismatching clnor,
        *   we know all remaining loops will have to be in a new, different smooth fan/lnor space.
        * - In smooth fan case, we compare each clnor against a ref one,
@@ -1736,12 +1680,12 @@ static void mesh_normals_loop_custom_set(const float (*positions)[3],
         continue;
       }
 
-      LinkNode *loops = lnors_spacearr.lspacearr[i]->loops;
+      LinkNode *loop_link = lnors_spacearr.lspacearr[i]->loops;
       int corner_prev = -1;
       const float *org_nor = nullptr;
 
-      while (loops) {
-        const int lidx = POINTER_AS_INT(loops->link);
+      while (loop_link) {
+        const int lidx = POINTER_AS_INT(loop_link->link);
         float *nor = r_custom_loop_normals[lidx];
 
         if (!org_nor) {
@@ -1763,7 +1707,7 @@ static void mesh_normals_loop_custom_set(const float (*positions)[3],
         }
 
         corner_prev = lidx;
-        loops = loops->next;
+        loop_link = loop_link->next;
         done_loops[lidx].set();
       }
 
@@ -1771,9 +1715,9 @@ static void mesh_normals_loop_custom_set(const float (*positions)[3],
        * otherwise we may miss some sharp edges here!
        * This is just a simplified version of above while loop.
        * See #45984. */
-      loops = lnors_spacearr.lspacearr[i]->loops;
-      if (loops && org_nor) {
-        const int lidx = POINTER_AS_INT(loops->link);
+      loop_link = lnors_spacearr.lspacearr[i]->loops;
+      if (loop_link && org_nor) {
+        const int lidx = POINTER_AS_INT(loop_link->link);
         float *nor = r_custom_loop_normals[lidx];
 
         if (dot_v3v3(org_nor, nor) < LNOR_SPACE_TRIGO_THRESHOLD) {
@@ -1789,30 +1733,26 @@ static void mesh_normals_loop_custom_set(const float (*positions)[3],
 
     /* And now, recompute our new auto `loop_normals` and lnor spacearr! */
     BKE_lnor_spacearr_clear(&lnors_spacearr);
-    BKE_mesh_normals_loop_split(positions,
-                                vert_normals,
-                                numVerts,
-                                edges,
-                                numEdges,
-                                corner_verts,
-                                corner_edges,
-                                loop_normals,
-                                numLoops,
-                                polys,
-                                poly_normals,
-                                numPolys,
-                                use_split_normals,
-                                split_angle,
-                                sharp_edges.data(),
-                                sharp_faces,
-                                loop_to_poly.data(),
-                                &lnors_spacearr,
-                                nullptr);
+    normals_calc_loop(positions,
+                      edges,
+                      polys,
+                      corner_verts,
+                      corner_edges,
+                      loop_to_poly,
+                      vert_normals,
+                      poly_normals,
+                      sharp_edges.data(),
+                      sharp_faces,
+                      use_split_normals,
+                      split_angle,
+                      r_clnors_data,
+                      &lnors_spacearr,
+                      loop_normals);
   }
 
   /* And we just have to convert plain object-space custom normals to our
    * lnor space-encoded ones. */
-  for (int i = 0; i < numLoops; i++) {
+  for (const int i : corner_verts.index_range()) {
     if (!lnors_spacearr.lspacearr[i]) {
       done_loops[i].reset();
       if (G.debug & G_DEBUG) {
@@ -1826,7 +1766,7 @@ static void mesh_normals_loop_custom_set(const float (*positions)[3],
       /* Note we accumulate and average all custom normals in current smooth fan,
        * to avoid getting different clnors data (tiny differences in plain custom normals can
        * give rather huge differences in computed 2D factors). */
-      LinkNode *loops = lnors_spacearr.lspacearr[i]->loops;
+      LinkNode *loop_link = lnors_spacearr.lspacearr[i]->loops;
       if (lnors_spacearr.lspacearr[i]->flags & MLNOR_SPACE_IS_SINGLE) {
         BLI_assert(POINTER_AS_INT(loops) == i);
         const int nidx = use_vertices ? corner_verts[i] : i;
@@ -1841,8 +1781,8 @@ static void mesh_normals_loop_custom_set(const float (*positions)[3],
         short clnor_data_tmp[2], *clnor_data;
 
         zero_v3(avg_nor);
-        while (loops) {
-          const int lidx = POINTER_AS_INT(loops->link);
+        while (loop_link) {
+          const int lidx = POINTER_AS_INT(loop_link->link);
           const int nidx = use_vertices ? corner_verts[lidx] : lidx;
           float *nor = r_custom_loop_normals[nidx];
 
@@ -1850,7 +1790,7 @@ static void mesh_normals_loop_custom_set(const float (*positions)[3],
           add_v3_v3(avg_nor, nor);
           BLI_SMALLSTACK_PUSH(clnors_data, (short *)r_clnors_data[lidx]);
 
-          loops = loops->next;
+          loop_link = loop_link->next;
           done_loops[lidx].reset();
         }
 
@@ -1865,82 +1805,63 @@ static void mesh_normals_loop_custom_set(const float (*positions)[3],
     }
   }
 
-  MEM_freeN(loop_normals);
   BKE_lnor_spacearr_free(&lnors_spacearr);
 }
 
-void BKE_mesh_normals_loop_custom_set(const float (*vert_positions)[3],
-                                      const float (*vert_normals)[3],
-                                      const int numVerts,
-                                      const MEdge *edges,
-                                      const int numEdges,
-                                      const int *corner_verts,
-                                      const int *corner_edges,
-                                      float (*r_custom_loop_normals)[3],
-                                      const int numLoops,
-                                      const MPoly *polys,
-                                      const float (*poly_normals)[3],
-                                      const bool *sharp_faces,
-                                      const int numPolys,
-                                      bool *sharp_edges,
-                                      short (*r_clnors_data)[2])
+void normals_loop_custom_set(const Span<float3> vert_positions,
+                             const Span<MEdge> edges,
+                             const Span<MPoly> polys,
+                             const Span<int> corner_verts,
+                             const Span<int> corner_edges,
+                             const Span<float3> vert_normals,
+                             const Span<float3> poly_normals,
+                             const bool *sharp_faces,
+                             MutableSpan<bool> sharp_edges,
+                             MutableSpan<float3> r_custom_loop_normals,
+                             short (*r_clnors_data)[2])
 {
   mesh_normals_loop_custom_set(vert_positions,
-                               vert_normals,
-                               numVerts,
                                edges,
-                               numEdges,
+                               polys,
                                corner_verts,
                                corner_edges,
-                               r_custom_loop_normals,
-                               numLoops,
-                               polys,
+                               vert_normals,
                                poly_normals,
                                sharp_faces,
-                               numPolys,
-                               {sharp_edges, numEdges},
-                               r_clnors_data,
-                               false);
+                               false,
+                               r_custom_loop_normals,
+                               sharp_edges,
+                               r_clnors_data);
 }
 
-void BKE_mesh_normals_loop_custom_from_verts_set(const float (*vert_positions)[3],
-                                                 const float (*vert_normals)[3],
-                                                 float (*r_custom_vert_normals)[3],
-                                                 const int numVerts,
-                                                 const MEdge *edges,
-                                                 const int numEdges,
-                                                 const int *corner_verts,
-                                                 const int *corner_edges,
-                                                 const int numLoops,
-                                                 const MPoly *polys,
-                                                 const float (*poly_normals)[3],
-                                                 const bool *sharp_faces,
-                                                 const int numPolys,
-                                                 bool *sharp_edges,
-                                                 short (*r_clnors_data)[2])
+void normals_loop_custom_set_from_verts(const Span<float3> vert_positions,
+                                        const Span<MEdge> edges,
+                                        const Span<MPoly> polys,
+                                        const Span<int> corner_verts,
+                                        const Span<int> corner_edges,
+                                        const Span<float3> vert_normals,
+                                        const Span<float3> poly_normals,
+                                        const bool *sharp_faces,
+                                        MutableSpan<bool> sharp_edges,
+                                        MutableSpan<float3> r_custom_vert_normals,
+                                        short (*r_clnors_data)[2])
 {
   mesh_normals_loop_custom_set(vert_positions,
-                               vert_normals,
-                               numVerts,
                                edges,
-                               numEdges,
+                               polys,
                                corner_verts,
                                corner_edges,
-                               r_custom_vert_normals,
-                               numLoops,
-                               polys,
+                               vert_normals,
                                poly_normals,
                                sharp_faces,
-                               numPolys,
-                               {sharp_edges, numEdges},
-                               r_clnors_data,
-                               true);
+                               true,
+                               r_custom_vert_normals,
+                               sharp_edges,
+                               r_clnors_data);
 }
 
 static void mesh_set_custom_normals(Mesh *mesh, float (*r_custom_nors)[3], const bool use_vertices)
 {
-  using namespace blender;
-  using namespace blender::bke;
   short(*clnors)[2];
   const int numloops = mesh->totloop;
 
@@ -1953,41 +1874,39 @@ static void mesh_set_custom_normals(Mesh *mesh, float (*r_custom_nors)[3], const
     clnors = (short(*)[2])CustomData_add_layer(
         &mesh->ldata, CD_CUSTOMLOOPNORMAL, CD_SET_DEFAULT, nullptr, numloops);
   }
-  const Span<float3> positions = mesh->vert_positions();
-  MutableSpan<MEdge> edges = mesh->edges_for_write();
-  const Span<MPoly> polys = mesh->polys();
   MutableAttributeAccessor attributes = mesh->attributes_for_write();
   SpanAttributeWriter<bool> sharp_edges = attributes.lookup_or_add_for_write_span<bool>(
       "sharp_edge", ATTR_DOMAIN_EDGE);
   const bool *sharp_faces = static_cast<const bool *>(
       CustomData_get_layer_named(&mesh->pdata, CD_PROP_BOOL, "sharp_face"));
-  mesh_normals_loop_custom_set(reinterpret_cast<const float(*)[3]>(positions.data()),
-                               BKE_mesh_vert_normals_ensure(mesh),
-                               positions.size(),
-                               edges.data(),
-                               edges.size(),
-                               mesh->corner_verts().data(),
-                               mesh->corner_edges().data(),
-                               r_custom_nors,
-                               mesh->totloop,
-                               polys.data(),
-                               BKE_mesh_poly_normals_ensure(mesh),
+
+  mesh_normals_loop_custom_set(mesh->vert_positions(),
+                               mesh->edges(),
+                               mesh->polys(),
+                               mesh->corner_verts(),
+                               mesh->corner_edges(),
+                               mesh->vert_normals(),
+                               mesh->poly_normals(),
                                sharp_faces,
-                               polys.size(),
+                               use_vertices,
+                               {reinterpret_cast<blender::float3 *>(r_custom_nors),
+                                use_vertices ? mesh->totvert : mesh->totloop},
                                sharp_edges.span,
-                               clnors,
-                               use_vertices);
+                               clnors);
+
   sharp_edges.finish();
 }
 
+}  // namespace blender::bke::mesh
+
 void BKE_mesh_set_custom_normals(Mesh *mesh, float (*r_custom_loop_normals)[3])
 {
-  mesh_set_custom_normals(mesh, r_custom_loop_normals, false);
+  blender::bke::mesh::mesh_set_custom_normals(mesh, r_custom_loop_normals, false);
 }
 
 void BKE_mesh_set_custom_normals_from_verts(Mesh *mesh, float (*r_custom_vert_normals)[3])
 {
-  mesh_set_custom_normals(mesh, r_custom_vert_normals, true);
+  blender::bke::mesh::mesh_set_custom_normals(mesh, r_custom_vert_normals, true);
 }
 
 void BKE_mesh_normals_loop_to_vertex(const int numVerts,
