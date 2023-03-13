@@ -319,7 +319,7 @@ void looptris_calc_with_normals(const Span<float3> vert_positions,
                                 const Span<float3> poly_normals,
                                 MutableSpan<MLoopTri> looptris)
 {
-  BLI_assert(!poly_normals.is_empty());
+  BLI_assert(!poly_normals.is_empty() || polys.is_empty());
   looptris_calc_all(vert_positions, polys, corner_verts, poly_normals, looptris);
 }
 
