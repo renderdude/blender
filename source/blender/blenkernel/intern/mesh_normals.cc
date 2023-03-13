@@ -1769,7 +1769,7 @@ static void mesh_normals_loop_custom_set(Span<float3> positions,
        * give rather huge differences in computed 2D factors). */
       LinkNode *loop_link = lnors_spacearr.lspacearr[i]->loops;
       if (lnors_spacearr.lspacearr[i]->flags & MLNOR_SPACE_IS_SINGLE) {
-        BLI_assert(POINTER_AS_INT(loops) == i);
+        BLI_assert(POINTER_AS_INT(loop_link) == i);
         const int nidx = use_vertices ? corner_verts[i] : i;
         float *nor = r_custom_loop_normals[nidx];
 
