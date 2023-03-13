@@ -16,7 +16,7 @@
 #include "BKE_customdata.h"
 #include "BKE_global.h"
 #include "BKE_material.h"
-#include "BKE_mesh.h"
+#include "BKE_mesh.hh"
 #include "BKE_node.h"
 #include "BKE_paint.h"
 #include "BKE_pbvh.h"
@@ -140,6 +140,12 @@ bool paint_is_grid_face_hidden(const uint * /*grid_hidden*/,
   BLI_assert_unreachable();
   return false;
 }
+
+/** \} */
+
+/* -------------------------------------------------------------------- */
+/** \name Stubs of BKE_mesh.h
+ * \{ */
 
 /** \} */
 

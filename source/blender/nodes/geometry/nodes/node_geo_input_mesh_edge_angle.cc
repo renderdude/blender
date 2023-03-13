@@ -6,7 +6,7 @@
 #include "DNA_mesh_types.h"
 #include "DNA_meshdata_types.h"
 
-#include "BKE_mesh.h"
+#include "BKE_mesh.hh"
 
 #include "node_geometry_util.hh"
 
@@ -79,13 +79,8 @@ class AngleFieldInput final : public bke::MeshFieldInput {
       }
       const IndexRange poly_1 = polys[edge_map[i].face_index_1];
       const IndexRange poly_2 = polys[edge_map[i].face_index_2];
-      float3 normal_1, normal_2;
-      BKE_mesh_calc_poly_normal(corner_verts.slice(poly_1),
-                                reinterpret_cast<const float(*)[3]>(positions.data()),
-                                normal_1);
-      BKE_mesh_calc_poly_normal(corner_verts.slice(poly_2),
-                                reinterpret_cast<const float(*)[3]>(positions.data()),
-                                normal_2);
+      const float3 normal_1 = bke::mesh::poly_normal_calc(positions, corner_verts.slice(poly_1));
+      const float3 normal_2 = bke::mesh::poly_normal_calc(positions, corner_verts.slice(poly_2));
       return angle_normalized_v3v3(normal_1, normal_2);
     };
 
@@ -137,23 +132,18 @@ class SignedAngleFieldInput final : public bke::MeshFieldInput {
       const IndexRange poly_2 = polys[edge_map[i].face_index_2];
 
       /* Find the normals of the 2 polys. */
-      float3 poly_1_normal, poly_2_normal;
-      BKE_mesh_calc_poly_normal(corner_verts.slice(poly_1),
-                                reinterpret_cast<const float(*)[3]>(positions.data()),
-                                poly_1_normal);
-      BKE_mesh_calc_poly_normal(corner_verts.slice(poly_2),
-                                reinterpret_cast<const float(*)[3]>(positions.data()),
-                                poly_2_normal);
+      const float3 poly_1_normal = bke::mesh::poly_normal_calc(positions,
+                                                               corner_verts.slice(poly_1));
+      const float3 poly_2_normal = bke::mesh::poly_normal_calc(positions,
+                                                               corner_verts.slice(poly_2));
 
       /* Find the centerpoint of the axis edge */
       const float3 edge_centerpoint = (positions[edges[i].v1] + positions[edges[i].v2]) * 0.5f;
 
       /* Get the centerpoint of poly 2 and subtract the edge centerpoint to get a tangent
        * normal for poly 2. */
-      float3 poly_center_2;
-      BKE_mesh_calc_poly_center(corner_verts.slice(poly_2),
-                                reinterpret_cast<const float(*)[3]>(positions.data()),
-                                poly_center_2);
+      const float3 poly_center_2 = bke::mesh::poly_center_calc(positions,
+                                                               corner_verts.slice(poly_2));
       const float3 poly_2_tangent = math::normalize(poly_center_2 - edge_centerpoint);
       const float concavity = math::dot(poly_1_normal, poly_2_tangent);
 

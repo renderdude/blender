@@ -7,7 +7,7 @@
 #include "DNA_meshdata_types.h"
 
 #include "BKE_attribute_math.hh"
-#include "BKE_mesh.h"
+#include "BKE_mesh.hh"
 #include "BKE_mesh_mapping.h"
 
 #include "node_geometry_util.hh"
@@ -680,9 +680,8 @@ static Mesh *calc_dual_mesh(const Mesh &src_mesh,
 
   Vector<float3> vert_positions(src_mesh.totpoly);
   for (const int i : src_polys.index_range()) {
-    BKE_mesh_calc_poly_center(src_corner_verts.slice(src_polys[i]),
-                              reinterpret_cast<const float(*)[3]>(src_positions.data()),
-                              vert_positions[i]);
+    const IndexRange poly = src_polys[i];
+    vert_positions[i] = bke::mesh::poly_center_calc(src_positions, src_corner_verts.slice(poly));
   }
 
   Array<int> boundary_edge_midpoint_index;

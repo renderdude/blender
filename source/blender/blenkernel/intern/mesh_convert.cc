@@ -40,7 +40,7 @@
 #include "BKE_main.h"
 #include "BKE_material.h"
 #include "BKE_mball.h"
-#include "BKE_mesh.h"
+#include "BKE_mesh.hh"
 #include "BKE_mesh_runtime.h"
 #include "BKE_mesh_wrapper.h"
 #include "BKE_modifier.h"
@@ -76,6 +76,21 @@ using blender::StringRefNull;
 
 static CLG_LogRef LOG = {"bke.mesh_convert"};
 
+static void poly_edgehash_insert(EdgeHash *ehash, const Span<int> poly_verts)
+{
+  int i = poly_verts.size();
+
+  int next = 0;              /* first loop */
+  int poly_corner = (i - 1); /* last loop */
+
+  while (i-- != 0) {
+    BLI_edgehash_reinsert(ehash, poly_verts[poly_corner], poly_verts[next], nullptr);
+
+    poly_corner = next;
+    next++;
+  }
+}
+
 /**
  * Specialized function to use when we _know_ existing edges don't overlap with poly edges.
  */
@@ -91,7 +106,7 @@ static void make_edges_mdata_extend(Mesh &mesh)
   EdgeHash *eh = BLI_edgehash_new_ex(__func__, eh_reserve);
 
   for (const int i : polys.index_range()) {
-    BKE_mesh_poly_edgehash_insert(eh, corner_verts.slice(polys[i]));
+    poly_edgehash_insert(eh, corner_verts.slice(polys[i]));
   }
 
   const int totedge_new = BLI_edgehash_len(eh);

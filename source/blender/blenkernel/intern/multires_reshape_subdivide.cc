@@ -14,7 +14,7 @@
 
 #include "BKE_customdata.h"
 #include "BKE_lib_id.h"
-#include "BKE_mesh.h"
+#include "BKE_mesh.hh"
 #include "BKE_mesh_runtime.h"
 #include "BKE_modifier.h"
 #include "BKE_multires.h"
@@ -28,7 +28,9 @@
 
 static void multires_subdivide_create_object_space_linear_grids(Mesh *mesh)
 {
-  const float(*positions)[3] = BKE_mesh_vert_positions(mesh);
+  using namespace blender;
+  using namespace blender::bke;
+  const Span<float3> positions = mesh->vert_positions();
   const blender::OffsetIndices polys = mesh->polys();
   const blender::Span<int> corner_verts = mesh->corner_verts();
 
@@ -36,10 +38,9 @@ static void multires_subdivide_create_object_space_linear_grids(Mesh *mesh)
       CustomData_get_layer_for_write(&mesh->ldata, CD_MDISPS, mesh->totloop));
   for (const int p : polys.index_range()) {
     const blender::IndexRange poly = polys[p];
-    float poly_center[3];
-    BKE_mesh_calc_poly_center(corner_verts.slice(poly), positions, poly_center);
+    const float3 poly_center = mesh::poly_center_calc(positions, corner_verts.slice(poly));
     for (int l = 0; l < poly.size(); l++) {
-      const int loop_index = poly.start() + l;
+      const int loop_index = poly[l];
 
       float(*disps)[3] = mdisps[loop_index].disps;
       mdisps[loop_index].totdisp = 4;

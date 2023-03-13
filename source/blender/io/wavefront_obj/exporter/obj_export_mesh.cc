@@ -9,7 +9,7 @@
 #include "BKE_deform.h"
 #include "BKE_lib_id.h"
 #include "BKE_material.h"
-#include "BKE_mesh.h"
+#include "BKE_mesh.hh"
 #include "BKE_mesh_mapping.h"
 #include "BKE_object.h"
 
@@ -353,10 +353,8 @@ Span<int> OBJMesh::calc_poly_uv_indices(const int poly_index) const
 
 float3 OBJMesh::calc_poly_normal(const int poly_index) const
 {
-  float3 r_poly_normal;
-  BKE_mesh_calc_poly_normal(mesh_corner_verts_.slice(mesh_polys_[poly_index]),
-                            reinterpret_cast<const float(*)[3]>(mesh_positions_.data()),
-                            r_poly_normal);
+  float3 r_poly_normal = bke::mesh::poly_normal_calc(
+      mesh_positions_, mesh_corner_verts_.slice(mesh_polys_[poly_index]));
   mul_m3_v3(world_and_axes_normal_transform_, r_poly_normal);
   normalize_v3(r_poly_normal);
   return r_poly_normal;

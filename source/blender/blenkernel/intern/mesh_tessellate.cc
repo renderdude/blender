@@ -10,23 +10,17 @@
  * \see bmesh_mesh_tessellate.c for the #BMesh equivalent of this file.
  */
 
-#include <climits>
-
-#include "MEM_guardedalloc.h"
-
-#include "DNA_mesh_types.h"
-#include "DNA_meshdata_types.h"
-
+#include "BLI_enumerable_thread_specific.hh"
 #include "BLI_math.h"
 #include "BLI_memarena.h"
 #include "BLI_polyfill_2d.h"
 #include "BLI_task.h"
-#include "BLI_utildefines.h"
 
-#include "BKE_customdata.h"
-#include "BKE_mesh.h" /* Own include. */
+#include "BKE_mesh.hh"
 
 #include "BLI_strict_flags.h"
+
+namespace blender::bke::mesh {
 
 /** Compared against total loops. */
 #define MESH_FACE_TESSELLATE_THREADED_LIMIT 4096
@@ -40,9 +34,9 @@
 /**
  * \param face_normal: This will be optimized out as a constant.
  */
-BLI_INLINE void mesh_calc_tessellation_for_face_impl(const int *corner_verts,
+BLI_INLINE void mesh_calc_tessellation_for_face_impl(const Span<int> corner_verts,
                                                      const blender::OffsetIndices<int> polys,
-                                                     const float (*positions)[3],
+                                                     const Span<float3> positions,
                                                      uint poly_index,
                                                      MLoopTri *mlt,
                                                      MemArena **pf_arena_p,
@@ -147,9 +141,9 @@ BLI_INLINE void mesh_calc_tessellation_for_face_impl(const int *corner_verts,
 #undef ML_TO_MLT
 }
 
-static void mesh_calc_tessellation_for_face(const int *corner_verts,
+static void mesh_calc_tessellation_for_face(const Span<int> corner_verts,
                                             const blender::OffsetIndices<int> polys,
-                                            const float (*positions)[3],
+                                            const Span<float3> positions,
                                             uint poly_index,
                                             MLoopTri *mlt,
                                             MemArena **pf_arena_p)
@@ -158,9 +152,9 @@ static void mesh_calc_tessellation_for_face(const int *corner_verts,
       corner_verts, polys, positions, poly_index, mlt, pf_arena_p, false, nullptr);
 }
 
-static void mesh_calc_tessellation_for_face_with_normal(const int *corner_verts,
+static void mesh_calc_tessellation_for_face_with_normal(const Span<int> corner_verts,
                                                         const blender::OffsetIndices<int> polys,
-                                                        const float (*positions)[3],
+                                                        const Span<float3> positions,
                                                         uint poly_index,
                                                         MLoopTri *mlt,
                                                         MemArena **pf_arena_p,
@@ -170,10 +164,9 @@ static void mesh_calc_tessellation_for_face_with_normal(const int *corner_verts,
       corner_verts, polys, positions, poly_index, mlt, pf_arena_p, true, normal_precalc);
 }
 
-static void mesh_recalc_looptri__single_threaded(const int *corner_verts,
+static void mesh_recalc_looptri__single_threaded(const Span<int> corner_verts,
                                                  const blender::OffsetIndices<int> polys,
-                                                 const float (*positions)[3],
-                                                 int totloop,
+                                                 const Span<float3> positions,
                                                  MLoopTri *mlooptri,
                                                  const float (*poly_normals)[3])
 {
@@ -204,17 +197,16 @@ static void mesh_recalc_looptri__single_threaded(const int *corner_verts,
     BLI_memarena_free(pf_arena);
     pf_arena = nullptr;
   }
-  BLI_assert(tri_index == uint(poly_to_tri_count(polys.ranges_num(), totloop)));
-  UNUSED_VARS_NDEBUG(totloop);
+  BLI_assert(tri_index == uint(poly_to_tri_count(polys.ranges_num(), int(corner_verts.size()))));
 }
 
 struct TessellationUserData {
-  const int *corner_verts;
+  Span<int> corner_verts;
   blender::OffsetIndices<int> polys;
-  const float (*positions)[3];
+  Span<float3> positions;
 
   /** Output array. */
-  MLoopTri *mlooptri;
+  MutableSpan<MLoopTri> mlooptri;
 
   /** Optional pre-calculated polygon normals array. */
   const float (*poly_normals)[3];
@@ -267,13 +259,20 @@ static void mesh_calc_tessellation_for_face_free_fn(const void *__restrict /*use
   }
 }
 
-static void mesh_recalc_looptri__multi_threaded(const int *corner_verts,
-                                                const blender::OffsetIndices<int> polys,
-                                                const float (*positions)[3],
-                                                int /*totloop*/,
-                                                MLoopTri *mlooptri,
-                                                const float (*poly_normals)[3])
+static void looptris_calc_all(const Span<float3> positions,
+                              const blender::OffsetIndices<int> polys,
+                              const Span<int> corner_verts,
+                              const Span<float3> poly_normals,
+                              MutableSpan<MLoopTri> looptris)
 {
+  if (corner_verts.size() < MESH_FACE_TESSELLATE_THREADED_LIMIT) {
+    mesh_recalc_looptri__single_threaded(corner_verts,
+                                         polys,
+                                         positions,
+                                         looptris.data(),
+                                         reinterpret_cast<const float(*)[3]>(poly_normals.data()));
+    return;
+  }
   struct TessellationUserTLS tls_data_dummy = {nullptr};
 
   struct TessellationUserData data {
@@ -281,8 +280,8 @@ static void mesh_recalc_looptri__multi_threaded(const int *corner_verts,
   data.corner_verts = corner_verts;
   data.polys = polys;
   data.positions = positions;
-  data.mlooptri = mlooptri;
-  data.poly_normals = poly_normals;
+  data.mlooptri = looptris;
+  data.poly_normals = reinterpret_cast<const float(*)[3]>(poly_normals.data());
 
   TaskParallelSettings settings;
   BLI_parallel_range_settings_defaults(&settings);
@@ -295,47 +294,44 @@ static void mesh_recalc_looptri__multi_threaded(const int *corner_verts,
   BLI_task_parallel_range(0,
                           polys.ranges_num(),
                           &data,
-                          poly_normals ? mesh_calc_tessellation_for_face_with_normal_fn :
-                                         mesh_calc_tessellation_for_face_fn,
+                          data.poly_normals ? mesh_calc_tessellation_for_face_with_normal_fn :
+                                              mesh_calc_tessellation_for_face_fn,
                           &settings);
 }
+
+void looptris_calc(const Span<float3> vert_positions,
+                   const OffsetIndices<int> polys,
+                   const Span<int> corner_verts,
+                   MutableSpan<MLoopTri> looptris)
+{
+  looptris_calc_all(vert_positions, polys, corner_verts, {}, looptris);
+}
+
+void looptris_calc_with_normals(const Span<float3> vert_positions,
+                                const OffsetIndices<int> polys,
+                                const Span<int> corner_verts,
+                                const Span<float3> poly_normals,
+                                MutableSpan<MLoopTri> looptris)
+{
+  BLI_assert(!poly_normals.is_empty());
+  looptris_calc_all(vert_positions, polys, corner_verts, poly_normals, looptris);
+}
+
+}  // namespace blender::bke::mesh
 
 void BKE_mesh_recalc_looptri(const int *corner_verts,
                              const int *poly_offsets,
                              const float (*vert_positions)[3],
+                             int totvert,
                              int totloop,
                              int totpoly,
                              MLoopTri *mlooptri)
 {
-  const blender::OffsetIndices<int> polys(blender::Span(poly_offsets, totpoly + 1));
-  if (totloop < MESH_FACE_TESSELLATE_THREADED_LIMIT) {
-    mesh_recalc_looptri__single_threaded(
-        corner_verts, polys, vert_positions, totloop, mlooptri, nullptr);
-  }
-  else {
-    mesh_recalc_looptri__multi_threaded(
-        corner_verts, polys, vert_positions, totloop, mlooptri, nullptr);
-  }
-}
-
-void BKE_mesh_recalc_looptri_with_normals(const int *corner_verts,
-                                          const int *poly_offsets,
-                                          const float (*vert_positions)[3],
-                                          int totloop,
-                                          int totpoly,
-                                          MLoopTri *mlooptri,
-                                          const float (*poly_normals)[3])
-{
-  const blender::OffsetIndices<int> polys(blender::Span(poly_offsets, totpoly + 1));
-  BLI_assert(poly_normals != nullptr);
-  if (totloop < MESH_FACE_TESSELLATE_THREADED_LIMIT) {
-    mesh_recalc_looptri__single_threaded(
-        corner_verts, polys, vert_positions, totloop, mlooptri, poly_normals);
-  }
-  else {
-    mesh_recalc_looptri__multi_threaded(
-        corner_verts, polys, vert_positions, totloop, mlooptri, poly_normals);
-  }
+  blender::bke::mesh::looptris_calc(
+      {reinterpret_cast<const blender::float3 *>(vert_positions), totvert},
+      blender::Span(poly_offsets, totpoly + 1),
+      {corner_verts, totloop},
+      {mlooptri, poly_to_tri_count(totpoly, totloop)});
 }
 
 /** \} */

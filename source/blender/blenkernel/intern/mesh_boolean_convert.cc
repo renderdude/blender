@@ -12,7 +12,7 @@
 #include "BKE_attribute.hh"
 #include "BKE_customdata.h"
 #include "BKE_material.h"
-#include "BKE_mesh.h"
+#include "BKE_mesh.hh"
 #include "BKE_mesh_boolean_convert.hh"
 
 #include "BLI_alloca.h"
@@ -545,9 +545,7 @@ static void get_poly2d_cos(const Mesh *me,
   const Span<int> poly_verts = corner_verts.slice(poly);
 
   /* Project coordinates to 2d in cos_2d, using normal as projection axis. */
-  float axis_dominant[3];
-  BKE_mesh_calc_poly_normal(
-      poly_verts, reinterpret_cast<const float(*)[3]>(positions.data()), axis_dominant);
+  const float3 axis_dominant = bke::mesh::poly_normal_calc(positions, poly_verts);
   axis_dominant_v3_to_m3(r_axis_mat, axis_dominant);
   for (const int i : poly_verts.index_range()) {
     float3 co = positions[poly_verts[i]];

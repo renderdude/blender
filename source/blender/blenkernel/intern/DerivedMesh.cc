@@ -42,7 +42,7 @@
 #include "BKE_layer.h"
 #include "BKE_lib_id.h"
 #include "BKE_material.h"
-#include "BKE_mesh.h"
+#include "BKE_mesh.hh"
 #include "BKE_mesh_iterators.h"
 #include "BKE_mesh_mapping.h"
 #include "BKE_mesh_runtime.h"
@@ -1928,14 +1928,15 @@ static void mesh_init_origspace(Mesh *mesh)
       }
     }
     else {
-      float p_nor[3], co[3];
+      float co[3];
       float mat[3][3];
 
       float min[2] = {FLT_MAX, FLT_MAX}, max[2] = {-FLT_MAX, -FLT_MAX};
       float translate[2], scale[2];
 
-      BKE_mesh_calc_poly_normal(
-          corner_verts.slice(poly), reinterpret_cast<const float(*)[3]>(positions.data()), p_nor);
+      const float3 p_nor = blender::bke::mesh::poly_normal_calc(positions,
+                                                                corner_verts.slice(poly));
+
       axis_dominant_v3_to_m3(mat, p_nor);
 
       vcos_2d.resize(poly.size());

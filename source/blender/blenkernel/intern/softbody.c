@@ -2761,7 +2761,7 @@ static void mesh_faces_to_scratch(Object *ob)
   sb->scratch->totface = poly_to_tri_count(me->totpoly, me->totloop);
   looptri = lt = MEM_mallocN(sizeof(*looptri) * sb->scratch->totface, __func__);
   BKE_mesh_recalc_looptri(
-      corner_verts, poly_offsets, vert_positions, me->totloop, me->totpoly, looptri);
+      corner_verts, poly_offsets, vert_positions, me->totvert, me->totloop, me->totpoly, looptri);
 
   bodyface = sb->scratch->bodyface = MEM_mallocN(sizeof(BodyFace) * sb->scratch->totface,
                                                  "SB_body_Faces");

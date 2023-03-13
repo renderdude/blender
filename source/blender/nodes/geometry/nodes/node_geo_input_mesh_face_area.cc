@@ -3,7 +3,7 @@
 #include "DNA_mesh_types.h"
 #include "DNA_meshdata_types.h"
 
-#include "BKE_mesh.h"
+#include "BKE_mesh.hh"
 
 #include "node_geometry_util.hh"
 
@@ -23,8 +23,7 @@ static VArray<float> construct_face_area_varray(const Mesh &mesh, const eAttrDom
   const Span<int> corner_verts = mesh.corner_verts();
 
   auto area_fn = [positions, polys, corner_verts](const int i) -> float {
-    return BKE_mesh_calc_poly_area(corner_verts.slice(polys[i]),
-                                   reinterpret_cast<const float(*)[3]>(positions.data()));
+    return bke::mesh::poly_area_calc(positions, corner_verts.slice(polys[i]));
   };
 
   return mesh.attributes().adapt_domain<float>(

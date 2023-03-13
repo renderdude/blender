@@ -24,10 +24,9 @@
 #include "BLI_utildefines.h"
 #include "BLI_virtual_array.hh"
 
-#include "BKE_customdata.h"
-
 #include "BKE_attribute.hh"
-#include "BKE_mesh.h"
+#include "BKE_customdata.h"
+#include "BKE_mesh.hh"
 #include "BKE_multires.h"
 
 using blender::float3;
@@ -39,60 +38,80 @@ using blender::VArray;
 /** \name Polygon Calculations
  * \{ */
 
-static void mesh_calc_ngon_center(const Span<int> poly_verts,
-                                  const float (*positions)[3],
-                                  float cent[3])
+namespace blender::bke::mesh {
+
+static float3 poly_center_calc_ngon(const Span<float3> vert_positions, const Span<int> poly_verts)
 {
   const float w = 1.0f / float(poly_verts.size());
 
-  zero_v3(cent);
-
-  for (int i = 0; i < poly_verts.size(); i++) {
-    madd_v3_v3fl(cent, positions[poly_verts[i]], w);
+  float3 center(0);
+  for (const int i : poly_verts.index_range()) {
+    center += vert_positions[poly_verts[i]] * w;
   }
+  return center;
 }
 
-void BKE_mesh_calc_poly_center(const Span<int> poly_verts,
-                               const float (*vert_positions)[3],
-                               float r_cent[3])
+float3 poly_center_calc(const Span<float3> vert_positions, const Span<int> poly_verts)
 {
   if (poly_verts.size() == 3) {
-    mid_v3_v3v3v3(r_cent,
+    float3 center;
+    mid_v3_v3v3v3(center,
                   vert_positions[poly_verts[0]],
                   vert_positions[poly_verts[1]],
                   vert_positions[poly_verts[2]]);
+    return center;
   }
-  else if (poly_verts.size() == 4) {
-    mid_v3_v3v3v3v3(r_cent,
+  if (poly_verts.size() == 4) {
+    float3 center;
+    mid_v3_v3v3v3v3(center,
                     vert_positions[poly_verts[0]],
                     vert_positions[poly_verts[1]],
                     vert_positions[poly_verts[2]],
                     vert_positions[poly_verts[3]]);
+    return center;
   }
-  else {
-    mesh_calc_ngon_center(poly_verts, vert_positions, r_cent);
-  }
+  return poly_center_calc_ngon(vert_positions, poly_verts);
 }
 
-float BKE_mesh_calc_poly_area(const Span<int> poly_verts, const float (*vert_positions)[3])
+}  // namespace blender::bke::mesh
+
+void BKE_mesh_calc_poly_center(const int *poly_verts,
+                               const int poly_size,
+                               const float (*vert_positions)[3],
+                               const int verts_num,
+                               float r_cent[3])
+{
+  copy_v3_v3(r_cent,
+             blender::bke::mesh::poly_center_calc(
+                 {reinterpret_cast<const blender::float3 *>(vert_positions), verts_num},
+                 {poly_verts, poly_size}));
+}
+
+namespace blender::bke::mesh {
+
+float poly_area_calc(const Span<float3> vert_positions, const Span<int> poly_verts)
 {
   if (poly_verts.size() == 3) {
     return area_tri_v3(vert_positions[poly_verts[0]],
                        vert_positions[poly_verts[1]],
                        vert_positions[poly_verts[2]]);
   }
-
-  float(*vertexcos)[3] = (float(*)[3])BLI_array_alloca(vertexcos, size_t(poly_verts.size()));
-
-  /* pack vertex cos into an array for area_poly_v3 */
-  for (int i = 0; i < poly_verts.size(); i++) {
-    copy_v3_v3(vertexcos[i], vert_positions[poly_verts[i]]);
+  Array<float3, 32> poly_coords(poly_verts.size());
+  for (const int i : poly_verts.index_range()) {
+    poly_coords[i] = vert_positions[poly_verts[i]];
   }
+  return area_poly_v3((const float(*)[3])poly_coords.data(), poly_verts.size());
+}
 
-  /* finally calculate the area */
-  float area = area_poly_v3((const float(*)[3])vertexcos, uint(poly_verts.size()));
+}  // namespace blender::bke::mesh
 
-  return area;
+float BKE_mesh_calc_poly_area(const int *poly_verts,
+                              const int poly_size,
+                              const float (*vert_positions)[3],
+                              const int verts_num)
+{
+  return blender::bke::mesh::poly_area_calc(
+      {reinterpret_cast<const float3 *>(vert_positions), verts_num}, {poly_verts, poly_size});
 }
 
 float BKE_mesh_calc_area(const Mesh *me)
@@ -103,14 +122,13 @@ float BKE_mesh_calc_area(const Mesh *me)
 
   float total_area = 0.0f;
   for (const int i : polys.index_range()) {
-    total_area += BKE_mesh_calc_poly_area(corner_verts.slice(polys[i]),
-                                          reinterpret_cast<const float(*)[3]>(positions.data()));
+    total_area += blender::bke::mesh::poly_area_calc(positions, corner_verts.slice(polys[i]));
   }
   return total_area;
 }
 
-static float UNUSED_FUNCTION(mesh_calc_poly_volume_centroid)(const blender::IndexRange poly,
-                                                             const int *poly_verts,
+static float UNUSED_FUNCTION(mesh_calc_poly_volume_centroid)(const int *poly_verts,
+                                                             const int poly_size,
                                                              const float (*positions)[3],
                                                              float r_cent[3])
 {
@@ -122,7 +140,7 @@ static float UNUSED_FUNCTION(mesh_calc_poly_volume_centroid)(const blender::Inde
   v_pivot = positions[poly_verts[0]];
   v_step1 = positions[poly_verts[1]];
 
-  for (int i = 2; i < poly.size(); i++) {
+  for (int i = 2; i < poly_size; i++) {
     const float *v_step2 = positions[poly_verts[i]];
 
     /* Calculate the 6x volume of the tetrahedron formed by the 3 vertices
@@ -146,14 +164,16 @@ static float UNUSED_FUNCTION(mesh_calc_poly_volume_centroid)(const blender::Inde
   return total_volume;
 }
 
+namespace blender::bke::mesh {
+
 /**
  * A version of mesh_calc_poly_volume_centroid that takes an initial reference center,
  * use this to increase numeric stability as the quality of the result becomes
  * very low quality as the value moves away from 0.0, see: #65986.
  */
-static float mesh_calc_poly_volume_centroid_with_reference_center(const Span<int> poly_verts,
-                                                                  const Span<float3> positions,
-                                                                  const float reference_center[3],
+static float mesh_calc_poly_volume_centroid_with_reference_center(const Span<float3> positions,
+                                                                  const Span<int> poly_verts,
+                                                                  const float3 &reference_center,
                                                                   float r_cent[3])
 {
   /* See: mesh_calc_poly_volume_centroid for comments. */
@@ -181,16 +201,18 @@ static float mesh_calc_poly_volume_centroid_with_reference_center(const Span<int
  * - This has the advantage over #mesh_calc_poly_volume_centroid
  *   that it doesn't depend on solid geometry, instead it weights the surface by volume.
  */
-static float mesh_calc_poly_area_centroid(const Span<int> poly_verts,
-                                          const float (*positions)[3],
-                                          float r_cent[3])
+static float poly_area_centroid_calc(const Span<float3> positions,
+                                     const Span<int> poly_verts,
+                                     float r_cent[3])
 {
   float total_area = 0.0f;
-  float v1[3], v2[3], v3[3], normal[3], tri_cent[3];
+  float v1[3], v2[3], v3[3], tri_cent[3];
 
-  BKE_mesh_calc_poly_normal(poly_verts, positions, normal);
+  const float3 normal = blender::bke::mesh::poly_normal_calc(positions, poly_verts);
+
   copy_v3_v3(v1, positions[poly_verts[0]]);
   copy_v3_v3(v2, positions[poly_verts[1]]);
+
   zero_v3(r_cent);
 
   for (int i = 2; i < poly_verts.size(); i++) {
@@ -210,9 +232,9 @@ static float mesh_calc_poly_area_centroid(const Span<int> poly_verts,
   return total_area;
 }
 
-void BKE_mesh_calc_poly_angles(const Span<int> poly_verts,
-                               const float (*vert_positions)[3],
-                               float angles[])
+void poly_angles_calc(const Span<float3> vert_positions,
+                      const Span<int> poly_verts,
+                      MutableSpan<float> angles)
 {
   float nor_prev[3];
   float nor_next[3];
@@ -236,27 +258,7 @@ void BKE_mesh_calc_poly_angles(const Span<int> poly_verts,
   }
 }
 
-void BKE_mesh_poly_edgehash_insert(EdgeHash *ehash, const Span<int> poly_verts)
-{
-  int i = poly_verts.size();
-
-  int next = 0;              /* first loop */
-  int poly_corner = (i - 1); /* last loop */
-
-  while (i-- != 0) {
-    BLI_edgehash_reinsert(ehash, poly_verts[poly_corner], poly_verts[next], nullptr);
-
-    poly_corner = next;
-    next++;
-  }
-}
-
-void BKE_mesh_poly_edgebitmap_insert(uint *edge_bitmap, const Span<int> poly_edges)
-{
-  for (const int i : poly_edges.index_range()) {
-    BLI_BITMAP_ENABLE(edge_bitmap, poly_edges[i]);
-  }
-}
+}  // namespace blender::bke::mesh
 
 /** \} */
 
@@ -315,7 +317,7 @@ bool BKE_mesh_center_of_surface(const Mesh *me, float r_cent[3])
   float poly_area;
   float total_area = 0.0f;
   float poly_cent[3];
-  const float(*positions)[3] = BKE_mesh_vert_positions(me);
+  const Span<float3> positions = me->vert_positions();
   const blender::OffsetIndices polys = me->polys();
   const Span<int> corner_verts = me->corner_verts();
 
@@ -323,7 +325,8 @@ bool BKE_mesh_center_of_surface(const Mesh *me, float r_cent[3])
 
   /* calculate a weighted average of polygon centroids */
   for (const int i : polys.index_range()) {
-    poly_area = mesh_calc_poly_area_centroid(corner_verts.slice(polys[i]), positions, poly_cent);
+    poly_area = blender::bke::mesh::poly_area_centroid_calc(
+        positions, corner_verts.slice(polys[i]), poly_cent);
 
     madd_v3_v3fl(r_cent, poly_cent, poly_area);
     total_area += poly_area;
@@ -358,8 +361,8 @@ bool BKE_mesh_center_of_volume(const Mesh *me, float r_cent[3])
 
   /* calculate a weighted average of polyhedron centroids */
   for (const int i : polys.index_range()) {
-    poly_volume = mesh_calc_poly_volume_centroid_with_reference_center(
-        corner_verts.slice(polys[i]), positions, init_cent, poly_cent);
+    poly_volume = blender::bke::mesh::mesh_calc_poly_volume_centroid_with_reference_center(
+        positions, corner_verts.slice(polys[i]), init_cent, poly_cent);
 
     /* poly_cent is already volume-weighted, so no need to multiply by the volume */
     add_v3_v3(r_cent, poly_cent);

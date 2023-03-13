@@ -650,7 +650,12 @@ static void rna_MeshLoop_bitangent_get(PointerRNA *ptr, float *values)
 
 static void rna_MeshPolygon_normal_get(PointerRNA *ptr, float *values)
 {
-  ED_mesh_calc_poly_normal_index(rna_mesh(ptr), rna_MeshPolygon_index_get(ptr), values);
+  Mesh *me = rna_mesh(ptr);
+  const int poly_start = *((const int *)ptr->data);
+  const int poly_size = *(((const int *)ptr->data) + 1) - poly_start;
+  const float(*positions)[3] = BKE_mesh_vert_positions(me);
+  const int *corner_verts = BKE_mesh_corner_verts(me);
+  BKE_mesh_calc_poly_normal(&corner_verts[poly_start], poly_size, positions, me->totvert, values);
 }
 
 static bool rna_MeshPolygon_hide_get(PointerRNA *ptr)
@@ -749,12 +754,22 @@ static void rna_MeshPolygon_material_index_set(PointerRNA *ptr, int value)
 
 static void rna_MeshPolygon_center_get(PointerRNA *ptr, float *values)
 {
-  ED_mesh_calc_poly_center_index(rna_mesh(ptr), rna_MeshPolygon_index_get(ptr), values);
+  Mesh *me = rna_mesh(ptr);
+  const int poly_start = *((const int *)ptr->data);
+  const int poly_size = *(((const int *)ptr->data) + 1) - poly_start;
+  const float(*positions)[3] = BKE_mesh_vert_positions(me);
+  const int *corner_verts = BKE_mesh_corner_verts(me);
+  BKE_mesh_calc_poly_center(&corner_verts[poly_start], poly_size, positions, me->totvert, values);
 }
 
 static float rna_MeshPolygon_area_get(PointerRNA *ptr)
 {
-  return ED_mesh_calc_poly_area_index(rna_mesh(ptr), rna_MeshPolygon_index_get(ptr));
+  Mesh *me = (Mesh *)ptr->owner_id;
+  const int poly_start = *((const int *)ptr->data);
+  const int poly_size = *(((const int *)ptr->data) + 1) - poly_start;
+  const float(*positions)[3] = BKE_mesh_vert_positions(me);
+  const int *corner_verts = BKE_mesh_corner_verts(me);
+  return BKE_mesh_calc_poly_area(&corner_verts[poly_start], poly_size, positions, me->totvert);
 }
 
 static void rna_MeshPolygon_flip(ID *id, MIntProperty *poly_offset_p)
