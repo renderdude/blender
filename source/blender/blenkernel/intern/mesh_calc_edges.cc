@@ -236,7 +236,7 @@ void BKE_mesh_calc_edges(Mesh *mesh, bool keep_existing_edges, const bool select
   /* Create new edges. */
   if (!CustomData_get_layer_named(&mesh->ldata, CD_PROP_INT32, ".corner_edge")) {
     CustomData_add_layer_named(
-        &mesh->ldata, CD_PROP_INT32, CD_CONSTRUCT, nullptr, mesh->totloop, ".corner_edge");
+        &mesh->ldata, CD_PROP_INT32, CD_CONSTRUCT, mesh->totloop, ".corner_edge");
   }
   MutableSpan<MEdge> new_edges{
       static_cast<MEdge *>(MEM_calloc_arrayN(new_totedge, sizeof(MEdge), __func__)), new_totedge};
@@ -246,7 +246,7 @@ void BKE_mesh_calc_edges(Mesh *mesh, bool keep_existing_edges, const bool select
   /* Free old CustomData and assign new one. */
   CustomData_free(&mesh->edata, mesh->totedge);
   CustomData_reset(&mesh->edata);
-  CustomData_add_layer(&mesh->edata, CD_MEDGE, CD_ASSIGN, new_edges.data(), new_totedge);
+  CustomData_add_layer_with_data(&mesh->edata, CD_MEDGE, new_edges.data(), new_totedge);
   mesh->totedge = new_totedge;
 
   if (select_new_edges) {

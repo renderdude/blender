@@ -99,7 +99,7 @@ static float *dm_getVertArray(DerivedMesh *dm)
 
   if (!positions) {
     positions = (float(*)[3])CustomData_add_layer_named(
-        &dm->vertData, CD_PROP_FLOAT3, CD_SET_DEFAULT, nullptr, dm->getNumVerts(dm), "position");
+        &dm->vertData, CD_PROP_FLOAT3, CD_SET_DEFAULT, dm->getNumVerts(dm), "position");
     CustomData_set_layer_flag(&dm->vertData, CD_PROP_FLOAT3, CD_FLAG_TEMPORARY);
     dm->copyVertArray(dm, positions);
   }
@@ -114,7 +114,7 @@ static MEdge *dm_getEdgeArray(DerivedMesh *dm)
 
   if (!edge) {
     edge = (MEdge *)CustomData_add_layer(
-        &dm->edgeData, CD_MEDGE, CD_SET_DEFAULT, nullptr, dm->getNumEdges(dm));
+        &dm->edgeData, CD_MEDGE, CD_SET_DEFAULT, dm->getNumEdges(dm));
     CustomData_set_layer_flag(&dm->edgeData, CD_MEDGE, CD_FLAG_TEMPORARY);
     dm->copyEdgeArray(dm, edge);
   }
@@ -128,12 +128,8 @@ static int *dm_getCornerVertArray(DerivedMesh *dm)
       &dm->loopData, CD_PROP_INT32, ".corner_vert", dm->getNumLoops(dm));
 
   if (!corner_verts) {
-    corner_verts = (int *)CustomData_add_layer_named(&dm->loopData,
-                                                     CD_PROP_INT32,
-                                                     CD_SET_DEFAULT,
-                                                     nullptr,
-                                                     dm->getNumLoops(dm),
-                                                     ".corner_vert");
+    corner_verts = (int *)CustomData_add_layer_named(
+        &dm->loopData, CD_PROP_INT32, CD_SET_DEFAULT, dm->getNumLoops(dm), ".corner_vert");
     dm->copyCornerVertArray(dm, corner_verts);
   }
 
@@ -146,12 +142,8 @@ static int *dm_getCornerEdgeArray(DerivedMesh *dm)
       &dm->loopData, CD_PROP_INT32, ".corner_edge");
 
   if (!corner_edges) {
-    corner_edges = (int *)CustomData_add_layer_named(&dm->loopData,
-                                                     CD_PROP_INT32,
-                                                     CD_SET_DEFAULT,
-                                                     nullptr,
-                                                     dm->getNumLoops(dm),
-                                                     ".corner_edge");
+    corner_edges = (int *)CustomData_add_layer_named(
+        &dm->loopData, CD_PROP_INT32, CD_SET_DEFAULT, dm->getNumLoops(dm), ".corner_edge");
     dm->copyCornerEdgeArray(dm, corner_edges);
   }
 
@@ -520,7 +512,7 @@ static void add_orco_mesh(Object *ob, BMEditMesh *em, Mesh *mesh, Mesh *mesh_orc
     layerorco = (float(*)[3])CustomData_get_layer_for_write(&mesh->vdata, layer, mesh->totvert);
     if (!layerorco) {
       layerorco = (float(*)[3])CustomData_add_layer(
-          &mesh->vdata, layer, CD_SET_DEFAULT, nullptr, mesh->totvert);
+          &mesh->vdata, eCustomDataType(layer), CD_SET_DEFAULT, mesh->totvert);
     }
 
     memcpy(layerorco, orco, sizeof(float[3]) * totvert);
@@ -901,11 +893,11 @@ static void mesh_calc_modifiers(struct Depsgraph *depsgraph,
             ((nextmask.vmask | nextmask.emask | nextmask.pmask) & CD_MASK_ORIGINDEX)) {
           /* calc */
           CustomData_add_layer(
-              &mesh_final->vdata, CD_ORIGINDEX, CD_CONSTRUCT, nullptr, mesh_final->totvert);
+              &mesh_final->vdata, CD_ORIGINDEX, CD_CONSTRUCT, mesh_final->totvert);
           CustomData_add_layer(
-              &mesh_final->edata, CD_ORIGINDEX, CD_CONSTRUCT, nullptr, mesh_final->totedge);
+              &mesh_final->edata, CD_ORIGINDEX, CD_CONSTRUCT, mesh_final->totedge);
           CustomData_add_layer(
-              &mesh_final->pdata, CD_ORIGINDEX, CD_CONSTRUCT, nullptr, mesh_final->totpoly);
+              &mesh_final->pdata, CD_ORIGINDEX, CD_CONSTRUCT, mesh_final->totpoly);
 
           /* Not worth parallelizing this,
            * gives less than 0.1% overall speedup in best of best cases... */
@@ -944,11 +936,8 @@ static void mesh_calc_modifiers(struct Depsgraph *depsgraph,
       /* add an origspace layer if needed */
       if ((md_datamask->mask.lmask) & CD_MASK_ORIGSPACE_MLOOP) {
         if (!CustomData_has_layer(&mesh_final->ldata, CD_ORIGSPACE_MLOOP)) {
-          CustomData_add_layer(&mesh_final->ldata,
-                               CD_ORIGSPACE_MLOOP,
-                               CD_SET_DEFAULT,
-                               nullptr,
-                               mesh_final->totloop);
+          CustomData_add_layer(
+              &mesh_final->ldata, CD_ORIGSPACE_MLOOP, CD_SET_DEFAULT, mesh_final->totloop);
           mesh_init_origspace(mesh_final);
         }
       }
@@ -1395,11 +1384,8 @@ static void editbmesh_calc_modifiers(struct Depsgraph *depsgraph,
 
       if (mask.lmask & CD_MASK_ORIGSPACE_MLOOP) {
         if (!CustomData_has_layer(&mesh_final->ldata, CD_ORIGSPACE_MLOOP)) {
-          CustomData_add_layer(&mesh_final->ldata,
-                               CD_ORIGSPACE_MLOOP,
-                               CD_SET_DEFAULT,
-                               nullptr,
-                               mesh_final->totloop);
+          CustomData_add_layer(
+              &mesh_final->ldata, CD_ORIGSPACE_MLOOP, CD_SET_DEFAULT, mesh_final->totloop);
           mesh_init_origspace(mesh_final);
         }
       }

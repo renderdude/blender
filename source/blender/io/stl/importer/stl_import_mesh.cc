@@ -77,18 +77,22 @@ Mesh *STLMeshHelper::to_mesh(Main *bmain, char *mesh_name)
 
   mesh->totvert = verts_.size();
   CustomData_add_layer_named(
-      &mesh->vdata, CD_PROP_FLOAT3, CD_CONSTRUCT, nullptr, mesh->totvert, "position");
+      &mesh->vdata, CD_PROP_FLOAT3, CD_CONSTRUCT, mesh->totvert, "position");
   mesh->vert_positions_for_write().copy_from(verts_);
 
   mesh->totpoly = tris_.size();
   mesh->totloop = tris_.size() * 3;
   BKE_mesh_poly_offsets_ensure(mesh);
   CustomData_add_layer_named(
-      &mesh->ldata, CD_PROP_INT32, CD_SET_DEFAULT, nullptr, mesh->totloop, ".corner_vert");
+      &mesh->ldata, CD_PROP_INT32, CD_SET_DEFAULT, mesh->totloop, ".corner_vert");
 
   MutableSpan<int> poly_offsets = mesh->poly_offsets_for_write();
-  poly_offsets.fill(3);
-  offset_indices::accumulate_counts_to_offsets(poly_offsets);
+  threading::parallel_for(
+      poly_offsets.index_range(), 4096, [poly_offsets](const IndexRange range) {
+        for (const int i : range) {
+          poly_offsets[i] = i * 3;
+        }
+      });
 
   MutableSpan<int> corner_verts = mesh->corner_verts_for_write();
   threading::parallel_for(tris_.index_range(), 2048, [&](IndexRange tris_range) {

@@ -230,6 +230,7 @@ void normals_calc_polys(const Span<float3> positions,
                         const Span<int> corner_verts,
                         MutableSpan<float3> poly_normals)
 {
+  BLI_assert(polys.size() == poly_normals.size());
   threading::parallel_for(polys.index_range(), 1024, [&](const IndexRange range) {
     for (const int i : range) {
       poly_normals[i] = poly_normal_calc(positions, corner_verts.slice(polys[i]));
@@ -415,7 +416,7 @@ const float (*BKE_mesh_poly_normals_ensure(const Mesh *mesh))[3]
         positions,
         mesh_mutable.polys(),
         corner_verts,
-        {reinterpret_cast<float3 *>(poly_normals), mesh->totvert});
+        {reinterpret_cast<float3 *>(poly_normals), mesh->totpoly});
 
     BKE_mesh_poly_normals_clear_dirty(&mesh_mutable);
   });
@@ -1864,7 +1865,7 @@ static void mesh_set_custom_normals(Mesh *mesh, float (*r_custom_nors)[3], const
   }
   else {
     clnors = (short(*)[2])CustomData_add_layer(
-        &mesh->ldata, CD_CUSTOMLOOPNORMAL, CD_SET_DEFAULT, nullptr, numloops);
+        &mesh->ldata, CD_CUSTOMLOOPNORMAL, CD_SET_DEFAULT, numloops);
   }
   MutableAttributeAccessor attributes = mesh->attributes_for_write();
   SpanAttributeWriter<bool> sharp_edges = attributes.lookup_or_add_for_write_span<bool>(

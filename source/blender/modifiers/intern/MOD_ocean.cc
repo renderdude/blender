@@ -279,7 +279,7 @@ static Mesh *generate_ocean_geometry(OceanModifierData *omd, Mesh *mesh_orig, co
   /* add uvs */
   if (CustomData_number_of_layers(&result->ldata, CD_PROP_FLOAT2) < MAX_MTFACE) {
     gogd.mloopuvs = static_cast<float(*)[2]>(CustomData_add_layer_named(
-        &result->ldata, CD_PROP_FLOAT2, CD_SET_DEFAULT, nullptr, polys_num * 4, "UVMap"));
+        &result->ldata, CD_PROP_FLOAT2, CD_SET_DEFAULT, polys_num * 4, "UVMap"));
 
     if (gogd.mloopuvs) { /* unlikely to fail */
       gogd.ix = 1.0 / gogd.rx;
@@ -363,7 +363,6 @@ static Mesh *doOcean(ModifierData *md, const ModifierEvalContext *ctx, Mesh *mes
     MLoopCol *mloopcols = static_cast<MLoopCol *>(CustomData_add_layer_named(&result->ldata,
                                                                              CD_PROP_BYTE_COLOR,
                                                                              CD_SET_DEFAULT,
-                                                                             nullptr,
                                                                              corner_verts.size(),
                                                                              omd->foamlayername));
 
@@ -372,7 +371,6 @@ static Mesh *doOcean(ModifierData *md, const ModifierEvalContext *ctx, Mesh *mes
       mloopcols_spray = static_cast<MLoopCol *>(CustomData_add_layer_named(&result->ldata,
                                                                            CD_PROP_BYTE_COLOR,
                                                                            CD_SET_DEFAULT,
-                                                                           nullptr,
                                                                            corner_verts.size(),
                                                                            omd->spraylayername));
     }

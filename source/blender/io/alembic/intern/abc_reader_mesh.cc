@@ -390,8 +390,7 @@ static void *add_customdata_cb(Mesh *mesh, const char *name, int data_type)
 
   /* Create a new layer. */
   int numloops = mesh->totloop;
-  cd_ptr = CustomData_add_layer_named(
-      &mesh->ldata, cd_data_type, CD_SET_DEFAULT, nullptr, numloops, name);
+  cd_ptr = CustomData_add_layer_named(&mesh->ldata, cd_data_type, CD_SET_DEFAULT, numloops, name);
   return cd_ptr;
 }
 
@@ -889,7 +888,7 @@ static void read_vertex_creases(Mesh *mesh,
   }
 
   float *vertex_crease_data = (float *)CustomData_add_layer(
-      &mesh->vdata, CD_CREASE, CD_SET_DEFAULT, nullptr, mesh->totvert);
+      &mesh->vdata, CD_CREASE, CD_SET_DEFAULT, mesh->totvert);
   const int totvert = mesh->totvert;
 
   for (int i = 0, v = indices->size(); i < v; ++i) {
@@ -915,7 +914,7 @@ static void read_edge_creases(Mesh *mesh,
   EdgeHash *edge_hash = BLI_edgehash_new_ex(__func__, edges.size());
 
   float *creases = static_cast<float *>(
-      CustomData_add_layer(&mesh->edata, CD_CREASE, CD_SET_DEFAULT, nullptr, edges.size()));
+      CustomData_add_layer(&mesh->edata, CD_CREASE, CD_SET_DEFAULT, edges.size()));
 
   for (const int i : edges.index_range()) {
     MEdge *edge = &edges[i];

@@ -244,10 +244,26 @@ typedef struct Mesh {
   /** Write access to polygon data. */
   blender::MutableSpan<int> poly_offsets_for_write();
 
+  /**
+   * Array of vertices for every face corner,  stored in the ".corner_vert" integer attribute.
+   * For example, the vertices in a face can be retrieved with the #slice method:
+   * \code{.cc}
+   * const Span<int> poly_verts = corner_verts.slice(poly.loopstart, poly.totloop);
+   * \endcode
+   * Such a span can often be passed as an argument in lieu of a polygon and the entire corner
+   * verts array.
+   */
   blender::Span<int> corner_verts() const;
+  /** Write access to the #corner_verts data. */
   blender::MutableSpan<int> corner_verts_for_write();
 
+  /**
+   * Array of edges following every face corner traveling around each face, stored in the
+   * ".corner_edge" attribute. The array sliced the same way as the #corner_verts data. The edge
+   * previous to a corner must be accessed with the index of the previous face corner.
+   */
   blender::Span<int> corner_edges() const;
+  /** Write access to the #corner_edges data. */
   blender::MutableSpan<int> corner_edges_for_write();
 
   blender::bke::AttributeAccessor attributes() const;
