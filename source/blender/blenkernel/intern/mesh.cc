@@ -820,7 +820,7 @@ void BKE_mesh_ensure_skin_customdata(Mesh *me)
   else {
     if (!CustomData_has_layer(&me->vdata, CD_MVERT_SKIN)) {
       vs = (MVertSkin *)CustomData_add_layer(
-          &me->vdata, CD_MVERT_SKIN, CD_SET_DEFAULT, nullptr, me->totvert);
+          &me->vdata, CD_MVERT_SKIN, CD_SET_DEFAULT, me->totvert);
 
       /* Mark an arbitrary vertex as root */
       if (vs) {
@@ -842,7 +842,7 @@ bool BKE_mesh_ensure_facemap_customdata(struct Mesh *me)
   }
   else {
     if (!CustomData_has_layer(&me->pdata, CD_FACEMAP)) {
-      CustomData_add_layer(&me->pdata, CD_FACEMAP, CD_SET_DEFAULT, nullptr, me->totpoly);
+      CustomData_add_layer(&me->pdata, CD_FACEMAP, CD_SET_DEFAULT, me->totpoly);
       changed = true;
     }
   }
@@ -947,21 +947,21 @@ static void mesh_ensure_cdlayers_primary(Mesh *mesh)
 {
   if (!CustomData_get_layer_named(&mesh->vdata, CD_PROP_FLOAT3, "position")) {
     CustomData_add_layer_named(
-        &mesh->vdata, CD_PROP_FLOAT3, CD_CONSTRUCT, nullptr, mesh->totvert, "position");
+        &mesh->vdata, CD_PROP_FLOAT3, CD_CONSTRUCT, mesh->totvert, "position");
   }
   if (!CustomData_get_layer(&mesh->edata, CD_MEDGE)) {
-    CustomData_add_layer(&mesh->edata, CD_MEDGE, CD_SET_DEFAULT, nullptr, mesh->totedge);
+    CustomData_add_layer(&mesh->edata, CD_MEDGE, CD_SET_DEFAULT, mesh->totedge);
   }
   if (!CustomData_get_layer_named(&mesh->ldata, CD_PROP_INT32, ".corner_vert")) {
     CustomData_add_layer_named(
-        &mesh->ldata, CD_PROP_INT32, CD_SET_DEFAULT, nullptr, mesh->totloop, ".corner_vert");
+        &mesh->ldata, CD_PROP_INT32, CD_SET_DEFAULT, mesh->totloop, ".corner_vert");
   }
   if (!CustomData_get_layer_named(&mesh->ldata, CD_PROP_INT32, ".corner_edge")) {
     CustomData_add_layer_named(
-        &mesh->ldata, CD_PROP_INT32, CD_SET_DEFAULT, nullptr, mesh->totloop, ".corner_edge");
+        &mesh->ldata, CD_PROP_INT32, CD_SET_DEFAULT, mesh->totloop, ".corner_edge");
   }
   if (!CustomData_get_layer(&mesh->pdata, CD_MPOLY)) {
-    CustomData_add_layer(&mesh->pdata, CD_MPOLY, CD_SET_DEFAULT, nullptr, mesh->totpoly);
+    CustomData_add_layer(&mesh->pdata, CD_MPOLY, CD_SET_DEFAULT, mesh->totpoly);
   }
 }
 
@@ -1081,7 +1081,7 @@ Mesh *BKE_mesh_new_nomain_from_template_ex(const Mesh *me_src,
    * even in cases where the source mesh does not. */
   mesh_ensure_cdlayers_primary(me_dst);
   if (do_tessface && !CustomData_get_layer(&me_dst->fdata, CD_MFACE)) {
-    CustomData_add_layer(&me_dst->fdata, CD_MFACE, CD_SET_DEFAULT, nullptr, me_dst->totface);
+    CustomData_add_layer(&me_dst->fdata, CD_MFACE, CD_SET_DEFAULT, me_dst->totface);
   }
 
   /* Expect that normals aren't copied at all, since the destination mesh is new. */
@@ -1170,7 +1170,7 @@ static void ensure_orig_index_layer(CustomData &data, const int size)
   if (CustomData_has_layer(&data, CD_ORIGINDEX)) {
     return;
   }
-  int *indices = (int *)CustomData_add_layer(&data, CD_ORIGINDEX, CD_SET_DEFAULT, nullptr, size);
+  int *indices = (int *)CustomData_add_layer(&data, CD_ORIGINDEX, CD_SET_DEFAULT, size);
   range_vn_i(indices, size, 0);
 }
 
@@ -1347,7 +1347,7 @@ void BKE_mesh_orco_ensure(Object *ob, Mesh *mesh)
   /* Orcos are stored in normalized 0..1 range by convention. */
   float(*orcodata)[3] = BKE_mesh_orco_verts_get(ob);
   BKE_mesh_orco_verts_transform(mesh, orcodata, mesh->totvert, false);
-  CustomData_add_layer(&mesh->vdata, CD_ORCO, CD_ASSIGN, orcodata, mesh->totvert);
+  CustomData_add_layer_with_data(&mesh->vdata, CD_ORCO, orcodata, mesh->totvert);
 }
 
 Mesh *BKE_mesh_from_object(Object *ob)
@@ -1825,7 +1825,7 @@ static float (*ensure_corner_normal_layer(Mesh &mesh))[3]
   }
   else {
     r_loop_normals = (float(*)[3])CustomData_add_layer(
-        &mesh.ldata, CD_NORMAL, CD_SET_DEFAULT, nullptr, mesh.totloop);
+        &mesh.ldata, CD_NORMAL, CD_SET_DEFAULT, mesh.totloop);
     CustomData_set_layer_flag(&mesh.ldata, CD_NORMAL, CD_FLAG_TEMPORARY);
   }
   return r_loop_normals;
