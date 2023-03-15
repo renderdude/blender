@@ -20,13 +20,13 @@
 
 #include "util/vector.h"
 
-#if INTEGRATOR_SHADOW_ISECT_SIZE < 256
-using numhit_t = uchar;
-#else
-using numhit_t = uint;
-#endif
-
 CCL_NAMESPACE_BEGIN
+
+#if INTEGRATOR_SHADOW_ISECT_SIZE < 256
+using numhit_t = uint8_t;
+#else
+using numhit_t = uint32_t;
+#endif
 
 #define EMBREE_IS_HAIR(x) (x & 1)
 
