@@ -4,11 +4,14 @@
 #ifndef __CYCLES_XML_H__
 #define __CYCLES_XML_H__
 
+#include <string>
+
 CCL_NAMESPACE_BEGIN
 
 class Scene;
 
 void xml_read_file(Scene *scene, const char *filepath);
+void xml_read_string(Scene *scene, std::string xml_desc);
 
 /* macros for importing */
 #define RAD2DEGF(_rad) ((_rad) * (float)(180.0 / M_PI))

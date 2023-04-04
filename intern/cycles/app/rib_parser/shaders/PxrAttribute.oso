@@ -1,0 +1,217 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrAttribute.osl/obj/PxrAttribute.oso
+shader PxrAttribute	%meta{int,rfm_nodeid,1053260} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/utility"} %meta{string,rfh_classification,"Pattern/Utility"} 
+param	string	varname	""		%meta{string,widget,"default"} %meta{string,help,"varname (string)"} %meta{int,connectable,0} %meta{string,label,"Variable Name"}  %read{4,69} %write{2147483647,-1}
+param	string	type	"float"		%meta{string,widget,"mapper"} %meta{string,help,"type (string)"} %meta{string,options,"int:int|float:float|float2:float2|color:color|point:point|vector:vector|normal:normal"} %meta{int,connectable,0} %meta{string,label,"Variable Type"}  %read{1,54} %write{2147483647,-1}
+param	int	defaultInt	0		%meta{string,widget,"int"} %meta{string,help,"If there is an error when retrieving an attribute of type 'int', this is the value that<br>will be used.<br><br>defaultInt (int)"} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisPath,"../type"} %meta{string,conditionalVisValue,"int"} %meta{string,label,"Default Int"}  %read{3,3} %write{2147483647,-1}
+param	float	defaultFloat	0		%meta{string,widget,"float"} %meta{string,help,"If there is an error when retrieving an attribute of type 'float', this is the value that<br>will be used.<br><br>defaultFloat (float)"} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisPath,"../type"} %meta{string,conditionalVisValue,"float"} %meta{string,label,"Default Float"}  %read{12,12} %write{2147483647,-1}
+param	vector	defaultFloat3	0 0 0		%meta{string,widget,"vector"} %meta{string,help,"If there is an error when retrieving an attribute of type 'float2', 'normal', 'point' or<br>'vector', this is the value that will be used. For the type 'float2', only the first two<br>components will be used.<br><br>defaultFloat3 (vector)"} %meta{string,conditionalVisOp,"and"} %meta{string,conditionalVisLeft,"conditionalVis1"} %meta{string,conditionalVisRight,"conditionalVis2"} %meta{string,conditionalVis2Op,"and"} %meta{string,conditionalVis2Left,"conditionalVis3"} %meta{string,conditionalVis2Right,"conditionalVis4"} %meta{string,conditionalVis1Path,"../type"} %meta{string,conditionalVis1Op,"notEqualTo"} %meta{string,conditionalVis1Value,"int"} %meta{string,conditionalVis3Path,"../type"} %meta{string,conditionalVis3Op,"notEqualTo"} %meta{string,conditionalVis3Value,"float"} %meta{string,conditionalVis4Path,"../type"} %meta{string,conditionalVis4Op,"notEqualTo"} %meta{string,conditionalVis4Value,"color"} %meta{string,label,"Default Float3"}  %read{19,56} %write{2147483647,-1}
+param	color	defaultColor	0 0 0		%meta{string,widget,"color"} %meta{string,help,"If there is an error when retrieving an attribute of type 'normal', 'point' or 'vector',<br>this is the value that will be used.<br><br>defaultColor (color)"} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisPath,"../type"} %meta{string,conditionalVisValue,"color"} %meta{string,label,"Default Color"}  %read{2147483647,-1} %write{2147483647,-1}
+param	int	verbosity	0		%meta{string,widget,"mapper"} %meta{string,help,"Diagnostic output levels for scene debugging.<br><br>verbosity (int)"} %meta{string,options,"Silent:0|Warnings:1|Info:2"} %meta{int,connectable,0} %meta{string,label,"Verbosity"}  %read{65,65} %write{2147483647,-1}
+oparam	color	resultRGB	0 0 0		%meta{string,help,"resultRGB (color)"}  %read{2147483647,-1} %write{6,58}
+oparam	float	resultF	0		%meta{string,help,"resultF (float)"}  %read{2147483647,-1} %write{8,59}
+oparam	int	resultI	0		%meta{string,help,"resultF (int)"}  %read{2147483647,-1} %write{9,61}
+local	int	success	%read{62,62} %write{0,57}
+local	int	___325_val	%read{5,9} %write{3,4}
+local	float	___326_val	%read{14,16} %write{12,13}
+local	float[2]	___327_val	%read{24,28} %write{20,23}
+local	color	___328_val	%read{34,36} %write{32,33}
+local	point	___329_val	%read{42,44} %write{40,41}
+local	vector	___330_val	%read{50,52} %write{48,49}
+local	normal	___331_val	%read{58,60} %write{56,57}
+const	int	$const1	1		%read{0,25} %write{2147483647,-1}
+const	string	$const2	"int"		%read{1,1} %write{2147483647,-1}
+temp	int	$tmp1	%read{2,2} %write{1,1}
+temp	float	$tmp2	%read{6,6} %write{5,5}
+temp	float	$tmp3	%read{8,8} %write{7,7}
+const	string	$const3	"float"		%read{10,10} %write{2147483647,-1}
+temp	int	$tmp4	%read{11,11} %write{10,10}
+const	string	$const4	"float2"		%read{17,17} %write{2147483647,-1}
+temp	int	$tmp5	%read{18,18} %write{17,17}
+const	int	$const5	0		%read{19,66} %write{2147483647,-1}
+temp	float	$tmp6	%read{20,20} %write{19,19}
+temp	float	$tmp7	%read{22,22} %write{21,21}
+temp	float	$tmp8	%read{26,26} %write{24,24}
+temp	float	$tmp9	%read{26,26} %write{25,25}
+const	float	$const6	0		%read{26,26} %write{2147483647,-1}
+temp	float	$tmp10	%read{29,29} %write{28,28}
+const	string	$const7	"color"		%read{30,30} %write{2147483647,-1}
+temp	int	$tmp11	%read{31,31} %write{30,30}
+temp	float	$tmp12	%read{37,37} %write{36,36}
+const	string	$const8	"point"		%read{38,38} %write{2147483647,-1}
+temp	int	$tmp13	%read{39,39} %write{38,38}
+temp	float	$tmp14	%read{45,45} %write{44,44}
+const	string	$const9	"vector"		%read{46,46} %write{2147483647,-1}
+temp	int	$tmp15	%read{47,47} %write{46,46}
+temp	float	$tmp16	%read{53,53} %write{52,52}
+const	string	$const10	"normal"		%read{54,54} %write{2147483647,-1}
+temp	int	$tmp17	%read{55,55} %write{54,54}
+temp	float	$tmp18	%read{61,61} %write{60,60}
+temp	int	$tmp19	%read{63,63} %write{62,62}
+temp	int	$tmp20	%read{64,68} %write{63,67}
+temp	int	$tmp21	%read{66,66} %write{65,65}
+temp	int	$tmp22	%read{67,67} %write{66,66}
+const	string	$const11	"[PxrAttribute] Could not find: '%s' attribute or option"		%read{69,69} %write{2147483647,-1}
+code ___main___
+# PxrAttribute.osl:134
+#     int success = 1;
+	assign		success $const1 	%filename{"PxrAttribute.osl"} %line{134} %argrw{"wr"}
+# PxrAttribute.osl:135
+#     if (type == "int")
+	eq		$tmp1 type $const2 	%line{135} %argrw{"wrr"}
+	if		$tmp1 10 62 	%argrw{"r"}
+# PxrAttribute.osl:137
+#         int val = defaultInt;
+	assign		___325_val defaultInt 	%line{137} %argrw{"wr"}
+# PxrAttribute.osl:138
+#         success = getattribute(varname, val);
+	getattribute	success varname ___325_val 	%line{138} %argrw{"wrw"}
+# PxrAttribute.osl:139
+#         resultRGB = color(val);
+	assign		$tmp2 ___325_val 	%line{139} %argrw{"wr"}
+	assign		resultRGB $tmp2 	%argrw{"wr"}
+# PxrAttribute.osl:140
+#         resultF = float(val);
+	assign		$tmp3 ___325_val 	%line{140} %argrw{"wr"}
+	assign		resultF $tmp3 	%argrw{"wr"}
+# PxrAttribute.osl:141
+#         resultI = val;
+	assign		resultI ___325_val 	%line{141} %argrw{"wr"}
+# PxrAttribute.osl:143
+#     else if (type == "float")
+	eq		$tmp4 type $const3 	%line{143} %argrw{"wrr"}
+	if		$tmp4 17 62 	%argrw{"r"}
+# PxrAttribute.osl:145
+#         float val = defaultFloat;
+	assign		___326_val defaultFloat 	%line{145} %argrw{"wr"}
+# PxrAttribute.osl:146
+#         success = getattribute(varname, val);
+	getattribute	success varname ___326_val 	%line{146} %argrw{"wrw"}
+# PxrAttribute.osl:147
+#         resultRGB = color(val);
+	assign		resultRGB ___326_val 	%line{147} %argrw{"wr"}
+# PxrAttribute.osl:148
+#         resultF = val;
+	assign		resultF ___326_val 	%line{148} %argrw{"wr"}
+# PxrAttribute.osl:149
+#         resultI = int(val);
+	assign		resultI ___326_val 	%line{149} %argrw{"wr"}
+# PxrAttribute.osl:151
+#     else if (type == "float2")
+	eq		$tmp5 type $const4 	%line{151} %argrw{"wrr"}
+	if		$tmp5 30 62 	%argrw{"r"}
+# PxrAttribute.osl:153
+#         float val[2] = {defaultFloat3[0], defaultFloat3[1]};
+	compref		$tmp6 defaultFloat3 $const5 	%line{153} %argrw{"wrr"}
+	aassign		___327_val $const5 $tmp6 	%argrw{"wrr"}
+	compref		$tmp7 defaultFloat3 $const1 	%argrw{"wrr"}
+	aassign		___327_val $const1 $tmp7 	%argrw{"wrr"}
+# PxrAttribute.osl:154
+#         success = getattribute(varname, val);
+	getattribute	success varname ___327_val 	%line{154} %argrw{"wrw"}
+# PxrAttribute.osl:155
+#         resultRGB = color(val[0], val[1], 0.0);
+	aref		$tmp8 ___327_val $const5 	%line{155} %argrw{"wrr"}
+	aref		$tmp9 ___327_val $const1 	%argrw{"wrr"}
+	color		resultRGB $tmp8 $tmp9 $const6 	%argrw{"wrrr"}
+# PxrAttribute.osl:156
+#         resultF = val[0];
+	aref		resultF ___327_val $const5 	%line{156} %argrw{"wrr"}
+# PxrAttribute.osl:157
+#         resultI = int(val[0]);
+	aref		$tmp10 ___327_val $const5 	%line{157} %argrw{"wrr"}
+	assign		resultI $tmp10 	%argrw{"wr"}
+# PxrAttribute.osl:159
+#     else if (type == "color")
+	eq		$tmp11 type $const7 	%line{159} %argrw{"wrr"}
+	if		$tmp11 38 62 	%argrw{"r"}
+# PxrAttribute.osl:161
+#         color val = color(defaultFloat3);
+	assign		___328_val defaultFloat3 	%line{161} %argrw{"wr"}
+# PxrAttribute.osl:162
+#         success = getattribute(varname, val);
+	getattribute	success varname ___328_val 	%line{162} %argrw{"wrw"}
+# PxrAttribute.osl:163
+#         resultRGB = color(val);
+	assign		resultRGB ___328_val 	%line{163} %argrw{"wr"}
+# PxrAttribute.osl:164
+#         resultF = val[0];
+	compref		resultF ___328_val $const5 	%line{164} %argrw{"wrr"}
+# PxrAttribute.osl:165
+#         resultI = int(val[0]);
+	compref		$tmp12 ___328_val $const5 	%line{165} %argrw{"wrr"}
+	assign		resultI $tmp12 	%argrw{"wr"}
+# PxrAttribute.osl:167
+#     else if (type == "point")
+	eq		$tmp13 type $const8 	%line{167} %argrw{"wrr"}
+	if		$tmp13 46 62 	%argrw{"r"}
+# PxrAttribute.osl:169
+#         point val = point(defaultFloat3);
+	assign		___329_val defaultFloat3 	%line{169} %argrw{"wr"}
+# PxrAttribute.osl:170
+#         success = getattribute(varname, val);
+	getattribute	success varname ___329_val 	%line{170} %argrw{"wrw"}
+# PxrAttribute.osl:171
+#         resultRGB = color(val);
+	assign		resultRGB ___329_val 	%line{171} %argrw{"wr"}
+# PxrAttribute.osl:172
+#         resultF = val[0];
+	compref		resultF ___329_val $const5 	%line{172} %argrw{"wrr"}
+# PxrAttribute.osl:173
+#         resultI = int(val[0]);
+	compref		$tmp14 ___329_val $const5 	%line{173} %argrw{"wrr"}
+	assign		resultI $tmp14 	%argrw{"wr"}
+# PxrAttribute.osl:175
+#     else if (type == "vector")
+	eq		$tmp15 type $const9 	%line{175} %argrw{"wrr"}
+	if		$tmp15 54 62 	%argrw{"r"}
+# PxrAttribute.osl:177
+#         vector val = defaultFloat3;
+	assign		___330_val defaultFloat3 	%line{177} %argrw{"wr"}
+# PxrAttribute.osl:178
+#         success = getattribute(varname, val);
+	getattribute	success varname ___330_val 	%line{178} %argrw{"wrw"}
+# PxrAttribute.osl:179
+#         resultRGB = color(val);
+	assign		resultRGB ___330_val 	%line{179} %argrw{"wr"}
+# PxrAttribute.osl:180
+#         resultF = val[0];
+	compref		resultF ___330_val $const5 	%line{180} %argrw{"wrr"}
+# PxrAttribute.osl:181
+#         resultI = int(val[0]);
+	compref		$tmp16 ___330_val $const5 	%line{181} %argrw{"wrr"}
+	assign		resultI $tmp16 	%argrw{"wr"}
+# PxrAttribute.osl:183
+#     else if (type == "normal")
+	eq		$tmp17 type $const10 	%line{183} %argrw{"wrr"}
+	if		$tmp17 62 62 	%argrw{"r"}
+# PxrAttribute.osl:185
+#         normal val = normal(defaultFloat3);
+	assign		___331_val defaultFloat3 	%line{185} %argrw{"wr"}
+# PxrAttribute.osl:186
+#         success = getattribute(varname, val);
+	getattribute	success varname ___331_val 	%line{186} %argrw{"wrw"}
+# PxrAttribute.osl:187
+#         resultRGB = color(val);
+	assign		resultRGB ___331_val 	%line{187} %argrw{"wr"}
+# PxrAttribute.osl:188
+#         resultF = val[0];
+	compref		resultF ___331_val $const5 	%line{188} %argrw{"wrr"}
+# PxrAttribute.osl:189
+#         resultI = int(val[0]);
+	compref		$tmp18 ___331_val $const5 	%line{189} %argrw{"wrr"}
+	assign		resultI $tmp18 	%argrw{"wr"}
+# PxrAttribute.osl:192
+#     if (!success && verbosity > k_silent)
+	eq		$tmp19 success $const5 	%line{192} %argrw{"wrr"}
+	neq		$tmp20 $tmp19 $const5 	%argrw{"wrr"}
+	if		$tmp20 68 68 	%argrw{"r"}
+	gt		$tmp21 verbosity $const5 	%argrw{"wrr"}
+	neq		$tmp22 $tmp21 $const5 	%argrw{"wrr"}
+	assign		$tmp20 $tmp22 	%argrw{"wr"}
+	if		$tmp20 70 70 	%argrw{"r"}
+# PxrAttribute.osl:194
+#         warning("[PxrAttribute] Could not find: '%s' attribute or option",
+	warning		$const11 varname 	%line{194} %argrw{"rr"}
+	end

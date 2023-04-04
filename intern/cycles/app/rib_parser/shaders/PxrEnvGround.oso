@@ -1,0 +1,228 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrEnvGround.osl/obj/PxrEnvGround.oso
+shader PxrEnvGround	%meta{int,rfm_nodeid,1233482} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/texture"} %meta{string,rfh_classification,"Pattern/Texture"} %meta{string,help,"Project an environment map onto a flat ground plane, for quick look-dev turntables."} 
+param	string	filename	""		%meta{string,widget,"assetIdInput"} %meta{string,options,"texture"} %meta{int,connectable,0} %meta{string,label,"Filename"}  %read{47,47} %write{2147483647,-1} %derivs
+param	float	envRadius	10		%meta{string,label,"Environment Radius"} %meta{float,min,0} %meta{float,slidermax,10}  %read{3,3} %write{2147483647,-1} %derivs
+param	float	offsetX	0		%meta{string,label,"Offset X"} %meta{float,slidermin,-10} %meta{float,slidermax,-10}  %read{2,2} %write{2147483647,-1} %derivs
+param	float	offsetZ	0		%meta{string,label,"Offset Z"} %meta{float,slidermin,-10} %meta{float,slidermax,-10}  %read{2,2} %write{2147483647,-1} %derivs
+param	float	rotation	0		%meta{string,label,"Rotation"} %meta{float,min,-180} %meta{float,max,180}  %read{34,34} %write{2147483647,-1} %derivs
+param	float	filterWidth	1		%meta{string,label,"Filter Width"} %meta{int,slider,1} %meta{float,min,0} %meta{float,slidermax,1}  %read{47,47} %write{2147483647,-1} %derivs
+oparam	color	resultRGB	0 0 0		%read{55,55} %write{33,47} %derivs
+oparam	float	resultPresence	1		%read{48,48} %write{52,52}
+oparam	vector	resultNG	0 0 0		%read{53,53} %write{67,67}
+global	point	P	%read{1,58} %write{2147483647,-1} %derivs
+global	normal	N	%read{57,63} %write{2147483647,-1} %derivs
+local	float	___471_k	%read{63,65} %write{62,62}
+local	float	___486_n	%read{41,41} %write{40,40} %derivs
+local	float	___486_result	%read{43,46} %write{42,45} %derivs
+local	point	Pw	%read{5,5} %write{1,1} %derivs
+local	point	hvo	%read{5,5} %write{2,2} %derivs
+local	vector	proj	%read{6,6} %write{4,4} %derivs
+local	vector	dir	%read{8,50} %write{7,7} %derivs
+local	float	x	%read{11,11} %write{8,8} %derivs
+local	float	y	%read{14,14} %write{9,9} %derivs
+local	float	z	%read{11,11} %write{10,10} %derivs
+local	float	s	%read{19,47} %write{13,46} %derivs
+local	float	t	%read{20,47} %write{16,16} %derivs
+local	float	___487_sp	%read{19,30} %write{18,18} %derivs
+local	float	___487_rs	%read{25,25} %write{19,19} %derivs
+local	float	___487_rt	%read{31,31} %write{20,20} %derivs
+local	float	___489_fade	%read{52,52} %write{51,51}
+local	normal	___490_bumpN	%read{62,64} %write{60,60}
+const	string	$const1	"world"		%read{1,4} %write{2147483647,-1}
+const	string	$const2	"transform"		%read{0,0} %write{2147483647,-1}
+const	string	$const3	"common"		%read{1,1} %write{2147483647,-1}
+const	float	$const4	0		%read{2,43} %write{2147483647,-1}
+const	int	$const5	0		%read{8,17} %write{2147483647,-1}
+temp	float	$tmp1	%read{4,4} %write{3,3} %derivs
+temp	point	$tmp2	%read{6,6} %write{5,5} %derivs
+temp	point	$tmp3	%read{7,7} %write{6,6} %derivs
+const	int	$const6	1		%read{9,50} %write{2147483647,-1}
+const	int	$const7	2		%read{10,10} %write{2147483647,-1}
+const	float	$const8	0.5		%read{13,56} %write{2147483647,-1}
+temp	float	$tmp4	%read{12,12} %write{11,11} %derivs
+const	float	$const9	6.28318548		%read{12,15} %write{2147483647,-1}
+temp	float	$tmp5	%read{13,13} %write{12,12} %derivs
+temp	float	$tmp6	%read{15,15} %write{14,14} %derivs
+temp	float	$tmp7	%read{16,16} %write{15,15} %derivs
+const	float	$const10	0.100000001		%read{18,18} %write{2147483647,-1}
+temp	float	$tmp8	%read{33,33} %write{26,26} %derivs
+temp	float	$tmp9	%read{26,26} %write{23,23} %derivs
+const	float	$const11	1		%read{22,52} %write{2147483647,-1}
+const	string	$const12	"clamp"		%read{21,27} %write{2147483647,-1}
+temp	float	$tmp10	%read{23,23} %write{22,22} %derivs
+temp	float	$tmp11	%read{26,26} %write{25,25} %derivs
+const	float	$const13	0.00499999989		%read{24,30} %write{2147483647,-1}
+temp	float	$tmp12	%read{25,25} %write{24,24} %derivs
+temp	float	$tmp13	%read{33,33} %write{32,32} %derivs
+temp	float	$tmp14	%read{32,32} %write{29,29} %derivs
+temp	float	$tmp15	%read{29,29} %write{28,28} %derivs
+temp	float	$tmp16	%read{32,32} %write{31,31} %derivs
+temp	float	$tmp17	%read{31,31} %write{30,30} %derivs
+const	float	$const14	180		%read{34,34} %write{2147483647,-1}
+temp	float	$tmp18	%read{35,35} %write{34,34} %derivs
+temp	float	$tmp19	%read{37,42} %write{35,35} %derivs
+const	string	$const15	"rixMod"		%read{36,36} %write{2147483647,-1}
+temp	int	$tmp20	%read{39,39} %write{38,38} %derivs
+temp	float	$tmp21	%read{38,38} %write{37,37} %derivs
+temp	float	$tmp22	%read{40,40} %write{39,39} %derivs
+temp	float	$tmp23	%read{42,42} %write{41,41} %derivs
+temp	int	$tmp24	%read{44,44} %write{43,43}
+const	string	$const16	"width"		%read{47,47} %write{2147483647,-1}
+temp	int	$tmp25	%read{49,49} %write{48,48}
+const	float	$const17	-0.125		%read{51,51} %write{2147483647,-1}
+const	float	$const18	-0.100000001		%read{51,51} %write{2147483647,-1}
+temp	float	$tmp26	%read{51,51} %write{50,50}
+temp	int	$tmp27	%read{54,54} %write{53,53}
+temp	vector	$tmp28	%read{60,60} %write{59,59}
+temp	float	$tmp29	%read{56,56} %write{55,55} %derivs
+temp	float	$tmp30	%read{57,57} %write{56,56} %derivs
+temp	normal	$tmp31	%read{58,58} %write{57,57} %derivs
+temp	point	$tmp32	%read{59,59} %write{58,58} %derivs
+const	string	$const19	"surfgradFromPerturbedNormal"		%read{61,61} %write{2147483647,-1}
+temp	vector	$tmp33	%read{64,64} %write{63,63}
+temp	vector	$tmp34	%read{67,67} %write{64,64}
+temp	float	$tmp35	%read{67,67} %write{66,66}
+const	float	$const20	9.99999994e-09		%read{66,66} %write{2147483647,-1}
+temp	float	$tmp36	%read{66,66} %write{65,65}
+code ___main___
+# PxrEnvGround.osl:102
+#     point Pw = transform("world", P);
+	functioncall	$const2 2 	%filename{"PxrEnvGround.osl"} %line{102} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:285
+# point  transform (string to, point p)  { return transform("common",to,p); }
+	transform	Pw $const3 $const1 P 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{285} %argrw{"wrrr"}
+# PxrEnvGround.osl:103
+#     point hvo = point(offsetX, 0.0, offsetZ);
+	point		hvo offsetX $const4 offsetZ 	%filename{"PxrEnvGround.osl"} %line{103} %argrw{"wrrr"}
+# PxrEnvGround.osl:104
+#     vector proj = vector("world", 0, -envRadius, 0);
+	neg		$tmp1 envRadius 	%line{104} %argrw{"wr"}
+	vector		proj $const1 $const4 $tmp1 $const4 	%argrw{"wrrrr"}
+# PxrEnvGround.osl:105
+#     vector dir = normalize(Pw + hvo + proj);
+	add		$tmp2 Pw hvo 	%line{105} %argrw{"wrr"}
+	add		$tmp3 $tmp2 proj 	%argrw{"wrr"}
+	normalize	dir $tmp3 	%argrw{"wr"}
+# PxrEnvGround.osl:107
+#     float x = dir[0];
+	compref		x dir $const5 	%line{107} %argrw{"wrr"}
+# PxrEnvGround.osl:108
+#     float y = dir[1];
+	compref		y dir $const6 	%line{108} %argrw{"wrr"}
+# PxrEnvGround.osl:109
+#     float z = dir[2];
+	compref		z dir $const7 	%line{109} %argrw{"wrr"}
+# PxrEnvGround.osl:112
+#     float s = 0.5 - atan2(x, z) / M_2PI;
+	atan2		$tmp4 x z 	%line{112} %argrw{"wrr"}
+	div		$tmp5 $tmp4 $const9 	%argrw{"wrr"}
+	sub		s $const8 $tmp5 	%argrw{"wrr"}
+# PxrEnvGround.osl:113
+#     float t = 0.5 - asin(y) / M_2PI;
+	asin		$tmp6 y 	%line{113} %argrw{"wr"}
+	div		$tmp7 $tmp6 $const9 	%argrw{"wrr"}
+	sub		t $const8 $tmp7 	%argrw{"wrr"}
+# PxrEnvGround.osl:115
+#     if (0)
+	if		$const5 34 48 	%line{115} %argrw{"r"}
+# PxrEnvGround.osl:118
+#         float sp = 0.1;
+	assign		___487_sp $const10 	%line{118} %argrw{"wr"}
+# PxrEnvGround.osl:119
+#         float rs = fmod(s, sp);
+	fmod		___487_rs s ___487_sp 	%line{119} %argrw{"wrr"}
+# PxrEnvGround.osl:120
+#         float rt = fmod(t, sp);
+	fmod		___487_rt t ___487_sp 	%line{120} %argrw{"wrr"}
+# PxrEnvGround.osl:121
+#         resultRGB = color(mix(clamp(s, 0.0, 1.0), 0, step(sp - 0.005, rs)),
+	functioncall	$const12 24 	%line{121} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
+	min		$tmp10 s $const11 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	max		$tmp9 $tmp10 $const4 	%argrw{"wrr"}
+# PxrEnvGround.osl:121
+#         resultRGB = color(mix(clamp(s, 0.0, 1.0), 0, step(sp - 0.005, rs)),
+	sub		$tmp12 ___487_sp $const13 	%filename{"PxrEnvGround.osl"} %line{121} %argrw{"wrr"}
+	step		$tmp11 $tmp12 ___487_rs 	%argrw{"wrr"}
+	mix		$tmp8 $tmp9 $const4 $tmp11 	%argrw{"wrrr"}
+# PxrEnvGround.osl:122
+#                           mix(clamp(t, 0.0, 1.0), 0, step(sp - 0.005, rt)),
+	functioncall	$const12 30 	%line{122} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
+	min		$tmp15 t $const11 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	max		$tmp14 $tmp15 $const4 	%argrw{"wrr"}
+# PxrEnvGround.osl:122
+#                           mix(clamp(t, 0.0, 1.0), 0, step(sp - 0.005, rt)),
+	sub		$tmp17 ___487_sp $const13 	%filename{"PxrEnvGround.osl"} %line{122} %argrw{"wrr"}
+	step		$tmp16 $tmp17 ___487_rt 	%argrw{"wrr"}
+	mix		$tmp13 $tmp14 $const4 $tmp16 	%argrw{"wrrr"}
+# PxrEnvGround.osl:121
+#         resultRGB = color(mix(clamp(s, 0.0, 1.0), 0, step(sp - 0.005, rs)),
+	color		resultRGB $tmp8 $tmp13 $const4 	%line{121} %argrw{"wrrr"}
+# PxrEnvGround.osl:127
+#         s = rixMod(s + (rotation / 180.0), 1.0);
+	div		$tmp18 rotation $const14 	%line{127} %argrw{"wrr"}
+	add		$tmp19 s $tmp18 	%argrw{"wrr"}
+	functioncall	$const15 47 	%argrw{"r"}
+# PxrEnvGround.osl:43
+#     float n = float(int(x/y));
+	div		$tmp21 $tmp19 $const11 	%line{43} %argrw{"wrr"}
+	assign		$tmp20 $tmp21 	%argrw{"wr"}
+	assign		$tmp22 $tmp20 	%argrw{"wr"}
+	assign		___486_n $tmp22 	%argrw{"wr"}
+# PxrEnvGround.osl:44
+#     float result = x - n*y;
+	mul		$tmp23 ___486_n $const11 	%line{44} %argrw{"wrr"}
+	sub		___486_result $tmp19 $tmp23 	%argrw{"wrr"}
+# PxrEnvGround.osl:45
+#     if (result < 0.0) result += y;
+	lt		$tmp24 ___486_result $const4 	%line{45} %argrw{"wrr"}
+	if		$tmp24 46 46 	%argrw{"r"}
+	add		___486_result ___486_result $const11 	%argrw{"wrr"}
+# PxrEnvGround.osl:46
+#     return result;
+	assign		s ___486_result 	%line{46} %argrw{"wr"}
+# PxrEnvGround.osl:128
+#         resultRGB = texture(filename, s, t, "width", filterWidth);
+	texture		resultRGB filename s t $const16 filterWidth 	%line{128} %argrw{"wrrrrr"} %argderivs{2,3}
+# PxrEnvGround.osl:131
+#     if (isconnected(resultPresence))
+	isconnected	$tmp25 resultPresence 	%line{131} %argrw{"wr"}
+	if		$tmp25 53 53 	%argrw{"r"}
+# PxrEnvGround.osl:133
+#         float fade = smoothstep(-0.125, -0.10, dir[1]);
+	compref		$tmp26 dir $const6 	%line{133} %argrw{"wrr"}
+	smoothstep	___489_fade $const17 $const18 $tmp26 	%argrw{"wrrr"}
+# PxrEnvGround.osl:134
+#         resultPresence = 1.0 - fade;
+	sub		resultPresence $const11 ___489_fade 	%line{134} %argrw{"wrr"}
+# PxrEnvGround.osl:137
+#     if (isconnected(resultNG))
+	isconnected	$tmp27 resultNG 	%line{137} %argrw{"wr"}
+	if		$tmp27 68 68 	%argrw{"r"}
+# PxrEnvGround.osl:139
+#         normal bumpN = normalize(calculatenormal(P + N * (luminance(resultRGB) - 0.5)));
+	luminance	$tmp29 resultRGB 	%line{139} %argrw{"wr"}
+	sub		$tmp30 $tmp29 $const8 	%argrw{"wrr"}
+	mul		$tmp31 N $tmp30 	%argrw{"wrr"}
+	add		$tmp32 P $tmp31 	%argrw{"wrr"}
+	calculatenormal	$tmp28 $tmp32 	%argrw{"wr"} %argderivs{1}
+	normalize	___490_bumpN $tmp28 	%argrw{"wr"}
+# PxrEnvGround.osl:140
+#         resultNG = surfgradFromPerturbedNormal(bumpN, N);
+	functioncall	$const19 68 	%line{140} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:100
+# 	float k = dot(Nn, bN);
+	dot		___471_k N ___490_bumpN 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Bump.h"} %line{100} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:101
+# 	return (k * Nn - bN) / max(1.0e-8, abs(k));
+	mul		$tmp33 ___471_k N 	%line{101} %argrw{"wrr"}
+	sub		$tmp34 $tmp33 ___490_bumpN 	%argrw{"wrr"}
+	abs		$tmp36 ___471_k 	%argrw{"wr"}
+	max		$tmp35 $const20 $tmp36 	%argrw{"wrr"}
+	div		resultNG $tmp34 $tmp35 	%argrw{"wrr"}
+	end

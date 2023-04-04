@@ -1,0 +1,522 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrLayer.osl/obj/PxrLayer.oso
+shader PxrLayer	%meta{int,rfm_nodeid,1053299} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/PxrSurface"} %meta{string,rfh_classification,"Pattern/PxrSurface"} %meta{int,rfc_nodeid,1037674} %meta{string,rfc_description,"Xpxrlayer"} %meta{string,help,"An OSL pattern for layerable parameters for PxrSurface or input layer to PxrLayerMixer."} 
+param	int	enableDiffuseAlways	1		%meta{string,widget,"null"} %meta{int,connectable,0}  %read{2147483647,-1} %write{2147483647,-1}
+param	int	enableDiffuse	1		%meta{string,page,"Diffuse"} %meta{string,label,"Enable"} %meta{string,widget,"checkBox"} %meta{string,help,"Enable the diffuse lobe."} %meta{int,connectable,0}  %read{1,1} %write{2147483647,-1}
+param	float	diffuseGain	1		%meta{string,page,"Diffuse"} %meta{string,label,"Gain"} %meta{float,min,0} %meta{float,max,1} %meta{float,sensitivity,0.00999999978} %meta{int,slider,1} %meta{float,slidermin,0} %meta{float,slidermax,1} %meta{string,help,"Multiplier for the diffuse lobe."}  %read{3,5} %write{2147483647,-1}
+param	color	diffuseColor	0.180000007 0.180000007 0.180000007		%meta{string,page,"Diffuse"} %meta{string,label,"Color"} %meta{string,help,"Diffuse color of this layer."}  %read{3,3} %write{2147483647,-1}
+param	float	diffuseRoughness	0		%meta{string,page,"Diffuse"} %meta{string,label,"Roughness"} %meta{float,min,0} %meta{float,max,1} %meta{float,sensitivity,0.00999999978} %meta{int,slider,1} %meta{float,slidermin,0} %meta{float,slidermax,1} %meta{string,help,"If 0, this is a basic Lambert lobe. If it's > 0, it is Oren Nayar model.The higher the number, the rougher it gets."}  %read{4,4} %write{2147483647,-1}
+param	normal	diffuseBumpNormal	0 0 0		%meta{string,page,"Diffuse.Advanced"} %meta{string,label,"Bump"} %meta{string,readOnly,"True"} %meta{string,help,"Connect a PxrBump node here if you need bump or normal-mapped normals for the diffuse lobe instead of using the normal bump in the Globals. Only valid when provided as a texture/connection."}  %read{8,10} %write{2147483647,-1}
+param	color	diffuseBackColor	0.180000007 0.180000007 0.180000007		%meta{string,page,"Diffuse.Advanced"} %meta{string,label,"Back Color"} %meta{string,help,"Diffuse back color of this layer."}  %read{5,5} %write{2147483647,-1}
+param	float	diffuseTransmitGain	0		%meta{string,page,"Diffuse.Advanced"} %meta{string,label,"Transmit Gain"} %meta{float,min,0} %meta{float,max,1} %meta{float,sensitivity,0.00999999978} %meta{int,slider,1} %meta{float,slidermin,0} %meta{float,slidermax,1} %meta{string,help,"This only applies when diffuse lobe's Double Sided is on in the Bxdf. Instead of using Diffuse Gain for controlling the intensity of the diffuse transmission, we use Diffuse Transmit Gain.If it is set to 0.0, the diffuse transmission is off."}  %read{7,7} %write{2147483647,-1}
+param	color	diffuseTransmitColor	0.180000007 0.180000007 0.180000007		%meta{string,page,"Diffuse.Advanced"} %meta{string,label,"Transmit Color"} %meta{string,help,"This only applies when diffuse lobe's Double Sided is on in the Bxdf. This sets the color for diffuse transmission of this layer."}  %read{7,7} %write{2147483647,-1}
+param	int	enableSpecular	0		%meta{string,page,"Primary Specular"} %meta{string,label,"Enable"} %meta{string,widget,"checkBox"} %meta{string,help,"Enable the specular lobe."} %meta{int,connectable,0}  %read{12,12} %write{2147483647,-1}
+param	float	specularGain	0		%meta{string,page,"Primary Specular"} %meta{string,label,"Gain"} %meta{float,min,0} %meta{float,max,1} %meta{float,sensitivity,0.00999999978} %meta{int,slider,1} %meta{float,slidermin,0} %meta{float,slidermax,1} %meta{string,help,"Multiplier for the specular lobe."}  %read{15,16} %write{2147483647,-1}
+param	color	specularFaceColor	0 0 0		%meta{string,page,"Primary Specular"} %meta{string,label,"Face Color"} %meta{string,help,"Specular color at 0 degree incidence. This is the specular color for facing the camera."}  %read{15,15} %write{2147483647,-1}
+param	color	specularEdgeColor	0 0 0		%meta{string,page,"Primary Specular"} %meta{string,label,"Edge Color"} %meta{string,help,"Specular color at 90 degree incidence. This is the specular color for the glancing angle on the edge."}  %read{16,16} %write{2147483647,-1}
+param	color	specularIor	1.5 1.5 1.5		%meta{int,color_restrictComponents,0} %meta{int,color_enableFilmlookVis,0} %meta{string,page,"Primary Specular.Physical"} %meta{string,label,"Refraction Index"} %meta{string,help,"This is for physical specular fresnel mode only. Refractive Index is the dielectric index of refraction for the material. Channel values for this parameter typically lie in the range 1 - 3.  Since we support 3 color values to capture the spectral effect presets may be preferred over color pickers."}  %read{17,17} %write{2147483647,-1}
+param	color	specularExtinctionCoeff	0 0 0		%meta{int,color_restrictComponents,0} %meta{int,color_enableFilmlookVis,0} %meta{string,page,"Primary Specular.Physical"} %meta{string,label,"Extinction Coefficient"} %meta{string,help,"This is for physical specular only.Extinction Coefficient is a second refractive index for the material useful for characterizing metallic behaviors. Channel values for this parameter typically lie in the range 1 - 3.  Since we support 3 color values to capture the spectral effect presets may be prefered over color pickers.  When 0, the material reacts as a dielectric (glass, clearcoat)> When non-zero, the material responds as a conductor would."}  %read{18,18} %write{2147483647,-1}
+param	float	specularRoughness	0.200000003		%meta{string,page,"Primary Specular"} %meta{string,label,"Roughness"} %meta{float,min,0} %meta{float,max,1} %meta{float,sensitivity,0.00999999978} %meta{int,slider,1} %meta{float,slidermin,0} %meta{float,slidermax,1} %meta{string,help,"Specular roughness.  The higher the number, the rougher it gets.  The range is between 0 to 1. Negative number is not allowed.Suggested values range from 0 to 0.4."}  %read{14,14} %write{2147483647,-1}
+param	float	specularAnisotropy	0		%meta{string,page,"Primary Specular.Advanced"} %meta{string,label,"Anisotropy"} %meta{float,min,-1} %meta{float,max,1} %meta{float,sensitivity,0.00999999978} %meta{int,slider,1} %meta{float,slidermin,-1} %meta{float,slidermax,1} %meta{string,help,"Controls the shape of the specular highlights and reflections.At 0 the shape is circular.  Values from -1 to 1 produce the range of ellipses from fat to tall.  The direction of anisotropycan also be controlled by your model texture parameters and bythe Shading Tangent parameter."}  %read{13,13} %write{2147483647,-1}
+param	normal	specularBumpNormal	0 0 0		%meta{string,page,"Primary Specular.Advanced"} %meta{string,label,"Bump"} %meta{string,readOnly,"True"} %meta{string,help,"Connect a PxrBump node here if you need bump or normal-mapped normals for the specular lobe instead of using the global normal bump. Only valid when provided as a texture/connection."}  %read{19,21} %write{2147483647,-1}
+param	int	enableRoughSpecular	0		%meta{string,page,"Rough Specular"} %meta{string,label,"Enable"} %meta{string,widget,"checkBox"} %meta{string,help,"Enable the rough specular lobe."} %meta{int,connectable,0}  %read{23,23} %write{2147483647,-1}
+param	float	roughSpecularGain	0		%meta{string,page,"Rough Specular"} %meta{string,label,"Gain"} %meta{float,min,0} %meta{float,max,1} %meta{float,sensitivity,0.00999999978} %meta{int,slider,1} %meta{float,slidermin,0} %meta{float,slidermax,1} %meta{string,help,"Multiplier for the rough specular lobe."}  %read{26,27} %write{2147483647,-1}
+param	color	roughSpecularFaceColor	0 0 0		%meta{string,page,"Rough Specular"} %meta{string,label,"Face Color"} %meta{string,help,"Specular color at 0 degree incidence. This is the specular color for facing the camera."}  %read{26,26} %write{2147483647,-1}
+param	color	roughSpecularEdgeColor	0 0 0		%meta{string,page,"Rough Specular"} %meta{string,label,"Edge Color"} %meta{string,help,"Specular color at 90 degree incidence. This is the specular color for the glancing angle on the edge."}  %read{27,27} %write{2147483647,-1}
+param	color	roughSpecularIor	1.5 1.5 1.5		%meta{int,color_restrictComponents,0} %meta{int,color_enableFilmlookVis,0} %meta{string,page,"Rough Specular.Physical"} %meta{string,label,"Refraction Index"} %meta{string,help,"This is for physical specular fresnel mode only. Refractive Index is the dielectric index of refraction for the material. Channel values for this parameter typically lie in the range 1 - 3.  Since we support 3 color values to capture the spectral effect presets may be preferred over color pickers."}  %read{28,28} %write{2147483647,-1}
+param	color	roughSpecularExtinctionCoeff	0 0 0		%meta{int,color_restrictComponents,0} %meta{int,color_enableFilmlookVis,0} %meta{string,page,"Rough Specular.Physical"} %meta{string,label,"Extinction Coefficient"} %meta{string,help,"This is for physical specular fresnel mode only. Extinction Coefficient is a second refractive index for the material useful for characterizing metallic behaviors. Channel values for this parameter typically lie in the range 1 - 3.  Since we support 3 color values to capture the spectral effect presets may be prefered over color pickers.  When 0, the material reacts as a dielectric (glass, clearcoat)> When non-zero, the material responds as a conductor would."}  %read{29,29} %write{2147483647,-1}
+param	float	roughSpecularRoughness	0.600000024		%meta{string,page,"Rough Specular"} %meta{string,label,"Roughness"} %meta{float,min,0} %meta{float,max,1} %meta{float,sensitivity,0.00999999978} %meta{int,slider,1} %meta{float,slidermin,0} %meta{float,slidermax,1} %meta{string,help,"Specular roughness.  The higher the number, the rougher it gets.  The range is between 0 to 1. Negative number is not allowed.Suggested values range from 0.4 to 1.0."}  %read{25,25} %write{2147483647,-1}
+param	float	roughSpecularAnisotropy	0		%meta{string,page,"Rough Specular.Advanced"} %meta{string,label,"Anisotropy"} %meta{float,min,-1} %meta{float,max,1} %meta{float,sensitivity,0.00999999978} %meta{int,slider,1} %meta{float,slidermin,-1} %meta{float,slidermax,1} %meta{string,help,"If > 0, this specular lobe will get anisotropic along a direction defined by the surface."}  %read{24,24} %write{2147483647,-1}
+param	normal	roughSpecularBumpNormal	0 0 0		%meta{string,page,"Rough Specular.Advanced"} %meta{string,label,"Bump"} %meta{string,readOnly,"True"} %meta{string,help,"Connect a PxrBump node here if you need bump or normal-mapped normals for the specular lobe instead of using the global normal bump. Only valid when provided as a texture/connection."}  %read{30,32} %write{2147483647,-1}
+param	int	enableClearcoat	0		%meta{string,page,"Clear Coat"} %meta{string,label,"Enable"} %meta{string,widget,"checkBox"} %meta{string,help,"Enable the clear coat lobe."} %meta{int,connectable,0}  %read{34,34} %write{2147483647,-1}
+param	float	clearcoatGain	0		%meta{string,page,"Clear Coat"} %meta{string,label,"Gain"} %meta{float,min,0} %meta{float,max,1} %meta{float,sensitivity,0.00999999978} %meta{int,slider,1} %meta{float,slidermin,0} %meta{float,slidermax,1} %meta{string,help,"Multiplier for the clear coat lobe."}  %read{37,38} %write{2147483647,-1}
+param	color	clearcoatFaceColor	0 0 0		%meta{string,page,"Clear Coat"} %meta{string,label,"Face Color"} %meta{string,help,"Specular color at 0 degree incidence. This is the specular color for facing the camera."}  %read{37,37} %write{2147483647,-1}
+param	color	clearcoatEdgeColor	0 0 0		%meta{string,page,"Clear Coat"} %meta{string,label,"Edge Color"} %meta{string,help,"Specular color at 90 degree incidence. This is the specular color for the glancing angle on the edge."}  %read{38,38} %write{2147483647,-1}
+param	color	clearcoatIor	1.5 1.5 1.5		%meta{int,color_restrictComponents,0} %meta{int,color_enableFilmlookVis,0} %meta{string,page,"Clear Coat.Physical"} %meta{string,label,"Refraction Index"} %meta{string,help,"This is for physical specular fresnel mode only. Refractive Index is the dielectric index of refraction for the material. Channel values for this parameter typically lie in the range 1 - 3.  Since we support 3 color values to capture the spectral effect presets may be preferred over color pickers."}  %read{39,39} %write{2147483647,-1}
+param	color	clearcoatExtinctionCoeff	0 0 0		%meta{int,color_restrictComponents,0} %meta{int,color_enableFilmlookVis,0} %meta{string,page,"Clear Coat.Physical"} %meta{string,label,"Extinction Coefficient"} %meta{string,help,"This is for physical specular fresnel mode only. Extinction Coefficient is a second refractive index for the material useful for characterizing metallic behaviors. Channel values for this parameter typically lie in the range 1 - 3.  Since we support 3 color values to capture the spectral effect presets may be prefered over color pickers.  When 0, the material reacts as a dielectric (glass, clearcoat)> When non-zero, the material responds as a conductor would."}  %read{40,40} %write{2147483647,-1}
+param	float	clearcoatRoughness	0		%meta{string,page,"Clear Coat"} %meta{string,label,"Roughness"} %meta{float,min,0} %meta{float,max,1} %meta{float,sensitivity,0.00999999978} %meta{int,slider,1} %meta{float,slidermin,0} %meta{float,slidermax,1} %meta{string,help,"Clearcoat roughness.  The higher the number, the rougher it gets.  The range is between 0 to 1. Negative number is not allowed.Suggested values range from 0 to 0.2."}  %read{36,36} %write{2147483647,-1}
+param	float	clearcoatAnisotropy	0		%meta{string,page,"Clear Coat.Advanced"} %meta{string,label,"Anisotropy"} %meta{float,min,-1} %meta{float,max,1} %meta{float,sensitivity,0.00999999978} %meta{int,slider,1} %meta{float,slidermin,-1} %meta{float,slidermax,1} %meta{string,help,"Controls the shape of the specular highlights and reflections.At 0 the shape is circular.  Values from -1 to 1 produce the range of ellipses from fat to tall.  The direction of anisotropycan also be controlled by your model texture parameters and bythe Shading Tangent parameter."}  %read{35,35} %write{2147483647,-1}
+param	normal	clearcoatBumpNormal	0 0 0		%meta{string,page,"Clear Coat.Advanced"} %meta{string,label,"Bump"} %meta{string,readOnly,"True"} %meta{string,help,"Connect a PxrBump node here if you need bump or normal-mapped normals for the clearcoat lobe instead of using the global normal bump. Only valid when provided as a texture/connection."}  %read{41,43} %write{2147483647,-1}
+param	float	clearcoatThickness	0		%meta{string,page,"Clear Coat.Physical"} %meta{string,label,"Layer Thickness"} %meta{float,min,0} %meta{float,max,1} %meta{float,sensitivity,0.100000001} %meta{int,slider,1} %meta{float,slidermin,0} %meta{float,slidermax,1} %meta{string,help,"Thickness of the clearcoat layer for attenuating through absorptionthe other active substrates.This method can work in addition to the clearcoatEnergyCompensation approach."}  %read{45,45} %write{2147483647,-1}
+param	color	clearcoatAbsorptionTint	0 0 0		%meta{int,color_restrictComponents,0} %meta{int,color_enableFilmlookVis,0} %meta{string,page,"Clear Coat.Physical"} %meta{string,label,"Absorption Tint"} %meta{string,help,"Controls the wavelength dependence of the clearcoatThickness above. The clearcoat medium provides a filter to the substrates.At infinite Thickness, this would be the color observed on the substrates."}  %read{46,46} %write{2147483647,-1}
+param	int	enableIridescence	0		%meta{string,page,"Iridescence"} %meta{string,label,"Enable"} %meta{string,widget,"checkBox"} %meta{string,help,"Enable the iridescence lobe."} %meta{int,connectable,0}  %read{55,55} %write{2147483647,-1}
+param	float	iridescenceFaceGain	0		%meta{string,page,"Iridescence"} %meta{string,label,"Face Gain"} %meta{float,min,0} %meta{float,max,1} %meta{float,sensitivity,0.00999999978} %meta{int,slider,1} %meta{float,slidermin,0} %meta{float,slidermax,1} %meta{string,help,"Iridescence gain at 0 degree incidence.This is the iridescence gain for facing the camera."}  %read{58,58} %write{2147483647,-1}
+param	float	iridescenceEdgeGain	0		%meta{string,page,"Iridescence"} %meta{string,label,"Edge Gain"} %meta{float,min,0} %meta{float,max,1} %meta{float,sensitivity,0.00999999978} %meta{int,slider,1} %meta{float,slidermin,0} %meta{float,slidermax,1} %meta{string,help,"Iridescence gain at 90 degree incidence.This is the iridescence gain for the glancing angle on the edge."}  %read{59,59} %write{2147483647,-1}
+param	color	iridescencePrimaryColor	1 0 0		%meta{string,page,"Iridescence"} %meta{string,label,"Primary Color"} %meta{string,help,"Iridescence primary color on the hue wheel to start from."}  %read{60,60} %write{2147483647,-1}
+param	color	iridescenceSecondaryColor	0 0 1		%meta{string,page,"Iridescence"} %meta{string,label,"Secondary Color"} %meta{string,help,"Iridescence secondary color on the hue wheel to end at."}  %read{61,61} %write{2147483647,-1}
+param	float	iridescenceThickness	800		%meta{string,page,"Iridescence.Physical"} %meta{string,label,"Thin Film Thickness"} %meta{string,help,"This is for physical mode only. Thin film thickness in nanometer."}  %read{66,66} %write{2147483647,-1}
+param	float	iridescenceRoughness	0.200000003		%meta{string,page,"Iridescence"} %meta{string,label,"Roughness"} %meta{float,min,0} %meta{float,max,1} %meta{float,sensitivity,0.00999999978} %meta{int,slider,1} %meta{float,slidermin,0} %meta{float,slidermax,1} %meta{string,help,"Iridescence roughness.The higher the number, it rougher it gets.The range is between 0 to 1.  Negative number is not allowed."}  %read{57,57} %write{2147483647,-1}
+param	float	iridescenceAnisotropy	0		%meta{string,page,"Iridescence.Advanced"} %meta{string,label,"Anisotropy"} %meta{float,min,-1} %meta{float,max,1} %meta{float,sensitivity,0.00999999978} %meta{int,slider,1} %meta{float,slidermin,-1} %meta{float,slidermax,1} %meta{string,help,"Controls the shape of the iridescence highlights and reflections.At 0 the shape is circular.  Values from -1 to 1 produce the range of ellipses from fat to tall.  The direction of anisotropycan also be controlled by your model texture parameters and bythe Shading Tangent parameter."}  %read{56,56} %write{2147483647,-1}
+param	normal	iridescenceBumpNormal	0 0 0		%meta{string,page,"Iridescence.Advanced"} %meta{string,label,"Bump"} %meta{string,readOnly,"True"} %meta{string,help,"Connect a PxrBump node here if you need bump or normal-mapped normals for the iridescence lobe instead of using the global normal bump. Only valid when provided as a texture/connection."}  %read{62,64} %write{2147483647,-1}
+param	int	enableFuzz	0		%meta{string,page,"Fuzz"} %meta{string,label,"Enable"} %meta{string,widget,"checkBox"} %meta{string,help,"Enable the fuzz lobe."} %meta{int,connectable,0}  %read{47,47} %write{2147483647,-1}
+param	float	fuzzGain	0		%meta{string,page,"Fuzz"} %meta{string,label,"Gain"} %meta{float,min,0} %meta{float,sensitivity,0.00999999978} %meta{int,slider,1} %meta{float,slidermin,0} %meta{float,slidermax,1} %meta{string,help,"Multiplier for the fuzz lobe."}  %read{49,49} %write{2147483647,-1}
+param	color	fuzzColor	1 1 1		%meta{string,page,"Fuzz"} %meta{string,label,"Color"} %meta{string,help,"Fuzz color.  This sets the color for the fuzz lobe."}  %read{49,49} %write{2147483647,-1}
+param	float	fuzzConeAngle	8		%meta{string,page,"Fuzz"} %meta{string,label,"Cone Angle"} %meta{float,min,0} %meta{float,max,20} %meta{float,sensitivity,0.0500000007} %meta{int,slider,1} %meta{float,slidermin,0} %meta{float,slidermax,20} %meta{string,help,"Fuzz roughness (corresponding to Marschner R cone angle)."}  %read{50,50} %write{2147483647,-1}
+param	normal	fuzzBumpNormal	0 0 0		%meta{string,page,"Fuzz.Advanced"} %meta{string,label,"Bump"} %meta{string,readOnly,"True"} %meta{string,help,"Connect a PxrBump node here if you need bump or normal-mapped normals for the fuzz lobe instead of using the global normal bump. Only valid when provided as a texture/connection."}  %read{51,53} %write{2147483647,-1}
+param	int	enableSubsurface	0		%meta{string,page,"Subsurface"} %meta{string,label,"Enable"} %meta{string,widget,"checkBox"} %meta{string,help,"Enable the subsurface lobe."} %meta{int,connectable,0}  %read{67,67} %write{2147483647,-1}
+param	float	subsurfaceGain	0		%meta{string,page,"Subsurface"} %meta{string,label,"Gain"} %meta{float,min,0} %meta{float,max,1} %meta{float,sensitivity,0.00999999978} %meta{int,slider,1} %meta{float,slidermin,0} %meta{float,slidermax,1} %meta{string,help,"Multiplier for the subsurface lobe."}  %read{69,79} %write{2147483647,-1}
+param	color	subsurfaceColor	0.829999983 0.791000009 0.753000021		%meta{string,page,"Subsurface"} %meta{string,label,"Color"} %meta{string,help,"Subsurface color.  This sets the color for the subsurface lobe."}  %read{69,69} %write{2147483647,-1}
+param	float	subsurfaceDmfp	10		%meta{string,page,"Subsurface"} %meta{string,label,"Mean Free Path Distance"} %meta{float,min,0} %meta{string,help,"Subsurface mean free path scalar distance.This specifies how far the light travels. This gets multiplied to the Mean Free Path Color below."}  %read{76,76} %write{2147483647,-1}
+param	color	subsurfaceDmfpColor	0.851000011 0.556999981 0.395000011		%meta{string,page,"Subsurface"} %meta{string,label,"Mean Free Path Color"} %meta{string,help,"Subsurface mean free path color. This specifies  how far the light travels in the R, G and B spectra."}  %read{77,77} %write{2147483647,-1}
+param	float	shortSubsurfaceGain	0		%meta{string,page,"Subsurface.Multiple Mean Free Paths"} %meta{string,label,"Short Gain"} %meta{float,min,0} %meta{float,max,1} %meta{float,sensitivity,0.00999999978} %meta{int,slider,1} %meta{float,slidermin,0} %meta{float,slidermax,1} %meta{string,help,"Multiplier for the subsurface lobe."}  %read{71,71} %write{2147483647,-1}
+param	color	shortSubsurfaceColor	0.899999976 0.899999976 0.899999976		%meta{string,page,"Subsurface.Multiple Mean Free Paths"} %meta{string,label,"Short Color"} %meta{string,help,"Subsurface color.  This sets the color for the subsurface lobe."}  %read{71,71} %write{2147483647,-1}
+param	float	shortSubsurfaceDmfp	5		%meta{string,page,"Subsurface.Multiple Mean Free Paths"} %meta{string,label,"Short MFP Distance"} %meta{float,min,0} %meta{string,help,"Subsurface mean free path scalar distance.This specifies how far the light travels. This gets multiplied to the Mean Free Path Color below."}  %read{72,72} %write{2147483647,-1}
+param	float	longSubsurfaceGain	0		%meta{string,page,"Subsurface.Multiple Mean Free Paths"} %meta{string,label,"Long Gain"} %meta{float,min,0} %meta{float,max,1} %meta{float,sensitivity,0.00999999978} %meta{int,slider,1} %meta{float,slidermin,0} %meta{float,slidermax,1} %meta{string,help,"Multiplier for the subsurface lobe."}  %read{74,74} %write{2147483647,-1}
+param	color	longSubsurfaceColor	0.800000012 0 0		%meta{string,page,"Subsurface.Multiple Mean Free Paths"} %meta{string,label,"Long Color"} %meta{string,help,"Subsurface color.  This sets the color for the subsurface lobe."}  %read{74,74} %write{2147483647,-1}
+param	float	longSubsurfaceDmfp	20		%meta{string,page,"Subsurface.Multiple Mean Free Paths"} %meta{string,label,"Long MFP Distance"} %meta{float,min,0} %meta{string,help,"Subsurface mean free path scalar distance.This specifies how far the light travels. This gets multiplied to the Mean Free Path Color below."}  %read{75,75} %write{2147483647,-1}
+param	float	subsurfaceDirectionality	0		%meta{string,page,"Subsurface"} %meta{string,label,"Directionality"} %meta{float,min,0} %meta{float,max,0.949999988} %meta{float,sensitivity,0.00999999978} %meta{int,slider,1} %meta{float,slidermin,0} %meta{float,slidermax,0.949999988} %meta{string,help,"Anisotropy ('specularity') of the subsurface medium.Higher values makes light scatter predominantly forward."}  %read{78,78} %write{2147483647,-1}
+param	color	subsurfacePostTint	1 1 1		%meta{string,page,"Subsurface.Advanced"} %meta{string,label,"Post Tint"} %meta{string,help,"Tint that is applied at the end of the subsurface computation."}  %read{79,79} %write{2147483647,-1}
+param	float	subsurfaceTransmitGain	0		%meta{string,page,"Subsurface.Advanced"} %meta{string,label,"Transmit Gain"} %meta{float,min,0} %meta{float,max,1} %meta{float,sensitivity,0.00999999978} %meta{int,slider,1} %meta{float,slidermin,0} %meta{float,slidermax,1} %meta{string,help,"This only applies when subsurface lobe's Double Sided is on in the Bxdf. Instead of using Subsurface Gain for controlling the intensity of the subsurface transmission, we use Subsurface Transmit Gain.If it is set to 0.0, the subsurface transmission is off."}  %read{80,80} %write{2147483647,-1}
+param	int	enableSinglescatter	0		%meta{string,page,"Single Scatter"} %meta{string,label,"Enable"} %meta{string,widget,"checkBox"} %meta{string,help,"Enable the single scatter lobe."} %meta{int,connectable,0}  %read{93,93} %write{2147483647,-1}
+param	float	singlescatterGain	0		%meta{string,page,"Single Scatter"} %meta{string,label,"Gain"} %meta{float,min,0} %meta{float,max,1} %meta{float,sensitivity,0.00999999978} %meta{int,slider,1} %meta{float,slidermin,0} %meta{float,slidermax,1} %meta{string,help,"Multiplier for the single scatter lobe."}  %read{95,95} %write{2147483647,-1}
+param	color	singlescatterColor	0.829999983 0.791000009 0.753000021		%meta{string,page,"Single Scatter"} %meta{string,label,"Color"} %meta{string,help,"Single scatter color.  This is the color for the single scatter lobe."}  %read{95,95} %write{2147483647,-1}
+param	float	singlescatterMfp	10		%meta{string,page,"Single Scatter"} %meta{string,label,"Mean Free Path"} %meta{float,min,0} %meta{string,help,"Single scatter mean free path scalar distance.This specifies how far the light travels. This gets multiplied to the Mean Free Path Color below."}  %read{97,97} %write{2147483647,-1}
+param	color	singlescatterMfpColor	0.851000011 0.556999981 0.395000011		%meta{string,page,"Single Scatter"} %meta{string,label,"Mean Free Path Color"} %meta{string,help,"Single scatter mean free path color. This specifies  how far the light travels in the R, G and B spectra."}  %read{97,97} %write{2147483647,-1}
+param	float	singlescatterDirectionality	0		%meta{string,page,"Single Scatter.Advanced"} %meta{string,label,"Directionality"} %meta{float,min,-0.99000001} %meta{float,max,0.99000001} %meta{float,sensitivity,0.00999999978} %meta{int,slider,1} %meta{float,slidermin,-0.99000001} %meta{float,slidermax,0.99000001} %meta{string,help,"0 isotropic (no effect). 1 forward scatter (more light on backside).  -1 backwards scatter (more light on front side)"}  %read{98,98} %write{2147483647,-1}
+param	float	singlescatterIor	1.29999995		%meta{string,page,"Single Scatter.Advanced"} %meta{string,label,"Refractive Index"} %meta{float,min,1.00100005} %meta{float,max,2} %meta{float,sensitivity,0.00999999978} %meta{string,help,"Affects how light bends when entering the medium. 1.5 makes sense for glass. Skin is aound 1.3."}  %read{99,99} %write{2147483647,-1}
+param	float	singlescatterBlur	0		%meta{string,page,"Single Scatter.Advanced"} %meta{string,label,"Blur"} %meta{float,min,0} %meta{float,max,1} %meta{float,sensitivity,0.00999999978} %meta{int,slider,1} %meta{float,slidermin,0} %meta{float,slidermax,1} %meta{string,help,"Spread of the rays when entering the surface. Affects both single scatter and its 'direct' component."}  %read{100,100} %write{2147483647,-1}
+param	float	singlescatterDirectGain	0		%meta{string,page,"Single Scatter.Advanced"} %meta{string,label,"Backside Direct Illum Gain"} %meta{float,min,0} %meta{float,max,1} %meta{float,sensitivity,0.00999999978} %meta{int,slider,1} %meta{float,slidermin,0} %meta{float,slidermax,1} %meta{string,help,"Independent from singlescatterK, this defines a gain for rays going straight through the geometry (not scattered)"}  %read{101,101} %write{2147483647,-1}
+param	color	singlescatterDirectGainTint	1 1 1		%meta{string,page,"Single Scatter.Advanced"} %meta{string,label,"Direction Tint"} %meta{string,help,"Independent from singlescatterTint, this defines a color for rays going straight through the geometry (not scattered)."}  %read{102,102} %write{2147483647,-1}
+param	int	enableRR	0		%meta{string,page,"Glass"} %meta{string,label,"Enable"} %meta{string,widget,"checkBox"} %meta{string,help,"Global toggle for the glass lobe, both reflection and refraction"} %meta{int,connectable,0}  %read{81,81} %write{2147483647,-1}
+param	float	rrRefractionGain	0		%meta{string,page,"Glass"} %meta{string,label,"Refraction Gain"} %meta{float,min,0} %meta{float,max,1} %meta{float,sensitivity,0.00999999978} %meta{int,slider,1} %meta{float,slidermin,0} %meta{float,slidermax,1} %meta{string,help,"Multiplier for the refraction component of this lobe."}  %read{83,83} %write{2147483647,-1}
+param	float	rrReflectionGain	0		%meta{string,page,"Glass"} %meta{string,label,"Reflection Gain"} %meta{float,min,0} %meta{float,max,1} %meta{float,sensitivity,0.00999999978} %meta{int,slider,1} %meta{float,slidermin,0} %meta{float,slidermax,1} %meta{string,help,"Multiplier for the reflection component of this lobe."}  %read{84,84} %write{2147483647,-1}
+param	color	rrRefractionColor	1 1 1		%meta{string,page,"Glass"} %meta{string,label,"Refraction Color"} %meta{string,help,"Tint the objects seen through this medium."}  %read{83,83} %write{2147483647,-1}
+param	float	rrRoughness	0.100000001		%meta{string,page,"Glass"} %meta{string,label,"Roughness"} %meta{float,min,0} %meta{float,max,1} %meta{float,sensitivity,0.00999999978} %meta{int,slider,1} %meta{float,slidermin,0} %meta{float,slidermax,1} %meta{string,help,"Shared roughness for both reflection and refraction."}  %read{86,86} %write{2147483647,-1}
+param	float	rrRefractionRoughness	-1		%meta{string,page,"Glass"} %meta{string,label,"RefractionRoughness"} %meta{float,min,-1} %meta{float,max,1} %meta{float,sensitivity,0.00999999978} %meta{int,slider,1} %meta{float,slidermin,0} %meta{float,slidermax,1} %meta{string,help,"Separate roughness for refraction."}  %read{87,87} %write{2147483647,-1}
+param	float	rrIor	1.5		%meta{string,page,"Glass.Advanced"} %meta{string,label,"Refractive Index"} %meta{string,help,"Defines how much rays curve in refraction, as well as the fresnel effect of the reflection."}  %read{88,88} %write{2147483647,-1}
+param	float	rrAnisotropy	0		%meta{string,page,"Glass.Advanced"} %meta{string,label,"Anisotropy"} %meta{float,min,-1} %meta{float,max,1} %meta{float,sensitivity,0.00999999978} %meta{int,slider,1} %meta{float,slidermin,-1} %meta{float,slidermax,1} %meta{string,help,"Controls the shape of the glass highlights and reflections.At 0 the shape is circular.  Values from -1 to 1 produce the range of ellipses from fat to tall.  The direction of anisotropycan also be controlled by your model texture parameters and bythe Shading Tangent parameter."}  %read{85,85} %write{2147483647,-1}
+param	normal	rrBumpNormal	0 0 0		%meta{string,page,"Glass.Advanced"} %meta{string,label,"Bump"} %meta{string,readOnly,"True"} %meta{string,help,"Connect a PxrBump node here if you need bump or normal-mapped normals for the glass lobe instead of using the global normal bump. Only valid when provided as a texture/connection."}  %read{89,91} %write{2147483647,-1}
+param	int	enableGlow	0		%meta{string,page,"Glow"} %meta{string,label,"Enable"} %meta{string,widget,"checkBox"} %meta{string,help,"Enable the glow lobe."} %meta{int,connectable,0}  %read{103,103} %write{2147483647,-1}
+param	float	glowGain	0		%meta{string,page,"Glow"} %meta{string,label,"Gain"} %meta{float,min,0} %meta{float,sensitivity,0.00999999978} %meta{int,slider,1} %meta{float,slidermin,0} %meta{float,slidermax,1} %meta{string,help,"Multiplier for the glow lobe."}  %read{105,105} %write{2147483647,-1}
+param	color	glowColor	1 1 1		%meta{string,page,"Glow"} %meta{string,label,"Color"} %meta{string,help,"Controls the glow (incandescence) of the material."}  %read{105,105} %write{2147483647,-1}
+param	int	enableInterior	0		%meta{string,page,"Interior"} %meta{string,label,"Enable"} %meta{string,widget,"checkBox"} %meta{string,help,"Enable the interior."} %meta{int,connectable,0}  %read{106,106} %write{2147483647,-1}
+param	color	ssAlbedo	0 0 0		%meta{string,page,"Interior"} %meta{string,label,"SsAlbedo"} %meta{string,help,"Color of the particles in the volume."}  %read{107,107} %write{2147483647,-1}
+param	color	extinction	0 0 0		%meta{string,page,"Interior"} %meta{string,label,"Extinction"} %meta{string,help,"Extinction coefficient that controls how light is absorbed as it travels through the volume. Higher values will block more light."}  %read{108,108} %write{2147483647,-1}
+param	normal	bumpNormal	0 0 0		%meta{string,help,"Normal to use for the bump calculation."} %meta{string,label,"Global Bump"} %meta{string,readOnly,"True"} %meta{string,help,"Connect a PxrBump node here if you need bump or normal-mapped normals. Only valid when provided as a texture/connection. If the individual lobe's bump normal is set, this global bump be ignored for that lobe."}  %read{109,111} %write{2147483647,-1}
+oparam	float	pxrMaterialOut	0		%meta{string,widget,"null"} %meta{string,help,"This is a virtual struct output. It connects all shader parameters in the same scope."} %meta{string,tag,"vstruct"}  %read{2147483647,-1} %write{2147483647,-1}
+oparam	normal	pxrMaterialOut_bumpNormal	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.bumpNormal"} %meta{string,label,"pxrMaterialOut_bumpNormal"} %meta{string,vstructConditionalExpr,"connect if bumpNormal is connected "}  %read{2147483647,-1} %write{111,112}
+oparam	int	pxrMaterialOut_enableDiffuse	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.enableDiffuse"} %meta{string,label,"pxrMaterialOut_enableDiffuse"} %meta{string,vstructConditionalExpr,"set 1 if enableDiffuse == 1 else set 0"}  %read{2147483647,-1} %write{2147483647,-1}
+oparam	float	pxrMaterialOut_diffuseGain	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.diffuseGain"} %meta{string,label,"pxrMaterialOut_diffuseGain"} %meta{string,vstructConditionalExpr,"connect if enableDiffuse == 1 "}  %read{2147483647,-1} %write{2,2}
+oparam	color	pxrMaterialOut_diffuseColor	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.diffuseColor"} %meta{string,label,"pxrMaterialOut_diffuseColor"} %meta{string,vstructConditionalExpr,"connect if enableDiffuseAlways == 1 "}  %read{2147483647,-1} %write{3,3}
+oparam	float	pxrMaterialOut_diffuseRoughness	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.diffuseRoughness"} %meta{string,label,"pxrMaterialOut_diffuseRoughness"} %meta{string,vstructConditionalExpr,"connect if enableDiffuse == 1 "}  %read{2147483647,-1} %write{4,4}
+oparam	normal	pxrMaterialOut_diffuseBumpNormal	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.diffuseBumpNormal"} %meta{string,label,"pxrMaterialOut_diffuseBumpNormal"} %meta{string,vstructConditionalExpr,"connect if enableDiffuse == 1 and diffuseBumpNormal is connected "}  %read{2147483647,-1} %write{10,11}
+oparam	color	pxrMaterialOut_diffuseBackColor	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.diffuseBackColor"} %meta{string,label,"pxrMaterialOut_diffuseBackColor"} %meta{string,vstructConditionalExpr,"connect if enableDiffuse == 1 "}  %read{2147483647,-1} %write{5,5}
+oparam	float	pxrMaterialOut_diffuseTransmitGain	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.diffuseTransmitGain"} %meta{string,label,"pxrMaterialOut_diffuseTransmitGain"} %meta{string,vstructConditionalExpr,"connect if enableDiffuse == 1 "}  %read{2147483647,-1} %write{6,6}
+oparam	color	pxrMaterialOut_diffuseTransmitColor	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.diffuseTransmitColor"} %meta{string,label,"pxrMaterialOut_diffuseTransmitColor"} %meta{string,vstructConditionalExpr,"connect if enableDiffuse == 1 "}  %read{2147483647,-1} %write{7,7}
+oparam	int	pxrMaterialOut_enableSpecular	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.enableSpecular"} %meta{string,label,"pxrMaterialOut_enableSpecular"} %meta{string,vstructConditionalExpr,"set 1 if enableSpecular == 1 else set 0"}  %read{2147483647,-1} %write{2147483647,-1}
+oparam	color	pxrMaterialOut_specularFaceColor	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.specularFaceColor"} %meta{string,label,"pxrMaterialOut_specularFaceColor"} %meta{string,vstructConditionalExpr,"connect if enableSpecular == 1 "}  %read{2147483647,-1} %write{15,15}
+oparam	color	pxrMaterialOut_specularEdgeColor	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.specularEdgeColor"} %meta{string,label,"pxrMaterialOut_specularEdgeColor"} %meta{string,vstructConditionalExpr,"connect if enableSpecular == 1 "}  %read{2147483647,-1} %write{16,16}
+oparam	color	pxrMaterialOut_specularIor	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.specularIor"} %meta{string,label,"pxrMaterialOut_specularIor"} %meta{string,vstructConditionalExpr,"connect if enableSpecular == 1 "}  %read{2147483647,-1} %write{17,17}
+oparam	color	pxrMaterialOut_specularExtinctionCoeff	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.specularExtinctionCoeff"} %meta{string,label,"pxrMaterialOut_specularExtinctionCoeff"} %meta{string,vstructConditionalExpr,"connect if enableSpecular == 1 "}  %read{2147483647,-1} %write{18,18}
+oparam	float	pxrMaterialOut_specularRoughness	0.200000003		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.specularRoughness"} %meta{string,label,"pxrMaterialOut_specularRoughness"} %meta{string,vstructConditionalExpr,"connect if enableSpecular == 1 "}  %read{2147483647,-1} %write{14,14}
+oparam	float	pxrMaterialOut_specularAnisotropy	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.specularAnisotropy"} %meta{string,label,"pxrMaterialOut_specularAnisotropy"} %meta{string,vstructConditionalExpr,"connect if enableSpecular == 1 "}  %read{2147483647,-1} %write{13,13}
+oparam	normal	pxrMaterialOut_specularBumpNormal	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.specularBumpNormal"} %meta{string,label,"pxrMaterialOut_specularBumpNormal"} %meta{string,vstructConditionalExpr,"connect if enableSpecular == 1 and specularBumpNormal is connected "}  %read{2147483647,-1} %write{21,22}
+oparam	int	pxrMaterialOut_enableRoughSpecular	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.enableRoughSpecular"} %meta{string,label,"pxrMaterialOut_enableRoughSpecular"} %meta{string,vstructConditionalExpr,"set 1 if enableRoughSpecular == 1 else set 0"}  %read{2147483647,-1} %write{2147483647,-1}
+oparam	color	pxrMaterialOut_roughSpecularFaceColor	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.roughSpecularFaceColor"} %meta{string,label,"pxrMaterialOut_roughSpecularFaceColor"} %meta{string,vstructConditionalExpr,"connect if enableRoughSpecular == 1 "}  %read{2147483647,-1} %write{26,26}
+oparam	color	pxrMaterialOut_roughSpecularEdgeColor	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.roughSpecularEdgeColor"} %meta{string,label,"pxrMaterialOut_roughSpecularEdgeColor"} %meta{string,vstructConditionalExpr,"connect if enableRoughSpecular == 1 "}  %read{2147483647,-1} %write{27,27}
+oparam	color	pxrMaterialOut_roughSpecularIor	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.roughSpecularIor"} %meta{string,label,"pxrMaterialOut_roughSpecularIor"} %meta{string,vstructConditionalExpr,"connect if enableRoughSpecular == 1 "}  %read{2147483647,-1} %write{28,28}
+oparam	color	pxrMaterialOut_roughSpecularExtinctionCoeff	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.roughSpecularExtinctionCoeff"} %meta{string,label,"pxrMaterialOut_roughSpecularExtinctionCoeff"} %meta{string,vstructConditionalExpr,"connect if enableRoughSpecular == 1 "}  %read{2147483647,-1} %write{29,29}
+oparam	float	pxrMaterialOut_roughSpecularRoughness	0.600000024		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.roughSpecularRoughness"} %meta{string,label,"pxrMaterialOut_roughSpecularRoughness"} %meta{string,vstructConditionalExpr,"connect if enableRoughSpecular == 1 "}  %read{2147483647,-1} %write{25,25}
+oparam	float	pxrMaterialOut_roughSpecularAnisotropy	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.roughSpecularAnisotropy"} %meta{string,label,"pxrMaterialOut_roughSpecularAnisotropy"} %meta{string,vstructConditionalExpr,"connect if enableRoughSpecular == 1 "}  %read{2147483647,-1} %write{24,24}
+oparam	normal	pxrMaterialOut_roughSpecularBumpNormal	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.roughSpecularBumpNormal"} %meta{string,label,"pxrMaterialOut_roughSpecularBumpNormal"} %meta{string,vstructConditionalExpr,"connect if enableRoughSpecular == 1 and roughSpecularBumpNormal is connected "}  %read{2147483647,-1} %write{32,33}
+oparam	int	pxrMaterialOut_enableClearcoat	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.enableClearcoat"} %meta{string,label,"pxrMaterialOut_enableClearcoat"} %meta{string,vstructConditionalExpr,"set 1 if enableClearcoat == 1 else set 0"}  %read{2147483647,-1} %write{2147483647,-1}
+oparam	color	pxrMaterialOut_clearcoatFaceColor	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.clearcoatFaceColor"} %meta{string,label,"pxrMaterialOut_clearcoatFaceColor"} %meta{string,vstructConditionalExpr,"connect if enableClearcoat == 1 "}  %read{2147483647,-1} %write{37,37}
+oparam	color	pxrMaterialOut_clearcoatEdgeColor	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.clearcoatEdgeColor"} %meta{string,label,"pxrMaterialOut_clearcoatEdgeColor"} %meta{string,vstructConditionalExpr,"connect if enableClearcoat == 1 "}  %read{2147483647,-1} %write{38,38}
+oparam	color	pxrMaterialOut_clearcoatIor	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.clearcoatIor"} %meta{string,label,"pxrMaterialOut_clearcoatIor"} %meta{string,vstructConditionalExpr,"connect if enableClearcoat == 1 "}  %read{2147483647,-1} %write{39,39}
+oparam	color	pxrMaterialOut_clearcoatExtinctionCoeff	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.clearcoatExtinctionCoeff"} %meta{string,label,"pxrMaterialOut_clearcoatExtinctionCoeff"} %meta{string,vstructConditionalExpr,"connect if enableClearcoat == 1 "}  %read{2147483647,-1} %write{40,40}
+oparam	float	pxrMaterialOut_clearcoatRoughness	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.clearcoatRoughness"} %meta{string,label,"pxrMaterialOut_clearcoatRoughness"} %meta{string,vstructConditionalExpr,"connect if enableClearcoat == 1 "}  %read{2147483647,-1} %write{36,36}
+oparam	float	pxrMaterialOut_clearcoatAnisotropy	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.clearcoatAnisotropy"} %meta{string,label,"pxrMaterialOut_clearcoatAnisotropy"} %meta{string,vstructConditionalExpr,"connect if enableClearcoat == 1 "}  %read{2147483647,-1} %write{35,35}
+oparam	normal	pxrMaterialOut_clearcoatBumpNormal	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.clearcoatBumpNormal"} %meta{string,label,"pxrMaterialOut_clearcoatBumpNormal"} %meta{string,vstructConditionalExpr,"connect if enableClearcoat == 1 and clearcoatBumpNormal is connected "}  %read{2147483647,-1} %write{43,44}
+oparam	float	pxrMaterialOut_clearcoatThickness	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.clearcoatThickness"} %meta{string,label,"pxrMaterialOut_clearcoatThickness"} %meta{string,vstructConditionalExpr,"connect if enableClearcoat == 1 "}  %read{2147483647,-1} %write{45,45}
+oparam	color	pxrMaterialOut_clearcoatAbsorptionTint	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.clearcoatAbsorptionTint"} %meta{string,label,"pxrMaterialOut_clearcoatAbsorptionTint"} %meta{string,vstructConditionalExpr,"connect if enableClearcoat == 1 "}  %read{2147483647,-1} %write{46,46}
+oparam	int	pxrMaterialOut_enableIridescence	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.enableIridescence"} %meta{string,label,"pxrMaterialOut_enableIridescence"} %meta{string,vstructConditionalExpr,"set 1 if enableIridescence == 1 else set 0"}  %read{2147483647,-1} %write{2147483647,-1}
+oparam	float	pxrMaterialOut_iridescenceFaceGain	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.iridescenceFaceGain"} %meta{string,label,"pxrMaterialOut_iridescenceFaceGain"} %meta{string,vstructConditionalExpr,"connect if enableIridescence == 1 "}  %read{2147483647,-1} %write{58,58}
+oparam	float	pxrMaterialOut_iridescenceEdgeGain	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.iridescenceEdgeGain"} %meta{string,label,"pxrMaterialOut_iridescenceEdgeGain"} %meta{string,vstructConditionalExpr,"connect if enableIridescence == 1 "}  %read{2147483647,-1} %write{59,59}
+oparam	color	pxrMaterialOut_iridescencePrimaryColor	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.iridescencePrimaryColor"} %meta{string,label,"pxrMaterialOut_iridescencePrimaryColor"} %meta{string,vstructConditionalExpr,"connect if enableIridescence == 1 "}  %read{2147483647,-1} %write{60,60}
+oparam	color	pxrMaterialOut_iridescenceSecondaryColor	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.iridescenceSecondaryColor"} %meta{string,label,"pxrMaterialOut_iridescenceSecondaryColor"} %meta{string,vstructConditionalExpr,"connect if enableIridescence == 1 "}  %read{2147483647,-1} %write{61,61}
+oparam	float	pxrMaterialOut_iridescenceThickness	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.iridescenceThickness"} %meta{string,label,"pxrMaterialOut_iridescenceThickness"} %meta{string,vstructConditionalExpr,"connect if enableIridescence == 1 "}  %read{2147483647,-1} %write{66,66}
+oparam	float	pxrMaterialOut_iridescenceRoughness	0.200000003		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.iridescenceRoughness"} %meta{string,label,"pxrMaterialOut_iridescenceRoughness"} %meta{string,vstructConditionalExpr,"connect if enableIridescence == 1 "}  %read{2147483647,-1} %write{57,57}
+oparam	float	pxrMaterialOut_iridescenceAnisotropy	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.iridescenceAnisotropy"} %meta{string,label,"pxrMaterialOut_iridescenceAnisotropy"} %meta{string,vstructConditionalExpr,"connect if enableIridescence == 1 "}  %read{2147483647,-1} %write{56,56}
+oparam	normal	pxrMaterialOut_iridescenceBumpNormal	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.iridescenceBumpNormal"} %meta{string,label,"pxrMaterialOut_iridescenceBumpNormal"} %meta{string,vstructConditionalExpr,"connect if enableIridescence == 1 and iridescenceBumpNormal is connected "}  %read{2147483647,-1} %write{64,65}
+oparam	int	pxrMaterialOut_enableFuzz	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.enableFuzz"} %meta{string,label,"pxrMaterialOut_enableFuzz"} %meta{string,vstructConditionalExpr,"set 1 if enableFuzz == 1 else set 0"}  %read{2147483647,-1} %write{2147483647,-1}
+oparam	float	pxrMaterialOut_fuzzGain	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.fuzzGain"} %meta{string,label,"pxrMaterialOut_fuzzGain"} %meta{string,vstructConditionalExpr,"connect if enableFuzz == 1 "}  %read{2147483647,-1} %write{48,48}
+oparam	color	pxrMaterialOut_fuzzColor	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.fuzzColor"} %meta{string,label,"pxrMaterialOut_fuzzColor"} %meta{string,vstructConditionalExpr,"connect if enableFuzz == 1 "}  %read{2147483647,-1} %write{49,49}
+oparam	float	pxrMaterialOut_fuzzConeAngle	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.fuzzConeAngle"} %meta{string,label,"pxrMaterialOut_fuzzConeAngle"} %meta{string,vstructConditionalExpr,"connect if enableFuzz == 1 "}  %read{2147483647,-1} %write{50,50}
+oparam	normal	pxrMaterialOut_fuzzBumpNormal	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.fuzzBumpNormal"} %meta{string,label,"pxrMaterialOut_fuzzBumpNormal"} %meta{string,vstructConditionalExpr,"connect if enableFuzz == 1 and fuzzBumpNormal is connected "}  %read{2147483647,-1} %write{53,54}
+oparam	int	pxrMaterialOut_enableRR	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.enableRR"} %meta{string,label,"pxrMaterialOut_enableRR"} %meta{string,vstructConditionalExpr,"set 1 if enableRR == 1 else set 0"}  %read{2147483647,-1} %write{2147483647,-1}
+oparam	float	pxrMaterialOut_refractionGain	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.refractionGain"} %meta{string,label,"pxrMaterialOut_refractionGain"} %meta{string,vstructConditionalExpr,"connect if enableRR == 1 "}  %read{2147483647,-1} %write{82,82}
+oparam	color	pxrMaterialOut_refractionColor	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.refractionColor"} %meta{string,label,"pxrMaterialOut_refractionColor"} %meta{string,vstructConditionalExpr,"connect if enableRR == 1 "}  %read{2147483647,-1} %write{83,83}
+oparam	float	pxrMaterialOut_reflectionGain	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.reflectionGain"} %meta{string,label,"pxrMaterialOut_reflectionGain"} %meta{string,vstructConditionalExpr,"connect if enableRR == 1 "}  %read{2147483647,-1} %write{84,84}
+oparam	float	pxrMaterialOut_glassRoughness	0.100000001		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.glassRoughness"} %meta{string,label,"pxrMaterialOut_glassRoughness"} %meta{string,vstructConditionalExpr,"connect if enableRR == 1 "}  %read{2147483647,-1} %write{86,86}
+oparam	float	pxrMaterialOut_glassRefractionRoughness	-1		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.glassRefractionRoughness"} %meta{string,label,"pxrMaterialOut_glassRefractionRoughness"} %meta{string,vstructConditionalExpr,"connect if enableRR == 1 "}  %read{2147483647,-1} %write{87,87}
+oparam	float	pxrMaterialOut_glassIor	1.5		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.glassIor"} %meta{string,label,"pxrMaterialOut_glassIor"} %meta{string,vstructConditionalExpr,"connect if enableRR == 1 "}  %read{2147483647,-1} %write{88,88}
+oparam	float	pxrMaterialOut_glassAnisotropy	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.glassAnisotropy"} %meta{string,label,"pxrMaterialOut_glassAnisotropy"} %meta{string,vstructConditionalExpr,"connect if enableRR == 1 "}  %read{2147483647,-1} %write{85,85}
+oparam	normal	pxrMaterialOut_glassBumpNormal	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.glassBumpNormal"} %meta{string,label,"pxrMaterialOut_glassBumpNormal"} %meta{string,vstructConditionalExpr,"connect if enableRR == 1 and rrBumpNormal is connected "}  %read{2147483647,-1} %write{91,92}
+oparam	int	pxrMaterialOut_enableSubsurface	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.enableSubsurface"} %meta{string,label,"pxrMaterialOut_enableSubsurface"} %meta{string,vstructConditionalExpr,"set 1 if enableSubsurface == 1 else set 0"}  %read{2147483647,-1} %write{2147483647,-1}
+oparam	float	pxrMaterialOut_subsurfaceGain	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.subsurfaceGain"} %meta{string,label,"pxrMaterialOut_subsurfaceGain"} %meta{string,vstructConditionalExpr,"connect if enableSubsurface == 1 "}  %read{2147483647,-1} %write{68,68}
+oparam	color	pxrMaterialOut_subsurfaceColor	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.subsurfaceColor"} %meta{string,label,"pxrMaterialOut_subsurfaceColor"} %meta{string,vstructConditionalExpr,"connect if enableSubsurface == 1 "}  %read{2147483647,-1} %write{69,69}
+oparam	float	pxrMaterialOut_subsurfaceDmfp	1		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.subsurfaceDmfp"} %meta{string,label,"pxrMaterialOut_subsurfaceDmfp"} %meta{string,vstructConditionalExpr,"connect if enableSubsurface == 1 "}  %read{2147483647,-1} %write{76,76}
+oparam	color	pxrMaterialOut_subsurfaceDmfpColor	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.subsurfaceDmfpColor"} %meta{string,label,"pxrMaterialOut_subsurfaceDmfpColor"} %meta{string,vstructConditionalExpr,"connect if enableSubsurface == 1 "}  %read{2147483647,-1} %write{77,77}
+oparam	float	pxrMaterialOut_shortSubsurfaceGain	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.shortSubsurfaceGain"} %meta{string,label,"pxrMaterialOut_shortSubsurfaceGain"} %meta{string,vstructConditionalExpr,"connect if enableSubsurface == 1 "}  %read{2147483647,-1} %write{70,70}
+oparam	color	pxrMaterialOut_shortSubsurfaceColor	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.shortSubsurfaceColor"} %meta{string,label,"pxrMaterialOut_shortSubsurfaceColor"} %meta{string,vstructConditionalExpr,"connect if enableSubsurface == 1 "}  %read{2147483647,-1} %write{71,71}
+oparam	float	pxrMaterialOut_shortSubsurfaceDmfp	1		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.shortSubsurfaceDmfp"} %meta{string,label,"pxrMaterialOut_shortSubsurfaceDmfp"} %meta{string,vstructConditionalExpr,"connect if enableSubsurface == 1 "}  %read{2147483647,-1} %write{72,72}
+oparam	float	pxrMaterialOut_longSubsurfaceGain	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.longSubsurfaceGain"} %meta{string,label,"pxrMaterialOut_longSubsurfaceGain"} %meta{string,vstructConditionalExpr,"connect if enableSubsurface == 1 "}  %read{2147483647,-1} %write{73,73}
+oparam	color	pxrMaterialOut_longSubsurfaceColor	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.longSubsurfaceColor"} %meta{string,label,"pxrMaterialOut_longSubsurfaceColor"} %meta{string,vstructConditionalExpr,"connect if enableSubsurface == 1 "}  %read{2147483647,-1} %write{74,74}
+oparam	float	pxrMaterialOut_longSubsurfaceDmfp	1		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.longSubsurfaceDmfp"} %meta{string,label,"pxrMaterialOut_longSubsurfaceDmfp"} %meta{string,vstructConditionalExpr,"connect if enableSubsurface == 1 "}  %read{2147483647,-1} %write{75,75}
+oparam	float	pxrMaterialOut_subsurfaceDirectionality	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.subsurfaceDirectionality"} %meta{string,label,"pxrMaterialOut_subsurfaceDirectionality"} %meta{string,vstructConditionalExpr,"connect if enableSubsurface == 1 "}  %read{2147483647,-1} %write{78,78}
+oparam	color	pxrMaterialOut_subsurfacePostTint	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.subsurfacePostTint"} %meta{string,label,"pxrMaterialOut_subsurfacePostTint"} %meta{string,vstructConditionalExpr,"connect if enableSubsurface == 1 "}  %read{2147483647,-1} %write{79,79}
+oparam	float	pxrMaterialOut_subsurfaceTransmitGain	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.subsurfaceTransmitGain"} %meta{string,label,"pxrMaterialOut_subsurfaceTransmitGain"} %meta{string,vstructConditionalExpr,"connect if enableSubsurface == 1 "}  %read{2147483647,-1} %write{80,80}
+oparam	int	pxrMaterialOut_enableSinglescatter	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.enableSinglescatter"} %meta{string,label,"pxrMaterialOut_enableSinglescatter"} %meta{string,vstructConditionalExpr,"set 1 if enableSinglescatter == 1 else set 0"}  %read{2147483647,-1} %write{2147483647,-1}
+oparam	float	pxrMaterialOut_singlescatterGain	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.singlescatterGain"} %meta{string,label,"pxrMaterialOut_singlescatterGain"} %meta{string,vstructConditionalExpr,"connect if enableSinglescatter == 1 "}  %read{2147483647,-1} %write{94,94}
+oparam	color	pxrMaterialOut_singlescatterColor	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.singlescatterColor"} %meta{string,label,"pxrMaterialOut_singlescatterColor"} %meta{string,vstructConditionalExpr,"connect if enableSinglescatter == 1 "}  %read{2147483647,-1} %write{95,95}
+oparam	float	pxrMaterialOut_singlescatterMfp	1		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.singlescatterMfp"} %meta{string,label,"pxrMaterialOut_singlescatterMfp"} %meta{string,vstructConditionalExpr,"connect if enableSinglescatter == 1 "}  %read{2147483647,-1} %write{96,96}
+oparam	color	pxrMaterialOut_singlescatterMfpColor	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.singlescatterMfpColor"} %meta{string,label,"pxrMaterialOut_singlescatterMfpColor"} %meta{string,vstructConditionalExpr,"connect if enableSinglescatter == 1 "}  %read{2147483647,-1} %write{97,97}
+oparam	float	pxrMaterialOut_singlescatterDirectionality	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.singlescatterDirectionality"} %meta{string,label,"pxrMaterialOut_singlescatterDirectionality"} %meta{string,vstructConditionalExpr,"connect if enableSinglescatter == 1 "}  %read{2147483647,-1} %write{98,98}
+oparam	float	pxrMaterialOut_singlescatterIor	1.29999995		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.singlescatterIor"} %meta{string,label,"pxrMaterialOut_singlescatterIor"} %meta{string,vstructConditionalExpr,"connect if enableSinglescatter == 1 "}  %read{2147483647,-1} %write{99,99}
+oparam	float	pxrMaterialOut_singlescatterBlur	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.singlescatterBlur"} %meta{string,label,"pxrMaterialOut_singlescatterBlur"} %meta{string,vstructConditionalExpr,"connect if enableSinglescatter == 1 "}  %read{2147483647,-1} %write{100,100}
+oparam	float	pxrMaterialOut_singlescatterDirectGain	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.singlescatterDirectGain"} %meta{string,label,"pxrMaterialOut_singlescatterDirectGain"} %meta{string,vstructConditionalExpr,"connect if enableSinglescatter == 1 "}  %read{2147483647,-1} %write{101,101}
+oparam	color	pxrMaterialOut_singlescatterDirectGainTint	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.singlescatterDirectGainTint"} %meta{string,label,"pxrMaterialOut_singlescatterDirectGainTint"} %meta{string,vstructConditionalExpr,"connect if enableSinglescatter == 1 "}  %read{2147483647,-1} %write{102,102}
+oparam	int	pxrMaterialOut_enableGlow	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.enableGlow"} %meta{string,label,"pxrMaterialOut_enableGlow"} %meta{string,vstructConditionalExpr,"set 1 if enableGlow == 1 else set 0"}  %read{2147483647,-1} %write{2147483647,-1}
+oparam	float	pxrMaterialOut_glowGain	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.glowGain"} %meta{string,label,"pxrMaterialOut_glowGain"} %meta{string,vstructConditionalExpr,"connect if enableGlow == 1 "}  %read{2147483647,-1} %write{104,104}
+oparam	color	pxrMaterialOut_glowColor	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.glowColor"} %meta{string,label,"pxrMaterialOut_glowColor"} %meta{string,vstructConditionalExpr,"connect if enableGlow == 1 "}  %read{2147483647,-1} %write{105,105}
+oparam	int	pxrMaterialOut_enableInterior	0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.enableInterior"} %meta{string,label,"pxrMaterialOut_enableInterior"} %meta{string,vstructConditionalExpr,"set 1 if enableInterior == 1 else set 0"}  %read{2147483647,-1} %write{2147483647,-1}
+oparam	color	pxrMaterialOut_ssAlbedo	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.ssAlbedo"} %meta{string,label,"pxrMaterialOut_ssAlbedo"} %meta{string,vstructConditionalExpr,"connect if enableInterior == 1 "}  %read{2147483647,-1} %write{107,107}
+oparam	color	pxrMaterialOut_extinction	0 0 0		%meta{string,widget,"null"} %meta{string,vstructmember,"pxrMaterialOut.extinction"} %meta{string,label,"pxrMaterialOut_extinction"} %meta{string,vstructConditionalExpr,"connect if enableInterior == 1 "}  %read{2147483647,-1} %write{108,108}
+global	normal	N	%read{0,0} %write{2147483647,-1}
+local	normal	Nn	%read{11,112} %write{0,0}
+const	float	$const1	1		%read{2,104} %write{2147483647,-1}
+const	normal	$const2	0 0 0		%read{8,109} %write{2147483647,-1}
+temp	int	$tmp2	%read{9,9} %write{8,8}
+temp	int	$tmp4	%read{20,20} %write{19,19}
+temp	int	$tmp6	%read{31,31} %write{30,30}
+temp	int	$tmp8	%read{42,42} %write{41,41}
+temp	int	$tmp10	%read{52,52} %write{51,51}
+temp	int	$tmp12	%read{63,63} %write{62,62}
+temp	int	$tmp14	%read{90,90} %write{89,89}
+temp	int	$tmp16	%read{110,110} %write{109,109}
+code ___main___
+# PxrLayer.osl:1366
+#         normal Nn = normalize(N);
+	normalize	Nn N 	%filename{"PxrLayer.osl"} %line{1366} %argrw{"wr"}
+# PxrLayer.osl:1368
+#         if (enableDiffuse)
+	if		enableDiffuse 12 12 	%line{1368} %argrw{"r"}
+# PxrLayer.osl:1371
+#             pxrMaterialOut_diffuseGain = 1.0;
+	assign		pxrMaterialOut_diffuseGain $const1 	%line{1371} %argrw{"wr"}
+# PxrLayer.osl:1372
+#             pxrMaterialOut_diffuseColor = diffuseGain*diffuseColor;
+	mul		pxrMaterialOut_diffuseColor diffuseGain diffuseColor 	%line{1372} %argrw{"wrr"}
+# PxrLayer.osl:1373
+#             pxrMaterialOut_diffuseRoughness = diffuseRoughness;
+	assign		pxrMaterialOut_diffuseRoughness diffuseRoughness 	%line{1373} %argrw{"wr"}
+# PxrLayer.osl:1374
+#             pxrMaterialOut_diffuseBackColor = diffuseGain*diffuseBackColor;
+	mul		pxrMaterialOut_diffuseBackColor diffuseGain diffuseBackColor 	%line{1374} %argrw{"wrr"}
+# PxrLayer.osl:1375
+#             pxrMaterialOut_diffuseTransmitGain = 1.0;
+	assign		pxrMaterialOut_diffuseTransmitGain $const1 	%line{1375} %argrw{"wr"}
+# PxrLayer.osl:1376
+#             pxrMaterialOut_diffuseTransmitColor = diffuseTransmitGain*diffuseTransmitColor;
+	mul		pxrMaterialOut_diffuseTransmitColor diffuseTransmitGain diffuseTransmitColor 	%line{1376} %argrw{"wrr"}
+# PxrLayer.osl:1378
+#             if (diffuseBumpNormal != normal(0,0,0))
+	neq		$tmp2 diffuseBumpNormal $const2 	%line{1378} %argrw{"wrr"}
+	if		$tmp2 11 12 	%argrw{"r"}
+# PxrLayer.osl:1379
+#                 pxrMaterialOut_diffuseBumpNormal = diffuseBumpNormal;
+	assign		pxrMaterialOut_diffuseBumpNormal diffuseBumpNormal 	%line{1379} %argrw{"wr"}
+# PxrLayer.osl:1381
+#                 pxrMaterialOut_diffuseBumpNormal = Nn;
+	assign		pxrMaterialOut_diffuseBumpNormal Nn 	%line{1381} %argrw{"wr"}
+# PxrLayer.osl:1384
+#         if (enableSpecular)
+	if		enableSpecular 23 23 	%line{1384} %argrw{"r"}
+# PxrLayer.osl:1386
+#             pxrMaterialOut_specularAnisotropy = specularAnisotropy;
+	assign		pxrMaterialOut_specularAnisotropy specularAnisotropy 	%line{1386} %argrw{"wr"}
+# PxrLayer.osl:1387
+#             pxrMaterialOut_specularRoughness = specularRoughness;
+	assign		pxrMaterialOut_specularRoughness specularRoughness 	%line{1387} %argrw{"wr"}
+# PxrLayer.osl:1388
+#             pxrMaterialOut_specularFaceColor = specularGain * specularFaceColor;
+	mul		pxrMaterialOut_specularFaceColor specularGain specularFaceColor 	%line{1388} %argrw{"wrr"}
+# PxrLayer.osl:1389
+#             pxrMaterialOut_specularEdgeColor = specularGain * specularEdgeColor;
+	mul		pxrMaterialOut_specularEdgeColor specularGain specularEdgeColor 	%line{1389} %argrw{"wrr"}
+# PxrLayer.osl:1390
+#             pxrMaterialOut_specularIor = specularIor;
+	assign		pxrMaterialOut_specularIor specularIor 	%line{1390} %argrw{"wr"}
+# PxrLayer.osl:1391
+#             pxrMaterialOut_specularExtinctionCoeff = specularExtinctionCoeff;
+	assign		pxrMaterialOut_specularExtinctionCoeff specularExtinctionCoeff 	%line{1391} %argrw{"wr"}
+# PxrLayer.osl:1392
+#             if (specularBumpNormal != normal(0,0,0))
+	neq		$tmp4 specularBumpNormal $const2 	%line{1392} %argrw{"wrr"}
+	if		$tmp4 22 23 	%argrw{"r"}
+# PxrLayer.osl:1393
+#                 pxrMaterialOut_specularBumpNormal = specularBumpNormal;
+	assign		pxrMaterialOut_specularBumpNormal specularBumpNormal 	%line{1393} %argrw{"wr"}
+# PxrLayer.osl:1395
+#                 pxrMaterialOut_specularBumpNormal = Nn;
+	assign		pxrMaterialOut_specularBumpNormal Nn 	%line{1395} %argrw{"wr"}
+# PxrLayer.osl:1398
+#         if (enableRoughSpecular)
+	if		enableRoughSpecular 34 34 	%line{1398} %argrw{"r"}
+# PxrLayer.osl:1400
+#             pxrMaterialOut_roughSpecularAnisotropy = roughSpecularAnisotropy;
+	assign		pxrMaterialOut_roughSpecularAnisotropy roughSpecularAnisotropy 	%line{1400} %argrw{"wr"}
+# PxrLayer.osl:1401
+#             pxrMaterialOut_roughSpecularRoughness = roughSpecularRoughness;
+	assign		pxrMaterialOut_roughSpecularRoughness roughSpecularRoughness 	%line{1401} %argrw{"wr"}
+# PxrLayer.osl:1402
+#             pxrMaterialOut_roughSpecularFaceColor = roughSpecularGain * roughSpecularFaceColor;
+	mul		pxrMaterialOut_roughSpecularFaceColor roughSpecularGain roughSpecularFaceColor 	%line{1402} %argrw{"wrr"}
+# PxrLayer.osl:1403
+#             pxrMaterialOut_roughSpecularEdgeColor = roughSpecularGain * roughSpecularEdgeColor;
+	mul		pxrMaterialOut_roughSpecularEdgeColor roughSpecularGain roughSpecularEdgeColor 	%line{1403} %argrw{"wrr"}
+# PxrLayer.osl:1404
+#             pxrMaterialOut_roughSpecularIor = roughSpecularIor;
+	assign		pxrMaterialOut_roughSpecularIor roughSpecularIor 	%line{1404} %argrw{"wr"}
+# PxrLayer.osl:1405
+#             pxrMaterialOut_roughSpecularExtinctionCoeff = roughSpecularExtinctionCoeff;
+	assign		pxrMaterialOut_roughSpecularExtinctionCoeff roughSpecularExtinctionCoeff 	%line{1405} %argrw{"wr"}
+# PxrLayer.osl:1406
+#             if (roughSpecularBumpNormal != normal(0,0,0))
+	neq		$tmp6 roughSpecularBumpNormal $const2 	%line{1406} %argrw{"wrr"}
+	if		$tmp6 33 34 	%argrw{"r"}
+# PxrLayer.osl:1407
+#                 pxrMaterialOut_roughSpecularBumpNormal = roughSpecularBumpNormal;
+	assign		pxrMaterialOut_roughSpecularBumpNormal roughSpecularBumpNormal 	%line{1407} %argrw{"wr"}
+# PxrLayer.osl:1409
+#                 pxrMaterialOut_roughSpecularBumpNormal = Nn;
+	assign		pxrMaterialOut_roughSpecularBumpNormal Nn 	%line{1409} %argrw{"wr"}
+# PxrLayer.osl:1412
+#         if (enableClearcoat)
+	if		enableClearcoat 47 47 	%line{1412} %argrw{"r"}
+# PxrLayer.osl:1414
+#             pxrMaterialOut_clearcoatAnisotropy = clearcoatAnisotropy;
+	assign		pxrMaterialOut_clearcoatAnisotropy clearcoatAnisotropy 	%line{1414} %argrw{"wr"}
+# PxrLayer.osl:1415
+#             pxrMaterialOut_clearcoatRoughness = clearcoatRoughness;
+	assign		pxrMaterialOut_clearcoatRoughness clearcoatRoughness 	%line{1415} %argrw{"wr"}
+# PxrLayer.osl:1416
+#             pxrMaterialOut_clearcoatFaceColor = clearcoatGain * clearcoatFaceColor;
+	mul		pxrMaterialOut_clearcoatFaceColor clearcoatGain clearcoatFaceColor 	%line{1416} %argrw{"wrr"}
+# PxrLayer.osl:1417
+#             pxrMaterialOut_clearcoatEdgeColor = clearcoatGain * clearcoatEdgeColor;
+	mul		pxrMaterialOut_clearcoatEdgeColor clearcoatGain clearcoatEdgeColor 	%line{1417} %argrw{"wrr"}
+# PxrLayer.osl:1418
+#             pxrMaterialOut_clearcoatIor = clearcoatIor;
+	assign		pxrMaterialOut_clearcoatIor clearcoatIor 	%line{1418} %argrw{"wr"}
+# PxrLayer.osl:1419
+#             pxrMaterialOut_clearcoatExtinctionCoeff = clearcoatExtinctionCoeff;
+	assign		pxrMaterialOut_clearcoatExtinctionCoeff clearcoatExtinctionCoeff 	%line{1419} %argrw{"wr"}
+# PxrLayer.osl:1420
+#             if (clearcoatBumpNormal != normal(0,0,0))
+	neq		$tmp8 clearcoatBumpNormal $const2 	%line{1420} %argrw{"wrr"}
+	if		$tmp8 44 45 	%argrw{"r"}
+# PxrLayer.osl:1421
+#                 pxrMaterialOut_clearcoatBumpNormal = clearcoatBumpNormal;
+	assign		pxrMaterialOut_clearcoatBumpNormal clearcoatBumpNormal 	%line{1421} %argrw{"wr"}
+# PxrLayer.osl:1423
+#                 pxrMaterialOut_clearcoatBumpNormal = Nn;
+	assign		pxrMaterialOut_clearcoatBumpNormal Nn 	%line{1423} %argrw{"wr"}
+# PxrLayer.osl:1424
+#             pxrMaterialOut_clearcoatThickness = clearcoatThickness;
+	assign		pxrMaterialOut_clearcoatThickness clearcoatThickness 	%line{1424} %argrw{"wr"}
+# PxrLayer.osl:1425
+#             pxrMaterialOut_clearcoatAbsorptionTint = clearcoatAbsorptionTint;
+	assign		pxrMaterialOut_clearcoatAbsorptionTint clearcoatAbsorptionTint 	%line{1425} %argrw{"wr"}
+# PxrLayer.osl:1428
+#         if (enableFuzz)
+	if		enableFuzz 55 55 	%line{1428} %argrw{"r"}
+# PxrLayer.osl:1431
+#             pxrMaterialOut_fuzzGain = 1.0;
+	assign		pxrMaterialOut_fuzzGain $const1 	%line{1431} %argrw{"wr"}
+# PxrLayer.osl:1432
+#             pxrMaterialOut_fuzzColor = fuzzColor * fuzzGain;
+	mul		pxrMaterialOut_fuzzColor fuzzColor fuzzGain 	%line{1432} %argrw{"wrr"}
+# PxrLayer.osl:1433
+#             pxrMaterialOut_fuzzConeAngle = fuzzConeAngle;
+	assign		pxrMaterialOut_fuzzConeAngle fuzzConeAngle 	%line{1433} %argrw{"wr"}
+# PxrLayer.osl:1434
+#             if (fuzzBumpNormal != normal(0,0,0))
+	neq		$tmp10 fuzzBumpNormal $const2 	%line{1434} %argrw{"wrr"}
+	if		$tmp10 54 55 	%argrw{"r"}
+# PxrLayer.osl:1435
+#                 pxrMaterialOut_fuzzBumpNormal = fuzzBumpNormal;
+	assign		pxrMaterialOut_fuzzBumpNormal fuzzBumpNormal 	%line{1435} %argrw{"wr"}
+# PxrLayer.osl:1437
+#                 pxrMaterialOut_fuzzBumpNormal = Nn;
+	assign		pxrMaterialOut_fuzzBumpNormal Nn 	%line{1437} %argrw{"wr"}
+# PxrLayer.osl:1440
+#         if (enableIridescence)
+	if		enableIridescence 67 67 	%line{1440} %argrw{"r"}
+# PxrLayer.osl:1442
+#             pxrMaterialOut_iridescenceAnisotropy = iridescenceAnisotropy;
+	assign		pxrMaterialOut_iridescenceAnisotropy iridescenceAnisotropy 	%line{1442} %argrw{"wr"}
+# PxrLayer.osl:1443
+#             pxrMaterialOut_iridescenceRoughness = iridescenceRoughness;
+	assign		pxrMaterialOut_iridescenceRoughness iridescenceRoughness 	%line{1443} %argrw{"wr"}
+# PxrLayer.osl:1444
+#             pxrMaterialOut_iridescenceFaceGain = iridescenceFaceGain;
+	assign		pxrMaterialOut_iridescenceFaceGain iridescenceFaceGain 	%line{1444} %argrw{"wr"}
+# PxrLayer.osl:1445
+#             pxrMaterialOut_iridescenceEdgeGain = iridescenceEdgeGain;
+	assign		pxrMaterialOut_iridescenceEdgeGain iridescenceEdgeGain 	%line{1445} %argrw{"wr"}
+# PxrLayer.osl:1446
+#             pxrMaterialOut_iridescencePrimaryColor = iridescencePrimaryColor;
+	assign		pxrMaterialOut_iridescencePrimaryColor iridescencePrimaryColor 	%line{1446} %argrw{"wr"}
+# PxrLayer.osl:1447
+#             pxrMaterialOut_iridescenceSecondaryColor = iridescenceSecondaryColor;
+	assign		pxrMaterialOut_iridescenceSecondaryColor iridescenceSecondaryColor 	%line{1447} %argrw{"wr"}
+# PxrLayer.osl:1448
+#             if (iridescenceBumpNormal != normal(0,0,0))
+	neq		$tmp12 iridescenceBumpNormal $const2 	%line{1448} %argrw{"wrr"}
+	if		$tmp12 65 66 	%argrw{"r"}
+# PxrLayer.osl:1449
+#                 pxrMaterialOut_iridescenceBumpNormal = iridescenceBumpNormal;
+	assign		pxrMaterialOut_iridescenceBumpNormal iridescenceBumpNormal 	%line{1449} %argrw{"wr"}
+# PxrLayer.osl:1451
+#                 pxrMaterialOut_iridescenceBumpNormal = Nn;
+	assign		pxrMaterialOut_iridescenceBumpNormal Nn 	%line{1451} %argrw{"wr"}
+# PxrLayer.osl:1452
+#             pxrMaterialOut_iridescenceThickness = iridescenceThickness;
+	assign		pxrMaterialOut_iridescenceThickness iridescenceThickness 	%line{1452} %argrw{"wr"}
+# PxrLayer.osl:1455
+#         if (enableSubsurface)
+	if		enableSubsurface 81 81 	%line{1455} %argrw{"r"}
+# PxrLayer.osl:1458
+#             pxrMaterialOut_subsurfaceGain = 1.0;
+	assign		pxrMaterialOut_subsurfaceGain $const1 	%line{1458} %argrw{"wr"}
+# PxrLayer.osl:1459
+#             pxrMaterialOut_subsurfaceColor = subsurfaceGain * subsurfaceColor;
+	mul		pxrMaterialOut_subsurfaceColor subsurfaceGain subsurfaceColor 	%line{1459} %argrw{"wrr"}
+# PxrLayer.osl:1460
+#             pxrMaterialOut_shortSubsurfaceGain = 1.0;
+	assign		pxrMaterialOut_shortSubsurfaceGain $const1 	%line{1460} %argrw{"wr"}
+# PxrLayer.osl:1461
+#             pxrMaterialOut_shortSubsurfaceColor = shortSubsurfaceGain*shortSubsurfaceColor;
+	mul		pxrMaterialOut_shortSubsurfaceColor shortSubsurfaceGain shortSubsurfaceColor 	%line{1461} %argrw{"wrr"}
+# PxrLayer.osl:1462
+#             pxrMaterialOut_shortSubsurfaceDmfp = shortSubsurfaceDmfp;
+	assign		pxrMaterialOut_shortSubsurfaceDmfp shortSubsurfaceDmfp 	%line{1462} %argrw{"wr"}
+# PxrLayer.osl:1463
+#             pxrMaterialOut_longSubsurfaceGain = 1.0;
+	assign		pxrMaterialOut_longSubsurfaceGain $const1 	%line{1463} %argrw{"wr"}
+# PxrLayer.osl:1464
+#             pxrMaterialOut_longSubsurfaceColor = longSubsurfaceGain*longSubsurfaceColor;
+	mul		pxrMaterialOut_longSubsurfaceColor longSubsurfaceGain longSubsurfaceColor 	%line{1464} %argrw{"wrr"}
+# PxrLayer.osl:1465
+#             pxrMaterialOut_longSubsurfaceDmfp = longSubsurfaceDmfp;
+	assign		pxrMaterialOut_longSubsurfaceDmfp longSubsurfaceDmfp 	%line{1465} %argrw{"wr"}
+# PxrLayer.osl:1466
+#             pxrMaterialOut_subsurfaceDmfp = subsurfaceDmfp;
+	assign		pxrMaterialOut_subsurfaceDmfp subsurfaceDmfp 	%line{1466} %argrw{"wr"}
+# PxrLayer.osl:1467
+#             pxrMaterialOut_subsurfaceDmfpColor = subsurfaceDmfpColor;
+	assign		pxrMaterialOut_subsurfaceDmfpColor subsurfaceDmfpColor 	%line{1467} %argrw{"wr"}
+# PxrLayer.osl:1468
+#             pxrMaterialOut_subsurfaceDirectionality = subsurfaceDirectionality;
+	assign		pxrMaterialOut_subsurfaceDirectionality subsurfaceDirectionality 	%line{1468} %argrw{"wr"}
+# PxrLayer.osl:1469
+#             pxrMaterialOut_subsurfacePostTint = subsurfaceGain * subsurfacePostTint;
+	mul		pxrMaterialOut_subsurfacePostTint subsurfaceGain subsurfacePostTint 	%line{1469} %argrw{"wrr"}
+# PxrLayer.osl:1470
+#             pxrMaterialOut_subsurfaceTransmitGain = subsurfaceTransmitGain;
+	assign		pxrMaterialOut_subsurfaceTransmitGain subsurfaceTransmitGain 	%line{1470} %argrw{"wr"}
+# PxrLayer.osl:1473
+#         if (enableRR)
+	if		enableRR 93 93 	%line{1473} %argrw{"r"}
+# PxrLayer.osl:1476
+#             pxrMaterialOut_refractionGain = 1.0;
+	assign		pxrMaterialOut_refractionGain $const1 	%line{1476} %argrw{"wr"}
+# PxrLayer.osl:1477
+#             pxrMaterialOut_refractionColor = rrRefractionGain*rrRefractionColor;
+	mul		pxrMaterialOut_refractionColor rrRefractionGain rrRefractionColor 	%line{1477} %argrw{"wrr"}
+# PxrLayer.osl:1478
+#             pxrMaterialOut_reflectionGain = rrReflectionGain;
+	assign		pxrMaterialOut_reflectionGain rrReflectionGain 	%line{1478} %argrw{"wr"}
+# PxrLayer.osl:1480
+#             pxrMaterialOut_glassAnisotropy = rrAnisotropy;
+	assign		pxrMaterialOut_glassAnisotropy rrAnisotropy 	%line{1480} %argrw{"wr"}
+# PxrLayer.osl:1481
+#             pxrMaterialOut_glassRoughness = rrRoughness;
+	assign		pxrMaterialOut_glassRoughness rrRoughness 	%line{1481} %argrw{"wr"}
+# PxrLayer.osl:1482
+#             pxrMaterialOut_glassRefractionRoughness = rrRefractionRoughness;
+	assign		pxrMaterialOut_glassRefractionRoughness rrRefractionRoughness 	%line{1482} %argrw{"wr"}
+# PxrLayer.osl:1483
+#             pxrMaterialOut_glassIor = rrIor;
+	assign		pxrMaterialOut_glassIor rrIor 	%line{1483} %argrw{"wr"}
+# PxrLayer.osl:1484
+#             if (rrBumpNormal != normal(0,0,0))
+	neq		$tmp14 rrBumpNormal $const2 	%line{1484} %argrw{"wrr"}
+	if		$tmp14 92 93 	%argrw{"r"}
+# PxrLayer.osl:1485
+#                 pxrMaterialOut_glassBumpNormal = rrBumpNormal;
+	assign		pxrMaterialOut_glassBumpNormal rrBumpNormal 	%line{1485} %argrw{"wr"}
+# PxrLayer.osl:1487
+#                 pxrMaterialOut_glassBumpNormal = Nn;
+	assign		pxrMaterialOut_glassBumpNormal Nn 	%line{1487} %argrw{"wr"}
+# PxrLayer.osl:1490
+#         if (enableSinglescatter)
+	if		enableSinglescatter 103 103 	%line{1490} %argrw{"r"}
+# PxrLayer.osl:1493
+#             pxrMaterialOut_singlescatterGain = 1.0;
+	assign		pxrMaterialOut_singlescatterGain $const1 	%line{1493} %argrw{"wr"}
+# PxrLayer.osl:1494
+#             pxrMaterialOut_singlescatterColor = singlescatterGain*singlescatterColor;
+	mul		pxrMaterialOut_singlescatterColor singlescatterGain singlescatterColor 	%line{1494} %argrw{"wrr"}
+# PxrLayer.osl:1496
+#             pxrMaterialOut_singlescatterMfp = 1.0;
+	assign		pxrMaterialOut_singlescatterMfp $const1 	%line{1496} %argrw{"wr"}
+# PxrLayer.osl:1497
+#             pxrMaterialOut_singlescatterMfpColor = singlescatterMfpColor*singlescatterMfp;
+	mul		pxrMaterialOut_singlescatterMfpColor singlescatterMfpColor singlescatterMfp 	%line{1497} %argrw{"wrr"}
+# PxrLayer.osl:1499
+#             pxrMaterialOut_singlescatterDirectionality =  singlescatterDirectionality;
+	assign		pxrMaterialOut_singlescatterDirectionality singlescatterDirectionality 	%line{1499} %argrw{"wr"}
+# PxrLayer.osl:1500
+#             pxrMaterialOut_singlescatterIor = singlescatterIor;
+	assign		pxrMaterialOut_singlescatterIor singlescatterIor 	%line{1500} %argrw{"wr"}
+# PxrLayer.osl:1501
+#             pxrMaterialOut_singlescatterBlur = singlescatterBlur;
+	assign		pxrMaterialOut_singlescatterBlur singlescatterBlur 	%line{1501} %argrw{"wr"}
+# PxrLayer.osl:1503
+#             pxrMaterialOut_singlescatterDirectGain = singlescatterDirectGain;
+	assign		pxrMaterialOut_singlescatterDirectGain singlescatterDirectGain 	%line{1503} %argrw{"wr"}
+# PxrLayer.osl:1504
+#             pxrMaterialOut_singlescatterDirectGainTint = singlescatterDirectGainTint;
+	assign		pxrMaterialOut_singlescatterDirectGainTint singlescatterDirectGainTint 	%line{1504} %argrw{"wr"}
+# PxrLayer.osl:1507
+#         if (enableGlow)
+	if		enableGlow 106 106 	%line{1507} %argrw{"r"}
+# PxrLayer.osl:1510
+#             pxrMaterialOut_glowGain = 1.0;
+	assign		pxrMaterialOut_glowGain $const1 	%line{1510} %argrw{"wr"}
+# PxrLayer.osl:1511
+#             pxrMaterialOut_glowColor = glowGain*glowColor;
+	mul		pxrMaterialOut_glowColor glowGain glowColor 	%line{1511} %argrw{"wrr"}
+# PxrLayer.osl:1514
+#         if (enableInterior)
+	if		enableInterior 109 109 	%line{1514} %argrw{"r"}
+# PxrLayer.osl:1516
+#             pxrMaterialOut_ssAlbedo = ssAlbedo;
+	assign		pxrMaterialOut_ssAlbedo ssAlbedo 	%line{1516} %argrw{"wr"}
+# PxrLayer.osl:1517
+#             pxrMaterialOut_extinction = extinction;
+	assign		pxrMaterialOut_extinction extinction 	%line{1517} %argrw{"wr"}
+# PxrLayer.osl:1520
+#         if (bumpNormal != normal(0,0,0))
+	neq		$tmp16 bumpNormal $const2 	%line{1520} %argrw{"wrr"}
+	if		$tmp16 112 113 	%argrw{"r"}
+# PxrLayer.osl:1521
+#             pxrMaterialOut_bumpNormal = bumpNormal;
+	assign		pxrMaterialOut_bumpNormal bumpNormal 	%line{1521} %argrw{"wr"}
+# PxrLayer.osl:1523
+#             pxrMaterialOut_bumpNormal = Nn;
+	assign		pxrMaterialOut_bumpNormal Nn 	%line{1523} %argrw{"wr"}
+	end

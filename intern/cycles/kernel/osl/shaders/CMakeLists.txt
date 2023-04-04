@@ -147,6 +147,7 @@ foreach(_file ${SRC_OSL})
 endforeach()
 
 add_custom_target(cycles_osl_shaders ALL DEPENDS ${SRC_OSO} ${SRC_OSL_HEADERS} ${OSL_COMPILER} SOURCES ${SRC_OSL})
+add_dependencies(cycles cycles_osl_shaders)
 cycles_set_solution_folder(cycles_osl_shaders)
 
 # CMAKE_CURRENT_SOURCE_DIR is already included in OSO paths

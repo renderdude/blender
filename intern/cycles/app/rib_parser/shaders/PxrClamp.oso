@@ -1,0 +1,45 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrClamp.osl/obj/PxrClamp.oso
+shader PxrClamp	%meta{int,rfm_nodeid,1053432} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/color"} %meta{string,rfh_classification,"Pattern/Color"} %meta{string,help,"Clamps the separate channels of a color between the specified min and max values. If an RGB channel value is less then min, it will be set to the min value, and if an RGB channel is greater than max, it will be set to the max value. "} 
+param	color	inputRGB	0 0 0		%meta{string,widget,"color"} %meta{string,help,"Each of the R, G, and B channels of this color get clamped between the specified min and max values. For example, if a color value of [.8 .5 .2] is specified, and a *min* value of [.3 .3 .3] and *max* value of [.6 .6 .6] are specified, then the resulting color will be [.6 .5 .3]."} %meta{string,label,"Input Color"}  %read{2,5} %write{2147483647,-1}
+param	color	min	0 0 0		%meta{string,widget,"color"} %meta{string,help,"The minimum value allowed for each of the color channels."} %meta{string,label,"Min"}  %read{1,6} %write{2147483647,-1}
+param	color	max	1 1 1		%meta{string,widget,"color"} %meta{string,help,"The maximum value allowed for each of the color channels."} %meta{string,label,"Max"}  %read{1,5} %write{2147483647,-1}
+param	int	modulus	0		%meta{string,widget,"checkBox"} %meta{string,help,"Perform a modulus operation between min and max."} %meta{int,connectable,0} %meta{string,label,"Modulus"}  %read{0,0} %write{2147483647,-1}
+oparam	color	resultRGB	0 0 0		%meta{string,help,"resultRGB (color)"}  %read{7,9} %write{3,6}
+oparam	float	resultR	0		%meta{string,help,"resultR (float)"}  %read{2147483647,-1} %write{7,7}
+oparam	float	resultG	0		%meta{string,help,"resultG (float)"}  %read{2147483647,-1} %write{8,8}
+oparam	float	resultB	0		%meta{string,help,"resultB (float)"}  %read{2147483647,-1} %write{9,9}
+temp	color	$tmp1	%read{3,3} %write{2,2}
+temp	color	$tmp2	%read{2,2} %write{1,1}
+const	string	$const1	"clamp"		%read{4,4} %write{2147483647,-1}
+temp	color	$tmp3	%read{6,6} %write{5,5}
+const	int	$const2	0		%read{7,7} %write{2147483647,-1}
+const	int	$const3	1		%read{8,8} %write{2147483647,-1}
+const	int	$const4	2		%read{9,9} %write{2147483647,-1}
+code ___main___
+# PxrClamp.osl:93
+#     if (modulus)
+	if		modulus 4 7 	%filename{"PxrClamp.osl"} %line{93} %argrw{"r"}
+# PxrClamp.osl:94
+#         resultRGB = fmod(inputRGB, max - min) + min;
+	sub		$tmp2 max min 	%line{94} %argrw{"wrr"}
+	fmod		$tmp1 inputRGB $tmp2 	%argrw{"wrr"}
+	add		resultRGB $tmp1 min 	%argrw{"wrr"}
+# PxrClamp.osl:96
+#         resultRGB = clamp(inputRGB, min, max);
+	functioncall	$const1 7 	%line{96} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
+	min		$tmp3 inputRGB max 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	max		resultRGB $tmp3 min 	%argrw{"wrr"}
+# PxrClamp.osl:98
+#     resultR = resultRGB[0];
+	compref		resultR resultRGB $const2 	%filename{"PxrClamp.osl"} %line{98} %argrw{"wrr"}
+# PxrClamp.osl:99
+#     resultG = resultRGB[1];
+	compref		resultG resultRGB $const3 	%line{99} %argrw{"wrr"}
+# PxrClamp.osl:100
+#     resultB = resultRGB[2];
+	compref		resultB resultRGB $const4 	%line{100} %argrw{"wrr"}
+	end

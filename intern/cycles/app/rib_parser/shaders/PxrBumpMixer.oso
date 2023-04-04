@@ -1,0 +1,431 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrBumpMixer.osl/obj/PxrBumpMixer.oso
+shader PxrBumpMixer	%meta{int,rfm_nodeid,1233480} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/bump"} %meta{string,rfh_classification,"Pattern/Bump"} %meta{string,help,"Combine surface gradients to output a bump normal.<br>See https://mmikk.github.io/papers3d/sgp.pdf."} 
+param	int	mode1	1		%meta{string,page,"Layer 1"} %meta{int,page_open,1} %meta{string,label,"Mode 1"} %meta{string,widget,"mapper"} %meta{string,options,"Over:0|Add:1|Substract:2"} %meta{int,connectable,0}  %read{5,12} %write{2147483647,-1}
+param	vector	surfaceGradient1	0 0 0		%meta{string,page,"Layer 1"} %meta{string,label,"Surface Gradient 1"} %meta{string,readOnly,"True"}  %read{1,3} %write{2147483647,-1}
+param	float	mask1	1		%meta{string,page,"Layer 1"} %meta{string,label,"Mask 1"}  %read{7,14} %write{2147483647,-1}
+param	float	amount1	1		%meta{string,page,"Layer 1"} %meta{string,label,"Amount 1"} %meta{float,min,0} %meta{float,max,1} %meta{int,connectable,0}  %read{3,3} %write{2147483647,-1}
+param	int	mode2	1		%meta{string,page,"Layer 2"} %meta{int,page_open,1} %meta{string,label,"Mode 2"} %meta{string,widget,"mapper"} %meta{string,options,"Over:0|Add:1|Substract:2"} %meta{int,connectable,0}  %read{20,27} %write{2147483647,-1}
+param	vector	surfaceGradient2	0 0 0		%meta{string,page,"Layer 2"} %meta{string,label,"Surface Gradient 2"} %meta{string,readOnly,"True"}  %read{16,18} %write{2147483647,-1}
+param	float	mask2	1		%meta{string,page,"Layer 2"} %meta{string,label,"Mask 2"}  %read{22,29} %write{2147483647,-1}
+param	float	amount2	1		%meta{string,page,"Layer 2"} %meta{string,label,"Amount 2"} %meta{float,min,0} %meta{float,max,1} %meta{int,connectable,0}  %read{18,18} %write{2147483647,-1}
+param	int	mode3	1		%meta{string,page,"Layer 3"} %meta{int,page_open,1} %meta{string,label,"Mode 3"} %meta{string,widget,"mapper"} %meta{string,options,"Over:0|Add:1|Substract:2"} %meta{int,connectable,0}  %read{35,42} %write{2147483647,-1}
+param	vector	surfaceGradient3	0 0 0		%meta{string,page,"Layer 3"} %meta{string,label,"Surface Gradient 3"} %meta{string,readOnly,"True"}  %read{31,33} %write{2147483647,-1}
+param	float	mask3	1		%meta{string,page,"Layer 3"} %meta{string,label,"Mask 3"}  %read{37,44} %write{2147483647,-1}
+param	float	amount3	1		%meta{string,page,"Layer 3"} %meta{string,label,"Amount 3"} %meta{float,min,0} %meta{float,max,1} %meta{int,connectable,0}  %read{33,33} %write{2147483647,-1}
+param	int	mode4	1		%meta{string,page,"Layer 4"} %meta{string,label,"Mode 4"} %meta{string,widget,"mapper"} %meta{string,options,"Over:0|Add:1|Substract:2"} %meta{int,connectable,0}  %read{50,57} %write{2147483647,-1}
+param	vector	surfaceGradient4	0 0 0		%meta{string,page,"Layer 4"} %meta{string,label,"Surface Gradient 4"} %meta{string,readOnly,"True"}  %read{46,48} %write{2147483647,-1}
+param	float	mask4	1		%meta{string,page,"Layer 4"} %meta{string,label,"Mask 4"}  %read{52,59} %write{2147483647,-1}
+param	float	amount4	1		%meta{string,page,"Layer 4"} %meta{string,label,"Amount 4"} %meta{float,min,0} %meta{float,max,1} %meta{int,connectable,0}  %read{48,48} %write{2147483647,-1}
+param	int	mode5	1		%meta{string,page,"Layer 5"} %meta{string,label,"Mode 5"} %meta{string,widget,"mapper"} %meta{string,options,"Over:0|Add:1|Substract:2"} %meta{int,connectable,0}  %read{65,72} %write{2147483647,-1}
+param	vector	surfaceGradient5	0 0 0		%meta{string,page,"Layer 5"} %meta{string,label,"Surface Gradient 5"} %meta{string,readOnly,"True"}  %read{61,63} %write{2147483647,-1}
+param	float	mask5	1		%meta{string,page,"Layer 5"} %meta{string,label,"Mask 5"}  %read{67,74} %write{2147483647,-1}
+param	float	amount5	1		%meta{string,page,"Layer 5"} %meta{string,label,"Amount 5"} %meta{float,min,0} %meta{float,max,1} %meta{int,connectable,0}  %read{63,63} %write{2147483647,-1}
+param	int	mode6	1		%meta{string,page,"Layer 6"} %meta{string,label,"Mode 6"} %meta{string,widget,"mapper"} %meta{string,options,"Over:0|Add:1|Substract:2"} %meta{int,connectable,0}  %read{80,87} %write{2147483647,-1}
+param	vector	surfaceGradient6	0 0 0		%meta{string,page,"Layer 6"} %meta{string,label,"Surface Gradient 6"} %meta{string,readOnly,"True"}  %read{76,78} %write{2147483647,-1}
+param	float	mask6	1		%meta{string,page,"Layer 6"} %meta{string,label,"Mask 6"}  %read{82,89} %write{2147483647,-1}
+param	float	amount6	1		%meta{string,page,"Layer 6"} %meta{string,label,"Amount 6"} %meta{float,min,0} %meta{float,max,1} %meta{int,connectable,0}  %read{78,78} %write{2147483647,-1}
+param	int	mode7	1		%meta{string,page,"Layer 7"} %meta{string,label,"Mode 7"} %meta{string,widget,"mapper"} %meta{string,options,"Over:0|Add:1|Substract:2"} %meta{int,connectable,0}  %read{95,102} %write{2147483647,-1}
+param	vector	surfaceGradient7	0 0 0		%meta{string,page,"Layer 7"} %meta{string,label,"Surface Gradient 7"} %meta{string,readOnly,"True"}  %read{91,93} %write{2147483647,-1}
+param	float	mask7	1		%meta{string,page,"Layer 7"} %meta{string,label,"Mask 7"}  %read{97,104} %write{2147483647,-1}
+param	float	amount7	1		%meta{string,page,"Layer 7"} %meta{string,label,"Amount 7"} %meta{float,min,0} %meta{float,max,1} %meta{int,connectable,0}  %read{93,93} %write{2147483647,-1}
+param	int	mode8	1		%meta{string,page,"Layer 8"} %meta{string,label,"Mode 8"} %meta{string,widget,"mapper"} %meta{string,options,"Over:0|Add:1|Substract:2"} %meta{int,connectable,0}  %read{110,117} %write{2147483647,-1}
+param	vector	surfaceGradient8	0 0 0		%meta{string,page,"Layer 8"} %meta{string,label,"Surface Gradient 8"} %meta{string,readOnly,"True"}  %read{106,108} %write{2147483647,-1}
+param	float	mask8	1		%meta{string,page,"Layer 8"} %meta{string,label,"Mask 8"}  %read{112,119} %write{2147483647,-1}
+param	float	amount8	1		%meta{string,page,"Layer 8"} %meta{string,label,"Amount 8"} %meta{float,min,0} %meta{float,max,1} %meta{int,connectable,0}  %read{108,108} %write{2147483647,-1}
+param	float	adjustAmount	1		%meta{string,widget,"default"} %meta{string,page,"Advanced"} %meta{string,help,"Amount to adjust the normals when they are facing away from the camera.<br><br>adjustAmount (float)"} %meta{string,label,"Adjust Amount"} %meta{float,max,1} %meta{float,min,0}  %read{128,137} %write{2147483647,-1}
+param	float	surfaceNormalMix	0		%meta{string,widget,"default"} %meta{string,page,"Advanced"} %meta{string,help,"The amount to mix the resulting normals with the surface normals.<br><br>surfaceNormalMix (float)"} %meta{string,label,"Surface Normal Mix"} %meta{float,max,1} %meta{float,min,0} %meta{int,slider,1} %meta{float,slidermax,1} %meta{float,slidermin,0}  %read{143,145} %write{2147483647,-1}
+oparam	normal	resultN	0 0 0		%read{2147483647,-1} %write{147,147}
+global	vector	I	%read{125,125} %write{2147483647,-1}
+global	normal	N	%read{123,145} %write{2147483647,-1}
+global	normal	Ng	%read{131,131} %write{2147483647,-1}
+local	float	___367_VdotN	%read{135,138} %write{134,134}
+local	vector	grad	%read{7,122} %write{0,120}
+local	normal	bumpN	%read{134,147} %write{124,146}
+local	vector	Vn	%read{131,139} %write{126,126}
+const	int	$const1	0		%read{0,143} %write{2147483647,-1}
+temp	int	$tmp1	%read{2,2} %write{1,1}
+temp	vector	$tmp2	%read{7,14} %write{3,3}
+const	string	$const2	"compGradient"		%read{4,109} %write{2147483647,-1}
+temp	int	$tmp3	%read{6,6} %write{5,5}
+const	int	$const3	1		%read{8,113} %write{2147483647,-1}
+temp	int	$tmp4	%read{9,9} %write{8,8}
+temp	vector	$tmp5	%read{11,11} %write{10,10}
+const	int	$const4	2		%read{12,117} %write{2147483647,-1}
+temp	int	$tmp6	%read{13,13} %write{12,12}
+temp	vector	$tmp7	%read{15,15} %write{14,14}
+temp	int	$tmp8	%read{17,17} %write{16,16}
+temp	vector	$tmp9	%read{22,29} %write{18,18}
+temp	int	$tmp10	%read{21,21} %write{20,20}
+temp	int	$tmp11	%read{24,24} %write{23,23}
+temp	vector	$tmp12	%read{26,26} %write{25,25}
+temp	int	$tmp13	%read{28,28} %write{27,27}
+temp	vector	$tmp14	%read{30,30} %write{29,29}
+temp	int	$tmp15	%read{32,32} %write{31,31}
+temp	vector	$tmp16	%read{37,44} %write{33,33}
+temp	int	$tmp17	%read{36,36} %write{35,35}
+temp	int	$tmp18	%read{39,39} %write{38,38}
+temp	vector	$tmp19	%read{41,41} %write{40,40}
+temp	int	$tmp20	%read{43,43} %write{42,42}
+temp	vector	$tmp21	%read{45,45} %write{44,44}
+temp	int	$tmp22	%read{47,47} %write{46,46}
+temp	vector	$tmp23	%read{52,59} %write{48,48}
+temp	int	$tmp24	%read{51,51} %write{50,50}
+temp	int	$tmp25	%read{54,54} %write{53,53}
+temp	vector	$tmp26	%read{56,56} %write{55,55}
+temp	int	$tmp27	%read{58,58} %write{57,57}
+temp	vector	$tmp28	%read{60,60} %write{59,59}
+temp	int	$tmp29	%read{62,62} %write{61,61}
+temp	vector	$tmp30	%read{67,74} %write{63,63}
+temp	int	$tmp31	%read{66,66} %write{65,65}
+temp	int	$tmp32	%read{69,69} %write{68,68}
+temp	vector	$tmp33	%read{71,71} %write{70,70}
+temp	int	$tmp34	%read{73,73} %write{72,72}
+temp	vector	$tmp35	%read{75,75} %write{74,74}
+temp	int	$tmp36	%read{77,77} %write{76,76}
+temp	vector	$tmp37	%read{82,89} %write{78,78}
+temp	int	$tmp38	%read{81,81} %write{80,80}
+temp	int	$tmp39	%read{84,84} %write{83,83}
+temp	vector	$tmp40	%read{86,86} %write{85,85}
+temp	int	$tmp41	%read{88,88} %write{87,87}
+temp	vector	$tmp42	%read{90,90} %write{89,89}
+temp	int	$tmp43	%read{92,92} %write{91,91}
+temp	vector	$tmp44	%read{97,104} %write{93,93}
+temp	int	$tmp45	%read{96,96} %write{95,95}
+temp	int	$tmp46	%read{99,99} %write{98,98}
+temp	vector	$tmp47	%read{101,101} %write{100,100}
+temp	int	$tmp48	%read{103,103} %write{102,102}
+temp	vector	$tmp49	%read{105,105} %write{104,104}
+temp	int	$tmp50	%read{107,107} %write{106,106}
+temp	vector	$tmp51	%read{112,119} %write{108,108}
+temp	int	$tmp52	%read{111,111} %write{110,110}
+temp	int	$tmp53	%read{114,114} %write{113,113}
+temp	vector	$tmp54	%read{116,116} %write{115,115}
+temp	int	$tmp55	%read{118,118} %write{117,117}
+temp	vector	$tmp56	%read{120,120} %write{119,119}
+const	float	$const5	1		%read{122,122} %write{2147483647,-1}
+const	string	$const6	"resolveNormalFromSurfaceGradient"		%read{121,121} %write{2147483647,-1}
+temp	vector	$tmp57	%read{123,123} %write{122,122}
+temp	normal	$tmp58	%read{124,124} %write{123,123}
+temp	vector	$tmp59	%read{126,126} %write{125,125}
+const	string	$const7	"RixAdjustNormal"		%read{127,127} %write{2147483647,-1}
+temp	int	$tmp60	%read{129,129} %write{128,128}
+temp	float	$tmp61	%read{132,132} %write{131,131}
+temp	int	$tmp62	%read{133,133} %write{132,132}
+temp	int	$tmp63	%read{136,136} %write{135,135}
+const	float	$const8	1.00999999		%read{137,137} %write{2147483647,-1}
+temp	float	$tmp64	%read{138,138} %write{137,137}
+temp	float	$tmp65	%read{139,139} %write{138,138}
+temp	vector	$tmp66	%read{140,140} %write{139,139}
+const	string	$const9	"RixBlendWithNormal"		%read{142,142} %write{2147483647,-1}
+temp	int	$tmp67	%read{144,144} %write{143,143}
+temp	normal	$tmp68	%read{146,146} %write{145,145}
+code ___main___
+# PxrBumpMixer.osl:321
+#     vector grad = 0;    // zero gradient == N
+	assign		grad $const1 	%filename{"PxrBumpMixer.osl"} %line{321} %argrw{"wr"}
+# PxrBumpMixer.osl:322
+#     if (isconnected(surfaceGradient1))
+	isconnected	$tmp1 surfaceGradient1 	%line{322} %argrw{"wr"}
+	if		$tmp1 16 16 	%argrw{"r"}
+# PxrBumpMixer.osl:323
+#         compGradient(surfaceGradient1 * amount1, mask1, mode1, grad);
+	mul		$tmp2 surfaceGradient1 amount1 	%line{323} %argrw{"wrr"}
+	functioncall	$const2 16 	%argrw{"r"}
+# PxrBumpMixer.osl:45
+#     if (mode == k_over)
+	eq		$tmp3 mode1 $const1 	%line{45} %argrw{"wrr"}
+	if		$tmp3 8 16 	%argrw{"r"}
+# PxrBumpMixer.osl:47
+#         result = mix(result, grad, mask);
+	mix		grad grad $tmp2 mask1 	%line{47} %argrw{"wrrr"}
+# PxrBumpMixer.osl:49
+#     else if (mode == k_add)
+	eq		$tmp4 mode1 $const3 	%line{49} %argrw{"wrr"}
+	if		$tmp4 12 16 	%argrw{"r"}
+# PxrBumpMixer.osl:51
+#         result += grad * mask;
+	mul		$tmp5 $tmp2 mask1 	%line{51} %argrw{"wrr"}
+	add		grad grad $tmp5 	%argrw{"wrr"}
+# PxrBumpMixer.osl:53
+#     else if (mode == k_substract)
+	eq		$tmp6 mode1 $const4 	%line{53} %argrw{"wrr"}
+	if		$tmp6 16 16 	%argrw{"r"}
+# PxrBumpMixer.osl:55
+#         result -= grad * mask;
+	mul		$tmp7 $tmp2 mask1 	%line{55} %argrw{"wrr"}
+	sub		grad grad $tmp7 	%argrw{"wrr"}
+# PxrBumpMixer.osl:324
+#     if (isconnected(surfaceGradient2))
+	isconnected	$tmp8 surfaceGradient2 	%line{324} %argrw{"wr"}
+	if		$tmp8 31 31 	%argrw{"r"}
+# PxrBumpMixer.osl:325
+#         compGradient(surfaceGradient2 * amount2, mask2, mode2, grad);
+	mul		$tmp9 surfaceGradient2 amount2 	%line{325} %argrw{"wrr"}
+	functioncall	$const2 31 	%argrw{"r"}
+# PxrBumpMixer.osl:45
+#     if (mode == k_over)
+	eq		$tmp10 mode2 $const1 	%line{45} %argrw{"wrr"}
+	if		$tmp10 23 31 	%argrw{"r"}
+# PxrBumpMixer.osl:47
+#         result = mix(result, grad, mask);
+	mix		grad grad $tmp9 mask2 	%line{47} %argrw{"wrrr"}
+# PxrBumpMixer.osl:49
+#     else if (mode == k_add)
+	eq		$tmp11 mode2 $const3 	%line{49} %argrw{"wrr"}
+	if		$tmp11 27 31 	%argrw{"r"}
+# PxrBumpMixer.osl:51
+#         result += grad * mask;
+	mul		$tmp12 $tmp9 mask2 	%line{51} %argrw{"wrr"}
+	add		grad grad $tmp12 	%argrw{"wrr"}
+# PxrBumpMixer.osl:53
+#     else if (mode == k_substract)
+	eq		$tmp13 mode2 $const4 	%line{53} %argrw{"wrr"}
+	if		$tmp13 31 31 	%argrw{"r"}
+# PxrBumpMixer.osl:55
+#         result -= grad * mask;
+	mul		$tmp14 $tmp9 mask2 	%line{55} %argrw{"wrr"}
+	sub		grad grad $tmp14 	%argrw{"wrr"}
+# PxrBumpMixer.osl:326
+#     if (isconnected(surfaceGradient3))
+	isconnected	$tmp15 surfaceGradient3 	%line{326} %argrw{"wr"}
+	if		$tmp15 46 46 	%argrw{"r"}
+# PxrBumpMixer.osl:327
+#         compGradient(surfaceGradient3 * amount3, mask3, mode3, grad);
+	mul		$tmp16 surfaceGradient3 amount3 	%line{327} %argrw{"wrr"}
+	functioncall	$const2 46 	%argrw{"r"}
+# PxrBumpMixer.osl:45
+#     if (mode == k_over)
+	eq		$tmp17 mode3 $const1 	%line{45} %argrw{"wrr"}
+	if		$tmp17 38 46 	%argrw{"r"}
+# PxrBumpMixer.osl:47
+#         result = mix(result, grad, mask);
+	mix		grad grad $tmp16 mask3 	%line{47} %argrw{"wrrr"}
+# PxrBumpMixer.osl:49
+#     else if (mode == k_add)
+	eq		$tmp18 mode3 $const3 	%line{49} %argrw{"wrr"}
+	if		$tmp18 42 46 	%argrw{"r"}
+# PxrBumpMixer.osl:51
+#         result += grad * mask;
+	mul		$tmp19 $tmp16 mask3 	%line{51} %argrw{"wrr"}
+	add		grad grad $tmp19 	%argrw{"wrr"}
+# PxrBumpMixer.osl:53
+#     else if (mode == k_substract)
+	eq		$tmp20 mode3 $const4 	%line{53} %argrw{"wrr"}
+	if		$tmp20 46 46 	%argrw{"r"}
+# PxrBumpMixer.osl:55
+#         result -= grad * mask;
+	mul		$tmp21 $tmp16 mask3 	%line{55} %argrw{"wrr"}
+	sub		grad grad $tmp21 	%argrw{"wrr"}
+# PxrBumpMixer.osl:328
+#     if (isconnected(surfaceGradient4))
+	isconnected	$tmp22 surfaceGradient4 	%line{328} %argrw{"wr"}
+	if		$tmp22 61 61 	%argrw{"r"}
+# PxrBumpMixer.osl:329
+#         compGradient(surfaceGradient4 * amount4, mask4, mode4, grad);
+	mul		$tmp23 surfaceGradient4 amount4 	%line{329} %argrw{"wrr"}
+	functioncall	$const2 61 	%argrw{"r"}
+# PxrBumpMixer.osl:45
+#     if (mode == k_over)
+	eq		$tmp24 mode4 $const1 	%line{45} %argrw{"wrr"}
+	if		$tmp24 53 61 	%argrw{"r"}
+# PxrBumpMixer.osl:47
+#         result = mix(result, grad, mask);
+	mix		grad grad $tmp23 mask4 	%line{47} %argrw{"wrrr"}
+# PxrBumpMixer.osl:49
+#     else if (mode == k_add)
+	eq		$tmp25 mode4 $const3 	%line{49} %argrw{"wrr"}
+	if		$tmp25 57 61 	%argrw{"r"}
+# PxrBumpMixer.osl:51
+#         result += grad * mask;
+	mul		$tmp26 $tmp23 mask4 	%line{51} %argrw{"wrr"}
+	add		grad grad $tmp26 	%argrw{"wrr"}
+# PxrBumpMixer.osl:53
+#     else if (mode == k_substract)
+	eq		$tmp27 mode4 $const4 	%line{53} %argrw{"wrr"}
+	if		$tmp27 61 61 	%argrw{"r"}
+# PxrBumpMixer.osl:55
+#         result -= grad * mask;
+	mul		$tmp28 $tmp23 mask4 	%line{55} %argrw{"wrr"}
+	sub		grad grad $tmp28 	%argrw{"wrr"}
+# PxrBumpMixer.osl:330
+#     if (isconnected(surfaceGradient5))
+	isconnected	$tmp29 surfaceGradient5 	%line{330} %argrw{"wr"}
+	if		$tmp29 76 76 	%argrw{"r"}
+# PxrBumpMixer.osl:331
+#         compGradient(surfaceGradient5 * amount5, mask5, mode5, grad);
+	mul		$tmp30 surfaceGradient5 amount5 	%line{331} %argrw{"wrr"}
+	functioncall	$const2 76 	%argrw{"r"}
+# PxrBumpMixer.osl:45
+#     if (mode == k_over)
+	eq		$tmp31 mode5 $const1 	%line{45} %argrw{"wrr"}
+	if		$tmp31 68 76 	%argrw{"r"}
+# PxrBumpMixer.osl:47
+#         result = mix(result, grad, mask);
+	mix		grad grad $tmp30 mask5 	%line{47} %argrw{"wrrr"}
+# PxrBumpMixer.osl:49
+#     else if (mode == k_add)
+	eq		$tmp32 mode5 $const3 	%line{49} %argrw{"wrr"}
+	if		$tmp32 72 76 	%argrw{"r"}
+# PxrBumpMixer.osl:51
+#         result += grad * mask;
+	mul		$tmp33 $tmp30 mask5 	%line{51} %argrw{"wrr"}
+	add		grad grad $tmp33 	%argrw{"wrr"}
+# PxrBumpMixer.osl:53
+#     else if (mode == k_substract)
+	eq		$tmp34 mode5 $const4 	%line{53} %argrw{"wrr"}
+	if		$tmp34 76 76 	%argrw{"r"}
+# PxrBumpMixer.osl:55
+#         result -= grad * mask;
+	mul		$tmp35 $tmp30 mask5 	%line{55} %argrw{"wrr"}
+	sub		grad grad $tmp35 	%argrw{"wrr"}
+# PxrBumpMixer.osl:332
+#     if (isconnected(surfaceGradient6))
+	isconnected	$tmp36 surfaceGradient6 	%line{332} %argrw{"wr"}
+	if		$tmp36 91 91 	%argrw{"r"}
+# PxrBumpMixer.osl:333
+#         compGradient(surfaceGradient6 * amount6, mask6, mode6, grad);
+	mul		$tmp37 surfaceGradient6 amount6 	%line{333} %argrw{"wrr"}
+	functioncall	$const2 91 	%argrw{"r"}
+# PxrBumpMixer.osl:45
+#     if (mode == k_over)
+	eq		$tmp38 mode6 $const1 	%line{45} %argrw{"wrr"}
+	if		$tmp38 83 91 	%argrw{"r"}
+# PxrBumpMixer.osl:47
+#         result = mix(result, grad, mask);
+	mix		grad grad $tmp37 mask6 	%line{47} %argrw{"wrrr"}
+# PxrBumpMixer.osl:49
+#     else if (mode == k_add)
+	eq		$tmp39 mode6 $const3 	%line{49} %argrw{"wrr"}
+	if		$tmp39 87 91 	%argrw{"r"}
+# PxrBumpMixer.osl:51
+#         result += grad * mask;
+	mul		$tmp40 $tmp37 mask6 	%line{51} %argrw{"wrr"}
+	add		grad grad $tmp40 	%argrw{"wrr"}
+# PxrBumpMixer.osl:53
+#     else if (mode == k_substract)
+	eq		$tmp41 mode6 $const4 	%line{53} %argrw{"wrr"}
+	if		$tmp41 91 91 	%argrw{"r"}
+# PxrBumpMixer.osl:55
+#         result -= grad * mask;
+	mul		$tmp42 $tmp37 mask6 	%line{55} %argrw{"wrr"}
+	sub		grad grad $tmp42 	%argrw{"wrr"}
+# PxrBumpMixer.osl:334
+#     if (isconnected(surfaceGradient7))
+	isconnected	$tmp43 surfaceGradient7 	%line{334} %argrw{"wr"}
+	if		$tmp43 106 106 	%argrw{"r"}
+# PxrBumpMixer.osl:335
+#         compGradient(surfaceGradient7 * amount7, mask7, mode7, grad);
+	mul		$tmp44 surfaceGradient7 amount7 	%line{335} %argrw{"wrr"}
+	functioncall	$const2 106 	%argrw{"r"}
+# PxrBumpMixer.osl:45
+#     if (mode == k_over)
+	eq		$tmp45 mode7 $const1 	%line{45} %argrw{"wrr"}
+	if		$tmp45 98 106 	%argrw{"r"}
+# PxrBumpMixer.osl:47
+#         result = mix(result, grad, mask);
+	mix		grad grad $tmp44 mask7 	%line{47} %argrw{"wrrr"}
+# PxrBumpMixer.osl:49
+#     else if (mode == k_add)
+	eq		$tmp46 mode7 $const3 	%line{49} %argrw{"wrr"}
+	if		$tmp46 102 106 	%argrw{"r"}
+# PxrBumpMixer.osl:51
+#         result += grad * mask;
+	mul		$tmp47 $tmp44 mask7 	%line{51} %argrw{"wrr"}
+	add		grad grad $tmp47 	%argrw{"wrr"}
+# PxrBumpMixer.osl:53
+#     else if (mode == k_substract)
+	eq		$tmp48 mode7 $const4 	%line{53} %argrw{"wrr"}
+	if		$tmp48 106 106 	%argrw{"r"}
+# PxrBumpMixer.osl:55
+#         result -= grad * mask;
+	mul		$tmp49 $tmp44 mask7 	%line{55} %argrw{"wrr"}
+	sub		grad grad $tmp49 	%argrw{"wrr"}
+# PxrBumpMixer.osl:336
+#     if (isconnected(surfaceGradient8))
+	isconnected	$tmp50 surfaceGradient8 	%line{336} %argrw{"wr"}
+	if		$tmp50 121 121 	%argrw{"r"}
+# PxrBumpMixer.osl:337
+#         compGradient(surfaceGradient8 * amount8, mask8, mode8, grad);
+	mul		$tmp51 surfaceGradient8 amount8 	%line{337} %argrw{"wrr"}
+	functioncall	$const2 121 	%argrw{"r"}
+# PxrBumpMixer.osl:45
+#     if (mode == k_over)
+	eq		$tmp52 mode8 $const1 	%line{45} %argrw{"wrr"}
+	if		$tmp52 113 121 	%argrw{"r"}
+# PxrBumpMixer.osl:47
+#         result = mix(result, grad, mask);
+	mix		grad grad $tmp51 mask8 	%line{47} %argrw{"wrrr"}
+# PxrBumpMixer.osl:49
+#     else if (mode == k_add)
+	eq		$tmp53 mode8 $const3 	%line{49} %argrw{"wrr"}
+	if		$tmp53 117 121 	%argrw{"r"}
+# PxrBumpMixer.osl:51
+#         result += grad * mask;
+	mul		$tmp54 $tmp51 mask8 	%line{51} %argrw{"wrr"}
+	add		grad grad $tmp54 	%argrw{"wrr"}
+# PxrBumpMixer.osl:53
+#     else if (mode == k_substract)
+	eq		$tmp55 mode8 $const4 	%line{53} %argrw{"wrr"}
+	if		$tmp55 121 121 	%argrw{"r"}
+# PxrBumpMixer.osl:55
+#         result -= grad * mask;
+	mul		$tmp56 $tmp51 mask8 	%line{55} %argrw{"wrr"}
+	sub		grad grad $tmp56 	%argrw{"wrr"}
+# PxrBumpMixer.osl:338
+#     normal bumpN = resolveNormalFromSurfaceGradient(grad, 1, N);
+	functioncall	$const6 125 	%line{338} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:110
+#     return normalize(Nn - resolveSign * surfGrad);
+	mul		$tmp57 $const5 grad 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Bump.h"} %line{110} %argrw{"wrr"}
+	sub		$tmp58 N $tmp57 	%argrw{"wrr"}
+	normalize	bumpN $tmp58 	%argrw{"wr"}
+# PxrBumpMixer.osl:341
+#     vector Vn = normalize(-I);
+	neg		$tmp59 I 	%filename{"PxrBumpMixer.osl"} %line{341} %argrw{"wr"}
+	normalize	Vn $tmp59 	%argrw{"wr"}
+# PxrBumpMixer.osl:342
+#     RixAdjustNormal(adjustAmount, Vn, Ng, bumpN);
+	functioncall	$const7 142 	%line{342} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:198
+#     if (amount == 0) return;
+	eq		$tmp60 adjustAmount $const1 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Bump.h"} %line{198} %argrw{"wrr"}
+	if		$tmp60 131 131 	%argrw{"r"}
+	return
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:200
+#     if (dot(Vn, Ngn) >= 0)
+	dot		$tmp61 Vn Ng 	%line{200} %argrw{"wrr"}
+	ge		$tmp62 $tmp61 $const1 	%argrw{"wrr"}
+	if		$tmp62 142 142 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:202
+#         float VdotN = dot(Vn, Nn);
+	dot		___367_VdotN Vn bumpN 	%line{202} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:203
+#         if (VdotN <= 0)
+	le		$tmp63 ___367_VdotN $const1 	%line{203} %argrw{"wrr"}
+	if		$tmp63 142 142 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:207
+#             Nn -= amount * 1.01 * VdotN * Vn;
+	mul		$tmp64 adjustAmount $const8 	%line{207} %argrw{"wrr"}
+	mul		$tmp65 $tmp64 ___367_VdotN 	%argrw{"wrr"}
+	mul		$tmp66 $tmp65 Vn 	%argrw{"wrr"}
+	sub		bumpN bumpN $tmp66 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:208
+#             Nn = normalize(Nn);
+	normalize	bumpN bumpN 	%line{208} %argrw{"wr"}
+# PxrBumpMixer.osl:343
+#     RixBlendWithNormal(surfaceNormalMix, N, bumpN);
+	functioncall	$const9 147 	%filename{"PxrBumpMixer.osl"} %line{343} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:215
+#     if (surfaceNormalMix > 0)
+	gt		$tmp67 surfaceNormalMix $const1 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Bump.h"} %line{215} %argrw{"wrr"}
+	if		$tmp67 147 147 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:216
+#         bumpN = normalize(mix(bumpN, Nn, surfaceNormalMix));
+	mix		$tmp68 bumpN N surfaceNormalMix 	%line{216} %argrw{"wrrr"}
+	normalize	bumpN $tmp68 	%argrw{"wr"}
+# PxrBumpMixer.osl:345
+#     resultN = normalize(bumpN);
+	normalize	resultN bumpN 	%filename{"PxrBumpMixer.osl"} %line{345} %argrw{"wr"}
+	end

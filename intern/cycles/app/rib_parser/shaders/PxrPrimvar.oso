@@ -1,0 +1,602 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrPrimvar.osl/obj/PxrPrimvar.oso
+shader PxrPrimvar	%meta{int,rfm_nodeid,1053400} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/utility"} %meta{string,rfh_classification,"Pattern/Utility"} 
+param	string	variable	""		%meta{string,widget,"mapper"} %meta{int,connectable,0} %meta{string,options,"Use Named Primvar:''|Shading position (P):P|Undisplaced position(Po):Po|Shading normal (Nn):N|Geometric normal (Ngn):Ngn|Undisplaced normal (Non):Non|Shading tangent (Tn):Tn|Normalized view vector (Vn):Vn|Length of view vector (VLen):VLen|Surface mean curvature (curvature):curvature|Surface principal curvature in u dir (curvatureU):curvatureU|Surface principal curvature in v dir (curvatureV):curvatureV|Ray Spread (incidentRaySpread):incidentRaySpread|Ray Radius (incidentRayRadius):incidentRayRadius|Micropolygon radius (PRadius):PRadius|Micropolygon size (mpSize):mpSize|Reflection Bias (biasR):biasR|Transmission (biasT):biasT|Surface U (u):u|Surface V (v):v|Surface W (w):w|Surface UV (uv):uv|Surface UVW (uvw):uvw|Ray footprint U (du):du|Ray footprint V (dv):dv|Ray footprint W (dw):dw|Ray footprint UV (duv):duv|Ray footprint UVW (duvw):duvw|Surface derivative U (dPdu):dPdu|Surface derivative V (dPdv):dPdv|Surface derivative W (dPdw):dPdw|Velocity (dPdtime):dPdtime|Time (time):time|Outside IOR (outsideIOR):outsideIOR|Opacity (Oi):Oi|Forward Motion (motionFore):motionFore|Backward Motion (motionBack):motionBack"} %meta{string,label,"Variable"}  %read{2,5} %write{2147483647,-1}
+param	string	varname	""		%meta{string,widget,"default"} %meta{int,connectable,0} %meta{string,label,"Variable Name"}  %read{4,4} %write{2147483647,-1}
+param	string	type	"float"		%meta{string,widget,"mapper"} %meta{int,connectable,0} %meta{string,label,"Variable Type"} %meta{string,options,"Float:float|Float2:float2|Color:color|Point:point|Vector:vector|Normal:normal|Integer:int"}  %read{6,140} %write{2147483647,-1}
+param	string	coordsys	"object"		%meta{string,widget,"string"} %meta{string,houdiniui,"oplist"} %meta{string,help,"By default, the shader uses current for coordinate system.  Possible coordinate systems include world, object, or a user defined coordinate system. "} %meta{int,connectable,0} %meta{string,conditionalVisOp,"or"} %meta{string,conditionalVisLeft,"conditionalVis1"} %meta{string,conditionalVisRight,"conditionalVis2"} %meta{string,conditionalVis2Op,"or"} %meta{string,conditionalVis2Left,"conditionalVis3"} %meta{string,conditionalVis2Right,"conditionalVis4"} %meta{string,conditionalVis1Path,"../type"} %meta{string,conditionalVis1Op,"equalTo"} %meta{string,conditionalVis1Value,"point"} %meta{string,conditionalVis3Path,"../type"} %meta{string,conditionalVis3Op,"equalTo"} %meta{string,conditionalVis3Value,"vector"} %meta{string,conditionalVis4Path,"../type"} %meta{string,conditionalVis4Op,"equalTo"} %meta{string,conditionalVis4Value,"normal"} %meta{string,label,"Coordinate System"}  %read{83,91} %write{2147483647,-1}
+param	int	defaultInt	0		%meta{string,widget,"int"} %meta{string,help,"If there is an error when retrieving a variable of type 'int', this is the value that will be used. "} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisPath,"../type"} %meta{string,conditionalVisValue,"int"} %meta{string,label,"Default Int"}  %read{142,142} %write{2147483647,-1}
+param	float	defaultFloat	0		%meta{string,widget,"float"} %meta{string,help,"If there is an error when retrieving a variable of type 'float', this is the value that will be used. "} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisPath,"../type"} %meta{string,conditionalVisValue,"float"} %meta{string,label,"Default Float"}  %read{156,156} %write{2147483647,-1}
+param	vector	defaultFloat3	0 0 0		%meta{string,widget,"vector"} %meta{string,help,"If there is an error when retrieving a variable of type 'float2', 'normal', 'point' or 'vector', this is the value that will be used. For the type 'float2', only the first two components will be used. "} %meta{string,conditionalVisOp,"and"} %meta{string,conditionalVisLeft,"conditionalVis1"} %meta{string,conditionalVisRight,"conditionalVis2"} %meta{string,conditionalVis2Op,"and"} %meta{string,conditionalVis2Left,"conditionalVis3"} %meta{string,conditionalVis2Right,"conditionalVis4"} %meta{string,conditionalVis1Path,"../type"} %meta{string,conditionalVis1Op,"notEqualTo"} %meta{string,conditionalVis1Value,"float"} %meta{string,conditionalVis3Path,"../type"} %meta{string,conditionalVis3Op,"notEqualTo"} %meta{string,conditionalVis3Value,"color"} %meta{string,conditionalVis4Path,"../type"} %meta{string,conditionalVis4Op,"notEqualTo"} %meta{string,conditionalVis4Value,"int"} %meta{string,label,"Default Float3"}  %read{24,110} %write{2147483647,-1}
+param	int	transformDefaultValues	1		%meta{string,widget,"checkBox"} %meta{string,help,"If this is not checked, the default values are used directly. If this is checked, the default values will be transformed from 'object' to 'Coordinate System' (similarly to what happens for primvars values). This setting is only used for 'normal', 'point' or 'vector' types, and only when the primvar wasn't found. "} %meta{int,connectable,0} %meta{string,conditionalVisOp,"or"} %meta{string,conditionalVisLeft,"conditionalVis1"} %meta{string,conditionalVisRight,"conditionalVis2"} %meta{string,conditionalVis2Op,"or"} %meta{string,conditionalVis2Left,"conditionalVis3"} %meta{string,conditionalVis2Right,"conditionalVis4"} %meta{string,conditionalVis1Path,"../type"} %meta{string,conditionalVis1Op,"equalTo"} %meta{string,conditionalVis1Value,"point"} %meta{string,conditionalVis3Path,"../type"} %meta{string,conditionalVis3Op,"equalTo"} %meta{string,conditionalVis3Value,"vector"} %meta{string,conditionalVis4Path,"../type"} %meta{string,conditionalVis4Op,"equalTo"} %meta{string,conditionalVis4Value,"normal"} %meta{string,label,"Transform Default Values"}  %read{76,76} %write{2147483647,-1}
+param	color	defaultColor	0 1 0		%meta{string,widget,"color"} %meta{string,help,"If there is an error when retrieving a variable of type 'normal', 'point' or 'vector', this is the value that will be used. "} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisPath,"../type"} %meta{string,conditionalVisValue,"color"} %meta{string,label,"Default Color"}  %read{27,27} %write{2147483647,-1}
+param	int	verbosity	0		%meta{string,widget,"mapper"} %meta{string,options,"Silent:0|Warnings:1|Info:2"} %meta{string,help,"Diagnostic output levels for scene debugging."} %meta{int,connectable,0} %meta{string,label,"Verbosity"}  %read{207,207} %write{2147483647,-1}
+oparam	color	resultRGB	0 0 0		%meta{string,help,"resultRGB (color)"}  %read{212,214} %write{92,185}
+oparam	float	resultR	0		%meta{string,help,"resultR (float)"}  %read{2147483647,-1} %write{212,212}
+oparam	float	resultG	0		%meta{string,help,"resultG (float)"}  %read{2147483647,-1} %write{213,213}
+oparam	float	resultB	0		%meta{string,help,"resultB (float)"}  %read{2147483647,-1} %write{214,214}
+oparam	float	resultF	0		%meta{string,help,"resultF (float)"}  %read{2147483647,-1} %write{93,184}
+oparam	point	resultP	0 0 0		%meta{string,help,"resultP (vector)"}  %read{2147483647,-1} %write{0,186} %initexpr
+oparam	float	width	0		%meta{string,help,"width (float)"}  %read{2147483647,-1} %write{95,203}
+global	vector	I	%read{46,173} %write{2147483647,-1}
+global	normal	N	%read{38,38} %write{2147483647,-1}
+global	normal	Ng	%read{42,42} %write{2147483647,-1}
+global	float	u	%read{30,159} %write{2147483647,-1}
+global	float	v	%read{30,162} %write{2147483647,-1}
+global	float	time	%read{176,176} %write{2147483647,-1}
+global	vector	dPdtime	%read{62,62} %write{2147483647,-1}
+local	int	found	%read{65,204} %write{1,183}
+local	string	var	%read{28,211} %write{4,5}
+local	int	___327_transformVal	%read{79,79} %write{23,63}
+local	vector	___327_value	%read{82,94} %write{24,91}
+local	float	___333_du	%read{53,53} %write{51,51}
+local	float	___333_dv	%read{53,53} %write{52,52}
+local	float	___334_du	%read{59,59} %write{56,56}
+local	float	___334_dv	%read{59,59} %write{57,57}
+local	float	___334_dw	%read{59,59} %write{58,58}
+local	string	___327_fromSpace	%read{83,91} %write{72,73}
+local	point	___341_val	%read{83,83} %write{82,82}
+local	normal	___342_val	%read{87,87} %write{86,86}
+local	vector	___343_val	%read{91,91} %write{90,90}
+local	float[2]	___344_value	%read{132,137} %write{109,131}
+local	int	___350_value	%read{150,153} %write{142,149}
+local	float	___353_value	%read{184,186} %write{156,183}
+const	vector	$const1	0 0 0		%read{0,0} %write{2147483647,-1}
+const	int	$const2	1		%read{1,213} %write{2147483647,-1}
+const	string	$const3	""		%read{2,2} %write{2147483647,-1}
+temp	int	$tmp1	%read{3,3} %write{2,2}
+const	string	$const4	"point"		%read{6,80} %write{2147483647,-1}
+temp	int	$tmp2	%read{7,7} %write{6,6}
+temp	int	$tmp3	%read{8,12} %write{7,11}
+const	int	$const5	0		%read{7,212} %write{2147483647,-1}
+const	string	$const6	"normal"		%read{9,84} %write{2147483647,-1}
+temp	int	$tmp4	%read{10,10} %write{9,9}
+temp	int	$tmp5	%read{11,11} %write{10,10}
+temp	int	$tmp6	%read{13,17} %write{12,16}
+const	string	$const7	"vector"		%read{14,88} %write{2147483647,-1}
+temp	int	$tmp7	%read{15,15} %write{14,14}
+temp	int	$tmp8	%read{16,16} %write{15,15}
+temp	int	$tmp9	%read{18,22} %write{17,21}
+const	string	$const8	"color"		%read{19,25} %write{2147483647,-1}
+temp	int	$tmp10	%read{20,20} %write{19,19}
+temp	int	$tmp11	%read{21,21} %write{20,20}
+temp	int	$tmp12	%read{26,26} %write{25,25}
+const	string	$const9	"uvw"		%read{28,28} %write{2147483647,-1}
+temp	int	$tmp13	%read{29,29} %write{28,28}
+const	float	$const10	0		%read{30,138} %write{2147483647,-1}
+const	string	$const11	"N"		%read{31,31} %write{2147483647,-1}
+temp	int	$tmp14	%read{32,32} %write{31,31}
+temp	int	$tmp15	%read{33,37} %write{32,36}
+const	string	$const12	"Nn"		%read{34,34} %write{2147483647,-1}
+temp	int	$tmp16	%read{35,35} %write{34,34}
+temp	int	$tmp17	%read{36,36} %write{35,35}
+const	string	$const13	"Ngn"		%read{40,40} %write{2147483647,-1}
+temp	int	$tmp18	%read{41,41} %write{40,40}
+const	string	$const14	"Vn"		%read{44,44} %write{2147483647,-1}
+temp	int	$tmp19	%read{45,45} %write{44,44}
+temp	vector	$tmp20	%read{47,47} %write{46,46}
+const	string	$const15	"duv"		%read{49,49} %write{2147483647,-1}
+temp	int	$tmp21	%read{50,50} %write{49,49}
+const	string	$const16	"builtin"		%read{51,202} %write{2147483647,-1}
+const	string	$const17	"du"		%read{51,194} %write{2147483647,-1}
+const	string	$const18	"dv"		%read{52,202} %write{2147483647,-1}
+const	string	$const19	"duvw"		%read{54,54} %write{2147483647,-1}
+temp	int	$tmp22	%read{55,55} %write{54,54}
+const	string	$const20	"dw"		%read{58,58} %write{2147483647,-1}
+const	string	$const21	"dPdtime"		%read{60,60} %write{2147483647,-1}
+temp	int	$tmp23	%read{61,61} %write{60,60}
+const	string	$const22	"primvar"		%read{64,177} %write{2147483647,-1}
+temp	int	$tmp24	%read{66,66} %write{65,65}
+temp	int	$tmp25	%read{69,69} %write{68,68}
+const	string	$const23	"current"		%read{72,72} %write{2147483647,-1}
+const	string	$const24	"object"		%read{73,73} %write{2147483647,-1}
+temp	int	$tmp26	%read{75,78} %write{74,77}
+temp	int	$tmp27	%read{77,77} %write{76,76}
+temp	int	$tmp28	%read{81,81} %write{80,80}
+temp	int	$tmp29	%read{85,85} %write{84,84}
+temp	int	$tmp30	%read{89,89} %write{88,88}
+const	string	$const25	"float[2]"		%read{96,96} %write{2147483647,-1}
+temp	int	$tmp31	%read{97,97} %write{96,96}
+temp	int	$tmp32	%read{98,102} %write{97,101}
+const	string	$const26	"float2"		%read{99,99} %write{2147483647,-1}
+temp	int	$tmp33	%read{100,100} %write{99,99}
+temp	int	$tmp34	%read{101,101} %write{100,100}
+temp	int	$tmp35	%read{103,107} %write{102,106}
+const	string	$const27	"st"		%read{104,126} %write{2147483647,-1}
+temp	int	$tmp36	%read{105,105} %write{104,104}
+temp	int	$tmp37	%read{106,106} %write{105,105}
+temp	float	$tmp38	%read{109,109} %write{108,108}
+temp	float	$tmp39	%read{111,111} %write{110,110}
+const	string	$const28	"uv"		%read{112,112} %write{2147483647,-1}
+temp	int	$tmp40	%read{113,113} %write{112,112}
+temp	int	$tmp41	%read{118,118} %write{117,117}
+temp	int	$tmp42	%read{121,121} %write{120,120}
+temp	int	$tmp43	%read{124,124} %write{123,123}
+temp	int	$tmp44	%read{125,129} %write{124,128}
+temp	int	$tmp45	%read{127,127} %write{126,126}
+temp	int	$tmp46	%read{128,128} %write{127,127}
+temp	float	$tmp47	%read{135,135} %write{133,133}
+temp	float	$tmp48	%read{135,135} %write{134,134}
+temp	float	$tmp49	%read{138,138} %write{136,136}
+temp	float	$tmp50	%read{138,138} %write{137,137}
+const	string	$const29	"int"		%read{140,140} %write{2147483647,-1}
+temp	int	$tmp51	%read{141,141} %write{140,140}
+temp	int	$tmp52	%read{145,145} %write{144,144}
+temp	int	$tmp53	%read{148,148} %write{147,147}
+temp	float	$tmp54	%read{152,152} %write{151,151}
+temp	float	$tmp55	%read{154,154} %write{153,153}
+const	string	$const30	"U"		%read{157,190} %write{2147483647,-1}
+temp	int	$tmp56	%read{158,158} %write{157,157}
+const	string	$const31	"V"		%read{160,198} %write{2147483647,-1}
+temp	int	$tmp57	%read{161,161} %write{160,160}
+const	string	$const32	"w"		%read{163,163} %write{2147483647,-1}
+temp	int	$tmp58	%read{164,164} %write{163,163}
+temp	int	$tmp59	%read{165,169} %write{164,168}
+const	string	$const33	"W"		%read{166,166} %write{2147483647,-1}
+temp	int	$tmp60	%read{167,167} %write{166,166}
+temp	int	$tmp61	%read{168,168} %write{167,167}
+const	string	$const34	"VLen"		%read{171,171} %write{2147483647,-1}
+temp	int	$tmp62	%read{172,172} %write{171,171}
+const	string	$const35	"time"		%read{174,174} %write{2147483647,-1}
+temp	int	$tmp63	%read{175,175} %write{174,174}
+temp	int	$tmp64	%read{179,179} %write{178,178}
+temp	int	$tmp65	%read{182,182} %write{181,181}
+const	string	$const36	"u"		%read{187,187} %write{2147483647,-1}
+temp	int	$tmp66	%read{188,188} %write{187,187}
+temp	int	$tmp67	%read{189,193} %write{188,192}
+temp	int	$tmp68	%read{191,191} %write{190,190}
+temp	int	$tmp69	%read{192,192} %write{191,191}
+temp	int	$tmp70	%read{2147483647,-1} %write{194,194}
+const	string	$const37	"v"		%read{195,195} %write{2147483647,-1}
+temp	int	$tmp71	%read{196,196} %write{195,195}
+temp	int	$tmp72	%read{197,201} %write{196,200}
+temp	int	$tmp73	%read{199,199} %write{198,198}
+temp	int	$tmp74	%read{200,200} %write{199,199}
+temp	int	$tmp75	%read{2147483647,-1} %write{202,202}
+temp	int	$tmp76	%read{205,205} %write{204,204}
+temp	int	$tmp77	%read{206,210} %write{205,209}
+temp	int	$tmp78	%read{208,208} %write{207,207}
+temp	int	$tmp79	%read{209,209} %write{208,208}
+const	string	$const38	"[PxrPrimvar] Could not find: '%s' primvar"		%read{211,211} %write{2147483647,-1}
+const	int	$const39	2		%read{214,214} %write{2147483647,-1}
+code resultP
+# PxrPrimvar.osl:244
+#     output point resultP = vector(0.0, 0.0, 0.0)
+	assign		resultP $const1 	%filename{"PxrPrimvar.osl"} %line{244} %argrw{"wr"}
+code ___main___
+# PxrPrimvar.osl:255
+#     int found = 1;
+	assign		found $const2 	%filename{"PxrPrimvar.osl"} %line{255} %argrw{"wr"}
+# PxrPrimvar.osl:259
+#     if (variable == "")
+	eq		$tmp1 variable $const3 	%line{259} %argrw{"wrr"}
+	if		$tmp1 5 6 	%argrw{"r"}
+# PxrPrimvar.osl:261
+#         var = varname;
+	assign		var varname 	%line{261} %argrw{"wr"}
+# PxrPrimvar.osl:265
+#         var = variable;
+	assign		var variable 	%line{265} %argrw{"wr"}
+# PxrPrimvar.osl:269
+#     if ((type == "point") || (type == "normal") || (type == "vector") || (type == "color"))
+	eq		$tmp2 type $const4 	%line{269} %argrw{"wrr"}
+	neq		$tmp3 $tmp2 $const5 	%argrw{"wrr"}
+	if		$tmp3 9 12 	%argrw{"r"}
+	eq		$tmp4 type $const6 	%argrw{"wrr"}
+	neq		$tmp5 $tmp4 $const5 	%argrw{"wrr"}
+	assign		$tmp3 $tmp5 	%argrw{"wr"}
+	neq		$tmp6 $tmp3 $const5 	%argrw{"wrr"}
+	if		$tmp6 14 17 	%argrw{"r"}
+	eq		$tmp7 type $const7 	%argrw{"wrr"}
+	neq		$tmp8 $tmp7 $const5 	%argrw{"wrr"}
+	assign		$tmp6 $tmp8 	%argrw{"wr"}
+	neq		$tmp9 $tmp6 $const5 	%argrw{"wrr"}
+	if		$tmp9 19 22 	%argrw{"r"}
+	eq		$tmp10 type $const8 	%argrw{"wrr"}
+	neq		$tmp11 $tmp10 $const5 	%argrw{"wrr"}
+	assign		$tmp9 $tmp11 	%argrw{"wr"}
+	if		$tmp9 96 204 	%argrw{"r"}
+# PxrPrimvar.osl:271
+#         int transformVal = 0;
+	assign		___327_transformVal $const5 	%line{271} %argrw{"wr"}
+# PxrPrimvar.osl:272
+#         vector value = defaultFloat3;
+	assign		___327_value defaultFloat3 	%line{272} %argrw{"wr"}
+# PxrPrimvar.osl:273
+#         if (type == "color")
+	eq		$tmp12 type $const8 	%line{273} %argrw{"wrr"}
+	if		$tmp12 28 28 	%argrw{"r"}
+# PxrPrimvar.osl:275
+#             value = defaultColor;
+	assign		___327_value defaultColor 	%line{275} %argrw{"wr"}
+# PxrPrimvar.osl:278
+#         if (var == "uvw")
+	eq		$tmp13 var $const9 	%line{278} %argrw{"wrr"}
+	if		$tmp13 31 71 	%argrw{"r"}
+# PxrPrimvar.osl:280
+#             value = vector(u, v, 0.0);
+	vector		___327_value u v $const10 	%line{280} %argrw{"wrrr"}
+# PxrPrimvar.osl:282
+#         else if (var == "N" || var == "Nn")
+	eq		$tmp14 var $const11 	%line{282} %argrw{"wrr"}
+	neq		$tmp15 $tmp14 $const5 	%argrw{"wrr"}
+	if		$tmp15 34 37 	%argrw{"r"}
+	eq		$tmp16 var $const12 	%argrw{"wrr"}
+	neq		$tmp17 $tmp16 $const5 	%argrw{"wrr"}
+	assign		$tmp15 $tmp17 	%argrw{"wr"}
+	if		$tmp15 40 71 	%argrw{"r"}
+# PxrPrimvar.osl:284
+#             value = N;
+	assign		___327_value N 	%line{284} %argrw{"wr"}
+# PxrPrimvar.osl:285
+#             transformVal = 1;
+	assign		___327_transformVal $const2 	%line{285} %argrw{"wr"}
+# PxrPrimvar.osl:287
+#         else if (var == "Ngn")
+	eq		$tmp18 var $const13 	%line{287} %argrw{"wrr"}
+	if		$tmp18 44 71 	%argrw{"r"}
+# PxrPrimvar.osl:289
+#             value = Ng;
+	assign		___327_value Ng 	%line{289} %argrw{"wr"}
+# PxrPrimvar.osl:290
+#             transformVal = 1;
+	assign		___327_transformVal $const2 	%line{290} %argrw{"wr"}
+# PxrPrimvar.osl:292
+#         else if (var == "Vn")
+	eq		$tmp19 var $const14 	%line{292} %argrw{"wrr"}
+	if		$tmp19 49 71 	%argrw{"r"}
+# PxrPrimvar.osl:294
+#             value = normalize(-I);
+	neg		$tmp20 I 	%line{294} %argrw{"wr"}
+	normalize	___327_value $tmp20 	%argrw{"wr"}
+# PxrPrimvar.osl:295
+#             transformVal = 1;
+	assign		___327_transformVal $const2 	%line{295} %argrw{"wr"}
+# PxrPrimvar.osl:297
+#         else if (var == "duv")
+	eq		$tmp21 var $const15 	%line{297} %argrw{"wrr"}
+	if		$tmp21 54 71 	%argrw{"r"}
+# PxrPrimvar.osl:300
+#             found = getattribute("builtin", "du", du);
+	getattribute	found $const16 $const17 ___333_du 	%line{300} %argrw{"wrrw"}
+# PxrPrimvar.osl:301
+#             found = getattribute("builtin", "dv", dv);
+	getattribute	found $const16 $const18 ___333_dv 	%line{301} %argrw{"wrrw"}
+# PxrPrimvar.osl:302
+#             value = vector(du, dv, 0);
+	vector		___327_value ___333_du ___333_dv $const10 	%line{302} %argrw{"wrrr"}
+# PxrPrimvar.osl:304
+#         else if (var == "duvw")
+	eq		$tmp22 var $const19 	%line{304} %argrw{"wrr"}
+	if		$tmp22 60 71 	%argrw{"r"}
+# PxrPrimvar.osl:307
+#             found = getattribute("builtin", "du", du);
+	getattribute	found $const16 $const17 ___334_du 	%line{307} %argrw{"wrrw"}
+# PxrPrimvar.osl:308
+#             found = getattribute("builtin", "dv", dv);
+	getattribute	found $const16 $const18 ___334_dv 	%line{308} %argrw{"wrrw"}
+# PxrPrimvar.osl:309
+#             found = getattribute("builtin", "dw", dw);
+	getattribute	found $const16 $const20 ___334_dw 	%line{309} %argrw{"wrrw"}
+# PxrPrimvar.osl:310
+#             value = vector(du, dv, dw);
+	vector		___327_value ___334_du ___334_dv ___334_dw 	%line{310} %argrw{"wrrr"}
+# PxrPrimvar.osl:312
+#         else if (var == "dPdtime")
+	eq		$tmp23 var $const21 	%line{312} %argrw{"wrr"}
+	if		$tmp23 63 71 	%argrw{"r"}
+# PxrPrimvar.osl:314
+#             value = dPdtime;
+	assign		___327_value dPdtime 	%line{314} %argrw{"wr"}
+# PxrPrimvar.osl:319
+#             transformVal = 1;
+	assign		___327_transformVal $const2 	%line{319} %argrw{"wr"}
+# PxrPrimvar.osl:320
+#             found = getattribute("primvar", var, value);
+	getattribute	found $const22 var ___327_value 	%line{320} %argrw{"wrrw"}
+# PxrPrimvar.osl:321
+#             if (!found)
+	eq		$tmp24 found $const5 	%line{321} %argrw{"wrr"}
+	if		$tmp24 71 71 	%argrw{"r"}
+# PxrPrimvar.osl:323
+#                 found = getattribute("builtin", var, value);
+	getattribute	found $const16 var ___327_value 	%line{323} %argrw{"wrrw"}
+# PxrPrimvar.osl:324
+#                 if (!found)
+	eq		$tmp25 found $const5 	%line{324} %argrw{"wrr"}
+	if		$tmp25 71 71 	%argrw{"r"}
+# PxrPrimvar.osl:326
+#                     found = getattribute(var, value);
+	getattribute	found var ___327_value 	%line{326} %argrw{"wrw"}
+# PxrPrimvar.osl:339
+#         string fromSpace = (found) ? k_current : k_object;
+	if		found 73 74 	%line{339} %argrw{"r"}
+	assign		___327_fromSpace $const23 	%argrw{"wr"}
+	assign		___327_fromSpace $const24 	%argrw{"wr"}
+# PxrPrimvar.osl:340
+#         if (found || transformDefaultValues)
+	neq		$tmp26 found $const5 	%line{340} %argrw{"wrr"}
+	if		$tmp26 76 78 	%argrw{"r"}
+	neq		$tmp27 transformDefaultValues $const5 	%argrw{"wrr"}
+	assign		$tmp26 $tmp27 	%argrw{"wr"}
+	if		$tmp26 92 92 	%argrw{"r"}
+# PxrPrimvar.osl:342
+#             if (transformVal)
+	if		___327_transformVal 92 92 	%line{342} %argrw{"r"}
+# PxrPrimvar.osl:344
+#                 if (type == "point")
+	eq		$tmp28 type $const4 	%line{344} %argrw{"wrr"}
+	if		$tmp28 84 92 	%argrw{"r"}
+# PxrPrimvar.osl:346
+#                     point val = value;
+	assign		___341_val ___327_value 	%line{346} %argrw{"wr"}
+# PxrPrimvar.osl:347
+#                     value = transform(fromSpace, coordsys, val);
+	transform	___327_value ___327_fromSpace coordsys ___341_val 	%line{347} %argrw{"wrrr"}
+# PxrPrimvar.osl:349
+#                 else if (type == "normal")
+	eq		$tmp29 type $const6 	%line{349} %argrw{"wrr"}
+	if		$tmp29 88 92 	%argrw{"r"}
+# PxrPrimvar.osl:351
+#                     normal val = value;
+	assign		___342_val ___327_value 	%line{351} %argrw{"wr"}
+# PxrPrimvar.osl:352
+#                     value = transform(fromSpace, coordsys, val);
+	transformn	___327_value ___327_fromSpace coordsys ___342_val 	%line{352} %argrw{"wrrr"}
+# PxrPrimvar.osl:354
+#                 else if (type == "vector")
+	eq		$tmp30 type $const7 	%line{354} %argrw{"wrr"}
+	if		$tmp30 92 92 	%argrw{"r"}
+# PxrPrimvar.osl:356
+#                     vector val = value;
+	assign		___343_val ___327_value 	%line{356} %argrw{"wr"}
+# PxrPrimvar.osl:357
+#                     value = transform(fromSpace, coordsys, val);
+	transformv	___327_value ___327_fromSpace coordsys ___343_val 	%line{357} %argrw{"wrrr"}
+# PxrPrimvar.osl:361
+#         resultRGB = value;
+	assign		resultRGB ___327_value 	%line{361} %argrw{"wr"}
+# PxrPrimvar.osl:362
+#         resultF = value[0];
+	compref		resultF ___327_value $const5 	%line{362} %argrw{"wrr"}
+# PxrPrimvar.osl:363
+#         resultP = value;
+	assign		resultP ___327_value 	%line{363} %argrw{"wr"}
+# PxrPrimvar.osl:364
+#         width = 0;
+	assign		width $const5 	%line{364} %argrw{"wr"}
+# PxrPrimvar.osl:366
+#     else if (type == "float[2]" || type == "float2" || var == "st")  // "float2" is for backwards compatib.
+	eq		$tmp31 type $const25 	%line{366} %argrw{"wrr"}
+	neq		$tmp32 $tmp31 $const5 	%argrw{"wrr"}
+	if		$tmp32 99 102 	%argrw{"r"}
+	eq		$tmp33 type $const26 	%argrw{"wrr"}
+	neq		$tmp34 $tmp33 $const5 	%argrw{"wrr"}
+	assign		$tmp32 $tmp34 	%argrw{"wr"}
+	neq		$tmp35 $tmp32 $const5 	%argrw{"wrr"}
+	if		$tmp35 104 107 	%argrw{"r"}
+	eq		$tmp36 var $const27 	%argrw{"wrr"}
+	neq		$tmp37 $tmp36 $const5 	%argrw{"wrr"}
+	assign		$tmp35 $tmp37 	%argrw{"wr"}
+	if		$tmp35 140 204 	%argrw{"r"}
+# PxrPrimvar.osl:368
+#         float value[2] = {defaultFloat3[0], defaultFloat3[1]};
+	compref		$tmp38 defaultFloat3 $const5 	%line{368} %argrw{"wrr"}
+	aassign		___344_value $const5 $tmp38 	%argrw{"wrr"}
+	compref		$tmp39 defaultFloat3 $const2 	%argrw{"wrr"}
+	aassign		___344_value $const2 $tmp39 	%argrw{"wrr"}
+# PxrPrimvar.osl:370
+#         if (var == "uv")
+	eq		$tmp40 var $const28 	%line{370} %argrw{"wrr"}
+	if		$tmp40 116 132 	%argrw{"r"}
+# PxrPrimvar.osl:372
+#             value[0] = u;
+	aassign		___344_value $const5 u 	%line{372} %argrw{"wrr"}
+# PxrPrimvar.osl:373
+#             value[1] = v;
+	aassign		___344_value $const2 v 	%line{373} %argrw{"wrr"}
+# PxrPrimvar.osl:377
+#             found = getattribute("primvar", var, value);
+	getattribute	found $const22 var ___344_value 	%line{377} %argrw{"wrrw"}
+# PxrPrimvar.osl:378
+#             if (!found)
+	eq		$tmp41 found $const5 	%line{378} %argrw{"wrr"}
+	if		$tmp41 123 123 	%argrw{"r"}
+# PxrPrimvar.osl:380
+#                 found = getattribute("builtin", var, value);
+	getattribute	found $const16 var ___344_value 	%line{380} %argrw{"wrrw"}
+# PxrPrimvar.osl:381
+#                 if (!found)
+	eq		$tmp42 found $const5 	%line{381} %argrw{"wrr"}
+	if		$tmp42 123 123 	%argrw{"r"}
+# PxrPrimvar.osl:383
+#                     found = getattribute(var, value);
+	getattribute	found var ___344_value 	%line{383} %argrw{"wrw"}
+# PxrPrimvar.osl:386
+#             if (!found && var == "st")
+	eq		$tmp43 found $const5 	%line{386} %argrw{"wrr"}
+	neq		$tmp44 $tmp43 $const5 	%argrw{"wrr"}
+	if		$tmp44 129 129 	%argrw{"r"}
+	eq		$tmp45 var $const27 	%argrw{"wrr"}
+	neq		$tmp46 $tmp45 $const5 	%argrw{"wrr"}
+	assign		$tmp44 $tmp46 	%argrw{"wr"}
+	if		$tmp44 132 132 	%argrw{"r"}
+# PxrPrimvar.osl:388
+#                 value[0] = u;
+	aassign		___344_value $const5 u 	%line{388} %argrw{"wrr"}
+# PxrPrimvar.osl:389
+#                 value[1] = v;
+	aassign		___344_value $const2 v 	%line{389} %argrw{"wrr"}
+# PxrPrimvar.osl:392
+#         resultF = value[0];
+	aref		resultF ___344_value $const5 	%line{392} %argrw{"wrr"}
+# PxrPrimvar.osl:393
+#         resultRGB = color(value[0], value[1], 0.0);
+	aref		$tmp47 ___344_value $const5 	%line{393} %argrw{"wrr"}
+	aref		$tmp48 ___344_value $const2 	%argrw{"wrr"}
+	color		resultRGB $tmp47 $tmp48 $const10 	%argrw{"wrrr"}
+# PxrPrimvar.osl:394
+#         resultP = point(value[0], value[1], 0.0);
+	aref		$tmp49 ___344_value $const5 	%line{394} %argrw{"wrr"}
+	aref		$tmp50 ___344_value $const2 	%argrw{"wrr"}
+	point		resultP $tmp49 $tmp50 $const10 	%argrw{"wrrr"}
+# PxrPrimvar.osl:395
+#         width = 0;
+	assign		width $const5 	%line{395} %argrw{"wr"}
+# PxrPrimvar.osl:397
+#     else if (type == "int")
+	eq		$tmp51 type $const29 	%line{397} %argrw{"wrr"}
+	if		$tmp51 156 204 	%argrw{"r"}
+# PxrPrimvar.osl:400
+#         value = defaultInt;
+	assign		___350_value defaultInt 	%line{400} %argrw{"wr"}
+# PxrPrimvar.osl:401
+#         found = getattribute("primvar", var, value);
+	getattribute	found $const22 var ___350_value 	%line{401} %argrw{"wrrw"}
+# PxrPrimvar.osl:402
+#         if (!found)
+	eq		$tmp52 found $const5 	%line{402} %argrw{"wrr"}
+	if		$tmp52 150 150 	%argrw{"r"}
+# PxrPrimvar.osl:404
+#             found = getattribute("builtin", var, value);
+	getattribute	found $const16 var ___350_value 	%line{404} %argrw{"wrrw"}
+# PxrPrimvar.osl:405
+#             if (!found)
+	eq		$tmp53 found $const5 	%line{405} %argrw{"wrr"}
+	if		$tmp53 150 150 	%argrw{"r"}
+# PxrPrimvar.osl:407
+#                 found = getattribute(var, value);
+	getattribute	found var ___350_value 	%line{407} %argrw{"wrw"}
+# PxrPrimvar.osl:410
+#         resultF = value;
+	assign		resultF ___350_value 	%line{410} %argrw{"wr"}
+# PxrPrimvar.osl:411
+#         resultRGB = color(value);
+	assign		$tmp54 ___350_value 	%line{411} %argrw{"wr"}
+	assign		resultRGB $tmp54 	%argrw{"wr"}
+# PxrPrimvar.osl:412
+#         resultP = vector(value);
+	assign		$tmp55 ___350_value 	%line{412} %argrw{"wr"}
+	assign		resultP $tmp55 	%argrw{"wr"}
+# PxrPrimvar.osl:413
+#         width = 0;
+	assign		width $const5 	%line{413} %argrw{"wr"}
+# PxrPrimvar.osl:417
+#         float value = defaultFloat;
+	assign		___353_value defaultFloat 	%line{417} %argrw{"wr"}
+# PxrPrimvar.osl:419
+#         if (var == "U")
+	eq		$tmp56 var $const30 	%line{419} %argrw{"wrr"}
+	if		$tmp56 160 184 	%argrw{"r"}
+# PxrPrimvar.osl:421
+#             value = u;
+	assign		___353_value u 	%line{421} %argrw{"wr"}
+# PxrPrimvar.osl:423
+#         else if (var == "V")
+	eq		$tmp57 var $const31 	%line{423} %argrw{"wrr"}
+	if		$tmp57 163 184 	%argrw{"r"}
+# PxrPrimvar.osl:425
+#             value = v;
+	assign		___353_value v 	%line{425} %argrw{"wr"}
+# PxrPrimvar.osl:427
+#         else if (var == "w" || var == "W")
+	eq		$tmp58 var $const32 	%line{427} %argrw{"wrr"}
+	neq		$tmp59 $tmp58 $const5 	%argrw{"wrr"}
+	if		$tmp59 166 169 	%argrw{"r"}
+	eq		$tmp60 var $const33 	%argrw{"wrr"}
+	neq		$tmp61 $tmp60 $const5 	%argrw{"wrr"}
+	assign		$tmp59 $tmp61 	%argrw{"wr"}
+	if		$tmp59 171 184 	%argrw{"r"}
+# PxrPrimvar.osl:429
+#             found = getattribute("primvar", var, value);
+	getattribute	found $const22 var ___353_value 	%line{429} %argrw{"wrrw"}
+# PxrPrimvar.osl:431
+#         else if (var == "VLen")
+	eq		$tmp62 var $const34 	%line{431} %argrw{"wrr"}
+	if		$tmp62 174 184 	%argrw{"r"}
+# PxrPrimvar.osl:433
+#             value = length(I);
+	length		___353_value I 	%line{433} %argrw{"wr"}
+# PxrPrimvar.osl:435
+#         else if (var == "time")
+	eq		$tmp63 var $const35 	%line{435} %argrw{"wrr"}
+	if		$tmp63 177 184 	%argrw{"r"}
+# PxrPrimvar.osl:437
+#             value = time;
+	assign		___353_value time 	%line{437} %argrw{"wr"}
+# PxrPrimvar.osl:441
+#             found = getattribute("primvar", var, value);
+	getattribute	found $const22 var ___353_value 	%line{441} %argrw{"wrrw"}
+# PxrPrimvar.osl:442
+#             if (!found)
+	eq		$tmp64 found $const5 	%line{442} %argrw{"wrr"}
+	if		$tmp64 184 184 	%argrw{"r"}
+# PxrPrimvar.osl:444
+#                 found = getattribute("builtin", var, value);
+	getattribute	found $const16 var ___353_value 	%line{444} %argrw{"wrrw"}
+# PxrPrimvar.osl:445
+#                 if (!found)
+	eq		$tmp65 found $const5 	%line{445} %argrw{"wrr"}
+	if		$tmp65 184 184 	%argrw{"r"}
+# PxrPrimvar.osl:447
+#                     found = getattribute(var, value);
+	getattribute	found var ___353_value 	%line{447} %argrw{"wrw"}
+# PxrPrimvar.osl:452
+#         resultF = value;
+	assign		resultF ___353_value 	%line{452} %argrw{"wr"}
+# PxrPrimvar.osl:453
+#         resultRGB = color(value);
+	assign		resultRGB ___353_value 	%line{453} %argrw{"wr"}
+# PxrPrimvar.osl:454
+#         resultP = vector(value);
+	assign		resultP ___353_value 	%line{454} %argrw{"wr"}
+# PxrPrimvar.osl:455
+#         if (var == "u" || var == "U")
+	eq		$tmp66 var $const36 	%line{455} %argrw{"wrr"}
+	neq		$tmp67 $tmp66 $const5 	%argrw{"wrr"}
+	if		$tmp67 190 193 	%argrw{"r"}
+	eq		$tmp68 var $const30 	%argrw{"wrr"}
+	neq		$tmp69 $tmp68 $const5 	%argrw{"wrr"}
+	assign		$tmp67 $tmp69 	%argrw{"wr"}
+	if		$tmp67 195 204 	%argrw{"r"}
+# PxrPrimvar.osl:457
+#             getattribute("builtin", "du", width);
+	getattribute	$tmp70 $const16 $const17 width 	%line{457} %argrw{"wrrw"}
+# PxrPrimvar.osl:459
+#         else if (var == "v" || var == "V")
+	eq		$tmp71 var $const37 	%line{459} %argrw{"wrr"}
+	neq		$tmp72 $tmp71 $const5 	%argrw{"wrr"}
+	if		$tmp72 198 201 	%argrw{"r"}
+	eq		$tmp73 var $const31 	%argrw{"wrr"}
+	neq		$tmp74 $tmp73 $const5 	%argrw{"wrr"}
+	assign		$tmp72 $tmp74 	%argrw{"wr"}
+	if		$tmp72 203 204 	%argrw{"r"}
+# PxrPrimvar.osl:461
+#             getattribute("builtin", "dv", width);
+	getattribute	$tmp75 $const16 $const18 width 	%line{461} %argrw{"wrrw"}
+# PxrPrimvar.osl:465
+#             width = 0;
+	assign		width $const5 	%line{465} %argrw{"wr"}
+# PxrPrimvar.osl:469
+#     if (found == 0 && verbosity > k_silent)
+	eq		$tmp76 found $const5 	%line{469} %argrw{"wrr"}
+	neq		$tmp77 $tmp76 $const5 	%argrw{"wrr"}
+	if		$tmp77 210 210 	%argrw{"r"}
+	gt		$tmp78 verbosity $const5 	%argrw{"wrr"}
+	neq		$tmp79 $tmp78 $const5 	%argrw{"wrr"}
+	assign		$tmp77 $tmp79 	%argrw{"wr"}
+	if		$tmp77 212 212 	%argrw{"r"}
+# PxrPrimvar.osl:471
+#         warning("[PxrPrimvar] Could not find: '%s' primvar", var);
+	warning		$const38 var 	%line{471} %argrw{"rr"}
+# PxrPrimvar.osl:474
+#     resultR = resultRGB[0];
+	compref		resultR resultRGB $const5 	%line{474} %argrw{"wrr"}
+# PxrPrimvar.osl:475
+#     resultG = resultRGB[1];
+	compref		resultG resultRGB $const2 	%line{475} %argrw{"wrr"}
+# PxrPrimvar.osl:476
+#     resultB = resultRGB[2];
+	compref		resultB resultRGB $const39 	%line{476} %argrw{"wrr"}
+	end

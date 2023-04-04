@@ -1,0 +1,844 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrGrid.osl/obj/PxrGrid.oso
+shader PxrGrid	%meta{int,rfm_nodeid,1053386} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/texture"} %meta{string,rfh_classification,"Pattern/Texture"} %meta{string,help,"Procedurally generates a grid texture. Unless specified, the texture is rectangular. Like all texture style nodes, this node takes a manifold which describes either a 2D domain to apply a the texture to. The default beahavior if no mainfold is attached, is to apply over the s, t domain defined on the geometry. "} 
+param	int	style	0		%meta{string,widget,"mapper"} %meta{string,options,"Rectangular:0|Hexagonal:1"} %meta{string,help,"Style of the grid to be generated."} %meta{int,connectable,0} %meta{string,label,"Style"}  %read{38,74} %write{2147483647,-1}
+param	float	tileWidth	1		%meta{string,widget,"default"} %meta{string,help,"Rescales the width of the repeating tile pattern, so values smaller than one will cause additional repetition. Note that hexagonal tiling is not square, so when tile width and height are specified, the min of the two is used. "} %meta{int,connectable,0} %meta{string,label,"Tile Width"}  %read{36,36} %write{2147483647,-1}
+param	float	tileHeight	1		%meta{string,widget,"default"} %meta{string,help,"Rescales the height of the repeating tile pattern, so values smaller than one will cause additional repetition. Note that hexagonal tiling is not square, so when tile width and height are specified, the min of the two is used. "} %meta{int,connectable,0} %meta{string,label,"Tile Height"}  %read{37,37} %write{2147483647,-1}
+param	float	tileShift	0		%meta{string,widget,"default"} %meta{string,help,"For rectangular grid shifts every other row by this fraction. For example, a value of 0 creates a grid, while a value of 0.5 creates a brick pattern. "} %meta{int,connectable,0} %meta{string,label,"Tile Shift"} %meta{float,max,1} %meta{float,min,0}  %read{58,59} %write{2147483647,-1}
+param	float	borderThickness	0.100000001		%meta{string,widget,"default"} %meta{string,help,"Thickness of the border between individual cells. This value remains unaffected as the tile width and height varies. "} %meta{string,label,"Border Thickness"} %meta{float,max,1} %meta{float,min,0}  %read{50,52} %write{2147483647,-1}
+param	color	colorTile	1 1 1		%meta{string,widget,"color"} %meta{string,help,"Color of the interior of the cells."}  %read{282,286} %write{2147483647,-1}
+param	color	colorBorder	0 0 0		%meta{string,widget,"color"} %meta{string,help,"Color of the border between cells."}  %read{282,286} %write{2147483647,-1}
+param	struct Manifold	manifold			%meta{string,page,""} %meta{string,widget,"default"} %meta{string,readOnly,"True"}  %read{0,26} %write{2147483647,-1} %struct{"Manifold"} %structfields{Q,QN,Qradius} %structfieldtypes{"pnf"} %structnfields{3}
+param	point	manifold.Q	0 0 0		%meta{string,page,""} %meta{string,widget,"default"} %meta{string,readOnly,"True"}  %read{22,22} %write{2147483647,-1} %mystruct{manifold} %mystructfield{0} %derivs
+param	normal	manifold.QN	0 0 1		%meta{string,page,""} %meta{string,widget,"default"} %meta{string,readOnly,"True"}  %read{23,23} %write{2147483647,-1} %mystruct{manifold} %mystructfield{1}
+param	float	manifold.Qradius	0		%meta{string,page,""} %meta{string,widget,"default"} %meta{string,readOnly,"True"}  %read{24,24} %write{2147483647,-1} %mystruct{manifold} %mystructfield{2}
+oparam	color	resultRGB	0 0 0		%meta{string,help,"resultRGB (color)"}  %read{2147483647,-1} %write{289,289}
+global	point	P	%read{4,4} %write{2147483647,-1} %derivs
+global	normal	N	%read{5,5} %write{2147483647,-1}
+local	vector	___392_vec1	%read{15,16} %write{14,15}
+local	float	___392_scale	%read{19,19} %write{18,18}
+local	float	___418_left	%read{155,272} %write{150,267}
+local	float	___418_right	%read{153,270} %write{152,269}
+local	point	inputManifoldRw.Q	%read{9,32} %write{4,22} %mystruct{inputManifoldRw} %mystructfield{0} %derivs
+local	normal	inputManifoldRw.QN	%read{11,13} %write{5,23} %mystruct{inputManifoldRw} %mystructfield{1}
+local	float	inputManifoldRw.Qradius	%read{19,20} %write{6,24} %mystruct{inputManifoldRw} %mystructfield{2}
+local	float[2]	stOut	%read{34,62} %write{25,33} %derivs
+local	float	stRadius	%read{149,287} %write{35,35}
+local	float	tileWidthToUse	%read{40,44} %write{36,40}
+local	float	tileHeightToUse	%read{40,48} %write{37,41}
+local	float	k_cellOffset	%read{43,89} %write{42,42}
+local	float	k_cellOffset2	%read{47,95} %write{43,43}
+local	float	tileWidthInv	%read{51,61} %write{44,44}
+local	float	tileHeightInv	%read{52,63} %write{49,49}
+local	float	borderThicknessHalf	%read{57,277} %write{50,50}
+local	float	borderThicknessHalfS	%read{173,271} %write{51,51}
+local	float	borderThicknessHalfT	%read{165,228} %write{52,52}
+local	float	borderThicknessHalfST	%read{153,287} %write{57,57}
+local	float	tileOffset01	%read{233,262} %write{59,59}
+local	float	sScaled	%read{64,193} %write{61,61}
+local	float	tScaled	%read{66,71} %write{63,63}
+local	int	sClamped	%read{68,191} %write{65,65}
+local	int	tClamped	%read{70,70} %write{67,67}
+local	float	sPortion	%read{96,262} %write{69,69}
+local	float	tPortion	%read{95,221} %write{71,71}
+local	float	borderFraction	%read{281,281} %write{72,276}
+local	float	innerColorFraction	%read{284,284} %write{73,280}
+local	int	___423_numPts	%read{114,140} %write{76,76}
+local	vector[11]	___423_points	%read{97,140} %write{78,94}
+local	vector	___423_hitPoint	%read{98,145} %write{96,96}
+local	vector	___423_closest0	%read{98,143} %write{97,140}
+local	vector	___423_closest1	%read{141,143} %write{114,140}
+local	float	___423_dist0	%read{114,140} %write{110,140}
+local	float	___423_dist1	%read{114,140} %write{111,140}
+local	int	___424_p	%read{114,140} %write{113,140}
+local	float	___425_distCheck	%read{114,140} %write{114,140}
+local	point	___423_centerPt	%read{145,145} %write{142,142}
+local	vector	___423_dir	%read{144,146} %write{143,144}
+local	point	___423_toPoint	%read{146,146} %write{145,145}
+local	float	___423_dist	%read{147,147} %write{146,146}
+local	float	___423_fullTriArea	%read{163,163} %write{159,159}
+local	float	___423_visTriArea	%read{163,163} %write{161,161}
+local	float	___428_fracVisible	%read{279,280} %write{278,278}
+local	color	sampledColor	%read{289,289} %write{282,282}
+local	color	aveColor	%read{289,289} %write{286,286}
+local	float	colorCombine	%read{289,289} %write{288,288}
+temp	int	$tmp1	%read{1,1} %write{0,0}
+temp	int	$tmp2	%read{2,2} %write{1,1}
+const	int	$const1	0		%read{1,120} %write{2147483647,-1}
+const	string	$const2	"Manifold_Construct"		%read{3,3} %write{2147483647,-1}
+const	float	$const3	0		%read{6,285} %write{2147483647,-1}
+const	string	$const4	"object"		%read{9,15} %write{2147483647,-1}
+const	string	$const5	"Manifold_Transform"		%read{7,8} %write{2147483647,-1}
+const	string	$const6	"common"		%read{9,15} %write{2147483647,-1}
+temp	normal	$tmp3	%read{12,12} %write{11,11}
+const	vector	$const7	1 1 1		%read{14,14} %write{2147483647,-1}
+temp	float	$tmp4	%read{18,18} %write{16,16}
+temp	float	$tmp5	%read{18,18} %write{17,17}
+const	float	$const8	3		%read{17,17} %write{2147483647,-1}
+const	string	$const9	"Manifold_Copy"		%read{21,21} %write{2147483647,-1}
+const	float[2]	$const10	0 0 		%read{25,25} %write{2147483647,-1}
+temp	int	$tmp6	%read{27,27} %write{26,26}
+temp	int	$tmp7	%read{28,28} %write{27,27}
+temp	int	$tmp8	%read{2147483647,-1} %write{29,29}
+const	string	$const11	"primvar"		%read{29,29} %write{2147483647,-1}
+const	string	$const12	"st"		%read{29,29} %write{2147483647,-1}
+temp	float	$tmp9	%read{31,31} %write{30,30} %derivs
+const	int	$const13	1		%read{32,191} %write{2147483647,-1}
+temp	float	$tmp10	%read{33,33} %write{32,32} %derivs
+temp	float	$tmp11	%read{35,35} %write{34,34} %derivs
+temp	int	$tmp12	%read{39,39} %write{38,38}
+const	float	$const14	0.433012694		%read{42,42} %write{2147483647,-1}
+const	float	$const15	2		%read{43,208} %write{2147483647,-1}
+const	float	$const16	1		%read{44,284} %write{2147483647,-1}
+temp	float	$tmp13	%read{49,49} %write{47,48}
+temp	int	$tmp14	%read{46,46} %write{45,45}
+temp	float	$tmp15	%read{57,57} %write{56,56}
+temp	float	$tmp16	%read{55,55} %write{53,53}
+temp	float	$tmp17	%read{55,55} %write{54,54}
+temp	float	$tmp18	%read{56,56} %write{55,55}
+temp	float	$tmp19	%read{59,59} %write{58,58}
+temp	float	$tmp20	%read{61,61} %write{60,60}
+temp	float	$tmp21	%read{63,63} %write{62,62}
+temp	float	$tmp22	%read{65,65} %write{64,64}
+temp	float	$tmp23	%read{67,67} %write{66,66}
+temp	float	$tmp24	%read{69,69} %write{68,68}
+temp	float	$tmp25	%read{71,71} %write{70,70}
+temp	int	$tmp26	%read{75,75} %write{74,74}
+const	int	$const17	11		%read{76,76} %write{2147483647,-1}
+temp	vector	$tmp27	%read{78,78} %write{77,77}
+const	float	$const18	-0.25		%read{77,77} %write{2147483647,-1}
+temp	vector	$tmp28	%read{80,80} %write{79,79}
+const	float	$const19	0.25		%read{79,79} %write{2147483647,-1}
+temp	vector	$tmp29	%read{82,82} %write{81,81}
+const	float	$const20	0.75		%read{81,81} %write{2147483647,-1}
+const	int	$const21	2		%read{82,127} %write{2147483647,-1}
+temp	vector	$tmp30	%read{84,84} %write{83,83}
+const	float	$const22	1.25		%read{83,83} %write{2147483647,-1}
+const	int	$const23	3		%read{84,84} %write{2147483647,-1}
+temp	vector	$tmp31	%read{86,86} %write{85,85}
+const	int	$const24	4		%read{86,86} %write{2147483647,-1}
+temp	vector	$tmp32	%read{88,88} %write{87,87}
+const	float	$const25	0.5		%read{87,278} %write{2147483647,-1}
+const	int	$const26	5		%read{88,88} %write{2147483647,-1}
+temp	vector	$tmp33	%read{90,90} %write{89,89}
+const	int	$const27	6		%read{90,90} %write{2147483647,-1}
+const	vector	$const28	-0.25 0 0		%read{91,91} %write{2147483647,-1}
+const	int	$const29	7		%read{91,91} %write{2147483647,-1}
+const	vector	$const30	0.25 0 0		%read{92,92} %write{2147483647,-1}
+const	int	$const31	8		%read{92,92} %write{2147483647,-1}
+const	vector	$const32	0.75 0 0		%read{93,93} %write{2147483647,-1}
+const	int	$const33	9		%read{93,93} %write{2147483647,-1}
+const	vector	$const34	1.25 0 0		%read{94,94} %write{2147483647,-1}
+const	int	$const35	10		%read{94,94} %write{2147483647,-1}
+temp	float	$tmp38	%read{96,96} %write{95,95}
+temp	vector	$tmp39	%read{100,108} %write{98,98}
+const	string	$const36	"LengthSq"		%read{99,118} %write{2147483647,-1}
+temp	float	$tmp40	%read{102,102} %write{100,100}
+temp	float	$tmp41	%read{102,102} %write{101,101}
+temp	float	$tmp42	%read{106,106} %write{102,102}
+temp	float	$tmp43	%read{105,105} %write{103,103}
+temp	float	$tmp44	%read{105,105} %write{104,104}
+temp	float	$tmp45	%read{106,106} %write{105,105}
+temp	float	$tmp46	%read{110,110} %write{106,106}
+temp	float	$tmp47	%read{109,109} %write{107,107}
+temp	float	$tmp48	%read{109,109} %write{108,108}
+temp	float	$tmp49	%read{110,110} %write{109,109}
+const	float	$const37	10000		%read{111,111} %write{2147483647,-1}
+temp	int	$tmp50	%read{114,140} %write{114,140}
+temp	int	$tmp51	%read{112,140} %write{113,140}
+temp	vector	$tmp52	%read{114,140} %write{114,140}
+temp	vector	$tmp53	%read{114,140} %write{114,140}
+temp	float	$tmp54	%read{114,140} %write{114,140}
+temp	float	$tmp55	%read{114,140} %write{114,140}
+temp	float	$tmp56	%read{114,140} %write{114,140}
+temp	float	$tmp57	%read{114,140} %write{114,140}
+temp	float	$tmp58	%read{114,140} %write{114,140}
+temp	float	$tmp59	%read{114,140} %write{114,140}
+temp	float	$tmp60	%read{114,140} %write{114,140}
+temp	float	$tmp61	%read{114,140} %write{114,140}
+temp	float	$tmp62	%read{114,140} %write{114,140}
+temp	float	$tmp63	%read{114,140} %write{114,140}
+temp	int	$tmp64	%read{114,140} %write{114,140}
+temp	int	$tmp65	%read{114,140} %write{114,140}
+temp	vector	$tmp66	%read{142,142} %write{141,141}
+temp	float	$tmp67	%read{150,152} %write{147,147}
+const	string	$const38	"FrequencyLimitedPulse"		%read{148,265} %write{2147483647,-1}
+temp	float	$tmp68	%read{150,150} %write{149,149}
+temp	float	$tmp69	%read{152,152} %write{151,151}
+temp	float	$tmp70	%read{156,156} %write{153,153}
+temp	float	$tmp71	%read{156,156} %write{155,155}
+temp	float	$tmp72	%read{155,155} %write{154,154}
+temp	float	$tmp73	%read{157,157} %write{156,156}
+temp	float	$tmp74	%read{158,158} %write{157,157}
+const	float	$const39	0.144337565		%read{159,159} %write{2147483647,-1}
+const	float	$const40	0.288675129		%read{161,161} %write{2147483647,-1}
+temp	float	$tmp75	%read{161,161} %write{160,160}
+const	float	$const41	4		%read{162,279} %write{2147483647,-1}
+const	float	$const42	6		%read{162,162} %write{2147483647,-1}
+temp	float	$tmp76	%read{164,164} %write{162,162}
+temp	float	$tmp77	%read{164,164} %write{163,163}
+temp	float	$tmp78	%read{166,166} %write{165,165}
+temp	int	$tmp79	%read{167,167} %write{166,166}
+temp	float	$tmp80	%read{190,190} %write{178,178}
+temp	float	$tmp81	%read{170,170} %write{169,169}
+temp	float	$tmp82	%read{172,172} %write{171,171}
+temp	float	$tmp83	%read{176,176} %write{173,173}
+temp	float	$tmp84	%read{176,176} %write{175,175}
+temp	float	$tmp85	%read{175,175} %write{174,174}
+temp	float	$tmp86	%read{177,177} %write{176,176}
+temp	float	$tmp87	%read{178,178} %write{177,177}
+temp	float	$tmp88	%read{190,190} %write{189,189}
+temp	float	$tmp89	%read{181,181} %write{180,180}
+temp	float	$tmp90	%read{183,183} %write{182,182}
+temp	float	$tmp91	%read{187,187} %write{184,184}
+temp	float	$tmp92	%read{187,187} %write{186,186}
+temp	float	$tmp93	%read{186,186} %write{185,185}
+temp	float	$tmp94	%read{188,188} %write{187,187}
+temp	float	$tmp95	%read{189,189} %write{188,188}
+temp	float	$tmp96	%read{205,205} %write{190,190}
+temp	float	$tmp97	%read{205,205} %write{204,204}
+temp	int	$tmp98	%read{192,192} %write{191,191}
+temp	float	$tmp99	%read{196,198} %write{193,193}
+temp	float	$tmp100	%read{193,193} %write{192,192}
+temp	float	$tmp101	%read{196,196} %write{195,195}
+temp	float	$tmp102	%read{198,198} %write{197,197}
+temp	float	$tmp103	%read{202,202} %write{199,199}
+temp	float	$tmp104	%read{202,202} %write{201,201}
+temp	float	$tmp105	%read{201,201} %write{200,200}
+temp	float	$tmp106	%read{203,203} %write{202,202}
+temp	float	$tmp107	%read{204,204} %write{203,203}
+temp	float	$tmp108	%read{220,220} %write{205,205}
+temp	float	$tmp109	%read{220,220} %write{219,219}
+temp	float	$tmp110	%read{207,207} %write{206,206}
+temp	float	$tmp111	%read{211,213} %write{207,207}
+temp	float	$tmp112	%read{214,215} %write{208,208}
+temp	float	$tmp113	%read{211,211} %write{210,210}
+temp	float	$tmp114	%read{213,213} %write{212,212}
+temp	float	$tmp115	%read{217,217} %write{214,214}
+temp	float	$tmp116	%read{217,217} %write{216,216}
+temp	float	$tmp117	%read{216,216} %write{215,215}
+temp	float	$tmp118	%read{218,218} %write{217,217}
+temp	float	$tmp119	%read{219,219} %write{218,218}
+temp	float	$tmp120	%read{246,246} %write{232,232}
+temp	float	$tmp121	%read{224,226} %write{221,221}
+temp	float	$tmp122	%read{224,224} %write{223,223}
+temp	float	$tmp123	%read{226,226} %write{225,225}
+temp	float	$tmp124	%read{230,230} %write{227,227}
+temp	float	$tmp125	%read{230,230} %write{229,229}
+temp	float	$tmp126	%read{229,229} %write{228,228}
+temp	float	$tmp127	%read{231,231} %write{230,230}
+temp	float	$tmp128	%read{232,232} %write{231,231}
+temp	float	$tmp129	%read{246,246} %write{245,245}
+temp	float	$tmp130	%read{237,239} %write{234,234}
+temp	float	$tmp131	%read{234,234} %write{233,233}
+temp	float	$tmp132	%read{237,237} %write{236,236}
+temp	float	$tmp133	%read{239,239} %write{238,238}
+temp	float	$tmp134	%read{243,243} %write{240,240}
+temp	float	$tmp135	%read{243,243} %write{242,242}
+temp	float	$tmp136	%read{242,242} %write{241,241}
+temp	float	$tmp137	%read{244,244} %write{243,243}
+temp	float	$tmp138	%read{245,245} %write{244,244}
+temp	float	$tmp139	%read{261,261} %write{246,246}
+temp	float	$tmp140	%read{261,261} %write{260,260}
+temp	float	$tmp141	%read{252,254} %write{249,249}
+temp	float	$tmp142	%read{248,248} %write{247,247}
+temp	float	$tmp143	%read{249,249} %write{248,248}
+temp	float	$tmp144	%read{252,252} %write{251,251}
+temp	float	$tmp145	%read{254,254} %write{253,253}
+temp	float	$tmp146	%read{258,258} %write{255,255}
+temp	float	$tmp147	%read{258,258} %write{257,257}
+temp	float	$tmp148	%read{257,257} %write{256,256}
+temp	float	$tmp149	%read{259,259} %write{258,258}
+temp	float	$tmp150	%read{260,260} %write{259,259}
+temp	float	$tmp151	%read{276,276} %write{261,261}
+temp	float	$tmp152	%read{276,276} %write{275,275}
+temp	float	$tmp153	%read{267,269} %write{264,264}
+temp	float	$tmp154	%read{263,263} %write{262,262}
+temp	float	$tmp155	%read{264,264} %write{263,263}
+temp	float	$tmp156	%read{267,267} %write{266,266}
+temp	float	$tmp157	%read{269,269} %write{268,268}
+temp	float	$tmp158	%read{273,273} %write{270,270}
+temp	float	$tmp159	%read{273,273} %write{272,272}
+temp	float	$tmp160	%read{272,272} %write{271,271}
+temp	float	$tmp161	%read{274,274} %write{273,273}
+temp	float	$tmp162	%read{275,275} %write{274,274}
+temp	float	$tmp163	%read{278,278} %write{277,277}
+temp	float	$tmp164	%read{280,280} %write{279,279}
+temp	float	$tmp165	%read{282,282} %write{281,281}
+temp	float	$tmp166	%read{286,286} %write{285,285}
+const	string	$const43	"clamp"		%read{283,283} %write{2147483647,-1}
+temp	float	$tmp167	%read{285,285} %write{284,284}
+const	float	$const44	0.100000001		%read{288,288} %write{2147483647,-1}
+const	float	$const45	0.949999988		%read{288,288} %write{2147483647,-1}
+temp	float	$tmp168	%read{288,288} %write{287,287}
+code ___main___
+# PxrGrid.osl:130
+#     if (!isconnected(manifold))
+	isconnected	$tmp1 manifold 	%filename{"PxrGrid.osl"} %line{130} %argrw{"wr"}
+	eq		$tmp2 $tmp1 $const1 	%argrw{"wrr"}
+	if		$tmp2 21 25 	%argrw{"r"}
+# PxrGrid.osl:132
+#         Manifold_Construct(P,N,inputManifoldRw);
+	functioncall	$const2 7 	%line{132} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:69
+#     m.Q = inP;
+	assign		inputManifoldRw.Q P 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{69} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:70
+#     m.QN = inN;
+	assign		inputManifoldRw.QN N 	%line{70} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:71
+#     m.Qradius = 0.0;
+	assign		inputManifoldRw.Qradius $const3 	%line{71} %argrw{"wr"}
+# PxrGrid.osl:133
+#         Manifold_Transform(inputManifoldRw,"object");
+	functioncall	$const5 21 	%filename{"PxrGrid.osl"} %line{133} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:91
+#     Manifold_Transform(ioManifold, "common", toSpace);
+	functioncall	$const5 21 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{91} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:78
+#     ioManifold.Q = transform(fromSpace, toSpace, ioManifold.Q);
+	transform	inputManifoldRw.Q $const6 $const4 inputManifoldRw.Q 	%line{78} %argrw{"wrrr"}
+	assign		inputManifoldRw.Q inputManifoldRw.Q 	%argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:79
+#     ioManifold.QN = normalize(transform(fromSpace, toSpace, ioManifold.QN));
+	transformn	$tmp3 $const6 $const4 inputManifoldRw.QN 	%line{79} %argrw{"wrrr"}
+	normalize	inputManifoldRw.QN $tmp3 	%argrw{"wr"}
+	assign		inputManifoldRw.QN inputManifoldRw.QN 	%argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:81
+#     vector vec1 = vector(1.0);
+	assign		___392_vec1 $const7 	%line{81} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:82
+#     vec1 = transform(fromSpace, toSpace, vec1);
+	transformv	___392_vec1 $const6 $const4 ___392_vec1 	%line{82} %argrw{"wrrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:83
+#     float scale = length(vec1) / sqrt(3.0);
+	length		$tmp4 ___392_vec1 	%line{83} %argrw{"wr"}
+	sqrt		$tmp5 $const8 	%argrw{"wr"}
+	div		___392_scale $tmp4 $tmp5 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:84
+#     ioManifold.Qradius *= scale;
+	mul		inputManifoldRw.Qradius inputManifoldRw.Qradius ___392_scale 	%line{84} %argrw{"wrr"}
+	assign		inputManifoldRw.Qradius inputManifoldRw.Qradius 	%argrw{"wr"}
+# PxrGrid.osl:136
+#         Manifold_Copy(manifold,inputManifoldRw);
+	functioncall	$const9 25 	%filename{"PxrGrid.osl"} %line{136} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:53
+#     dest.Q = src.Q;
+	assign		inputManifoldRw.Q manifold.Q 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{53} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:54
+#     dest.QN = src.QN;
+	assign		inputManifoldRw.QN manifold.QN 	%line{54} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:55
+#     dest.Qradius = src.Qradius;
+	assign		inputManifoldRw.Qradius manifold.Qradius 	%line{55} %argrw{"wr"}
+# PxrGrid.osl:139
+#     float stOut[2] = {0.0, 0.0};
+	assign		stOut $const10 	%filename{"PxrGrid.osl"} %line{139} %argrw{"wr"}
+# PxrGrid.osl:140
+#     if (!isconnected(manifold))
+	isconnected	$tmp6 manifold 	%line{140} %argrw{"wr"}
+	eq		$tmp7 $tmp6 $const1 	%argrw{"wrr"}
+	if		$tmp7 30 34 	%argrw{"r"}
+# PxrGrid.osl:142
+#         getattribute("primvar", "st", stOut);
+	getattribute	$tmp8 $const11 $const12 stOut 	%line{142} %argrw{"wrrw"}
+# PxrGrid.osl:147
+#         stOut[0] = inputManifoldRw.Q[0];
+	compref		$tmp9 inputManifoldRw.Q $const1 	%line{147} %argrw{"wrr"}
+	aassign		stOut $const1 $tmp9 	%argrw{"wrr"}
+# PxrGrid.osl:148
+#         stOut[1] = inputManifoldRw.Q[1];
+	compref		$tmp10 inputManifoldRw.Q $const13 	%line{148} %argrw{"wrr"}
+	aassign		stOut $const13 $tmp10 	%argrw{"wrr"}
+# PxrGrid.osl:151
+#     float stRadius = Dx(stOut[0]);
+	aref		$tmp11 stOut $const1 	%line{151} %argrw{"wrr"}
+	Dx		stRadius $tmp11 	%argrw{"wr"} %argderivs{1}
+# PxrGrid.osl:155
+#     float tileWidthToUse = tileWidth;
+	assign		tileWidthToUse tileWidth 	%line{155} %argrw{"wr"}
+# PxrGrid.osl:156
+#     float tileHeightToUse = tileHeight;
+	assign		tileHeightToUse tileHeight 	%line{156} %argrw{"wr"}
+# PxrGrid.osl:157
+#     if (style == k_hexagonal)
+	eq		$tmp12 style $const13 	%line{157} %argrw{"wrr"}
+	if		$tmp12 42 42 	%argrw{"r"}
+# PxrGrid.osl:159
+#         tileWidthToUse = min(tileWidthToUse, tileHeightToUse);
+	min		tileWidthToUse tileWidthToUse tileHeightToUse 	%line{159} %argrw{"wrr"}
+# PxrGrid.osl:160
+#         tileHeightToUse = tileWidthToUse;
+	assign		tileHeightToUse tileWidthToUse 	%line{160} %argrw{"wr"}
+# PxrGrid.osl:164
+#     float k_cellOffset = 0.433012702;  // tan(60 deg) / 4;
+	assign		k_cellOffset $const14 	%line{164} %argrw{"wr"}
+# PxrGrid.osl:165
+#     float k_cellOffset2 = 2.0 * k_cellOffset;
+	mul		k_cellOffset2 $const15 k_cellOffset 	%line{165} %argrw{"wrr"}
+# PxrGrid.osl:167
+#     float tileWidthInv = 1.0 / tileWidthToUse;
+	div		tileWidthInv $const16 tileWidthToUse 	%line{167} %argrw{"wrr"}
+# PxrGrid.osl:169
+#         1.0 / (style == k_hexagonal ? tileHeightToUse * k_cellOffset2 : tileHeightToUse);
+	eq		$tmp14 style $const13 	%line{169} %argrw{"wrr"}
+	if		$tmp14 48 49 	%argrw{"r"}
+	mul		$tmp13 tileHeightToUse k_cellOffset2 	%argrw{"wrr"}
+	assign		$tmp13 tileHeightToUse 	%argrw{"wr"}
+	div		tileHeightInv $const16 $tmp13 	%argrw{"wrr"}
+# PxrGrid.osl:170
+#     float borderThicknessHalf = borderThickness;
+	assign		borderThicknessHalf borderThickness 	%line{170} %argrw{"wr"}
+# PxrGrid.osl:171
+#     float borderThicknessHalfS = borderThickness * tileWidthInv;
+	mul		borderThicknessHalfS borderThickness tileWidthInv 	%line{171} %argrw{"wrr"}
+# PxrGrid.osl:172
+#     float borderThicknessHalfT = borderThickness * tileHeightInv;
+	mul		borderThicknessHalfT borderThickness tileHeightInv 	%line{172} %argrw{"wrr"}
+# PxrGrid.osl:174
+#         borderThicknessHalf * sqrt(tileWidthInv * tileWidthInv + tileHeightInv * tileHeightInv);
+	mul		$tmp16 tileWidthInv tileWidthInv 	%line{174} %argrw{"wrr"}
+	mul		$tmp17 tileHeightInv tileHeightInv 	%argrw{"wrr"}
+	add		$tmp18 $tmp16 $tmp17 	%argrw{"wrr"}
+	sqrt		$tmp15 $tmp18 	%argrw{"wr"}
+	mul		borderThicknessHalfST borderThicknessHalf $tmp15 	%argrw{"wrr"}
+# PxrGrid.osl:178
+#     float tileOffset01 = tileShift - floor(tileShift);  // RixFractional(*tileShift);
+	floor		$tmp19 tileShift 	%line{178} %argrw{"wr"}
+	sub		tileOffset01 tileShift $tmp19 	%argrw{"wrr"}
+# PxrGrid.osl:181
+#     float sScaled = stOut[0] * tileWidthInv;
+	aref		$tmp20 stOut $const1 	%line{181} %argrw{"wrr"}
+	mul		sScaled $tmp20 tileWidthInv 	%argrw{"wrr"}
+# PxrGrid.osl:182
+#     float tScaled = stOut[1] * tileHeightInv;
+	aref		$tmp21 stOut $const13 	%line{182} %argrw{"wrr"}
+	mul		tScaled $tmp21 tileHeightInv 	%argrw{"wrr"}
+# PxrGrid.osl:183
+#     int sClamped = (int)floor(sScaled);
+	floor		$tmp22 sScaled 	%line{183} %argrw{"wr"}
+	assign		sClamped $tmp22 	%argrw{"wr"}
+# PxrGrid.osl:184
+#     int tClamped = (int)floor(tScaled);
+	floor		$tmp23 tScaled 	%line{184} %argrw{"wr"}
+	assign		tClamped $tmp23 	%argrw{"wr"}
+# PxrGrid.osl:185
+#     float sPortion = sScaled - sClamped;
+	assign		$tmp24 sClamped 	%line{185} %argrw{"wr"}
+	sub		sPortion sScaled $tmp24 	%argrw{"wrr"}
+# PxrGrid.osl:186
+#     float tPortion = tScaled - tClamped;
+	assign		$tmp25 tClamped 	%line{186} %argrw{"wr"}
+	sub		tPortion tScaled $tmp25 	%argrw{"wrr"}
+# PxrGrid.osl:189
+#     float borderFraction = 0.0;
+	assign		borderFraction $const3 	%line{189} %argrw{"wr"}
+# PxrGrid.osl:192
+#     float innerColorFraction = 0.0;
+	assign		innerColorFraction $const3 	%line{192} %argrw{"wr"}
+# PxrGrid.osl:195
+#     if (style == k_hexagonal)
+	eq		$tmp26 style $const13 	%line{195} %argrw{"wrr"}
+	if		$tmp26 165 281 	%argrw{"r"}
+# PxrGrid.osl:200
+#         int numPts = 11;
+	assign		___423_numPts $const17 	%line{200} %argrw{"wr"}
+# PxrGrid.osl:202
+#                              vector(-0.25, k_cellOffset2, 0.0), vector(0.25, k_cellOffset2, 0.0),
+	vector		$tmp27 $const18 k_cellOffset2 $const3 	%line{202} %argrw{"wrrr"}
+# PxrGrid.osl:201
+#         vector points[11] = {// top row
+	aassign		___423_points $const1 $tmp27 	%line{201} %argrw{"wrr"}
+# PxrGrid.osl:202
+#                              vector(-0.25, k_cellOffset2, 0.0), vector(0.25, k_cellOffset2, 0.0),
+	vector		$tmp28 $const19 k_cellOffset2 $const3 	%line{202} %argrw{"wrrr"}
+# PxrGrid.osl:201
+#         vector points[11] = {// top row
+	aassign		___423_points $const13 $tmp28 	%line{201} %argrw{"wrr"}
+# PxrGrid.osl:203
+#                              vector(0.75, k_cellOffset2, 0.0), vector(1.25, k_cellOffset2, 0.0),
+	vector		$tmp29 $const20 k_cellOffset2 $const3 	%line{203} %argrw{"wrrr"}
+# PxrGrid.osl:201
+#         vector points[11] = {// top row
+	aassign		___423_points $const21 $tmp29 	%line{201} %argrw{"wrr"}
+# PxrGrid.osl:203
+#                              vector(0.75, k_cellOffset2, 0.0), vector(1.25, k_cellOffset2, 0.0),
+	vector		$tmp30 $const22 k_cellOffset2 $const3 	%line{203} %argrw{"wrrr"}
+# PxrGrid.osl:201
+#         vector points[11] = {// top row
+	aassign		___423_points $const23 $tmp30 	%line{201} %argrw{"wrr"}
+# PxrGrid.osl:206
+#                              vector(0.0, k_cellOffset, 0.0), vector(0.5, k_cellOffset, 0.0),
+	vector		$tmp31 $const3 k_cellOffset $const3 	%line{206} %argrw{"wrrr"}
+# PxrGrid.osl:201
+#         vector points[11] = {// top row
+	aassign		___423_points $const24 $tmp31 	%line{201} %argrw{"wrr"}
+# PxrGrid.osl:206
+#                              vector(0.0, k_cellOffset, 0.0), vector(0.5, k_cellOffset, 0.0),
+	vector		$tmp32 $const25 k_cellOffset $const3 	%line{206} %argrw{"wrrr"}
+# PxrGrid.osl:201
+#         vector points[11] = {// top row
+	aassign		___423_points $const26 $tmp32 	%line{201} %argrw{"wrr"}
+# PxrGrid.osl:207
+#                              vector(1.0, k_cellOffset, 0.0),
+	vector		$tmp33 $const16 k_cellOffset $const3 	%line{207} %argrw{"wrrr"}
+# PxrGrid.osl:201
+#         vector points[11] = {// top row
+	aassign		___423_points $const27 $tmp33 	%line{201} %argrw{"wrr"}
+	aassign		___423_points $const29 $const28 	%argrw{"wrr"}
+	aassign		___423_points $const31 $const30 	%argrw{"wrr"}
+	aassign		___423_points $const33 $const32 	%argrw{"wrr"}
+	aassign		___423_points $const35 $const34 	%argrw{"wrr"}
+# PxrGrid.osl:213
+#         vector hitPoint = vector(sPortion, tPortion * k_cellOffset2, 0.0);
+	mul		$tmp38 tPortion k_cellOffset2 	%line{213} %argrw{"wrr"}
+	vector		___423_hitPoint sPortion $tmp38 $const3 	%argrw{"wrrr"}
+# PxrGrid.osl:216
+#         closest0 = points[0];
+	aref		___423_closest0 ___423_points $const1 	%line{216} %argrw{"wrr"}
+# PxrGrid.osl:218
+#         float dist0 = LengthSq(closest0 - hitPoint);
+	sub		$tmp39 ___423_closest0 ___423_hitPoint 	%line{218} %argrw{"wrr"}
+	functioncall	$const36 111 	%argrw{"r"}
+# PxrGrid.osl:43
+# float LengthSq(vector vec) { return (vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2]); }
+	compref		$tmp40 $tmp39 $const1 	%line{43} %argrw{"wrr"}
+	compref		$tmp41 $tmp39 $const1 	%argrw{"wrr"}
+	mul		$tmp42 $tmp40 $tmp41 	%argrw{"wrr"}
+	compref		$tmp43 $tmp39 $const13 	%argrw{"wrr"}
+	compref		$tmp44 $tmp39 $const13 	%argrw{"wrr"}
+	mul		$tmp45 $tmp43 $tmp44 	%argrw{"wrr"}
+	add		$tmp46 $tmp42 $tmp45 	%argrw{"wrr"}
+	compref		$tmp47 $tmp39 $const21 	%argrw{"wrr"}
+	compref		$tmp48 $tmp39 $const21 	%argrw{"wrr"}
+	mul		$tmp49 $tmp47 $tmp48 	%argrw{"wrr"}
+	add		___423_dist0 $tmp46 $tmp49 	%argrw{"wrr"}
+# PxrGrid.osl:219
+#         float dist1 = 10000.0;
+	assign		___423_dist1 $const37 	%line{219} %argrw{"wr"}
+# PxrGrid.osl:221
+#         for (int p = 1; p < numPts; ++p)
+	for		$tmp51 114 116 140 141 	%line{221} %argrw{"r"}
+	assign		___424_p $const13 	%argrw{"wr"}
+	lt		$tmp50 ___424_p ___423_numPts 	%argrw{"wrr"}
+	neq		$tmp51 $tmp50 $const1 	%argrw{"wrr"}
+# PxrGrid.osl:223
+#             float distCheck = LengthSq(points[p] - hitPoint);
+	aref		$tmp52 ___423_points ___424_p 	%line{223} %argrw{"wrr"}
+	sub		$tmp53 $tmp52 ___423_hitPoint 	%argrw{"wrr"}
+	functioncall	$const36 130 	%argrw{"r"}
+# PxrGrid.osl:43
+# float LengthSq(vector vec) { return (vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2]); }
+	compref		$tmp54 $tmp53 $const1 	%line{43} %argrw{"wrr"}
+	compref		$tmp55 $tmp53 $const1 	%argrw{"wrr"}
+	mul		$tmp56 $tmp54 $tmp55 	%argrw{"wrr"}
+	compref		$tmp57 $tmp53 $const13 	%argrw{"wrr"}
+	compref		$tmp58 $tmp53 $const13 	%argrw{"wrr"}
+	mul		$tmp59 $tmp57 $tmp58 	%argrw{"wrr"}
+	add		$tmp60 $tmp56 $tmp59 	%argrw{"wrr"}
+	compref		$tmp61 $tmp53 $const21 	%argrw{"wrr"}
+	compref		$tmp62 $tmp53 $const21 	%argrw{"wrr"}
+	mul		$tmp63 $tmp61 $tmp62 	%argrw{"wrr"}
+	add		___425_distCheck $tmp60 $tmp63 	%argrw{"wrr"}
+# PxrGrid.osl:224
+#             if (dist0 > distCheck)
+	gt		$tmp64 ___423_dist0 ___425_distCheck 	%line{224} %argrw{"wrr"}
+	if		$tmp64 136 140 	%argrw{"r"}
+# PxrGrid.osl:227
+#                 dist1 = dist0;
+	assign		___423_dist1 ___423_dist0 	%line{227} %argrw{"wr"}
+# PxrGrid.osl:228
+#                 closest1 = closest0;
+	assign		___423_closest1 ___423_closest0 	%line{228} %argrw{"wr"}
+# PxrGrid.osl:231
+#                 dist0 = distCheck;
+	assign		___423_dist0 ___425_distCheck 	%line{231} %argrw{"wr"}
+# PxrGrid.osl:232
+#                 closest0 = points[p];
+	aref		___423_closest0 ___423_points ___424_p 	%line{232} %argrw{"wrr"}
+# PxrGrid.osl:234
+#             else if (dist1 > distCheck)
+	gt		$tmp65 ___423_dist1 ___425_distCheck 	%line{234} %argrw{"wrr"}
+	if		$tmp65 140 140 	%argrw{"r"}
+# PxrGrid.osl:236
+#                 dist1 = distCheck;
+	assign		___423_dist1 ___425_distCheck 	%line{236} %argrw{"wr"}
+# PxrGrid.osl:237
+#                 closest1 = points[p];
+	aref		___423_closest1 ___423_points ___424_p 	%line{237} %argrw{"wrr"}
+# PxrGrid.osl:221
+#         for (int p = 1; p < numPts; ++p)
+	add		___424_p ___424_p $const13 	%line{221} %argrw{"wrr"}
+# PxrGrid.osl:242
+#         point centerPt = 0.5 * (closest0 + closest1);
+	add		$tmp66 ___423_closest0 ___423_closest1 	%line{242} %argrw{"wrr"}
+	mul		___423_centerPt $const25 $tmp66 	%argrw{"wrr"}
+# PxrGrid.osl:243
+#         vector dir = (closest1 - closest0);
+	sub		___423_dir ___423_closest1 ___423_closest0 	%line{243} %argrw{"wrr"}
+# PxrGrid.osl:244
+#         dir = normalize(dir);
+	normalize	___423_dir ___423_dir 	%line{244} %argrw{"wr"}
+# PxrGrid.osl:246
+#         point toPoint = hitPoint - centerPt;
+	sub		___423_toPoint ___423_hitPoint ___423_centerPt 	%line{246} %argrw{"wrr"}
+# PxrGrid.osl:247
+#         float dist = dot(toPoint, dir);
+	dot		___423_dist ___423_toPoint ___423_dir 	%line{247} %argrw{"wrr"}
+# PxrGrid.osl:249
+#         borderFraction = FrequencyLimitedPulse(abs(dist), borderThicknessHalfST, stRadius);
+	abs		$tmp67 ___423_dist 	%line{249} %argrw{"wr"}
+	functioncall	$const38 159 	%argrw{"r"}
+# PxrGrid.osl:47
+#     float left = distanceFromCenter - (0.5 * filterWidth);
+	mul		$tmp68 $const25 stRadius 	%line{47} %argrw{"wrr"}
+	sub		___418_left $tmp67 $tmp68 	%argrw{"wrr"}
+# PxrGrid.osl:48
+#     float right = distanceFromCenter + (0.5 * filterWidth);
+	mul		$tmp69 $const25 stRadius 	%line{48} %argrw{"wrr"}
+	add		___418_right $tmp67 $tmp69 	%argrw{"wrr"}
+# PxrGrid.osl:49
+#     return max(0.0, (min(right, pulseHalfWidth) - max(left, -pulseHalfWidth)) / filterWidth);
+	min		$tmp70 ___418_right borderThicknessHalfST 	%line{49} %argrw{"wrr"}
+	neg		$tmp72 borderThicknessHalfST 	%argrw{"wr"}
+	max		$tmp71 ___418_left $tmp72 	%argrw{"wrr"}
+	sub		$tmp73 $tmp70 $tmp71 	%argrw{"wrr"}
+	div		$tmp74 $tmp73 stRadius 	%argrw{"wrr"}
+	max		borderFraction $const3 $tmp74 	%argrw{"wrr"}
+# PxrGrid.osl:253
+#         float fullTriArea = 0.144337567;                               // tan(30deg) / 2 / 2
+	assign		___423_fullTriArea $const39 	%line{253} %argrw{"wr"}
+# PxrGrid.osl:254
+#         float visTriArea = 0.288675135 * (0.5 - borderThicknessHalf);  // tan(30deg) / 2
+	sub		$tmp75 $const25 borderThicknessHalf 	%line{254} %argrw{"wrr"}
+	mul		___423_visTriArea $const40 $tmp75 	%argrw{"wrr"}
+# PxrGrid.osl:255
+#         innerColorFraction = 4.0 * 6.0 * (visTriArea / fullTriArea);
+	mul		$tmp76 $const41 $const42 	%line{255} %argrw{"wrr"}
+	div		$tmp77 ___423_visTriArea ___423_fullTriArea 	%argrw{"wrr"}
+	mul		innerColorFraction $tmp76 $tmp77 	%argrw{"wrr"}
+# PxrGrid.osl:260
+#         if (tPortion < (0.5 + borderThicknessHalfT))
+	add		$tmp78 $const25 borderThicknessHalfT 	%line{260} %argrw{"wrr"}
+	lt		$tmp79 tPortion $tmp78 	%argrw{"wrr"}
+	if		$tmp79 221 277 	%argrw{"r"}
+# PxrGrid.osl:263
+#                 FrequencyLimitedPulse(sPortion, borderThicknessHalfS, stRadius) +
+	functioncall	$const38 179 	%line{263} %argrw{"r"}
+# PxrGrid.osl:47
+#     float left = distanceFromCenter - (0.5 * filterWidth);
+	mul		$tmp81 $const25 stRadius 	%line{47} %argrw{"wrr"}
+	sub		___418_left sPortion $tmp81 	%argrw{"wrr"}
+# PxrGrid.osl:48
+#     float right = distanceFromCenter + (0.5 * filterWidth);
+	mul		$tmp82 $const25 stRadius 	%line{48} %argrw{"wrr"}
+	add		___418_right sPortion $tmp82 	%argrw{"wrr"}
+# PxrGrid.osl:49
+#     return max(0.0, (min(right, pulseHalfWidth) - max(left, -pulseHalfWidth)) / filterWidth);
+	min		$tmp83 ___418_right borderThicknessHalfS 	%line{49} %argrw{"wrr"}
+	neg		$tmp85 borderThicknessHalfS 	%argrw{"wr"}
+	max		$tmp84 ___418_left $tmp85 	%argrw{"wrr"}
+	sub		$tmp86 $tmp83 $tmp84 	%argrw{"wrr"}
+	div		$tmp87 $tmp86 stRadius 	%argrw{"wrr"}
+	max		$tmp80 $const3 $tmp87 	%argrw{"wrr"}
+# PxrGrid.osl:264
+#                 FrequencyLimitedPulse(tPortion, borderThicknessHalfT, stRadius) +
+	functioncall	$const38 190 	%line{264} %argrw{"r"}
+# PxrGrid.osl:47
+#     float left = distanceFromCenter - (0.5 * filterWidth);
+	mul		$tmp89 $const25 stRadius 	%line{47} %argrw{"wrr"}
+	sub		___418_left tPortion $tmp89 	%argrw{"wrr"}
+# PxrGrid.osl:48
+#     float right = distanceFromCenter + (0.5 * filterWidth);
+	mul		$tmp90 $const25 stRadius 	%line{48} %argrw{"wrr"}
+	add		___418_right tPortion $tmp90 	%argrw{"wrr"}
+# PxrGrid.osl:49
+#     return max(0.0, (min(right, pulseHalfWidth) - max(left, -pulseHalfWidth)) / filterWidth);
+	min		$tmp91 ___418_right borderThicknessHalfT 	%line{49} %argrw{"wrr"}
+	neg		$tmp93 borderThicknessHalfT 	%argrw{"wr"}
+	max		$tmp92 ___418_left $tmp93 	%argrw{"wrr"}
+	sub		$tmp94 $tmp91 $tmp92 	%argrw{"wrr"}
+	div		$tmp95 $tmp94 stRadius 	%argrw{"wrr"}
+	max		$tmp88 $const3 $tmp95 	%argrw{"wrr"}
+# PxrGrid.osl:263
+#                 FrequencyLimitedPulse(sPortion, borderThicknessHalfS, stRadius) +
+	add		$tmp96 $tmp80 $tmp88 	%line{263} %argrw{"wrr"}
+# PxrGrid.osl:265
+#                 FrequencyLimitedPulse((sClamped + 1) - sScaled, borderThicknessHalfS, stRadius) +
+	add		$tmp98 sClamped $const13 	%line{265} %argrw{"wrr"}
+	assign		$tmp100 $tmp98 	%argrw{"wr"}
+	sub		$tmp99 $tmp100 sScaled 	%argrw{"wrr"}
+	functioncall	$const38 205 	%argrw{"r"}
+# PxrGrid.osl:47
+#     float left = distanceFromCenter - (0.5 * filterWidth);
+	mul		$tmp101 $const25 stRadius 	%line{47} %argrw{"wrr"}
+	sub		___418_left $tmp99 $tmp101 	%argrw{"wrr"}
+# PxrGrid.osl:48
+#     float right = distanceFromCenter + (0.5 * filterWidth);
+	mul		$tmp102 $const25 stRadius 	%line{48} %argrw{"wrr"}
+	add		___418_right $tmp99 $tmp102 	%argrw{"wrr"}
+# PxrGrid.osl:49
+#     return max(0.0, (min(right, pulseHalfWidth) - max(left, -pulseHalfWidth)) / filterWidth);
+	min		$tmp103 ___418_right borderThicknessHalfS 	%line{49} %argrw{"wrr"}
+	neg		$tmp105 borderThicknessHalfS 	%argrw{"wr"}
+	max		$tmp104 ___418_left $tmp105 	%argrw{"wrr"}
+	sub		$tmp106 $tmp103 $tmp104 	%argrw{"wrr"}
+	div		$tmp107 $tmp106 stRadius 	%argrw{"wrr"}
+	max		$tmp97 $const3 $tmp107 	%argrw{"wrr"}
+# PxrGrid.osl:264
+#                 FrequencyLimitedPulse(tPortion, borderThicknessHalfT, stRadius) +
+	add		$tmp108 $tmp96 $tmp97 	%line{264} %argrw{"wrr"}
+# PxrGrid.osl:266
+#                 FrequencyLimitedPulse((0.5 + borderThicknessHalfT) - tPortion,
+	add		$tmp110 $const25 borderThicknessHalfT 	%line{266} %argrw{"wrr"}
+	sub		$tmp111 $tmp110 tPortion 	%argrw{"wrr"}
+# PxrGrid.osl:267
+#                                       2.0 * borderThicknessHalfT, stRadius);
+	mul		$tmp112 $const15 borderThicknessHalfT 	%line{267} %argrw{"wrr"}
+# PxrGrid.osl:266
+#                 FrequencyLimitedPulse((0.5 + borderThicknessHalfT) - tPortion,
+	functioncall	$const38 220 	%line{266} %argrw{"r"}
+# PxrGrid.osl:47
+#     float left = distanceFromCenter - (0.5 * filterWidth);
+	mul		$tmp113 $const25 stRadius 	%line{47} %argrw{"wrr"}
+	sub		___418_left $tmp111 $tmp113 	%argrw{"wrr"}
+# PxrGrid.osl:48
+#     float right = distanceFromCenter + (0.5 * filterWidth);
+	mul		$tmp114 $const25 stRadius 	%line{48} %argrw{"wrr"}
+	add		___418_right $tmp111 $tmp114 	%argrw{"wrr"}
+# PxrGrid.osl:49
+#     return max(0.0, (min(right, pulseHalfWidth) - max(left, -pulseHalfWidth)) / filterWidth);
+	min		$tmp115 ___418_right $tmp112 	%line{49} %argrw{"wrr"}
+	neg		$tmp117 $tmp112 	%argrw{"wr"}
+	max		$tmp116 ___418_left $tmp117 	%argrw{"wrr"}
+	sub		$tmp118 $tmp115 $tmp116 	%argrw{"wrr"}
+	div		$tmp119 $tmp118 stRadius 	%argrw{"wrr"}
+	max		$tmp109 $const3 $tmp119 	%argrw{"wrr"}
+# PxrGrid.osl:265
+#                 FrequencyLimitedPulse((sClamped + 1) - sScaled, borderThicknessHalfS, stRadius) +
+	add		borderFraction $tmp108 $tmp109 	%line{265} %argrw{"wrr"}
+# PxrGrid.osl:273
+#             borderFraction = FrequencyLimitedPulse(1.0 - tPortion, borderThicknessHalfT, stRadius) +
+	sub		$tmp121 $const16 tPortion 	%line{273} %argrw{"wrr"}
+	functioncall	$const38 233 	%argrw{"r"}
+# PxrGrid.osl:47
+#     float left = distanceFromCenter - (0.5 * filterWidth);
+	mul		$tmp122 $const25 stRadius 	%line{47} %argrw{"wrr"}
+	sub		___418_left $tmp121 $tmp122 	%argrw{"wrr"}
+# PxrGrid.osl:48
+#     float right = distanceFromCenter + (0.5 * filterWidth);
+	mul		$tmp123 $const25 stRadius 	%line{48} %argrw{"wrr"}
+	add		___418_right $tmp121 $tmp123 	%argrw{"wrr"}
+# PxrGrid.osl:49
+#     return max(0.0, (min(right, pulseHalfWidth) - max(left, -pulseHalfWidth)) / filterWidth);
+	min		$tmp124 ___418_right borderThicknessHalfT 	%line{49} %argrw{"wrr"}
+	neg		$tmp126 borderThicknessHalfT 	%argrw{"wr"}
+	max		$tmp125 ___418_left $tmp126 	%argrw{"wrr"}
+	sub		$tmp127 $tmp124 $tmp125 	%argrw{"wrr"}
+	div		$tmp128 $tmp127 stRadius 	%argrw{"wrr"}
+	max		$tmp120 $const3 $tmp128 	%argrw{"wrr"}
+# PxrGrid.osl:274
+#                              FrequencyLimitedPulse(abs(sPortion - tileOffset01),
+	sub		$tmp131 sPortion tileOffset01 	%line{274} %argrw{"wrr"}
+	abs		$tmp130 $tmp131 	%argrw{"wr"}
+	functioncall	$const38 246 	%argrw{"r"}
+# PxrGrid.osl:47
+#     float left = distanceFromCenter - (0.5 * filterWidth);
+	mul		$tmp132 $const25 stRadius 	%line{47} %argrw{"wrr"}
+	sub		___418_left $tmp130 $tmp132 	%argrw{"wrr"}
+# PxrGrid.osl:48
+#     float right = distanceFromCenter + (0.5 * filterWidth);
+	mul		$tmp133 $const25 stRadius 	%line{48} %argrw{"wrr"}
+	add		___418_right $tmp130 $tmp133 	%argrw{"wrr"}
+# PxrGrid.osl:49
+#     return max(0.0, (min(right, pulseHalfWidth) - max(left, -pulseHalfWidth)) / filterWidth);
+	min		$tmp134 ___418_right borderThicknessHalfS 	%line{49} %argrw{"wrr"}
+	neg		$tmp136 borderThicknessHalfS 	%argrw{"wr"}
+	max		$tmp135 ___418_left $tmp136 	%argrw{"wrr"}
+	sub		$tmp137 $tmp134 $tmp135 	%argrw{"wrr"}
+	div		$tmp138 $tmp137 stRadius 	%argrw{"wrr"}
+	max		$tmp129 $const3 $tmp138 	%argrw{"wrr"}
+# PxrGrid.osl:273
+#             borderFraction = FrequencyLimitedPulse(1.0 - tPortion, borderThicknessHalfT, stRadius) +
+	add		$tmp139 $tmp120 $tmp129 	%line{273} %argrw{"wrr"}
+# PxrGrid.osl:276
+#                              FrequencyLimitedPulse(abs(sPortion - tileOffset01 - 1.0),
+	sub		$tmp142 sPortion tileOffset01 	%line{276} %argrw{"wrr"}
+	sub		$tmp143 $tmp142 $const16 	%argrw{"wrr"}
+	abs		$tmp141 $tmp143 	%argrw{"wr"}
+	functioncall	$const38 261 	%argrw{"r"}
+# PxrGrid.osl:47
+#     float left = distanceFromCenter - (0.5 * filterWidth);
+	mul		$tmp144 $const25 stRadius 	%line{47} %argrw{"wrr"}
+	sub		___418_left $tmp141 $tmp144 	%argrw{"wrr"}
+# PxrGrid.osl:48
+#     float right = distanceFromCenter + (0.5 * filterWidth);
+	mul		$tmp145 $const25 stRadius 	%line{48} %argrw{"wrr"}
+	add		___418_right $tmp141 $tmp145 	%argrw{"wrr"}
+# PxrGrid.osl:49
+#     return max(0.0, (min(right, pulseHalfWidth) - max(left, -pulseHalfWidth)) / filterWidth);
+	min		$tmp146 ___418_right borderThicknessHalfS 	%line{49} %argrw{"wrr"}
+	neg		$tmp148 borderThicknessHalfS 	%argrw{"wr"}
+	max		$tmp147 ___418_left $tmp148 	%argrw{"wrr"}
+	sub		$tmp149 $tmp146 $tmp147 	%argrw{"wrr"}
+	div		$tmp150 $tmp149 stRadius 	%argrw{"wrr"}
+	max		$tmp140 $const3 $tmp150 	%argrw{"wrr"}
+# PxrGrid.osl:275
+#                                                    borderThicknessHalfS, stRadius) +
+	add		$tmp151 $tmp139 $tmp140 	%line{275} %argrw{"wrr"}
+# PxrGrid.osl:278
+#                              FrequencyLimitedPulse(abs(sPortion - tileOffset01 + 1.0),
+	sub		$tmp154 sPortion tileOffset01 	%line{278} %argrw{"wrr"}
+	add		$tmp155 $tmp154 $const16 	%argrw{"wrr"}
+	abs		$tmp153 $tmp155 	%argrw{"wr"}
+	functioncall	$const38 276 	%argrw{"r"}
+# PxrGrid.osl:47
+#     float left = distanceFromCenter - (0.5 * filterWidth);
+	mul		$tmp156 $const25 stRadius 	%line{47} %argrw{"wrr"}
+	sub		___418_left $tmp153 $tmp156 	%argrw{"wrr"}
+# PxrGrid.osl:48
+#     float right = distanceFromCenter + (0.5 * filterWidth);
+	mul		$tmp157 $const25 stRadius 	%line{48} %argrw{"wrr"}
+	add		___418_right $tmp153 $tmp157 	%argrw{"wrr"}
+# PxrGrid.osl:49
+#     return max(0.0, (min(right, pulseHalfWidth) - max(left, -pulseHalfWidth)) / filterWidth);
+	min		$tmp158 ___418_right borderThicknessHalfS 	%line{49} %argrw{"wrr"}
+	neg		$tmp160 borderThicknessHalfS 	%argrw{"wr"}
+	max		$tmp159 ___418_left $tmp160 	%argrw{"wrr"}
+	sub		$tmp161 $tmp158 $tmp159 	%argrw{"wrr"}
+	div		$tmp162 $tmp161 stRadius 	%argrw{"wrr"}
+	max		$tmp152 $const3 $tmp162 	%argrw{"wrr"}
+# PxrGrid.osl:277
+#                                                    borderThicknessHalfS, stRadius) +
+	add		borderFraction $tmp151 $tmp152 	%line{277} %argrw{"wrr"}
+# PxrGrid.osl:286
+#         float fracVisible = 0.5 - min(0.5, borderThicknessHalf);
+	min		$tmp163 $const25 borderThicknessHalf 	%line{286} %argrw{"wrr"}
+	sub		___428_fracVisible $const25 $tmp163 	%argrw{"wrr"}
+# PxrGrid.osl:287
+#         innerColorFraction = 4.0 * fracVisible * fracVisible;
+	mul		$tmp164 $const41 ___428_fracVisible 	%line{287} %argrw{"wrr"}
+	mul		innerColorFraction $tmp164 ___428_fracVisible 	%argrw{"wrr"}
+# PxrGrid.osl:293
+#     color sampledColor = mix(colorTile, colorBorder, min(borderFraction, 1.0));
+	min		$tmp165 borderFraction $const16 	%line{293} %argrw{"wrr"}
+	mix		sampledColor colorTile colorBorder $tmp165 	%argrw{"wrrr"}
+# PxrGrid.osl:296
+#     color aveColor = mix(colorBorder, colorTile, clamp(innerColorFraction, 0.0, 1.0));
+	functioncall	$const43 286 	%line{296} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
+	min		$tmp167 innerColorFraction $const16 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	max		$tmp166 $tmp167 $const3 	%argrw{"wrr"}
+# PxrGrid.osl:296
+#     color aveColor = mix(colorBorder, colorTile, clamp(innerColorFraction, 0.0, 1.0));
+	mix		aveColor colorBorder colorTile $tmp166 	%filename{"PxrGrid.osl"} %line{296} %argrw{"wrrr"}
+# PxrGrid.osl:301
+#     float colorCombine = smoothstep(0.1, 0.95, stRadius / borderThicknessHalfST);
+	div		$tmp168 stRadius borderThicknessHalfST 	%line{301} %argrw{"wrr"}
+	smoothstep	colorCombine $const44 $const45 $tmp168 	%argrw{"wrrr"}
+# PxrGrid.osl:302
+#     resultRGB = mix(sampledColor, aveColor, colorCombine);
+	mix		resultRGB sampledColor aveColor colorCombine 	%line{302} %argrw{"wrrr"}
+	end

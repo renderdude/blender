@@ -1,0 +1,986 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrProjectionStack.osl/obj/PxrProjectionStack.oso
+shader PxrProjectionStack	%meta{int,rfm_nodeid,1053388} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/color"} %meta{string,rfh_classification,"Pattern/Color"} 
+param	int[]	layersMode	1		%meta{string,label,"Layers Mode"} %meta{string,widget,"mapper"} %meta{string,options,"Off:0|On:1|Solo:2"} %meta{string,help,"Each layer has a mode to help you debug your setup:<br>- Off: disable this layer - it won't render.<br>- On: enable this layer - this is the default.<br>- Solo: disable all other layers - only solo-ed layers will render.<br><br>layersMode (int)"} %meta{string,uiStruct,"Layers"} %meta{int,isDynamicArray,1} %meta{int,arraySize,-1} %meta{int,connectable,0}  %read{258,300} %write{2147483647,-1}
+param	color[]	layersRGB	0.5 0.5 0.5		%meta{string,label,"Layers RGB"} %meta{string,widget,"default"} %meta{string,help,"Each layer's color source should be connected here.<br>You should use PxrProjectionLayer.resultRGB as a source.<br><br>layersRGB (color)"} %meta{string,uiStruct,"Layers"} %meta{int,isDynamicArray,1} %meta{int,arraySize,-1}  %read{256,313} %write{2147483647,-1}
+param	float[]	layersA	1		%meta{string,label,"Layers A"} %meta{string,widget,"default"} %meta{string,help,"Each layer's alpha source should be connected here.<br>You should use PxrProjectionLayer.resultA as a source.<br><br>layersA (float)"} %meta{string,uiStruct,"Layers"} %meta{int,isDynamicArray,1} %meta{int,arraySize,-1}  %read{257,295} %write{2147483647,-1}
+param	struct Channels	layerChannelsRGB0			%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 0 RGB"} %meta{string,page,"Channels"}  %read{2147483647,-1} %write{2147483647,-1} %struct{"Channels"} %structfields{numChannels,data} %structfieldtypes{"ic[16]"} %structnfields{2}
+param	int	layerChannelsRGB0.numChannels	0		%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 0 RGB"} %meta{string,page,"Channels"}  %read{337,337} %write{2147483647,-1} %mystruct{layerChannelsRGB0} %mystructfield{0}
+param	color[16]	layerChannelsRGB0.data	0 0 0		%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 0 RGB"} %meta{string,page,"Channels"}  %read{290,426} %write{0,15} %mystruct{layerChannelsRGB0} %mystructfield{1} %initexpr
+param	struct Channels	layerChannelsRGB1			%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 1 RGB"} %meta{string,page,"Channels"}  %read{2147483647,-1} %write{2147483647,-1} %struct{"Channels"} %structfields{numChannels,data} %structfieldtypes{"ic[16]"} %structnfields{2}
+param	int	layerChannelsRGB1.numChannels	0		%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 1 RGB"} %meta{string,page,"Channels"}  %read{342,342} %write{2147483647,-1} %mystruct{layerChannelsRGB1} %mystructfield{0}
+param	color[16]	layerChannelsRGB1.data	0 0 0		%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 1 RGB"} %meta{string,page,"Channels"}  %read{290,426} %write{16,31} %mystruct{layerChannelsRGB1} %mystructfield{1} %initexpr
+param	struct Channels	layerChannelsRGB2			%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 2 RGB"} %meta{string,page,"Channels"}  %read{2147483647,-1} %write{2147483647,-1} %struct{"Channels"} %structfields{numChannels,data} %structfieldtypes{"ic[16]"} %structnfields{2}
+param	int	layerChannelsRGB2.numChannels	0		%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 2 RGB"} %meta{string,page,"Channels"}  %read{347,347} %write{2147483647,-1} %mystruct{layerChannelsRGB2} %mystructfield{0}
+param	color[16]	layerChannelsRGB2.data	0 0 0		%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 2 RGB"} %meta{string,page,"Channels"}  %read{290,426} %write{32,47} %mystruct{layerChannelsRGB2} %mystructfield{1} %initexpr
+param	struct Channels	layerChannelsRGB3			%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 3 RGB"} %meta{string,page,"Channels"}  %read{2147483647,-1} %write{2147483647,-1} %struct{"Channels"} %structfields{numChannels,data} %structfieldtypes{"ic[16]"} %structnfields{2}
+param	int	layerChannelsRGB3.numChannels	0		%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 3 RGB"} %meta{string,page,"Channels"}  %read{352,352} %write{2147483647,-1} %mystruct{layerChannelsRGB3} %mystructfield{0}
+param	color[16]	layerChannelsRGB3.data	0 0 0		%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 3 RGB"} %meta{string,page,"Channels"}  %read{290,426} %write{48,63} %mystruct{layerChannelsRGB3} %mystructfield{1} %initexpr
+param	struct Channels	layerChannelsRGB4			%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 4 RGB"} %meta{string,page,"Channels"}  %read{2147483647,-1} %write{2147483647,-1} %struct{"Channels"} %structfields{numChannels,data} %structfieldtypes{"ic[16]"} %structnfields{2}
+param	int	layerChannelsRGB4.numChannels	0		%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 4 RGB"} %meta{string,page,"Channels"}  %read{357,357} %write{2147483647,-1} %mystruct{layerChannelsRGB4} %mystructfield{0}
+param	color[16]	layerChannelsRGB4.data	0 0 0		%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 4 RGB"} %meta{string,page,"Channels"}  %read{290,426} %write{64,79} %mystruct{layerChannelsRGB4} %mystructfield{1} %initexpr
+param	struct Channels	layerChannelsRGB5			%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 5 RGB"} %meta{string,page,"Channels"}  %read{2147483647,-1} %write{2147483647,-1} %struct{"Channels"} %structfields{numChannels,data} %structfieldtypes{"ic[16]"} %structnfields{2}
+param	int	layerChannelsRGB5.numChannels	0		%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 5 RGB"} %meta{string,page,"Channels"}  %read{362,362} %write{2147483647,-1} %mystruct{layerChannelsRGB5} %mystructfield{0}
+param	color[16]	layerChannelsRGB5.data	0 0 0		%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 5 RGB"} %meta{string,page,"Channels"}  %read{290,426} %write{80,95} %mystruct{layerChannelsRGB5} %mystructfield{1} %initexpr
+param	struct Channels	layerChannelsRGB6			%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 6 RGB"} %meta{string,page,"Channels"}  %read{2147483647,-1} %write{2147483647,-1} %struct{"Channels"} %structfields{numChannels,data} %structfieldtypes{"ic[16]"} %structnfields{2}
+param	int	layerChannelsRGB6.numChannels	0		%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 6 RGB"} %meta{string,page,"Channels"}  %read{367,367} %write{2147483647,-1} %mystruct{layerChannelsRGB6} %mystructfield{0}
+param	color[16]	layerChannelsRGB6.data	0 0 0		%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 6 RGB"} %meta{string,page,"Channels"}  %read{290,426} %write{96,111} %mystruct{layerChannelsRGB6} %mystructfield{1} %initexpr
+param	struct Channels	layerChannelsRGB7			%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 7 RGB"} %meta{string,page,"Channels"}  %read{2147483647,-1} %write{2147483647,-1} %struct{"Channels"} %structfields{numChannels,data} %structfieldtypes{"ic[16]"} %structnfields{2}
+param	int	layerChannelsRGB7.numChannels	0		%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 7 RGB"} %meta{string,page,"Channels"}  %read{372,372} %write{2147483647,-1} %mystruct{layerChannelsRGB7} %mystructfield{0}
+param	color[16]	layerChannelsRGB7.data	0 0 0		%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 7 RGB"} %meta{string,page,"Channels"}  %read{290,426} %write{112,127} %mystruct{layerChannelsRGB7} %mystructfield{1} %initexpr
+param	struct Channels	layerChannelsRGB8			%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 8 RGB"} %meta{string,page,"Channels"}  %read{2147483647,-1} %write{2147483647,-1} %struct{"Channels"} %structfields{numChannels,data} %structfieldtypes{"ic[16]"} %structnfields{2}
+param	int	layerChannelsRGB8.numChannels	0		%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 8 RGB"} %meta{string,page,"Channels"}  %read{377,377} %write{2147483647,-1} %mystruct{layerChannelsRGB8} %mystructfield{0}
+param	color[16]	layerChannelsRGB8.data	0 0 0		%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 8 RGB"} %meta{string,page,"Channels"}  %read{290,426} %write{128,143} %mystruct{layerChannelsRGB8} %mystructfield{1} %initexpr
+param	struct Channels	layerChannelsRGB9			%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 9 RGB"} %meta{string,page,"Channels"}  %read{2147483647,-1} %write{2147483647,-1} %struct{"Channels"} %structfields{numChannels,data} %structfieldtypes{"ic[16]"} %structnfields{2}
+param	int	layerChannelsRGB9.numChannels	0		%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 9 RGB"} %meta{string,page,"Channels"}  %read{382,382} %write{2147483647,-1} %mystruct{layerChannelsRGB9} %mystructfield{0}
+param	color[16]	layerChannelsRGB9.data	0 0 0		%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 9 RGB"} %meta{string,page,"Channels"}  %read{290,426} %write{144,159} %mystruct{layerChannelsRGB9} %mystructfield{1} %initexpr
+param	struct Channels	layerChannelsRGB10			%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 10 RGB"} %meta{string,page,"Channels"}  %read{2147483647,-1} %write{2147483647,-1} %struct{"Channels"} %structfields{numChannels,data} %structfieldtypes{"ic[16]"} %structnfields{2}
+param	int	layerChannelsRGB10.numChannels	0		%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 10 RGB"} %meta{string,page,"Channels"}  %read{387,387} %write{2147483647,-1} %mystruct{layerChannelsRGB10} %mystructfield{0}
+param	color[16]	layerChannelsRGB10.data	0 0 0		%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 10 RGB"} %meta{string,page,"Channels"}  %read{290,426} %write{160,175} %mystruct{layerChannelsRGB10} %mystructfield{1} %initexpr
+param	struct Channels	layerChannelsRGB11			%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 11 RGB"} %meta{string,page,"Channels"}  %read{2147483647,-1} %write{2147483647,-1} %struct{"Channels"} %structfields{numChannels,data} %structfieldtypes{"ic[16]"} %structnfields{2}
+param	int	layerChannelsRGB11.numChannels	0		%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 11 RGB"} %meta{string,page,"Channels"}  %read{392,392} %write{2147483647,-1} %mystruct{layerChannelsRGB11} %mystructfield{0}
+param	color[16]	layerChannelsRGB11.data	0 0 0		%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 11 RGB"} %meta{string,page,"Channels"}  %read{290,426} %write{176,191} %mystruct{layerChannelsRGB11} %mystructfield{1} %initexpr
+param	struct Channels	layerChannelsRGB12			%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 12 RGB"} %meta{string,page,"Channels"}  %read{2147483647,-1} %write{2147483647,-1} %struct{"Channels"} %structfields{numChannels,data} %structfieldtypes{"ic[16]"} %structnfields{2}
+param	int	layerChannelsRGB12.numChannels	0		%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 12 RGB"} %meta{string,page,"Channels"}  %read{397,397} %write{2147483647,-1} %mystruct{layerChannelsRGB12} %mystructfield{0}
+param	color[16]	layerChannelsRGB12.data	0 0 0		%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 12 RGB"} %meta{string,page,"Channels"}  %read{290,426} %write{192,207} %mystruct{layerChannelsRGB12} %mystructfield{1} %initexpr
+param	struct Channels	layerChannelsRGB13			%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 13 RGB"} %meta{string,page,"Channels"}  %read{2147483647,-1} %write{2147483647,-1} %struct{"Channels"} %structfields{numChannels,data} %structfieldtypes{"ic[16]"} %structnfields{2}
+param	int	layerChannelsRGB13.numChannels	0		%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 13 RGB"} %meta{string,page,"Channels"}  %read{402,402} %write{2147483647,-1} %mystruct{layerChannelsRGB13} %mystructfield{0}
+param	color[16]	layerChannelsRGB13.data	0 0 0		%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 13 RGB"} %meta{string,page,"Channels"}  %read{290,426} %write{208,223} %mystruct{layerChannelsRGB13} %mystructfield{1} %initexpr
+param	struct Channels	layerChannelsRGB14			%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 14 RGB"} %meta{string,page,"Channels"}  %read{2147483647,-1} %write{2147483647,-1} %struct{"Channels"} %structfields{numChannels,data} %structfieldtypes{"ic[16]"} %structnfields{2}
+param	int	layerChannelsRGB14.numChannels	0		%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 14 RGB"} %meta{string,page,"Channels"}  %read{407,407} %write{2147483647,-1} %mystruct{layerChannelsRGB14} %mystructfield{0}
+param	color[16]	layerChannelsRGB14.data	0 0 0		%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 14 RGB"} %meta{string,page,"Channels"}  %read{290,426} %write{224,239} %mystruct{layerChannelsRGB14} %mystructfield{1} %initexpr
+param	struct Channels	layerChannelsRGB15			%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 15 RGB"} %meta{string,page,"Channels"}  %read{2147483647,-1} %write{2147483647,-1} %struct{"Channels"} %structfields{numChannels,data} %structfieldtypes{"ic[16]"} %structnfields{2}
+param	int	layerChannelsRGB15.numChannels	0		%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 15 RGB"} %meta{string,page,"Channels"}  %read{412,412} %write{2147483647,-1} %mystruct{layerChannelsRGB15} %mystructfield{0}
+param	color[16]	layerChannelsRGB15.data	0 0 0		%meta{string,widget,"default"} %meta{string,help,"Connect here PxrProjectionLayer.outChannelsRGB.<br>It contains all the color channels from the source PxrProjectionLayer node, packed into a single struct output.<br><br>layersChannelsRGB (color)"} %meta{string,label,"Channels 15 RGB"} %meta{string,page,"Channels"}  %read{290,426} %write{240,255} %mystruct{layerChannelsRGB15} %mystructfield{1} %initexpr
+param	string[16]	channelsAovNames	""		%meta{string,widget,"default"} %meta{string,help,"Define an mapping from a channel index to a displayChannel.<br>For example, to output channel 3 to the \"srfRoughness\" displayChannel, enter \"srfRoughness\" in channelsAovNames[3].<br>An empty string means no routing.<br>channel indices start at 0.<br>The number of AOV routings is limited to 32.<br><br>channelsAovNames (string)"} %meta{string,label,"Channels AOV names"}  %read{434,437} %write{2147483647,-1}
+param	int[8]	outputChanIdx	-1 -1 -1 -1 -1 -1 -1 -1		%meta{string,widget,"default"} %meta{string,help,"Channels can be routed to one of the 8 channel output plugs (channelOut0 to channelOut7).<br>A channel's order is its array index, so if you want to send channel 0 to channelOut4, you need to set outputChanIdx[4] to 0.<br>Of course, you will want to make sure the channel order is the same in all PxrProjectionLayer nodes connected to this PxrProjectionStack.<br>Default: -1 which means no channel routed to this output.<br><br>outputChanIdx (int)"} %meta{string,label,"Channel # -> Output"}  %read{444,530} %write{2147483647,-1}
+oparam	color	resultRGB	0 0 0		%meta{string,widget,"default"}  %read{312,429} %write{290,426}
+oparam	float	resultR	0		%meta{string,widget,"default"}  %read{2147483647,-1} %write{427,427}
+oparam	float	resultG	0		%meta{string,widget,"default"}  %read{2147483647,-1} %write{428,428}
+oparam	float	resultB	0		%meta{string,widget,"default"}  %read{2147483647,-1} %write{429,429}
+oparam	float	resultA	0		%meta{string,widget,"default"}  %read{290,426} %write{287,426}
+oparam	color	channelOut0	0 0 0		%meta{string,widget,"default"}  %read{2147483647,-1} %write{454,454}
+oparam	color	channelOut1	0 0 0		%meta{string,widget,"default"}  %read{2147483647,-1} %write{465,465}
+oparam	color	channelOut2	0 0 0		%meta{string,widget,"default"}  %read{2147483647,-1} %write{476,476}
+oparam	color	channelOut3	0 0 0		%meta{string,widget,"default"}  %read{2147483647,-1} %write{487,487}
+oparam	color	channelOut4	0 0 0		%meta{string,widget,"default"}  %read{2147483647,-1} %write{498,498}
+oparam	color	channelOut5	0 0 0		%meta{string,widget,"default"}  %read{2147483647,-1} %write{509,509}
+oparam	color	channelOut6	0 0 0		%meta{string,widget,"default"}  %read{2147483647,-1} %write{520,520}
+oparam	color	channelOut7	0 0 0		%meta{string,widget,"default"}  %read{2147483647,-1} %write{531,531}
+global	closure color	Ci	%read{432,443} %write{432,443}
+local	int	numRGB	%read{289,426} %write{256,256}
+local	int	numA	%read{290,426} %write{257,257}
+local	int	numMode	%read{262,426} %write{258,258}
+local	int	soloEnabled	%read{262,426} %write{259,269}
+local	int	___346_m	%read{262,269} %write{261,269}
+local	color[16]	resultChRGB	%read{290,531} %write{270,426}
+local	int	offset	%read{2147483647,-1} %write{286,286}
+local	int	___348_lyr	%read{290,426} %write{289,426}
+local	float	___349_a	%read{290,426} %write{290,426}
+local	float	___349_inv_a	%read{290,426} %write{290,426}
+local	int	___349_mode	%read{290,426} %write{290,426}
+local	color[16]	___350_channels	%read{290,426} %write{290,426}
+local	int	___350_numChannels	%read{290,426} %write{290,426}
+local	int	___351_ch	%read{290,426} %write{290,426}
+local	int	___353_ch	%read{432,443} %write{431,443}
+const	color	$const1	0 0 0		%read{0,332} %write{2147483647,-1}
+const	int	$const2	0		%read{0,527} %write{2147483647,-1}
+const	int	$const3	1		%read{1,464} %write{2147483647,-1}
+const	int	$const4	2		%read{2,475} %write{2147483647,-1}
+const	int	$const5	3		%read{3,486} %write{2147483647,-1}
+const	int	$const6	4		%read{4,497} %write{2147483647,-1}
+const	int	$const7	5		%read{5,508} %write{2147483647,-1}
+const	int	$const8	6		%read{6,519} %write{2147483647,-1}
+const	int	$const9	7		%read{7,530} %write{2147483647,-1}
+const	int	$const10	8		%read{8,526} %write{2147483647,-1}
+const	int	$const11	9		%read{9,379} %write{2147483647,-1}
+const	int	$const12	10		%read{10,384} %write{2147483647,-1}
+const	int	$const13	11		%read{11,389} %write{2147483647,-1}
+const	int	$const14	12		%read{12,394} %write{2147483647,-1}
+const	int	$const15	13		%read{13,399} %write{2147483647,-1}
+const	int	$const16	14		%read{14,404} %write{2147483647,-1}
+const	int	$const17	15		%read{15,409} %write{2147483647,-1}
+temp	int	$tmp257	%read{262,269} %write{262,269}
+temp	int	$tmp258	%read{260,269} %write{261,269}
+temp	int	$tmp259	%read{262,269} %write{262,269}
+temp	int	$tmp260	%read{2147483647,-1} %write{262,269}
+temp	int	$tmp277	%read{290,426} %write{290,426}
+temp	int	$tmp278	%read{288,426} %write{289,426}
+temp	int	$tmp279	%read{290,426} %write{290,426}
+const	float	$const18	1		%read{294,296} %write{2147483647,-1}
+temp	int	$tmp280	%read{290,426} %write{290,426}
+temp	int	$tmp281	%read{290,426} %write{290,426}
+temp	int	$tmp282	%read{290,426} %write{290,426}
+temp	int	$tmp283	%read{290,426} %write{290,426}
+temp	int	$tmp284	%read{290,426} %write{290,426}
+temp	int	$tmp285	%read{290,426} %write{290,426}
+temp	int	$tmp286	%read{290,426} %write{290,426}
+temp	color	$tmp287	%read{290,426} %write{290,426}
+temp	color	$tmp288	%read{290,426} %write{290,426}
+temp	float	$tmp289	%read{290,426} %write{290,426}
+const	string	$const19	"getData"		%read{333,333} %write{2147483647,-1}
+temp	int	$tmp306	%read{290,426} %write{290,426}
+temp	int	$tmp307	%read{290,426} %write{290,426}
+temp	int	$tmp308	%read{290,426} %write{290,426}
+temp	int	$tmp309	%read{290,426} %write{290,426}
+temp	int	$tmp310	%read{290,426} %write{290,426}
+temp	int	$tmp311	%read{290,426} %write{290,426}
+temp	int	$tmp312	%read{290,426} %write{290,426}
+temp	int	$tmp313	%read{290,426} %write{290,426}
+temp	int	$tmp314	%read{290,426} %write{290,426}
+temp	int	$tmp315	%read{290,426} %write{290,426}
+temp	int	$tmp316	%read{290,426} %write{290,426}
+temp	int	$tmp317	%read{290,426} %write{290,426}
+temp	int	$tmp318	%read{290,426} %write{290,426}
+temp	int	$tmp319	%read{290,426} %write{290,426}
+temp	int	$tmp320	%read{290,426} %write{290,426}
+temp	int	$tmp321	%read{290,426} %write{290,426}
+temp	int	$tmp322	%read{290,426} %write{290,426}
+temp	int	$tmp323	%read{290,426} %write{290,426}
+temp	color	$tmp324	%read{290,426} %write{290,426}
+temp	color	$tmp325	%read{290,426} %write{290,426}
+temp	color	$tmp326	%read{290,426} %write{290,426}
+temp	color	$tmp327	%read{290,426} %write{290,426}
+temp	int	$tmp328	%read{2147483647,-1} %write{290,426}
+temp	int	$tmp329	%read{2147483647,-1} %write{290,426}
+const	int	$const20	16		%read{432,432} %write{2147483647,-1}
+temp	int	$tmp330	%read{432,443} %write{432,443}
+temp	int	$tmp331	%read{430,443} %write{431,443}
+temp	string	$tmp332	%read{432,443} %write{432,443}
+const	string	$const21	""		%read{435,435} %write{2147483647,-1}
+temp	int	$tmp333	%read{432,443} %write{432,443}
+temp	closure color	$tmp334	%read{432,443} %write{432,443}
+temp	string	$tmp335	%read{432,443} %write{432,443}
+const	string	$const22	"debug"		%read{438,438} %write{2147483647,-1}
+temp	color	$tmp336	%read{432,443} %write{432,443}
+temp	closure color	$tmp337	%read{432,443} %write{432,443}
+temp	int	$tmp338	%read{2147483647,-1} %write{432,443}
+temp	int	$tmp339	%read{445,445} %write{444,444}
+temp	int	$tmp340	%read{446,446} %write{445,445}
+temp	int	$tmp341	%read{447,452} %write{446,451}
+temp	int	$tmp342	%read{449,449} %write{448,448}
+temp	int	$tmp343	%read{450,450} %write{449,449}
+temp	int	$tmp344	%read{451,451} %write{450,450}
+temp	int	$tmp345	%read{454,454} %write{453,453}
+temp	int	$tmp346	%read{456,456} %write{455,455}
+temp	int	$tmp347	%read{457,457} %write{456,456}
+temp	int	$tmp348	%read{458,463} %write{457,462}
+temp	int	$tmp349	%read{460,460} %write{459,459}
+temp	int	$tmp350	%read{461,461} %write{460,460}
+temp	int	$tmp351	%read{462,462} %write{461,461}
+temp	int	$tmp352	%read{465,465} %write{464,464}
+temp	int	$tmp353	%read{467,467} %write{466,466}
+temp	int	$tmp354	%read{468,468} %write{467,467}
+temp	int	$tmp355	%read{469,474} %write{468,473}
+temp	int	$tmp356	%read{471,471} %write{470,470}
+temp	int	$tmp357	%read{472,472} %write{471,471}
+temp	int	$tmp358	%read{473,473} %write{472,472}
+temp	int	$tmp359	%read{476,476} %write{475,475}
+temp	int	$tmp360	%read{478,478} %write{477,477}
+temp	int	$tmp361	%read{479,479} %write{478,478}
+temp	int	$tmp362	%read{480,485} %write{479,484}
+temp	int	$tmp363	%read{482,482} %write{481,481}
+temp	int	$tmp364	%read{483,483} %write{482,482}
+temp	int	$tmp365	%read{484,484} %write{483,483}
+temp	int	$tmp366	%read{487,487} %write{486,486}
+temp	int	$tmp367	%read{489,489} %write{488,488}
+temp	int	$tmp368	%read{490,490} %write{489,489}
+temp	int	$tmp369	%read{491,496} %write{490,495}
+temp	int	$tmp370	%read{493,493} %write{492,492}
+temp	int	$tmp371	%read{494,494} %write{493,493}
+temp	int	$tmp372	%read{495,495} %write{494,494}
+temp	int	$tmp373	%read{498,498} %write{497,497}
+temp	int	$tmp374	%read{500,500} %write{499,499}
+temp	int	$tmp375	%read{501,501} %write{500,500}
+temp	int	$tmp376	%read{502,507} %write{501,506}
+temp	int	$tmp377	%read{504,504} %write{503,503}
+temp	int	$tmp378	%read{505,505} %write{504,504}
+temp	int	$tmp379	%read{506,506} %write{505,505}
+temp	int	$tmp380	%read{509,509} %write{508,508}
+temp	int	$tmp381	%read{511,511} %write{510,510}
+temp	int	$tmp382	%read{512,512} %write{511,511}
+temp	int	$tmp383	%read{513,518} %write{512,517}
+temp	int	$tmp384	%read{515,515} %write{514,514}
+temp	int	$tmp385	%read{516,516} %write{515,515}
+temp	int	$tmp386	%read{517,517} %write{516,516}
+temp	int	$tmp387	%read{520,520} %write{519,519}
+temp	int	$tmp388	%read{522,522} %write{521,521}
+temp	int	$tmp389	%read{523,523} %write{522,522}
+temp	int	$tmp390	%read{524,529} %write{523,528}
+temp	int	$tmp391	%read{526,526} %write{525,525}
+temp	int	$tmp392	%read{527,527} %write{526,526}
+temp	int	$tmp393	%read{528,528} %write{527,527}
+temp	int	$tmp394	%read{531,531} %write{530,530}
+code layerChannelsRGB0.data
+# PxrProjectionStack.osl:97
+#     CHANNEL_INPUT(0),
+	aassign		layerChannelsRGB0.data $const2 $const1 	%filename{"PxrProjectionStack.osl"} %line{97} %argrw{"wrr"}
+	aassign		layerChannelsRGB0.data $const3 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB0.data $const4 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB0.data $const5 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB0.data $const6 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB0.data $const7 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB0.data $const8 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB0.data $const9 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB0.data $const10 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB0.data $const11 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB0.data $const12 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB0.data $const13 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB0.data $const14 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB0.data $const15 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB0.data $const16 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB0.data $const17 $const1 	%argrw{"wrr"}
+code layerChannelsRGB1.data
+# PxrProjectionStack.osl:98
+#     CHANNEL_INPUT(1),
+	aassign		layerChannelsRGB1.data $const2 $const1 	%filename{"PxrProjectionStack.osl"} %line{98} %argrw{"wrr"}
+	aassign		layerChannelsRGB1.data $const3 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB1.data $const4 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB1.data $const5 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB1.data $const6 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB1.data $const7 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB1.data $const8 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB1.data $const9 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB1.data $const10 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB1.data $const11 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB1.data $const12 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB1.data $const13 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB1.data $const14 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB1.data $const15 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB1.data $const16 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB1.data $const17 $const1 	%argrw{"wrr"}
+code layerChannelsRGB2.data
+# PxrProjectionStack.osl:99
+#     CHANNEL_INPUT(2),
+	aassign		layerChannelsRGB2.data $const2 $const1 	%filename{"PxrProjectionStack.osl"} %line{99} %argrw{"wrr"}
+	aassign		layerChannelsRGB2.data $const3 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB2.data $const4 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB2.data $const5 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB2.data $const6 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB2.data $const7 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB2.data $const8 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB2.data $const9 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB2.data $const10 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB2.data $const11 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB2.data $const12 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB2.data $const13 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB2.data $const14 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB2.data $const15 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB2.data $const16 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB2.data $const17 $const1 	%argrw{"wrr"}
+code layerChannelsRGB3.data
+# PxrProjectionStack.osl:100
+#     CHANNEL_INPUT(3),
+	aassign		layerChannelsRGB3.data $const2 $const1 	%filename{"PxrProjectionStack.osl"} %line{100} %argrw{"wrr"}
+	aassign		layerChannelsRGB3.data $const3 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB3.data $const4 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB3.data $const5 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB3.data $const6 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB3.data $const7 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB3.data $const8 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB3.data $const9 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB3.data $const10 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB3.data $const11 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB3.data $const12 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB3.data $const13 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB3.data $const14 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB3.data $const15 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB3.data $const16 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB3.data $const17 $const1 	%argrw{"wrr"}
+code layerChannelsRGB4.data
+# PxrProjectionStack.osl:101
+#     CHANNEL_INPUT(4),
+	aassign		layerChannelsRGB4.data $const2 $const1 	%filename{"PxrProjectionStack.osl"} %line{101} %argrw{"wrr"}
+	aassign		layerChannelsRGB4.data $const3 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB4.data $const4 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB4.data $const5 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB4.data $const6 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB4.data $const7 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB4.data $const8 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB4.data $const9 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB4.data $const10 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB4.data $const11 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB4.data $const12 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB4.data $const13 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB4.data $const14 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB4.data $const15 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB4.data $const16 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB4.data $const17 $const1 	%argrw{"wrr"}
+code layerChannelsRGB5.data
+# PxrProjectionStack.osl:102
+#     CHANNEL_INPUT(5),
+	aassign		layerChannelsRGB5.data $const2 $const1 	%filename{"PxrProjectionStack.osl"} %line{102} %argrw{"wrr"}
+	aassign		layerChannelsRGB5.data $const3 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB5.data $const4 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB5.data $const5 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB5.data $const6 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB5.data $const7 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB5.data $const8 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB5.data $const9 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB5.data $const10 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB5.data $const11 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB5.data $const12 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB5.data $const13 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB5.data $const14 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB5.data $const15 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB5.data $const16 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB5.data $const17 $const1 	%argrw{"wrr"}
+code layerChannelsRGB6.data
+# PxrProjectionStack.osl:103
+#     CHANNEL_INPUT(6),
+	aassign		layerChannelsRGB6.data $const2 $const1 	%filename{"PxrProjectionStack.osl"} %line{103} %argrw{"wrr"}
+	aassign		layerChannelsRGB6.data $const3 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB6.data $const4 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB6.data $const5 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB6.data $const6 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB6.data $const7 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB6.data $const8 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB6.data $const9 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB6.data $const10 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB6.data $const11 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB6.data $const12 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB6.data $const13 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB6.data $const14 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB6.data $const15 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB6.data $const16 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB6.data $const17 $const1 	%argrw{"wrr"}
+code layerChannelsRGB7.data
+# PxrProjectionStack.osl:104
+#     CHANNEL_INPUT(7),
+	aassign		layerChannelsRGB7.data $const2 $const1 	%filename{"PxrProjectionStack.osl"} %line{104} %argrw{"wrr"}
+	aassign		layerChannelsRGB7.data $const3 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB7.data $const4 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB7.data $const5 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB7.data $const6 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB7.data $const7 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB7.data $const8 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB7.data $const9 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB7.data $const10 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB7.data $const11 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB7.data $const12 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB7.data $const13 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB7.data $const14 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB7.data $const15 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB7.data $const16 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB7.data $const17 $const1 	%argrw{"wrr"}
+code layerChannelsRGB8.data
+# PxrProjectionStack.osl:105
+#     CHANNEL_INPUT(8),
+	aassign		layerChannelsRGB8.data $const2 $const1 	%filename{"PxrProjectionStack.osl"} %line{105} %argrw{"wrr"}
+	aassign		layerChannelsRGB8.data $const3 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB8.data $const4 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB8.data $const5 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB8.data $const6 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB8.data $const7 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB8.data $const8 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB8.data $const9 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB8.data $const10 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB8.data $const11 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB8.data $const12 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB8.data $const13 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB8.data $const14 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB8.data $const15 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB8.data $const16 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB8.data $const17 $const1 	%argrw{"wrr"}
+code layerChannelsRGB9.data
+# PxrProjectionStack.osl:106
+#     CHANNEL_INPUT(9),
+	aassign		layerChannelsRGB9.data $const2 $const1 	%filename{"PxrProjectionStack.osl"} %line{106} %argrw{"wrr"}
+	aassign		layerChannelsRGB9.data $const3 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB9.data $const4 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB9.data $const5 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB9.data $const6 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB9.data $const7 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB9.data $const8 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB9.data $const9 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB9.data $const10 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB9.data $const11 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB9.data $const12 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB9.data $const13 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB9.data $const14 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB9.data $const15 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB9.data $const16 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB9.data $const17 $const1 	%argrw{"wrr"}
+code layerChannelsRGB10.data
+# PxrProjectionStack.osl:107
+#     CHANNEL_INPUT(10),
+	aassign		layerChannelsRGB10.data $const2 $const1 	%filename{"PxrProjectionStack.osl"} %line{107} %argrw{"wrr"}
+	aassign		layerChannelsRGB10.data $const3 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB10.data $const4 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB10.data $const5 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB10.data $const6 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB10.data $const7 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB10.data $const8 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB10.data $const9 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB10.data $const10 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB10.data $const11 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB10.data $const12 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB10.data $const13 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB10.data $const14 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB10.data $const15 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB10.data $const16 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB10.data $const17 $const1 	%argrw{"wrr"}
+code layerChannelsRGB11.data
+# PxrProjectionStack.osl:108
+#     CHANNEL_INPUT(11),
+	aassign		layerChannelsRGB11.data $const2 $const1 	%filename{"PxrProjectionStack.osl"} %line{108} %argrw{"wrr"}
+	aassign		layerChannelsRGB11.data $const3 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB11.data $const4 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB11.data $const5 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB11.data $const6 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB11.data $const7 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB11.data $const8 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB11.data $const9 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB11.data $const10 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB11.data $const11 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB11.data $const12 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB11.data $const13 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB11.data $const14 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB11.data $const15 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB11.data $const16 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB11.data $const17 $const1 	%argrw{"wrr"}
+code layerChannelsRGB12.data
+# PxrProjectionStack.osl:109
+#     CHANNEL_INPUT(12),
+	aassign		layerChannelsRGB12.data $const2 $const1 	%filename{"PxrProjectionStack.osl"} %line{109} %argrw{"wrr"}
+	aassign		layerChannelsRGB12.data $const3 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB12.data $const4 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB12.data $const5 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB12.data $const6 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB12.data $const7 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB12.data $const8 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB12.data $const9 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB12.data $const10 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB12.data $const11 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB12.data $const12 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB12.data $const13 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB12.data $const14 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB12.data $const15 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB12.data $const16 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB12.data $const17 $const1 	%argrw{"wrr"}
+code layerChannelsRGB13.data
+# PxrProjectionStack.osl:110
+#     CHANNEL_INPUT(13),
+	aassign		layerChannelsRGB13.data $const2 $const1 	%filename{"PxrProjectionStack.osl"} %line{110} %argrw{"wrr"}
+	aassign		layerChannelsRGB13.data $const3 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB13.data $const4 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB13.data $const5 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB13.data $const6 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB13.data $const7 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB13.data $const8 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB13.data $const9 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB13.data $const10 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB13.data $const11 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB13.data $const12 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB13.data $const13 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB13.data $const14 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB13.data $const15 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB13.data $const16 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB13.data $const17 $const1 	%argrw{"wrr"}
+code layerChannelsRGB14.data
+# PxrProjectionStack.osl:111
+#     CHANNEL_INPUT(14),
+	aassign		layerChannelsRGB14.data $const2 $const1 	%filename{"PxrProjectionStack.osl"} %line{111} %argrw{"wrr"}
+	aassign		layerChannelsRGB14.data $const3 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB14.data $const4 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB14.data $const5 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB14.data $const6 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB14.data $const7 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB14.data $const8 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB14.data $const9 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB14.data $const10 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB14.data $const11 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB14.data $const12 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB14.data $const13 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB14.data $const14 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB14.data $const15 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB14.data $const16 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB14.data $const17 $const1 	%argrw{"wrr"}
+code layerChannelsRGB15.data
+# PxrProjectionStack.osl:112
+#     CHANNEL_INPUT(15),
+	aassign		layerChannelsRGB15.data $const2 $const1 	%filename{"PxrProjectionStack.osl"} %line{112} %argrw{"wrr"}
+	aassign		layerChannelsRGB15.data $const3 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB15.data $const4 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB15.data $const5 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB15.data $const6 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB15.data $const7 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB15.data $const8 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB15.data $const9 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB15.data $const10 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB15.data $const11 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB15.data $const12 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB15.data $const13 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB15.data $const14 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB15.data $const15 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB15.data $const16 $const1 	%argrw{"wrr"}
+	aassign		layerChannelsRGB15.data $const17 $const1 	%argrw{"wrr"}
+code ___main___
+# PxrProjectionStack.osl:265
+#     int numRGB = arraylength(layersRGB);
+	arraylength	numRGB layersRGB 	%filename{"PxrProjectionStack.osl"} %line{265} %argrw{"wr"}
+# PxrProjectionStack.osl:266
+#     int numA = arraylength(layersA);
+	arraylength	numA layersA 	%line{266} %argrw{"wr"}
+# PxrProjectionStack.osl:267
+#     int numMode = arraylength(layersMode);
+	arraylength	numMode layersMode 	%line{267} %argrw{"wr"}
+# PxrProjectionStack.osl:269
+#     int soloEnabled = 0;
+	assign		soloEnabled $const2 	%line{269} %argrw{"wr"}
+# PxrProjectionStack.osl:270
+#     for (int m = 0; m < numMode; m++)
+	for		$tmp258 262 264 268 270 	%line{270} %argrw{"r"}
+	assign		___346_m $const2 	%argrw{"wr"}
+	lt		$tmp257 ___346_m numMode 	%argrw{"wrr"}
+	neq		$tmp258 $tmp257 $const2 	%argrw{"wrr"}
+# PxrProjectionStack.osl:272
+#         soloEnabled = layersMode[m] == k_solo;
+	aref		$tmp259 layersMode ___346_m 	%line{272} %argrw{"wrr"}
+	eq		soloEnabled $tmp259 $const4 	%argrw{"wrr"}
+# PxrProjectionStack.osl:273
+#         if (soloEnabled) break;
+	if		soloEnabled 268 268 	%line{273} %argrw{"r"}
+	break
+# PxrProjectionStack.osl:270
+#     for (int m = 0; m < numMode; m++)
+	assign		$tmp260 ___346_m 	%line{270} %argrw{"wr"}
+	add		___346_m ___346_m $const3 	%argrw{"wrr"}
+# PxrProjectionStack.osl:276
+#     color resultChRGB[16] = EMPTY_COLOR_ARRAY;
+	aassign		resultChRGB $const2 $const1 	%line{276} %argrw{"wrr"}
+	aassign		resultChRGB $const3 $const1 	%argrw{"wrr"}
+	aassign		resultChRGB $const4 $const1 	%argrw{"wrr"}
+	aassign		resultChRGB $const5 $const1 	%argrw{"wrr"}
+	aassign		resultChRGB $const6 $const1 	%argrw{"wrr"}
+	aassign		resultChRGB $const7 $const1 	%argrw{"wrr"}
+	aassign		resultChRGB $const8 $const1 	%argrw{"wrr"}
+	aassign		resultChRGB $const9 $const1 	%argrw{"wrr"}
+	aassign		resultChRGB $const10 $const1 	%argrw{"wrr"}
+	aassign		resultChRGB $const11 $const1 	%argrw{"wrr"}
+	aassign		resultChRGB $const12 $const1 	%argrw{"wrr"}
+	aassign		resultChRGB $const13 $const1 	%argrw{"wrr"}
+	aassign		resultChRGB $const14 $const1 	%argrw{"wrr"}
+	aassign		resultChRGB $const15 $const1 	%argrw{"wrr"}
+	aassign		resultChRGB $const16 $const1 	%argrw{"wrr"}
+	aassign		resultChRGB $const17 $const1 	%argrw{"wrr"}
+# PxrProjectionStack.osl:277
+#     int offset = 0;
+	assign		offset $const2 	%line{277} %argrw{"wr"}
+# PxrProjectionStack.osl:278
+#     resultA = 0;
+	assign		resultA $const2 	%line{278} %argrw{"wr"}
+# PxrProjectionStack.osl:279
+#     for (int lyr = numRGB - 1; lyr >= 0; lyr--)
+	for		$tmp278 290 292 425 427 	%line{279} %argrw{"r"}
+	sub		___348_lyr numRGB $const3 	%argrw{"wrr"}
+	ge		$tmp277 ___348_lyr $const2 	%argrw{"wrr"}
+	neq		$tmp278 $tmp277 $const2 	%argrw{"wrr"}
+# PxrProjectionStack.osl:281
+#         float a = lyr >= numA ? 1.0 : layersA[lyr];
+	ge		$tmp279 ___348_lyr numA 	%line{281} %argrw{"wrr"}
+	if		$tmp279 295 296 	%argrw{"r"}
+	assign		___349_a $const18 	%argrw{"wr"}
+	aref		___349_a layersA ___348_lyr 	%argrw{"wrr"}
+# PxrProjectionStack.osl:282
+#         float inv_a = 1.0 - a;
+	sub		___349_inv_a $const18 ___349_a 	%line{282} %argrw{"wrr"}
+# PxrProjectionStack.osl:283
+#         int mode = lyr >= numMode ? k_on : layersMode[lyr];
+	ge		$tmp280 ___348_lyr numMode 	%line{283} %argrw{"wrr"}
+	if		$tmp280 300 301 	%argrw{"r"}
+	assign		___349_mode $const3 	%argrw{"wr"}
+	aref		___349_mode layersMode ___348_lyr 	%argrw{"wrr"}
+# PxrProjectionStack.osl:284
+#         if ((mode && !soloEnabled) || mode == k_solo)
+	neq		$tmp281 ___349_mode $const2 	%line{284} %argrw{"wrr"}
+	if		$tmp281 306 306 	%argrw{"r"}
+	eq		$tmp282 soloEnabled $const2 	%argrw{"wrr"}
+	neq		$tmp283 $tmp282 $const2 	%argrw{"wrr"}
+	assign		$tmp281 $tmp283 	%argrw{"wr"}
+	neq		$tmp284 $tmp281 $const2 	%argrw{"wrr"}
+	if		$tmp284 308 311 	%argrw{"r"}
+	eq		$tmp285 ___349_mode $const4 	%argrw{"wrr"}
+	neq		$tmp286 $tmp285 $const2 	%argrw{"wrr"}
+	assign		$tmp284 $tmp286 	%argrw{"wr"}
+	if		$tmp284 425 425 	%argrw{"r"}
+# PxrProjectionStack.osl:290
+#             resultRGB = resultRGB * inv_a + layersRGB[lyr];
+	mul		$tmp287 resultRGB ___349_inv_a 	%line{290} %argrw{"wrr"}
+	aref		$tmp288 layersRGB ___348_lyr 	%argrw{"wrr"}
+	add		resultRGB $tmp287 $tmp288 	%argrw{"wrr"}
+# PxrProjectionStack.osl:291
+#             resultA = resultA * inv_a + a;
+	mul		$tmp289 resultA ___349_inv_a 	%line{291} %argrw{"wrr"}
+	add		resultA $tmp289 ___349_a 	%argrw{"wrr"}
+# PxrProjectionStack.osl:293
+#             color channels[16] = EMPTY_COLOR_ARRAY;
+	aassign		___350_channels $const2 $const1 	%line{293} %argrw{"wrr"}
+	aassign		___350_channels $const3 $const1 	%argrw{"wrr"}
+	aassign		___350_channels $const4 $const1 	%argrw{"wrr"}
+	aassign		___350_channels $const5 $const1 	%argrw{"wrr"}
+	aassign		___350_channels $const6 $const1 	%argrw{"wrr"}
+	aassign		___350_channels $const7 $const1 	%argrw{"wrr"}
+	aassign		___350_channels $const8 $const1 	%argrw{"wrr"}
+	aassign		___350_channels $const9 $const1 	%argrw{"wrr"}
+	aassign		___350_channels $const10 $const1 	%argrw{"wrr"}
+	aassign		___350_channels $const11 $const1 	%argrw{"wrr"}
+	aassign		___350_channels $const12 $const1 	%argrw{"wrr"}
+	aassign		___350_channels $const13 $const1 	%argrw{"wrr"}
+	aassign		___350_channels $const14 $const1 	%argrw{"wrr"}
+	aassign		___350_channels $const15 $const1 	%argrw{"wrr"}
+	aassign		___350_channels $const16 $const1 	%argrw{"wrr"}
+	aassign		___350_channels $const17 $const1 	%argrw{"wrr"}
+# PxrProjectionStack.osl:294
+#             int numChannels = getData(lyr, channels);
+	functioncall	$const19 414 	%line{294} %argrw{"r"}
+# PxrProjectionStack.osl:181
+#         if (idx == 0)
+	eq		$tmp306 ___348_lyr $const2 	%line{181} %argrw{"wrr"}
+	if		$tmp306 339 414 	%argrw{"r"}
+# PxrProjectionStack.osl:183
+#             data = layerChannelsRGB0.data;
+	arraycopy	___350_channels layerChannelsRGB0.data 	%line{183} %argrw{"wr"}
+# PxrProjectionStack.osl:184
+#             return layerChannelsRGB0.numChannels;
+	assign		___350_numChannels layerChannelsRGB0.numChannels 	%line{184} %argrw{"wr"}
+	return
+# PxrProjectionStack.osl:186
+#         else if (idx == 1)
+	eq		$tmp307 ___348_lyr $const3 	%line{186} %argrw{"wrr"}
+	if		$tmp307 344 414 	%argrw{"r"}
+# PxrProjectionStack.osl:188
+#             data = layerChannelsRGB1.data;
+	arraycopy	___350_channels layerChannelsRGB1.data 	%line{188} %argrw{"wr"}
+# PxrProjectionStack.osl:189
+#             return layerChannelsRGB1.numChannels;
+	assign		___350_numChannels layerChannelsRGB1.numChannels 	%line{189} %argrw{"wr"}
+	return
+# PxrProjectionStack.osl:191
+#         else if (idx == 2)
+	eq		$tmp308 ___348_lyr $const4 	%line{191} %argrw{"wrr"}
+	if		$tmp308 349 414 	%argrw{"r"}
+# PxrProjectionStack.osl:193
+#             data = layerChannelsRGB2.data;
+	arraycopy	___350_channels layerChannelsRGB2.data 	%line{193} %argrw{"wr"}
+# PxrProjectionStack.osl:194
+#             return layerChannelsRGB2.numChannels;
+	assign		___350_numChannels layerChannelsRGB2.numChannels 	%line{194} %argrw{"wr"}
+	return
+# PxrProjectionStack.osl:196
+#         else if (idx == 3)
+	eq		$tmp309 ___348_lyr $const5 	%line{196} %argrw{"wrr"}
+	if		$tmp309 354 414 	%argrw{"r"}
+# PxrProjectionStack.osl:198
+#             data = layerChannelsRGB3.data;
+	arraycopy	___350_channels layerChannelsRGB3.data 	%line{198} %argrw{"wr"}
+# PxrProjectionStack.osl:199
+#             return layerChannelsRGB3.numChannels;
+	assign		___350_numChannels layerChannelsRGB3.numChannels 	%line{199} %argrw{"wr"}
+	return
+# PxrProjectionStack.osl:201
+#         else if (idx == 4)
+	eq		$tmp310 ___348_lyr $const6 	%line{201} %argrw{"wrr"}
+	if		$tmp310 359 414 	%argrw{"r"}
+# PxrProjectionStack.osl:203
+#             data = layerChannelsRGB4.data;
+	arraycopy	___350_channels layerChannelsRGB4.data 	%line{203} %argrw{"wr"}
+# PxrProjectionStack.osl:204
+#             return layerChannelsRGB4.numChannels;
+	assign		___350_numChannels layerChannelsRGB4.numChannels 	%line{204} %argrw{"wr"}
+	return
+# PxrProjectionStack.osl:206
+#         else if (idx == 5)
+	eq		$tmp311 ___348_lyr $const7 	%line{206} %argrw{"wrr"}
+	if		$tmp311 364 414 	%argrw{"r"}
+# PxrProjectionStack.osl:208
+#             data = layerChannelsRGB5.data;
+	arraycopy	___350_channels layerChannelsRGB5.data 	%line{208} %argrw{"wr"}
+# PxrProjectionStack.osl:209
+#             return layerChannelsRGB5.numChannels;
+	assign		___350_numChannels layerChannelsRGB5.numChannels 	%line{209} %argrw{"wr"}
+	return
+# PxrProjectionStack.osl:211
+#         else if (idx == 6)
+	eq		$tmp312 ___348_lyr $const8 	%line{211} %argrw{"wrr"}
+	if		$tmp312 369 414 	%argrw{"r"}
+# PxrProjectionStack.osl:213
+#             data = layerChannelsRGB6.data;
+	arraycopy	___350_channels layerChannelsRGB6.data 	%line{213} %argrw{"wr"}
+# PxrProjectionStack.osl:214
+#             return layerChannelsRGB6.numChannels;
+	assign		___350_numChannels layerChannelsRGB6.numChannels 	%line{214} %argrw{"wr"}
+	return
+# PxrProjectionStack.osl:216
+#         else if (idx == 7)
+	eq		$tmp313 ___348_lyr $const9 	%line{216} %argrw{"wrr"}
+	if		$tmp313 374 414 	%argrw{"r"}
+# PxrProjectionStack.osl:218
+#             data = layerChannelsRGB7.data;
+	arraycopy	___350_channels layerChannelsRGB7.data 	%line{218} %argrw{"wr"}
+# PxrProjectionStack.osl:219
+#             return layerChannelsRGB7.numChannels;
+	assign		___350_numChannels layerChannelsRGB7.numChannels 	%line{219} %argrw{"wr"}
+	return
+# PxrProjectionStack.osl:221
+#         else if (idx == 8)
+	eq		$tmp314 ___348_lyr $const10 	%line{221} %argrw{"wrr"}
+	if		$tmp314 379 414 	%argrw{"r"}
+# PxrProjectionStack.osl:223
+#             data = layerChannelsRGB8.data;
+	arraycopy	___350_channels layerChannelsRGB8.data 	%line{223} %argrw{"wr"}
+# PxrProjectionStack.osl:224
+#             return layerChannelsRGB8.numChannels;
+	assign		___350_numChannels layerChannelsRGB8.numChannels 	%line{224} %argrw{"wr"}
+	return
+# PxrProjectionStack.osl:226
+#         else if (idx == 9)
+	eq		$tmp315 ___348_lyr $const11 	%line{226} %argrw{"wrr"}
+	if		$tmp315 384 414 	%argrw{"r"}
+# PxrProjectionStack.osl:228
+#             data = layerChannelsRGB9.data;
+	arraycopy	___350_channels layerChannelsRGB9.data 	%line{228} %argrw{"wr"}
+# PxrProjectionStack.osl:229
+#             return layerChannelsRGB9.numChannels;
+	assign		___350_numChannels layerChannelsRGB9.numChannels 	%line{229} %argrw{"wr"}
+	return
+# PxrProjectionStack.osl:231
+#         else if (idx == 10)
+	eq		$tmp316 ___348_lyr $const12 	%line{231} %argrw{"wrr"}
+	if		$tmp316 389 414 	%argrw{"r"}
+# PxrProjectionStack.osl:233
+#             data = layerChannelsRGB10.data;
+	arraycopy	___350_channels layerChannelsRGB10.data 	%line{233} %argrw{"wr"}
+# PxrProjectionStack.osl:234
+#             return layerChannelsRGB10.numChannels;
+	assign		___350_numChannels layerChannelsRGB10.numChannels 	%line{234} %argrw{"wr"}
+	return
+# PxrProjectionStack.osl:236
+#         else if (idx == 11)
+	eq		$tmp317 ___348_lyr $const13 	%line{236} %argrw{"wrr"}
+	if		$tmp317 394 414 	%argrw{"r"}
+# PxrProjectionStack.osl:238
+#             data = layerChannelsRGB11.data;
+	arraycopy	___350_channels layerChannelsRGB11.data 	%line{238} %argrw{"wr"}
+# PxrProjectionStack.osl:239
+#             return layerChannelsRGB11.numChannels;
+	assign		___350_numChannels layerChannelsRGB11.numChannels 	%line{239} %argrw{"wr"}
+	return
+# PxrProjectionStack.osl:241
+#         else if (idx == 12)
+	eq		$tmp318 ___348_lyr $const14 	%line{241} %argrw{"wrr"}
+	if		$tmp318 399 414 	%argrw{"r"}
+# PxrProjectionStack.osl:243
+#             data = layerChannelsRGB12.data;
+	arraycopy	___350_channels layerChannelsRGB12.data 	%line{243} %argrw{"wr"}
+# PxrProjectionStack.osl:244
+#             return layerChannelsRGB12.numChannels;
+	assign		___350_numChannels layerChannelsRGB12.numChannels 	%line{244} %argrw{"wr"}
+	return
+# PxrProjectionStack.osl:246
+#         else if (idx == 13)
+	eq		$tmp319 ___348_lyr $const15 	%line{246} %argrw{"wrr"}
+	if		$tmp319 404 414 	%argrw{"r"}
+# PxrProjectionStack.osl:248
+#             data = layerChannelsRGB13.data;
+	arraycopy	___350_channels layerChannelsRGB13.data 	%line{248} %argrw{"wr"}
+# PxrProjectionStack.osl:249
+#             return layerChannelsRGB13.numChannels;
+	assign		___350_numChannels layerChannelsRGB13.numChannels 	%line{249} %argrw{"wr"}
+	return
+# PxrProjectionStack.osl:251
+#         else if (idx == 14)
+	eq		$tmp320 ___348_lyr $const16 	%line{251} %argrw{"wrr"}
+	if		$tmp320 409 414 	%argrw{"r"}
+# PxrProjectionStack.osl:253
+#             data = layerChannelsRGB14.data;
+	arraycopy	___350_channels layerChannelsRGB14.data 	%line{253} %argrw{"wr"}
+# PxrProjectionStack.osl:254
+#             return layerChannelsRGB14.numChannels;
+	assign		___350_numChannels layerChannelsRGB14.numChannels 	%line{254} %argrw{"wr"}
+	return
+# PxrProjectionStack.osl:256
+#         else if (idx == 15)
+	eq		$tmp321 ___348_lyr $const17 	%line{256} %argrw{"wrr"}
+	if		$tmp321 414 414 	%argrw{"r"}
+# PxrProjectionStack.osl:258
+#             data = layerChannelsRGB15.data;
+	arraycopy	___350_channels layerChannelsRGB15.data 	%line{258} %argrw{"wr"}
+# PxrProjectionStack.osl:259
+#             return layerChannelsRGB15.numChannels;
+	assign		___350_numChannels layerChannelsRGB15.numChannels 	%line{259} %argrw{"wr"}
+	return
+# PxrProjectionStack.osl:295
+#             for (int ch = 0; ch < numChannels; ch++)
+	for		$tmp323 416 418 423 425 	%line{295} %argrw{"r"}
+	assign		___351_ch $const2 	%argrw{"wr"}
+	lt		$tmp322 ___351_ch ___350_numChannels 	%argrw{"wrr"}
+	neq		$tmp323 $tmp322 $const2 	%argrw{"wrr"}
+# PxrProjectionStack.osl:297
+#                 resultChRGB[ch] = resultChRGB[ch] * inv_a + channels[ch];
+	aref		$tmp324 resultChRGB ___351_ch 	%line{297} %argrw{"wrr"}
+	mul		$tmp325 $tmp324 ___349_inv_a 	%argrw{"wrr"}
+	aref		$tmp326 ___350_channels ___351_ch 	%argrw{"wrr"}
+	add		$tmp327 $tmp325 $tmp326 	%argrw{"wrr"}
+	aassign		resultChRGB ___351_ch $tmp327 	%argrw{"wrr"}
+# PxrProjectionStack.osl:295
+#             for (int ch = 0; ch < numChannels; ch++)
+	assign		$tmp328 ___351_ch 	%line{295} %argrw{"wr"}
+	add		___351_ch ___351_ch $const3 	%argrw{"wrr"}
+# PxrProjectionStack.osl:279
+#     for (int lyr = numRGB - 1; lyr >= 0; lyr--)
+	assign		$tmp329 ___348_lyr 	%line{279} %argrw{"wr"}
+	sub		___348_lyr ___348_lyr $const3 	%argrw{"wrr"}
+# PxrProjectionStack.osl:302
+#     resultR = resultRGB.r;
+	compref		resultR resultRGB $const2 	%line{302} %argrw{"wrr"}
+# PxrProjectionStack.osl:303
+#     resultG = resultRGB.g;
+	compref		resultG resultRGB $const3 	%line{303} %argrw{"wrr"}
+# PxrProjectionStack.osl:304
+#     resultB = resultRGB.b;
+	compref		resultB resultRGB $const4 	%line{304} %argrw{"wrr"}
+# PxrProjectionStack.osl:307
+#     for (int ch = 0; ch < NUM_CHANNELS; ch++)
+	for		$tmp331 432 434 442 444 	%line{307} %argrw{"r"}
+	assign		___353_ch $const2 	%argrw{"wr"}
+	lt		$tmp330 ___353_ch $const20 	%argrw{"wrr"}
+	neq		$tmp331 $tmp330 $const2 	%argrw{"wrr"}
+# PxrProjectionStack.osl:309
+#         if (channelsAovNames[ch] != "")
+	aref		$tmp332 channelsAovNames ___353_ch 	%line{309} %argrw{"wrr"}
+	neq		$tmp333 $tmp332 $const21 	%argrw{"wrr"}
+	if		$tmp333 442 442 	%argrw{"r"}
+# PxrProjectionStack.osl:311
+#             Ci = Ci + resultChRGB[ch] * debug(channelsAovNames[ch]);
+	aref		$tmp335 channelsAovNames ___353_ch 	%line{311} %argrw{"wrr"}
+	closure		$tmp334 $const22 $tmp335 	%argrw{"wrr"}
+	aref		$tmp336 resultChRGB ___353_ch 	%argrw{"wrr"}
+	mul		$tmp337 $tmp334 $tmp336 	%argrw{"wrr"}
+	add		Ci Ci $tmp337 	%argrw{"wrr"}
+# PxrProjectionStack.osl:307
+#     for (int ch = 0; ch < NUM_CHANNELS; ch++)
+	assign		$tmp338 ___353_ch 	%line{307} %argrw{"wr"}
+	add		___353_ch ___353_ch $const3 	%argrw{"wrr"}
+# PxrProjectionStack.osl:316
+#     if (outputChanIdx[0] >= 0 && outputChanIdx[0] < NUM_OUTPUTS)
+	aref		$tmp339 outputChanIdx $const2 	%line{316} %argrw{"wrr"}
+	ge		$tmp340 $tmp339 $const2 	%argrw{"wrr"}
+	neq		$tmp341 $tmp340 $const2 	%argrw{"wrr"}
+	if		$tmp341 452 452 	%argrw{"r"}
+	aref		$tmp342 outputChanIdx $const2 	%argrw{"wrr"}
+	lt		$tmp343 $tmp342 $const10 	%argrw{"wrr"}
+	neq		$tmp344 $tmp343 $const2 	%argrw{"wrr"}
+	assign		$tmp341 $tmp344 	%argrw{"wr"}
+	if		$tmp341 455 455 	%argrw{"r"}
+# PxrProjectionStack.osl:317
+#         channelOut0 = resultChRGB[outputChanIdx[0]];
+	aref		$tmp345 outputChanIdx $const2 	%line{317} %argrw{"wrr"}
+	aref		channelOut0 resultChRGB $tmp345 	%argrw{"wrr"}
+# PxrProjectionStack.osl:318
+#     if (outputChanIdx[1] >= 0 && outputChanIdx[1] < NUM_OUTPUTS)
+	aref		$tmp346 outputChanIdx $const3 	%line{318} %argrw{"wrr"}
+	ge		$tmp347 $tmp346 $const2 	%argrw{"wrr"}
+	neq		$tmp348 $tmp347 $const2 	%argrw{"wrr"}
+	if		$tmp348 463 463 	%argrw{"r"}
+	aref		$tmp349 outputChanIdx $const3 	%argrw{"wrr"}
+	lt		$tmp350 $tmp349 $const10 	%argrw{"wrr"}
+	neq		$tmp351 $tmp350 $const2 	%argrw{"wrr"}
+	assign		$tmp348 $tmp351 	%argrw{"wr"}
+	if		$tmp348 466 466 	%argrw{"r"}
+# PxrProjectionStack.osl:319
+#         channelOut1 = resultChRGB[outputChanIdx[1]];
+	aref		$tmp352 outputChanIdx $const3 	%line{319} %argrw{"wrr"}
+	aref		channelOut1 resultChRGB $tmp352 	%argrw{"wrr"}
+# PxrProjectionStack.osl:320
+#     if (outputChanIdx[2] >= 0 && outputChanIdx[2] < NUM_OUTPUTS)
+	aref		$tmp353 outputChanIdx $const4 	%line{320} %argrw{"wrr"}
+	ge		$tmp354 $tmp353 $const2 	%argrw{"wrr"}
+	neq		$tmp355 $tmp354 $const2 	%argrw{"wrr"}
+	if		$tmp355 474 474 	%argrw{"r"}
+	aref		$tmp356 outputChanIdx $const4 	%argrw{"wrr"}
+	lt		$tmp357 $tmp356 $const10 	%argrw{"wrr"}
+	neq		$tmp358 $tmp357 $const2 	%argrw{"wrr"}
+	assign		$tmp355 $tmp358 	%argrw{"wr"}
+	if		$tmp355 477 477 	%argrw{"r"}
+# PxrProjectionStack.osl:321
+#         channelOut2 = resultChRGB[outputChanIdx[2]];
+	aref		$tmp359 outputChanIdx $const4 	%line{321} %argrw{"wrr"}
+	aref		channelOut2 resultChRGB $tmp359 	%argrw{"wrr"}
+# PxrProjectionStack.osl:322
+#     if (outputChanIdx[3] >= 0 && outputChanIdx[3] < NUM_OUTPUTS)
+	aref		$tmp360 outputChanIdx $const5 	%line{322} %argrw{"wrr"}
+	ge		$tmp361 $tmp360 $const2 	%argrw{"wrr"}
+	neq		$tmp362 $tmp361 $const2 	%argrw{"wrr"}
+	if		$tmp362 485 485 	%argrw{"r"}
+	aref		$tmp363 outputChanIdx $const5 	%argrw{"wrr"}
+	lt		$tmp364 $tmp363 $const10 	%argrw{"wrr"}
+	neq		$tmp365 $tmp364 $const2 	%argrw{"wrr"}
+	assign		$tmp362 $tmp365 	%argrw{"wr"}
+	if		$tmp362 488 488 	%argrw{"r"}
+# PxrProjectionStack.osl:323
+#         channelOut3 = resultChRGB[outputChanIdx[3]];
+	aref		$tmp366 outputChanIdx $const5 	%line{323} %argrw{"wrr"}
+	aref		channelOut3 resultChRGB $tmp366 	%argrw{"wrr"}
+# PxrProjectionStack.osl:324
+#     if (outputChanIdx[4] >= 0 && outputChanIdx[4] < NUM_OUTPUTS)
+	aref		$tmp367 outputChanIdx $const6 	%line{324} %argrw{"wrr"}
+	ge		$tmp368 $tmp367 $const2 	%argrw{"wrr"}
+	neq		$tmp369 $tmp368 $const2 	%argrw{"wrr"}
+	if		$tmp369 496 496 	%argrw{"r"}
+	aref		$tmp370 outputChanIdx $const6 	%argrw{"wrr"}
+	lt		$tmp371 $tmp370 $const10 	%argrw{"wrr"}
+	neq		$tmp372 $tmp371 $const2 	%argrw{"wrr"}
+	assign		$tmp369 $tmp372 	%argrw{"wr"}
+	if		$tmp369 499 499 	%argrw{"r"}
+# PxrProjectionStack.osl:325
+#         channelOut4 = resultChRGB[outputChanIdx[4]];
+	aref		$tmp373 outputChanIdx $const6 	%line{325} %argrw{"wrr"}
+	aref		channelOut4 resultChRGB $tmp373 	%argrw{"wrr"}
+# PxrProjectionStack.osl:326
+#     if (outputChanIdx[5] >= 0 && outputChanIdx[5] < NUM_OUTPUTS)
+	aref		$tmp374 outputChanIdx $const7 	%line{326} %argrw{"wrr"}
+	ge		$tmp375 $tmp374 $const2 	%argrw{"wrr"}
+	neq		$tmp376 $tmp375 $const2 	%argrw{"wrr"}
+	if		$tmp376 507 507 	%argrw{"r"}
+	aref		$tmp377 outputChanIdx $const7 	%argrw{"wrr"}
+	lt		$tmp378 $tmp377 $const10 	%argrw{"wrr"}
+	neq		$tmp379 $tmp378 $const2 	%argrw{"wrr"}
+	assign		$tmp376 $tmp379 	%argrw{"wr"}
+	if		$tmp376 510 510 	%argrw{"r"}
+# PxrProjectionStack.osl:327
+#         channelOut5 = resultChRGB[outputChanIdx[5]];
+	aref		$tmp380 outputChanIdx $const7 	%line{327} %argrw{"wrr"}
+	aref		channelOut5 resultChRGB $tmp380 	%argrw{"wrr"}
+# PxrProjectionStack.osl:328
+#     if (outputChanIdx[6] >= 0 && outputChanIdx[6] < NUM_OUTPUTS)
+	aref		$tmp381 outputChanIdx $const8 	%line{328} %argrw{"wrr"}
+	ge		$tmp382 $tmp381 $const2 	%argrw{"wrr"}
+	neq		$tmp383 $tmp382 $const2 	%argrw{"wrr"}
+	if		$tmp383 518 518 	%argrw{"r"}
+	aref		$tmp384 outputChanIdx $const8 	%argrw{"wrr"}
+	lt		$tmp385 $tmp384 $const10 	%argrw{"wrr"}
+	neq		$tmp386 $tmp385 $const2 	%argrw{"wrr"}
+	assign		$tmp383 $tmp386 	%argrw{"wr"}
+	if		$tmp383 521 521 	%argrw{"r"}
+# PxrProjectionStack.osl:329
+#         channelOut6 = resultChRGB[outputChanIdx[6]];
+	aref		$tmp387 outputChanIdx $const8 	%line{329} %argrw{"wrr"}
+	aref		channelOut6 resultChRGB $tmp387 	%argrw{"wrr"}
+# PxrProjectionStack.osl:330
+#     if (outputChanIdx[7] >= 0 && outputChanIdx[7] < NUM_OUTPUTS)
+	aref		$tmp388 outputChanIdx $const9 	%line{330} %argrw{"wrr"}
+	ge		$tmp389 $tmp388 $const2 	%argrw{"wrr"}
+	neq		$tmp390 $tmp389 $const2 	%argrw{"wrr"}
+	if		$tmp390 529 529 	%argrw{"r"}
+	aref		$tmp391 outputChanIdx $const9 	%argrw{"wrr"}
+	lt		$tmp392 $tmp391 $const10 	%argrw{"wrr"}
+	neq		$tmp393 $tmp392 $const2 	%argrw{"wrr"}
+	assign		$tmp390 $tmp393 	%argrw{"wr"}
+	if		$tmp390 532 532 	%argrw{"r"}
+# PxrProjectionStack.osl:331
+#         channelOut7 = resultChRGB[outputChanIdx[7]];
+	aref		$tmp394 outputChanIdx $const9 	%line{331} %argrw{"wrr"}
+	aref		channelOut7 resultChRGB $tmp394 	%argrw{"wrr"}
+	end

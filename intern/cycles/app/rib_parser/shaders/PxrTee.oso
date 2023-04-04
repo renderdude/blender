@@ -1,0 +1,44 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrTee.osl/obj/PxrTee.oso
+shader PxrTee	%meta{int,rfm_nodeid,1053359} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/utility"} %meta{string,rfh_classification,"Pattern/Utility"} %meta{string,help,"This utility pattern takes either an input parameter and passes it<br>through unchanged to its result.  As a side effect, it will send the<br>values out into an AOV when shading a camera-visible primary ray.  Note<br>that either inputF and resultF should be connected, or inputRGB and<br>resultRGB, but not both, and the type of the AOV should also match."} 
+param	color	inputRGB	0 0 0		%meta{string,widget,"color"} %meta{string,help,"The triple float to pass through to resultRGB and write to a color AOV.<br><br>inputRGB (color)"} %meta{string,label,"Input RGB"}  %read{0,4} %write{2147483647,-1}
+param	float	inputF	0		%meta{string,widget,"default"} %meta{string,help,"The float to pass through to resultF and write to a float AOV.<br><br>inputF (float)"} %meta{string,label,"Input Float"}  %read{6,10} %write{2147483647,-1}
+param	string	aov	""		%meta{string,widget,"string"} %meta{string,help,"The name of the AOV to write to.<br><br>aov (string)"} %meta{int,connectable,0} %meta{string,label,"AOV Name"}  %read{3,9} %write{2147483647,-1}
+param	int	verbosity	0		%meta{string,widget,"mapper"} %meta{string,help,"Diagnostic output levels for scene debugging.<br><br>verbosity (int)"} %meta{string,options,"Silent:0|Warnings:1|Info:2"} %meta{int,connectable,0} %meta{string,label,"Verbosity"}  %read{2147483647,-1} %write{2147483647,-1}
+oparam	color	resultRGB	0 0 0		%read{2147483647,-1} %write{2,2}
+oparam	float	resultF	0		%read{2147483647,-1} %write{8,8}
+global	closure color	Ci	%read{5,11} %write{5,11}
+temp	int	$tmp1	%read{1,1} %write{0,0}
+temp	closure color	$tmp2	%read{4,4} %write{3,3}
+const	string	$const1	"debug"		%read{3,9} %write{2147483647,-1}
+temp	closure color	$tmp3	%read{5,5} %write{4,4}
+temp	int	$tmp4	%read{7,7} %write{6,6}
+temp	closure color	$tmp5	%read{10,10} %write{9,9}
+temp	closure color	$tmp6	%read{11,11} %write{10,10}
+code ___main___
+# PxrTee.osl:80
+#     if (isconnected(inputRGB))
+	isconnected	$tmp1 inputRGB 	%filename{"PxrTee.osl"} %line{80} %argrw{"wr"}
+	if		$tmp1 6 12 	%argrw{"r"}
+# PxrTee.osl:82
+#         resultRGB = inputRGB;
+	assign		resultRGB inputRGB 	%line{82} %argrw{"wr"}
+# PxrTee.osl:83
+#         Ci = Ci + inputRGB * debug(aov);
+	closure		$tmp2 $const1 aov 	%line{83} %argrw{"wrr"}
+	mul		$tmp3 $tmp2 inputRGB 	%argrw{"wrr"}
+	add		Ci Ci $tmp3 	%argrw{"wrr"}
+# PxrTee.osl:85
+#     else if (isconnected(inputF))
+	isconnected	$tmp4 inputF 	%line{85} %argrw{"wr"}
+	if		$tmp4 12 12 	%argrw{"r"}
+# PxrTee.osl:87
+#         resultF = inputF;
+	assign		resultF inputF 	%line{87} %argrw{"wr"}
+# PxrTee.osl:88
+#         Ci = Ci + inputF * debug(aov);
+	closure		$tmp5 $const1 aov 	%line{88} %argrw{"wrr"}
+	mul		$tmp6 $tmp5 inputF 	%argrw{"wrr"}
+	add		Ci Ci $tmp6 	%argrw{"wrr"}
+	end

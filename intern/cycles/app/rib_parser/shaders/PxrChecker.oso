@@ -1,0 +1,252 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrChecker.osl/obj/PxrChecker.oso
+shader PxrChecker	%meta{int,rfm_nodeid,1053270} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/texture"} %meta{string,rfh_classification,"Pattern/Texture"} %meta{string,help,"An OSL pattern for making a checkerboard texture."} 
+param	color	colorA	1 1 1		%meta{string,label,"Color A"} %meta{string,widget,"color"} %meta{string,help,"First checker color"} %meta{int,connectable,1}  %read{72,73} %write{2147483647,-1}
+param	color	colorB	0 0 0		%meta{string,label,"Color B"} %meta{string,widget,"color"} %meta{string,help,"Second checker color"} %meta{int,connectable,1}  %read{72,73} %write{2147483647,-1}
+param	int	dimensions	2		%meta{string,label,"Dimensions"} %meta{string,widget,"number"} %meta{int,min,1} %meta{int,max,3} %meta{string,help,"The number of dimensions in which to compute the checker pattern"} %meta{int,connectable,0}  %read{35,40} %write{2147483647,-1}
+param	struct Manifold	manifold			%meta{string,page,""} %meta{string,widget,"default"} %meta{string,readOnly,"True"}  %read{0,26} %write{2147483647,-1} %struct{"Manifold"} %structfields{Q,QN,Qradius} %structfieldtypes{"pnf"} %structnfields{3}
+param	point	manifold.Q	0 0 0		%meta{string,page,""} %meta{string,widget,"default"} %meta{string,readOnly,"True"}  %read{22,22} %write{2147483647,-1} %mystruct{manifold} %mystructfield{0} %derivs
+param	normal	manifold.QN	0 0 1		%meta{string,page,""} %meta{string,widget,"default"} %meta{string,readOnly,"True"}  %read{23,23} %write{2147483647,-1} %mystruct{manifold} %mystructfield{1}
+param	float	manifold.Qradius	0		%meta{string,page,""} %meta{string,widget,"default"} %meta{string,readOnly,"True"}  %read{24,24} %write{2147483647,-1} %mystruct{manifold} %mystructfield{2}
+oparam	color	resultRGB	0 0 0		%meta{string,widget,"null"}  %read{74,76} %write{72,73}
+oparam	float	resultR	0		%read{2147483647,-1} %write{74,74}
+oparam	float	resultG	0		%read{2147483647,-1} %write{75,75}
+oparam	float	resultB	0		%read{2147483647,-1} %write{76,76}
+global	point	P	%read{4,4} %write{2147483647,-1} %derivs
+global	normal	N	%read{5,5} %write{2147483647,-1}
+global	float	u	%read{34,34} %write{2147483647,-1} %derivs
+global	float	v	%read{34,34} %write{2147483647,-1} %derivs
+local	vector	___392_vec1	%read{15,16} %write{14,15}
+local	float	___392_scale	%read{19,19} %write{18,18}
+local	point	inputManifoldRw.Q	%read{9,28} %write{4,22} %mystruct{inputManifoldRw} %mystructfield{0} %derivs
+local	normal	inputManifoldRw.QN	%read{11,13} %write{5,23} %mystruct{inputManifoldRw} %mystructfield{1}
+local	float	inputManifoldRw.Qradius	%read{19,63} %write{6,24} %mystruct{inputManifoldRw} %mystructfield{2}
+local	point	stOut	%read{40,59} %write{25,34} %derivs
+local	float[2]	___420_inManifold	%read{31,32} %write{29,29} %derivs
+local	int	checkerIndex	%read{40,70} %write{35,59}
+local	float	minrad	%read{40,68} %write{36,59}
+local	float	minfilterwidth	%read{40,67} %write{37,59}
+local	int	___423_j	%read{40,59} %write{39,59} %derivs
+local	float	___424_mymod	%read{40,59} %write{40,59}
+local	float	___424_rad	%read{40,59} %write{40,59}
+local	float	myStep	%read{72,73} %write{60,69}
+local	float	___426_filterradius	%read{68,68} %write{67,67}
+temp	int	$tmp1	%read{1,1} %write{0,0}
+temp	int	$tmp2	%read{2,2} %write{1,1}
+const	int	$const1	0		%read{1,74} %write{2147483647,-1}
+const	string	$const2	"Manifold_Construct"		%read{3,3} %write{2147483647,-1}
+const	float	$const3	0		%read{6,65} %write{2147483647,-1}
+const	string	$const4	"object"		%read{9,15} %write{2147483647,-1}
+const	string	$const5	"Manifold_Transform"		%read{7,8} %write{2147483647,-1}
+const	string	$const6	"common"		%read{9,15} %write{2147483647,-1}
+temp	normal	$tmp3	%read{12,12} %write{11,11}
+const	vector	$const7	1 1 1		%read{14,14} %write{2147483647,-1}
+temp	float	$tmp4	%read{18,18} %write{16,16}
+temp	float	$tmp5	%read{18,18} %write{17,17}
+const	float	$const8	3		%read{17,17} %write{2147483647,-1}
+const	string	$const9	"Manifold_Copy"		%read{21,21} %write{2147483647,-1}
+const	point	$const10	0 0 0		%read{25,25} %write{2147483647,-1}
+temp	int	$tmp6	%read{27,27} %write{26,26}
+temp	int	$tmp7	%read{30,30} %write{29,29}
+const	string	$const11	"primvar"		%read{29,29} %write{2147483647,-1}
+const	string	$const12	"st"		%read{29,29} %write{2147483647,-1}
+temp	float	$tmp8	%read{33,33} %write{31,31} %derivs
+const	int	$const13	1		%read{32,75} %write{2147483647,-1}
+temp	float	$tmp9	%read{33,33} %write{32,32} %derivs
+const	int	$const14	1000000000		%read{36,37} %write{2147483647,-1}
+temp	int	$tmp10	%read{40,59} %write{40,59}
+temp	int	$tmp11	%read{38,59} %write{39,59}
+temp	float	$tmp12	%read{40,59} %write{40,59}
+const	float	$const15	1		%read{44,69} %write{2147483647,-1}
+const	string	$const16	"mod"		%read{43,43} %write{2147483647,-1}
+temp	float	$tmp13	%read{40,59} %write{40,59}
+temp	float	$tmp14	%read{40,59} %write{40,59}
+temp	float	$tmp15	%read{40,59} %write{40,59}
+const	float	$const17	0.25		%read{50,52} %write{2147483647,-1}
+temp	float	$tmp16	%read{40,59} %write{40,59}
+temp	float	$tmp17	%read{40,59} %write{40,59}
+const	float	$const18	0.5		%read{48,67} %write{2147483647,-1}
+temp	float	$tmp18	%read{40,59} %write{40,59}
+temp	float	$tmp19	%read{40,59} %write{40,59}
+temp	float	$tmp20	%read{40,59} %write{40,59}
+temp	float	$tmp21	%read{40,59} %write{40,59} %derivs
+temp	int	$tmp22	%read{40,59} %write{40,59}
+temp	int	$tmp23	%read{62,62} %write{61,61}
+const	float	$const19	-1		%read{64,69} %write{2147483647,-1}
+temp	float	$tmp24	%read{64,64} %write{63,63}
+temp	int	$tmp25	%read{66,66} %write{65,65}
+temp	float	$tmp26	%read{69,69} %write{68,68}
+const	int	$const20	2		%read{70,76} %write{2147483647,-1}
+temp	int	$tmp27	%read{71,71} %write{70,70}
+code ___main___
+# PxrChecker.osl:84
+#     if (!isconnected(manifold))
+	isconnected	$tmp1 manifold 	%filename{"PxrChecker.osl"} %line{84} %argrw{"wr"}
+	eq		$tmp2 $tmp1 $const1 	%argrw{"wrr"}
+	if		$tmp2 21 25 	%argrw{"r"}
+# PxrChecker.osl:86
+#         Manifold_Construct(P,N,inputManifoldRw);
+	functioncall	$const2 7 	%line{86} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:69
+#     m.Q = inP;
+	assign		inputManifoldRw.Q P 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{69} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:70
+#     m.QN = inN;
+	assign		inputManifoldRw.QN N 	%line{70} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:71
+#     m.Qradius = 0.0;
+	assign		inputManifoldRw.Qradius $const3 	%line{71} %argrw{"wr"}
+# PxrChecker.osl:87
+#         Manifold_Transform(inputManifoldRw,"object");
+	functioncall	$const5 21 	%filename{"PxrChecker.osl"} %line{87} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:91
+#     Manifold_Transform(ioManifold, "common", toSpace);
+	functioncall	$const5 21 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{91} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:78
+#     ioManifold.Q = transform(fromSpace, toSpace, ioManifold.Q);
+	transform	inputManifoldRw.Q $const6 $const4 inputManifoldRw.Q 	%line{78} %argrw{"wrrr"}
+	assign		inputManifoldRw.Q inputManifoldRw.Q 	%argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:79
+#     ioManifold.QN = normalize(transform(fromSpace, toSpace, ioManifold.QN));
+	transformn	$tmp3 $const6 $const4 inputManifoldRw.QN 	%line{79} %argrw{"wrrr"}
+	normalize	inputManifoldRw.QN $tmp3 	%argrw{"wr"}
+	assign		inputManifoldRw.QN inputManifoldRw.QN 	%argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:81
+#     vector vec1 = vector(1.0);
+	assign		___392_vec1 $const7 	%line{81} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:82
+#     vec1 = transform(fromSpace, toSpace, vec1);
+	transformv	___392_vec1 $const6 $const4 ___392_vec1 	%line{82} %argrw{"wrrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:83
+#     float scale = length(vec1) / sqrt(3.0);
+	length		$tmp4 ___392_vec1 	%line{83} %argrw{"wr"}
+	sqrt		$tmp5 $const8 	%argrw{"wr"}
+	div		___392_scale $tmp4 $tmp5 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:84
+#     ioManifold.Qradius *= scale;
+	mul		inputManifoldRw.Qradius inputManifoldRw.Qradius ___392_scale 	%line{84} %argrw{"wrr"}
+	assign		inputManifoldRw.Qradius inputManifoldRw.Qradius 	%argrw{"wr"}
+# PxrChecker.osl:91
+#         Manifold_Copy(manifold,inputManifoldRw);
+	functioncall	$const9 25 	%filename{"PxrChecker.osl"} %line{91} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:53
+#     dest.Q = src.Q;
+	assign		inputManifoldRw.Q manifold.Q 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{53} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:54
+#     dest.QN = src.QN;
+	assign		inputManifoldRw.QN manifold.QN 	%line{54} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:55
+#     dest.Qradius = src.Qradius;
+	assign		inputManifoldRw.Qradius manifold.Qradius 	%line{55} %argrw{"wr"}
+# PxrChecker.osl:96
+#     point stOut = point(0.0);
+	assign		stOut $const10 	%filename{"PxrChecker.osl"} %line{96} %argrw{"wr"}
+# PxrChecker.osl:98
+#     if (isconnected(manifold))
+	isconnected	$tmp6 manifold 	%line{98} %argrw{"wr"}
+	if		$tmp6 29 35 	%argrw{"r"}
+# PxrChecker.osl:100
+#         stOut = inputManifoldRw.Q;
+	assign		stOut inputManifoldRw.Q 	%line{100} %argrw{"wr"}
+# PxrChecker.osl:106
+#         if (getattribute("primvar", "st", inManifold))
+	getattribute	$tmp7 $const11 $const12 ___420_inManifold 	%line{106} %argrw{"wrrw"}
+	if		$tmp7 34 35 	%argrw{"r"}
+# PxrChecker.osl:108
+#             stOut = point(inManifold[0], inManifold[1], 0.0);
+	aref		$tmp8 ___420_inManifold $const1 	%line{108} %argrw{"wrr"}
+	aref		$tmp9 ___420_inManifold $const13 	%argrw{"wrr"}
+	point		stOut $tmp8 $tmp9 $const3 	%argrw{"wrrr"}
+# PxrChecker.osl:112
+#             stOut = point(u, v, 0.0);
+	point		stOut u v $const3 	%line{112} %argrw{"wrrr"}
+# PxrChecker.osl:116
+#     int checkerIndex = dimensions;
+	assign		checkerIndex dimensions 	%line{116} %argrw{"wr"}
+# PxrChecker.osl:117
+#     float minrad = 1000000000;
+	assign		minrad $const14 	%line{117} %argrw{"wr"}
+# PxrChecker.osl:118
+#     float minfilterwidth = 1000000000;
+	assign		minfilterwidth $const14 	%line{118} %argrw{"wr"}
+# PxrChecker.osl:119
+#     for (int j = 0; j < dimensions; ++j)
+	for		$tmp11 40 42 59 60 	%line{119} %argrw{"r"}
+	assign		___423_j $const1 	%argrw{"wr"}
+	lt		$tmp10 ___423_j dimensions 	%argrw{"wrr"}
+	neq		$tmp11 $tmp10 $const1 	%argrw{"wrr"}
+# PxrChecker.osl:122
+#         float mymod = mod(stOut[j], 1.0);
+	compref		$tmp12 stOut ___423_j 	%line{122} %argrw{"wrr"}
+	functioncall	$const16 48 	%argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:154
+# float  mod (float  a, float  b) { return a - b*floor(a/b); }
+	div		$tmp14 $tmp12 $const15 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{154} %argrw{"wrr"}
+	floor		$tmp13 $tmp14 	%argrw{"wr"}
+	mul		$tmp15 $const15 $tmp13 	%argrw{"wrr"}
+	sub		___424_mymod $tmp12 $tmp15 	%argrw{"wrr"}
+# PxrChecker.osl:124
+#         float rad = 0.25 - abs(abs(mymod - 0.5) - 0.25);
+	sub		$tmp18 ___424_mymod $const18 	%filename{"PxrChecker.osl"} %line{124} %argrw{"wrr"}
+	abs		$tmp17 $tmp18 	%argrw{"wr"}
+	sub		$tmp19 $tmp17 $const17 	%argrw{"wrr"}
+	abs		$tmp16 $tmp19 	%argrw{"wr"}
+	sub		___424_rad $const17 $tmp16 	%argrw{"wrr"}
+# PxrChecker.osl:126
+#         minrad = min(rad, minrad);
+	min		minrad ___424_rad minrad 	%line{126} %argrw{"wrr"}
+# PxrChecker.osl:128
+#         minfilterwidth = min(filterwidth(stOut[j]), minfilterwidth);
+	compref		$tmp21 stOut ___423_j 	%line{128} %argrw{"wrr"}
+	filterwidth	$tmp20 $tmp21 	%argrw{"wr"} %argderivs{1}
+	min		minfilterwidth $tmp20 minfilterwidth 	%argrw{"wrr"}
+# PxrChecker.osl:130
+#         checkerIndex += (mymod < 0.5);
+	lt		$tmp22 ___424_mymod $const18 	%line{130} %argrw{"wrr"}
+	add		checkerIndex checkerIndex $tmp22 	%argrw{"wrr"}
+# PxrChecker.osl:119
+#     for (int j = 0; j < dimensions; ++j)
+	add		___423_j ___423_j $const13 	%line{119} %argrw{"wrr"}
+# PxrChecker.osl:134
+#     float myStep = 1.0;
+	assign		myStep $const15 	%line{134} %argrw{"wr"}
+# PxrChecker.osl:135
+#     if (inputManifoldRw.Qradius != 0.0)
+	neq		$tmp23 inputManifoldRw.Qradius $const3 	%line{135} %argrw{"wrr"}
+	if		$tmp23 65 70 	%argrw{"r"}
+# PxrChecker.osl:137
+#         myStep = smoothstep(-1.0, 1.0, minrad / inputManifoldRw.Qradius);
+	div		$tmp24 minrad inputManifoldRw.Qradius 	%line{137} %argrw{"wrr"}
+	smoothstep	myStep $const19 $const15 $tmp24 	%argrw{"wrrr"}
+# PxrChecker.osl:139
+#     else if (minfilterwidth > 0.0)
+	gt		$tmp25 minfilterwidth $const3 	%line{139} %argrw{"wrr"}
+	if		$tmp25 70 70 	%argrw{"r"}
+# PxrChecker.osl:141
+#         float filterradius = 0.5 * minfilterwidth;
+	mul		___426_filterradius $const18 minfilterwidth 	%line{141} %argrw{"wrr"}
+# PxrChecker.osl:142
+#         myStep = smoothstep(-1.0, 1.0, minrad / filterradius);
+	div		$tmp26 minrad ___426_filterradius 	%line{142} %argrw{"wrr"}
+	smoothstep	myStep $const19 $const15 $tmp26 	%argrw{"wrrr"}
+# PxrChecker.osl:146
+#     if (checkerIndex % 2)
+	mod		$tmp27 checkerIndex $const20 	%line{146} %argrw{"wrr"}
+	if		$tmp27 73 74 	%argrw{"r"}
+# PxrChecker.osl:148
+#         resultRGB = mix(colorA, colorB, myStep);
+	mix		resultRGB colorA colorB myStep 	%line{148} %argrw{"wrrr"}
+# PxrChecker.osl:153
+#         resultRGB = mix(colorB, colorA, myStep);
+	mix		resultRGB colorB colorA myStep 	%line{153} %argrw{"wrrr"}
+# PxrChecker.osl:156
+#     resultR = resultRGB[0];
+	compref		resultR resultRGB $const1 	%line{156} %argrw{"wrr"}
+# PxrChecker.osl:157
+#     resultG = resultRGB[1];
+	compref		resultG resultRGB $const13 	%line{157} %argrw{"wrr"}
+# PxrChecker.osl:158
+#     resultB = resultRGB[2];
+	compref		resultB resultRGB $const20 	%line{158} %argrw{"wrr"}
+	end

@@ -1,0 +1,40 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrSwitch.osl/obj/PxrSwitch.oso
+shader PxrSwitch	%meta{int,rfm_nodeid,1200434} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/utility"} %meta{string,rfh_classification,"Pattern/Utility"} %meta{string,help,"This node selects one of the connected inputs based on the index value.  Index values are expected to be integers, but the node accepts float values for ease of use.The first input is selected for index values between -0.5 and 0.5, the second input for index values between 0.5 and 1.5, and so on...If the index value is larger than the actual number of connected inputs, the node will cycle through the connected inputs."} 
+param	float	index	0		%meta{string,label,"Index"} %meta{float,min,0} %meta{string,widget,"default"}  %read{0,0} %write{2147483647,-1}
+param	color[]	inputsRGB	0 0 0		%meta{string,label,"Inputs RGB"} %meta{int,isDynamicArray,1} %meta{int,arraySize,-1}  %read{3,5} %write{2147483647,-1}
+oparam	color	resultRGB	0 0 0		%read{6,8} %write{5,5}
+oparam	float	resultR	0		%read{2147483647,-1} %write{6,6}
+oparam	float	resultG	0		%read{2147483647,-1} %write{7,7}
+oparam	float	resultB	0		%read{2147483647,-1} %write{8,8}
+local	int	idx	%read{5,5} %write{4,4}
+temp	int	$tmp1	%read{4,4} %write{2,2}
+temp	float	$tmp2	%read{2,2} %write{1,1}
+const	float	$const1	0.5		%read{0,0} %write{2147483647,-1}
+temp	float	$tmp3	%read{1,1} %write{0,0}
+temp	int	$tmp4	%read{4,4} %write{3,3}
+const	int	$const2	0		%read{6,6} %write{2147483647,-1}
+const	int	$const3	1		%read{7,7} %write{2147483647,-1}
+const	int	$const4	2		%read{8,8} %write{2147483647,-1}
+code ___main___
+# PxrSwitch.osl:71
+#     int idx = int(floor(index + 0.5)) % arraylength(inputsRGB);
+	add		$tmp3 index $const1 	%filename{"PxrSwitch.osl"} %line{71} %argrw{"wrr"}
+	floor		$tmp2 $tmp3 	%argrw{"wr"}
+	assign		$tmp1 $tmp2 	%argrw{"wr"}
+	arraylength	$tmp4 inputsRGB 	%argrw{"wr"}
+	mod		idx $tmp1 $tmp4 	%argrw{"wrr"}
+# PxrSwitch.osl:72
+#     resultRGB = inputsRGB[idx];
+	aref		resultRGB inputsRGB idx 	%line{72} %argrw{"wrr"}
+# PxrSwitch.osl:73
+#     resultR = resultRGB[0];
+	compref		resultR resultRGB $const2 	%line{73} %argrw{"wrr"}
+# PxrSwitch.osl:74
+#     resultG = resultRGB[1];
+	compref		resultG resultRGB $const3 	%line{74} %argrw{"wrr"}
+# PxrSwitch.osl:75
+#     resultB = resultRGB[2];
+	compref		resultB resultRGB $const4 	%line{75} %argrw{"wrr"}
+	end

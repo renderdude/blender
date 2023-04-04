@@ -1,0 +1,77 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrWireframe.osl/obj/PxrWireframe.oso
+shader PxrWireframe	%meta{int,rfm_nodeid,1200435} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/geometry"} %meta{string,rfh_classification,"Pattern/Geometry"} 
+param	color	wireColor	0 0 0		%meta{string,label,"Wireframe Color"}  %read{19,19} %write{2147483647,-1}
+param	color	backColor	0.5 0.5 0.5		%meta{string,label,"Background Color"}  %read{19,19} %write{2147483647,-1}
+param	float	wireOpacity	0.5		%meta{string,label,"Wireframe Opacity"} %meta{float,min,0} %meta{float,max,1}  %read{18,18} %write{2147483647,-1}
+param	float	wireWidth	1		%meta{string,label,"Wireframe Width"} %meta{float,min,0} %meta{float,max,4}  %read{12,15} %write{2147483647,-1}
+oparam	color	Cout	0 0 0		%meta{string,widget,"null"}  %read{2147483647,-1} %write{19,19}
+global	float	u	%read{1,9} %write{2147483647,-1} %derivs
+global	float	v	%read{2,10} %write{2147483647,-1} %derivs
+local	float	LW	%read{11,14} %write{0,0}
+local	float	uedge	%read{13,13} %write{1,5}
+local	float	vedge	%read{16,16} %write{2,8}
+local	float	du	%read{11,11} %write{9,9}
+local	float	dv	%read{14,14} %write{10,10}
+local	float	wire	%read{18,18} %write{17,17}
+const	float	$const1	2		%read{0,0} %write{2147483647,-1}
+const	float	$const2	0.5		%read{3,6} %write{2147483647,-1}
+temp	int	$tmp1	%read{4,4} %write{3,3}
+const	float	$const3	1		%read{5,8} %write{2147483647,-1}
+temp	int	$tmp2	%read{7,7} %write{6,6}
+temp	float	$tmp3	%read{17,17} %write{13,13}
+temp	float	$tmp4	%read{12,12} %write{11,11}
+temp	float	$tmp5	%read{13,13} %write{12,12}
+temp	float	$tmp6	%read{17,17} %write{16,16}
+temp	float	$tmp7	%read{15,15} %write{14,14}
+temp	float	$tmp8	%read{16,16} %write{15,15}
+temp	float	$tmp9	%read{19,19} %write{18,18}
+code ___main___
+# PxrWireframe.osl:69
+#     float LW =  2.0;
+	assign		LW $const1 	%filename{"PxrWireframe.osl"} %line{69} %argrw{"wr"}
+# PxrWireframe.osl:70
+#     float uedge = u;
+	assign		uedge u 	%line{70} %argrw{"wr"}
+# PxrWireframe.osl:71
+#     float vedge = v;
+	assign		vedge v 	%line{71} %argrw{"wr"}
+# PxrWireframe.osl:72
+#     if (u >= 0.5)
+	ge		$tmp1 u $const2 	%line{72} %argrw{"wrr"}
+	if		$tmp1 6 6 	%argrw{"r"}
+# PxrWireframe.osl:73
+#         uedge = 1.0-u;
+	sub		uedge $const3 u 	%line{73} %argrw{"wrr"}
+# PxrWireframe.osl:74
+#     if (v >= 0.5)
+	ge		$tmp2 v $const2 	%line{74} %argrw{"wrr"}
+	if		$tmp2 9 9 	%argrw{"r"}
+# PxrWireframe.osl:75
+#         vedge = 1.0-v;
+	sub		vedge $const3 v 	%line{75} %argrw{"wrr"}
+# PxrWireframe.osl:77
+#     float du = Dx(u); float dv = Dy(v);
+	Dx		du u 	%line{77} %argrw{"wr"} %argderivs{1}
+	Dy		dv v 	%argrw{"wr"} %argderivs{1}
+# PxrWireframe.osl:78
+#     float wire = max( step( uedge, du*LW*wireWidth),
+	mul		$tmp4 du LW 	%line{78} %argrw{"wrr"}
+	mul		$tmp5 $tmp4 wireWidth 	%argrw{"wrr"}
+	step		$tmp3 uedge $tmp5 	%argrw{"wrr"}
+# PxrWireframe.osl:79
+#                    step( vedge, dv*LW*wireWidth)
+	mul		$tmp7 dv LW 	%line{79} %argrw{"wrr"}
+	mul		$tmp8 $tmp7 wireWidth 	%argrw{"wrr"}
+	step		$tmp6 vedge $tmp8 	%argrw{"wrr"}
+# PxrWireframe.osl:78
+#     float wire = max( step( uedge, du*LW*wireWidth),
+	max		wire $tmp3 $tmp6 	%line{78} %argrw{"wrr"}
+# PxrWireframe.osl:82
+#              wire*wireOpacity);
+	mul		$tmp9 wire wireOpacity 	%line{82} %argrw{"wrr"}
+# PxrWireframe.osl:81
+#     Cout = mix(backColor, wireColor,
+	mix		Cout backColor wireColor $tmp9 	%line{81} %argrw{"wrrr"}
+	end

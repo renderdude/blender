@@ -1,0 +1,687 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrTangentField.osl/obj/PxrTangentField.oso
+shader PxrTangentField	%meta{int,rfm_nodeid,1053348} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/geometry"} %meta{string,rfh_classification,"Pattern/Geometry"} %meta{string,help,"Defines a tangent field typically used to control anisotropic direction. InputRotation takes a single grayscale channel where black = 0 degrees and white = 360 degrees.InputVector takes a 2 channels map where the red channels is x and green is y. The blue channel is ignored. The vector method often gives better results by minimizing texture filtering artifacts. If such artifacts are too visible, use the 'nearest' texture filter. The 'nearest' filter disables entirely mip-mapping, so you should only us it with a low resolutiion map to avoid slowing down the renderer and consuming too much texture memory. "} 
+param	float	inputRotation	0		%meta{string,widget,"default"} %meta{string,help,"A single float value to rotate the shading tangent. This input will take precedence over inputVector"} %meta{string,label,"Input Rotation"}  %read{1,10} %write{2147483647,-1}
+param	color	inputVector	0 0 0		%meta{string,widget,"default"} %meta{string,help,"The red and green channels will be read as x and y coordinates of a 2d vector. If inputRotation is connected, this input will be ignored."} %meta{string,label,"Input Vector"}  %read{132,134} %write{2147483647,-1}
+param	float	rotationOffset	0		%meta{string,widget,"default"} %meta{string,help,"A global rotation offset."} %meta{int,connectable,0} %meta{string,label,"Rotation Offset"} %meta{float,max,90} %meta{float,min,-90}  %read{12,153} %write{2147483647,-1}
+param	float	rotationRange	1		%meta{string,widget,"default"} %meta{string,help,"Scales the rotation range. 1.0 equates 0 to 360 degrees."} %meta{int,connectable,0} %meta{string,label,"Rotation Range"} %meta{float,max,2} %meta{float,min,0}  %read{11,154} %write{2147483647,-1}
+param	int	centeredVectors	1		%meta{string,widget,"checkBox"} %meta{string,help,"Centers the gradient values of the vector map."} %meta{int,connectable,0} %meta{string,label,"Centered Vectors"}  %read{137,137} %write{2147483647,-1}
+oparam	vector	resultXYZ	0 0 0		%meta{string,help,"resultXYZ (vector)"}  %read{272,275} %write{131,272}
+oparam	float	resultX	0		%meta{string,help,"resultX (float)"}  %read{2147483647,-1} %write{273,273}
+oparam	float	resultY	0		%meta{string,help,"resultY (float)"}  %read{2147483647,-1} %write{274,274}
+oparam	float	resultZ	0		%meta{string,help,"resultZ (float)"}  %read{2147483647,-1} %write{275,275}
+global	point	P	%read{17,159} %write{2147483647,-1}
+global	normal	N	%read{19,159} %write{2147483647,-1}
+local	point	___325_p	%read{20,160} %write{17,157}
+local	point	___325_p1	%read{20,271} %write{18,158}
+local	point	___325_p2	%read{21,161} %write{19,159}
+local	vector	___325_u	%read{22,264} %write{21,162}
+local	vector	___325_q1	%read{33,271} %write{20,270}
+local	vector	___325_q2	%read{56,270} %write{34,269}
+local	float	___325_d	%read{31,266} %write{30,170}
+local	float	___325_sn	%read{76,220} %write{72,212}
+local	float	___325_cs	%read{74,222} %write{72,212}
+local	int	doRotation	%read{9,9} %write{0,3}
+local	vector	U	%read{145,145} %write{4,4}
+local	vector	V	%read{138,147} %write{5,144}
+local	vector	Tn	%read{8,8} %write{6,7}
+local	vector	dPds	%read{17,157} %write{8,8}
+local	float	___332_rad	%read{150,154} %write{146,150}
+const	int	$const1	0		%read{0,273} %write{2147483647,-1}
+temp	int	$tmp1	%read{2,2} %write{1,1}
+const	int	$const2	1		%read{3,274} %write{2147483647,-1}
+const	vector	$const3	1 0 0		%read{4,4} %write{2147483647,-1}
+const	vector	$const4	0 0 0		%read{5,5} %write{2147483647,-1}
+temp	int	$tmp2	%read{2147483647,-1} %write{7,7}
+const	string	$const5	"builtin"		%read{7,7} %write{2147483647,-1}
+const	string	$const6	"Tn"		%read{7,7} %write{2147483647,-1}
+temp	float	$tmp3	%read{72,72} %write{15,15}
+const	float	$const7	360		%read{10,10} %write{2147483647,-1}
+temp	float	$tmp4	%read{11,11} %write{10,10}
+temp	float	$tmp5	%read{12,12} %write{11,11}
+temp	float	$tmp6	%read{15,15} %write{12,12}
+const	string	$const8	"radians"		%read{13,151} %write{2147483647,-1}
+const	float	$const9	3.14159274		%read{14,152} %write{2147483647,-1}
+const	float	$const10	180		%read{14,152} %write{2147483647,-1}
+temp	float	$tmp7	%read{15,15} %write{14,14}
+const	string	$const11	"rotate"		%read{16,156} %write{2147483647,-1}
+temp	float	$tmp8	%read{25,25} %write{23,23}
+temp	float	$tmp9	%read{25,25} %write{24,24}
+temp	float	$tmp10	%read{29,29} %write{25,25}
+const	int	$const12	2		%read{26,275} %write{2147483647,-1}
+temp	float	$tmp11	%read{28,28} %write{26,26}
+temp	float	$tmp12	%read{28,28} %write{27,27}
+temp	float	$tmp13	%read{29,29} %write{28,28}
+temp	float	$tmp14	%read{30,30} %write{29,29}
+const	float	$const13	0		%read{31,171} %write{2147483647,-1}
+temp	int	$tmp15	%read{32,32} %write{31,31}
+temp	float	$tmp16	%read{34,34} %write{33,33}
+temp	float	$tmp17	%read{37,37} %write{35,35}
+temp	float	$tmp18	%read{37,37} %write{36,36}
+temp	float	$tmp19	%read{38,38} %write{37,37}
+temp	float	$tmp20	%read{43,43} %write{38,38}
+temp	float	$tmp21	%read{41,41} %write{39,39}
+temp	float	$tmp22	%read{41,41} %write{40,40}
+temp	float	$tmp23	%read{42,42} %write{41,41}
+temp	float	$tmp24	%read{43,43} %write{42,42}
+temp	float	$tmp25	%read{44,44} %write{43,43}
+temp	float	$tmp26	%read{47,47} %write{45,45}
+temp	float	$tmp27	%read{47,47} %write{46,46}
+temp	float	$tmp28	%read{48,48} %write{47,47}
+temp	float	$tmp29	%read{53,53} %write{48,48}
+temp	float	$tmp30	%read{51,51} %write{49,49}
+temp	float	$tmp31	%read{51,51} %write{50,50}
+temp	float	$tmp32	%read{52,52} %write{51,51}
+temp	float	$tmp33	%read{53,53} %write{52,52}
+temp	float	$tmp34	%read{54,54} %write{53,53}
+temp	float	$tmp35	%read{57,57} %write{56,56}
+temp	float	$tmp36	%read{61,61} %write{57,57}
+temp	float	$tmp37	%read{60,60} %write{58,58}
+temp	float	$tmp38	%read{60,60} %write{59,59}
+temp	float	$tmp39	%read{61,61} %write{60,60}
+temp	float	$tmp40	%read{62,62} %write{61,61}
+temp	float	$tmp41	%read{64,64} %write{63,63}
+temp	float	$tmp42	%read{67,67} %write{65,65}
+temp	float	$tmp43	%read{67,67} %write{66,66}
+temp	float	$tmp44	%read{70,70} %write{67,67}
+temp	float	$tmp45	%read{69,69} %write{68,68}
+temp	float	$tmp46	%read{70,70} %write{69,69}
+temp	float	$tmp47	%read{71,71} %write{70,70}
+temp	float	$tmp48	%read{74,74} %write{73,73}
+temp	float	$tmp49	%read{77,77} %write{74,74}
+temp	float	$tmp50	%read{76,76} %write{75,75}
+temp	float	$tmp51	%read{77,77} %write{76,76}
+temp	float	$tmp52	%read{78,78} %write{77,77}
+temp	float	$tmp53	%read{80,80} %write{79,79}
+temp	float	$tmp54	%read{83,83} %write{80,80}
+temp	float	$tmp55	%read{82,82} %write{81,81}
+temp	float	$tmp56	%read{83,83} %write{82,82}
+temp	float	$tmp57	%read{84,84} %write{83,83}
+temp	float	$tmp58	%read{86,86} %write{85,85}
+temp	float	$tmp59	%read{88,88} %write{87,87}
+temp	float	$tmp60	%read{92,92} %write{88,88}
+temp	float	$tmp61	%read{91,91} %write{89,89}
+temp	float	$tmp62	%read{91,91} %write{90,90}
+temp	float	$tmp63	%read{92,92} %write{91,91}
+temp	float	$tmp64	%read{93,93} %write{92,92}
+temp	float	$tmp65	%read{95,95} %write{94,94}
+temp	float	$tmp66	%read{97,97} %write{96,96}
+temp	float	$tmp67	%read{99,99} %write{97,97}
+temp	float	$tmp68	%read{99,99} %write{98,98}
+temp	float	$tmp69	%read{102,102} %write{99,99}
+temp	float	$tmp70	%read{101,101} %write{100,100}
+temp	float	$tmp71	%read{102,102} %write{101,101}
+temp	float	$tmp72	%read{103,103} %write{102,102}
+temp	int	$tmp73	%read{105,105} %write{104,104}
+temp	float	$tmp74	%read{107,107} %write{106,106}
+temp	float	$tmp75	%read{110,110} %write{108,108}
+temp	float	$tmp76	%read{110,110} %write{109,109}
+temp	float	$tmp77	%read{111,111} %write{110,110}
+temp	float	$tmp78	%read{116,116} %write{111,111}
+temp	float	$tmp79	%read{114,114} %write{112,112}
+temp	float	$tmp80	%read{114,114} %write{113,113}
+temp	float	$tmp81	%read{115,115} %write{114,114}
+temp	float	$tmp82	%read{116,116} %write{115,115}
+temp	float	$tmp83	%read{117,117} %write{116,116}
+temp	float	$tmp84	%read{119,119} %write{118,118}
+temp	float	$tmp85	%read{121,121} %write{119,119}
+temp	float	$tmp86	%read{121,121} %write{120,120}
+temp	float	$tmp87	%read{122,122} %write{121,121}
+temp	float	$tmp88	%read{127,127} %write{122,122}
+temp	float	$tmp89	%read{125,125} %write{123,123}
+temp	float	$tmp90	%read{125,125} %write{124,124}
+temp	float	$tmp91	%read{126,126} %write{125,125}
+temp	float	$tmp92	%read{127,127} %write{126,126}
+temp	float	$tmp93	%read{128,128} %write{127,127}
+temp	float	$tmp94	%read{133,133} %write{132,132}
+temp	float	$tmp95	%read{135,135} %write{134,134}
+temp	float	$tmp96	%read{139,139} %write{138,138}
+const	float	$const14	0.5		%read{139,142} %write{2147483647,-1}
+temp	float	$tmp97	%read{140,140} %write{139,139}
+temp	float	$tmp98	%read{142,142} %write{141,141}
+temp	float	$tmp99	%read{143,143} %write{142,142}
+temp	float	$tmp100	%read{146,146} %write{145,145}
+temp	float	$tmp101	%read{148,148} %write{147,147}
+temp	int	$tmp102	%read{149,149} %write{148,148}
+const	float	$const15	-1		%read{150,150} %write{2147483647,-1}
+temp	float	$tmp103	%read{155,155} %write{153,153}
+temp	float	$tmp104	%read{153,153} %write{152,152}
+temp	float	$tmp105	%read{155,155} %write{154,154}
+temp	float	$tmp106	%read{212,212} %write{155,155}
+temp	float	$tmp107	%read{165,165} %write{163,163}
+temp	float	$tmp108	%read{165,165} %write{164,164}
+temp	float	$tmp109	%read{169,169} %write{165,165}
+temp	float	$tmp110	%read{168,168} %write{166,166}
+temp	float	$tmp111	%read{168,168} %write{167,167}
+temp	float	$tmp112	%read{169,169} %write{168,168}
+temp	float	$tmp113	%read{170,170} %write{169,169}
+temp	int	$tmp114	%read{172,172} %write{171,171}
+temp	float	$tmp115	%read{174,174} %write{173,173}
+temp	float	$tmp116	%read{177,177} %write{175,175}
+temp	float	$tmp117	%read{177,177} %write{176,176}
+temp	float	$tmp118	%read{178,178} %write{177,177}
+temp	float	$tmp119	%read{183,183} %write{178,178}
+temp	float	$tmp120	%read{181,181} %write{179,179}
+temp	float	$tmp121	%read{181,181} %write{180,180}
+temp	float	$tmp122	%read{182,182} %write{181,181}
+temp	float	$tmp123	%read{183,183} %write{182,182}
+temp	float	$tmp124	%read{184,184} %write{183,183}
+temp	float	$tmp125	%read{187,187} %write{185,185}
+temp	float	$tmp126	%read{187,187} %write{186,186}
+temp	float	$tmp127	%read{188,188} %write{187,187}
+temp	float	$tmp128	%read{193,193} %write{188,188}
+temp	float	$tmp129	%read{191,191} %write{189,189}
+temp	float	$tmp130	%read{191,191} %write{190,190}
+temp	float	$tmp131	%read{192,192} %write{191,191}
+temp	float	$tmp132	%read{193,193} %write{192,192}
+temp	float	$tmp133	%read{194,194} %write{193,193}
+temp	float	$tmp134	%read{197,197} %write{196,196}
+temp	float	$tmp135	%read{201,201} %write{197,197}
+temp	float	$tmp136	%read{200,200} %write{198,198}
+temp	float	$tmp137	%read{200,200} %write{199,199}
+temp	float	$tmp138	%read{201,201} %write{200,200}
+temp	float	$tmp139	%read{202,202} %write{201,201}
+temp	float	$tmp140	%read{204,204} %write{203,203}
+temp	float	$tmp141	%read{207,207} %write{205,205}
+temp	float	$tmp142	%read{207,207} %write{206,206}
+temp	float	$tmp143	%read{210,210} %write{207,207}
+temp	float	$tmp144	%read{209,209} %write{208,208}
+temp	float	$tmp145	%read{210,210} %write{209,209}
+temp	float	$tmp146	%read{211,211} %write{210,210}
+temp	float	$tmp147	%read{214,214} %write{213,213}
+temp	float	$tmp148	%read{217,217} %write{214,214}
+temp	float	$tmp149	%read{216,216} %write{215,215}
+temp	float	$tmp150	%read{217,217} %write{216,216}
+temp	float	$tmp151	%read{218,218} %write{217,217}
+temp	float	$tmp152	%read{220,220} %write{219,219}
+temp	float	$tmp153	%read{223,223} %write{220,220}
+temp	float	$tmp154	%read{222,222} %write{221,221}
+temp	float	$tmp155	%read{223,223} %write{222,222}
+temp	float	$tmp156	%read{224,224} %write{223,223}
+temp	float	$tmp157	%read{226,226} %write{225,225}
+temp	float	$tmp158	%read{228,228} %write{227,227}
+temp	float	$tmp159	%read{232,232} %write{228,228}
+temp	float	$tmp160	%read{231,231} %write{229,229}
+temp	float	$tmp161	%read{231,231} %write{230,230}
+temp	float	$tmp162	%read{232,232} %write{231,231}
+temp	float	$tmp163	%read{233,233} %write{232,232}
+temp	float	$tmp164	%read{235,235} %write{234,234}
+temp	float	$tmp165	%read{237,237} %write{236,236}
+temp	float	$tmp166	%read{239,239} %write{237,237}
+temp	float	$tmp167	%read{239,239} %write{238,238}
+temp	float	$tmp168	%read{242,242} %write{239,239}
+temp	float	$tmp169	%read{241,241} %write{240,240}
+temp	float	$tmp170	%read{242,242} %write{241,241}
+temp	float	$tmp171	%read{243,243} %write{242,242}
+temp	int	$tmp172	%read{245,245} %write{244,244}
+temp	float	$tmp173	%read{247,247} %write{246,246}
+temp	float	$tmp174	%read{250,250} %write{248,248}
+temp	float	$tmp175	%read{250,250} %write{249,249}
+temp	float	$tmp176	%read{251,251} %write{250,250}
+temp	float	$tmp177	%read{256,256} %write{251,251}
+temp	float	$tmp178	%read{254,254} %write{252,252}
+temp	float	$tmp179	%read{254,254} %write{253,253}
+temp	float	$tmp180	%read{255,255} %write{254,254}
+temp	float	$tmp181	%read{256,256} %write{255,255}
+temp	float	$tmp182	%read{257,257} %write{256,256}
+temp	float	$tmp183	%read{259,259} %write{258,258}
+temp	float	$tmp184	%read{261,261} %write{259,259}
+temp	float	$tmp185	%read{261,261} %write{260,260}
+temp	float	$tmp186	%read{262,262} %write{261,261}
+temp	float	$tmp187	%read{267,267} %write{262,262}
+temp	float	$tmp188	%read{265,265} %write{263,263}
+temp	float	$tmp189	%read{265,265} %write{264,264}
+temp	float	$tmp190	%read{266,266} %write{265,265}
+temp	float	$tmp191	%read{267,267} %write{266,266}
+temp	float	$tmp192	%read{268,268} %write{267,267}
+code ___main___
+# PxrTangentField.osl:175
+#     int doRotation = 0;
+	assign		doRotation $const1 	%filename{"PxrTangentField.osl"} %line{175} %argrw{"wr"}
+# PxrTangentField.osl:176
+#     if (isconnected(inputRotation))
+	isconnected	$tmp1 inputRotation 	%line{176} %argrw{"wr"}
+	if		$tmp1 4 4 	%argrw{"r"}
+# PxrTangentField.osl:178
+#         doRotation = 1;
+	assign		doRotation $const2 	%line{178} %argrw{"wr"}
+# PxrTangentField.osl:181
+#     vector U = vector(1.0, 0.0, 0.0);
+	assign		U $const3 	%line{181} %argrw{"wr"}
+# PxrTangentField.osl:182
+#     vector V = vector(0.0, 0.0, 0.0);
+	assign		V $const4 	%line{182} %argrw{"wr"}
+# PxrTangentField.osl:184
+#     vector Tn = 0;
+	assign		Tn $const1 	%line{184} %argrw{"wr"}
+# PxrTangentField.osl:185
+#     getattribute("builtin", "Tn", Tn);
+	getattribute	$tmp2 $const5 $const6 Tn 	%line{185} %argrw{"wrrw"}
+# PxrTangentField.osl:186
+#     vector dPds = normalize(Tn);
+	normalize	dPds Tn 	%line{186} %argrw{"wr"}
+# PxrTangentField.osl:188
+#     if (doRotation)
+	if		doRotation 132 272 	%line{188} %argrw{"r"}
+# PxrTangentField.osl:191
+#         rotate(dPds, radians(rotationOffset + inputRotation * 360.0 * rotationRange), P, N,
+	mul		$tmp4 inputRotation $const7 	%line{191} %argrw{"wrr"}
+	mul		$tmp5 $tmp4 rotationRange 	%argrw{"wrr"}
+	add		$tmp6 rotationOffset $tmp5 	%argrw{"wrr"}
+	functioncall	$const8 16 	%argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:88
+# float  radians (float x)  { return x*(M_PI/180.0); }
+	div		$tmp7 $const9 $const10 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{88} %argrw{"wrr"}
+	mul		$tmp3 $tmp6 $tmp7 	%argrw{"wrr"}
+# PxrTangentField.osl:191
+#         rotate(dPds, radians(rotationOffset + inputRotation * 360.0 * rotationRange), P, N,
+	functioncall	$const11 132 	%filename{"PxrTangentField.osl"} %line{191} %argrw{"r"}
+# PxrTangentField.osl:39
+#     point p = P + invec;
+	add		___325_p P dPds 	%line{39} %argrw{"wrr"}
+# PxrTangentField.osl:40
+#     point p1 = P;
+	assign		___325_p1 P 	%line{40} %argrw{"wr"}
+# PxrTangentField.osl:41
+#     point p2 = P + Nn;
+	add		___325_p2 P N 	%line{41} %argrw{"wrr"}
+# PxrTangentField.osl:47
+#     q1 = p - p1;
+	sub		___325_q1 ___325_p ___325_p1 	%line{47} %argrw{"wrr"}
+# PxrTangentField.osl:48
+#     u = p2 - p1;
+	sub		___325_u ___325_p2 ___325_p1 	%line{48} %argrw{"wrr"}
+# PxrTangentField.osl:49
+#     u = normalize(u);
+	normalize	___325_u ___325_u 	%line{49} %argrw{"wr"}
+# PxrTangentField.osl:50
+#     d = sqrt(u[1] * u[1] + u[2] * u[2]);
+	compref		$tmp8 ___325_u $const2 	%line{50} %argrw{"wrr"}
+	compref		$tmp9 ___325_u $const2 	%argrw{"wrr"}
+	mul		$tmp10 $tmp8 $tmp9 	%argrw{"wrr"}
+	compref		$tmp11 ___325_u $const12 	%argrw{"wrr"}
+	compref		$tmp12 ___325_u $const12 	%argrw{"wrr"}
+	mul		$tmp13 $tmp11 $tmp12 	%argrw{"wrr"}
+	add		$tmp14 $tmp10 $tmp13 	%argrw{"wrr"}
+	sqrt		___325_d $tmp14 	%argrw{"wr"}
+# PxrTangentField.osl:53
+#     if (d != 0.0)
+	neq		$tmp15 ___325_d $const13 	%line{53} %argrw{"wrr"}
+	if		$tmp15 55 56 	%argrw{"r"}
+# PxrTangentField.osl:55
+#         q2[0] = q1[0];
+	compref		$tmp16 ___325_q1 $const1 	%line{55} %argrw{"wrr"}
+	compassign	___325_q2 $const1 $tmp16 	%argrw{"wrr"}
+# PxrTangentField.osl:56
+#         q2[1] = q1[1] * u[2] / d - q1[2] * u[1] / d;
+	compref		$tmp17 ___325_q1 $const2 	%line{56} %argrw{"wrr"}
+	compref		$tmp18 ___325_u $const12 	%argrw{"wrr"}
+	mul		$tmp19 $tmp17 $tmp18 	%argrw{"wrr"}
+	div		$tmp20 $tmp19 ___325_d 	%argrw{"wrr"}
+	compref		$tmp21 ___325_q1 $const12 	%argrw{"wrr"}
+	compref		$tmp22 ___325_u $const2 	%argrw{"wrr"}
+	mul		$tmp23 $tmp21 $tmp22 	%argrw{"wrr"}
+	div		$tmp24 $tmp23 ___325_d 	%argrw{"wrr"}
+	sub		$tmp25 $tmp20 $tmp24 	%argrw{"wrr"}
+	compassign	___325_q2 $const2 $tmp25 	%argrw{"wrr"}
+# PxrTangentField.osl:57
+#         q2[2] = q1[1] * u[1] / d + q1[2] * u[2] / d;
+	compref		$tmp26 ___325_q1 $const2 	%line{57} %argrw{"wrr"}
+	compref		$tmp27 ___325_u $const2 	%argrw{"wrr"}
+	mul		$tmp28 $tmp26 $tmp27 	%argrw{"wrr"}
+	div		$tmp29 $tmp28 ___325_d 	%argrw{"wrr"}
+	compref		$tmp30 ___325_q1 $const12 	%argrw{"wrr"}
+	compref		$tmp31 ___325_u $const12 	%argrw{"wrr"}
+	mul		$tmp32 $tmp30 $tmp31 	%argrw{"wrr"}
+	div		$tmp33 $tmp32 ___325_d 	%argrw{"wrr"}
+	add		$tmp34 $tmp29 $tmp33 	%argrw{"wrr"}
+	compassign	___325_q2 $const12 $tmp34 	%argrw{"wrr"}
+# PxrTangentField.osl:61
+#         q2 = q1;
+	assign		___325_q2 ___325_q1 	%line{61} %argrw{"wr"}
+# PxrTangentField.osl:65
+#     q1[0] = q2[0] * d - q2[2] * u[0];
+	compref		$tmp35 ___325_q2 $const1 	%line{65} %argrw{"wrr"}
+	mul		$tmp36 $tmp35 ___325_d 	%argrw{"wrr"}
+	compref		$tmp37 ___325_q2 $const12 	%argrw{"wrr"}
+	compref		$tmp38 ___325_u $const1 	%argrw{"wrr"}
+	mul		$tmp39 $tmp37 $tmp38 	%argrw{"wrr"}
+	sub		$tmp40 $tmp36 $tmp39 	%argrw{"wrr"}
+	compassign	___325_q1 $const1 $tmp40 	%argrw{"wrr"}
+# PxrTangentField.osl:66
+#     q1[1] = q2[1];
+	compref		$tmp41 ___325_q2 $const2 	%line{66} %argrw{"wrr"}
+	compassign	___325_q1 $const2 $tmp41 	%argrw{"wrr"}
+# PxrTangentField.osl:67
+#     q1[2] = q2[0] * u[0] + q2[2] * d;
+	compref		$tmp42 ___325_q2 $const1 	%line{67} %argrw{"wrr"}
+	compref		$tmp43 ___325_u $const1 	%argrw{"wrr"}
+	mul		$tmp44 $tmp42 $tmp43 	%argrw{"wrr"}
+	compref		$tmp45 ___325_q2 $const12 	%argrw{"wrr"}
+	mul		$tmp46 $tmp45 ___325_d 	%argrw{"wrr"}
+	add		$tmp47 $tmp44 $tmp46 	%argrw{"wrr"}
+	compassign	___325_q1 $const12 $tmp47 	%argrw{"wrr"}
+# PxrTangentField.osl:71
+#     sincos(rad, sn, cs);
+	sincos		$tmp3 ___325_sn ___325_cs 	%line{71} %argrw{"rww"}
+# PxrTangentField.osl:72
+#     q2[0] = q1[0] * cs - q1[1] * sn;
+	compref		$tmp48 ___325_q1 $const1 	%line{72} %argrw{"wrr"}
+	mul		$tmp49 $tmp48 ___325_cs 	%argrw{"wrr"}
+	compref		$tmp50 ___325_q1 $const2 	%argrw{"wrr"}
+	mul		$tmp51 $tmp50 ___325_sn 	%argrw{"wrr"}
+	sub		$tmp52 $tmp49 $tmp51 	%argrw{"wrr"}
+	compassign	___325_q2 $const1 $tmp52 	%argrw{"wrr"}
+# PxrTangentField.osl:73
+#     q2[1] = q1[0] * sn + q1[1] * cs;
+	compref		$tmp53 ___325_q1 $const1 	%line{73} %argrw{"wrr"}
+	mul		$tmp54 $tmp53 ___325_sn 	%argrw{"wrr"}
+	compref		$tmp55 ___325_q1 $const2 	%argrw{"wrr"}
+	mul		$tmp56 $tmp55 ___325_cs 	%argrw{"wrr"}
+	add		$tmp57 $tmp54 $tmp56 	%argrw{"wrr"}
+	compassign	___325_q2 $const2 $tmp57 	%argrw{"wrr"}
+# PxrTangentField.osl:74
+#     q2[2] = q1[2];
+	compref		$tmp58 ___325_q1 $const12 	%line{74} %argrw{"wrr"}
+	compassign	___325_q2 $const12 $tmp58 	%argrw{"wrr"}
+# PxrTangentField.osl:77
+#     q1[0] = q2[0] * d + q2[2] * u[0];
+	compref		$tmp59 ___325_q2 $const1 	%line{77} %argrw{"wrr"}
+	mul		$tmp60 $tmp59 ___325_d 	%argrw{"wrr"}
+	compref		$tmp61 ___325_q2 $const12 	%argrw{"wrr"}
+	compref		$tmp62 ___325_u $const1 	%argrw{"wrr"}
+	mul		$tmp63 $tmp61 $tmp62 	%argrw{"wrr"}
+	add		$tmp64 $tmp60 $tmp63 	%argrw{"wrr"}
+	compassign	___325_q1 $const1 $tmp64 	%argrw{"wrr"}
+# PxrTangentField.osl:78
+#     q1[1] = q2[1];
+	compref		$tmp65 ___325_q2 $const2 	%line{78} %argrw{"wrr"}
+	compassign	___325_q1 $const2 $tmp65 	%argrw{"wrr"}
+# PxrTangentField.osl:79
+#     q1[2] = -q2[0] * u[0] + q2[2] * d;
+	compref		$tmp66 ___325_q2 $const1 	%line{79} %argrw{"wrr"}
+	neg		$tmp67 $tmp66 	%argrw{"wr"}
+	compref		$tmp68 ___325_u $const1 	%argrw{"wrr"}
+	mul		$tmp69 $tmp67 $tmp68 	%argrw{"wrr"}
+	compref		$tmp70 ___325_q2 $const12 	%argrw{"wrr"}
+	mul		$tmp71 $tmp70 ___325_d 	%argrw{"wrr"}
+	add		$tmp72 $tmp69 $tmp71 	%argrw{"wrr"}
+	compassign	___325_q1 $const12 $tmp72 	%argrw{"wrr"}
+# PxrTangentField.osl:82
+#     if (d != 0)
+	neq		$tmp73 ___325_d $const1 	%line{82} %argrw{"wrr"}
+	if		$tmp73 129 130 	%argrw{"r"}
+# PxrTangentField.osl:84
+#         q2[0] = q1[0];
+	compref		$tmp74 ___325_q1 $const1 	%line{84} %argrw{"wrr"}
+	compassign	___325_q2 $const1 $tmp74 	%argrw{"wrr"}
+# PxrTangentField.osl:85
+#         q2[1] = q1[1] * u[2] / d + q1[2] * u[1] / d;
+	compref		$tmp75 ___325_q1 $const2 	%line{85} %argrw{"wrr"}
+	compref		$tmp76 ___325_u $const12 	%argrw{"wrr"}
+	mul		$tmp77 $tmp75 $tmp76 	%argrw{"wrr"}
+	div		$tmp78 $tmp77 ___325_d 	%argrw{"wrr"}
+	compref		$tmp79 ___325_q1 $const12 	%argrw{"wrr"}
+	compref		$tmp80 ___325_u $const2 	%argrw{"wrr"}
+	mul		$tmp81 $tmp79 $tmp80 	%argrw{"wrr"}
+	div		$tmp82 $tmp81 ___325_d 	%argrw{"wrr"}
+	add		$tmp83 $tmp78 $tmp82 	%argrw{"wrr"}
+	compassign	___325_q2 $const2 $tmp83 	%argrw{"wrr"}
+# PxrTangentField.osl:86
+#         q2[2] = -q1[1] * u[1] / d + q1[2] * u[2] / d;
+	compref		$tmp84 ___325_q1 $const2 	%line{86} %argrw{"wrr"}
+	neg		$tmp85 $tmp84 	%argrw{"wr"}
+	compref		$tmp86 ___325_u $const2 	%argrw{"wrr"}
+	mul		$tmp87 $tmp85 $tmp86 	%argrw{"wrr"}
+	div		$tmp88 $tmp87 ___325_d 	%argrw{"wrr"}
+	compref		$tmp89 ___325_q1 $const12 	%argrw{"wrr"}
+	compref		$tmp90 ___325_u $const12 	%argrw{"wrr"}
+	mul		$tmp91 $tmp89 $tmp90 	%argrw{"wrr"}
+	div		$tmp92 $tmp91 ___325_d 	%argrw{"wrr"}
+	add		$tmp93 $tmp88 $tmp92 	%argrw{"wrr"}
+	compassign	___325_q2 $const12 $tmp93 	%argrw{"wrr"}
+# PxrTangentField.osl:90
+#         q2 = q1;
+	assign		___325_q2 ___325_q1 	%line{90} %argrw{"wr"}
+# PxrTangentField.osl:94
+#     q1 = q2 + p1;
+	add		___325_q1 ___325_q2 ___325_p1 	%line{94} %argrw{"wrr"}
+# PxrTangentField.osl:96
+#     result = p1 - q1;
+	sub		resultXYZ ___325_p1 ___325_q1 	%line{96} %argrw{"wrr"}
+# PxrTangentField.osl:198
+#         V[0] = inputVector[0];
+	compref		$tmp94 inputVector $const1 	%line{198} %argrw{"wrr"}
+	compassign	V $const1 $tmp94 	%argrw{"wrr"}
+# PxrTangentField.osl:199
+#         V[1] = inputVector[1];
+	compref		$tmp95 inputVector $const2 	%line{199} %argrw{"wrr"}
+	compassign	V $const2 $tmp95 	%argrw{"wrr"}
+# PxrTangentField.osl:200
+#         V[2] = 0.0;
+	compassign	V $const12 $const13 	%line{200} %argrw{"wrr"}
+# PxrTangentField.osl:201
+#         if (centeredVectors)
+	if		centeredVectors 144 144 	%line{201} %argrw{"r"}
+# PxrTangentField.osl:203
+#             V[0] -= 0.5;
+	compref		$tmp96 V $const1 	%line{203} %argrw{"wrr"}
+	sub		$tmp97 $tmp96 $const14 	%argrw{"wrr"}
+	compassign	V $const1 $tmp97 	%argrw{"wrr"}
+# PxrTangentField.osl:204
+#             V[1] -= 0.5;
+	compref		$tmp98 V $const2 	%line{204} %argrw{"wrr"}
+	sub		$tmp99 $tmp98 $const14 	%argrw{"wrr"}
+	compassign	V $const2 $tmp99 	%argrw{"wrr"}
+# PxrTangentField.osl:206
+#         V = normalize(V);
+	normalize	V V 	%line{206} %argrw{"wr"}
+# PxrTangentField.osl:207
+#         float rad = acos(dot(U, V));
+	dot		$tmp100 U V 	%line{207} %argrw{"wrr"}
+	acos		___332_rad $tmp100 	%argrw{"wr"}
+# PxrTangentField.osl:208
+#         if (V[1] < 0.0) rad *= -1.0;
+	compref		$tmp101 V $const2 	%line{208} %argrw{"wrr"}
+	lt		$tmp102 $tmp101 $const13 	%argrw{"wrr"}
+	if		$tmp102 151 151 	%argrw{"r"}
+	mul		___332_rad ___332_rad $const15 	%argrw{"wrr"}
+# PxrTangentField.osl:210
+#         rotate(dPds, radians(rotationOffset) + rad * rotationRange, P, N, resultXYZ);
+	functioncall	$const8 154 	%line{210} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:88
+# float  radians (float x)  { return x*(M_PI/180.0); }
+	div		$tmp104 $const9 $const10 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{88} %argrw{"wrr"}
+	mul		$tmp103 rotationOffset $tmp104 	%argrw{"wrr"}
+# PxrTangentField.osl:210
+#         rotate(dPds, radians(rotationOffset) + rad * rotationRange, P, N, resultXYZ);
+	mul		$tmp105 ___332_rad rotationRange 	%filename{"PxrTangentField.osl"} %line{210} %argrw{"wrr"}
+	add		$tmp106 $tmp103 $tmp105 	%argrw{"wrr"}
+	functioncall	$const11 272 	%argrw{"r"}
+# PxrTangentField.osl:39
+#     point p = P + invec;
+	add		___325_p P dPds 	%line{39} %argrw{"wrr"}
+# PxrTangentField.osl:40
+#     point p1 = P;
+	assign		___325_p1 P 	%line{40} %argrw{"wr"}
+# PxrTangentField.osl:41
+#     point p2 = P + Nn;
+	add		___325_p2 P N 	%line{41} %argrw{"wrr"}
+# PxrTangentField.osl:47
+#     q1 = p - p1;
+	sub		___325_q1 ___325_p ___325_p1 	%line{47} %argrw{"wrr"}
+# PxrTangentField.osl:48
+#     u = p2 - p1;
+	sub		___325_u ___325_p2 ___325_p1 	%line{48} %argrw{"wrr"}
+# PxrTangentField.osl:49
+#     u = normalize(u);
+	normalize	___325_u ___325_u 	%line{49} %argrw{"wr"}
+# PxrTangentField.osl:50
+#     d = sqrt(u[1] * u[1] + u[2] * u[2]);
+	compref		$tmp107 ___325_u $const2 	%line{50} %argrw{"wrr"}
+	compref		$tmp108 ___325_u $const2 	%argrw{"wrr"}
+	mul		$tmp109 $tmp107 $tmp108 	%argrw{"wrr"}
+	compref		$tmp110 ___325_u $const12 	%argrw{"wrr"}
+	compref		$tmp111 ___325_u $const12 	%argrw{"wrr"}
+	mul		$tmp112 $tmp110 $tmp111 	%argrw{"wrr"}
+	add		$tmp113 $tmp109 $tmp112 	%argrw{"wrr"}
+	sqrt		___325_d $tmp113 	%argrw{"wr"}
+# PxrTangentField.osl:53
+#     if (d != 0.0)
+	neq		$tmp114 ___325_d $const13 	%line{53} %argrw{"wrr"}
+	if		$tmp114 195 196 	%argrw{"r"}
+# PxrTangentField.osl:55
+#         q2[0] = q1[0];
+	compref		$tmp115 ___325_q1 $const1 	%line{55} %argrw{"wrr"}
+	compassign	___325_q2 $const1 $tmp115 	%argrw{"wrr"}
+# PxrTangentField.osl:56
+#         q2[1] = q1[1] * u[2] / d - q1[2] * u[1] / d;
+	compref		$tmp116 ___325_q1 $const2 	%line{56} %argrw{"wrr"}
+	compref		$tmp117 ___325_u $const12 	%argrw{"wrr"}
+	mul		$tmp118 $tmp116 $tmp117 	%argrw{"wrr"}
+	div		$tmp119 $tmp118 ___325_d 	%argrw{"wrr"}
+	compref		$tmp120 ___325_q1 $const12 	%argrw{"wrr"}
+	compref		$tmp121 ___325_u $const2 	%argrw{"wrr"}
+	mul		$tmp122 $tmp120 $tmp121 	%argrw{"wrr"}
+	div		$tmp123 $tmp122 ___325_d 	%argrw{"wrr"}
+	sub		$tmp124 $tmp119 $tmp123 	%argrw{"wrr"}
+	compassign	___325_q2 $const2 $tmp124 	%argrw{"wrr"}
+# PxrTangentField.osl:57
+#         q2[2] = q1[1] * u[1] / d + q1[2] * u[2] / d;
+	compref		$tmp125 ___325_q1 $const2 	%line{57} %argrw{"wrr"}
+	compref		$tmp126 ___325_u $const2 	%argrw{"wrr"}
+	mul		$tmp127 $tmp125 $tmp126 	%argrw{"wrr"}
+	div		$tmp128 $tmp127 ___325_d 	%argrw{"wrr"}
+	compref		$tmp129 ___325_q1 $const12 	%argrw{"wrr"}
+	compref		$tmp130 ___325_u $const12 	%argrw{"wrr"}
+	mul		$tmp131 $tmp129 $tmp130 	%argrw{"wrr"}
+	div		$tmp132 $tmp131 ___325_d 	%argrw{"wrr"}
+	add		$tmp133 $tmp128 $tmp132 	%argrw{"wrr"}
+	compassign	___325_q2 $const12 $tmp133 	%argrw{"wrr"}
+# PxrTangentField.osl:61
+#         q2 = q1;
+	assign		___325_q2 ___325_q1 	%line{61} %argrw{"wr"}
+# PxrTangentField.osl:65
+#     q1[0] = q2[0] * d - q2[2] * u[0];
+	compref		$tmp134 ___325_q2 $const1 	%line{65} %argrw{"wrr"}
+	mul		$tmp135 $tmp134 ___325_d 	%argrw{"wrr"}
+	compref		$tmp136 ___325_q2 $const12 	%argrw{"wrr"}
+	compref		$tmp137 ___325_u $const1 	%argrw{"wrr"}
+	mul		$tmp138 $tmp136 $tmp137 	%argrw{"wrr"}
+	sub		$tmp139 $tmp135 $tmp138 	%argrw{"wrr"}
+	compassign	___325_q1 $const1 $tmp139 	%argrw{"wrr"}
+# PxrTangentField.osl:66
+#     q1[1] = q2[1];
+	compref		$tmp140 ___325_q2 $const2 	%line{66} %argrw{"wrr"}
+	compassign	___325_q1 $const2 $tmp140 	%argrw{"wrr"}
+# PxrTangentField.osl:67
+#     q1[2] = q2[0] * u[0] + q2[2] * d;
+	compref		$tmp141 ___325_q2 $const1 	%line{67} %argrw{"wrr"}
+	compref		$tmp142 ___325_u $const1 	%argrw{"wrr"}
+	mul		$tmp143 $tmp141 $tmp142 	%argrw{"wrr"}
+	compref		$tmp144 ___325_q2 $const12 	%argrw{"wrr"}
+	mul		$tmp145 $tmp144 ___325_d 	%argrw{"wrr"}
+	add		$tmp146 $tmp143 $tmp145 	%argrw{"wrr"}
+	compassign	___325_q1 $const12 $tmp146 	%argrw{"wrr"}
+# PxrTangentField.osl:71
+#     sincos(rad, sn, cs);
+	sincos		$tmp106 ___325_sn ___325_cs 	%line{71} %argrw{"rww"}
+# PxrTangentField.osl:72
+#     q2[0] = q1[0] * cs - q1[1] * sn;
+	compref		$tmp147 ___325_q1 $const1 	%line{72} %argrw{"wrr"}
+	mul		$tmp148 $tmp147 ___325_cs 	%argrw{"wrr"}
+	compref		$tmp149 ___325_q1 $const2 	%argrw{"wrr"}
+	mul		$tmp150 $tmp149 ___325_sn 	%argrw{"wrr"}
+	sub		$tmp151 $tmp148 $tmp150 	%argrw{"wrr"}
+	compassign	___325_q2 $const1 $tmp151 	%argrw{"wrr"}
+# PxrTangentField.osl:73
+#     q2[1] = q1[0] * sn + q1[1] * cs;
+	compref		$tmp152 ___325_q1 $const1 	%line{73} %argrw{"wrr"}
+	mul		$tmp153 $tmp152 ___325_sn 	%argrw{"wrr"}
+	compref		$tmp154 ___325_q1 $const2 	%argrw{"wrr"}
+	mul		$tmp155 $tmp154 ___325_cs 	%argrw{"wrr"}
+	add		$tmp156 $tmp153 $tmp155 	%argrw{"wrr"}
+	compassign	___325_q2 $const2 $tmp156 	%argrw{"wrr"}
+# PxrTangentField.osl:74
+#     q2[2] = q1[2];
+	compref		$tmp157 ___325_q1 $const12 	%line{74} %argrw{"wrr"}
+	compassign	___325_q2 $const12 $tmp157 	%argrw{"wrr"}
+# PxrTangentField.osl:77
+#     q1[0] = q2[0] * d + q2[2] * u[0];
+	compref		$tmp158 ___325_q2 $const1 	%line{77} %argrw{"wrr"}
+	mul		$tmp159 $tmp158 ___325_d 	%argrw{"wrr"}
+	compref		$tmp160 ___325_q2 $const12 	%argrw{"wrr"}
+	compref		$tmp161 ___325_u $const1 	%argrw{"wrr"}
+	mul		$tmp162 $tmp160 $tmp161 	%argrw{"wrr"}
+	add		$tmp163 $tmp159 $tmp162 	%argrw{"wrr"}
+	compassign	___325_q1 $const1 $tmp163 	%argrw{"wrr"}
+# PxrTangentField.osl:78
+#     q1[1] = q2[1];
+	compref		$tmp164 ___325_q2 $const2 	%line{78} %argrw{"wrr"}
+	compassign	___325_q1 $const2 $tmp164 	%argrw{"wrr"}
+# PxrTangentField.osl:79
+#     q1[2] = -q2[0] * u[0] + q2[2] * d;
+	compref		$tmp165 ___325_q2 $const1 	%line{79} %argrw{"wrr"}
+	neg		$tmp166 $tmp165 	%argrw{"wr"}
+	compref		$tmp167 ___325_u $const1 	%argrw{"wrr"}
+	mul		$tmp168 $tmp166 $tmp167 	%argrw{"wrr"}
+	compref		$tmp169 ___325_q2 $const12 	%argrw{"wrr"}
+	mul		$tmp170 $tmp169 ___325_d 	%argrw{"wrr"}
+	add		$tmp171 $tmp168 $tmp170 	%argrw{"wrr"}
+	compassign	___325_q1 $const12 $tmp171 	%argrw{"wrr"}
+# PxrTangentField.osl:82
+#     if (d != 0)
+	neq		$tmp172 ___325_d $const1 	%line{82} %argrw{"wrr"}
+	if		$tmp172 269 270 	%argrw{"r"}
+# PxrTangentField.osl:84
+#         q2[0] = q1[0];
+	compref		$tmp173 ___325_q1 $const1 	%line{84} %argrw{"wrr"}
+	compassign	___325_q2 $const1 $tmp173 	%argrw{"wrr"}
+# PxrTangentField.osl:85
+#         q2[1] = q1[1] * u[2] / d + q1[2] * u[1] / d;
+	compref		$tmp174 ___325_q1 $const2 	%line{85} %argrw{"wrr"}
+	compref		$tmp175 ___325_u $const12 	%argrw{"wrr"}
+	mul		$tmp176 $tmp174 $tmp175 	%argrw{"wrr"}
+	div		$tmp177 $tmp176 ___325_d 	%argrw{"wrr"}
+	compref		$tmp178 ___325_q1 $const12 	%argrw{"wrr"}
+	compref		$tmp179 ___325_u $const2 	%argrw{"wrr"}
+	mul		$tmp180 $tmp178 $tmp179 	%argrw{"wrr"}
+	div		$tmp181 $tmp180 ___325_d 	%argrw{"wrr"}
+	add		$tmp182 $tmp177 $tmp181 	%argrw{"wrr"}
+	compassign	___325_q2 $const2 $tmp182 	%argrw{"wrr"}
+# PxrTangentField.osl:86
+#         q2[2] = -q1[1] * u[1] / d + q1[2] * u[2] / d;
+	compref		$tmp183 ___325_q1 $const2 	%line{86} %argrw{"wrr"}
+	neg		$tmp184 $tmp183 	%argrw{"wr"}
+	compref		$tmp185 ___325_u $const2 	%argrw{"wrr"}
+	mul		$tmp186 $tmp184 $tmp185 	%argrw{"wrr"}
+	div		$tmp187 $tmp186 ___325_d 	%argrw{"wrr"}
+	compref		$tmp188 ___325_q1 $const12 	%argrw{"wrr"}
+	compref		$tmp189 ___325_u $const12 	%argrw{"wrr"}
+	mul		$tmp190 $tmp188 $tmp189 	%argrw{"wrr"}
+	div		$tmp191 $tmp190 ___325_d 	%argrw{"wrr"}
+	add		$tmp192 $tmp187 $tmp191 	%argrw{"wrr"}
+	compassign	___325_q2 $const12 $tmp192 	%argrw{"wrr"}
+# PxrTangentField.osl:90
+#         q2 = q1;
+	assign		___325_q2 ___325_q1 	%line{90} %argrw{"wr"}
+# PxrTangentField.osl:94
+#     q1 = q2 + p1;
+	add		___325_q1 ___325_q2 ___325_p1 	%line{94} %argrw{"wrr"}
+# PxrTangentField.osl:96
+#     result = p1 - q1;
+	sub		resultXYZ ___325_p1 ___325_q1 	%line{96} %argrw{"wrr"}
+# PxrTangentField.osl:213
+#     resultXYZ = normalize(resultXYZ);
+	normalize	resultXYZ resultXYZ 	%line{213} %argrw{"wr"}
+# PxrTangentField.osl:215
+#     resultX = resultXYZ[0];
+	compref		resultX resultXYZ $const1 	%line{215} %argrw{"wrr"}
+# PxrTangentField.osl:216
+#     resultY = resultXYZ[1];
+	compref		resultY resultXYZ $const2 	%line{216} %argrw{"wrr"}
+# PxrTangentField.osl:217
+#     resultZ = resultXYZ[2];
+	compref		resultZ resultXYZ $const12 	%line{217} %argrw{"wrr"}
+	end

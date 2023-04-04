@@ -1,0 +1,31 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrMetallicWorkflow.osl/obj/PxrMetallicWorkflow.oso
+shader PxrMetallicWorkflow	%meta{int,rfm_nodeid,1233489} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/utility"} %meta{string,rfh_classification,"Pattern/Utility"} %meta{string,help,"This node converts baseColor, metallic and specular parameters from Disney's Principled BRDF to a diffuseColor, specularEdgeColor and specularFaceColor values. The BxDF MUST use Artistic fresnel.The diffuse and specular outputs are weighted so they can be added together."} 
+param	color	baseColor	0.200000003 0.5 0.800000012		%meta{string,label,"Base Color"} %meta{string,help,"Base color texture input"}  %read{1,5} %write{2147483647,-1}
+param	float	metallic	0		%meta{string,label,"Metallic"} %meta{float,min,0} %meta{float,max,1} %meta{string,help,"Metallic texture input"}  %read{0,5} %write{2147483647,-1}
+param	float	specular	0.5		%meta{string,label,"Specular"} %meta{float,min,0} %meta{float,slidermax,1} %meta{string,help,"Specular texture input. The default 0.5 value corresponds to a index of refraction of 1.5."}  %read{3,3} %write{2147483647,-1}
+oparam	color	resultDiffuseRGB	0 0 0		%read{2147483647,-1} %write{1,1}
+oparam	color	resultSpecularEdgeRGB	1 1 1		%read{2147483647,-1} %write{2,2}
+oparam	color	resultSpecularFaceRGB	0.0399999991 0.0399999991 0.0399999991		%read{2147483647,-1} %write{5,5}
+const	float	$const1	1		%read{0,0} %write{2147483647,-1}
+temp	float	$tmp1	%read{1,1} %write{0,0}
+const	color	$const2	1 1 1		%read{2,2} %write{2147483647,-1}
+temp	color	$tmp3	%read{5,5} %write{4,4}
+temp	float	$tmp4	%read{4,4} %write{3,3}
+const	float	$const3	0		%read{3,3} %write{2147483647,-1}
+const	float	$const4	0.0799999982		%read{3,3} %write{2147483647,-1}
+code ___main___
+# PxrMetallicWorkflow.osl:74
+#     resultDiffuseRGB = baseColor * (1.0 - metallic);
+	sub		$tmp1 $const1 metallic 	%filename{"PxrMetallicWorkflow.osl"} %line{74} %argrw{"wrr"}
+	mul		resultDiffuseRGB baseColor $tmp1 	%argrw{"wrr"}
+# PxrMetallicWorkflow.osl:75
+#     resultSpecularEdgeRGB = mix(color(1.0), baseColor, metallic);
+	mix		resultSpecularEdgeRGB $const2 baseColor metallic 	%line{75} %argrw{"wrrr"}
+# PxrMetallicWorkflow.osl:76
+#     resultSpecularFaceRGB = mix(color(mix(0.0, 0.08, specular)), baseColor, metallic);
+	mix		$tmp4 $const3 $const4 specular 	%line{76} %argrw{"wrrr"}
+	assign		$tmp3 $tmp4 	%argrw{"wr"}
+	mix		resultSpecularFaceRGB $tmp3 baseColor metallic 	%argrw{"wrrr"}
+	end

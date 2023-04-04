@@ -1,0 +1,601 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrDirt.osl/obj/PxrDirt.oso
+shader PxrDirt	%meta{int,rfm_nodeid,1053280} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/geometry"} %meta{string,rfh_classification,"Pattern/Geometry"} 
+param	color	occluded	1 1 1		%meta{string,widget,"color"} %meta{string,page,"Dirt Color"} %meta{int,page_open,1} %meta{string,help,"Occluded shading color. The default is white.<br><br>occluded (color)"} %meta{string,label,"Occluded"}  %read{219,219} %write{2147483647,-1}
+param	color	unoccluded	0 0 0		%meta{string,widget,"color"} %meta{string,page,"Dirt Color"} %meta{string,help,"Unoccluded shading color. The default is black.<br><br>unoccluded (color)"} %meta{string,label,"Unoccluded"}  %read{219,219} %write{2147483647,-1}
+param	int	numSamples	4		%meta{string,widget,"default"} %meta{string,page,"Sampling"} %meta{int,page_open,1} %meta{string,help,"Controls the number of occlusion samples per camera hit point. The default is 4.<br><br>numSamples (int)"} %meta{int,connectable,0} %meta{string,label,"Num Samples"} %meta{int,min,1} %meta{int,slider,1} %meta{int,slidermax,64} %meta{int,slidermin,4}  %read{0,3} %write{2147483647,-1} %derivs
+param	int	distribution	1		%meta{string,widget,"mapper"} %meta{string,page,"Sampling"} %meta{string,help,"Sample distribution can be uniform or cosine. The defaul is cosine.<br><br>distribution (int)"} %meta{string,options,"Uniform:0|Cosine:1"} %meta{int,connectable,0} %meta{string,label,"Sample Distribution"}  %read{141,141} %write{2147483647,-1}
+param	float	cosineSpread	1		%meta{string,widget,"default"} %meta{string,page,"Sampling"} %meta{string,help,"Sample spread of rays for cosine distribution. The defaul of 1 gives lambertian distribution.<br><br>cosineSpread (float)"} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisPath,"../distribution"} %meta{string,conditionalVisValue,"1"} %meta{int,connectable,0} %meta{string,label,"Cosine Spread"} %meta{float,min,0} %meta{int,slider,1} %meta{float,slidermax,1.5} %meta{float,slidermin,0.5}  %read{152,152} %write{2147483647,-1} %derivs
+param	float	falloff	0		%meta{string,widget,"default"} %meta{string,page,"Sampling"} %meta{string,help,"Falloff values greater than zero create a softer look. The default is 0.<br><br>falloff (float)"} %meta{int,connectable,0} %meta{string,label,"Falloff"} %meta{float,min,0} %meta{int,slider,1} %meta{float,slidermax,1}  %read{58,201} %write{2147483647,-1}
+param	float	maxDistance	0		%meta{string,widget,"default"} %meta{string,page,"Sampling"} %meta{string,help,"The max distance at which objects may occlude. The default of 0 is infinite.<br><br>maxDistance (float)"} %meta{int,connectable,0} %meta{string,label,"Max Distance"} %meta{float,min,0} %meta{int,slider,1} %meta{float,slidermax,100}  %read{52,56} %write{2147483647,-1}
+param	int	direction	0		%meta{string,widget,"mapper"} %meta{string,page,"Sampling"} %meta{string,help,"Trace rays in the direction of the surface normal (outside), inverse to the normal (inside), or in both directions. The default is outside.<br><br>direction (int)"} %meta{string,options,"Outside:0|Inside:1|Both:2"} %meta{int,connectable,0} %meta{string,label,"Direction"}  %read{7,134} %write{2147483647,-1}
+param	vector	biasDirection	0 0 0		%meta{string,widget,"default"} %meta{string,page,"Sampling"} %meta{string,help,"Add a directional bias to occlusion rays. The default is no bias.<br><br>biasDirection (vector)"} %meta{string,label,"Bias Direction"}  %read{11,11} %write{2147483647,-1} %derivs
+param	string	biasDirectionCoordsys	"object"		%meta{string,widget,"string"} %meta{string,houdiniui,"oplist"} %meta{string,page,"Sampling"} %meta{string,help,"Name of bias direction coordinate system transform such as object, world, or camera.<br><br>biasDirectionCoordsys (string)"} %meta{int,connectable,0} %meta{string,label,"Bias Coordinate System"}  %read{14,17} %write{2147483647,-1} %derivs
+param	string	traceSet	""		%meta{string,widget,"default"} %meta{string,page,"Sampling"} %meta{string,help,"Restrict ray tracing to a subset of objects defined by one or<br>more trace groups.<br><br>traceSet (string)"} %meta{string,label,"Trace Set"} %meta{int,connectable,0}  %read{198,198} %write{2147483647,-1}
+oparam	color	resultRGB	0 0 0		%meta{string,help,"resultRGB (color)"}  %read{220,222} %write{219,219}
+oparam	float	resultR	0		%meta{string,help,"resultR (float)"}  %read{2147483647,-1} %write{220,220}
+oparam	float	resultG	0		%meta{string,help,"resultG (float)"}  %read{2147483647,-1} %write{221,221}
+oparam	float	resultB	0		%meta{string,help,"resultB (float)"}  %read{2147483647,-1} %write{222,222}
+global	point	P	%read{5,198} %write{2147483647,-1} %derivs
+global	normal	N	%read{20,192} %write{2147483647,-1} %derivs
+local	float	___325_fsign	%read{26,49} %write{23,24} %derivs
+local	float	___325_a	%read{31,44} %write{27,27} %derivs
+local	float	___326_e1	%read{64,216} %write{64,216} %derivs
+local	float	___326_z	%read{64,216} %write{64,216} %derivs
+local	float	___326_r	%read{64,216} %write{64,216} %derivs
+local	vector	___326_outDir	%read{64,216} %write{64,216} %derivs
+local	float	___327_e1	%read{64,216} %write{64,216} %derivs
+local	float	___327_z	%read{64,216} %write{64,216} %derivs
+local	float	___327_r	%read{64,216} %write{64,216} %derivs
+local	float	___327_x	%read{64,216} %write{64,216} %derivs
+local	float	___327_y	%read{64,216} %write{64,216} %derivs
+local	vector	___327_outDir	%read{64,216} %write{64,216} %derivs
+local	vector	___328_outDir	%read{64,216} %write{64,216} %derivs
+local	float	___328_sinTheta	%read{64,216} %write{64,216} %derivs
+local	float	___329_phi	%read{64,216} %write{64,216} %derivs
+local	point	___331_jitter	%read{64,216} %write{64,216} %derivs
+local	point	___331_xi	%read{64,216} %write{64,216} %derivs
+local	int	___331_sx	%read{64,216} %write{64,216} %derivs
+local	int	___331_sy	%read{64,216} %write{64,216} %derivs
+local	float	___332_biasR	%read{64,216} %write{64,216}
+local	float	___332_biasT	%read{64,216} %write{64,216}
+local	int	numStrataX	%read{3,216} %write{2,2} %derivs
+local	int	numStrataY	%read{4,216} %write{3,3} %derivs
+local	int	numStrata	%read{9,216} %write{4,4} %derivs
+local	point	offset	%read{64,216} %write{6,6} %derivs
+local	int	totalSamples	%read{64,217} %write{9,10}
+local	vector	biasDir	%read{12,216} %write{11,18} %derivs
+local	string	___333_space	%read{18,18} %write{16,17} %derivs
+local	vector	t0	%read{64,216} %write{51,51} %derivs
+local	vector	t1	%read{46,216} %write{39,39} %derivs
+local	float	maxdist	%read{64,216} %write{54,55}
+local	float	sfalloff	%read{64,216} %write{58,60}
+local	vector	dir	%read{64,216} %write{64,216} %derivs
+local	float	occlusion	%read{64,219} %write{61,218}
+local	int	___334_i	%read{64,216} %write{63,216} %derivs
+local	point	___335_xi	%read{64,216} %write{64,216} %derivs
+local	normal	___336_Nn	%read{64,216} %write{64,216} %derivs
+local	int	___335_hit	%read{64,216} %write{64,216}
+local	float	___337_hitdist	%read{64,216} %write{64,216}
+temp	float	$tmp1	%read{2,2} %write{1,1} %derivs
+temp	float	$tmp2	%read{1,1} %write{0,0} %derivs
+const	float	$const1	1000000		%read{5,5} %write{2147483647,-1}
+temp	point	$tmp3	%read{6,6} %write{5,5} %derivs
+const	int	$const2	2		%read{7,222} %write{2147483647,-1}
+temp	int	$tmp4	%read{8,8} %write{7,7}
+temp	int	$tmp5	%read{13,13} %write{12,12}
+const	float	$const3	0		%read{12,200} %write{2147483647,-1}
+const	string	$const4	""		%read{14,14} %write{2147483647,-1}
+temp	int	$tmp6	%read{15,15} %write{14,14}
+const	string	$const5	"object"		%read{16,16} %write{2147483647,-1}
+const	string	$const6	"common"		%read{18,18} %write{2147483647,-1}
+const	string	$const7	"CreateOrthonormalBasis"		%read{19,19} %write{2147483647,-1}
+temp	float	$tmp7	%read{21,21} %write{20,20}
+temp	int	$tmp8	%read{22,22} %write{21,21}
+const	float	$const8	1		%read{23,212} %write{2147483647,-1}
+const	float	$const9	-1		%read{24,27} %write{2147483647,-1}
+temp	float	$tmp9	%read{26,26} %write{25,25} %derivs
+temp	float	$tmp10	%read{27,27} %write{26,26} %derivs
+const	int	$const10	0		%read{28,220} %write{2147483647,-1}
+temp	float	$tmp11	%read{30,30} %write{28,28} %derivs
+const	int	$const11	1		%read{29,221} %write{2147483647,-1}
+temp	float	$tmp12	%read{30,30} %write{29,29} %derivs
+temp	float	$tmp13	%read{31,31} %write{30,30} %derivs
+temp	float	$tmp14	%read{39,39} %write{31,31} %derivs
+temp	float	$tmp15	%read{34,34} %write{32,32} %derivs
+temp	float	$tmp16	%read{34,34} %write{33,33} %derivs
+temp	float	$tmp17	%read{35,35} %write{34,34} %derivs
+temp	float	$tmp18	%read{36,36} %write{35,35} %derivs
+temp	float	$tmp19	%read{39,39} %write{36,36} %derivs
+temp	float	$tmp20	%read{38,38} %write{37,37} %derivs
+temp	float	$tmp21	%read{39,39} %write{38,38} %derivs
+temp	float	$tmp22	%read{41,41} %write{40,40} %derivs
+temp	float	$tmp23	%read{43,43} %write{41,41} %derivs
+temp	float	$tmp24	%read{43,43} %write{42,42} %derivs
+temp	float	$tmp25	%read{44,44} %write{43,43} %derivs
+temp	float	$tmp26	%read{45,45} %write{44,44} %derivs
+temp	float	$tmp27	%read{51,51} %write{45,45} %derivs
+temp	float	$tmp28	%read{47,47} %write{46,46} %derivs
+temp	float	$tmp29	%read{51,51} %write{47,47} %derivs
+temp	float	$tmp30	%read{49,49} %write{48,48} %derivs
+temp	float	$tmp31	%read{50,50} %write{49,49} %derivs
+temp	float	$tmp32	%read{51,51} %write{50,50} %derivs
+temp	int	$tmp33	%read{53,53} %write{52,52}
+const	float	$const12	9.99999968e+37		%read{55,206} %write{2147483647,-1}
+temp	int	$tmp34	%read{57,57} %write{56,56}
+temp	float	$tmp35	%read{60,60} %write{59,59}
+temp	int	$tmp36	%read{64,216} %write{64,216}
+temp	int	$tmp37	%read{62,216} %write{63,216}
+temp	int	$tmp38	%read{64,216} %write{64,216} %derivs
+const	string	$const13	"stratifiedSample"		%read{67,67} %write{2147483647,-1}
+const	float	$const14	3.14159274		%read{74,74} %write{2147483647,-1}
+temp	int	$tmp39	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp40	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp41	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp42	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp43	%read{64,216} %write{64,216} %derivs
+const	float	$const15	2.71828175		%read{80,80} %write{2147483647,-1}
+temp	int	$tmp44	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp45	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp46	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp47	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp48	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp49	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp50	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp51	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp52	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp53	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp54	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp55	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp56	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp57	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp58	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp59	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp60	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp61	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp62	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp63	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp64	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp65	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp66	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp67	%read{64,216} %write{64,216}
+temp	int	$tmp68	%read{64,216} %write{64,216}
+const	string	$const16	"distributionSpherical"		%read{108,108} %write{2147483647,-1}
+const	float	$const17	2		%read{110,110} %write{2147483647,-1}
+temp	float	$tmp69	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp70	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp71	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp72	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp73	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp74	%read{64,216} %write{64,216} %derivs
+temp	int	$tmp75	%read{64,216} %write{64,216}
+temp	float	$tmp76	%read{64,216} %write{64,216} %derivs
+const	float	$const18	6.28318548		%read{121,168} %write{2147483647,-1}
+temp	float	$tmp77	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp78	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp79	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp80	%read{64,216} %write{64,216} %derivs
+temp	int	$tmp81	%read{64,216} %write{64,216}
+temp	int	$tmp82	%read{64,216} %write{64,216}
+temp	int	$tmp83	%read{64,216} %write{64,216}
+temp	int	$tmp84	%read{64,216} %write{64,216}
+const	string	$const19	"distributionCosine"		%read{143,143} %write{2147483647,-1}
+temp	float	$tmp85	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp86	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp87	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp88	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp89	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp90	%read{64,216} %write{64,216} %derivs
+const	float	$const20	9.99999996e-13		%read{153,180} %write{2147483647,-1}
+temp	int	$tmp91	%read{64,216} %write{64,216}
+temp	float	$tmp92	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp93	%read{64,216} %write{64,216} %derivs
+temp	vector	$tmp94	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp95	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp96	%read{64,216} %write{64,216} %derivs
+temp	vector	$tmp97	%read{64,216} %write{64,216} %derivs
+temp	vector	$tmp98	%read{64,216} %write{64,216} %derivs
+temp	vector	$tmp99	%read{64,216} %write{64,216} %derivs
+const	string	$const21	"distributionUniform"		%read{166,166} %write{2147483647,-1}
+temp	float	$tmp100	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp101	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp102	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp103	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp104	%read{64,216} %write{64,216} %derivs
+temp	float	$tmp105	%read{64,216} %write{64,216} %derivs
+temp	int	$tmp106	%read{64,216} %write{64,216}
+temp	vector	$tmp107	%read{64,216} %write{64,216} %derivs
+temp	vector	$tmp108	%read{64,216} %write{64,216} %derivs
+temp	vector	$tmp109	%read{64,216} %write{64,216} %derivs
+temp	vector	$tmp110	%read{64,216} %write{64,216} %derivs
+temp	vector	$tmp111	%read{64,216} %write{64,216} %derivs
+const	string	$const22	"mindist"		%read{198,198} %write{2147483647,-1}
+temp	float	$tmp112	%read{64,216} %write{64,216}
+const	string	$const23	"autoBias"		%read{189,189} %write{2147483647,-1}
+temp	int	$tmp113	%read{2147483647,-1} %write{64,216}
+const	string	$const24	"builtin"		%read{190,191} %write{2147483647,-1}
+const	string	$const25	"biasR"		%read{190,190} %write{2147483647,-1}
+temp	int	$tmp114	%read{2147483647,-1} %write{64,216}
+const	string	$const26	"biasT"		%read{191,191} %write{2147483647,-1}
+temp	float	$tmp115	%read{64,216} %write{64,216}
+temp	int	$tmp116	%read{64,216} %write{64,216}
+const	string	$const27	"maxdist"		%read{198,198} %write{2147483647,-1}
+const	string	$const28	"traceset"		%read{198,198} %write{2147483647,-1}
+temp	int	$tmp117	%read{64,216} %write{64,216}
+temp	int	$tmp118	%read{64,216} %write{64,216}
+const	string	$const29	"trace"		%read{204,204} %write{2147483647,-1}
+const	string	$const30	"hitdist"		%read{204,204} %write{2147483647,-1}
+temp	int	$tmp119	%read{64,216} %write{64,216}
+temp	float	$tmp120	%read{64,216} %write{64,216}
+temp	float	$tmp121	%read{64,216} %write{64,216}
+temp	float	$tmp122	%read{64,216} %write{64,216}
+temp	float	$tmp123	%read{64,216} %write{64,216}
+temp	float	$tmp124	%read{64,216} %write{64,216}
+temp	int	$tmp125	%read{2147483647,-1} %write{64,216}
+temp	float	$tmp126	%read{218,218} %write{217,217}
+code ___main___
+# PxrDirt.osl:180
+#     int numStrataX = sqrt(numSamples);
+	assign		$tmp2 numSamples 	%filename{"PxrDirt.osl"} %line{180} %argrw{"wr"}
+	sqrt		$tmp1 $tmp2 	%argrw{"wr"}
+	assign		numStrataX $tmp1 	%argrw{"wr"}
+# PxrDirt.osl:181
+#     int numStrataY = numSamples / numStrataX;
+	div		numStrataY numSamples numStrataX 	%line{181} %argrw{"wrr"}
+# PxrDirt.osl:182
+#     int numStrata = numStrataX * numStrataY;  // actual number of samples on hemisphere
+	mul		numStrata numStrataX numStrataY 	%line{182} %argrw{"wrr"}
+# PxrDirt.osl:183
+#     point offset = cellnoise(P*1.0e6);
+	mul		$tmp3 P $const1 	%line{183} %argrw{"wrr"}
+	cellnoise	offset $tmp3 	%argrw{"wr"}
+# PxrDirt.osl:186
+#     int totalSamples = direction == k_dir_both ? 2 * numStrata : numStrata;
+	eq		$tmp4 direction $const2 	%line{186} %argrw{"wrr"}
+	if		$tmp4 10 11 	%argrw{"r"}
+	mul		totalSamples $const2 numStrata 	%argrw{"wrr"}
+	assign		totalSamples numStrata 	%argrw{"wr"}
+# PxrDirt.osl:189
+#     vector biasDir = biasDirection;
+	assign		biasDir biasDirection 	%line{189} %argrw{"wr"}
+# PxrDirt.osl:190
+#     if (biasDir)
+	neq		$tmp5 biasDir $const3 	%line{190} %argrw{"wrr"}
+	if		$tmp5 19 19 	%argrw{"r"}
+# PxrDirt.osl:192
+#         string space = biasDirectionCoordsys == "" ? "object" : biasDirectionCoordsys;
+	eq		$tmp6 biasDirectionCoordsys $const4 	%line{192} %argrw{"wrr"}
+	if		$tmp6 17 18 	%argrw{"r"}
+	assign		___333_space $const5 	%argrw{"wr"}
+	assign		___333_space biasDirectionCoordsys 	%argrw{"wr"}
+# PxrDirt.osl:193
+#         biasDir = transform("common", space, biasDir);
+	transformv	biasDir $const6 ___333_space biasDir 	%line{193} %argrw{"wrrr"}
+# PxrDirt.osl:198
+#     CreateOrthonormalBasis(N, t0, t1);
+	functioncall	$const7 52 	%line{198} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:42
+#     float fsign = (n[2] >= 0.0) ? 1.0 : -1.0;
+	compref		$tmp7 N $const2 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h"} %line{42} %argrw{"wrr"}
+	ge		$tmp8 $tmp7 $const3 	%argrw{"wrr"}
+	if		$tmp8 24 25 	%argrw{"r"}
+	assign		___325_fsign $const8 	%argrw{"wr"}
+	assign		___325_fsign $const9 	%argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:43
+#     float a = -1.0 / (fsign + n[2]);
+	compref		$tmp9 N $const2 	%line{43} %argrw{"wrr"}
+	add		$tmp10 ___325_fsign $tmp9 	%argrw{"wrr"}
+	div		___325_a $const9 $tmp10 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:44
+#     v2 = vector(n[0]*n[1]*a, fsign + n[1]*n[1]*a, -n[1]);
+	compref		$tmp11 N $const10 	%line{44} %argrw{"wrr"}
+	compref		$tmp12 N $const11 	%argrw{"wrr"}
+	mul		$tmp13 $tmp11 $tmp12 	%argrw{"wrr"}
+	mul		$tmp14 $tmp13 ___325_a 	%argrw{"wrr"}
+	compref		$tmp15 N $const11 	%argrw{"wrr"}
+	compref		$tmp16 N $const11 	%argrw{"wrr"}
+	mul		$tmp17 $tmp15 $tmp16 	%argrw{"wrr"}
+	mul		$tmp18 $tmp17 ___325_a 	%argrw{"wrr"}
+	add		$tmp19 ___325_fsign $tmp18 	%argrw{"wrr"}
+	compref		$tmp20 N $const11 	%argrw{"wrr"}
+	neg		$tmp21 $tmp20 	%argrw{"wr"}
+	vector		t1 $tmp14 $tmp19 $tmp21 	%argrw{"wrrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:45
+#     v1 = vector(1.0 + fsign*n[0]*n[0]*a, fsign*v2[0], -(fsign*n[0]));
+	compref		$tmp22 N $const10 	%line{45} %argrw{"wrr"}
+	mul		$tmp23 ___325_fsign $tmp22 	%argrw{"wrr"}
+	compref		$tmp24 N $const10 	%argrw{"wrr"}
+	mul		$tmp25 $tmp23 $tmp24 	%argrw{"wrr"}
+	mul		$tmp26 $tmp25 ___325_a 	%argrw{"wrr"}
+	add		$tmp27 $const8 $tmp26 	%argrw{"wrr"}
+	compref		$tmp28 t1 $const10 	%argrw{"wrr"}
+	mul		$tmp29 ___325_fsign $tmp28 	%argrw{"wrr"}
+	compref		$tmp30 N $const10 	%argrw{"wrr"}
+	mul		$tmp31 ___325_fsign $tmp30 	%argrw{"wrr"}
+	neg		$tmp32 $tmp31 	%argrw{"wr"}
+	vector		t0 $tmp27 $tmp29 $tmp32 	%argrw{"wrrr"}
+# PxrDirt.osl:199
+#     float maxdist = maxDistance > 0 ? maxDistance : MAXDIST;
+	gt		$tmp33 maxDistance $const10 	%filename{"PxrDirt.osl"} %line{199} %argrw{"wrr"}
+	if		$tmp33 55 56 	%argrw{"r"}
+	assign		maxdist maxDistance 	%argrw{"wr"}
+	assign		maxdist $const12 	%argrw{"wr"}
+# PxrDirt.osl:200
+#     float sfalloff = maxDistance > 0 ? falloff : min(0.0, -falloff);
+	gt		$tmp34 maxDistance $const10 	%line{200} %argrw{"wrr"}
+	if		$tmp34 59 61 	%argrw{"r"}
+	assign		sfalloff falloff 	%argrw{"wr"}
+	neg		$tmp35 falloff 	%argrw{"wr"}
+	min		sfalloff $const3 $tmp35 	%argrw{"wrr"}
+# PxrDirt.osl:203
+#     float occlusion = 0;
+	assign		occlusion $const10 	%line{203} %argrw{"wr"}
+# PxrDirt.osl:204
+#     for (int i = 0; i < totalSamples; i++)
+	for		$tmp37 64 66 215 217 	%line{204} %argrw{"r"}
+	assign		___334_i $const10 	%argrw{"wr"}
+	lt		$tmp36 ___334_i totalSamples 	%argrw{"wrr"}
+	neq		$tmp37 $tmp36 $const10 	%argrw{"wrr"}
+# PxrDirt.osl:208
+#         point xi = stratifiedSample(i % numStrata, numStrataX, numStrataY, offset);
+	mod		$tmp38 ___334_i numStrata 	%line{208} %argrw{"wrr"}
+	functioncall	$const13 105 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:103
+#     int sx = stratum % numStrataX;
+	mod		___331_sx $tmp38 numStrataX 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h"} %line{103} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:104
+#     int sy = stratum / numStrataX;
+	div		___331_sy $tmp38 numStrataX 	%line{104} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:107
+#     jitter.x = M_PI * (stratum + 1 + offset.x);
+	add		$tmp39 $tmp38 $const11 	%line{107} %argrw{"wrr"}
+	compref		$tmp40 offset $const10 	%argrw{"wrr"}
+	assign		$tmp42 $tmp39 	%argrw{"wr"}
+	add		$tmp41 $tmp42 $tmp40 	%argrw{"wrr"}
+	mul		$tmp43 $const14 $tmp41 	%argrw{"wrr"}
+	compassign	___331_jitter $const10 $tmp43 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:108
+#     jitter.y = M_E * (stratum + 1 + offset.y);
+	add		$tmp44 $tmp38 $const11 	%line{108} %argrw{"wrr"}
+	compref		$tmp45 offset $const11 	%argrw{"wrr"}
+	assign		$tmp47 $tmp44 	%argrw{"wr"}
+	add		$tmp46 $tmp47 $tmp45 	%argrw{"wrr"}
+	mul		$tmp48 $const15 $tmp46 	%argrw{"wrr"}
+	compassign	___331_jitter $const11 $tmp48 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:109
+#     jitter.x = jitter.x - floor(jitter.x);
+	compref		$tmp49 ___331_jitter $const10 	%line{109} %argrw{"wrr"}
+	compref		$tmp51 ___331_jitter $const10 	%argrw{"wrr"}
+	floor		$tmp50 $tmp51 	%argrw{"wr"}
+	sub		$tmp52 $tmp49 $tmp50 	%argrw{"wrr"}
+	compassign	___331_jitter $const10 $tmp52 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:110
+#     jitter.y = jitter.y - floor(jitter.y);
+	compref		$tmp53 ___331_jitter $const11 	%line{110} %argrw{"wrr"}
+	compref		$tmp55 ___331_jitter $const11 	%argrw{"wrr"}
+	floor		$tmp54 $tmp55 	%argrw{"wr"}
+	sub		$tmp56 $tmp53 $tmp54 	%argrw{"wrr"}
+	compassign	___331_jitter $const11 $tmp56 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:113
+#     xi.x = (sx + jitter.x) / numStrataX;
+	compref		$tmp57 ___331_jitter $const10 	%line{113} %argrw{"wrr"}
+	assign		$tmp59 ___331_sx 	%argrw{"wr"}
+	add		$tmp58 $tmp59 $tmp57 	%argrw{"wrr"}
+	assign		$tmp61 numStrataX 	%argrw{"wr"}
+	div		$tmp60 $tmp58 $tmp61 	%argrw{"wrr"}
+	compassign	___331_xi $const10 $tmp60 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:114
+#     xi.y = (sy + jitter.y) / numStrataY;
+	compref		$tmp62 ___331_jitter $const11 	%line{114} %argrw{"wrr"}
+	assign		$tmp64 ___331_sy 	%argrw{"wr"}
+	add		$tmp63 $tmp64 $tmp62 	%argrw{"wrr"}
+	assign		$tmp66 numStrataY 	%argrw{"wr"}
+	div		$tmp65 $tmp63 $tmp66 	%argrw{"wrr"}
+	compassign	___331_xi $const11 $tmp65 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:115
+#     return xi;
+	assign		___335_xi ___331_xi 	%line{115} %argrw{"wr"}
+# PxrDirt.osl:211
+#         if (length(N) == 0)
+	length		$tmp67 N 	%filename{"PxrDirt.osl"} %line{211} %argrw{"wr"}
+	eq		$tmp68 $tmp67 $const10 	%argrw{"wrr"}
+	if		$tmp68 131 187 	%argrw{"r"}
+# PxrDirt.osl:212
+#             dir = distributionSpherical(xi);
+	functioncall	$const16 131 	%line{212} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:76
+#     outDir[2] = 2.0 * xi[1] - 1.0;  // cosTheta
+	compref		$tmp69 ___335_xi $const11 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h"} %line{76} %argrw{"wrr"}
+	mul		$tmp70 $const17 $tmp69 	%argrw{"wrr"}
+	sub		$tmp71 $tmp70 $const8 	%argrw{"wrr"}
+	compassign	___328_outDir $const2 $tmp71 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:77
+#     float sinTheta = 1.0 - outDir[2] * outDir[2];  // actually sinTheta^2 here
+	compref		$tmp72 ___328_outDir $const2 	%line{77} %argrw{"wrr"}
+	compref		$tmp73 ___328_outDir $const2 	%argrw{"wrr"}
+	mul		$tmp74 $tmp72 $tmp73 	%argrw{"wrr"}
+	sub		___328_sinTheta $const8 $tmp74 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:79
+#     if (sinTheta > 0.0)
+	gt		$tmp75 ___328_sinTheta $const3 	%line{79} %argrw{"wrr"}
+	if		$tmp75 128 130 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:81
+#         sinTheta  = sqrt(sinTheta);
+	sqrt		___328_sinTheta ___328_sinTheta 	%line{81} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:82
+#         float phi = xi[0] * M_2PI;
+	compref		$tmp76 ___335_xi $const10 	%line{82} %argrw{"wrr"}
+	mul		___329_phi $tmp76 $const18 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:83
+#         outDir[0]  = sinTheta * cos(phi);
+	cos		$tmp77 ___329_phi 	%line{83} %argrw{"wr"}
+	mul		$tmp78 ___328_sinTheta $tmp77 	%argrw{"wrr"}
+	compassign	___328_outDir $const10 $tmp78 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:84
+#         outDir[1]  = sinTheta * sin(phi);
+	sin		$tmp79 ___329_phi 	%line{84} %argrw{"wr"}
+	mul		$tmp80 ___328_sinTheta $tmp79 	%argrw{"wrr"}
+	compassign	___328_outDir $const11 $tmp80 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:88
+#         outDir[0] = 0.0;
+	compassign	___328_outDir $const10 $const3 	%line{88} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:89
+#         outDir[1] = 0.0;
+	compassign	___328_outDir $const11 $const3 	%line{89} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:91
+#     return outDir;
+	assign		dir ___328_outDir 	%line{91} %argrw{"wr"}
+# PxrDirt.osl:215
+#             normal Nn = direction == k_dir_outside ? N :
+	eq		$tmp81 direction $const10 	%filename{"PxrDirt.osl"} %line{215} %argrw{"wrr"}
+	if		$tmp81 134 141 	%argrw{"r"}
+	assign		___336_Nn N 	%argrw{"wr"}
+# PxrDirt.osl:216
+#                         direction == k_dir_inside ? -N :
+	eq		$tmp82 direction $const11 	%line{216} %argrw{"wrr"}
+	if		$tmp82 137 141 	%argrw{"r"}
+	neg		___336_Nn N 	%argrw{"wr"}
+# PxrDirt.osl:217
+#                         i >= numStrata ? -N : N;
+	ge		$tmp83 ___334_i numStrata 	%line{217} %argrw{"wrr"}
+	if		$tmp83 140 141 	%argrw{"r"}
+	neg		___336_Nn N 	%argrw{"wr"}
+	assign		___336_Nn N 	%argrw{"wr"}
+# PxrDirt.osl:218
+#             if (distribution == k_dist_cosine)
+	eq		$tmp84 distribution $const11 	%line{218} %argrw{"wrr"}
+	if		$tmp84 166 187 	%argrw{"r"}
+# PxrDirt.osl:219
+#                 dir = distributionCosine(xi, Nn, t0, t1, cosineSpread);
+	functioncall	$const19 166 	%line{219} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:51
+#     float e1 = xi[0] * M_2PI;
+	compref		$tmp85 ___335_xi $const10 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h"} %line{51} %argrw{"wrr"}
+	mul		___326_e1 $tmp85 $const18 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:52
+#     float z = sqrt(xi[1]);
+	compref		$tmp86 ___335_xi $const11 	%line{52} %argrw{"wrr"}
+	sqrt		___326_z $tmp86 	%argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:53
+#     float r = spread * sqrt(max(0.0, 1.0 - xi[1]));
+	compref		$tmp89 ___335_xi $const11 	%line{53} %argrw{"wrr"}
+	sub		$tmp90 $const8 $tmp89 	%argrw{"wrr"}
+	max		$tmp88 $const3 $tmp90 	%argrw{"wrr"}
+	sqrt		$tmp87 $tmp88 	%argrw{"wr"}
+	mul		___326_r cosineSpread $tmp87 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:54
+#     if (z < 1.e-12) z = 1.e-12;
+	lt		$tmp91 ___326_z $const20 	%line{54} %argrw{"wrr"}
+	if		$tmp91 156 156 	%argrw{"r"}
+	assign		___326_z $const20 	%argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:55
+#     vector outDir = r * cos(e1) * t0 + r * sin(e1) * t1 + z * n;
+	cos		$tmp92 ___326_e1 	%line{55} %argrw{"wr"}
+	mul		$tmp93 ___326_r $tmp92 	%argrw{"wrr"}
+	mul		$tmp94 $tmp93 t0 	%argrw{"wrr"}
+	sin		$tmp95 ___326_e1 	%argrw{"wr"}
+	mul		$tmp96 ___326_r $tmp95 	%argrw{"wrr"}
+	mul		$tmp97 $tmp96 t1 	%argrw{"wrr"}
+	add		$tmp98 $tmp94 $tmp97 	%argrw{"wrr"}
+	mul		$tmp99 ___326_z ___336_Nn 	%argrw{"wrr"}
+	add		___326_outDir $tmp98 $tmp99 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:56
+#     return normalize(outDir);
+	normalize	dir ___326_outDir 	%line{56} %argrw{"wr"}
+# PxrDirt.osl:221
+#                 dir = distributionUniform(xi, Nn, t0, t1);
+	functioncall	$const21 187 	%filename{"PxrDirt.osl"} %line{221} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:62
+#     float e1 = xi[0] * M_2PI;
+	compref		$tmp100 ___335_xi $const10 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h"} %line{62} %argrw{"wrr"}
+	mul		___327_e1 $tmp100 $const18 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:63
+#     float z = xi[1];
+	compref		___327_z ___335_xi $const11 	%line{63} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:64
+#     float r = sqrt(max(0.0, 1.0 - z * z));
+	mul		$tmp102 ___327_z ___327_z 	%line{64} %argrw{"wrr"}
+	sub		$tmp103 $const8 $tmp102 	%argrw{"wrr"}
+	max		$tmp101 $const3 $tmp103 	%argrw{"wrr"}
+	sqrt		___327_r $tmp101 	%argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:65
+#     float x = r * cos(e1);
+	cos		$tmp104 ___327_e1 	%line{65} %argrw{"wr"}
+	mul		___327_x ___327_r $tmp104 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:66
+#     float y = r * sin(e1);
+	sin		$tmp105 ___327_e1 	%line{66} %argrw{"wr"}
+	mul		___327_y ___327_r $tmp105 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:67
+#     if (z < 1.e-12) z = 1.e-12;
+	lt		$tmp106 ___327_z $const20 	%line{67} %argrw{"wrr"}
+	if		$tmp106 181 181 	%argrw{"r"}
+	assign		___327_z $const20 	%argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:68
+#     vector outDir = x * t0 + y * t1 + z * n;
+	mul		$tmp107 ___327_x t0 	%line{68} %argrw{"wrr"}
+	mul		$tmp108 ___327_y t1 	%argrw{"wrr"}
+	add		$tmp109 $tmp107 $tmp108 	%argrw{"wrr"}
+	mul		$tmp110 ___327_z ___336_Nn 	%argrw{"wrr"}
+	add		___327_outDir $tmp109 $tmp110 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:69
+#     return outDir;
+	assign		dir ___327_outDir 	%line{69} %argrw{"wr"}
+# PxrDirt.osl:223
+#         dir = normalize(dir + biasDir);
+	add		$tmp111 dir biasDir 	%filename{"PxrDirt.osl"} %line{223} %argrw{"wrr"}
+	normalize	dir $tmp111 	%argrw{"wr"}
+# PxrDirt.osl:227
+#                         "mindist", autoBias(N, dir),
+	functioncall	$const23 198 	%line{227} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:122
+#     getattribute("builtin", "biasR", biasR);
+	getattribute	$tmp113 $const24 $const25 ___332_biasR 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h"} %line{122} %argrw{"wrrw"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:123
+#     getattribute("builtin", "biasT", biasT);
+	getattribute	$tmp114 $const24 $const26 ___332_biasT 	%line{123} %argrw{"wrrw"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:124
+#     return dot(n, dir) < 0.0 ? biasT : biasR;
+	dot		$tmp115 N dir 	%line{124} %argrw{"wrr"}
+	lt		$tmp116 $tmp115 $const3 	%argrw{"wrr"}
+	if		$tmp116 196 197 	%argrw{"r"}
+	assign		$tmp112 ___332_biasT 	%argrw{"wr"}
+	assign		$tmp112 ___332_biasR 	%argrw{"wr"}
+	return
+# PxrDirt.osl:226
+#         int hit = trace(P, dir,
+	trace		___335_hit P dir $const22 $tmp112 $const27 maxdist $const28 traceSet 	%filename{"PxrDirt.osl"} %line{226} %argrw{"wrrrrrrrr"} %argderivs{1,2}
+# PxrDirt.osl:232
+#         if (hit)
+	if		___335_hit 215 215 	%line{232} %argrw{"r"}
+# PxrDirt.osl:234
+#             float hitdist = 0.0;
+	assign		___337_hitdist $const3 	%line{234} %argrw{"wr"}
+# PxrDirt.osl:235
+#             if (falloff == 0)
+	eq		$tmp117 falloff $const10 	%line{235} %argrw{"wrr"}
+	if		$tmp117 204 215 	%argrw{"r"}
+# PxrDirt.osl:237
+#                 occlusion += 1;
+	add		occlusion occlusion $const8 	%line{237} %argrw{"wrr"}
+# PxrDirt.osl:239
+#             else if (getmessage("trace", "hitdist", hitdist))
+	getmessage	$tmp118 $const29 $const30 ___337_hitdist 	%line{239} %argrw{"wrrw"}
+	if		$tmp118 215 215 	%argrw{"r"}
+# PxrDirt.osl:241
+#                 if (maxdist == MAXDIST)
+	eq		$tmp119 maxdist $const12 	%line{241} %argrw{"wrr"}
+	if		$tmp119 211 215 	%argrw{"r"}
+# PxrDirt.osl:242
+#                     occlusion += exp(sfalloff * hitdist);
+	mul		$tmp121 sfalloff ___337_hitdist 	%line{242} %argrw{"wrr"}
+	exp		$tmp120 $tmp121 	%argrw{"wr"}
+	add		occlusion occlusion $tmp120 	%argrw{"wrr"}
+# PxrDirt.osl:244
+#                     occlusion += pow(1.0 - hitdist / maxdist, sfalloff);
+	div		$tmp123 ___337_hitdist maxdist 	%line{244} %argrw{"wrr"}
+	sub		$tmp124 $const8 $tmp123 	%argrw{"wrr"}
+	pow		$tmp122 $tmp124 sfalloff 	%argrw{"wrr"}
+	add		occlusion occlusion $tmp122 	%argrw{"wrr"}
+# PxrDirt.osl:204
+#     for (int i = 0; i < totalSamples; i++)
+	assign		$tmp125 ___334_i 	%line{204} %argrw{"wr"}
+	add		___334_i ___334_i $const11 	%argrw{"wrr"}
+# PxrDirt.osl:248
+#     occlusion /= totalSamples;
+	assign		$tmp126 totalSamples 	%line{248} %argrw{"wr"}
+	div		occlusion occlusion $tmp126 	%argrw{"wrr"}
+# PxrDirt.osl:249
+#     resultRGB = mix(unoccluded, occluded, occlusion);
+	mix		resultRGB unoccluded occluded occlusion 	%line{249} %argrw{"wrrr"}
+# PxrDirt.osl:252
+#     resultR = resultRGB[0];
+	compref		resultR resultRGB $const10 	%line{252} %argrw{"wrr"}
+# PxrDirt.osl:253
+#     resultG = resultRGB[1];
+	compref		resultG resultRGB $const11 	%line{253} %argrw{"wrr"}
+# PxrDirt.osl:254
+#     resultB = resultRGB[2];
+	compref		resultB resultRGB $const2 	%line{254} %argrw{"wrr"}
+	end

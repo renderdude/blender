@@ -1,0 +1,99 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrRadialDensity.osl/obj/PxrRadialDensity.oso
+shader PxrRadialDensity	%meta{int,rfm_nodeid,1233477} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/volume"} %meta{string,rfh_classification,"Pattern/Volume"} %meta{string,help,"Creates a radial density gradient to shape volume areas."} 
+param	float	radius	1		%meta{float,min,0} %meta{float,slidermax,100} %meta{string,help,"The radius of the gradient."}  %read{8,8} %write{2147483647,-1}
+param	float	density	1		%meta{float,min,0} %meta{float,slidermax,1} %meta{string,help,"Maximum density of the gradient."}  %read{25,25} %write{2147483647,-1}
+param	float	exponent	1		%meta{float,min,0.00100000005} %meta{float,slidermax,4} %meta{string,help,"Shape the transition from max to min density."}  %read{22,22} %write{2147483647,-1}
+param	float	start	0		%meta{float,min,0} %meta{float,max,1} %meta{string,help,"Start position of the gradient. 0 is the center."}  %read{12,20} %write{2147483647,-1}
+param	float	stop	1		%meta{float,min,0} %meta{float,max,1} %meta{string,help,"Stop position of the gradient. 1 is the edge / radius."}  %read{12,18} %write{2147483647,-1}
+param	string	coordsys	"object"		%meta{string,widget,"string"} %meta{string,houdiniui,"oplist"} %meta{string,help,"default to the center of your object's bounding box."} %meta{int,connectable,0} %meta{string,label,"Coordinate System"}  %read{0,3} %write{2147483647,-1}
+oparam	float	resultF	1		%read{25,25} %write{24,26}
+global	point	P	%read{5,5} %write{2147483647,-1}
+local	float	___269_result	%read{21,21} %write{19,20}
+local	float	___270_xclamped	%read{17,17} %write{16,16}
+local	string	space	%read{5,5} %write{2,3}
+local	point	pShaded	%read{7,7} %write{5,5}
+local	point	pCenter	%read{7,7} %write{6,6}
+local	float	normDist	%read{9,23} %write{8,22}
+const	string	$const1	""		%read{0,0} %write{2147483647,-1}
+temp	int	$tmp1	%read{1,1} %write{0,0}
+const	string	$const2	"object"		%read{2,2} %write{2147483647,-1}
+const	string	$const3	"transform"		%read{4,4} %write{2147483647,-1}
+const	string	$const4	"common"		%read{5,5} %write{2147483647,-1}
+const	point	$const5	0 0 0		%read{6,6} %write{2147483647,-1}
+temp	float	$tmp2	%read{8,8} %write{7,7}
+const	float	$const6	1		%read{9,24} %write{2147483647,-1}
+temp	int	$tmp3	%read{10,10} %write{9,9}
+const	string	$const7	"linearstep"		%read{11,11} %write{2147483647,-1}
+temp	int	$tmp4	%read{13,13} %write{12,12}
+const	string	$const8	"clamp"		%read{14,14} %write{2147483647,-1}
+temp	float	$tmp5	%read{16,16} %write{15,15}
+temp	float	$tmp6	%read{19,19} %write{17,17}
+temp	float	$tmp7	%read{19,19} %write{18,18}
+temp	float	$tmp8	%read{24,24} %write{23,23}
+const	int	$const9	0		%read{26,26} %write{2147483647,-1}
+const	float	$const10	0		%read{23,23} %write{2147483647,-1}
+code ___main___
+# PxrRadialDensity.osl:85
+#     string space = coordsys == "" ? "object" : coordsys;
+	eq		$tmp1 coordsys $const1 	%filename{"PxrRadialDensity.osl"} %line{85} %argrw{"wrr"}
+	if		$tmp1 3 4 	%argrw{"r"}
+	assign		space $const2 	%argrw{"wr"}
+	assign		space coordsys 	%argrw{"wr"}
+# PxrRadialDensity.osl:86
+# 	point pShaded = transform(space, P);
+	functioncall	$const3 6 	%line{86} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:285
+# point  transform (string to, point p)  { return transform("common",to,p); }
+	transform	pShaded $const4 space P 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{285} %argrw{"wrrr"}
+# PxrRadialDensity.osl:87
+# 	point pCenter = point(0, 0, 0);
+	assign		pCenter $const5 	%filename{"PxrRadialDensity.osl"} %line{87} %argrw{"wr"}
+# PxrRadialDensity.osl:88
+# 	float normDist = distance(pCenter, pShaded) / radius;
+	distance	$tmp2 pCenter pShaded 	%line{88} %argrw{"wrr"}
+	div		normDist $tmp2 radius 	%argrw{"wrr"}
+# PxrRadialDensity.osl:89
+#     if (normDist <= 1.0)
+	le		$tmp3 normDist $const6 	%line{89} %argrw{"wrr"}
+	if		$tmp3 26 27 	%argrw{"r"}
+# PxrRadialDensity.osl:91
+#         normDist = linearstep(start, stop, normDist);
+	functioncall	$const7 22 	%line{91} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:361
+#     if (edge0 != edge1) {
+	neq		$tmp4 start stop 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{361} %argrw{"wrr"}
+	if		$tmp4 20 21 	%argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:362
+#         float xclamped = clamp (x, edge0, edge1);
+	functioncall	$const8 17 	%line{362} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
+	min		$tmp5 normDist stop 	%line{163} %argrw{"wrr"}
+	max		___270_xclamped $tmp5 start 	%argrw{"wrr"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:363
+#         result = (xclamped - edge0) / (edge1 - edge0);
+	sub		$tmp6 ___270_xclamped start 	%line{363} %argrw{"wrr"}
+	sub		$tmp7 stop start 	%argrw{"wrr"}
+	div		___269_result $tmp6 $tmp7 	%argrw{"wrr"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:365
+#         result = step (edge0, x);
+	step		___269_result start normDist 	%line{365} %argrw{"wrr"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:367
+#     return result;
+	assign		normDist ___269_result 	%line{367} %argrw{"wr"}
+# PxrRadialDensity.osl:92
+#         normDist = pow(normDist, exponent);
+	pow		normDist normDist exponent 	%filename{"PxrRadialDensity.osl"} %line{92} %argrw{"wrr"}
+# PxrRadialDensity.osl:93
+#         resultF = (1.0 - smoothstep(0, 1, normDist));
+	smoothstep	$tmp8 $const10 $const6 normDist 	%line{93} %argrw{"wrrr"}
+	sub		resultF $const6 $tmp8 	%argrw{"wrr"}
+# PxrRadialDensity.osl:94
+#         resultF *= density;
+	mul		resultF resultF density 	%line{94} %argrw{"wrr"}
+# PxrRadialDensity.osl:97
+#         resultF = 0;
+	assign		resultF $const9 	%line{97} %argrw{"wr"}
+	end

@@ -1,0 +1,181 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrHSL.osl/obj/PxrHSL.oso
+shader PxrHSL	%meta{int,rfm_nodeid,1053429} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/color"} %meta{string,rfh_classification,"Pattern/Color"} %meta{string,help,"Adjust the hue, saturation and value of a given input color. Note the output is in RGB color space. "} 
+param	color	inputRGB	0 0 0		%meta{string,widget,"color"} %meta{string,help,"The color to have HSL adjustments applied to it."} %meta{string,label,"Input Color"}  %read{0,0} %write{2147483647,-1}
+param	int	hdrInput	0		%meta{string,widget,"checkBox"} %meta{string,help,"When enabled (set to 1) the output is not clamped."} %meta{string,label,"HDR Input"} %meta{int,connectable,0}  %read{1,38} %write{2147483647,-1}
+param	float	hue	0		%meta{string,widget,"default"} %meta{string,help,"The amount to shift hue by."} %meta{string,label,"Hue"} %meta{float,max,1} %meta{float,min,-1}  %read{22,22} %write{2147483647,-1}
+param	float	saturation	1		%meta{string,widget,"default"} %meta{string,help,"The amount to scale saturation by."} %meta{string,label,"Saturation"} %meta{float,max,2} %meta{float,min,0}  %read{26,26} %write{2147483647,-1}
+param	float	lum	1		%meta{string,widget,"default"} %meta{string,help,"The amount to scale luminance by."} %meta{string,label,"Luminance"} %meta{float,max,2} %meta{float,min,0}  %read{32,32} %write{2147483647,-1}
+oparam	color	resultRGB	0 0 0		%meta{string,help,"resultRGB (color)"}  %read{58,60} %write{57,57}
+oparam	float	resultR	0		%meta{string,help,"resultR (float)"}  %read{2147483647,-1} %write{58,58}
+oparam	float	resultG	0		%meta{string,help,"resultG (float)"}  %read{2147483647,-1} %write{59,59}
+oparam	float	resultB	0		%meta{string,help,"resultB (float)"}  %read{2147483647,-1} %write{60,60}
+local	color	___325_result	%read{4,19} %write{3,18}
+local	color	___326_result	%read{41,56} %write{40,55}
+local	color	colorRemap	%read{3,57} %write{0,56}
+local	color	hsl	%read{21,37} %write{20,36}
+const	string	$const1	"reinhardMap"		%read{2,2} %write{2147483647,-1}
+const	int	$const2	0		%read{4,58} %write{2147483647,-1}
+temp	float	$tmp1	%read{7,7} %write{4,4}
+temp	float	$tmp2	%read{6,6} %write{5,5}
+const	float	$const3	1		%read{6,53} %write{2147483647,-1}
+temp	float	$tmp3	%read{7,7} %write{6,6}
+temp	float	$tmp4	%read{8,8} %write{7,7}
+const	int	$const4	1		%read{9,59} %write{2147483647,-1}
+temp	float	$tmp5	%read{12,12} %write{9,9}
+temp	float	$tmp6	%read{11,11} %write{10,10}
+temp	float	$tmp7	%read{12,12} %write{11,11}
+temp	float	$tmp8	%read{13,13} %write{12,12}
+const	int	$const5	2		%read{14,60} %write{2147483647,-1}
+temp	float	$tmp9	%read{17,17} %write{14,14}
+temp	float	$tmp10	%read{16,16} %write{15,15}
+temp	float	$tmp11	%read{17,17} %write{16,16}
+temp	float	$tmp12	%read{18,18} %write{17,17}
+const	string	$const6	"rgb"		%read{20,37} %write{2147483647,-1}
+const	string	$const7	"hsl"		%read{20,37} %write{2147483647,-1}
+temp	float	$tmp13	%read{24,24} %write{23,23}
+temp	float	$tmp14	%read{22,22} %write{21,21}
+temp	float	$tmp15	%read{23,23} %write{22,22}
+temp	float	$tmp16	%read{30,30} %write{29,29}
+temp	float	$tmp17	%read{26,26} %write{25,25}
+temp	float	$tmp18	%read{28,28} %write{26,26}
+const	float	$const8	0		%read{29,35} %write{2147483647,-1}
+const	string	$const9	"clamp"		%read{27,33} %write{2147483647,-1}
+temp	float	$tmp19	%read{29,29} %write{28,28}
+temp	float	$tmp20	%read{36,36} %write{35,35}
+temp	float	$tmp21	%read{32,32} %write{31,31}
+temp	float	$tmp22	%read{34,34} %write{32,32}
+temp	float	$tmp23	%read{35,35} %write{34,34}
+const	string	$const10	"reinhardMapInv"		%read{39,39} %write{2147483647,-1}
+temp	float	$tmp24	%read{44,44} %write{41,41}
+temp	float	$tmp25	%read{43,43} %write{42,42}
+temp	float	$tmp26	%read{44,44} %write{43,43}
+temp	float	$tmp27	%read{45,45} %write{44,44}
+temp	float	$tmp28	%read{49,49} %write{46,46}
+temp	float	$tmp29	%read{48,48} %write{47,47}
+temp	float	$tmp30	%read{49,49} %write{48,48}
+temp	float	$tmp31	%read{50,50} %write{49,49}
+temp	float	$tmp32	%read{54,54} %write{51,51}
+temp	float	$tmp33	%read{53,53} %write{52,52}
+temp	float	$tmp34	%read{54,54} %write{53,53}
+temp	float	$tmp35	%read{55,55} %write{54,54}
+code ___main___
+# PxrHSL.osl:122
+#     color colorRemap = inputRGB;
+	assign		colorRemap inputRGB 	%filename{"PxrHSL.osl"} %line{122} %argrw{"wr"}
+# PxrHSL.osl:123
+#     if (hdrInput)
+	if		hdrInput 20 20 	%line{123} %argrw{"r"}
+# PxrHSL.osl:125
+#         colorRemap = reinhardMap(colorRemap);
+	functioncall	$const1 20 	%line{125} %argrw{"r"}
+# PxrHSL.osl:40
+#     color result = input;
+	assign		___325_result colorRemap 	%line{40} %argrw{"wr"}
+# PxrHSL.osl:41
+#     result[0] = result[0] / (result[0] + 1.0);
+	compref		$tmp1 ___325_result $const2 	%line{41} %argrw{"wrr"}
+	compref		$tmp2 ___325_result $const2 	%argrw{"wrr"}
+	add		$tmp3 $tmp2 $const3 	%argrw{"wrr"}
+	div		$tmp4 $tmp1 $tmp3 	%argrw{"wrr"}
+	compassign	___325_result $const2 $tmp4 	%argrw{"wrr"}
+# PxrHSL.osl:42
+#     result[1] = result[1] / (result[1] + 1.0);
+	compref		$tmp5 ___325_result $const4 	%line{42} %argrw{"wrr"}
+	compref		$tmp6 ___325_result $const4 	%argrw{"wrr"}
+	add		$tmp7 $tmp6 $const3 	%argrw{"wrr"}
+	div		$tmp8 $tmp5 $tmp7 	%argrw{"wrr"}
+	compassign	___325_result $const4 $tmp8 	%argrw{"wrr"}
+# PxrHSL.osl:43
+#     result[2] = result[2] / (result[2] + 1.0);
+	compref		$tmp9 ___325_result $const5 	%line{43} %argrw{"wrr"}
+	compref		$tmp10 ___325_result $const5 	%argrw{"wrr"}
+	add		$tmp11 $tmp10 $const3 	%argrw{"wrr"}
+	div		$tmp12 $tmp9 $tmp11 	%argrw{"wrr"}
+	compassign	___325_result $const5 $tmp12 	%argrw{"wrr"}
+# PxrHSL.osl:44
+#     return result;
+	assign		colorRemap ___325_result 	%line{44} %argrw{"wr"}
+# PxrHSL.osl:128
+#     color hsl = transformc("rgb", "hsl", colorRemap);
+	transformc	hsl $const6 $const7 colorRemap 	%line{128} %argrw{"wrrr"}
+# PxrHSL.osl:130
+#     hsl[0] = fmod(hsl[0] + hue, 1.0);
+	compref		$tmp14 hsl $const2 	%line{130} %argrw{"wrr"}
+	add		$tmp15 $tmp14 hue 	%argrw{"wrr"}
+	fmod		$tmp13 $tmp15 $const3 	%argrw{"wrr"}
+	compassign	hsl $const2 $tmp13 	%argrw{"wrr"}
+# PxrHSL.osl:131
+#     hsl[1] = clamp(hsl[1] * saturation, 0, 1);
+	compref		$tmp17 hsl $const4 	%line{131} %argrw{"wrr"}
+	mul		$tmp18 $tmp17 saturation 	%argrw{"wrr"}
+	functioncall	$const9 30 	%argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
+	min		$tmp19 $tmp18 $const3 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	max		$tmp16 $tmp19 $const8 	%argrw{"wrr"}
+# PxrHSL.osl:131
+#     hsl[1] = clamp(hsl[1] * saturation, 0, 1);
+	compassign	hsl $const4 $tmp16 	%filename{"PxrHSL.osl"} %line{131} %argrw{"wrr"}
+# PxrHSL.osl:132
+#     hsl[2] = clamp(hsl[2] * lum, 0, 1);
+	compref		$tmp21 hsl $const5 	%line{132} %argrw{"wrr"}
+	mul		$tmp22 $tmp21 lum 	%argrw{"wrr"}
+	functioncall	$const9 36 	%argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
+	min		$tmp23 $tmp22 $const3 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	max		$tmp20 $tmp23 $const8 	%argrw{"wrr"}
+# PxrHSL.osl:132
+#     hsl[2] = clamp(hsl[2] * lum, 0, 1);
+	compassign	hsl $const5 $tmp20 	%filename{"PxrHSL.osl"} %line{132} %argrw{"wrr"}
+# PxrHSL.osl:134
+#     colorRemap = transformc("hsl", "rgb", hsl);
+	transformc	colorRemap $const7 $const6 hsl 	%line{134} %argrw{"wrrr"}
+# PxrHSL.osl:135
+#     if (hdrInput)
+	if		hdrInput 57 57 	%line{135} %argrw{"r"}
+# PxrHSL.osl:137
+#         colorRemap = reinhardMapInv(colorRemap);
+	functioncall	$const10 57 	%line{137} %argrw{"r"}
+# PxrHSL.osl:50
+#     color result = input;
+	assign		___326_result colorRemap 	%line{50} %argrw{"wr"}
+# PxrHSL.osl:51
+#     result[0] = result[0] / (1.0 - result[0]);
+	compref		$tmp24 ___326_result $const2 	%line{51} %argrw{"wrr"}
+	compref		$tmp25 ___326_result $const2 	%argrw{"wrr"}
+	sub		$tmp26 $const3 $tmp25 	%argrw{"wrr"}
+	div		$tmp27 $tmp24 $tmp26 	%argrw{"wrr"}
+	compassign	___326_result $const2 $tmp27 	%argrw{"wrr"}
+# PxrHSL.osl:52
+#     result[1] = result[1] / (1.0 - result[1]);
+	compref		$tmp28 ___326_result $const4 	%line{52} %argrw{"wrr"}
+	compref		$tmp29 ___326_result $const4 	%argrw{"wrr"}
+	sub		$tmp30 $const3 $tmp29 	%argrw{"wrr"}
+	div		$tmp31 $tmp28 $tmp30 	%argrw{"wrr"}
+	compassign	___326_result $const4 $tmp31 	%argrw{"wrr"}
+# PxrHSL.osl:53
+#     result[2] = result[2] / (1.0 - result[2]);
+	compref		$tmp32 ___326_result $const5 	%line{53} %argrw{"wrr"}
+	compref		$tmp33 ___326_result $const5 	%argrw{"wrr"}
+	sub		$tmp34 $const3 $tmp33 	%argrw{"wrr"}
+	div		$tmp35 $tmp32 $tmp34 	%argrw{"wrr"}
+	compassign	___326_result $const5 $tmp35 	%argrw{"wrr"}
+# PxrHSL.osl:54
+#     return result;
+	assign		colorRemap ___326_result 	%line{54} %argrw{"wr"}
+# PxrHSL.osl:140
+#     resultRGB = colorRemap;
+	assign		resultRGB colorRemap 	%line{140} %argrw{"wr"}
+# PxrHSL.osl:141
+#     resultR = resultRGB[0];
+	compref		resultR resultRGB $const2 	%line{141} %argrw{"wrr"}
+# PxrHSL.osl:142
+#     resultG = resultRGB[1];
+	compref		resultG resultRGB $const4 	%line{142} %argrw{"wrr"}
+# PxrHSL.osl:143
+#     resultB = resultRGB[2];
+	compref		resultB resultRGB $const5 	%line{143} %argrw{"wrr"}
+	end

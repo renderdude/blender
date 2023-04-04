@@ -1,0 +1,791 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrVariable.osl/obj/PxrVariable.oso
+shader PxrVariable	%meta{int,rfm_nodeid,1053276} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/utility"} %meta{string,rfh_classification,"Pattern/Utility"} 
+param	string	variable	""		%meta{string,widget,"mapper"} %meta{string,help,"variable (string)"} %meta{string,options,"Use Named PrimVar:|Shading position (P):P|Undisplaced position (Po):Po|Shading normal (Nn):Nn|Geometric normal (Ngn):Ngn|Undisplaced normal (Non):Non|Analytical undisplaced normal (Naon):Naon|Shading tangent (Tn):Tn|Normalized view vector (Vn):Vn|Length of view vector (VLen):VLen|Surface mean curvature (curvature):curvature|Surface principal curvature in u dir (curvature_u):curvature_u|Surface principal curvature in v dir (curvature_v):curvature_v|Ray Spread (incidentRaySpread):incidentRaySpread|Ray Radius (incidentRayRadius):incidentRayRadius|Micropolygon radius (PRadius):PRadius|Micropolygon size (mpSize):mpSize|Reflection Bias (biasR):biasR|Transmission (biasT):biasT|Surface U (u):u|Surface V (v):v|Surface W (w):w|Surface UV (uv):uv|Surface UVW (uvw):uvw|Ray footprint U (du):du|Ray footprint V (dv):dv|Ray footprint W (dw):dw|Ray footprint UV (duv):duv|Ray footprint UVW (duvw):duvw|Surface derivative U (dPdu):dPdu|Surface derivative V (dPdv):dPdv|Surface derivative W (dPdw):dPdw|Velocity (dPdtime):dPdtime|Velocity with camera (dPcameradtime):dPcameradtime|Time (time):time|Outside IOR (outsideIOR):outsideIOR|Opacity (Oi):Oi|Forward Motion (motionFore):motionFore|Backward Motion (motionBack):motionBack"} %meta{int,connectable,0} %meta{string,label,"Variable"}  %read{0,3} %write{2147483647,-1}
+param	string	name	""		%meta{string,widget,"default"} %meta{string,help,"name (string)"} %meta{int,connectable,0} %meta{string,label,"PrimVar"}  %read{2,2} %write{2147483647,-1}
+param	string	type	"float"		%meta{string,widget,"popup"} %meta{string,options,"float|float2|float3|color|point|vector|normal"} %meta{string,help,"type (string)"} %meta{int,connectable,0} %meta{string,label,"Type"}  %read{233,276} %write{2147483647,-1}
+param	string	coordsys	"object"		%meta{string,widget,"default"} %meta{string,houdiniui,"oplist"} %meta{string,help,"By default, the shader uses current coordinate system. Possible<br>coordinate systems include 'world', 'object', or an user defined<br>coordinate system.<br><br>coordsys (string)"} %meta{int,connectable,0} %meta{string,label,"Coordinate System"}  %read{7,13} %write{2147483647,-1}
+oparam	color	resultRGB	0 0 0		%meta{string,help,"resultRGB (color)"}  %read{282,284} %write{20,275}
+oparam	float	resultR	0		%meta{string,help,"resultR (float)"}  %read{232,232} %write{229,282}
+oparam	float	resultG	0		%meta{string,help,"resultG (float)"}  %read{232,232} %write{230,283}
+oparam	float	resultB	0		%meta{string,help,"resultB (float)"}  %read{206,232} %write{205,284}
+oparam	float	resultRadius	0		%meta{string,help,"resultRadius (float)"}  %read{2147483647,-1} %write{2147483647,-1}
+oparam	string	resultString	""		%meta{string,help,"resultString (string)"}  %read{2147483647,-1} %write{278,278}
+global	point	P	%read{17,17} %write{2147483647,-1}
+global	vector	I	%read{52,109} %write{2147483647,-1}
+global	normal	N	%read{29,29} %write{2147483647,-1}
+global	normal	Ng	%read{35,35} %write{2147483647,-1}
+global	float	u	%read{191,247} %write{2147483647,-1}
+global	float	v	%read{194,247} %write{2147483647,-1}
+global	vector	dPdu	%read{59,59} %write{2147483647,-1}
+global	vector	dPdv	%read{65,65} %write{2147483647,-1}
+global	float	time	%read{113,113} %write{2147483647,-1}
+global	vector	dPdtime	%read{71,71} %write{2147483647,-1}
+local	string	var	%read{4,281} %write{2,3}
+local	string	dst_space	%read{19,274} %write{9,13}
+local	int	success	%read{241,279} %write{14,278}
+local	point	___325_val	%read{19,20} %write{17,19}
+local	point	___326_val	%read{25,26} %write{23,25}
+local	normal	___327_val	%read{31,32} %write{29,31}
+local	normal	___328_val	%read{37,38} %write{35,37}
+local	normal	___329_val	%read{48,49} %write{46,48}
+local	vector	___330_val	%read{55,56} %write{53,55}
+local	vector	___331_val	%read{61,62} %write{59,61}
+local	vector	___332_val	%read{67,68} %write{65,67}
+local	vector	___333_val	%read{73,74} %write{71,73}
+local	vector	___334_val	%read{100,101} %write{97,100}
+local	color	___335_val	%read{106,106} %write{104,105}
+local	float	___338_val	%read{188,188} %write{186,187}
+local	float	___343_fdu	%read{218,218} %write{214,216}
+local	float	___343_fdv	%read{218,218} %write{215,217}
+local	float	___344_duval	%read{2147483647,-1} %write{226,226}
+local	float	___344_dvval	%read{2147483647,-1} %write{227,227}
+local	float	___344_dwval	%read{2147483647,-1} %write{228,228}
+local	float	___345_val	%read{236,236} %write{235,235}
+local	float[2]	___346_val	%read{242,243} %write{239,240}
+local	point	___349_val	%read{253,254} %write{251,253}
+local	point	___351_val	%read{262,263} %write{260,262}
+local	vector	___352_val	%read{268,269} %write{266,268}
+local	normal	___353_val	%read{274,275} %write{272,274}
+const	string	$const1	""		%read{0,7} %write{2147483647,-1}
+temp	int	$tmp1	%read{1,1} %write{0,0}
+temp	int	$tmp2	%read{5,5} %write{4,4}
+temp	int	$tmp3	%read{8,8} %write{7,7}
+const	string	$const2	"object"		%read{9,9} %write{2147483647,-1}
+const	string	$const3	"current"		%read{10,10} %write{2147483647,-1}
+temp	int	$tmp4	%read{11,11} %write{10,10}
+const	string	$const4	"common"		%read{12,274} %write{2147483647,-1}
+const	int	$const5	1		%read{14,283} %write{2147483647,-1}
+const	string	$const6	"P"		%read{15,23} %write{2147483647,-1}
+temp	int	$tmp5	%read{16,16} %write{15,15}
+const	string	$const7	"transform"		%read{18,273} %write{2147483647,-1}
+const	string	$const8	"Po"		%read{21,21} %write{2147483647,-1}
+temp	int	$tmp6	%read{22,22} %write{21,21}
+const	string	$const9	"primvar"		%read{23,278} %write{2147483647,-1}
+const	string	$const10	"Nn"		%read{27,27} %write{2147483647,-1}
+temp	int	$tmp7	%read{28,28} %write{27,27}
+const	string	$const11	"Ngn"		%read{33,33} %write{2147483647,-1}
+temp	int	$tmp8	%read{34,34} %write{33,33}
+const	string	$const12	"Non"		%read{39,39} %write{2147483647,-1}
+temp	int	$tmp9	%read{40,40} %write{39,39}
+temp	int	$tmp10	%read{41,45} %write{40,44}
+const	int	$const13	0		%read{40,282} %write{2147483647,-1}
+const	string	$const14	"Naon"		%read{42,42} %write{2147483647,-1}
+temp	int	$tmp11	%read{43,43} %write{42,42}
+temp	int	$tmp12	%read{44,44} %write{43,43}
+const	string	$const15	"builtin"		%read{46,231} %write{2147483647,-1}
+const	string	$const16	"Vn"		%read{50,50} %write{2147483647,-1}
+temp	int	$tmp13	%read{51,51} %write{50,50}
+temp	vector	$tmp14	%read{53,53} %write{52,52}
+const	string	$const17	"dPdu"		%read{57,57} %write{2147483647,-1}
+temp	int	$tmp15	%read{58,58} %write{57,57}
+const	string	$const18	"dPdv"		%read{63,63} %write{2147483647,-1}
+temp	int	$tmp16	%read{64,64} %write{63,63}
+const	string	$const19	"dPdtime"		%read{69,69} %write{2147483647,-1}
+temp	int	$tmp17	%read{70,70} %write{69,69}
+const	string	$const20	"Tn"		%read{75,75} %write{2147483647,-1}
+temp	int	$tmp18	%read{76,76} %write{75,75}
+temp	int	$tmp19	%read{77,81} %write{76,80}
+const	string	$const21	"dPdw"		%read{78,78} %write{2147483647,-1}
+temp	int	$tmp20	%read{79,79} %write{78,78}
+temp	int	$tmp21	%read{80,80} %write{79,79}
+temp	int	$tmp22	%read{82,86} %write{81,85}
+const	string	$const22	"dPcameradtime"		%read{83,83} %write{2147483647,-1}
+temp	int	$tmp23	%read{84,84} %write{83,83}
+temp	int	$tmp24	%read{85,85} %write{84,84}
+temp	int	$tmp25	%read{87,91} %write{86,90}
+const	string	$const23	"motionFore"		%read{88,88} %write{2147483647,-1}
+temp	int	$tmp26	%read{89,89} %write{88,88}
+temp	int	$tmp27	%read{90,90} %write{89,89}
+temp	int	$tmp28	%read{92,96} %write{91,95}
+const	string	$const24	"motionBack"		%read{93,93} %write{2147483647,-1}
+temp	int	$tmp29	%read{94,94} %write{93,93}
+temp	int	$tmp30	%read{95,95} %write{94,94}
+const	string	$const25	"Oi"		%read{102,102} %write{2147483647,-1}
+temp	int	$tmp31	%read{103,103} %write{102,102}
+const	string	$const26	"VLen"		%read{107,117} %write{2147483647,-1}
+temp	int	$tmp32	%read{108,108} %write{107,107}
+temp	float	$tmp33	%read{110,110} %write{109,109}
+const	string	$const27	"time"		%read{111,111} %write{2147483647,-1}
+temp	int	$tmp34	%read{112,112} %write{111,111}
+const	string	$const28	"PRadius"		%read{114,114} %write{2147483647,-1}
+temp	int	$tmp35	%read{115,115} %write{114,114}
+temp	int	$tmp36	%read{116,120} %write{115,119}
+temp	int	$tmp37	%read{118,118} %write{117,117}
+temp	int	$tmp38	%read{119,119} %write{118,118}
+temp	int	$tmp39	%read{121,125} %write{120,124}
+const	string	$const29	"curvature"		%read{122,122} %write{2147483647,-1}
+temp	int	$tmp40	%read{123,123} %write{122,122}
+temp	int	$tmp41	%read{124,124} %write{123,123}
+temp	int	$tmp42	%read{126,130} %write{125,129}
+const	string	$const30	"curvature_u"		%read{127,127} %write{2147483647,-1}
+temp	int	$tmp43	%read{128,128} %write{127,127}
+temp	int	$tmp44	%read{129,129} %write{128,128}
+temp	int	$tmp45	%read{131,135} %write{130,134}
+const	string	$const31	"curvature_v"		%read{132,132} %write{2147483647,-1}
+temp	int	$tmp46	%read{133,133} %write{132,132}
+temp	int	$tmp47	%read{134,134} %write{133,133}
+temp	int	$tmp48	%read{136,140} %write{135,139}
+const	string	$const32	"incidentRaySpread"		%read{137,137} %write{2147483647,-1}
+temp	int	$tmp49	%read{138,138} %write{137,137}
+temp	int	$tmp50	%read{139,139} %write{138,138}
+temp	int	$tmp51	%read{141,145} %write{140,144}
+const	string	$const33	"incidentRayRadius"		%read{142,142} %write{2147483647,-1}
+temp	int	$tmp52	%read{143,143} %write{142,142}
+temp	int	$tmp53	%read{144,144} %write{143,143}
+temp	int	$tmp54	%read{146,150} %write{145,149}
+const	string	$const34	"mpSize"		%read{147,147} %write{2147483647,-1}
+temp	int	$tmp55	%read{148,148} %write{147,147}
+temp	int	$tmp56	%read{149,149} %write{148,148}
+temp	int	$tmp57	%read{151,155} %write{150,154}
+const	string	$const35	"biasR"		%read{152,152} %write{2147483647,-1}
+temp	int	$tmp58	%read{153,153} %write{152,152}
+temp	int	$tmp59	%read{154,154} %write{153,153}
+temp	int	$tmp60	%read{156,160} %write{155,159}
+const	string	$const36	"biasT"		%read{157,157} %write{2147483647,-1}
+temp	int	$tmp61	%read{158,158} %write{157,157}
+temp	int	$tmp62	%read{159,159} %write{158,158}
+temp	int	$tmp63	%read{161,165} %write{160,164}
+const	string	$const37	"w"		%read{162,205} %write{2147483647,-1}
+temp	int	$tmp64	%read{163,163} %write{162,162}
+temp	int	$tmp65	%read{164,164} %write{163,163}
+temp	int	$tmp66	%read{166,170} %write{165,169}
+const	string	$const38	"du"		%read{167,229} %write{2147483647,-1}
+temp	int	$tmp67	%read{168,168} %write{167,167}
+temp	int	$tmp68	%read{169,169} %write{168,168}
+temp	int	$tmp69	%read{171,175} %write{170,174}
+const	string	$const39	"dv"		%read{172,230} %write{2147483647,-1}
+temp	int	$tmp70	%read{173,173} %write{172,172}
+temp	int	$tmp71	%read{174,174} %write{173,173}
+temp	int	$tmp72	%read{176,180} %write{175,179}
+const	string	$const40	"dw"		%read{177,231} %write{2147483647,-1}
+temp	int	$tmp73	%read{178,178} %write{177,177}
+temp	int	$tmp74	%read{179,179} %write{178,178}
+temp	int	$tmp75	%read{181,185} %write{180,184}
+const	string	$const41	"outsideIOR"		%read{182,182} %write{2147483647,-1}
+temp	int	$tmp76	%read{183,183} %write{182,182}
+temp	int	$tmp77	%read{184,184} %write{183,183}
+const	string	$const42	"u"		%read{189,189} %write{2147483647,-1}
+temp	int	$tmp78	%read{190,190} %write{189,189}
+const	string	$const43	"v"		%read{192,192} %write{2147483647,-1}
+temp	int	$tmp79	%read{193,193} %write{192,192}
+const	string	$const44	"uv"		%read{195,195} %write{2147483647,-1}
+temp	int	$tmp80	%read{196,196} %write{195,195}
+temp	int	$tmp81	%read{197,201} %write{196,200}
+const	string	$const45	"uvw"		%read{198,203} %write{2147483647,-1}
+temp	int	$tmp82	%read{199,199} %write{198,198}
+temp	int	$tmp83	%read{200,200} %write{199,199}
+const	float	$const46	0		%read{202,247} %write{2147483647,-1}
+temp	int	$tmp84	%read{204,204} %write{203,203}
+const	int	$const47	2		%read{206,284} %write{2147483647,-1}
+const	string	$const48	"duv"		%read{207,207} %write{2147483647,-1}
+temp	int	$tmp85	%read{208,208} %write{207,207}
+temp	int	$tmp86	%read{209,213} %write{208,212}
+const	string	$const49	"duvfp"		%read{210,210} %write{2147483647,-1}
+temp	int	$tmp87	%read{211,211} %write{210,210}
+temp	int	$tmp88	%read{212,212} %write{211,211}
+const	string	$const50	"duvw"		%read{219,219} %write{2147483647,-1}
+temp	int	$tmp89	%read{220,220} %write{219,219}
+temp	int	$tmp90	%read{221,225} %write{220,224}
+const	string	$const51	"duvwfp"		%read{222,222} %write{2147483647,-1}
+temp	int	$tmp91	%read{223,223} %write{222,222}
+temp	int	$tmp92	%read{224,224} %write{223,223}
+const	string	$const52	"float"		%read{233,233} %write{2147483647,-1}
+temp	int	$tmp93	%read{234,234} %write{233,233}
+const	string	$const53	"float2"		%read{237,237} %write{2147483647,-1}
+temp	int	$tmp94	%read{238,238} %write{237,237}
+const	float[2]	$const54	0 0 		%read{239,239} %write{2147483647,-1}
+temp	float	$tmp95	%read{244,244} %write{242,242}
+temp	float	$tmp96	%read{244,244} %write{243,243}
+const	string	$const55	"st"		%read{245,245} %write{2147483647,-1}
+temp	int	$tmp97	%read{246,246} %write{245,245}
+const	string	$const56	"float3"		%read{249,249} %write{2147483647,-1}
+temp	int	$tmp98	%read{250,250} %write{249,249}
+const	string	$const57	"color"		%read{255,255} %write{2147483647,-1}
+temp	int	$tmp99	%read{256,256} %write{255,255}
+const	string	$const58	"point"		%read{258,258} %write{2147483647,-1}
+temp	int	$tmp100	%read{259,259} %write{258,258}
+const	string	$const59	"vector"		%read{264,264} %write{2147483647,-1}
+temp	int	$tmp101	%read{265,265} %write{264,264}
+const	string	$const60	"normal"		%read{270,270} %write{2147483647,-1}
+temp	int	$tmp102	%read{271,271} %write{270,270}
+const	string	$const61	"string"		%read{276,276} %write{2147483647,-1}
+temp	int	$tmp103	%read{277,277} %write{276,276}
+temp	int	$tmp104	%read{280,280} %write{279,279}
+const	string	$const62	"PxrVariable failed to lookup %s"		%read{281,281} %write{2147483647,-1}
+code ___main___
+# PxrVariable.osl:101
+#     string var = variable == "" ? name : variable;
+	eq		$tmp1 variable $const1 	%filename{"PxrVariable.osl"} %line{101} %argrw{"wrr"}
+	if		$tmp1 3 4 	%argrw{"r"}
+	assign		var name 	%argrw{"wr"}
+	assign		var variable 	%argrw{"wr"}
+# PxrVariable.osl:102
+#     if (var == "") return;
+	eq		$tmp2 var $const1 	%line{102} %argrw{"wrr"}
+	if		$tmp2 7 7 	%argrw{"r"}
+	exit
+# PxrVariable.osl:103
+#     string dst_space = coordsys == "" ? "object"
+	eq		$tmp3 coordsys $const1 	%line{103} %argrw{"wrr"}
+	if		$tmp3 10 14 	%argrw{"r"}
+	assign		dst_space $const2 	%argrw{"wr"}
+# PxrVariable.osl:104
+#                        : coordsys == "current" ? "common" : coordsys;
+	eq		$tmp4 coordsys $const3 	%line{104} %argrw{"wrr"}
+	if		$tmp4 13 14 	%argrw{"r"}
+	assign		dst_space $const4 	%argrw{"wr"}
+	assign		dst_space coordsys 	%argrw{"wr"}
+# PxrVariable.osl:105
+#     int success = 1;
+	assign		success $const5 	%line{105} %argrw{"wr"}
+# PxrVariable.osl:107
+#     if (var == "P")
+	eq		$tmp5 var $const6 	%line{107} %argrw{"wrr"}
+	if		$tmp5 21 279 	%argrw{"r"}
+# PxrVariable.osl:109
+#         point val = P;
+	assign		___325_val P 	%line{109} %argrw{"wr"}
+# PxrVariable.osl:110
+#         val = transform(dst_space, val);
+	functioncall	$const7 20 	%line{110} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:285
+# point  transform (string to, point p)  { return transform("common",to,p); }
+	transform	___325_val $const4 dst_space ___325_val 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{285} %argrw{"wrrr"}
+# PxrVariable.osl:111
+#         resultRGB = color(val);
+	assign		resultRGB ___325_val 	%filename{"PxrVariable.osl"} %line{111} %argrw{"wr"}
+# PxrVariable.osl:113
+#     else if (var == "Po")
+	eq		$tmp6 var $const8 	%line{113} %argrw{"wrr"}
+	if		$tmp6 27 279 	%argrw{"r"}
+# PxrVariable.osl:117
+#         success = getattribute("primvar", "P", val);
+	getattribute	success $const9 $const6 ___326_val 	%line{117} %argrw{"wrrw"}
+# PxrVariable.osl:118
+#         val = transform(dst_space, val);
+	functioncall	$const7 26 	%line{118} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:285
+# point  transform (string to, point p)  { return transform("common",to,p); }
+	transform	___326_val $const4 dst_space ___326_val 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{285} %argrw{"wrrr"}
+# PxrVariable.osl:119
+#         resultRGB = color(val);
+	assign		resultRGB ___326_val 	%filename{"PxrVariable.osl"} %line{119} %argrw{"wr"}
+# PxrVariable.osl:121
+#     else if (var == "Nn")
+	eq		$tmp7 var $const10 	%line{121} %argrw{"wrr"}
+	if		$tmp7 33 279 	%argrw{"r"}
+# PxrVariable.osl:123
+#         normal val = N;
+	assign		___327_val N 	%line{123} %argrw{"wr"}
+# PxrVariable.osl:124
+#         val = transform(dst_space, val);
+	functioncall	$const7 32 	%line{124} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:283
+# normal transform (string to, normal p) { return transform("common",to,p); }
+	transformn	___327_val $const4 dst_space ___327_val 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{283} %argrw{"wrrr"}
+# PxrVariable.osl:125
+#         resultRGB = color(val);
+	assign		resultRGB ___327_val 	%filename{"PxrVariable.osl"} %line{125} %argrw{"wr"}
+# PxrVariable.osl:127
+#     else if (var == "Ngn")
+	eq		$tmp8 var $const11 	%line{127} %argrw{"wrr"}
+	if		$tmp8 39 279 	%argrw{"r"}
+# PxrVariable.osl:129
+#         normal val = Ng;
+	assign		___328_val Ng 	%line{129} %argrw{"wr"}
+# PxrVariable.osl:130
+#         val = transform(dst_space, val);
+	functioncall	$const7 38 	%line{130} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:283
+# normal transform (string to, normal p) { return transform("common",to,p); }
+	transformn	___328_val $const4 dst_space ___328_val 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{283} %argrw{"wrrr"}
+# PxrVariable.osl:131
+#         resultRGB = color(val);
+	assign		resultRGB ___328_val 	%filename{"PxrVariable.osl"} %line{131} %argrw{"wr"}
+# PxrVariable.osl:133
+#     else if (var == "Non" || var == "Naon")
+	eq		$tmp9 var $const12 	%line{133} %argrw{"wrr"}
+	neq		$tmp10 $tmp9 $const13 	%argrw{"wrr"}
+	if		$tmp10 42 45 	%argrw{"r"}
+	eq		$tmp11 var $const14 	%argrw{"wrr"}
+	neq		$tmp12 $tmp11 $const13 	%argrw{"wrr"}
+	assign		$tmp10 $tmp12 	%argrw{"wr"}
+	if		$tmp10 50 279 	%argrw{"r"}
+# PxrVariable.osl:136
+#         success = getattribute("builtin", var, val);
+	getattribute	success $const15 var ___329_val 	%line{136} %argrw{"wrrw"}
+# PxrVariable.osl:137
+#         val = transform(dst_space, val);
+	functioncall	$const7 49 	%line{137} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:283
+# normal transform (string to, normal p) { return transform("common",to,p); }
+	transformn	___329_val $const4 dst_space ___329_val 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{283} %argrw{"wrrr"}
+# PxrVariable.osl:138
+#         resultRGB = color(val);
+	assign		resultRGB ___329_val 	%filename{"PxrVariable.osl"} %line{138} %argrw{"wr"}
+# PxrVariable.osl:140
+#     else if (var == "Vn")
+	eq		$tmp13 var $const16 	%line{140} %argrw{"wrr"}
+	if		$tmp13 57 279 	%argrw{"r"}
+# PxrVariable.osl:142
+#         vector val = normalize(-I);
+	neg		$tmp14 I 	%line{142} %argrw{"wr"}
+	normalize	___330_val $tmp14 	%argrw{"wr"}
+# PxrVariable.osl:143
+#         val = transform(dst_space, val);
+	functioncall	$const7 56 	%line{143} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:284
+# vector transform (string to, vector p) { return transform("common",to,p); }
+	transformv	___330_val $const4 dst_space ___330_val 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{284} %argrw{"wrrr"}
+# PxrVariable.osl:144
+#         resultRGB = color(val);
+	assign		resultRGB ___330_val 	%filename{"PxrVariable.osl"} %line{144} %argrw{"wr"}
+# PxrVariable.osl:146
+#     else if (var == "dPdu")
+	eq		$tmp15 var $const17 	%line{146} %argrw{"wrr"}
+	if		$tmp15 63 279 	%argrw{"r"}
+# PxrVariable.osl:148
+#         vector val = dPdu;
+	assign		___331_val dPdu 	%line{148} %argrw{"wr"}
+# PxrVariable.osl:149
+#         val = transform(dst_space, val);
+	functioncall	$const7 62 	%line{149} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:284
+# vector transform (string to, vector p) { return transform("common",to,p); }
+	transformv	___331_val $const4 dst_space ___331_val 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{284} %argrw{"wrrr"}
+# PxrVariable.osl:150
+#         resultRGB = color(val);
+	assign		resultRGB ___331_val 	%filename{"PxrVariable.osl"} %line{150} %argrw{"wr"}
+# PxrVariable.osl:152
+#     else if (var == "dPdv")
+	eq		$tmp16 var $const18 	%line{152} %argrw{"wrr"}
+	if		$tmp16 69 279 	%argrw{"r"}
+# PxrVariable.osl:154
+#         vector val = dPdv;
+	assign		___332_val dPdv 	%line{154} %argrw{"wr"}
+# PxrVariable.osl:155
+#         val = transform(dst_space, val);
+	functioncall	$const7 68 	%line{155} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:284
+# vector transform (string to, vector p) { return transform("common",to,p); }
+	transformv	___332_val $const4 dst_space ___332_val 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{284} %argrw{"wrrr"}
+# PxrVariable.osl:156
+#         resultRGB = color(val);
+	assign		resultRGB ___332_val 	%filename{"PxrVariable.osl"} %line{156} %argrw{"wr"}
+# PxrVariable.osl:158
+#     else if (var == "dPdtime")
+	eq		$tmp17 var $const19 	%line{158} %argrw{"wrr"}
+	if		$tmp17 75 279 	%argrw{"r"}
+# PxrVariable.osl:160
+#         vector val = dPdtime;
+	assign		___333_val dPdtime 	%line{160} %argrw{"wr"}
+# PxrVariable.osl:161
+#         val = transform(dst_space, val);
+	functioncall	$const7 74 	%line{161} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:284
+# vector transform (string to, vector p) { return transform("common",to,p); }
+	transformv	___333_val $const4 dst_space ___333_val 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{284} %argrw{"wrrr"}
+# PxrVariable.osl:162
+#         resultRGB = color(val);
+	assign		resultRGB ___333_val 	%filename{"PxrVariable.osl"} %line{162} %argrw{"wr"}
+# PxrVariable.osl:164
+#     else if (var == "Tn" || var == "dPdw" || var == "dPcameradtime" ||
+	eq		$tmp18 var $const20 	%line{164} %argrw{"wrr"}
+	neq		$tmp19 $tmp18 $const13 	%argrw{"wrr"}
+	if		$tmp19 78 81 	%argrw{"r"}
+	eq		$tmp20 var $const21 	%argrw{"wrr"}
+	neq		$tmp21 $tmp20 $const13 	%argrw{"wrr"}
+	assign		$tmp19 $tmp21 	%argrw{"wr"}
+	neq		$tmp22 $tmp19 $const13 	%argrw{"wrr"}
+	if		$tmp22 83 86 	%argrw{"r"}
+	eq		$tmp23 var $const22 	%argrw{"wrr"}
+	neq		$tmp24 $tmp23 $const13 	%argrw{"wrr"}
+	assign		$tmp22 $tmp24 	%argrw{"wr"}
+	neq		$tmp25 $tmp22 $const13 	%argrw{"wrr"}
+	if		$tmp25 88 91 	%argrw{"r"}
+# PxrVariable.osl:165
+#              var == "motionFore" || var == "motionBack")
+	eq		$tmp26 var $const23 	%line{165} %argrw{"wrr"}
+	neq		$tmp27 $tmp26 $const13 	%argrw{"wrr"}
+# PxrVariable.osl:164
+#     else if (var == "Tn" || var == "dPdw" || var == "dPcameradtime" ||
+	assign		$tmp25 $tmp27 	%line{164} %argrw{"wr"}
+	neq		$tmp28 $tmp25 $const13 	%argrw{"wrr"}
+# PxrVariable.osl:165
+#              var == "motionFore" || var == "motionBack")
+	if		$tmp28 93 96 	%line{165} %argrw{"r"}
+	eq		$tmp29 var $const24 	%argrw{"wrr"}
+	neq		$tmp30 $tmp29 $const13 	%argrw{"wrr"}
+	assign		$tmp28 $tmp30 	%argrw{"wr"}
+# PxrVariable.osl:164
+#     else if (var == "Tn" || var == "dPdw" || var == "dPcameradtime" ||
+	if		$tmp28 102 279 	%line{164} %argrw{"r"}
+# PxrVariable.osl:167
+#         vector val = 0;
+	assign		___334_val $const13 	%line{167} %argrw{"wr"}
+# PxrVariable.osl:168
+#         success = getattribute("builtin", var, val);
+	getattribute	success $const15 var ___334_val 	%line{168} %argrw{"wrrw"}
+# PxrVariable.osl:169
+#         val = transform(dst_space, val);
+	functioncall	$const7 101 	%line{169} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:284
+# vector transform (string to, vector p) { return transform("common",to,p); }
+	transformv	___334_val $const4 dst_space ___334_val 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{284} %argrw{"wrrr"}
+# PxrVariable.osl:170
+#         resultRGB = color(val);
+	assign		resultRGB ___334_val 	%filename{"PxrVariable.osl"} %line{170} %argrw{"wr"}
+# PxrVariable.osl:172
+#     else if (var == "Oi")
+	eq		$tmp31 var $const25 	%line{172} %argrw{"wrr"}
+	if		$tmp31 107 279 	%argrw{"r"}
+# PxrVariable.osl:174
+#         color val = 0;
+	assign		___335_val $const13 	%line{174} %argrw{"wr"}
+# PxrVariable.osl:175
+#         success = getattribute("builtin", var, val);
+	getattribute	success $const15 var ___335_val 	%line{175} %argrw{"wrrw"}
+# PxrVariable.osl:176
+#         resultRGB = val;
+	assign		resultRGB ___335_val 	%line{176} %argrw{"wr"}
+# PxrVariable.osl:178
+#     else if (var == "VLen")
+	eq		$tmp32 var $const26 	%line{178} %argrw{"wrr"}
+	if		$tmp32 111 279 	%argrw{"r"}
+# PxrVariable.osl:180
+#         resultRGB =  color(length(I));
+	length		$tmp33 I 	%line{180} %argrw{"wr"}
+	assign		resultRGB $tmp33 	%argrw{"wr"}
+# PxrVariable.osl:182
+#     else if (var == "time")
+	eq		$tmp34 var $const27 	%line{182} %argrw{"wrr"}
+	if		$tmp34 114 279 	%argrw{"r"}
+# PxrVariable.osl:184
+#         resultRGB =  color(time);
+	assign		resultRGB time 	%line{184} %argrw{"wr"}
+# PxrVariable.osl:186
+#     else if (var == "PRadius" || var == "VLen" || var == "curvature" ||
+	eq		$tmp35 var $const28 	%line{186} %argrw{"wrr"}
+	neq		$tmp36 $tmp35 $const13 	%argrw{"wrr"}
+	if		$tmp36 117 120 	%argrw{"r"}
+	eq		$tmp37 var $const26 	%argrw{"wrr"}
+	neq		$tmp38 $tmp37 $const13 	%argrw{"wrr"}
+	assign		$tmp36 $tmp38 	%argrw{"wr"}
+	neq		$tmp39 $tmp36 $const13 	%argrw{"wrr"}
+	if		$tmp39 122 125 	%argrw{"r"}
+	eq		$tmp40 var $const29 	%argrw{"wrr"}
+	neq		$tmp41 $tmp40 $const13 	%argrw{"wrr"}
+	assign		$tmp39 $tmp41 	%argrw{"wr"}
+	neq		$tmp42 $tmp39 $const13 	%argrw{"wrr"}
+	if		$tmp42 127 130 	%argrw{"r"}
+# PxrVariable.osl:187
+#              var == "curvature_u" || var == "curvature_v" ||
+	eq		$tmp43 var $const30 	%line{187} %argrw{"wrr"}
+	neq		$tmp44 $tmp43 $const13 	%argrw{"wrr"}
+# PxrVariable.osl:186
+#     else if (var == "PRadius" || var == "VLen" || var == "curvature" ||
+	assign		$tmp42 $tmp44 	%line{186} %argrw{"wr"}
+	neq		$tmp45 $tmp42 $const13 	%argrw{"wrr"}
+# PxrVariable.osl:187
+#              var == "curvature_u" || var == "curvature_v" ||
+	if		$tmp45 132 135 	%line{187} %argrw{"r"}
+	eq		$tmp46 var $const31 	%argrw{"wrr"}
+	neq		$tmp47 $tmp46 $const13 	%argrw{"wrr"}
+	assign		$tmp45 $tmp47 	%argrw{"wr"}
+	neq		$tmp48 $tmp45 $const13 	%argrw{"wrr"}
+	if		$tmp48 137 140 	%argrw{"r"}
+# PxrVariable.osl:188
+#              var == "incidentRaySpread" || var == "incidentRayRadius" ||
+	eq		$tmp49 var $const32 	%line{188} %argrw{"wrr"}
+	neq		$tmp50 $tmp49 $const13 	%argrw{"wrr"}
+# PxrVariable.osl:187
+#              var == "curvature_u" || var == "curvature_v" ||
+	assign		$tmp48 $tmp50 	%line{187} %argrw{"wr"}
+	neq		$tmp51 $tmp48 $const13 	%argrw{"wrr"}
+# PxrVariable.osl:188
+#              var == "incidentRaySpread" || var == "incidentRayRadius" ||
+	if		$tmp51 142 145 	%line{188} %argrw{"r"}
+	eq		$tmp52 var $const33 	%argrw{"wrr"}
+	neq		$tmp53 $tmp52 $const13 	%argrw{"wrr"}
+	assign		$tmp51 $tmp53 	%argrw{"wr"}
+	neq		$tmp54 $tmp51 $const13 	%argrw{"wrr"}
+	if		$tmp54 147 150 	%argrw{"r"}
+# PxrVariable.osl:189
+#              var == "mpSize" || var == "biasR" || var == "biasT" || var == "w" ||
+	eq		$tmp55 var $const34 	%line{189} %argrw{"wrr"}
+	neq		$tmp56 $tmp55 $const13 	%argrw{"wrr"}
+# PxrVariable.osl:188
+#              var == "incidentRaySpread" || var == "incidentRayRadius" ||
+	assign		$tmp54 $tmp56 	%line{188} %argrw{"wr"}
+	neq		$tmp57 $tmp54 $const13 	%argrw{"wrr"}
+# PxrVariable.osl:189
+#              var == "mpSize" || var == "biasR" || var == "biasT" || var == "w" ||
+	if		$tmp57 152 155 	%line{189} %argrw{"r"}
+	eq		$tmp58 var $const35 	%argrw{"wrr"}
+	neq		$tmp59 $tmp58 $const13 	%argrw{"wrr"}
+	assign		$tmp57 $tmp59 	%argrw{"wr"}
+	neq		$tmp60 $tmp57 $const13 	%argrw{"wrr"}
+	if		$tmp60 157 160 	%argrw{"r"}
+	eq		$tmp61 var $const36 	%argrw{"wrr"}
+	neq		$tmp62 $tmp61 $const13 	%argrw{"wrr"}
+	assign		$tmp60 $tmp62 	%argrw{"wr"}
+	neq		$tmp63 $tmp60 $const13 	%argrw{"wrr"}
+	if		$tmp63 162 165 	%argrw{"r"}
+	eq		$tmp64 var $const37 	%argrw{"wrr"}
+	neq		$tmp65 $tmp64 $const13 	%argrw{"wrr"}
+	assign		$tmp63 $tmp65 	%argrw{"wr"}
+	neq		$tmp66 $tmp63 $const13 	%argrw{"wrr"}
+	if		$tmp66 167 170 	%argrw{"r"}
+# PxrVariable.osl:190
+#              var == "du" || var == "dv" || var == "dw" || var == "outsideIOR")
+	eq		$tmp67 var $const38 	%line{190} %argrw{"wrr"}
+	neq		$tmp68 $tmp67 $const13 	%argrw{"wrr"}
+# PxrVariable.osl:189
+#              var == "mpSize" || var == "biasR" || var == "biasT" || var == "w" ||
+	assign		$tmp66 $tmp68 	%line{189} %argrw{"wr"}
+	neq		$tmp69 $tmp66 $const13 	%argrw{"wrr"}
+# PxrVariable.osl:190
+#              var == "du" || var == "dv" || var == "dw" || var == "outsideIOR")
+	if		$tmp69 172 175 	%line{190} %argrw{"r"}
+	eq		$tmp70 var $const39 	%argrw{"wrr"}
+	neq		$tmp71 $tmp70 $const13 	%argrw{"wrr"}
+	assign		$tmp69 $tmp71 	%argrw{"wr"}
+	neq		$tmp72 $tmp69 $const13 	%argrw{"wrr"}
+	if		$tmp72 177 180 	%argrw{"r"}
+	eq		$tmp73 var $const40 	%argrw{"wrr"}
+	neq		$tmp74 $tmp73 $const13 	%argrw{"wrr"}
+	assign		$tmp72 $tmp74 	%argrw{"wr"}
+	neq		$tmp75 $tmp72 $const13 	%argrw{"wrr"}
+	if		$tmp75 182 185 	%argrw{"r"}
+	eq		$tmp76 var $const41 	%argrw{"wrr"}
+	neq		$tmp77 $tmp76 $const13 	%argrw{"wrr"}
+	assign		$tmp75 $tmp77 	%argrw{"wr"}
+# PxrVariable.osl:186
+#     else if (var == "PRadius" || var == "VLen" || var == "curvature" ||
+	if		$tmp75 189 279 	%line{186} %argrw{"r"}
+# PxrVariable.osl:192
+#         float val = 0;
+	assign		___338_val $const13 	%line{192} %argrw{"wr"}
+# PxrVariable.osl:193
+#         success = getattribute("builtin", var, val);
+	getattribute	success $const15 var ___338_val 	%line{193} %argrw{"wrrw"}
+# PxrVariable.osl:194
+#         resultRGB =  color(val);
+	assign		resultRGB ___338_val 	%line{194} %argrw{"wr"}
+# PxrVariable.osl:196
+#     else if (var == "u")
+	eq		$tmp78 var $const42 	%line{196} %argrw{"wrr"}
+	if		$tmp78 192 279 	%argrw{"r"}
+# PxrVariable.osl:198
+#         resultRGB = color(u);
+	assign		resultRGB u 	%line{198} %argrw{"wr"}
+# PxrVariable.osl:200
+#     else if (var == "v")
+	eq		$tmp79 var $const43 	%line{200} %argrw{"wrr"}
+	if		$tmp79 195 279 	%argrw{"r"}
+# PxrVariable.osl:202
+#         resultRGB = color(v);
+	assign		resultRGB v 	%line{202} %argrw{"wr"}
+# PxrVariable.osl:204
+#     else if (var == "uv" || var == "uvw")
+	eq		$tmp80 var $const44 	%line{204} %argrw{"wrr"}
+	neq		$tmp81 $tmp80 $const13 	%argrw{"wrr"}
+	if		$tmp81 198 201 	%argrw{"r"}
+	eq		$tmp82 var $const45 	%argrw{"wrr"}
+	neq		$tmp83 $tmp82 $const13 	%argrw{"wrr"}
+	assign		$tmp81 $tmp83 	%argrw{"wr"}
+	if		$tmp81 207 279 	%argrw{"r"}
+# PxrVariable.osl:206
+#         resultRGB = color(u, v, 0);
+	color		resultRGB u v $const46 	%line{206} %argrw{"wrrr"}
+# PxrVariable.osl:207
+#         if (var == "uvw")
+	eq		$tmp84 var $const45 	%line{207} %argrw{"wrr"}
+	if		$tmp84 207 207 	%argrw{"r"}
+# PxrVariable.osl:210
+#            success = getattribute("builtin", "w", resultB);
+	getattribute	success $const15 $const37 resultB 	%line{210} %argrw{"wrrw"}
+# PxrVariable.osl:211
+#            resultRGB[2] = resultB;
+	compassign	resultRGB $const47 resultB 	%line{211} %argrw{"wrr"}
+# PxrVariable.osl:214
+#     else if (var == "duv" || var == "duvfp")
+	eq		$tmp85 var $const48 	%line{214} %argrw{"wrr"}
+	neq		$tmp86 $tmp85 $const13 	%argrw{"wrr"}
+	if		$tmp86 210 213 	%argrw{"r"}
+	eq		$tmp87 var $const49 	%argrw{"wrr"}
+	neq		$tmp88 $tmp87 $const13 	%argrw{"wrr"}
+	assign		$tmp86 $tmp88 	%argrw{"wr"}
+	if		$tmp86 219 279 	%argrw{"r"}
+# PxrVariable.osl:216
+#         float fdu = 0, fdv = 0;
+	assign		___343_fdu $const13 	%line{216} %argrw{"wr"}
+	assign		___343_fdv $const13 	%argrw{"wr"}
+# PxrVariable.osl:217
+#         success = getattribute("builtin", "du", fdu);
+	getattribute	success $const15 $const38 ___343_fdu 	%line{217} %argrw{"wrrw"}
+# PxrVariable.osl:218
+#         success = getattribute("builtin", "dv", fdv);
+	getattribute	success $const15 $const39 ___343_fdv 	%line{218} %argrw{"wrrw"}
+# PxrVariable.osl:219
+#         resultRGB = color(fdu, fdv, 0);
+	color		resultRGB ___343_fdu ___343_fdv $const46 	%line{219} %argrw{"wrrr"}
+# PxrVariable.osl:221
+#     else if (var == "duvw" || var == "duvwfp")
+	eq		$tmp89 var $const50 	%line{221} %argrw{"wrr"}
+	neq		$tmp90 $tmp89 $const13 	%argrw{"wrr"}
+	if		$tmp90 222 225 	%argrw{"r"}
+	eq		$tmp91 var $const51 	%argrw{"wrr"}
+	neq		$tmp92 $tmp91 $const13 	%argrw{"wrr"}
+	assign		$tmp90 $tmp92 	%argrw{"wr"}
+	if		$tmp90 233 279 	%argrw{"r"}
+# PxrVariable.osl:223
+#         float duval = 0, dvval = 0, dwval = 0;
+	assign		___344_duval $const13 	%line{223} %argrw{"wr"}
+	assign		___344_dvval $const13 	%argrw{"wr"}
+	assign		___344_dwval $const13 	%argrw{"wr"}
+# PxrVariable.osl:224
+#         success = getattribute("builtin", "du", resultR);
+	getattribute	success $const15 $const38 resultR 	%line{224} %argrw{"wrrw"}
+# PxrVariable.osl:225
+#         success = getattribute("builtin", "dv", resultG);
+	getattribute	success $const15 $const39 resultG 	%line{225} %argrw{"wrrw"}
+# PxrVariable.osl:226
+#         success = getattribute("builtin", "dw", resultB);
+	getattribute	success $const15 $const40 resultB 	%line{226} %argrw{"wrrw"}
+# PxrVariable.osl:227
+#         resultRGB = color(resultR, resultG, resultB);
+	color		resultRGB resultR resultG resultB 	%line{227} %argrw{"wrrr"}
+# PxrVariable.osl:229
+#     else if (type == "float")
+	eq		$tmp93 type $const52 	%line{229} %argrw{"wrr"}
+	if		$tmp93 237 279 	%argrw{"r"}
+# PxrVariable.osl:232
+#         success = getattribute("primvar", var, val);
+	getattribute	success $const9 var ___345_val 	%line{232} %argrw{"wrrw"}
+# PxrVariable.osl:233
+#         resultRGB = color(val);
+	assign		resultRGB ___345_val 	%line{233} %argrw{"wr"}
+# PxrVariable.osl:235
+#     else if (type == "float2")
+	eq		$tmp94 type $const53 	%line{235} %argrw{"wrr"}
+	if		$tmp94 249 279 	%argrw{"r"}
+# PxrVariable.osl:237
+#         float val[2] = {0, 0};
+	assign		___346_val $const54 	%line{237} %argrw{"wr"}
+# PxrVariable.osl:238
+#         success = getattribute("primvar", var, val);
+	getattribute	success $const9 var ___346_val 	%line{238} %argrw{"wrrw"}
+# PxrVariable.osl:239
+#         if (success)
+	if		success 245 249 	%line{239} %argrw{"r"}
+# PxrVariable.osl:241
+#             resultRGB = color(val[0], val[1], 0);
+	aref		$tmp95 ___346_val $const13 	%line{241} %argrw{"wrr"}
+	aref		$tmp96 ___346_val $const5 	%argrw{"wrr"}
+	color		resultRGB $tmp95 $tmp96 $const46 	%argrw{"wrrr"}
+# PxrVariable.osl:243
+#         else if (var == "st")
+	eq		$tmp97 var $const55 	%line{243} %argrw{"wrr"}
+	if		$tmp97 249 249 	%argrw{"r"}
+# PxrVariable.osl:246
+#             resultRGB = color(u, v, 0);
+	color		resultRGB u v $const46 	%line{246} %argrw{"wrrr"}
+# PxrVariable.osl:247
+#             success = 1;
+	assign		success $const5 	%line{247} %argrw{"wr"}
+# PxrVariable.osl:250
+#     else if (type == "float3")
+	eq		$tmp98 type $const56 	%line{250} %argrw{"wrr"}
+	if		$tmp98 255 279 	%argrw{"r"}
+# PxrVariable.osl:253
+#         success = getattribute("primvar", var, val);
+	getattribute	success $const9 var ___349_val 	%line{253} %argrw{"wrrw"}
+# PxrVariable.osl:254
+#         val = transform(dst_space, val);
+	functioncall	$const7 254 	%line{254} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:285
+# point  transform (string to, point p)  { return transform("common",to,p); }
+	transform	___349_val $const4 dst_space ___349_val 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{285} %argrw{"wrrr"}
+# PxrVariable.osl:255
+#         resultRGB = color(val);
+	assign		resultRGB ___349_val 	%filename{"PxrVariable.osl"} %line{255} %argrw{"wr"}
+# PxrVariable.osl:257
+#     else if (type == "color")
+	eq		$tmp99 type $const57 	%line{257} %argrw{"wrr"}
+	if		$tmp99 258 279 	%argrw{"r"}
+# PxrVariable.osl:259
+#         success = getattribute("primvar", var, resultRGB);
+	getattribute	success $const9 var resultRGB 	%line{259} %argrw{"wrrw"}
+# PxrVariable.osl:261
+#     else if (type == "point")
+	eq		$tmp100 type $const58 	%line{261} %argrw{"wrr"}
+	if		$tmp100 264 279 	%argrw{"r"}
+# PxrVariable.osl:264
+#         success = getattribute("primvar", var, val);
+	getattribute	success $const9 var ___351_val 	%line{264} %argrw{"wrrw"}
+# PxrVariable.osl:265
+#         val = transform(dst_space, val);
+	functioncall	$const7 263 	%line{265} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:285
+# point  transform (string to, point p)  { return transform("common",to,p); }
+	transform	___351_val $const4 dst_space ___351_val 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{285} %argrw{"wrrr"}
+# PxrVariable.osl:266
+#         resultRGB = color(val);
+	assign		resultRGB ___351_val 	%filename{"PxrVariable.osl"} %line{266} %argrw{"wr"}
+# PxrVariable.osl:268
+#     else if (type == "vector")
+	eq		$tmp101 type $const59 	%line{268} %argrw{"wrr"}
+	if		$tmp101 270 279 	%argrw{"r"}
+# PxrVariable.osl:271
+#         success = getattribute("primvar", var, val);
+	getattribute	success $const9 var ___352_val 	%line{271} %argrw{"wrrw"}
+# PxrVariable.osl:272
+#         val = transform(dst_space, val);
+	functioncall	$const7 269 	%line{272} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:284
+# vector transform (string to, vector p) { return transform("common",to,p); }
+	transformv	___352_val $const4 dst_space ___352_val 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{284} %argrw{"wrrr"}
+# PxrVariable.osl:273
+#         resultRGB = color(val);
+	assign		resultRGB ___352_val 	%filename{"PxrVariable.osl"} %line{273} %argrw{"wr"}
+# PxrVariable.osl:275
+#     else if (type == "normal")
+	eq		$tmp102 type $const60 	%line{275} %argrw{"wrr"}
+	if		$tmp102 276 279 	%argrw{"r"}
+# PxrVariable.osl:278
+#         success = getattribute("primvar", var, val);
+	getattribute	success $const9 var ___353_val 	%line{278} %argrw{"wrrw"}
+# PxrVariable.osl:279
+#         val = transform(dst_space, val);
+	functioncall	$const7 275 	%line{279} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:283
+# normal transform (string to, normal p) { return transform("common",to,p); }
+	transformn	___353_val $const4 dst_space ___353_val 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{283} %argrw{"wrrr"}
+# PxrVariable.osl:280
+#         resultRGB = color(val);
+	assign		resultRGB ___353_val 	%filename{"PxrVariable.osl"} %line{280} %argrw{"wr"}
+# PxrVariable.osl:282
+#     else if (type == "string")
+	eq		$tmp103 type $const61 	%line{282} %argrw{"wrr"}
+	if		$tmp103 279 279 	%argrw{"r"}
+# PxrVariable.osl:284
+#         success = getattribute("primvar", var, resultString);
+	getattribute	success $const9 var resultString 	%line{284} %argrw{"wrrw"}
+# PxrVariable.osl:287
+#     if (!success) warning("PxrVariable failed to lookup %s", var);
+	eq		$tmp104 success $const13 	%line{287} %argrw{"wrr"}
+	if		$tmp104 282 282 	%argrw{"r"}
+	warning		$const62 var 	%argrw{"rr"}
+# PxrVariable.osl:289
+#     resultR = resultRGB[0];
+	compref		resultR resultRGB $const13 	%line{289} %argrw{"wrr"}
+# PxrVariable.osl:290
+#     resultG = resultRGB[1];
+	compref		resultG resultRGB $const5 	%line{290} %argrw{"wrr"}
+# PxrVariable.osl:291
+#     resultB = resultRGB[2];
+	compref		resultB resultRGB $const47 	%line{291} %argrw{"wrr"}
+	end

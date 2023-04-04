@@ -1,0 +1,2588 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrBlend.osl/obj/PxrBlend.oso
+shader PxrBlend	%meta{int,rfm_nodeid,1053411} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/color"} %meta{string,rfh_classification,"Pattern/Color"} 
+param	int	operation	19		%meta{string,widget,"mapper"} %meta{string,options,"Color:0|Color Burn:1|Color Dodge:2|Darken:3|Darker Color:4|Difference:5|Dissolve:6|Divide:7|Exclusion:8|Hard Light:9|Hard Mix:10|Hue:11|Lighten:12|Lighter Color:13|Linear Burn:14|Linear Dodge:15|Linear Light:16|Luminosity:17|Multiply:18|Normal:19|Overlay:20|Pin Light:21|Saturation:22|Screen:23|Soft Light:24|Subtract:25|Vivid Light:26 "} %meta{string,help,"operation (int)"} %meta{int,connectable,0} %meta{string,label,"Operation"}  %read{10,1123} %write{2147483647,-1}
+param	color	topRGB	0 0 0		%meta{string,widget,"color"} %meta{string,help,"topRGB (color)"} %meta{string,label,"Top Color"}  %read{3,3} %write{2147483647,-1}
+param	float	topA	1		%meta{string,widget,"default"} %meta{string,help,"topA (float)"} %meta{string,label,"Top Alpha"} %meta{float,max,1} %meta{float,min,0}  %read{0,1122} %write{2147483647,-1}
+param	color	bottomRGB	0 0 0		%meta{string,widget,"color"} %meta{string,help,"bottomRGB (color)"} %meta{string,label,"Bottom Color"}  %read{7,7} %write{2147483647,-1}
+param	float	bottomA	1		%meta{string,widget,"default"} %meta{string,help,"bottomA (float)"} %meta{string,label,"Bottom Alpha"} %meta{float,max,1} %meta{float,min,0}  %read{4,1136} %write{2147483647,-1}
+param	int	clampOutput	1		%meta{string,widget,"checkBox"} %meta{string,help,"Clamp the output to 0-1"} %meta{int,connectable,0} %meta{string,label,"Clamp Output"}  %read{1138,1138} %write{2147483647,-1}
+oparam	color	resultRGB	0 0 0		%meta{string,help,"resultRGB (color)"}  %read{1134,1146} %write{86,1143}
+oparam	float	resultR	0		%meta{string,help,"resultR (float)"}  %read{2147483647,-1} %write{1144,1144}
+oparam	float	resultG	0		%meta{string,help,"resultG (float)"}  %read{2147483647,-1} %write{1145,1145}
+oparam	float	resultB	0		%meta{string,help,"resultB (float)"}  %read{2147483647,-1} %write{1146,1146}
+oparam	float	resultA	0		%meta{string,help,"resultA (float)"}  %read{2147483647,-1} %write{1147,1147}
+global	point	P	%read{1125,1125} %write{2147483647,-1}
+local	color	___330_result	%read{456,935} %write{323,934}
+local	int	___330_min	%read{440,934} %write{336,830}
+local	int	___330_max	%read{439,933} %write{365,859}
+local	int	___330_mid	%read{443,932} %write{408,916}
+local	color	___333_result	%read{43,1009} %write{41,1008}
+local	float	___333_l	%read{63,1003} %write{50,973}
+local	float	___333_n	%read{61,988} %write{55,978}
+local	float	___333_x	%read{73,1001} %write{60,983}
+local	color	___336_result	%read{41,964} %write{23,962}
+local	float	___336_d	%read{34,957} %write{33,956}
+local	float	___365_a	%read{1129,1137} %write{1122,1131}
+local	point	___394_Pobj	%read{1126,1126} %write{1125,1125}
+local	float	___394_random	%read{1129,1129} %write{1128,1128}
+local	float	___365_invA	%read{1133,1136} %write{1132,1132}
+local	color	cc1	%read{23,1121} %write{2,3}
+local	color	cc2	%read{14,1133} %write{6,7}
+local	float	alpha	%read{1147,1147} %write{8,1137}
+const	int	$const1	0		%read{0,1144} %write{2147483647,-1}
+temp	int	$tmp1	%read{1,1} %write{0,0}
+const	color	$const2	0 0 0		%read{2,6} %write{2147483647,-1}
+temp	int	$tmp2	%read{5,5} %write{4,4}
+const	int	$const3	1		%read{8,1145} %write{2147483647,-1}
+const	string	$const4	"PxrColorBlend"		%read{9,9} %write{2147483647,-1}
+temp	int	$tmp3	%read{11,11} %write{10,10}
+const	string	$const5	"pxrBlendColor"		%read{12,600} %write{2147483647,-1}
+temp	float	$tmp4	%read{33,33} %write{21,21}
+const	string	$const6	"pxrLum"		%read{13,965} %write{2147483647,-1}
+const	float	$const7	0.300000012		%read{15,967} %write{2147483647,-1}
+temp	float	$tmp5	%read{15,15} %write{14,14}
+temp	float	$tmp6	%read{18,18} %write{15,15}
+const	float	$const8	0.589999974		%read{17,969} %write{2147483647,-1}
+temp	float	$tmp7	%read{17,17} %write{16,16}
+temp	float	$tmp8	%read{18,18} %write{17,17}
+temp	float	$tmp9	%read{21,21} %write{18,18}
+const	float	$const9	0.109999999		%read{20,972} %write{2147483647,-1}
+const	int	$const10	2		%read{19,1146} %write{2147483647,-1}
+temp	float	$tmp10	%read{20,20} %write{19,19}
+temp	float	$tmp11	%read{21,21} %write{20,20}
+const	string	$const11	"pxrSetLum"		%read{22,945} %write{2147483647,-1}
+temp	float	$tmp12	%read{33,33} %write{32,32}
+temp	float	$tmp13	%read{26,26} %write{25,25}
+temp	float	$tmp14	%read{29,29} %write{26,26}
+temp	float	$tmp15	%read{28,28} %write{27,27}
+temp	float	$tmp16	%read{29,29} %write{28,28}
+temp	float	$tmp17	%read{32,32} %write{29,29}
+temp	float	$tmp18	%read{31,31} %write{30,30}
+temp	float	$tmp19	%read{32,32} %write{31,31}
+temp	color	$tmp20	%read{38,38} %write{34,34}
+const	float	$const12	0		%read{35,1139} %write{2147483647,-1}
+temp	color	$tmp21	%read{39,39} %write{35,35}
+const	float	$const13	1		%read{36,1140} %write{2147483647,-1}
+temp	color	$tmp22	%read{38,38} %write{36,36}
+const	string	$const14	"clamp"		%read{37,1141} %write{2147483647,-1}
+temp	color	$tmp23	%read{39,39} %write{38,38}
+const	string	$const15	"pxrClipColor"		%read{40,963} %write{2147483647,-1}
+temp	float	$tmp24	%read{44,44} %write{43,43}
+temp	float	$tmp25	%read{47,47} %write{44,44}
+temp	float	$tmp26	%read{46,46} %write{45,45}
+temp	float	$tmp27	%read{47,47} %write{46,46}
+temp	float	$tmp28	%read{50,50} %write{47,47}
+temp	float	$tmp29	%read{49,49} %write{48,48}
+temp	float	$tmp30	%read{50,50} %write{49,49}
+temp	float	$tmp31	%read{55,55} %write{53,53}
+temp	float	$tmp32	%read{53,53} %write{51,51}
+temp	float	$tmp33	%read{53,53} %write{52,52}
+temp	float	$tmp34	%read{55,55} %write{54,54}
+temp	float	$tmp35	%read{60,60} %write{58,58}
+temp	float	$tmp36	%read{58,58} %write{56,56}
+temp	float	$tmp37	%read{58,58} %write{57,57}
+temp	float	$tmp38	%read{60,60} %write{59,59}
+temp	int	$tmp39	%read{62,62} %write{61,61}
+temp	color	$tmp40	%read{64,64} %write{63,63}
+temp	color	$tmp41	%read{66,66} %write{64,64}
+temp	float	$tmp42	%read{66,66} %write{65,65}
+temp	color	$tmp43	%read{67,67} %write{66,66}
+temp	color	$tmp44	%read{71,71} %write{67,67}
+temp	color	$tmp45	%read{72,72} %write{68,68}
+temp	color	$tmp46	%read{71,71} %write{69,69}
+temp	color	$tmp47	%read{72,72} %write{71,71}
+temp	int	$tmp48	%read{74,74} %write{73,73}
+temp	color	$tmp49	%read{77,77} %write{75,75}
+temp	float	$tmp50	%read{77,77} %write{76,76}
+temp	color	$tmp51	%read{79,79} %write{77,77}
+temp	float	$tmp52	%read{79,79} %write{78,78}
+temp	color	$tmp53	%read{80,80} %write{79,79}
+temp	color	$tmp54	%read{84,84} %write{80,80}
+temp	color	$tmp55	%read{85,85} %write{81,81}
+temp	color	$tmp56	%read{84,84} %write{82,82}
+temp	color	$tmp57	%read{85,85} %write{84,84}
+temp	int	$tmp58	%read{88,88} %write{87,87}
+const	string	$const16	"pxrBlendColorBurn"		%read{89,89} %write{2147483647,-1}
+temp	float	$tmp59	%read{100,100} %write{93,99}
+temp	float	$tmp60	%read{91,91} %write{90,90}
+temp	int	$tmp61	%read{92,92} %write{91,91}
+temp	float	$tmp62	%read{99,99} %write{98,98}
+temp	float	$tmp63	%read{95,95} %write{94,94}
+temp	float	$tmp64	%read{97,97} %write{95,95}
+temp	float	$tmp65	%read{97,97} %write{96,96}
+temp	float	$tmp66	%read{98,98} %write{97,97}
+temp	float	$tmp67	%read{111,111} %write{104,110}
+temp	float	$tmp68	%read{102,102} %write{101,101}
+temp	int	$tmp69	%read{103,103} %write{102,102}
+temp	float	$tmp70	%read{110,110} %write{109,109}
+temp	float	$tmp71	%read{106,106} %write{105,105}
+temp	float	$tmp72	%read{108,108} %write{106,106}
+temp	float	$tmp73	%read{108,108} %write{107,107}
+temp	float	$tmp74	%read{109,109} %write{108,108}
+temp	float	$tmp75	%read{122,122} %write{115,121}
+temp	float	$tmp76	%read{113,113} %write{112,112}
+temp	int	$tmp77	%read{114,114} %write{113,113}
+temp	float	$tmp78	%read{121,121} %write{120,120}
+temp	float	$tmp79	%read{117,117} %write{116,116}
+temp	float	$tmp80	%read{119,119} %write{117,117}
+temp	float	$tmp81	%read{119,119} %write{118,118}
+temp	float	$tmp82	%read{120,120} %write{119,119}
+temp	int	$tmp83	%read{124,124} %write{123,123}
+const	string	$const17	"pxrBlendColorDodge"		%read{125,125} %write{2147483647,-1}
+temp	float	$tmp84	%read{135,135} %write{129,134}
+temp	float	$tmp85	%read{127,127} %write{126,126}
+temp	int	$tmp86	%read{128,128} %write{127,127}
+temp	float	$tmp87	%read{133,133} %write{130,130}
+temp	float	$tmp88	%read{132,132} %write{131,131}
+temp	float	$tmp89	%read{133,133} %write{132,132}
+temp	float	$tmp90	%read{134,134} %write{133,133}
+temp	float	$tmp91	%read{145,145} %write{139,144}
+temp	float	$tmp92	%read{137,137} %write{136,136}
+temp	int	$tmp93	%read{138,138} %write{137,137}
+temp	float	$tmp94	%read{143,143} %write{140,140}
+temp	float	$tmp95	%read{142,142} %write{141,141}
+temp	float	$tmp96	%read{143,143} %write{142,142}
+temp	float	$tmp97	%read{144,144} %write{143,143}
+temp	float	$tmp98	%read{155,155} %write{149,154}
+temp	float	$tmp99	%read{147,147} %write{146,146}
+temp	int	$tmp100	%read{148,148} %write{147,147}
+temp	float	$tmp101	%read{153,153} %write{150,150}
+temp	float	$tmp102	%read{152,152} %write{151,151}
+temp	float	$tmp103	%read{153,153} %write{152,152}
+temp	float	$tmp104	%read{154,154} %write{153,153}
+const	int	$const18	3		%read{156,156} %write{2147483647,-1}
+temp	int	$tmp105	%read{157,157} %write{156,156}
+const	string	$const19	"pxrBlendDarken"		%read{158,158} %write{2147483647,-1}
+const	int	$const20	4		%read{160,160} %write{2147483647,-1}
+temp	int	$tmp106	%read{161,161} %write{160,160}
+const	string	$const21	"pxrBlendDarkerColor"		%read{162,162} %write{2147483647,-1}
+temp	float	$tmp107	%read{165,165} %write{163,163}
+temp	float	$tmp108	%read{165,165} %write{164,164}
+temp	float	$tmp109	%read{167,167} %write{165,165}
+temp	float	$tmp110	%read{167,167} %write{166,166}
+temp	float	$tmp111	%read{173,173} %write{167,167}
+temp	float	$tmp112	%read{170,170} %write{168,168}
+temp	float	$tmp113	%read{170,170} %write{169,169}
+temp	float	$tmp114	%read{172,172} %write{170,170}
+temp	float	$tmp115	%read{172,172} %write{171,171}
+temp	float	$tmp116	%read{173,173} %write{172,172}
+temp	int	$tmp117	%read{174,174} %write{173,173}
+const	int	$const22	5		%read{177,177} %write{2147483647,-1}
+temp	int	$tmp118	%read{178,178} %write{177,177}
+const	string	$const23	"pxrBlendDifference"		%read{179,179} %write{2147483647,-1}
+temp	color	$tmp119	%read{181,181} %write{180,180}
+const	int	$const24	6		%read{182,1123} %write{2147483647,-1}
+temp	int	$tmp120	%read{183,183} %write{182,182}
+const	string	$const25	"pxrBlendDissolve"		%read{184,184} %write{2147483647,-1}
+const	int	$const26	7		%read{186,186} %write{2147483647,-1}
+temp	int	$tmp121	%read{187,187} %write{186,186}
+const	string	$const27	"pxrBlendDivide"		%read{188,188} %write{2147483647,-1}
+temp	float	$tmp122	%read{196,196} %write{192,195}
+temp	float	$tmp123	%read{190,190} %write{189,189}
+temp	int	$tmp124	%read{191,191} %write{190,190}
+temp	float	$tmp125	%read{195,195} %write{193,193}
+temp	float	$tmp126	%read{195,195} %write{194,194}
+temp	float	$tmp127	%read{204,204} %write{200,203}
+temp	float	$tmp128	%read{198,198} %write{197,197}
+temp	int	$tmp129	%read{199,199} %write{198,198}
+temp	float	$tmp130	%read{203,203} %write{201,201}
+temp	float	$tmp131	%read{203,203} %write{202,202}
+temp	float	$tmp132	%read{212,212} %write{208,211}
+temp	float	$tmp133	%read{206,206} %write{205,205}
+temp	int	$tmp134	%read{207,207} %write{206,206}
+temp	float	$tmp135	%read{211,211} %write{209,209}
+temp	float	$tmp136	%read{211,211} %write{210,210}
+const	int	$const28	8		%read{213,213} %write{2147483647,-1}
+temp	int	$tmp137	%read{214,214} %write{213,213}
+const	string	$const29	"pxrBlendExclusion"		%read{215,215} %write{2147483647,-1}
+temp	color	$tmp138	%read{219,219} %write{216,216}
+temp	color	$tmp139	%read{218,218} %write{217,217}
+const	float	$const30	2		%read{217,1115} %write{2147483647,-1}
+temp	color	$tmp140	%read{219,219} %write{218,218}
+const	int	$const31	9		%read{220,220} %write{2147483647,-1}
+temp	int	$tmp141	%read{221,221} %write{220,220}
+const	string	$const32	"pxrBlendHardLight"		%read{222,686} %write{2147483647,-1}
+temp	float	$tmp142	%read{241,241} %write{236,240}
+temp	float	$tmp143	%read{224,224} %write{223,223}
+const	float	$const33	0.5		%read{224,1114} %write{2147483647,-1}
+temp	int	$tmp144	%read{225,225} %write{224,224}
+temp	float	$tmp145	%read{227,227} %write{226,226}
+temp	float	$tmp146	%read{228,228} %write{227,227}
+temp	float	$tmp147	%read{230,230} %write{228,228}
+temp	float	$tmp148	%read{230,230} %write{229,229}
+temp	float	$tmp149	%read{236,236} %write{230,230}
+temp	float	$tmp150	%read{232,232} %write{231,231}
+temp	float	$tmp151	%read{233,233} %write{232,232}
+temp	float	$tmp152	%read{235,235} %write{233,233}
+temp	float	$tmp153	%read{235,235} %write{234,234}
+temp	float	$tmp154	%read{236,236} %write{235,235}
+temp	float	$tmp155	%read{240,240} %write{237,237}
+temp	float	$tmp156	%read{239,239} %write{238,238}
+temp	float	$tmp157	%read{240,240} %write{239,239}
+temp	float	$tmp158	%read{260,260} %write{255,259}
+temp	float	$tmp159	%read{243,243} %write{242,242}
+temp	int	$tmp160	%read{244,244} %write{243,243}
+temp	float	$tmp161	%read{246,246} %write{245,245}
+temp	float	$tmp162	%read{247,247} %write{246,246}
+temp	float	$tmp163	%read{249,249} %write{247,247}
+temp	float	$tmp164	%read{249,249} %write{248,248}
+temp	float	$tmp165	%read{255,255} %write{249,249}
+temp	float	$tmp166	%read{251,251} %write{250,250}
+temp	float	$tmp167	%read{252,252} %write{251,251}
+temp	float	$tmp168	%read{254,254} %write{252,252}
+temp	float	$tmp169	%read{254,254} %write{253,253}
+temp	float	$tmp170	%read{255,255} %write{254,254}
+temp	float	$tmp171	%read{259,259} %write{256,256}
+temp	float	$tmp172	%read{258,258} %write{257,257}
+temp	float	$tmp173	%read{259,259} %write{258,258}
+temp	float	$tmp174	%read{279,279} %write{274,278}
+temp	float	$tmp175	%read{262,262} %write{261,261}
+temp	int	$tmp176	%read{263,263} %write{262,262}
+temp	float	$tmp177	%read{265,265} %write{264,264}
+temp	float	$tmp178	%read{266,266} %write{265,265}
+temp	float	$tmp179	%read{268,268} %write{266,266}
+temp	float	$tmp180	%read{268,268} %write{267,267}
+temp	float	$tmp181	%read{274,274} %write{268,268}
+temp	float	$tmp182	%read{270,270} %write{269,269}
+temp	float	$tmp183	%read{271,271} %write{270,270}
+temp	float	$tmp184	%read{273,273} %write{271,271}
+temp	float	$tmp185	%read{273,273} %write{272,272}
+temp	float	$tmp186	%read{274,274} %write{273,273}
+temp	float	$tmp187	%read{278,278} %write{275,275}
+temp	float	$tmp188	%read{277,277} %write{276,276}
+temp	float	$tmp189	%read{278,278} %write{277,277}
+const	int	$const34	10		%read{280,280} %write{2147483647,-1}
+temp	int	$tmp190	%read{281,281} %write{280,280}
+const	string	$const35	"pxrBlendHardMix"		%read{282,282} %write{2147483647,-1}
+temp	int	$tmp191	%read{290,290} %write{288,289}
+temp	float	$tmp192	%read{285,285} %write{283,283}
+temp	float	$tmp193	%read{285,285} %write{284,284}
+temp	float	$tmp194	%read{286,286} %write{285,285}
+temp	int	$tmp195	%read{287,287} %write{286,286}
+temp	int	$tmp196	%read{298,298} %write{296,297}
+temp	float	$tmp197	%read{293,293} %write{291,291}
+temp	float	$tmp198	%read{293,293} %write{292,292}
+temp	float	$tmp199	%read{294,294} %write{293,293}
+temp	int	$tmp200	%read{295,295} %write{294,294}
+temp	int	$tmp201	%read{306,306} %write{304,305}
+temp	float	$tmp202	%read{301,301} %write{299,299}
+temp	float	$tmp203	%read{301,301} %write{300,300}
+temp	float	$tmp204	%read{302,302} %write{301,301}
+temp	int	$tmp205	%read{303,303} %write{302,302}
+const	int	$const36	11		%read{307,307} %write{2147483647,-1}
+temp	int	$tmp206	%read{308,308} %write{307,307}
+const	string	$const37	"pxrBlendHue"		%read{309,309} %write{2147483647,-1}
+temp	color	$tmp207	%read{467,478} %write{456,456}
+temp	float	$tmp208	%read{446,452} %write{321,321}
+const	string	$const38	"pxrSat"		%read{310,789} %write{2147483647,-1}
+temp	float	$tmp209	%read{321,321} %write{315,315}
+temp	float	$tmp210	%read{315,315} %write{313,313}
+temp	float	$tmp211	%read{313,313} %write{311,311}
+temp	float	$tmp212	%read{313,313} %write{312,312}
+temp	float	$tmp213	%read{315,315} %write{314,314}
+temp	float	$tmp214	%read{321,321} %write{320,320}
+temp	float	$tmp215	%read{320,320} %write{318,318}
+temp	float	$tmp216	%read{318,318} %write{316,316}
+temp	float	$tmp217	%read{318,318} %write{317,317}
+temp	float	$tmp218	%read{320,320} %write{319,319}
+const	string	$const39	"pxrSetSat"		%read{322,801} %write{2147483647,-1}
+const	string	$const40	"pxrMinChannel"		%read{324,803} %write{2147483647,-1}
+temp	float	$tmp219	%read{327,327} %write{325,325}
+temp	float	$tmp220	%read{327,327} %write{326,326}
+temp	int	$tmp221	%read{328,328} %write{327,327}
+temp	int	$tmp222	%read{329,335} %write{328,334}
+temp	float	$tmp223	%read{332,332} %write{330,330}
+temp	float	$tmp224	%read{332,332} %write{331,331}
+temp	int	$tmp225	%read{333,333} %write{332,332}
+temp	int	$tmp226	%read{334,334} %write{333,333}
+temp	float	$tmp227	%read{340,340} %write{338,338}
+temp	float	$tmp228	%read{340,340} %write{339,339}
+temp	int	$tmp229	%read{341,341} %write{340,340}
+temp	int	$tmp230	%read{342,348} %write{341,347}
+temp	float	$tmp231	%read{345,345} %write{343,343}
+temp	float	$tmp232	%read{345,345} %write{344,344}
+temp	int	$tmp233	%read{346,346} %write{345,345}
+temp	int	$tmp234	%read{347,347} %write{346,346}
+const	string	$const41	"pxrMaxChannel"		%read{353,832} %write{2147483647,-1}
+temp	float	$tmp235	%read{356,356} %write{354,354}
+temp	float	$tmp236	%read{356,356} %write{355,355}
+temp	int	$tmp237	%read{357,357} %write{356,356}
+temp	int	$tmp238	%read{358,364} %write{357,363}
+temp	float	$tmp239	%read{361,361} %write{359,359}
+temp	float	$tmp240	%read{361,361} %write{360,360}
+temp	int	$tmp241	%read{362,362} %write{361,361}
+temp	int	$tmp242	%read{363,363} %write{362,362}
+temp	float	$tmp243	%read{369,369} %write{367,367}
+temp	float	$tmp244	%read{369,369} %write{368,368}
+temp	int	$tmp245	%read{370,370} %write{369,369}
+temp	int	$tmp246	%read{371,377} %write{370,376}
+temp	float	$tmp247	%read{374,374} %write{372,372}
+temp	float	$tmp248	%read{374,374} %write{373,373}
+temp	int	$tmp249	%read{375,375} %write{374,374}
+temp	int	$tmp250	%read{376,376} %write{375,375}
+const	string	$const42	"pxrMidChannel"		%read{382,861} %write{2147483647,-1}
+temp	float	$tmp251	%read{385,385} %write{383,383}
+temp	float	$tmp252	%read{385,385} %write{384,384}
+temp	int	$tmp253	%read{386,386} %write{385,385}
+temp	int	$tmp254	%read{387,393} %write{386,392}
+temp	float	$tmp255	%read{390,390} %write{388,388}
+temp	float	$tmp256	%read{390,390} %write{389,389}
+temp	int	$tmp257	%read{391,391} %write{390,390}
+temp	int	$tmp258	%read{392,392} %write{391,391}
+temp	int	$tmp259	%read{394,407} %write{393,406}
+temp	float	$tmp260	%read{397,397} %write{395,395}
+temp	float	$tmp261	%read{397,397} %write{396,396}
+temp	int	$tmp262	%read{398,398} %write{397,397}
+temp	int	$tmp263	%read{399,405} %write{398,404}
+temp	float	$tmp264	%read{402,402} %write{400,400}
+temp	float	$tmp265	%read{402,402} %write{401,401}
+temp	int	$tmp266	%read{403,403} %write{402,402}
+temp	int	$tmp267	%read{404,404} %write{403,403}
+temp	int	$tmp268	%read{406,406} %write{405,405}
+temp	float	$tmp269	%read{412,412} %write{410,410}
+temp	float	$tmp270	%read{412,412} %write{411,411}
+temp	int	$tmp271	%read{413,413} %write{412,412}
+temp	int	$tmp272	%read{414,420} %write{413,419}
+temp	float	$tmp273	%read{417,417} %write{415,415}
+temp	float	$tmp274	%read{417,417} %write{416,416}
+temp	int	$tmp275	%read{418,418} %write{417,417}
+temp	int	$tmp276	%read{419,419} %write{418,418}
+temp	int	$tmp277	%read{421,434} %write{420,433}
+temp	float	$tmp278	%read{424,424} %write{422,422}
+temp	float	$tmp279	%read{424,424} %write{423,423}
+temp	int	$tmp280	%read{425,425} %write{424,424}
+temp	int	$tmp281	%read{426,432} %write{425,431}
+temp	float	$tmp282	%read{429,429} %write{427,427}
+temp	float	$tmp283	%read{429,429} %write{428,428}
+temp	int	$tmp284	%read{430,430} %write{429,429}
+temp	int	$tmp285	%read{431,431} %write{430,430}
+temp	int	$tmp286	%read{433,433} %write{432,432}
+temp	float	$tmp287	%read{441,441} %write{439,439}
+temp	float	$tmp288	%read{441,441} %write{440,440}
+temp	int	$tmp289	%read{442,442} %write{441,441}
+temp	float	$tmp290	%read{445,445} %write{443,443}
+temp	float	$tmp291	%read{445,445} %write{444,444}
+temp	float	$tmp292	%read{446,446} %write{445,445}
+temp	float	$tmp293	%read{450,450} %write{446,446}
+temp	float	$tmp294	%read{449,449} %write{447,447}
+temp	float	$tmp295	%read{449,449} %write{448,448}
+temp	float	$tmp296	%read{450,450} %write{449,449}
+temp	float	$tmp297	%read{451,451} %write{450,450}
+temp	float	$tmp298	%read{477,477} %write{465,465}
+temp	float	$tmp299	%read{459,459} %write{458,458}
+temp	float	$tmp300	%read{462,462} %write{459,459}
+temp	float	$tmp301	%read{461,461} %write{460,460}
+temp	float	$tmp302	%read{462,462} %write{461,461}
+temp	float	$tmp303	%read{465,465} %write{462,462}
+temp	float	$tmp304	%read{464,464} %write{463,463}
+temp	float	$tmp305	%read{465,465} %write{464,464}
+temp	float	$tmp306	%read{477,477} %write{476,476}
+temp	float	$tmp307	%read{470,470} %write{469,469}
+temp	float	$tmp308	%read{473,473} %write{470,470}
+temp	float	$tmp309	%read{472,472} %write{471,471}
+temp	float	$tmp310	%read{473,473} %write{472,472}
+temp	float	$tmp311	%read{476,476} %write{473,473}
+temp	float	$tmp312	%read{475,475} %write{474,474}
+temp	float	$tmp313	%read{476,476} %write{475,475}
+temp	color	$tmp314	%read{482,482} %write{478,478}
+temp	color	$tmp315	%read{483,483} %write{479,479}
+temp	color	$tmp316	%read{482,482} %write{480,480}
+temp	color	$tmp317	%read{483,483} %write{482,482}
+temp	float	$tmp318	%read{488,488} %write{487,487}
+temp	float	$tmp319	%read{491,491} %write{488,488}
+temp	float	$tmp320	%read{490,490} %write{489,489}
+temp	float	$tmp321	%read{491,491} %write{490,490}
+temp	float	$tmp322	%read{494,494} %write{491,491}
+temp	float	$tmp323	%read{493,493} %write{492,492}
+temp	float	$tmp324	%read{494,494} %write{493,493}
+temp	float	$tmp325	%read{499,499} %write{497,497}
+temp	float	$tmp326	%read{497,497} %write{495,495}
+temp	float	$tmp327	%read{497,497} %write{496,496}
+temp	float	$tmp328	%read{499,499} %write{498,498}
+temp	float	$tmp329	%read{504,504} %write{502,502}
+temp	float	$tmp330	%read{502,502} %write{500,500}
+temp	float	$tmp331	%read{502,502} %write{501,501}
+temp	float	$tmp332	%read{504,504} %write{503,503}
+temp	int	$tmp333	%read{506,506} %write{505,505}
+temp	color	$tmp334	%read{508,508} %write{507,507}
+temp	color	$tmp335	%read{510,510} %write{508,508}
+temp	float	$tmp336	%read{510,510} %write{509,509}
+temp	color	$tmp337	%read{511,511} %write{510,510}
+temp	color	$tmp338	%read{515,515} %write{511,511}
+temp	color	$tmp339	%read{516,516} %write{512,512}
+temp	color	$tmp340	%read{515,515} %write{513,513}
+temp	color	$tmp341	%read{516,516} %write{515,515}
+temp	int	$tmp342	%read{518,518} %write{517,517}
+temp	color	$tmp343	%read{521,521} %write{519,519}
+temp	float	$tmp344	%read{521,521} %write{520,520}
+temp	color	$tmp345	%read{523,523} %write{521,521}
+temp	float	$tmp346	%read{523,523} %write{522,522}
+temp	color	$tmp347	%read{524,524} %write{523,523}
+temp	color	$tmp348	%read{528,528} %write{524,524}
+temp	color	$tmp349	%read{529,529} %write{525,525}
+temp	color	$tmp350	%read{528,528} %write{526,526}
+temp	color	$tmp351	%read{529,529} %write{528,528}
+const	int	$const43	12		%read{531,531} %write{2147483647,-1}
+temp	int	$tmp352	%read{532,532} %write{531,531}
+const	string	$const44	"pxrBlendLighten"		%read{533,533} %write{2147483647,-1}
+const	int	$const45	13		%read{535,535} %write{2147483647,-1}
+temp	int	$tmp353	%read{536,536} %write{535,535}
+const	string	$const46	"pxrBlendLighterColor"		%read{537,537} %write{2147483647,-1}
+temp	float	$tmp354	%read{540,540} %write{538,538}
+temp	float	$tmp355	%read{540,540} %write{539,539}
+temp	float	$tmp356	%read{542,542} %write{540,540}
+temp	float	$tmp357	%read{542,542} %write{541,541}
+temp	float	$tmp358	%read{548,548} %write{542,542}
+temp	float	$tmp359	%read{545,545} %write{543,543}
+temp	float	$tmp360	%read{545,545} %write{544,544}
+temp	float	$tmp361	%read{547,547} %write{545,545}
+temp	float	$tmp362	%read{547,547} %write{546,546}
+temp	float	$tmp363	%read{548,548} %write{547,547}
+temp	int	$tmp364	%read{549,549} %write{548,548}
+const	int	$const47	14		%read{552,552} %write{2147483647,-1}
+temp	int	$tmp365	%read{553,553} %write{552,552}
+const	string	$const48	"pxrBlendLinearBurn"		%read{554,554} %write{2147483647,-1}
+temp	color	$tmp366	%read{556,556} %write{555,555}
+const	int	$const49	15		%read{557,557} %write{2147483647,-1}
+temp	int	$tmp367	%read{558,558} %write{557,557}
+const	string	$const50	"pxrBlendLinearDodge"		%read{559,559} %write{2147483647,-1}
+const	int	$const51	16		%read{561,561} %write{2147483647,-1}
+temp	int	$tmp368	%read{562,562} %write{561,561}
+const	string	$const52	"pxrBlendLinearLight"		%read{563,563} %write{2147483647,-1}
+temp	float	$tmp369	%read{574,574} %write{570,573}
+temp	float	$tmp370	%read{565,565} %write{564,564}
+temp	int	$tmp371	%read{566,566} %write{565,565}
+temp	float	$tmp372	%read{569,569} %write{567,567}
+temp	float	$tmp373	%read{569,569} %write{568,568}
+temp	float	$tmp374	%read{570,570} %write{569,569}
+temp	float	$tmp375	%read{573,573} %write{571,571}
+temp	float	$tmp376	%read{573,573} %write{572,572}
+temp	float	$tmp377	%read{585,585} %write{581,584}
+temp	float	$tmp378	%read{576,576} %write{575,575}
+temp	int	$tmp379	%read{577,577} %write{576,576}
+temp	float	$tmp380	%read{580,580} %write{578,578}
+temp	float	$tmp381	%read{580,580} %write{579,579}
+temp	float	$tmp382	%read{581,581} %write{580,580}
+temp	float	$tmp383	%read{584,584} %write{582,582}
+temp	float	$tmp384	%read{584,584} %write{583,583}
+temp	float	$tmp385	%read{596,596} %write{592,595}
+temp	float	$tmp386	%read{587,587} %write{586,586}
+temp	int	$tmp387	%read{588,588} %write{587,587}
+temp	float	$tmp388	%read{591,591} %write{589,589}
+temp	float	$tmp389	%read{591,591} %write{590,590}
+temp	float	$tmp390	%read{592,592} %write{591,591}
+temp	float	$tmp391	%read{595,595} %write{593,593}
+temp	float	$tmp392	%read{595,595} %write{594,594}
+const	int	$const53	17		%read{597,597} %write{2147483647,-1}
+temp	int	$tmp393	%read{598,598} %write{597,597}
+const	string	$const54	"pxrBlendLuminosity"		%read{599,599} %write{2147483647,-1}
+temp	float	$tmp394	%read{621,621} %write{609,609}
+temp	float	$tmp395	%read{603,603} %write{602,602}
+temp	float	$tmp396	%read{606,606} %write{603,603}
+temp	float	$tmp397	%read{605,605} %write{604,604}
+temp	float	$tmp398	%read{606,606} %write{605,605}
+temp	float	$tmp399	%read{609,609} %write{606,606}
+temp	float	$tmp400	%read{608,608} %write{607,607}
+temp	float	$tmp401	%read{609,609} %write{608,608}
+temp	float	$tmp402	%read{621,621} %write{620,620}
+temp	float	$tmp403	%read{614,614} %write{613,613}
+temp	float	$tmp404	%read{617,617} %write{614,614}
+temp	float	$tmp405	%read{616,616} %write{615,615}
+temp	float	$tmp406	%read{617,617} %write{616,616}
+temp	float	$tmp407	%read{620,620} %write{617,617}
+temp	float	$tmp408	%read{619,619} %write{618,618}
+temp	float	$tmp409	%read{620,620} %write{619,619}
+temp	color	$tmp410	%read{626,626} %write{622,622}
+temp	color	$tmp411	%read{627,627} %write{623,623}
+temp	color	$tmp412	%read{626,626} %write{624,624}
+temp	color	$tmp413	%read{627,627} %write{626,626}
+temp	float	$tmp414	%read{632,632} %write{631,631}
+temp	float	$tmp415	%read{635,635} %write{632,632}
+temp	float	$tmp416	%read{634,634} %write{633,633}
+temp	float	$tmp417	%read{635,635} %write{634,634}
+temp	float	$tmp418	%read{638,638} %write{635,635}
+temp	float	$tmp419	%read{637,637} %write{636,636}
+temp	float	$tmp420	%read{638,638} %write{637,637}
+temp	float	$tmp421	%read{643,643} %write{641,641}
+temp	float	$tmp422	%read{641,641} %write{639,639}
+temp	float	$tmp423	%read{641,641} %write{640,640}
+temp	float	$tmp424	%read{643,643} %write{642,642}
+temp	float	$tmp425	%read{648,648} %write{646,646}
+temp	float	$tmp426	%read{646,646} %write{644,644}
+temp	float	$tmp427	%read{646,646} %write{645,645}
+temp	float	$tmp428	%read{648,648} %write{647,647}
+temp	int	$tmp429	%read{650,650} %write{649,649}
+temp	color	$tmp430	%read{652,652} %write{651,651}
+temp	color	$tmp431	%read{654,654} %write{652,652}
+temp	float	$tmp432	%read{654,654} %write{653,653}
+temp	color	$tmp433	%read{655,655} %write{654,654}
+temp	color	$tmp434	%read{659,659} %write{655,655}
+temp	color	$tmp435	%read{660,660} %write{656,656}
+temp	color	$tmp436	%read{659,659} %write{657,657}
+temp	color	$tmp437	%read{660,660} %write{659,659}
+temp	int	$tmp438	%read{662,662} %write{661,661}
+temp	color	$tmp439	%read{665,665} %write{663,663}
+temp	float	$tmp440	%read{665,665} %write{664,664}
+temp	color	$tmp441	%read{667,667} %write{665,665}
+temp	float	$tmp442	%read{667,667} %write{666,666}
+temp	color	$tmp443	%read{668,668} %write{667,667}
+temp	color	$tmp444	%read{672,672} %write{668,668}
+temp	color	$tmp445	%read{673,673} %write{669,669}
+temp	color	$tmp446	%read{672,672} %write{670,670}
+temp	color	$tmp447	%read{673,673} %write{672,672}
+const	int	$const55	18		%read{675,675} %write{2147483647,-1}
+temp	int	$tmp448	%read{676,676} %write{675,675}
+const	string	$const56	"pxrBlendMultiply"		%read{677,677} %write{2147483647,-1}
+const	int	$const57	19		%read{679,679} %write{2147483647,-1}
+temp	int	$tmp449	%read{680,680} %write{679,679}
+const	string	$const58	"pxrBlendNormal"		%read{681,1120} %write{2147483647,-1}
+const	int	$const59	20		%read{683,683} %write{2147483647,-1}
+temp	int	$tmp450	%read{684,684} %write{683,683}
+const	string	$const60	"pxrBlendOverlay"		%read{685,685} %write{2147483647,-1}
+temp	float	$tmp451	%read{705,705} %write{700,704}
+temp	float	$tmp452	%read{688,688} %write{687,687}
+temp	int	$tmp453	%read{689,689} %write{688,688}
+temp	float	$tmp454	%read{691,691} %write{690,690}
+temp	float	$tmp455	%read{692,692} %write{691,691}
+temp	float	$tmp456	%read{694,694} %write{692,692}
+temp	float	$tmp457	%read{694,694} %write{693,693}
+temp	float	$tmp458	%read{700,700} %write{694,694}
+temp	float	$tmp459	%read{696,696} %write{695,695}
+temp	float	$tmp460	%read{697,697} %write{696,696}
+temp	float	$tmp461	%read{699,699} %write{697,697}
+temp	float	$tmp462	%read{699,699} %write{698,698}
+temp	float	$tmp463	%read{700,700} %write{699,699}
+temp	float	$tmp464	%read{704,704} %write{701,701}
+temp	float	$tmp465	%read{703,703} %write{702,702}
+temp	float	$tmp466	%read{704,704} %write{703,703}
+temp	float	$tmp467	%read{724,724} %write{719,723}
+temp	float	$tmp468	%read{707,707} %write{706,706}
+temp	int	$tmp469	%read{708,708} %write{707,707}
+temp	float	$tmp470	%read{710,710} %write{709,709}
+temp	float	$tmp471	%read{711,711} %write{710,710}
+temp	float	$tmp472	%read{713,713} %write{711,711}
+temp	float	$tmp473	%read{713,713} %write{712,712}
+temp	float	$tmp474	%read{719,719} %write{713,713}
+temp	float	$tmp475	%read{715,715} %write{714,714}
+temp	float	$tmp476	%read{716,716} %write{715,715}
+temp	float	$tmp477	%read{718,718} %write{716,716}
+temp	float	$tmp478	%read{718,718} %write{717,717}
+temp	float	$tmp479	%read{719,719} %write{718,718}
+temp	float	$tmp480	%read{723,723} %write{720,720}
+temp	float	$tmp481	%read{722,722} %write{721,721}
+temp	float	$tmp482	%read{723,723} %write{722,722}
+temp	float	$tmp483	%read{743,743} %write{738,742}
+temp	float	$tmp484	%read{726,726} %write{725,725}
+temp	int	$tmp485	%read{727,727} %write{726,726}
+temp	float	$tmp486	%read{729,729} %write{728,728}
+temp	float	$tmp487	%read{730,730} %write{729,729}
+temp	float	$tmp488	%read{732,732} %write{730,730}
+temp	float	$tmp489	%read{732,732} %write{731,731}
+temp	float	$tmp490	%read{738,738} %write{732,732}
+temp	float	$tmp491	%read{734,734} %write{733,733}
+temp	float	$tmp492	%read{735,735} %write{734,734}
+temp	float	$tmp493	%read{737,737} %write{735,735}
+temp	float	$tmp494	%read{737,737} %write{736,736}
+temp	float	$tmp495	%read{738,738} %write{737,737}
+temp	float	$tmp496	%read{742,742} %write{739,739}
+temp	float	$tmp497	%read{741,741} %write{740,740}
+temp	float	$tmp498	%read{742,742} %write{741,741}
+const	int	$const61	21		%read{744,744} %write{2147483647,-1}
+temp	int	$tmp499	%read{745,745} %write{744,744}
+const	string	$const62	"pxrBlendPinLight"		%read{746,746} %write{2147483647,-1}
+temp	float	$tmp500	%read{759,759} %write{753,758}
+temp	float	$tmp501	%read{748,748} %write{747,747}
+temp	int	$tmp502	%read{749,749} %write{748,748}
+temp	float	$tmp503	%read{751,751} %write{750,750}
+temp	float	$tmp504	%read{753,753} %write{751,751}
+temp	float	$tmp505	%read{753,753} %write{752,752}
+temp	float	$tmp506	%read{755,755} %write{754,754}
+temp	float	$tmp507	%read{756,756} %write{755,755}
+temp	float	$tmp508	%read{758,758} %write{756,756}
+temp	float	$tmp509	%read{758,758} %write{757,757}
+temp	float	$tmp510	%read{772,772} %write{766,771}
+temp	float	$tmp511	%read{761,761} %write{760,760}
+temp	int	$tmp512	%read{762,762} %write{761,761}
+temp	float	$tmp513	%read{764,764} %write{763,763}
+temp	float	$tmp514	%read{766,766} %write{764,764}
+temp	float	$tmp515	%read{766,766} %write{765,765}
+temp	float	$tmp516	%read{768,768} %write{767,767}
+temp	float	$tmp517	%read{769,769} %write{768,768}
+temp	float	$tmp518	%read{771,771} %write{769,769}
+temp	float	$tmp519	%read{771,771} %write{770,770}
+temp	float	$tmp520	%read{785,785} %write{779,784}
+temp	float	$tmp521	%read{774,774} %write{773,773}
+temp	int	$tmp522	%read{775,775} %write{774,774}
+temp	float	$tmp523	%read{777,777} %write{776,776}
+temp	float	$tmp524	%read{779,779} %write{777,777}
+temp	float	$tmp525	%read{779,779} %write{778,778}
+temp	float	$tmp526	%read{781,781} %write{780,780}
+temp	float	$tmp527	%read{782,782} %write{781,781}
+temp	float	$tmp528	%read{784,784} %write{782,782}
+temp	float	$tmp529	%read{784,784} %write{783,783}
+const	int	$const63	22		%read{786,786} %write{2147483647,-1}
+temp	int	$tmp530	%read{787,787} %write{786,786}
+const	string	$const64	"pxrBlendSaturation"		%read{788,788} %write{2147483647,-1}
+temp	color	$tmp531	%read{946,957} %write{935,935}
+temp	float	$tmp532	%read{925,931} %write{800,800}
+temp	float	$tmp533	%read{800,800} %write{794,794}
+temp	float	$tmp534	%read{794,794} %write{792,792}
+temp	float	$tmp535	%read{792,792} %write{790,790}
+temp	float	$tmp536	%read{792,792} %write{791,791}
+temp	float	$tmp537	%read{794,794} %write{793,793}
+temp	float	$tmp538	%read{800,800} %write{799,799}
+temp	float	$tmp539	%read{799,799} %write{797,797}
+temp	float	$tmp540	%read{797,797} %write{795,795}
+temp	float	$tmp541	%read{797,797} %write{796,796}
+temp	float	$tmp542	%read{799,799} %write{798,798}
+temp	float	$tmp543	%read{806,806} %write{804,804}
+temp	float	$tmp544	%read{806,806} %write{805,805}
+temp	int	$tmp545	%read{807,807} %write{806,806}
+temp	int	$tmp546	%read{808,814} %write{807,813}
+temp	float	$tmp547	%read{811,811} %write{809,809}
+temp	float	$tmp548	%read{811,811} %write{810,810}
+temp	int	$tmp549	%read{812,812} %write{811,811}
+temp	int	$tmp550	%read{813,813} %write{812,812}
+temp	float	$tmp551	%read{819,819} %write{817,817}
+temp	float	$tmp552	%read{819,819} %write{818,818}
+temp	int	$tmp553	%read{820,820} %write{819,819}
+temp	int	$tmp554	%read{821,827} %write{820,826}
+temp	float	$tmp555	%read{824,824} %write{822,822}
+temp	float	$tmp556	%read{824,824} %write{823,823}
+temp	int	$tmp557	%read{825,825} %write{824,824}
+temp	int	$tmp558	%read{826,826} %write{825,825}
+temp	float	$tmp559	%read{835,835} %write{833,833}
+temp	float	$tmp560	%read{835,835} %write{834,834}
+temp	int	$tmp561	%read{836,836} %write{835,835}
+temp	int	$tmp562	%read{837,843} %write{836,842}
+temp	float	$tmp563	%read{840,840} %write{838,838}
+temp	float	$tmp564	%read{840,840} %write{839,839}
+temp	int	$tmp565	%read{841,841} %write{840,840}
+temp	int	$tmp566	%read{842,842} %write{841,841}
+temp	float	$tmp567	%read{848,848} %write{846,846}
+temp	float	$tmp568	%read{848,848} %write{847,847}
+temp	int	$tmp569	%read{849,849} %write{848,848}
+temp	int	$tmp570	%read{850,856} %write{849,855}
+temp	float	$tmp571	%read{853,853} %write{851,851}
+temp	float	$tmp572	%read{853,853} %write{852,852}
+temp	int	$tmp573	%read{854,854} %write{853,853}
+temp	int	$tmp574	%read{855,855} %write{854,854}
+temp	float	$tmp575	%read{864,864} %write{862,862}
+temp	float	$tmp576	%read{864,864} %write{863,863}
+temp	int	$tmp577	%read{865,865} %write{864,864}
+temp	int	$tmp578	%read{866,872} %write{865,871}
+temp	float	$tmp579	%read{869,869} %write{867,867}
+temp	float	$tmp580	%read{869,869} %write{868,868}
+temp	int	$tmp581	%read{870,870} %write{869,869}
+temp	int	$tmp582	%read{871,871} %write{870,870}
+temp	int	$tmp583	%read{873,886} %write{872,885}
+temp	float	$tmp584	%read{876,876} %write{874,874}
+temp	float	$tmp585	%read{876,876} %write{875,875}
+temp	int	$tmp586	%read{877,877} %write{876,876}
+temp	int	$tmp587	%read{878,884} %write{877,883}
+temp	float	$tmp588	%read{881,881} %write{879,879}
+temp	float	$tmp589	%read{881,881} %write{880,880}
+temp	int	$tmp590	%read{882,882} %write{881,881}
+temp	int	$tmp591	%read{883,883} %write{882,882}
+temp	int	$tmp592	%read{885,885} %write{884,884}
+temp	float	$tmp593	%read{891,891} %write{889,889}
+temp	float	$tmp594	%read{891,891} %write{890,890}
+temp	int	$tmp595	%read{892,892} %write{891,891}
+temp	int	$tmp596	%read{893,899} %write{892,898}
+temp	float	$tmp597	%read{896,896} %write{894,894}
+temp	float	$tmp598	%read{896,896} %write{895,895}
+temp	int	$tmp599	%read{897,897} %write{896,896}
+temp	int	$tmp600	%read{898,898} %write{897,897}
+temp	int	$tmp601	%read{900,913} %write{899,912}
+temp	float	$tmp602	%read{903,903} %write{901,901}
+temp	float	$tmp603	%read{903,903} %write{902,902}
+temp	int	$tmp604	%read{904,904} %write{903,903}
+temp	int	$tmp605	%read{905,911} %write{904,910}
+temp	float	$tmp606	%read{908,908} %write{906,906}
+temp	float	$tmp607	%read{908,908} %write{907,907}
+temp	int	$tmp608	%read{909,909} %write{908,908}
+temp	int	$tmp609	%read{910,910} %write{909,909}
+temp	int	$tmp610	%read{912,912} %write{911,911}
+temp	float	$tmp611	%read{920,920} %write{918,918}
+temp	float	$tmp612	%read{920,920} %write{919,919}
+temp	int	$tmp613	%read{921,921} %write{920,920}
+temp	float	$tmp614	%read{924,924} %write{922,922}
+temp	float	$tmp615	%read{924,924} %write{923,923}
+temp	float	$tmp616	%read{925,925} %write{924,924}
+temp	float	$tmp617	%read{929,929} %write{925,925}
+temp	float	$tmp618	%read{928,928} %write{926,926}
+temp	float	$tmp619	%read{928,928} %write{927,927}
+temp	float	$tmp620	%read{929,929} %write{928,928}
+temp	float	$tmp621	%read{930,930} %write{929,929}
+temp	float	$tmp622	%read{956,956} %write{944,944}
+temp	float	$tmp623	%read{938,938} %write{937,937}
+temp	float	$tmp624	%read{941,941} %write{938,938}
+temp	float	$tmp625	%read{940,940} %write{939,939}
+temp	float	$tmp626	%read{941,941} %write{940,940}
+temp	float	$tmp627	%read{944,944} %write{941,941}
+temp	float	$tmp628	%read{943,943} %write{942,942}
+temp	float	$tmp629	%read{944,944} %write{943,943}
+temp	float	$tmp630	%read{956,956} %write{955,955}
+temp	float	$tmp631	%read{949,949} %write{948,948}
+temp	float	$tmp632	%read{952,952} %write{949,949}
+temp	float	$tmp633	%read{951,951} %write{950,950}
+temp	float	$tmp634	%read{952,952} %write{951,951}
+temp	float	$tmp635	%read{955,955} %write{952,952}
+temp	float	$tmp636	%read{954,954} %write{953,953}
+temp	float	$tmp637	%read{955,955} %write{954,954}
+temp	color	$tmp638	%read{961,961} %write{957,957}
+temp	color	$tmp639	%read{962,962} %write{958,958}
+temp	color	$tmp640	%read{961,961} %write{959,959}
+temp	color	$tmp641	%read{962,962} %write{961,961}
+temp	float	$tmp642	%read{967,967} %write{966,966}
+temp	float	$tmp643	%read{970,970} %write{967,967}
+temp	float	$tmp644	%read{969,969} %write{968,968}
+temp	float	$tmp645	%read{970,970} %write{969,969}
+temp	float	$tmp646	%read{973,973} %write{970,970}
+temp	float	$tmp647	%read{972,972} %write{971,971}
+temp	float	$tmp648	%read{973,973} %write{972,972}
+temp	float	$tmp649	%read{978,978} %write{976,976}
+temp	float	$tmp650	%read{976,976} %write{974,974}
+temp	float	$tmp651	%read{976,976} %write{975,975}
+temp	float	$tmp652	%read{978,978} %write{977,977}
+temp	float	$tmp653	%read{983,983} %write{981,981}
+temp	float	$tmp654	%read{981,981} %write{979,979}
+temp	float	$tmp655	%read{981,981} %write{980,980}
+temp	float	$tmp656	%read{983,983} %write{982,982}
+temp	int	$tmp657	%read{985,985} %write{984,984}
+temp	color	$tmp658	%read{987,987} %write{986,986}
+temp	color	$tmp659	%read{989,989} %write{987,987}
+temp	float	$tmp660	%read{989,989} %write{988,988}
+temp	color	$tmp661	%read{990,990} %write{989,989}
+temp	color	$tmp662	%read{994,994} %write{990,990}
+temp	color	$tmp663	%read{995,995} %write{991,991}
+temp	color	$tmp664	%read{994,994} %write{992,992}
+temp	color	$tmp665	%read{995,995} %write{994,994}
+temp	int	$tmp666	%read{997,997} %write{996,996}
+temp	color	$tmp667	%read{1000,1000} %write{998,998}
+temp	float	$tmp668	%read{1000,1000} %write{999,999}
+temp	color	$tmp669	%read{1002,1002} %write{1000,1000}
+temp	float	$tmp670	%read{1002,1002} %write{1001,1001}
+temp	color	$tmp671	%read{1003,1003} %write{1002,1002}
+temp	color	$tmp672	%read{1007,1007} %write{1003,1003}
+temp	color	$tmp673	%read{1008,1008} %write{1004,1004}
+temp	color	$tmp674	%read{1007,1007} %write{1005,1005}
+temp	color	$tmp675	%read{1008,1008} %write{1007,1007}
+const	int	$const65	23		%read{1010,1010} %write{2147483647,-1}
+temp	int	$tmp676	%read{1011,1011} %write{1010,1010}
+const	string	$const66	"pxrBlendScreen"		%read{1012,1012} %write{2147483647,-1}
+temp	color	$tmp677	%read{1015,1015} %write{1013,1013}
+temp	color	$tmp678	%read{1015,1015} %write{1014,1014}
+const	int	$const67	24		%read{1016,1016} %write{2147483647,-1}
+temp	int	$tmp679	%read{1017,1017} %write{1016,1016}
+const	string	$const68	"pxrBlendSoftLight"		%read{1018,1018} %write{2147483647,-1}
+temp	color	$tmp680	%read{1020,1020} %write{1019,1019}
+temp	color	$tmp681	%read{1021,1021} %write{1020,1020}
+temp	color	$tmp682	%read{1022,1022} %write{1021,1021}
+temp	color	$tmp683	%read{1025,1025} %write{1022,1022}
+temp	color	$tmp684	%read{1024,1024} %write{1023,1023}
+temp	color	$tmp685	%read{1025,1025} %write{1024,1024}
+const	int	$const69	25		%read{1026,1026} %write{2147483647,-1}
+temp	int	$tmp686	%read{1027,1027} %write{1026,1026}
+const	string	$const70	"pxrBlendSubtract"		%read{1028,1028} %write{2147483647,-1}
+const	int	$const71	26		%read{1030,1030} %write{2147483647,-1}
+temp	int	$tmp687	%read{1031,1031} %write{1030,1030}
+const	string	$const72	"pxrBlendVividLight"		%read{1032,1032} %write{2147483647,-1}
+temp	float	$tmp688	%read{1061,1061} %write{1040,1060}
+temp	float	$tmp689	%read{1034,1034} %write{1033,1033}
+temp	int	$tmp690	%read{1035,1035} %write{1034,1034}
+temp	float	$tmp691	%read{1037,1037} %write{1036,1036}
+temp	float	$tmp692	%read{1038,1038} %write{1037,1037}
+temp	int	$tmp693	%read{1039,1039} %write{1038,1038}
+temp	float	$tmp694	%read{1047,1047} %write{1046,1046}
+temp	float	$tmp695	%read{1042,1042} %write{1041,1041}
+temp	float	$tmp696	%read{1045,1045} %write{1042,1042}
+temp	float	$tmp697	%read{1044,1044} %write{1043,1043}
+temp	float	$tmp698	%read{1045,1045} %write{1044,1044}
+temp	float	$tmp699	%read{1046,1046} %write{1045,1045}
+temp	float	$tmp700	%read{1049,1049} %write{1048,1048}
+temp	float	$tmp701	%read{1050,1050} %write{1049,1049}
+temp	float	$tmp702	%read{1051,1051} %write{1050,1050}
+temp	int	$tmp703	%read{1052,1052} %write{1051,1051}
+temp	float	$tmp704	%read{1059,1059} %write{1054,1054}
+temp	float	$tmp705	%read{1056,1056} %write{1055,1055}
+temp	float	$tmp706	%read{1057,1057} %write{1056,1056}
+temp	float	$tmp707	%read{1058,1058} %write{1057,1057}
+temp	float	$tmp708	%read{1059,1059} %write{1058,1058}
+temp	float	$tmp709	%read{1060,1060} %write{1059,1059}
+temp	float	$tmp710	%read{1090,1090} %write{1069,1089}
+temp	float	$tmp711	%read{1063,1063} %write{1062,1062}
+temp	int	$tmp712	%read{1064,1064} %write{1063,1063}
+temp	float	$tmp713	%read{1066,1066} %write{1065,1065}
+temp	float	$tmp714	%read{1067,1067} %write{1066,1066}
+temp	int	$tmp715	%read{1068,1068} %write{1067,1067}
+temp	float	$tmp716	%read{1076,1076} %write{1075,1075}
+temp	float	$tmp717	%read{1071,1071} %write{1070,1070}
+temp	float	$tmp718	%read{1074,1074} %write{1071,1071}
+temp	float	$tmp719	%read{1073,1073} %write{1072,1072}
+temp	float	$tmp720	%read{1074,1074} %write{1073,1073}
+temp	float	$tmp721	%read{1075,1075} %write{1074,1074}
+temp	float	$tmp722	%read{1078,1078} %write{1077,1077}
+temp	float	$tmp723	%read{1079,1079} %write{1078,1078}
+temp	float	$tmp724	%read{1080,1080} %write{1079,1079}
+temp	int	$tmp725	%read{1081,1081} %write{1080,1080}
+temp	float	$tmp726	%read{1088,1088} %write{1083,1083}
+temp	float	$tmp727	%read{1085,1085} %write{1084,1084}
+temp	float	$tmp728	%read{1086,1086} %write{1085,1085}
+temp	float	$tmp729	%read{1087,1087} %write{1086,1086}
+temp	float	$tmp730	%read{1088,1088} %write{1087,1087}
+temp	float	$tmp731	%read{1089,1089} %write{1088,1088}
+temp	float	$tmp732	%read{1119,1119} %write{1098,1118}
+temp	float	$tmp733	%read{1092,1092} %write{1091,1091}
+temp	int	$tmp734	%read{1093,1093} %write{1092,1092}
+temp	float	$tmp735	%read{1095,1095} %write{1094,1094}
+temp	float	$tmp736	%read{1096,1096} %write{1095,1095}
+temp	int	$tmp737	%read{1097,1097} %write{1096,1096}
+temp	float	$tmp738	%read{1105,1105} %write{1104,1104}
+temp	float	$tmp739	%read{1100,1100} %write{1099,1099}
+temp	float	$tmp740	%read{1103,1103} %write{1100,1100}
+temp	float	$tmp741	%read{1102,1102} %write{1101,1101}
+temp	float	$tmp742	%read{1103,1103} %write{1102,1102}
+temp	float	$tmp743	%read{1104,1104} %write{1103,1103}
+temp	float	$tmp744	%read{1107,1107} %write{1106,1106}
+temp	float	$tmp745	%read{1108,1108} %write{1107,1107}
+temp	float	$tmp746	%read{1109,1109} %write{1108,1108}
+temp	int	$tmp747	%read{1110,1110} %write{1109,1109}
+temp	float	$tmp748	%read{1117,1117} %write{1112,1112}
+temp	float	$tmp749	%read{1114,1114} %write{1113,1113}
+temp	float	$tmp750	%read{1115,1115} %write{1114,1114}
+temp	float	$tmp751	%read{1116,1116} %write{1115,1115}
+temp	float	$tmp752	%read{1117,1117} %write{1116,1116}
+temp	float	$tmp753	%read{1118,1118} %write{1117,1117}
+temp	int	$tmp754	%read{1124,1124} %write{1123,1123}
+const	string	$const73	"current"		%read{1125,1125} %write{2147483647,-1}
+const	string	$const74	"object"		%read{1125,1125} %write{2147483647,-1}
+temp	float	$tmp755	%read{1128,1128} %write{1127,1127}
+const	string	$const75	"uperlin"		%read{1127,1127} %write{2147483647,-1}
+temp	point	$tmp756	%read{1127,1127} %write{1126,1126}
+const	float	$const77	100000		%read{1126,1126} %write{2147483647,-1}
+temp	int	$tmp757	%read{1130,1130} %write{1129,1129}
+temp	color	$tmp758	%read{1135,1135} %write{1133,1133}
+temp	color	$tmp759	%read{1135,1135} %write{1134,1134}
+temp	float	$tmp760	%read{1137,1137} %write{1136,1136}
+temp	color	$tmp761	%read{1143,1143} %write{1139,1139}
+temp	color	$tmp762	%read{1142,1142} %write{1140,1140}
+temp	color	$tmp763	%read{1143,1143} %write{1142,1142}
+code ___main___
+# PxrBlend.osl:118
+#     if (topA == 0)
+	eq		$tmp1 topA $const1 	%filename{"PxrBlend.osl"} %line{118} %argrw{"wrr"}
+	if		$tmp1 3 4 	%argrw{"r"}
+# PxrBlend.osl:119
+#         cc1 = color(0);
+	assign		cc1 $const2 	%line{119} %argrw{"wr"}
+# PxrBlend.osl:121
+#         cc1 = topRGB;
+	assign		cc1 topRGB 	%line{121} %argrw{"wr"}
+# PxrBlend.osl:123
+#     if (bottomA == 0)
+	eq		$tmp2 bottomA $const1 	%line{123} %argrw{"wrr"}
+	if		$tmp2 7 8 	%argrw{"r"}
+# PxrBlend.osl:124
+#         cc2 = color(0);
+	assign		cc2 $const2 	%line{124} %argrw{"wr"}
+# PxrBlend.osl:126
+#         cc2 = bottomRGB;
+	assign		cc2 bottomRGB 	%line{126} %argrw{"wr"}
+# PxrBlend.osl:128
+#     float alpha = 1;
+	assign		alpha $const3 	%line{128} %argrw{"wr"}
+# PxrBlend.osl:130
+#     PxrColorBlend(operation, cc1, topA, cc2, bottomA, resultRGB, alpha);
+	functioncall	$const4 1138 	%line{130} %argrw{"r"}
+# PxrColorBlend.h:416
+#     if (mode == k_color)
+	eq		$tmp3 operation $const1 	%filename{"PxrColorBlend.h"} %line{416} %argrw{"wrr"}
+	if		$tmp3 87 1122 	%argrw{"r"}
+# PxrColorBlend.h:418
+#         pxrBlendColor(cA, cB, resultC);
+	functioncall	$const5 87 	%line{418} %argrw{"r"}
+# PxrColorBlend.h:164
+# void pxrBlendColor(color cA, color cB, output color result) { result = pxrSetLum(cA, pxrLum(cB)); }
+	functioncall	$const6 22 	%line{164} %argrw{"r"}
+# PxrColorBlend.h:73
+#     return (0.3 * c[0]) + (0.59 * c[1]) + (0.11 * c[2]);
+	compref		$tmp5 cc2 $const1 	%line{73} %argrw{"wrr"}
+	mul		$tmp6 $const7 $tmp5 	%argrw{"wrr"}
+	compref		$tmp7 cc2 $const3 	%argrw{"wrr"}
+	mul		$tmp8 $const8 $tmp7 	%argrw{"wrr"}
+	add		$tmp9 $tmp6 $tmp8 	%argrw{"wrr"}
+	compref		$tmp10 cc2 $const10 	%argrw{"wrr"}
+	mul		$tmp11 $const9 $tmp10 	%argrw{"wrr"}
+	add		$tmp4 $tmp9 $tmp11 	%argrw{"wrr"}
+# PxrColorBlend.h:164
+# void pxrBlendColor(color cA, color cB, output color result) { result = pxrSetLum(cA, pxrLum(cB)); }
+	functioncall	$const11 87 	%line{164} %argrw{"r"}
+# PxrColorBlend.h:147
+#     color result = c;
+	assign		___336_result cc1 	%line{147} %argrw{"wr"}
+# PxrColorBlend.h:148
+#     float d = l - pxrLum(c);
+	functioncall	$const6 33 	%line{148} %argrw{"r"}
+# PxrColorBlend.h:73
+#     return (0.3 * c[0]) + (0.59 * c[1]) + (0.11 * c[2]);
+	compref		$tmp13 cc1 $const1 	%line{73} %argrw{"wrr"}
+	mul		$tmp14 $const7 $tmp13 	%argrw{"wrr"}
+	compref		$tmp15 cc1 $const3 	%argrw{"wrr"}
+	mul		$tmp16 $const8 $tmp15 	%argrw{"wrr"}
+	add		$tmp17 $tmp14 $tmp16 	%argrw{"wrr"}
+	compref		$tmp18 cc1 $const10 	%argrw{"wrr"}
+	mul		$tmp19 $const9 $tmp18 	%argrw{"wrr"}
+	add		$tmp12 $tmp17 $tmp19 	%argrw{"wrr"}
+# PxrColorBlend.h:148
+#     float d = l - pxrLum(c);
+	sub		___336_d $tmp4 $tmp12 	%line{148} %argrw{"wrr"}
+# PxrColorBlend.h:149
+#     result = clamp(c + d, 0, 1);
+	add		$tmp20 cc1 ___336_d 	%line{149} %argrw{"wrr"}
+	assign		$tmp21 $const12 	%argrw{"wr"}
+	assign		$tmp22 $const13 	%argrw{"wr"}
+	functioncall	$const14 40 	%argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
+	min		$tmp23 $tmp20 $tmp22 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	max		___336_result $tmp23 $tmp21 	%argrw{"wrr"}
+# PxrColorBlend.h:150
+#     return pxrClipColor(result);
+	functioncall	$const15 87 	%filename{"PxrColorBlend.h"} %line{150} %argrw{"r"}
+# PxrColorBlend.h:130
+#     color result = c;
+	assign		___333_result ___336_result 	%line{130} %argrw{"wr"}
+# PxrColorBlend.h:131
+#     float l = pxrLum(result);
+	functioncall	$const6 51 	%line{131} %argrw{"r"}
+# PxrColorBlend.h:73
+#     return (0.3 * c[0]) + (0.59 * c[1]) + (0.11 * c[2]);
+	compref		$tmp24 ___333_result $const1 	%line{73} %argrw{"wrr"}
+	mul		$tmp25 $const7 $tmp24 	%argrw{"wrr"}
+	compref		$tmp26 ___333_result $const3 	%argrw{"wrr"}
+	mul		$tmp27 $const8 $tmp26 	%argrw{"wrr"}
+	add		$tmp28 $tmp25 $tmp27 	%argrw{"wrr"}
+	compref		$tmp29 ___333_result $const10 	%argrw{"wrr"}
+	mul		$tmp30 $const9 $tmp29 	%argrw{"wrr"}
+	add		___333_l $tmp28 $tmp30 	%argrw{"wrr"}
+# PxrColorBlend.h:132
+#     float n = min(min(result[0], result[1]), result[2]);
+	compref		$tmp32 ___333_result $const1 	%line{132} %argrw{"wrr"}
+	compref		$tmp33 ___333_result $const3 	%argrw{"wrr"}
+	min		$tmp31 $tmp32 $tmp33 	%argrw{"wrr"}
+	compref		$tmp34 ___333_result $const10 	%argrw{"wrr"}
+	min		___333_n $tmp31 $tmp34 	%argrw{"wrr"}
+# PxrColorBlend.h:133
+#     float x = max(max(result[0], result[1]), result[2]);
+	compref		$tmp36 ___333_result $const1 	%line{133} %argrw{"wrr"}
+	compref		$tmp37 ___333_result $const3 	%argrw{"wrr"}
+	max		$tmp35 $tmp36 $tmp37 	%argrw{"wrr"}
+	compref		$tmp38 ___333_result $const10 	%argrw{"wrr"}
+	max		___333_x $tmp35 $tmp38 	%argrw{"wrr"}
+# PxrColorBlend.h:134
+#     if (n < 0.0)
+	lt		$tmp39 ___333_n $const12 	%line{134} %argrw{"wrr"}
+	if		$tmp39 73 73 	%argrw{"r"}
+# PxrColorBlend.h:136
+#         result = clamp(l + (((result - l) * l) / (l - n)), 0, 1);
+	sub		$tmp40 ___333_result ___333_l 	%line{136} %argrw{"wrr"}
+	mul		$tmp41 $tmp40 ___333_l 	%argrw{"wrr"}
+	sub		$tmp42 ___333_l ___333_n 	%argrw{"wrr"}
+	div		$tmp43 $tmp41 $tmp42 	%argrw{"wrr"}
+	add		$tmp44 ___333_l $tmp43 	%argrw{"wrr"}
+	assign		$tmp45 $const12 	%argrw{"wr"}
+	assign		$tmp46 $const13 	%argrw{"wr"}
+	functioncall	$const14 73 	%argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
+	min		$tmp47 $tmp44 $tmp46 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	max		___333_result $tmp47 $tmp45 	%argrw{"wrr"}
+# PxrColorBlend.h:138
+#     if (x > 1)
+	gt		$tmp48 ___333_x $const3 	%filename{"PxrColorBlend.h"} %line{138} %argrw{"wrr"}
+	if		$tmp48 86 86 	%argrw{"r"}
+# PxrColorBlend.h:140
+#         result = clamp(l + (((result - l) * (1 - l)) / (x - l)), 0, 1);
+	sub		$tmp49 ___333_result ___333_l 	%line{140} %argrw{"wrr"}
+	sub		$tmp50 $const13 ___333_l 	%argrw{"wrr"}
+	mul		$tmp51 $tmp49 $tmp50 	%argrw{"wrr"}
+	sub		$tmp52 ___333_x ___333_l 	%argrw{"wrr"}
+	div		$tmp53 $tmp51 $tmp52 	%argrw{"wrr"}
+	add		$tmp54 ___333_l $tmp53 	%argrw{"wrr"}
+	assign		$tmp55 $const12 	%argrw{"wr"}
+	assign		$tmp56 $const13 	%argrw{"wr"}
+	functioncall	$const14 86 	%argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
+	min		$tmp57 $tmp54 $tmp56 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	max		___333_result $tmp57 $tmp55 	%argrw{"wrr"}
+# PxrColorBlend.h:142
+#     return result;
+	assign		resultRGB ___333_result 	%filename{"PxrColorBlend.h"} %line{142} %argrw{"wr"}
+# PxrColorBlend.h:420
+#     else if (mode == k_colorBurn)
+	eq		$tmp58 operation $const3 	%line{420} %argrw{"wrr"}
+	if		$tmp58 123 1122 	%argrw{"r"}
+# PxrColorBlend.h:422
+#         pxrBlendColorBurn(cA, cB, resultC);
+	functioncall	$const16 123 	%line{422} %argrw{"r"}
+# PxrColorBlend.h:172
+#     result[0] = (cA[0] == 0) ? 0 : 1 - min(1, (1 - cB[0]) / cA[0]);
+	compref		$tmp60 cc1 $const1 	%line{172} %argrw{"wrr"}
+	eq		$tmp61 $tmp60 $const1 	%argrw{"wrr"}
+	if		$tmp61 94 100 	%argrw{"r"}
+	assign		$tmp59 $const1 	%argrw{"wr"}
+	compref		$tmp63 cc2 $const1 	%argrw{"wrr"}
+	sub		$tmp64 $const13 $tmp63 	%argrw{"wrr"}
+	compref		$tmp65 cc1 $const1 	%argrw{"wrr"}
+	div		$tmp66 $tmp64 $tmp65 	%argrw{"wrr"}
+	min		$tmp62 $const13 $tmp66 	%argrw{"wrr"}
+	sub		$tmp59 $const13 $tmp62 	%argrw{"wrr"}
+	compassign	resultRGB $const1 $tmp59 	%argrw{"wrr"}
+# PxrColorBlend.h:173
+#     result[1] = (cA[1] == 0) ? 0 : 1 - min(1, (1 - cB[1]) / cA[1]);
+	compref		$tmp68 cc1 $const3 	%line{173} %argrw{"wrr"}
+	eq		$tmp69 $tmp68 $const1 	%argrw{"wrr"}
+	if		$tmp69 105 111 	%argrw{"r"}
+	assign		$tmp67 $const1 	%argrw{"wr"}
+	compref		$tmp71 cc2 $const3 	%argrw{"wrr"}
+	sub		$tmp72 $const13 $tmp71 	%argrw{"wrr"}
+	compref		$tmp73 cc1 $const3 	%argrw{"wrr"}
+	div		$tmp74 $tmp72 $tmp73 	%argrw{"wrr"}
+	min		$tmp70 $const13 $tmp74 	%argrw{"wrr"}
+	sub		$tmp67 $const13 $tmp70 	%argrw{"wrr"}
+	compassign	resultRGB $const3 $tmp67 	%argrw{"wrr"}
+# PxrColorBlend.h:174
+#     result[2] = (cA[2] == 0) ? 0 : 1 - min(1, (1 - cB[2]) / cA[2]);
+	compref		$tmp76 cc1 $const10 	%line{174} %argrw{"wrr"}
+	eq		$tmp77 $tmp76 $const1 	%argrw{"wrr"}
+	if		$tmp77 116 122 	%argrw{"r"}
+	assign		$tmp75 $const1 	%argrw{"wr"}
+	compref		$tmp79 cc2 $const10 	%argrw{"wrr"}
+	sub		$tmp80 $const13 $tmp79 	%argrw{"wrr"}
+	compref		$tmp81 cc1 $const10 	%argrw{"wrr"}
+	div		$tmp82 $tmp80 $tmp81 	%argrw{"wrr"}
+	min		$tmp78 $const13 $tmp82 	%argrw{"wrr"}
+	sub		$tmp75 $const13 $tmp78 	%argrw{"wrr"}
+	compassign	resultRGB $const10 $tmp75 	%argrw{"wrr"}
+# PxrColorBlend.h:424
+#     else if (mode == k_colorDodge)
+	eq		$tmp83 operation $const10 	%line{424} %argrw{"wrr"}
+	if		$tmp83 156 1122 	%argrw{"r"}
+# PxrColorBlend.h:426
+#         pxrBlendColorDodge(cA, cB, resultC);
+	functioncall	$const17 156 	%line{426} %argrw{"r"}
+# PxrColorBlend.h:183
+#     result[0] = (cA[0] == 1) ? 1 : min(1, cB[0] / (1 - cA[0]));
+	compref		$tmp85 cc1 $const1 	%line{183} %argrw{"wrr"}
+	eq		$tmp86 $tmp85 $const3 	%argrw{"wrr"}
+	if		$tmp86 130 135 	%argrw{"r"}
+	assign		$tmp84 $const3 	%argrw{"wr"}
+	compref		$tmp87 cc2 $const1 	%argrw{"wrr"}
+	compref		$tmp88 cc1 $const1 	%argrw{"wrr"}
+	sub		$tmp89 $const13 $tmp88 	%argrw{"wrr"}
+	div		$tmp90 $tmp87 $tmp89 	%argrw{"wrr"}
+	min		$tmp84 $const13 $tmp90 	%argrw{"wrr"}
+	compassign	resultRGB $const1 $tmp84 	%argrw{"wrr"}
+# PxrColorBlend.h:184
+#     result[1] = (cA[1] == 1) ? 1 : min(1, cB[1] / (1 - cA[1]));
+	compref		$tmp92 cc1 $const3 	%line{184} %argrw{"wrr"}
+	eq		$tmp93 $tmp92 $const3 	%argrw{"wrr"}
+	if		$tmp93 140 145 	%argrw{"r"}
+	assign		$tmp91 $const3 	%argrw{"wr"}
+	compref		$tmp94 cc2 $const3 	%argrw{"wrr"}
+	compref		$tmp95 cc1 $const3 	%argrw{"wrr"}
+	sub		$tmp96 $const13 $tmp95 	%argrw{"wrr"}
+	div		$tmp97 $tmp94 $tmp96 	%argrw{"wrr"}
+	min		$tmp91 $const13 $tmp97 	%argrw{"wrr"}
+	compassign	resultRGB $const3 $tmp91 	%argrw{"wrr"}
+# PxrColorBlend.h:185
+#     result[2] = (cA[2] == 1) ? 1 : min(1, cB[2] / (1 - cA[2]));
+	compref		$tmp99 cc1 $const10 	%line{185} %argrw{"wrr"}
+	eq		$tmp100 $tmp99 $const3 	%argrw{"wrr"}
+	if		$tmp100 150 155 	%argrw{"r"}
+	assign		$tmp98 $const3 	%argrw{"wr"}
+	compref		$tmp101 cc2 $const10 	%argrw{"wrr"}
+	compref		$tmp102 cc1 $const10 	%argrw{"wrr"}
+	sub		$tmp103 $const13 $tmp102 	%argrw{"wrr"}
+	div		$tmp104 $tmp101 $tmp103 	%argrw{"wrr"}
+	min		$tmp98 $const13 $tmp104 	%argrw{"wrr"}
+	compassign	resultRGB $const10 $tmp98 	%argrw{"wrr"}
+# PxrColorBlend.h:428
+#     else if (mode == k_darken)
+	eq		$tmp105 operation $const18 	%line{428} %argrw{"wrr"}
+	if		$tmp105 160 1122 	%argrw{"r"}
+# PxrColorBlend.h:430
+#         pxrBlendDarken(cA, cB, resultC);
+	functioncall	$const19 160 	%line{430} %argrw{"r"}
+# PxrColorBlend.h:193
+# void pxrBlendDarken(color cA, color cB, output color result) { result = min(cA, cB); }
+	min		resultRGB cc1 cc2 	%line{193} %argrw{"wrr"}
+# PxrColorBlend.h:432
+#     else if (mode == k_darkenColor)
+	eq		$tmp106 operation $const20 	%line{432} %argrw{"wrr"}
+	if		$tmp106 177 1122 	%argrw{"r"}
+# PxrColorBlend.h:434
+#         pxrBlendDarkerColor(cA, cB, resultC);
+	functioncall	$const21 177 	%line{434} %argrw{"r"}
+# PxrColorBlend.h:203
+#     result = ((cA[0] + cA[1] + cA[2]) > (cB[0] + cB[1] + cB[2])) ? cB : cA;
+	compref		$tmp107 cc1 $const1 	%line{203} %argrw{"wrr"}
+	compref		$tmp108 cc1 $const3 	%argrw{"wrr"}
+	add		$tmp109 $tmp107 $tmp108 	%argrw{"wrr"}
+	compref		$tmp110 cc1 $const10 	%argrw{"wrr"}
+	add		$tmp111 $tmp109 $tmp110 	%argrw{"wrr"}
+	compref		$tmp112 cc2 $const1 	%argrw{"wrr"}
+	compref		$tmp113 cc2 $const3 	%argrw{"wrr"}
+	add		$tmp114 $tmp112 $tmp113 	%argrw{"wrr"}
+	compref		$tmp115 cc2 $const10 	%argrw{"wrr"}
+	add		$tmp116 $tmp114 $tmp115 	%argrw{"wrr"}
+	gt		$tmp117 $tmp111 $tmp116 	%argrw{"wrr"}
+	if		$tmp117 176 177 	%argrw{"r"}
+	assign		resultRGB cc2 	%argrw{"wr"}
+	assign		resultRGB cc1 	%argrw{"wr"}
+# PxrColorBlend.h:436
+#     else if (mode == k_difference)
+	eq		$tmp118 operation $const22 	%line{436} %argrw{"wrr"}
+	if		$tmp118 182 1122 	%argrw{"r"}
+# PxrColorBlend.h:438
+#         pxrBlendDifference(cA, cB, resultC);
+	functioncall	$const23 182 	%line{438} %argrw{"r"}
+# PxrColorBlend.h:212
+# void pxrBlendDifference(color cA, color cB, output color result) { result = abs(cB - cA); }
+	sub		$tmp119 cc2 cc1 	%line{212} %argrw{"wrr"}
+	abs		resultRGB $tmp119 	%argrw{"wr"}
+# PxrColorBlend.h:440
+#     else if (mode == k_dissolve)
+	eq		$tmp120 operation $const24 	%line{440} %argrw{"wrr"}
+	if		$tmp120 186 1122 	%argrw{"r"}
+# PxrColorBlend.h:442
+#         pxrBlendDissolve(cA, resultC);
+	functioncall	$const25 186 	%line{442} %argrw{"r"}
+# PxrColorBlend.h:218
+# void pxrBlendDissolve(color cA, output color result) { result = cA; }
+	assign		resultRGB cc1 	%line{218} %argrw{"wr"}
+# PxrColorBlend.h:444
+#     else if (mode == k_divide)
+	eq		$tmp121 operation $const26 	%line{444} %argrw{"wrr"}
+	if		$tmp121 213 1122 	%argrw{"r"}
+# PxrColorBlend.h:446
+#         pxrBlendDivide(cA, cB, resultC);
+	functioncall	$const27 213 	%line{446} %argrw{"r"}
+# PxrColorBlend.h:225
+#     result[0] = (cA[0] == 0) ? 0 : cB[0] / cA[0];
+	compref		$tmp123 cc1 $const1 	%line{225} %argrw{"wrr"}
+	eq		$tmp124 $tmp123 $const1 	%argrw{"wrr"}
+	if		$tmp124 193 196 	%argrw{"r"}
+	assign		$tmp122 $const1 	%argrw{"wr"}
+	compref		$tmp125 cc2 $const1 	%argrw{"wrr"}
+	compref		$tmp126 cc1 $const1 	%argrw{"wrr"}
+	div		$tmp122 $tmp125 $tmp126 	%argrw{"wrr"}
+	compassign	resultRGB $const1 $tmp122 	%argrw{"wrr"}
+# PxrColorBlend.h:226
+#     result[1] = (cA[1] == 0) ? 0 : cB[1] / cA[1];
+	compref		$tmp128 cc1 $const3 	%line{226} %argrw{"wrr"}
+	eq		$tmp129 $tmp128 $const1 	%argrw{"wrr"}
+	if		$tmp129 201 204 	%argrw{"r"}
+	assign		$tmp127 $const1 	%argrw{"wr"}
+	compref		$tmp130 cc2 $const3 	%argrw{"wrr"}
+	compref		$tmp131 cc1 $const3 	%argrw{"wrr"}
+	div		$tmp127 $tmp130 $tmp131 	%argrw{"wrr"}
+	compassign	resultRGB $const3 $tmp127 	%argrw{"wrr"}
+# PxrColorBlend.h:227
+#     result[2] = (cA[2] == 0) ? 0 : cB[2] / cA[2];
+	compref		$tmp133 cc1 $const10 	%line{227} %argrw{"wrr"}
+	eq		$tmp134 $tmp133 $const1 	%argrw{"wrr"}
+	if		$tmp134 209 212 	%argrw{"r"}
+	assign		$tmp132 $const1 	%argrw{"wr"}
+	compref		$tmp135 cc2 $const10 	%argrw{"wrr"}
+	compref		$tmp136 cc1 $const10 	%argrw{"wrr"}
+	div		$tmp132 $tmp135 $tmp136 	%argrw{"wrr"}
+	compassign	resultRGB $const10 $tmp132 	%argrw{"wrr"}
+# PxrColorBlend.h:448
+#     else if (mode == k_exclusion)
+	eq		$tmp137 operation $const28 	%line{448} %argrw{"wrr"}
+	if		$tmp137 220 1122 	%argrw{"r"}
+# PxrColorBlend.h:450
+#         pxrBlendExclusion(cA, cB, resultC);
+	functioncall	$const29 220 	%line{450} %argrw{"r"}
+# PxrColorBlend.h:234
+# void pxrBlendExclusion(color cA, color cB, output color result) { result = cB + cA - 2 * cB * cA; }
+	add		$tmp138 cc2 cc1 	%line{234} %argrw{"wrr"}
+	mul		$tmp139 $const30 cc2 	%argrw{"wrr"}
+	mul		$tmp140 $tmp139 cc1 	%argrw{"wrr"}
+	sub		resultRGB $tmp138 $tmp140 	%argrw{"wrr"}
+# PxrColorBlend.h:452
+#     else if (mode == k_hardLight)
+	eq		$tmp141 operation $const31 	%line{452} %argrw{"wrr"}
+	if		$tmp141 280 1122 	%argrw{"r"}
+# PxrColorBlend.h:454
+#         pxrBlendHardLight(cA, cB, resultC);
+	functioncall	$const32 280 	%line{454} %argrw{"r"}
+# PxrColorBlend.h:248
+#         (cA[0] > 0.5) ? (2 * cA[0] - 1) + cB[0] - ((2 * cA[0] - 1) * cB[0]) : cB[0] * (2 * cA[0]);
+	compref		$tmp143 cc1 $const1 	%line{248} %argrw{"wrr"}
+	gt		$tmp144 $tmp143 $const33 	%argrw{"wrr"}
+	if		$tmp144 237 241 	%argrw{"r"}
+	compref		$tmp145 cc1 $const1 	%argrw{"wrr"}
+	mul		$tmp146 $const30 $tmp145 	%argrw{"wrr"}
+	sub		$tmp147 $tmp146 $const13 	%argrw{"wrr"}
+	compref		$tmp148 cc2 $const1 	%argrw{"wrr"}
+	add		$tmp149 $tmp147 $tmp148 	%argrw{"wrr"}
+	compref		$tmp150 cc1 $const1 	%argrw{"wrr"}
+	mul		$tmp151 $const30 $tmp150 	%argrw{"wrr"}
+	sub		$tmp152 $tmp151 $const13 	%argrw{"wrr"}
+	compref		$tmp153 cc2 $const1 	%argrw{"wrr"}
+	mul		$tmp154 $tmp152 $tmp153 	%argrw{"wrr"}
+	sub		$tmp142 $tmp149 $tmp154 	%argrw{"wrr"}
+	compref		$tmp155 cc2 $const1 	%argrw{"wrr"}
+	compref		$tmp156 cc1 $const1 	%argrw{"wrr"}
+	mul		$tmp157 $const30 $tmp156 	%argrw{"wrr"}
+	mul		$tmp142 $tmp155 $tmp157 	%argrw{"wrr"}
+# PxrColorBlend.h:247
+#     result[0] =
+	compassign	resultRGB $const1 $tmp142 	%line{247} %argrw{"wrr"}
+# PxrColorBlend.h:250
+#         (cA[1] > 0.5) ? (2 * cA[1] - 1) + cB[1] - ((2 * cA[1] - 1) * cB[1]) : cB[1] * (2 * cA[1]);
+	compref		$tmp159 cc1 $const3 	%line{250} %argrw{"wrr"}
+	gt		$tmp160 $tmp159 $const33 	%argrw{"wrr"}
+	if		$tmp160 256 260 	%argrw{"r"}
+	compref		$tmp161 cc1 $const3 	%argrw{"wrr"}
+	mul		$tmp162 $const30 $tmp161 	%argrw{"wrr"}
+	sub		$tmp163 $tmp162 $const13 	%argrw{"wrr"}
+	compref		$tmp164 cc2 $const3 	%argrw{"wrr"}
+	add		$tmp165 $tmp163 $tmp164 	%argrw{"wrr"}
+	compref		$tmp166 cc1 $const3 	%argrw{"wrr"}
+	mul		$tmp167 $const30 $tmp166 	%argrw{"wrr"}
+	sub		$tmp168 $tmp167 $const13 	%argrw{"wrr"}
+	compref		$tmp169 cc2 $const3 	%argrw{"wrr"}
+	mul		$tmp170 $tmp168 $tmp169 	%argrw{"wrr"}
+	sub		$tmp158 $tmp165 $tmp170 	%argrw{"wrr"}
+	compref		$tmp171 cc2 $const3 	%argrw{"wrr"}
+	compref		$tmp172 cc1 $const3 	%argrw{"wrr"}
+	mul		$tmp173 $const30 $tmp172 	%argrw{"wrr"}
+	mul		$tmp158 $tmp171 $tmp173 	%argrw{"wrr"}
+# PxrColorBlend.h:249
+#     result[1] =
+	compassign	resultRGB $const3 $tmp158 	%line{249} %argrw{"wrr"}
+# PxrColorBlend.h:252
+#         (cA[2] > 0.5) ? (2 * cA[2] - 1) + cB[2] - ((2 * cA[2] - 1) * cB[2]) : cB[2] * (2 * cA[2]);
+	compref		$tmp175 cc1 $const10 	%line{252} %argrw{"wrr"}
+	gt		$tmp176 $tmp175 $const33 	%argrw{"wrr"}
+	if		$tmp176 275 279 	%argrw{"r"}
+	compref		$tmp177 cc1 $const10 	%argrw{"wrr"}
+	mul		$tmp178 $const30 $tmp177 	%argrw{"wrr"}
+	sub		$tmp179 $tmp178 $const13 	%argrw{"wrr"}
+	compref		$tmp180 cc2 $const10 	%argrw{"wrr"}
+	add		$tmp181 $tmp179 $tmp180 	%argrw{"wrr"}
+	compref		$tmp182 cc1 $const10 	%argrw{"wrr"}
+	mul		$tmp183 $const30 $tmp182 	%argrw{"wrr"}
+	sub		$tmp184 $tmp183 $const13 	%argrw{"wrr"}
+	compref		$tmp185 cc2 $const10 	%argrw{"wrr"}
+	mul		$tmp186 $tmp184 $tmp185 	%argrw{"wrr"}
+	sub		$tmp174 $tmp181 $tmp186 	%argrw{"wrr"}
+	compref		$tmp187 cc2 $const10 	%argrw{"wrr"}
+	compref		$tmp188 cc1 $const10 	%argrw{"wrr"}
+	mul		$tmp189 $const30 $tmp188 	%argrw{"wrr"}
+	mul		$tmp174 $tmp187 $tmp189 	%argrw{"wrr"}
+# PxrColorBlend.h:251
+#     result[2] =
+	compassign	resultRGB $const10 $tmp174 	%line{251} %argrw{"wrr"}
+# PxrColorBlend.h:456
+#     else if (mode == k_hardMix)
+	eq		$tmp190 operation $const34 	%line{456} %argrw{"wrr"}
+	if		$tmp190 307 1122 	%argrw{"r"}
+# PxrColorBlend.h:458
+#         pxrBlendHardMix(cA, cB, resultC);
+	functioncall	$const35 307 	%line{458} %argrw{"r"}
+# PxrColorBlend.h:264
+#     result[0] = ((cA[0] + cB[0]) >= 1) ? 1 : 0;
+	compref		$tmp192 cc1 $const1 	%line{264} %argrw{"wrr"}
+	compref		$tmp193 cc2 $const1 	%argrw{"wrr"}
+	add		$tmp194 $tmp192 $tmp193 	%argrw{"wrr"}
+	ge		$tmp195 $tmp194 $const3 	%argrw{"wrr"}
+	if		$tmp195 289 290 	%argrw{"r"}
+	assign		$tmp191 $const3 	%argrw{"wr"}
+	assign		$tmp191 $const1 	%argrw{"wr"}
+	compassign	resultRGB $const1 $tmp191 	%argrw{"wrr"}
+# PxrColorBlend.h:265
+#     result[1] = ((cA[1] + cB[1]) >= 1) ? 1 : 0;
+	compref		$tmp197 cc1 $const3 	%line{265} %argrw{"wrr"}
+	compref		$tmp198 cc2 $const3 	%argrw{"wrr"}
+	add		$tmp199 $tmp197 $tmp198 	%argrw{"wrr"}
+	ge		$tmp200 $tmp199 $const3 	%argrw{"wrr"}
+	if		$tmp200 297 298 	%argrw{"r"}
+	assign		$tmp196 $const3 	%argrw{"wr"}
+	assign		$tmp196 $const1 	%argrw{"wr"}
+	compassign	resultRGB $const3 $tmp196 	%argrw{"wrr"}
+# PxrColorBlend.h:266
+#     result[2] = ((cA[2] + cB[2]) >= 1) ? 1 : 0;
+	compref		$tmp202 cc1 $const10 	%line{266} %argrw{"wrr"}
+	compref		$tmp203 cc2 $const10 	%argrw{"wrr"}
+	add		$tmp204 $tmp202 $tmp203 	%argrw{"wrr"}
+	ge		$tmp205 $tmp204 $const3 	%argrw{"wrr"}
+	if		$tmp205 305 306 	%argrw{"r"}
+	assign		$tmp201 $const3 	%argrw{"wr"}
+	assign		$tmp201 $const1 	%argrw{"wr"}
+	compassign	resultRGB $const10 $tmp201 	%argrw{"wrr"}
+# PxrColorBlend.h:460
+#     else if (mode == k_hue)
+	eq		$tmp206 operation $const36 	%line{460} %argrw{"wrr"}
+	if		$tmp206 531 1122 	%argrw{"r"}
+# PxrColorBlend.h:462
+#         pxrBlendHue(cA, cB, resultC);
+	functioncall	$const37 531 	%line{462} %argrw{"r"}
+# PxrColorBlend.h:274
+#     result = pxrSetLum(pxrSetSat(cA, pxrSat(cB)), pxrLum(cB));
+	functioncall	$const38 322 	%line{274} %argrw{"r"}
+# PxrColorBlend.h:106
+# float pxrSat(color c) { return max(max(c[0], c[1]), c[2]) - min(min(c[0], c[1]), c[2]); }
+	compref		$tmp211 cc2 $const1 	%line{106} %argrw{"wrr"}
+	compref		$tmp212 cc2 $const3 	%argrw{"wrr"}
+	max		$tmp210 $tmp211 $tmp212 	%argrw{"wrr"}
+	compref		$tmp213 cc2 $const10 	%argrw{"wrr"}
+	max		$tmp209 $tmp210 $tmp213 	%argrw{"wrr"}
+	compref		$tmp216 cc2 $const1 	%argrw{"wrr"}
+	compref		$tmp217 cc2 $const3 	%argrw{"wrr"}
+	min		$tmp215 $tmp216 $tmp217 	%argrw{"wrr"}
+	compref		$tmp218 cc2 $const10 	%argrw{"wrr"}
+	min		$tmp214 $tmp215 $tmp218 	%argrw{"wrr"}
+	sub		$tmp208 $tmp209 $tmp214 	%argrw{"wrr"}
+# PxrColorBlend.h:274
+#     result = pxrSetLum(pxrSetSat(cA, pxrSat(cB)), pxrLum(cB));
+	functioncall	$const39 457 	%line{274} %argrw{"r"}
+# PxrColorBlend.h:110
+#     color result = c;
+	assign		___330_result cc1 	%line{110} %argrw{"wr"}
+# PxrColorBlend.h:111
+#     int min = pxrMinChannel(c);
+	functioncall	$const40 353 	%line{111} %argrw{"r"}
+# PxrColorBlend.h:88
+#     if (c[0] <= c[2] && c[0] <= c[1])
+	compref		$tmp219 cc1 $const1 	%line{88} %argrw{"wrr"}
+	compref		$tmp220 cc1 $const10 	%argrw{"wrr"}
+	le		$tmp221 $tmp219 $tmp220 	%argrw{"wrr"}
+	neq		$tmp222 $tmp221 $const1 	%argrw{"wrr"}
+	if		$tmp222 335 335 	%argrw{"r"}
+	compref		$tmp223 cc1 $const1 	%argrw{"wrr"}
+	compref		$tmp224 cc1 $const3 	%argrw{"wrr"}
+	le		$tmp225 $tmp223 $tmp224 	%argrw{"wrr"}
+	neq		$tmp226 $tmp225 $const1 	%argrw{"wrr"}
+	assign		$tmp222 $tmp226 	%argrw{"wr"}
+	if		$tmp222 338 353 	%argrw{"r"}
+# PxrColorBlend.h:89
+#         return 0;
+	assign		___330_min $const1 	%line{89} %argrw{"wr"}
+	return
+# PxrColorBlend.h:90
+#     else if (c[1] <= c[0] && c[1] <= c[2])
+	compref		$tmp227 cc1 $const3 	%line{90} %argrw{"wrr"}
+	compref		$tmp228 cc1 $const1 	%argrw{"wrr"}
+	le		$tmp229 $tmp227 $tmp228 	%argrw{"wrr"}
+	neq		$tmp230 $tmp229 $const1 	%argrw{"wrr"}
+	if		$tmp230 348 348 	%argrw{"r"}
+	compref		$tmp231 cc1 $const3 	%argrw{"wrr"}
+	compref		$tmp232 cc1 $const10 	%argrw{"wrr"}
+	le		$tmp233 $tmp231 $tmp232 	%argrw{"wrr"}
+	neq		$tmp234 $tmp233 $const1 	%argrw{"wrr"}
+	assign		$tmp230 $tmp234 	%argrw{"wr"}
+	if		$tmp230 351 353 	%argrw{"r"}
+# PxrColorBlend.h:91
+#         return 1;
+	assign		___330_min $const3 	%line{91} %argrw{"wr"}
+	return
+# PxrColorBlend.h:93
+#         return 2;
+	assign		___330_min $const10 	%line{93} %argrw{"wr"}
+	return
+# PxrColorBlend.h:112
+#     int max = pxrMaxChannel(c);
+	functioncall	$const41 382 	%line{112} %argrw{"r"}
+# PxrColorBlend.h:78
+#     if (c[0] >= c[2] && c[0] >= c[1])
+	compref		$tmp235 cc1 $const1 	%line{78} %argrw{"wrr"}
+	compref		$tmp236 cc1 $const10 	%argrw{"wrr"}
+	ge		$tmp237 $tmp235 $tmp236 	%argrw{"wrr"}
+	neq		$tmp238 $tmp237 $const1 	%argrw{"wrr"}
+	if		$tmp238 364 364 	%argrw{"r"}
+	compref		$tmp239 cc1 $const1 	%argrw{"wrr"}
+	compref		$tmp240 cc1 $const3 	%argrw{"wrr"}
+	ge		$tmp241 $tmp239 $tmp240 	%argrw{"wrr"}
+	neq		$tmp242 $tmp241 $const1 	%argrw{"wrr"}
+	assign		$tmp238 $tmp242 	%argrw{"wr"}
+	if		$tmp238 367 382 	%argrw{"r"}
+# PxrColorBlend.h:79
+#         return 0;
+	assign		___330_max $const1 	%line{79} %argrw{"wr"}
+	return
+# PxrColorBlend.h:80
+#     else if (c[1] >= c[0] && c[1] >= c[2])
+	compref		$tmp243 cc1 $const3 	%line{80} %argrw{"wrr"}
+	compref		$tmp244 cc1 $const1 	%argrw{"wrr"}
+	ge		$tmp245 $tmp243 $tmp244 	%argrw{"wrr"}
+	neq		$tmp246 $tmp245 $const1 	%argrw{"wrr"}
+	if		$tmp246 377 377 	%argrw{"r"}
+	compref		$tmp247 cc1 $const3 	%argrw{"wrr"}
+	compref		$tmp248 cc1 $const10 	%argrw{"wrr"}
+	ge		$tmp249 $tmp247 $tmp248 	%argrw{"wrr"}
+	neq		$tmp250 $tmp249 $const1 	%argrw{"wrr"}
+	assign		$tmp246 $tmp250 	%argrw{"wr"}
+	if		$tmp246 380 382 	%argrw{"r"}
+# PxrColorBlend.h:81
+#         return 1;
+	assign		___330_max $const3 	%line{81} %argrw{"wr"}
+	return
+# PxrColorBlend.h:83
+#         return 2;
+	assign		___330_max $const10 	%line{83} %argrw{"wr"}
+	return
+# PxrColorBlend.h:113
+#     int mid = pxrMidChannel(c);
+	functioncall	$const42 439 	%line{113} %argrw{"r"}
+# PxrColorBlend.h:98
+#     if ((c[0] >= c[1] && c[0] <= c[2]) || (c[0] >= c[2] && c[0] <= c[1]))
+	compref		$tmp251 cc1 $const1 	%line{98} %argrw{"wrr"}
+	compref		$tmp252 cc1 $const3 	%argrw{"wrr"}
+	ge		$tmp253 $tmp251 $tmp252 	%argrw{"wrr"}
+	neq		$tmp254 $tmp253 $const1 	%argrw{"wrr"}
+	if		$tmp254 393 393 	%argrw{"r"}
+	compref		$tmp255 cc1 $const1 	%argrw{"wrr"}
+	compref		$tmp256 cc1 $const10 	%argrw{"wrr"}
+	le		$tmp257 $tmp255 $tmp256 	%argrw{"wrr"}
+	neq		$tmp258 $tmp257 $const1 	%argrw{"wrr"}
+	assign		$tmp254 $tmp258 	%argrw{"wr"}
+	neq		$tmp259 $tmp254 $const1 	%argrw{"wrr"}
+	if		$tmp259 395 407 	%argrw{"r"}
+	compref		$tmp260 cc1 $const1 	%argrw{"wrr"}
+	compref		$tmp261 cc1 $const10 	%argrw{"wrr"}
+	ge		$tmp262 $tmp260 $tmp261 	%argrw{"wrr"}
+	neq		$tmp263 $tmp262 $const1 	%argrw{"wrr"}
+	if		$tmp263 405 405 	%argrw{"r"}
+	compref		$tmp264 cc1 $const1 	%argrw{"wrr"}
+	compref		$tmp265 cc1 $const3 	%argrw{"wrr"}
+	le		$tmp266 $tmp264 $tmp265 	%argrw{"wrr"}
+	neq		$tmp267 $tmp266 $const1 	%argrw{"wrr"}
+	assign		$tmp263 $tmp267 	%argrw{"wr"}
+	neq		$tmp268 $tmp263 $const1 	%argrw{"wrr"}
+	assign		$tmp259 $tmp268 	%argrw{"wr"}
+	if		$tmp259 410 439 	%argrw{"r"}
+# PxrColorBlend.h:99
+#         return 0;
+	assign		___330_mid $const1 	%line{99} %argrw{"wr"}
+	return
+# PxrColorBlend.h:100
+#     else if ((c[1] >= c[0] && c[1] <= c[2]) || (c[1] <= c[0] && c[1] >= c[2]))
+	compref		$tmp269 cc1 $const3 	%line{100} %argrw{"wrr"}
+	compref		$tmp270 cc1 $const1 	%argrw{"wrr"}
+	ge		$tmp271 $tmp269 $tmp270 	%argrw{"wrr"}
+	neq		$tmp272 $tmp271 $const1 	%argrw{"wrr"}
+	if		$tmp272 420 420 	%argrw{"r"}
+	compref		$tmp273 cc1 $const3 	%argrw{"wrr"}
+	compref		$tmp274 cc1 $const10 	%argrw{"wrr"}
+	le		$tmp275 $tmp273 $tmp274 	%argrw{"wrr"}
+	neq		$tmp276 $tmp275 $const1 	%argrw{"wrr"}
+	assign		$tmp272 $tmp276 	%argrw{"wr"}
+	neq		$tmp277 $tmp272 $const1 	%argrw{"wrr"}
+	if		$tmp277 422 434 	%argrw{"r"}
+	compref		$tmp278 cc1 $const3 	%argrw{"wrr"}
+	compref		$tmp279 cc1 $const1 	%argrw{"wrr"}
+	le		$tmp280 $tmp278 $tmp279 	%argrw{"wrr"}
+	neq		$tmp281 $tmp280 $const1 	%argrw{"wrr"}
+	if		$tmp281 432 432 	%argrw{"r"}
+	compref		$tmp282 cc1 $const3 	%argrw{"wrr"}
+	compref		$tmp283 cc1 $const10 	%argrw{"wrr"}
+	ge		$tmp284 $tmp282 $tmp283 	%argrw{"wrr"}
+	neq		$tmp285 $tmp284 $const1 	%argrw{"wrr"}
+	assign		$tmp281 $tmp285 	%argrw{"wr"}
+	neq		$tmp286 $tmp281 $const1 	%argrw{"wrr"}
+	assign		$tmp277 $tmp286 	%argrw{"wr"}
+	if		$tmp277 437 439 	%argrw{"r"}
+# PxrColorBlend.h:101
+#         return 1;
+	assign		___330_mid $const3 	%line{101} %argrw{"wr"}
+	return
+# PxrColorBlend.h:103
+#         return 2;
+	assign		___330_mid $const10 	%line{103} %argrw{"wr"}
+	return
+# PxrColorBlend.h:114
+#     if (c[max] > c[min])
+	compref		$tmp287 cc1 ___330_max 	%line{114} %argrw{"wrr"}
+	compref		$tmp288 cc1 ___330_min 	%argrw{"wrr"}
+	gt		$tmp289 $tmp287 $tmp288 	%argrw{"wrr"}
+	if		$tmp289 453 455 	%argrw{"r"}
+# PxrColorBlend.h:116
+#         result[mid] = ((c[mid] - c[min]) * s) / (c[max] - c[min]);
+	compref		$tmp290 cc1 ___330_mid 	%line{116} %argrw{"wrr"}
+	compref		$tmp291 cc1 ___330_min 	%argrw{"wrr"}
+	sub		$tmp292 $tmp290 $tmp291 	%argrw{"wrr"}
+	mul		$tmp293 $tmp292 $tmp208 	%argrw{"wrr"}
+	compref		$tmp294 cc1 ___330_max 	%argrw{"wrr"}
+	compref		$tmp295 cc1 ___330_min 	%argrw{"wrr"}
+	sub		$tmp296 $tmp294 $tmp295 	%argrw{"wrr"}
+	div		$tmp297 $tmp293 $tmp296 	%argrw{"wrr"}
+	compassign	___330_result ___330_mid $tmp297 	%argrw{"wrr"}
+# PxrColorBlend.h:117
+#         result[max] = s;
+	compassign	___330_result ___330_max $tmp208 	%line{117} %argrw{"wrr"}
+# PxrColorBlend.h:121
+#         result[mid] = 0;
+	compassign	___330_result ___330_mid $const1 	%line{121} %argrw{"wrr"}
+# PxrColorBlend.h:122
+#         result[max] = 0;
+	compassign	___330_result ___330_max $const1 	%line{122} %argrw{"wrr"}
+# PxrColorBlend.h:124
+#     result[min] = 0;
+	compassign	___330_result ___330_min $const1 	%line{124} %argrw{"wrr"}
+# PxrColorBlend.h:125
+#     return result;
+	assign		$tmp207 ___330_result 	%line{125} %argrw{"wr"}
+# PxrColorBlend.h:274
+#     result = pxrSetLum(pxrSetSat(cA, pxrSat(cB)), pxrLum(cB));
+	functioncall	$const6 466 	%line{274} %argrw{"r"}
+# PxrColorBlend.h:73
+#     return (0.3 * c[0]) + (0.59 * c[1]) + (0.11 * c[2]);
+	compref		$tmp299 cc2 $const1 	%line{73} %argrw{"wrr"}
+	mul		$tmp300 $const7 $tmp299 	%argrw{"wrr"}
+	compref		$tmp301 cc2 $const3 	%argrw{"wrr"}
+	mul		$tmp302 $const8 $tmp301 	%argrw{"wrr"}
+	add		$tmp303 $tmp300 $tmp302 	%argrw{"wrr"}
+	compref		$tmp304 cc2 $const10 	%argrw{"wrr"}
+	mul		$tmp305 $const9 $tmp304 	%argrw{"wrr"}
+	add		$tmp298 $tmp303 $tmp305 	%argrw{"wrr"}
+# PxrColorBlend.h:274
+#     result = pxrSetLum(pxrSetSat(cA, pxrSat(cB)), pxrLum(cB));
+	functioncall	$const11 531 	%line{274} %argrw{"r"}
+# PxrColorBlend.h:147
+#     color result = c;
+	assign		___336_result $tmp207 	%line{147} %argrw{"wr"}
+# PxrColorBlend.h:148
+#     float d = l - pxrLum(c);
+	functioncall	$const6 477 	%line{148} %argrw{"r"}
+# PxrColorBlend.h:73
+#     return (0.3 * c[0]) + (0.59 * c[1]) + (0.11 * c[2]);
+	compref		$tmp307 $tmp207 $const1 	%line{73} %argrw{"wrr"}
+	mul		$tmp308 $const7 $tmp307 	%argrw{"wrr"}
+	compref		$tmp309 $tmp207 $const3 	%argrw{"wrr"}
+	mul		$tmp310 $const8 $tmp309 	%argrw{"wrr"}
+	add		$tmp311 $tmp308 $tmp310 	%argrw{"wrr"}
+	compref		$tmp312 $tmp207 $const10 	%argrw{"wrr"}
+	mul		$tmp313 $const9 $tmp312 	%argrw{"wrr"}
+	add		$tmp306 $tmp311 $tmp313 	%argrw{"wrr"}
+# PxrColorBlend.h:148
+#     float d = l - pxrLum(c);
+	sub		___336_d $tmp298 $tmp306 	%line{148} %argrw{"wrr"}
+# PxrColorBlend.h:149
+#     result = clamp(c + d, 0, 1);
+	add		$tmp314 $tmp207 ___336_d 	%line{149} %argrw{"wrr"}
+	assign		$tmp315 $const12 	%argrw{"wr"}
+	assign		$tmp316 $const13 	%argrw{"wr"}
+	functioncall	$const14 484 	%argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
+	min		$tmp317 $tmp314 $tmp316 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	max		___336_result $tmp317 $tmp315 	%argrw{"wrr"}
+# PxrColorBlend.h:150
+#     return pxrClipColor(result);
+	functioncall	$const15 531 	%filename{"PxrColorBlend.h"} %line{150} %argrw{"r"}
+# PxrColorBlend.h:130
+#     color result = c;
+	assign		___333_result ___336_result 	%line{130} %argrw{"wr"}
+# PxrColorBlend.h:131
+#     float l = pxrLum(result);
+	functioncall	$const6 495 	%line{131} %argrw{"r"}
+# PxrColorBlend.h:73
+#     return (0.3 * c[0]) + (0.59 * c[1]) + (0.11 * c[2]);
+	compref		$tmp318 ___333_result $const1 	%line{73} %argrw{"wrr"}
+	mul		$tmp319 $const7 $tmp318 	%argrw{"wrr"}
+	compref		$tmp320 ___333_result $const3 	%argrw{"wrr"}
+	mul		$tmp321 $const8 $tmp320 	%argrw{"wrr"}
+	add		$tmp322 $tmp319 $tmp321 	%argrw{"wrr"}
+	compref		$tmp323 ___333_result $const10 	%argrw{"wrr"}
+	mul		$tmp324 $const9 $tmp323 	%argrw{"wrr"}
+	add		___333_l $tmp322 $tmp324 	%argrw{"wrr"}
+# PxrColorBlend.h:132
+#     float n = min(min(result[0], result[1]), result[2]);
+	compref		$tmp326 ___333_result $const1 	%line{132} %argrw{"wrr"}
+	compref		$tmp327 ___333_result $const3 	%argrw{"wrr"}
+	min		$tmp325 $tmp326 $tmp327 	%argrw{"wrr"}
+	compref		$tmp328 ___333_result $const10 	%argrw{"wrr"}
+	min		___333_n $tmp325 $tmp328 	%argrw{"wrr"}
+# PxrColorBlend.h:133
+#     float x = max(max(result[0], result[1]), result[2]);
+	compref		$tmp330 ___333_result $const1 	%line{133} %argrw{"wrr"}
+	compref		$tmp331 ___333_result $const3 	%argrw{"wrr"}
+	max		$tmp329 $tmp330 $tmp331 	%argrw{"wrr"}
+	compref		$tmp332 ___333_result $const10 	%argrw{"wrr"}
+	max		___333_x $tmp329 $tmp332 	%argrw{"wrr"}
+# PxrColorBlend.h:134
+#     if (n < 0.0)
+	lt		$tmp333 ___333_n $const12 	%line{134} %argrw{"wrr"}
+	if		$tmp333 517 517 	%argrw{"r"}
+# PxrColorBlend.h:136
+#         result = clamp(l + (((result - l) * l) / (l - n)), 0, 1);
+	sub		$tmp334 ___333_result ___333_l 	%line{136} %argrw{"wrr"}
+	mul		$tmp335 $tmp334 ___333_l 	%argrw{"wrr"}
+	sub		$tmp336 ___333_l ___333_n 	%argrw{"wrr"}
+	div		$tmp337 $tmp335 $tmp336 	%argrw{"wrr"}
+	add		$tmp338 ___333_l $tmp337 	%argrw{"wrr"}
+	assign		$tmp339 $const12 	%argrw{"wr"}
+	assign		$tmp340 $const13 	%argrw{"wr"}
+	functioncall	$const14 517 	%argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
+	min		$tmp341 $tmp338 $tmp340 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	max		___333_result $tmp341 $tmp339 	%argrw{"wrr"}
+# PxrColorBlend.h:138
+#     if (x > 1)
+	gt		$tmp342 ___333_x $const3 	%filename{"PxrColorBlend.h"} %line{138} %argrw{"wrr"}
+	if		$tmp342 530 530 	%argrw{"r"}
+# PxrColorBlend.h:140
+#         result = clamp(l + (((result - l) * (1 - l)) / (x - l)), 0, 1);
+	sub		$tmp343 ___333_result ___333_l 	%line{140} %argrw{"wrr"}
+	sub		$tmp344 $const13 ___333_l 	%argrw{"wrr"}
+	mul		$tmp345 $tmp343 $tmp344 	%argrw{"wrr"}
+	sub		$tmp346 ___333_x ___333_l 	%argrw{"wrr"}
+	div		$tmp347 $tmp345 $tmp346 	%argrw{"wrr"}
+	add		$tmp348 ___333_l $tmp347 	%argrw{"wrr"}
+	assign		$tmp349 $const12 	%argrw{"wr"}
+	assign		$tmp350 $const13 	%argrw{"wr"}
+	functioncall	$const14 530 	%argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
+	min		$tmp351 $tmp348 $tmp350 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	max		___333_result $tmp351 $tmp349 	%argrw{"wrr"}
+# PxrColorBlend.h:142
+#     return result;
+	assign		resultRGB ___333_result 	%filename{"PxrColorBlend.h"} %line{142} %argrw{"wr"}
+# PxrColorBlend.h:464
+#     else if (mode == k_lighten)
+	eq		$tmp352 operation $const43 	%line{464} %argrw{"wrr"}
+	if		$tmp352 535 1122 	%argrw{"r"}
+# PxrColorBlend.h:466
+#         pxrBlendLighten(cA, cB, resultC);
+	functioncall	$const44 535 	%line{466} %argrw{"r"}
+# PxrColorBlend.h:282
+# void pxrBlendLighten(color cA, color cB, output color result) { result = max(cA, cB); }
+	max		resultRGB cc1 cc2 	%line{282} %argrw{"wrr"}
+# PxrColorBlend.h:468
+#     else if (mode == k_lighterColor)
+	eq		$tmp353 operation $const45 	%line{468} %argrw{"wrr"}
+	if		$tmp353 552 1122 	%argrw{"r"}
+# PxrColorBlend.h:470
+#         pxrBlendLighterColor(cA, cB, resultC);
+	functioncall	$const46 552 	%line{470} %argrw{"r"}
+# PxrColorBlend.h:292
+#     result = ((cA[0] + cA[1] + cA[2]) < (cB[0] + cB[1] + cB[2])) ? cB : cA;
+	compref		$tmp354 cc1 $const1 	%line{292} %argrw{"wrr"}
+	compref		$tmp355 cc1 $const3 	%argrw{"wrr"}
+	add		$tmp356 $tmp354 $tmp355 	%argrw{"wrr"}
+	compref		$tmp357 cc1 $const10 	%argrw{"wrr"}
+	add		$tmp358 $tmp356 $tmp357 	%argrw{"wrr"}
+	compref		$tmp359 cc2 $const1 	%argrw{"wrr"}
+	compref		$tmp360 cc2 $const3 	%argrw{"wrr"}
+	add		$tmp361 $tmp359 $tmp360 	%argrw{"wrr"}
+	compref		$tmp362 cc2 $const10 	%argrw{"wrr"}
+	add		$tmp363 $tmp361 $tmp362 	%argrw{"wrr"}
+	lt		$tmp364 $tmp358 $tmp363 	%argrw{"wrr"}
+	if		$tmp364 551 552 	%argrw{"r"}
+	assign		resultRGB cc2 	%argrw{"wr"}
+	assign		resultRGB cc1 	%argrw{"wr"}
+# PxrColorBlend.h:472
+#     else if (mode == k_linearBurn)
+	eq		$tmp365 operation $const47 	%line{472} %argrw{"wrr"}
+	if		$tmp365 557 1122 	%argrw{"r"}
+# PxrColorBlend.h:474
+#         pxrBlendLinearBurn(cA, cB, resultC);
+	functioncall	$const48 557 	%line{474} %argrw{"r"}
+# PxrColorBlend.h:299
+# void pxrBlendLinearBurn(color cA, color cB, output color result) { result = cA + cB - 1; }
+	add		$tmp366 cc1 cc2 	%line{299} %argrw{"wrr"}
+	sub		resultRGB $tmp366 $const13 	%argrw{"wrr"}
+# PxrColorBlend.h:476
+#     else if (mode == k_linearDodge)
+	eq		$tmp367 operation $const49 	%line{476} %argrw{"wrr"}
+	if		$tmp367 561 1122 	%argrw{"r"}
+# PxrColorBlend.h:478
+#         pxrBlendLinearDodge(cA, cB, resultC);
+	functioncall	$const50 561 	%line{478} %argrw{"r"}
+# PxrColorBlend.h:305
+# void pxrBlendLinearDodge(color cA, color cB, output color result) { result = cA + cB; }
+	add		resultRGB cc1 cc2 	%line{305} %argrw{"wrr"}
+# PxrColorBlend.h:480
+#     else if (mode == k_linearLight)
+	eq		$tmp368 operation $const51 	%line{480} %argrw{"wrr"}
+	if		$tmp368 597 1122 	%argrw{"r"}
+# PxrColorBlend.h:482
+#         pxrBlendLinearLight(cA, cB, resultC);
+	functioncall	$const52 597 	%line{482} %argrw{"r"}
+# PxrColorBlend.h:315
+#     result[0] = (cA[0] > 0.5) ? cA[0] + cB[0] - 1 : cA[0] + cB[0];
+	compref		$tmp370 cc1 $const1 	%line{315} %argrw{"wrr"}
+	gt		$tmp371 $tmp370 $const33 	%argrw{"wrr"}
+	if		$tmp371 571 574 	%argrw{"r"}
+	compref		$tmp372 cc1 $const1 	%argrw{"wrr"}
+	compref		$tmp373 cc2 $const1 	%argrw{"wrr"}
+	add		$tmp374 $tmp372 $tmp373 	%argrw{"wrr"}
+	sub		$tmp369 $tmp374 $const13 	%argrw{"wrr"}
+	compref		$tmp375 cc1 $const1 	%argrw{"wrr"}
+	compref		$tmp376 cc2 $const1 	%argrw{"wrr"}
+	add		$tmp369 $tmp375 $tmp376 	%argrw{"wrr"}
+	compassign	resultRGB $const1 $tmp369 	%argrw{"wrr"}
+# PxrColorBlend.h:316
+#     result[1] = (cA[1] > 0.5) ? cA[1] + cB[1] - 1 : cA[1] + cB[1];
+	compref		$tmp378 cc1 $const3 	%line{316} %argrw{"wrr"}
+	gt		$tmp379 $tmp378 $const33 	%argrw{"wrr"}
+	if		$tmp379 582 585 	%argrw{"r"}
+	compref		$tmp380 cc1 $const3 	%argrw{"wrr"}
+	compref		$tmp381 cc2 $const3 	%argrw{"wrr"}
+	add		$tmp382 $tmp380 $tmp381 	%argrw{"wrr"}
+	sub		$tmp377 $tmp382 $const13 	%argrw{"wrr"}
+	compref		$tmp383 cc1 $const3 	%argrw{"wrr"}
+	compref		$tmp384 cc2 $const3 	%argrw{"wrr"}
+	add		$tmp377 $tmp383 $tmp384 	%argrw{"wrr"}
+	compassign	resultRGB $const3 $tmp377 	%argrw{"wrr"}
+# PxrColorBlend.h:317
+#     result[2] = (cA[2] > 0.5) ? cA[2] + cB[2] - 1 : cA[2] + cB[2];
+	compref		$tmp386 cc1 $const10 	%line{317} %argrw{"wrr"}
+	gt		$tmp387 $tmp386 $const33 	%argrw{"wrr"}
+	if		$tmp387 593 596 	%argrw{"r"}
+	compref		$tmp388 cc1 $const10 	%argrw{"wrr"}
+	compref		$tmp389 cc2 $const10 	%argrw{"wrr"}
+	add		$tmp390 $tmp388 $tmp389 	%argrw{"wrr"}
+	sub		$tmp385 $tmp390 $const13 	%argrw{"wrr"}
+	compref		$tmp391 cc1 $const10 	%argrw{"wrr"}
+	compref		$tmp392 cc2 $const10 	%argrw{"wrr"}
+	add		$tmp385 $tmp391 $tmp392 	%argrw{"wrr"}
+	compassign	resultRGB $const10 $tmp385 	%argrw{"wrr"}
+# PxrColorBlend.h:484
+#     else if (mode == k_luminosity)
+	eq		$tmp393 operation $const53 	%line{484} %argrw{"wrr"}
+	if		$tmp393 675 1122 	%argrw{"r"}
+# PxrColorBlend.h:486
+#         pxrBlendLuminosity(cA, cB, resultC);
+	functioncall	$const54 675 	%line{486} %argrw{"r"}
+# PxrColorBlend.h:324
+# void pxrBlendLuminosity(color cA, color cB, output color result) { pxrBlendColor(cB, cA, result); }
+	functioncall	$const5 675 	%line{324} %argrw{"r"}
+# PxrColorBlend.h:164
+# void pxrBlendColor(color cA, color cB, output color result) { result = pxrSetLum(cA, pxrLum(cB)); }
+	functioncall	$const6 610 	%line{164} %argrw{"r"}
+# PxrColorBlend.h:73
+#     return (0.3 * c[0]) + (0.59 * c[1]) + (0.11 * c[2]);
+	compref		$tmp395 cc1 $const1 	%line{73} %argrw{"wrr"}
+	mul		$tmp396 $const7 $tmp395 	%argrw{"wrr"}
+	compref		$tmp397 cc1 $const3 	%argrw{"wrr"}
+	mul		$tmp398 $const8 $tmp397 	%argrw{"wrr"}
+	add		$tmp399 $tmp396 $tmp398 	%argrw{"wrr"}
+	compref		$tmp400 cc1 $const10 	%argrw{"wrr"}
+	mul		$tmp401 $const9 $tmp400 	%argrw{"wrr"}
+	add		$tmp394 $tmp399 $tmp401 	%argrw{"wrr"}
+# PxrColorBlend.h:164
+# void pxrBlendColor(color cA, color cB, output color result) { result = pxrSetLum(cA, pxrLum(cB)); }
+	functioncall	$const11 675 	%line{164} %argrw{"r"}
+# PxrColorBlend.h:147
+#     color result = c;
+	assign		___336_result cc2 	%line{147} %argrw{"wr"}
+# PxrColorBlend.h:148
+#     float d = l - pxrLum(c);
+	functioncall	$const6 621 	%line{148} %argrw{"r"}
+# PxrColorBlend.h:73
+#     return (0.3 * c[0]) + (0.59 * c[1]) + (0.11 * c[2]);
+	compref		$tmp403 cc2 $const1 	%line{73} %argrw{"wrr"}
+	mul		$tmp404 $const7 $tmp403 	%argrw{"wrr"}
+	compref		$tmp405 cc2 $const3 	%argrw{"wrr"}
+	mul		$tmp406 $const8 $tmp405 	%argrw{"wrr"}
+	add		$tmp407 $tmp404 $tmp406 	%argrw{"wrr"}
+	compref		$tmp408 cc2 $const10 	%argrw{"wrr"}
+	mul		$tmp409 $const9 $tmp408 	%argrw{"wrr"}
+	add		$tmp402 $tmp407 $tmp409 	%argrw{"wrr"}
+# PxrColorBlend.h:148
+#     float d = l - pxrLum(c);
+	sub		___336_d $tmp394 $tmp402 	%line{148} %argrw{"wrr"}
+# PxrColorBlend.h:149
+#     result = clamp(c + d, 0, 1);
+	add		$tmp410 cc2 ___336_d 	%line{149} %argrw{"wrr"}
+	assign		$tmp411 $const12 	%argrw{"wr"}
+	assign		$tmp412 $const13 	%argrw{"wr"}
+	functioncall	$const14 628 	%argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
+	min		$tmp413 $tmp410 $tmp412 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	max		___336_result $tmp413 $tmp411 	%argrw{"wrr"}
+# PxrColorBlend.h:150
+#     return pxrClipColor(result);
+	functioncall	$const15 675 	%filename{"PxrColorBlend.h"} %line{150} %argrw{"r"}
+# PxrColorBlend.h:130
+#     color result = c;
+	assign		___333_result ___336_result 	%line{130} %argrw{"wr"}
+# PxrColorBlend.h:131
+#     float l = pxrLum(result);
+	functioncall	$const6 639 	%line{131} %argrw{"r"}
+# PxrColorBlend.h:73
+#     return (0.3 * c[0]) + (0.59 * c[1]) + (0.11 * c[2]);
+	compref		$tmp414 ___333_result $const1 	%line{73} %argrw{"wrr"}
+	mul		$tmp415 $const7 $tmp414 	%argrw{"wrr"}
+	compref		$tmp416 ___333_result $const3 	%argrw{"wrr"}
+	mul		$tmp417 $const8 $tmp416 	%argrw{"wrr"}
+	add		$tmp418 $tmp415 $tmp417 	%argrw{"wrr"}
+	compref		$tmp419 ___333_result $const10 	%argrw{"wrr"}
+	mul		$tmp420 $const9 $tmp419 	%argrw{"wrr"}
+	add		___333_l $tmp418 $tmp420 	%argrw{"wrr"}
+# PxrColorBlend.h:132
+#     float n = min(min(result[0], result[1]), result[2]);
+	compref		$tmp422 ___333_result $const1 	%line{132} %argrw{"wrr"}
+	compref		$tmp423 ___333_result $const3 	%argrw{"wrr"}
+	min		$tmp421 $tmp422 $tmp423 	%argrw{"wrr"}
+	compref		$tmp424 ___333_result $const10 	%argrw{"wrr"}
+	min		___333_n $tmp421 $tmp424 	%argrw{"wrr"}
+# PxrColorBlend.h:133
+#     float x = max(max(result[0], result[1]), result[2]);
+	compref		$tmp426 ___333_result $const1 	%line{133} %argrw{"wrr"}
+	compref		$tmp427 ___333_result $const3 	%argrw{"wrr"}
+	max		$tmp425 $tmp426 $tmp427 	%argrw{"wrr"}
+	compref		$tmp428 ___333_result $const10 	%argrw{"wrr"}
+	max		___333_x $tmp425 $tmp428 	%argrw{"wrr"}
+# PxrColorBlend.h:134
+#     if (n < 0.0)
+	lt		$tmp429 ___333_n $const12 	%line{134} %argrw{"wrr"}
+	if		$tmp429 661 661 	%argrw{"r"}
+# PxrColorBlend.h:136
+#         result = clamp(l + (((result - l) * l) / (l - n)), 0, 1);
+	sub		$tmp430 ___333_result ___333_l 	%line{136} %argrw{"wrr"}
+	mul		$tmp431 $tmp430 ___333_l 	%argrw{"wrr"}
+	sub		$tmp432 ___333_l ___333_n 	%argrw{"wrr"}
+	div		$tmp433 $tmp431 $tmp432 	%argrw{"wrr"}
+	add		$tmp434 ___333_l $tmp433 	%argrw{"wrr"}
+	assign		$tmp435 $const12 	%argrw{"wr"}
+	assign		$tmp436 $const13 	%argrw{"wr"}
+	functioncall	$const14 661 	%argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
+	min		$tmp437 $tmp434 $tmp436 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	max		___333_result $tmp437 $tmp435 	%argrw{"wrr"}
+# PxrColorBlend.h:138
+#     if (x > 1)
+	gt		$tmp438 ___333_x $const3 	%filename{"PxrColorBlend.h"} %line{138} %argrw{"wrr"}
+	if		$tmp438 674 674 	%argrw{"r"}
+# PxrColorBlend.h:140
+#         result = clamp(l + (((result - l) * (1 - l)) / (x - l)), 0, 1);
+	sub		$tmp439 ___333_result ___333_l 	%line{140} %argrw{"wrr"}
+	sub		$tmp440 $const13 ___333_l 	%argrw{"wrr"}
+	mul		$tmp441 $tmp439 $tmp440 	%argrw{"wrr"}
+	sub		$tmp442 ___333_x ___333_l 	%argrw{"wrr"}
+	div		$tmp443 $tmp441 $tmp442 	%argrw{"wrr"}
+	add		$tmp444 ___333_l $tmp443 	%argrw{"wrr"}
+	assign		$tmp445 $const12 	%argrw{"wr"}
+	assign		$tmp446 $const13 	%argrw{"wr"}
+	functioncall	$const14 674 	%argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
+	min		$tmp447 $tmp444 $tmp446 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	max		___333_result $tmp447 $tmp445 	%argrw{"wrr"}
+# PxrColorBlend.h:142
+#     return result;
+	assign		resultRGB ___333_result 	%filename{"PxrColorBlend.h"} %line{142} %argrw{"wr"}
+# PxrColorBlend.h:488
+#     else if (mode == k_multiply)
+	eq		$tmp448 operation $const55 	%line{488} %argrw{"wrr"}
+	if		$tmp448 679 1122 	%argrw{"r"}
+# PxrColorBlend.h:490
+#         pxrBlendMultiply(cA, cB, resultC);
+	functioncall	$const56 679 	%line{490} %argrw{"r"}
+# PxrColorBlend.h:331
+# void pxrBlendMultiply(color cA, color cB, output color result) { result = cB * cA; }
+	mul		resultRGB cc2 cc1 	%line{331} %argrw{"wrr"}
+# PxrColorBlend.h:492
+#     else if (mode == k_normal)
+	eq		$tmp449 operation $const57 	%line{492} %argrw{"wrr"}
+	if		$tmp449 683 1122 	%argrw{"r"}
+# PxrColorBlend.h:494
+#         pxrBlendNormal(cA, cB, resultC);
+	functioncall	$const58 683 	%line{494} %argrw{"r"}
+# PxrColorBlend.h:335
+# void pxrBlendNormal(color cA, color cB, output color result) { result = cA; }
+	assign		resultRGB cc1 	%line{335} %argrw{"wr"}
+# PxrColorBlend.h:496
+#     else if (mode == k_overlay)
+	eq		$tmp450 operation $const59 	%line{496} %argrw{"wrr"}
+	if		$tmp450 744 1122 	%argrw{"r"}
+# PxrColorBlend.h:498
+#         pxrBlendOverlay(cA, cB, resultC);
+	functioncall	$const60 744 	%line{498} %argrw{"r"}
+# PxrColorBlend.h:343
+# void pxrBlendOverlay(color cA, color cB, output color result) { pxrBlendHardLight(cB, cA, result); }
+	functioncall	$const32 744 	%line{343} %argrw{"r"}
+# PxrColorBlend.h:248
+#         (cA[0] > 0.5) ? (2 * cA[0] - 1) + cB[0] - ((2 * cA[0] - 1) * cB[0]) : cB[0] * (2 * cA[0]);
+	compref		$tmp452 cc2 $const1 	%line{248} %argrw{"wrr"}
+	gt		$tmp453 $tmp452 $const33 	%argrw{"wrr"}
+	if		$tmp453 701 705 	%argrw{"r"}
+	compref		$tmp454 cc2 $const1 	%argrw{"wrr"}
+	mul		$tmp455 $const30 $tmp454 	%argrw{"wrr"}
+	sub		$tmp456 $tmp455 $const13 	%argrw{"wrr"}
+	compref		$tmp457 cc1 $const1 	%argrw{"wrr"}
+	add		$tmp458 $tmp456 $tmp457 	%argrw{"wrr"}
+	compref		$tmp459 cc2 $const1 	%argrw{"wrr"}
+	mul		$tmp460 $const30 $tmp459 	%argrw{"wrr"}
+	sub		$tmp461 $tmp460 $const13 	%argrw{"wrr"}
+	compref		$tmp462 cc1 $const1 	%argrw{"wrr"}
+	mul		$tmp463 $tmp461 $tmp462 	%argrw{"wrr"}
+	sub		$tmp451 $tmp458 $tmp463 	%argrw{"wrr"}
+	compref		$tmp464 cc1 $const1 	%argrw{"wrr"}
+	compref		$tmp465 cc2 $const1 	%argrw{"wrr"}
+	mul		$tmp466 $const30 $tmp465 	%argrw{"wrr"}
+	mul		$tmp451 $tmp464 $tmp466 	%argrw{"wrr"}
+# PxrColorBlend.h:247
+#     result[0] =
+	compassign	resultRGB $const1 $tmp451 	%line{247} %argrw{"wrr"}
+# PxrColorBlend.h:250
+#         (cA[1] > 0.5) ? (2 * cA[1] - 1) + cB[1] - ((2 * cA[1] - 1) * cB[1]) : cB[1] * (2 * cA[1]);
+	compref		$tmp468 cc2 $const3 	%line{250} %argrw{"wrr"}
+	gt		$tmp469 $tmp468 $const33 	%argrw{"wrr"}
+	if		$tmp469 720 724 	%argrw{"r"}
+	compref		$tmp470 cc2 $const3 	%argrw{"wrr"}
+	mul		$tmp471 $const30 $tmp470 	%argrw{"wrr"}
+	sub		$tmp472 $tmp471 $const13 	%argrw{"wrr"}
+	compref		$tmp473 cc1 $const3 	%argrw{"wrr"}
+	add		$tmp474 $tmp472 $tmp473 	%argrw{"wrr"}
+	compref		$tmp475 cc2 $const3 	%argrw{"wrr"}
+	mul		$tmp476 $const30 $tmp475 	%argrw{"wrr"}
+	sub		$tmp477 $tmp476 $const13 	%argrw{"wrr"}
+	compref		$tmp478 cc1 $const3 	%argrw{"wrr"}
+	mul		$tmp479 $tmp477 $tmp478 	%argrw{"wrr"}
+	sub		$tmp467 $tmp474 $tmp479 	%argrw{"wrr"}
+	compref		$tmp480 cc1 $const3 	%argrw{"wrr"}
+	compref		$tmp481 cc2 $const3 	%argrw{"wrr"}
+	mul		$tmp482 $const30 $tmp481 	%argrw{"wrr"}
+	mul		$tmp467 $tmp480 $tmp482 	%argrw{"wrr"}
+# PxrColorBlend.h:249
+#     result[1] =
+	compassign	resultRGB $const3 $tmp467 	%line{249} %argrw{"wrr"}
+# PxrColorBlend.h:252
+#         (cA[2] > 0.5) ? (2 * cA[2] - 1) + cB[2] - ((2 * cA[2] - 1) * cB[2]) : cB[2] * (2 * cA[2]);
+	compref		$tmp484 cc2 $const10 	%line{252} %argrw{"wrr"}
+	gt		$tmp485 $tmp484 $const33 	%argrw{"wrr"}
+	if		$tmp485 739 743 	%argrw{"r"}
+	compref		$tmp486 cc2 $const10 	%argrw{"wrr"}
+	mul		$tmp487 $const30 $tmp486 	%argrw{"wrr"}
+	sub		$tmp488 $tmp487 $const13 	%argrw{"wrr"}
+	compref		$tmp489 cc1 $const10 	%argrw{"wrr"}
+	add		$tmp490 $tmp488 $tmp489 	%argrw{"wrr"}
+	compref		$tmp491 cc2 $const10 	%argrw{"wrr"}
+	mul		$tmp492 $const30 $tmp491 	%argrw{"wrr"}
+	sub		$tmp493 $tmp492 $const13 	%argrw{"wrr"}
+	compref		$tmp494 cc1 $const10 	%argrw{"wrr"}
+	mul		$tmp495 $tmp493 $tmp494 	%argrw{"wrr"}
+	sub		$tmp483 $tmp490 $tmp495 	%argrw{"wrr"}
+	compref		$tmp496 cc1 $const10 	%argrw{"wrr"}
+	compref		$tmp497 cc2 $const10 	%argrw{"wrr"}
+	mul		$tmp498 $const30 $tmp497 	%argrw{"wrr"}
+	mul		$tmp483 $tmp496 $tmp498 	%argrw{"wrr"}
+# PxrColorBlend.h:251
+#     result[2] =
+	compassign	resultRGB $const10 $tmp483 	%line{251} %argrw{"wrr"}
+# PxrColorBlend.h:500
+#     else if (mode == k_pinLight)
+	eq		$tmp499 operation $const61 	%line{500} %argrw{"wrr"}
+	if		$tmp499 786 1122 	%argrw{"r"}
+# PxrColorBlend.h:502
+#         pxrBlendPinLight(cA, cB, resultC);
+	functioncall	$const62 786 	%line{502} %argrw{"r"}
+# PxrColorBlend.h:354
+#     result[0] = (cA[0] < 0.5) ? min(2 * cA[0], cB[0]) : max(2 * (cA[0] - 0.5), cB[0]);
+	compref		$tmp501 cc1 $const1 	%line{354} %argrw{"wrr"}
+	lt		$tmp502 $tmp501 $const33 	%argrw{"wrr"}
+	if		$tmp502 754 759 	%argrw{"r"}
+	compref		$tmp503 cc1 $const1 	%argrw{"wrr"}
+	mul		$tmp504 $const30 $tmp503 	%argrw{"wrr"}
+	compref		$tmp505 cc2 $const1 	%argrw{"wrr"}
+	min		$tmp500 $tmp504 $tmp505 	%argrw{"wrr"}
+	compref		$tmp506 cc1 $const1 	%argrw{"wrr"}
+	sub		$tmp507 $tmp506 $const33 	%argrw{"wrr"}
+	mul		$tmp508 $const30 $tmp507 	%argrw{"wrr"}
+	compref		$tmp509 cc2 $const1 	%argrw{"wrr"}
+	max		$tmp500 $tmp508 $tmp509 	%argrw{"wrr"}
+	compassign	resultRGB $const1 $tmp500 	%argrw{"wrr"}
+# PxrColorBlend.h:355
+#     result[1] = (cA[1] < 0.5) ? min(2 * cA[1], cB[1]) : max(2 * (cA[1] - 0.5), cB[1]);
+	compref		$tmp511 cc1 $const3 	%line{355} %argrw{"wrr"}
+	lt		$tmp512 $tmp511 $const33 	%argrw{"wrr"}
+	if		$tmp512 767 772 	%argrw{"r"}
+	compref		$tmp513 cc1 $const3 	%argrw{"wrr"}
+	mul		$tmp514 $const30 $tmp513 	%argrw{"wrr"}
+	compref		$tmp515 cc2 $const3 	%argrw{"wrr"}
+	min		$tmp510 $tmp514 $tmp515 	%argrw{"wrr"}
+	compref		$tmp516 cc1 $const3 	%argrw{"wrr"}
+	sub		$tmp517 $tmp516 $const33 	%argrw{"wrr"}
+	mul		$tmp518 $const30 $tmp517 	%argrw{"wrr"}
+	compref		$tmp519 cc2 $const3 	%argrw{"wrr"}
+	max		$tmp510 $tmp518 $tmp519 	%argrw{"wrr"}
+	compassign	resultRGB $const3 $tmp510 	%argrw{"wrr"}
+# PxrColorBlend.h:356
+#     result[2] = (cA[2] < 0.5) ? min(2 * cA[2], cB[2]) : max(2 * (cA[2] - 0.5), cB[2]);
+	compref		$tmp521 cc1 $const10 	%line{356} %argrw{"wrr"}
+	lt		$tmp522 $tmp521 $const33 	%argrw{"wrr"}
+	if		$tmp522 780 785 	%argrw{"r"}
+	compref		$tmp523 cc1 $const10 	%argrw{"wrr"}
+	mul		$tmp524 $const30 $tmp523 	%argrw{"wrr"}
+	compref		$tmp525 cc2 $const10 	%argrw{"wrr"}
+	min		$tmp520 $tmp524 $tmp525 	%argrw{"wrr"}
+	compref		$tmp526 cc1 $const10 	%argrw{"wrr"}
+	sub		$tmp527 $tmp526 $const33 	%argrw{"wrr"}
+	mul		$tmp528 $const30 $tmp527 	%argrw{"wrr"}
+	compref		$tmp529 cc2 $const10 	%argrw{"wrr"}
+	max		$tmp520 $tmp528 $tmp529 	%argrw{"wrr"}
+	compassign	resultRGB $const10 $tmp520 	%argrw{"wrr"}
+# PxrColorBlend.h:504
+#     else if (mode == k_saturation)
+	eq		$tmp530 operation $const63 	%line{504} %argrw{"wrr"}
+	if		$tmp530 1010 1122 	%argrw{"r"}
+# PxrColorBlend.h:506
+#         pxrBlendSaturation(cA, cB, resultC);
+	functioncall	$const64 1010 	%line{506} %argrw{"r"}
+# PxrColorBlend.h:365
+#     result = pxrSetLum(pxrSetSat(cB, pxrSat(cA)), pxrLum(cB));
+	functioncall	$const38 801 	%line{365} %argrw{"r"}
+# PxrColorBlend.h:106
+# float pxrSat(color c) { return max(max(c[0], c[1]), c[2]) - min(min(c[0], c[1]), c[2]); }
+	compref		$tmp535 cc1 $const1 	%line{106} %argrw{"wrr"}
+	compref		$tmp536 cc1 $const3 	%argrw{"wrr"}
+	max		$tmp534 $tmp535 $tmp536 	%argrw{"wrr"}
+	compref		$tmp537 cc1 $const10 	%argrw{"wrr"}
+	max		$tmp533 $tmp534 $tmp537 	%argrw{"wrr"}
+	compref		$tmp540 cc1 $const1 	%argrw{"wrr"}
+	compref		$tmp541 cc1 $const3 	%argrw{"wrr"}
+	min		$tmp539 $tmp540 $tmp541 	%argrw{"wrr"}
+	compref		$tmp542 cc1 $const10 	%argrw{"wrr"}
+	min		$tmp538 $tmp539 $tmp542 	%argrw{"wrr"}
+	sub		$tmp532 $tmp533 $tmp538 	%argrw{"wrr"}
+# PxrColorBlend.h:365
+#     result = pxrSetLum(pxrSetSat(cB, pxrSat(cA)), pxrLum(cB));
+	functioncall	$const39 936 	%line{365} %argrw{"r"}
+# PxrColorBlend.h:110
+#     color result = c;
+	assign		___330_result cc2 	%line{110} %argrw{"wr"}
+# PxrColorBlend.h:111
+#     int min = pxrMinChannel(c);
+	functioncall	$const40 832 	%line{111} %argrw{"r"}
+# PxrColorBlend.h:88
+#     if (c[0] <= c[2] && c[0] <= c[1])
+	compref		$tmp543 cc2 $const1 	%line{88} %argrw{"wrr"}
+	compref		$tmp544 cc2 $const10 	%argrw{"wrr"}
+	le		$tmp545 $tmp543 $tmp544 	%argrw{"wrr"}
+	neq		$tmp546 $tmp545 $const1 	%argrw{"wrr"}
+	if		$tmp546 814 814 	%argrw{"r"}
+	compref		$tmp547 cc2 $const1 	%argrw{"wrr"}
+	compref		$tmp548 cc2 $const3 	%argrw{"wrr"}
+	le		$tmp549 $tmp547 $tmp548 	%argrw{"wrr"}
+	neq		$tmp550 $tmp549 $const1 	%argrw{"wrr"}
+	assign		$tmp546 $tmp550 	%argrw{"wr"}
+	if		$tmp546 817 832 	%argrw{"r"}
+# PxrColorBlend.h:89
+#         return 0;
+	assign		___330_min $const1 	%line{89} %argrw{"wr"}
+	return
+# PxrColorBlend.h:90
+#     else if (c[1] <= c[0] && c[1] <= c[2])
+	compref		$tmp551 cc2 $const3 	%line{90} %argrw{"wrr"}
+	compref		$tmp552 cc2 $const1 	%argrw{"wrr"}
+	le		$tmp553 $tmp551 $tmp552 	%argrw{"wrr"}
+	neq		$tmp554 $tmp553 $const1 	%argrw{"wrr"}
+	if		$tmp554 827 827 	%argrw{"r"}
+	compref		$tmp555 cc2 $const3 	%argrw{"wrr"}
+	compref		$tmp556 cc2 $const10 	%argrw{"wrr"}
+	le		$tmp557 $tmp555 $tmp556 	%argrw{"wrr"}
+	neq		$tmp558 $tmp557 $const1 	%argrw{"wrr"}
+	assign		$tmp554 $tmp558 	%argrw{"wr"}
+	if		$tmp554 830 832 	%argrw{"r"}
+# PxrColorBlend.h:91
+#         return 1;
+	assign		___330_min $const3 	%line{91} %argrw{"wr"}
+	return
+# PxrColorBlend.h:93
+#         return 2;
+	assign		___330_min $const10 	%line{93} %argrw{"wr"}
+	return
+# PxrColorBlend.h:112
+#     int max = pxrMaxChannel(c);
+	functioncall	$const41 861 	%line{112} %argrw{"r"}
+# PxrColorBlend.h:78
+#     if (c[0] >= c[2] && c[0] >= c[1])
+	compref		$tmp559 cc2 $const1 	%line{78} %argrw{"wrr"}
+	compref		$tmp560 cc2 $const10 	%argrw{"wrr"}
+	ge		$tmp561 $tmp559 $tmp560 	%argrw{"wrr"}
+	neq		$tmp562 $tmp561 $const1 	%argrw{"wrr"}
+	if		$tmp562 843 843 	%argrw{"r"}
+	compref		$tmp563 cc2 $const1 	%argrw{"wrr"}
+	compref		$tmp564 cc2 $const3 	%argrw{"wrr"}
+	ge		$tmp565 $tmp563 $tmp564 	%argrw{"wrr"}
+	neq		$tmp566 $tmp565 $const1 	%argrw{"wrr"}
+	assign		$tmp562 $tmp566 	%argrw{"wr"}
+	if		$tmp562 846 861 	%argrw{"r"}
+# PxrColorBlend.h:79
+#         return 0;
+	assign		___330_max $const1 	%line{79} %argrw{"wr"}
+	return
+# PxrColorBlend.h:80
+#     else if (c[1] >= c[0] && c[1] >= c[2])
+	compref		$tmp567 cc2 $const3 	%line{80} %argrw{"wrr"}
+	compref		$tmp568 cc2 $const1 	%argrw{"wrr"}
+	ge		$tmp569 $tmp567 $tmp568 	%argrw{"wrr"}
+	neq		$tmp570 $tmp569 $const1 	%argrw{"wrr"}
+	if		$tmp570 856 856 	%argrw{"r"}
+	compref		$tmp571 cc2 $const3 	%argrw{"wrr"}
+	compref		$tmp572 cc2 $const10 	%argrw{"wrr"}
+	ge		$tmp573 $tmp571 $tmp572 	%argrw{"wrr"}
+	neq		$tmp574 $tmp573 $const1 	%argrw{"wrr"}
+	assign		$tmp570 $tmp574 	%argrw{"wr"}
+	if		$tmp570 859 861 	%argrw{"r"}
+# PxrColorBlend.h:81
+#         return 1;
+	assign		___330_max $const3 	%line{81} %argrw{"wr"}
+	return
+# PxrColorBlend.h:83
+#         return 2;
+	assign		___330_max $const10 	%line{83} %argrw{"wr"}
+	return
+# PxrColorBlend.h:113
+#     int mid = pxrMidChannel(c);
+	functioncall	$const42 918 	%line{113} %argrw{"r"}
+# PxrColorBlend.h:98
+#     if ((c[0] >= c[1] && c[0] <= c[2]) || (c[0] >= c[2] && c[0] <= c[1]))
+	compref		$tmp575 cc2 $const1 	%line{98} %argrw{"wrr"}
+	compref		$tmp576 cc2 $const3 	%argrw{"wrr"}
+	ge		$tmp577 $tmp575 $tmp576 	%argrw{"wrr"}
+	neq		$tmp578 $tmp577 $const1 	%argrw{"wrr"}
+	if		$tmp578 872 872 	%argrw{"r"}
+	compref		$tmp579 cc2 $const1 	%argrw{"wrr"}
+	compref		$tmp580 cc2 $const10 	%argrw{"wrr"}
+	le		$tmp581 $tmp579 $tmp580 	%argrw{"wrr"}
+	neq		$tmp582 $tmp581 $const1 	%argrw{"wrr"}
+	assign		$tmp578 $tmp582 	%argrw{"wr"}
+	neq		$tmp583 $tmp578 $const1 	%argrw{"wrr"}
+	if		$tmp583 874 886 	%argrw{"r"}
+	compref		$tmp584 cc2 $const1 	%argrw{"wrr"}
+	compref		$tmp585 cc2 $const10 	%argrw{"wrr"}
+	ge		$tmp586 $tmp584 $tmp585 	%argrw{"wrr"}
+	neq		$tmp587 $tmp586 $const1 	%argrw{"wrr"}
+	if		$tmp587 884 884 	%argrw{"r"}
+	compref		$tmp588 cc2 $const1 	%argrw{"wrr"}
+	compref		$tmp589 cc2 $const3 	%argrw{"wrr"}
+	le		$tmp590 $tmp588 $tmp589 	%argrw{"wrr"}
+	neq		$tmp591 $tmp590 $const1 	%argrw{"wrr"}
+	assign		$tmp587 $tmp591 	%argrw{"wr"}
+	neq		$tmp592 $tmp587 $const1 	%argrw{"wrr"}
+	assign		$tmp583 $tmp592 	%argrw{"wr"}
+	if		$tmp583 889 918 	%argrw{"r"}
+# PxrColorBlend.h:99
+#         return 0;
+	assign		___330_mid $const1 	%line{99} %argrw{"wr"}
+	return
+# PxrColorBlend.h:100
+#     else if ((c[1] >= c[0] && c[1] <= c[2]) || (c[1] <= c[0] && c[1] >= c[2]))
+	compref		$tmp593 cc2 $const3 	%line{100} %argrw{"wrr"}
+	compref		$tmp594 cc2 $const1 	%argrw{"wrr"}
+	ge		$tmp595 $tmp593 $tmp594 	%argrw{"wrr"}
+	neq		$tmp596 $tmp595 $const1 	%argrw{"wrr"}
+	if		$tmp596 899 899 	%argrw{"r"}
+	compref		$tmp597 cc2 $const3 	%argrw{"wrr"}
+	compref		$tmp598 cc2 $const10 	%argrw{"wrr"}
+	le		$tmp599 $tmp597 $tmp598 	%argrw{"wrr"}
+	neq		$tmp600 $tmp599 $const1 	%argrw{"wrr"}
+	assign		$tmp596 $tmp600 	%argrw{"wr"}
+	neq		$tmp601 $tmp596 $const1 	%argrw{"wrr"}
+	if		$tmp601 901 913 	%argrw{"r"}
+	compref		$tmp602 cc2 $const3 	%argrw{"wrr"}
+	compref		$tmp603 cc2 $const1 	%argrw{"wrr"}
+	le		$tmp604 $tmp602 $tmp603 	%argrw{"wrr"}
+	neq		$tmp605 $tmp604 $const1 	%argrw{"wrr"}
+	if		$tmp605 911 911 	%argrw{"r"}
+	compref		$tmp606 cc2 $const3 	%argrw{"wrr"}
+	compref		$tmp607 cc2 $const10 	%argrw{"wrr"}
+	ge		$tmp608 $tmp606 $tmp607 	%argrw{"wrr"}
+	neq		$tmp609 $tmp608 $const1 	%argrw{"wrr"}
+	assign		$tmp605 $tmp609 	%argrw{"wr"}
+	neq		$tmp610 $tmp605 $const1 	%argrw{"wrr"}
+	assign		$tmp601 $tmp610 	%argrw{"wr"}
+	if		$tmp601 916 918 	%argrw{"r"}
+# PxrColorBlend.h:101
+#         return 1;
+	assign		___330_mid $const3 	%line{101} %argrw{"wr"}
+	return
+# PxrColorBlend.h:103
+#         return 2;
+	assign		___330_mid $const10 	%line{103} %argrw{"wr"}
+	return
+# PxrColorBlend.h:114
+#     if (c[max] > c[min])
+	compref		$tmp611 cc2 ___330_max 	%line{114} %argrw{"wrr"}
+	compref		$tmp612 cc2 ___330_min 	%argrw{"wrr"}
+	gt		$tmp613 $tmp611 $tmp612 	%argrw{"wrr"}
+	if		$tmp613 932 934 	%argrw{"r"}
+# PxrColorBlend.h:116
+#         result[mid] = ((c[mid] - c[min]) * s) / (c[max] - c[min]);
+	compref		$tmp614 cc2 ___330_mid 	%line{116} %argrw{"wrr"}
+	compref		$tmp615 cc2 ___330_min 	%argrw{"wrr"}
+	sub		$tmp616 $tmp614 $tmp615 	%argrw{"wrr"}
+	mul		$tmp617 $tmp616 $tmp532 	%argrw{"wrr"}
+	compref		$tmp618 cc2 ___330_max 	%argrw{"wrr"}
+	compref		$tmp619 cc2 ___330_min 	%argrw{"wrr"}
+	sub		$tmp620 $tmp618 $tmp619 	%argrw{"wrr"}
+	div		$tmp621 $tmp617 $tmp620 	%argrw{"wrr"}
+	compassign	___330_result ___330_mid $tmp621 	%argrw{"wrr"}
+# PxrColorBlend.h:117
+#         result[max] = s;
+	compassign	___330_result ___330_max $tmp532 	%line{117} %argrw{"wrr"}
+# PxrColorBlend.h:121
+#         result[mid] = 0;
+	compassign	___330_result ___330_mid $const1 	%line{121} %argrw{"wrr"}
+# PxrColorBlend.h:122
+#         result[max] = 0;
+	compassign	___330_result ___330_max $const1 	%line{122} %argrw{"wrr"}
+# PxrColorBlend.h:124
+#     result[min] = 0;
+	compassign	___330_result ___330_min $const1 	%line{124} %argrw{"wrr"}
+# PxrColorBlend.h:125
+#     return result;
+	assign		$tmp531 ___330_result 	%line{125} %argrw{"wr"}
+# PxrColorBlend.h:365
+#     result = pxrSetLum(pxrSetSat(cB, pxrSat(cA)), pxrLum(cB));
+	functioncall	$const6 945 	%line{365} %argrw{"r"}
+# PxrColorBlend.h:73
+#     return (0.3 * c[0]) + (0.59 * c[1]) + (0.11 * c[2]);
+	compref		$tmp623 cc2 $const1 	%line{73} %argrw{"wrr"}
+	mul		$tmp624 $const7 $tmp623 	%argrw{"wrr"}
+	compref		$tmp625 cc2 $const3 	%argrw{"wrr"}
+	mul		$tmp626 $const8 $tmp625 	%argrw{"wrr"}
+	add		$tmp627 $tmp624 $tmp626 	%argrw{"wrr"}
+	compref		$tmp628 cc2 $const10 	%argrw{"wrr"}
+	mul		$tmp629 $const9 $tmp628 	%argrw{"wrr"}
+	add		$tmp622 $tmp627 $tmp629 	%argrw{"wrr"}
+# PxrColorBlend.h:365
+#     result = pxrSetLum(pxrSetSat(cB, pxrSat(cA)), pxrLum(cB));
+	functioncall	$const11 1010 	%line{365} %argrw{"r"}
+# PxrColorBlend.h:147
+#     color result = c;
+	assign		___336_result $tmp531 	%line{147} %argrw{"wr"}
+# PxrColorBlend.h:148
+#     float d = l - pxrLum(c);
+	functioncall	$const6 956 	%line{148} %argrw{"r"}
+# PxrColorBlend.h:73
+#     return (0.3 * c[0]) + (0.59 * c[1]) + (0.11 * c[2]);
+	compref		$tmp631 $tmp531 $const1 	%line{73} %argrw{"wrr"}
+	mul		$tmp632 $const7 $tmp631 	%argrw{"wrr"}
+	compref		$tmp633 $tmp531 $const3 	%argrw{"wrr"}
+	mul		$tmp634 $const8 $tmp633 	%argrw{"wrr"}
+	add		$tmp635 $tmp632 $tmp634 	%argrw{"wrr"}
+	compref		$tmp636 $tmp531 $const10 	%argrw{"wrr"}
+	mul		$tmp637 $const9 $tmp636 	%argrw{"wrr"}
+	add		$tmp630 $tmp635 $tmp637 	%argrw{"wrr"}
+# PxrColorBlend.h:148
+#     float d = l - pxrLum(c);
+	sub		___336_d $tmp622 $tmp630 	%line{148} %argrw{"wrr"}
+# PxrColorBlend.h:149
+#     result = clamp(c + d, 0, 1);
+	add		$tmp638 $tmp531 ___336_d 	%line{149} %argrw{"wrr"}
+	assign		$tmp639 $const12 	%argrw{"wr"}
+	assign		$tmp640 $const13 	%argrw{"wr"}
+	functioncall	$const14 963 	%argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
+	min		$tmp641 $tmp638 $tmp640 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	max		___336_result $tmp641 $tmp639 	%argrw{"wrr"}
+# PxrColorBlend.h:150
+#     return pxrClipColor(result);
+	functioncall	$const15 1010 	%filename{"PxrColorBlend.h"} %line{150} %argrw{"r"}
+# PxrColorBlend.h:130
+#     color result = c;
+	assign		___333_result ___336_result 	%line{130} %argrw{"wr"}
+# PxrColorBlend.h:131
+#     float l = pxrLum(result);
+	functioncall	$const6 974 	%line{131} %argrw{"r"}
+# PxrColorBlend.h:73
+#     return (0.3 * c[0]) + (0.59 * c[1]) + (0.11 * c[2]);
+	compref		$tmp642 ___333_result $const1 	%line{73} %argrw{"wrr"}
+	mul		$tmp643 $const7 $tmp642 	%argrw{"wrr"}
+	compref		$tmp644 ___333_result $const3 	%argrw{"wrr"}
+	mul		$tmp645 $const8 $tmp644 	%argrw{"wrr"}
+	add		$tmp646 $tmp643 $tmp645 	%argrw{"wrr"}
+	compref		$tmp647 ___333_result $const10 	%argrw{"wrr"}
+	mul		$tmp648 $const9 $tmp647 	%argrw{"wrr"}
+	add		___333_l $tmp646 $tmp648 	%argrw{"wrr"}
+# PxrColorBlend.h:132
+#     float n = min(min(result[0], result[1]), result[2]);
+	compref		$tmp650 ___333_result $const1 	%line{132} %argrw{"wrr"}
+	compref		$tmp651 ___333_result $const3 	%argrw{"wrr"}
+	min		$tmp649 $tmp650 $tmp651 	%argrw{"wrr"}
+	compref		$tmp652 ___333_result $const10 	%argrw{"wrr"}
+	min		___333_n $tmp649 $tmp652 	%argrw{"wrr"}
+# PxrColorBlend.h:133
+#     float x = max(max(result[0], result[1]), result[2]);
+	compref		$tmp654 ___333_result $const1 	%line{133} %argrw{"wrr"}
+	compref		$tmp655 ___333_result $const3 	%argrw{"wrr"}
+	max		$tmp653 $tmp654 $tmp655 	%argrw{"wrr"}
+	compref		$tmp656 ___333_result $const10 	%argrw{"wrr"}
+	max		___333_x $tmp653 $tmp656 	%argrw{"wrr"}
+# PxrColorBlend.h:134
+#     if (n < 0.0)
+	lt		$tmp657 ___333_n $const12 	%line{134} %argrw{"wrr"}
+	if		$tmp657 996 996 	%argrw{"r"}
+# PxrColorBlend.h:136
+#         result = clamp(l + (((result - l) * l) / (l - n)), 0, 1);
+	sub		$tmp658 ___333_result ___333_l 	%line{136} %argrw{"wrr"}
+	mul		$tmp659 $tmp658 ___333_l 	%argrw{"wrr"}
+	sub		$tmp660 ___333_l ___333_n 	%argrw{"wrr"}
+	div		$tmp661 $tmp659 $tmp660 	%argrw{"wrr"}
+	add		$tmp662 ___333_l $tmp661 	%argrw{"wrr"}
+	assign		$tmp663 $const12 	%argrw{"wr"}
+	assign		$tmp664 $const13 	%argrw{"wr"}
+	functioncall	$const14 996 	%argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
+	min		$tmp665 $tmp662 $tmp664 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	max		___333_result $tmp665 $tmp663 	%argrw{"wrr"}
+# PxrColorBlend.h:138
+#     if (x > 1)
+	gt		$tmp666 ___333_x $const3 	%filename{"PxrColorBlend.h"} %line{138} %argrw{"wrr"}
+	if		$tmp666 1009 1009 	%argrw{"r"}
+# PxrColorBlend.h:140
+#         result = clamp(l + (((result - l) * (1 - l)) / (x - l)), 0, 1);
+	sub		$tmp667 ___333_result ___333_l 	%line{140} %argrw{"wrr"}
+	sub		$tmp668 $const13 ___333_l 	%argrw{"wrr"}
+	mul		$tmp669 $tmp667 $tmp668 	%argrw{"wrr"}
+	sub		$tmp670 ___333_x ___333_l 	%argrw{"wrr"}
+	div		$tmp671 $tmp669 $tmp670 	%argrw{"wrr"}
+	add		$tmp672 ___333_l $tmp671 	%argrw{"wrr"}
+	assign		$tmp673 $const12 	%argrw{"wr"}
+	assign		$tmp674 $const13 	%argrw{"wr"}
+	functioncall	$const14 1009 	%argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
+	min		$tmp675 $tmp672 $tmp674 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	max		___333_result $tmp675 $tmp673 	%argrw{"wrr"}
+# PxrColorBlend.h:142
+#     return result;
+	assign		resultRGB ___333_result 	%filename{"PxrColorBlend.h"} %line{142} %argrw{"wr"}
+# PxrColorBlend.h:508
+#     else if (mode == k_screen)
+	eq		$tmp676 operation $const65 	%line{508} %argrw{"wrr"}
+	if		$tmp676 1016 1122 	%argrw{"r"}
+# PxrColorBlend.h:510
+#         pxrBlendScreen(cA, cB, resultC);
+	functioncall	$const66 1016 	%line{510} %argrw{"r"}
+# PxrColorBlend.h:373
+# void pxrBlendScreen(color cA, color cB, output color result) { result = cB + cA - (cB * cA); }
+	add		$tmp677 cc2 cc1 	%line{373} %argrw{"wrr"}
+	mul		$tmp678 cc2 cc1 	%argrw{"wrr"}
+	sub		resultRGB $tmp677 $tmp678 	%argrw{"wrr"}
+# PxrColorBlend.h:512
+#     else if (mode == k_softLight)
+	eq		$tmp679 operation $const67 	%line{512} %argrw{"wrr"}
+	if		$tmp679 1026 1122 	%argrw{"r"}
+# PxrColorBlend.h:514
+#         pxrBlendSoftLight(cA, cB, resultC);
+	functioncall	$const68 1026 	%line{514} %argrw{"r"}
+# PxrColorBlend.h:386
+#     result = (1 - 2 * cB) * cA * cA + 2 * cA * cB;
+	mul		$tmp680 $const30 cc2 	%line{386} %argrw{"wrr"}
+	sub		$tmp681 $const13 $tmp680 	%argrw{"wrr"}
+	mul		$tmp682 $tmp681 cc1 	%argrw{"wrr"}
+	mul		$tmp683 $tmp682 cc1 	%argrw{"wrr"}
+	mul		$tmp684 $const30 cc1 	%argrw{"wrr"}
+	mul		$tmp685 $tmp684 cc2 	%argrw{"wrr"}
+	add		resultRGB $tmp683 $tmp685 	%argrw{"wrr"}
+# PxrColorBlend.h:516
+#     else if (mode == k_subtract)
+	eq		$tmp686 operation $const69 	%line{516} %argrw{"wrr"}
+	if		$tmp686 1030 1122 	%argrw{"r"}
+# PxrColorBlend.h:518
+#         pxrBlendSubtract(cA, cB, resultC);
+	functioncall	$const70 1030 	%line{518} %argrw{"r"}
+# PxrColorBlend.h:392
+# void pxrBlendSubtract(color cA, color cB, output color result) { result = cB - cA; }
+	sub		resultRGB cc2 cc1 	%line{392} %argrw{"wrr"}
+# PxrColorBlend.h:520
+#     else if (mode == k_vividLight)
+	eq		$tmp687 operation $const71 	%line{520} %argrw{"wrr"}
+	if		$tmp687 1120 1122 	%argrw{"r"}
+# PxrColorBlend.h:522
+#         pxrBlendVividLight(cA, cB, resultC);
+	functioncall	$const72 1120 	%line{522} %argrw{"r"}
+# PxrColorBlend.h:402
+#     result[0] = (cA[0] < 0.5)
+	compref		$tmp689 cc1 $const1 	%line{402} %argrw{"wrr"}
+	lt		$tmp690 $tmp689 $const33 	%argrw{"wrr"}
+# PxrColorBlend.h:403
+#                     ? ((2 * cA[0]) == 0) ? 0 : 1 - min(1, (1 - cB[0]) / (2 * cA[0]))
+	if		$tmp690 1048 1061 	%line{403} %argrw{"r"}
+	compref		$tmp691 cc1 $const1 	%argrw{"wrr"}
+	mul		$tmp692 $const30 $tmp691 	%argrw{"wrr"}
+	eq		$tmp693 $tmp692 $const1 	%argrw{"wrr"}
+	if		$tmp693 1041 1048 	%argrw{"r"}
+	assign		$tmp688 $const1 	%argrw{"wr"}
+	compref		$tmp695 cc2 $const1 	%argrw{"wrr"}
+	sub		$tmp696 $const13 $tmp695 	%argrw{"wrr"}
+	compref		$tmp697 cc1 $const1 	%argrw{"wrr"}
+	mul		$tmp698 $const30 $tmp697 	%argrw{"wrr"}
+	div		$tmp699 $tmp696 $tmp698 	%argrw{"wrr"}
+	min		$tmp694 $const13 $tmp699 	%argrw{"wrr"}
+	sub		$tmp688 $const13 $tmp694 	%argrw{"wrr"}
+# PxrColorBlend.h:404
+#                     : ((2 * (cA[0] - 0.5)) == 1) ? 1 : min(1, cB[0] / (1 - (2 * (cA[0] - 0.5))));
+	compref		$tmp700 cc1 $const1 	%line{404} %argrw{"wrr"}
+	sub		$tmp701 $tmp700 $const33 	%argrw{"wrr"}
+	mul		$tmp702 $const30 $tmp701 	%argrw{"wrr"}
+	eq		$tmp703 $tmp702 $const3 	%argrw{"wrr"}
+	if		$tmp703 1054 1061 	%argrw{"r"}
+	assign		$tmp688 $const3 	%argrw{"wr"}
+	compref		$tmp704 cc2 $const1 	%argrw{"wrr"}
+	compref		$tmp705 cc1 $const1 	%argrw{"wrr"}
+	sub		$tmp706 $tmp705 $const33 	%argrw{"wrr"}
+	mul		$tmp707 $const30 $tmp706 	%argrw{"wrr"}
+	sub		$tmp708 $const13 $tmp707 	%argrw{"wrr"}
+	div		$tmp709 $tmp704 $tmp708 	%argrw{"wrr"}
+	min		$tmp688 $const13 $tmp709 	%argrw{"wrr"}
+# PxrColorBlend.h:402
+#     result[0] = (cA[0] < 0.5)
+	compassign	resultRGB $const1 $tmp688 	%line{402} %argrw{"wrr"}
+# PxrColorBlend.h:405
+#     result[1] = (cA[1] < 0.5)
+	compref		$tmp711 cc1 $const3 	%line{405} %argrw{"wrr"}
+	lt		$tmp712 $tmp711 $const33 	%argrw{"wrr"}
+# PxrColorBlend.h:406
+#                     ? ((2 * cA[1]) == 0) ? 0 : 1 - min(1, (1 - cB[1]) / (2 * cA[1]))
+	if		$tmp712 1077 1090 	%line{406} %argrw{"r"}
+	compref		$tmp713 cc1 $const3 	%argrw{"wrr"}
+	mul		$tmp714 $const30 $tmp713 	%argrw{"wrr"}
+	eq		$tmp715 $tmp714 $const1 	%argrw{"wrr"}
+	if		$tmp715 1070 1077 	%argrw{"r"}
+	assign		$tmp710 $const1 	%argrw{"wr"}
+	compref		$tmp717 cc2 $const3 	%argrw{"wrr"}
+	sub		$tmp718 $const13 $tmp717 	%argrw{"wrr"}
+	compref		$tmp719 cc1 $const3 	%argrw{"wrr"}
+	mul		$tmp720 $const30 $tmp719 	%argrw{"wrr"}
+	div		$tmp721 $tmp718 $tmp720 	%argrw{"wrr"}
+	min		$tmp716 $const13 $tmp721 	%argrw{"wrr"}
+	sub		$tmp710 $const13 $tmp716 	%argrw{"wrr"}
+# PxrColorBlend.h:407
+#                     : ((2 * (cA[1] - 0.5)) == 1) ? 1 : min(1, cB[1] / (1 - (2 * (cA[1] - 0.5))));
+	compref		$tmp722 cc1 $const3 	%line{407} %argrw{"wrr"}
+	sub		$tmp723 $tmp722 $const33 	%argrw{"wrr"}
+	mul		$tmp724 $const30 $tmp723 	%argrw{"wrr"}
+	eq		$tmp725 $tmp724 $const3 	%argrw{"wrr"}
+	if		$tmp725 1083 1090 	%argrw{"r"}
+	assign		$tmp710 $const3 	%argrw{"wr"}
+	compref		$tmp726 cc2 $const3 	%argrw{"wrr"}
+	compref		$tmp727 cc1 $const3 	%argrw{"wrr"}
+	sub		$tmp728 $tmp727 $const33 	%argrw{"wrr"}
+	mul		$tmp729 $const30 $tmp728 	%argrw{"wrr"}
+	sub		$tmp730 $const13 $tmp729 	%argrw{"wrr"}
+	div		$tmp731 $tmp726 $tmp730 	%argrw{"wrr"}
+	min		$tmp710 $const13 $tmp731 	%argrw{"wrr"}
+# PxrColorBlend.h:405
+#     result[1] = (cA[1] < 0.5)
+	compassign	resultRGB $const3 $tmp710 	%line{405} %argrw{"wrr"}
+# PxrColorBlend.h:408
+#     result[2] = (cA[2] < 0.5)
+	compref		$tmp733 cc1 $const10 	%line{408} %argrw{"wrr"}
+	lt		$tmp734 $tmp733 $const33 	%argrw{"wrr"}
+# PxrColorBlend.h:409
+#                     ? ((2 * cA[2]) == 0) ? 0 : 1 - min(1, (1 - cB[2]) / (2 * cA[2]))
+	if		$tmp734 1106 1119 	%line{409} %argrw{"r"}
+	compref		$tmp735 cc1 $const10 	%argrw{"wrr"}
+	mul		$tmp736 $const30 $tmp735 	%argrw{"wrr"}
+	eq		$tmp737 $tmp736 $const1 	%argrw{"wrr"}
+	if		$tmp737 1099 1106 	%argrw{"r"}
+	assign		$tmp732 $const1 	%argrw{"wr"}
+	compref		$tmp739 cc2 $const10 	%argrw{"wrr"}
+	sub		$tmp740 $const13 $tmp739 	%argrw{"wrr"}
+	compref		$tmp741 cc1 $const10 	%argrw{"wrr"}
+	mul		$tmp742 $const30 $tmp741 	%argrw{"wrr"}
+	div		$tmp743 $tmp740 $tmp742 	%argrw{"wrr"}
+	min		$tmp738 $const13 $tmp743 	%argrw{"wrr"}
+	sub		$tmp732 $const13 $tmp738 	%argrw{"wrr"}
+# PxrColorBlend.h:410
+#                     : ((2 * (cA[2] - 0.5)) == 1) ? 1 : min(1, cB[2] / (1 - (2 * (cA[2] - 0.5))));
+	compref		$tmp744 cc1 $const10 	%line{410} %argrw{"wrr"}
+	sub		$tmp745 $tmp744 $const33 	%argrw{"wrr"}
+	mul		$tmp746 $const30 $tmp745 	%argrw{"wrr"}
+	eq		$tmp747 $tmp746 $const3 	%argrw{"wrr"}
+	if		$tmp747 1112 1119 	%argrw{"r"}
+	assign		$tmp732 $const3 	%argrw{"wr"}
+	compref		$tmp748 cc2 $const10 	%argrw{"wrr"}
+	compref		$tmp749 cc1 $const10 	%argrw{"wrr"}
+	sub		$tmp750 $tmp749 $const33 	%argrw{"wrr"}
+	mul		$tmp751 $const30 $tmp750 	%argrw{"wrr"}
+	sub		$tmp752 $const13 $tmp751 	%argrw{"wrr"}
+	div		$tmp753 $tmp748 $tmp752 	%argrw{"wrr"}
+	min		$tmp732 $const13 $tmp753 	%argrw{"wrr"}
+# PxrColorBlend.h:408
+#     result[2] = (cA[2] < 0.5)
+	compassign	resultRGB $const10 $tmp732 	%line{408} %argrw{"wrr"}
+# PxrColorBlend.h:526
+#         pxrBlendNormal(cA, cB, resultC);
+	functioncall	$const58 1122 	%line{526} %argrw{"r"}
+# PxrColorBlend.h:335
+# void pxrBlendNormal(color cA, color cB, output color result) { result = cA; }
+	assign		resultRGB cc1 	%line{335} %argrw{"wr"}
+# PxrColorBlend.h:529
+#     float a = aA;
+	assign		___365_a topA 	%line{529} %argrw{"wr"}
+# PxrColorBlend.h:533
+#     if (mode == k_dissolve)
+	eq		$tmp754 operation $const24 	%line{533} %argrw{"wrr"}
+	if		$tmp754 1132 1132 	%argrw{"r"}
+# PxrColorBlend.h:536
+#         point Pobj = transform("current", "object", P);
+	transform	___394_Pobj $const73 $const74 P 	%line{536} %argrw{"wrrr"}
+# PxrColorBlend.h:537
+#         float random = 1.0 - noise("uperlin", Pobj * 100000);
+	mul		$tmp756 ___394_Pobj $const77 	%line{537} %argrw{"wrr"}
+	noise		$tmp755 $const75 $tmp756 	%argrw{"wrr"}
+	sub		___394_random $const13 $tmp755 	%argrw{"wrr"}
+# PxrColorBlend.h:538
+#         if (random >= a)
+	ge		$tmp757 ___394_random ___365_a 	%line{538} %argrw{"wrr"}
+	if		$tmp757 1132 1132 	%argrw{"r"}
+# PxrColorBlend.h:540
+#             a = 0.0;
+	assign		___365_a $const12 	%line{540} %argrw{"wr"}
+# PxrColorBlend.h:543
+#     float invA = 1.0 - a;
+	sub		___365_invA $const13 ___365_a 	%line{543} %argrw{"wrr"}
+# PxrColorBlend.h:544
+#     resultC = (invA * cB) + (a * resultC);
+	mul		$tmp758 ___365_invA cc2 	%line{544} %argrw{"wrr"}
+	mul		$tmp759 ___365_a resultRGB 	%argrw{"wrr"}
+	add		resultRGB $tmp758 $tmp759 	%argrw{"wrr"}
+# PxrColorBlend.h:545
+#     resultA = a + (invA * aB);
+	mul		$tmp760 ___365_invA bottomA 	%line{545} %argrw{"wrr"}
+	add		alpha ___365_a $tmp760 	%argrw{"wrr"}
+# PxrBlend.osl:132
+#     if (clampOutput) resultRGB = clamp(resultRGB, 0, 1);
+	if		clampOutput 1144 1144 	%filename{"PxrBlend.osl"} %line{132} %argrw{"r"}
+	assign		$tmp761 $const12 	%argrw{"wr"}
+	assign		$tmp762 $const13 	%argrw{"wr"}
+	functioncall	$const14 1144 	%argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
+	min		$tmp763 resultRGB $tmp762 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	max		resultRGB $tmp763 $tmp761 	%argrw{"wrr"}
+# PxrBlend.osl:134
+#     resultR = resultRGB[0];
+	compref		resultR resultRGB $const1 	%filename{"PxrBlend.osl"} %line{134} %argrw{"wrr"}
+# PxrBlend.osl:135
+#     resultG = resultRGB[1];
+	compref		resultG resultRGB $const3 	%line{135} %argrw{"wrr"}
+# PxrBlend.osl:136
+#     resultB = resultRGB[2];
+	compref		resultB resultRGB $const10 	%line{136} %argrw{"wrr"}
+# PxrBlend.osl:137
+#     resultA = alpha;
+	assign		resultA alpha 	%line{137} %argrw{"wr"}
+	end

@@ -1,0 +1,19 @@
+/* SPDX-License-Identifier: Apache-2.0
+ * Copyright 2011-2022 Blender Foundation */
+
+#include "stdcycles.h"
+
+shader node_convert_color_to_float(color value_color = 0.0,
+                                   int mode = 0,
+                                  output float value_float = 0.0)
+{
+  if (mode <= 2)
+    value_float = value_color[mode];
+  else
+  {
+    if (mode == 3) /* luminance */
+      value_float = luminance(value_color);
+    else if (mode == 4) /* average */
+      value_float = (value_color[0] + value_color[1] + value_color[2]) * 0.3333;
+  }
+}

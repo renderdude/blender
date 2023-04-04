@@ -1,0 +1,930 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrProjectionLayer.osl/obj/PxrProjectionLayer.oso
+shader PxrProjectionLayer	%meta{int,rfm_nodeid,1053389} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/texture"} %meta{string,rfh_classification,"Pattern/Texture"} 
+param	string	filename	""		%meta{string,widget,"assetIdInput"} %meta{string,options,"texture:texture"} %meta{string,label,"Filename"} %meta{int,connectable,0}  %read{148,204} %write{2147483647,-1}
+param	int	firstChannel	0		%meta{string,widget,"default"} %meta{string,help,"First channel offset to be looked up for Filename.<br><br>firstChannel (int)"} %meta{string,label,"First Channel Offset"} %meta{int,connectable,0}  %read{45,45} %write{2147483647,-1}
+param	int	filter	1		%meta{string,widget,"mapper"} %meta{string,options,"Closest:0|Smart cubic:1|Linear:2"} %meta{string,label,"Filter"} %meta{int,connectable,0}  %read{38,41} %write{2147483647,-1}
+param	float	blur	0		%meta{string,widget,"default"} %meta{string,label,"Blur"}  %read{46,46} %write{2147483647,-1}
+param	int	lerp	1		%meta{string,widget,"checkBox"} %meta{string,label,"Mip Interpolate"} %meta{int,connectable,0}  %read{2147483647,-1} %write{2147483647,-1}
+param	color	missingColor	1 0 1		%meta{string,widget,"color"} %meta{string,label,"Missing Color"}  %read{47,47} %write{2147483647,-1}
+param	float	missingAlpha	1		%meta{string,widget,"default"} %meta{string,label,"Missing Alpha"}  %read{48,48} %write{2147483647,-1}
+param	int	linearize	0		%meta{string,widget,"checkBox"} %meta{string,label,"Linearize"} %meta{int,connectable,0}  %read{174,207} %write{2147483647,-1}
+param	int	premultiply	0		%meta{string,widget,"checkBox"} %meta{string,label,"Premultiply"} %meta{int,connectable,0}  %read{209,229} %write{2147483647,-1}
+param	float	mask	1		%meta{string,widget,"default"} %meta{string,label,"Mask"}  %read{16,231} %write{2147483647,-1}
+param	struct Manifold	manifold			%meta{string,page,""} %meta{string,widget,"default"} %meta{string,readOnly,"True"}  %read{21,21} %write{2147483647,-1} %struct{"Manifold"} %structfields{Q,QN,Qradius} %structfieldtypes{"pnf"} %structnfields{3}
+param	point	manifold.Q	0 0 0		%meta{string,page,""} %meta{string,widget,"default"} %meta{string,readOnly,"True"}  %read{32,34} %write{2147483647,-1} %mystruct{manifold} %mystructfield{0} %derivs
+param	normal	manifold.QN	0 0 1		%meta{string,page,""} %meta{string,widget,"default"} %meta{string,readOnly,"True"}  %read{2147483647,-1} %write{2147483647,-1} %mystruct{manifold} %mystructfield{1}
+param	float	manifold.Qradius	0		%meta{string,page,""} %meta{string,widget,"default"} %meta{string,readOnly,"True"}  %read{2147483647,-1} %write{2147483647,-1} %mystruct{manifold} %mystructfield{2}
+param	int	premultiplyChannels	0		%meta{string,widget,"checkBox"} %meta{string,label,"Premultiply Channels"} %meta{int,connectable,0}  %read{342,342} %write{2147483647,-1}
+param	string[]	channelsFilenames	""		%meta{string,widget,"fileInput"} %meta{string,options,"texture:texture"} %meta{string,label,"Channels Filenames"} %meta{string,uiStruct,"Channels"} %meta{int,connectable,0}  %read{234,256} %write{2147483647,-1}
+param	int[]	channelsLinearize	0		%meta{string,widget,"checkBox"} %meta{string,label,"Channels Linearize"} %meta{string,uiStruct,"Channels"} %meta{int,connectable,0}  %read{288,288} %write{2147483647,-1}
+param	color[]	channelsMissingColor	0 0 0		%meta{string,widget,"default"} %meta{string,label,"Channels Missing Color"} %meta{string,uiStruct,"Channels"} %meta{int,connectable,0}  %read{2147483647,-1} %write{2147483647,-1}
+param	color[]	channelsInBlack	0 0 0		%meta{string,widget,"default"} %meta{string,label,"Channels Input Black"} %meta{string,uiStruct,"Channels"} %meta{int,connectable,0}  %read{315,315} %write{2147483647,-1}
+param	color[]	channelsInGamma	1 1 1		%meta{string,widget,"default"} %meta{string,label,"Channels Input Gamma"} %meta{string,uiStruct,"Channels"} %meta{int,connectable,0}  %read{316,316} %write{2147483647,-1}
+param	color[]	channelsInWhite	1 1 1		%meta{string,widget,"default"} %meta{string,label,"Channels input White"} %meta{string,uiStruct,"Channels"} %meta{int,connectable,0}  %read{317,317} %write{2147483647,-1}
+param	color[]	channelsOutBlack	0 0 0		%meta{string,widget,"default"} %meta{string,label,"Channels Output Black"} %meta{string,uiStruct,"Channels"} %meta{int,connectable,0}  %read{318,318} %write{2147483647,-1}
+param	color[]	channelsOutWhite	1 1 1		%meta{string,widget,"default"} %meta{string,label,"Channels Output White"} %meta{string,uiStruct,"Channels"} %meta{int,connectable,0}  %read{319,319} %write{2147483647,-1}
+param	int	mipBias	0		%meta{string,widget,"default"} %meta{string,page,"Advanced Texture Settings"} %meta{string,help,"Offset the selected MIP level picked by the renderer.<br>Positive values will bias toward lower resolution MIPs.<br>Negative values will bias toward higher resolution MIPs.<br><br>mipBias (int)"} %meta{string,label,"MIP bias"} %meta{int,slider,1} %meta{int,slidermax,10} %meta{int,slidermin,-10}  %read{81,91} %write{2147483647,-1}
+param	float	maxResolution	0		%meta{string,widget,"mapper"} %meta{string,page,"Advanced Texture Settings"} %meta{string,help,"Clamp the resolution to a maximum value.<br><br>maxResolution (float)"} %meta{string,options,"Unlimited:0|32:32|64:64|128:128|256:256|512:512|1024:1024|2048:2048|4096:4096|8192:8192"} %meta{string,label,"Max Resolution"}  %read{84,100} %write{2147483647,-1}
+param	int	optimizeIndirect	1		%meta{string,widget,"checkBox"} %meta{string,page,"Advanced Texture Settings"} %meta{string,help,"Make indirect hits use a box filter rather than the selected one.<br><br>optimizeIndirect (int)"} %meta{string,label,"Optimize Indirect"}  %read{2147483647,-1} %write{2147483647,-1}
+oparam	color	resultRGB	0 0 0		%meta{string,widget,"default"}  %read{184,352} %write{151,231}
+oparam	float	resultR	0		%meta{string,widget,"default"}  %read{2147483647,-1} %write{350,350}
+oparam	float	resultG	0		%meta{string,widget,"default"}  %read{2147483647,-1} %write{351,351}
+oparam	float	resultB	0		%meta{string,widget,"default"}  %read{2147483647,-1} %write{352,352}
+oparam	float	resultA	1		%meta{string,widget,"default"}  %read{198,349} %write{18,228}
+oparam	struct Channels	outChannelsRGB			%meta{string,widget,"default"}  %read{232,232} %write{2147483647,-1} %struct{"Channels"} %structfields{numChannels,data} %structfieldtypes{"ic[16]"} %structnfields{2}
+oparam	int	outChannelsRGB.numChannels	0		%meta{string,widget,"default"}  %read{250,349} %write{250,349} %mystruct{outChannelsRGB} %mystructfield{0}
+oparam	color[16]	outChannelsRGB.data	0 0 0		%meta{string,widget,"default"}  %read{250,349} %write{0,349} %mystruct{outChannelsRGB} %mystructfield{1} %initexpr
+global	float	u	%read{30,30} %write{2147483647,-1} %derivs
+global	float	v	%read{31,31} %write{2147483647,-1} %derivs
+local	string	___418_interp	%read{49,49} %write{40,44}
+local	int	___418_params.firstchannel	%read{51,51} %write{45,45} %mystruct{___418_params} %mystructfield{0}
+local	float	___418_params.blur	%read{52,52} %write{46,46} %mystruct{___418_params} %mystructfield{1}
+local	color	___418_params.missingcolor	%read{53,53} %write{47,47} %mystruct{___418_params} %mystructfield{2}
+local	float	___418_params.missingalpha	%read{54,54} %write{48,48} %mystruct{___418_params} %mystructfield{3}
+local	string	___418_params.interp	%read{55,55} %write{49,49} %mystruct{___418_params} %mystructfield{4}
+local	float	___418_params.width	%read{56,56} %write{50,50} %mystruct{___418_params} %mystructfield{5}
+local	float	___420__tt	%read{69,73} %write{66,67} %derivs
+local	float	___420_coords.s	%read{74,74} %write{68,68} %mystruct{___420_coords} %mystructfield{0}
+local	float	___420_coords.t	%read{75,75} %write{69,69} %mystruct{___420_coords} %mystructfield{1}
+local	float	___420_coords.dsdx	%read{76,76} %write{70,70} %mystruct{___420_coords} %mystructfield{2}
+local	float	___420_coords.dsdy	%read{77,77} %write{71,71} %mystruct{___420_coords} %mystructfield{3}
+local	float	___420_coords.dtdx	%read{78,78} %write{72,72} %mystruct{___420_coords} %mystructfield{4}
+local	float	___420_coords.dtdy	%read{79,79} %write{73,73} %mystruct{___420_coords} %mystructfield{5}
+local	string	___422_foo	%read{179,349} %write{177,349}
+local	int	___425_i	%read{184,349} %write{183,349}
+local	float	___429_bias	%read{94,117} %write{92,94}
+local	float	___431_minRadius	%read{104,119} %write{100,101}
+local	float	___431_dsdx	%read{125,125} %write{106,106}
+local	float	___431_dtdx	%read{125,125} %write{111,111}
+local	float	___431_dsdy	%read{126,126} %write{116,116}
+local	float	___431_dtdy	%read{126,126} %write{121,121}
+local	vector	___431_v0	%read{135,136} %write{124,124}
+local	vector	___431_v1	%read{128,139} %write{127,127}
+local	int	___433_success	%read{155,349} %write{145,349}
+local	int	___433_nchannels	%read{157,349} %write{146,349}
+local	color	___433_finalResult	%read{173,349} %write{147,349}
+local	color	___433_result	%read{149,349} %write{148,349}
+local	color	___436_missingalpha	%read{204,204} %write{203,203}
+local	color	___446_out	%read{250,349} %write{250,349}
+local	float[2]	st	%read{57,58} %write{20,35} %derivs
+local	int	txparams.firstchannel	%read{148,349} %write{51,206} %mystruct{txparams} %mystructfield{0}
+local	float	txparams.blur	%read{148,349} %write{52,52} %mystruct{txparams} %mystructfield{1}
+local	color	txparams.missingcolor	%read{148,349} %write{53,53} %mystruct{txparams} %mystructfield{2}
+local	float	txparams.missingalpha	%read{203,203} %write{54,54} %mystruct{txparams} %mystructfield{3}
+local	string	txparams.interp	%read{148,349} %write{55,55} %mystruct{txparams} %mystructfield{4}
+local	float	txparams.width	%read{94,349} %write{56,143} %mystruct{txparams} %mystructfield{5}
+local	float	txcoords.s	%read{148,349} %write{74,74} %mystruct{txcoords} %mystructfield{0}
+local	float	txcoords.t	%read{148,349} %write{75,75} %mystruct{txcoords} %mystructfield{1}
+local	float	txcoords.dsdx	%read{102,349} %write{76,76} %mystruct{txcoords} %mystructfield{2}
+local	float	txcoords.dsdy	%read{112,349} %write{77,77} %mystruct{txcoords} %mystructfield{3}
+local	float	txcoords.dtdx	%read{107,349} %write{78,78} %mystruct{txcoords} %mystructfield{4}
+local	float	txcoords.dtdy	%read{117,349} %write{79,79} %mystruct{txcoords} %mystructfield{5}
+local	int	___457_outNumChannels	%read{235,349} %write{234,245}
+local	int	___460_ch	%read{250,349} %write{249,349}
+const	color	$const1	0 0 0		%read{0,331} %write{2147483647,-1}
+const	int	$const2	0		%read{0,350} %write{2147483647,-1}
+const	int	$const3	1		%read{1,351} %write{2147483647,-1}
+const	int	$const4	2		%read{2,352} %write{2147483647,-1}
+const	int	$const5	3		%read{3,300} %write{2147483647,-1}
+const	int	$const6	4		%read{4,4} %write{2147483647,-1}
+const	int	$const7	5		%read{5,5} %write{2147483647,-1}
+const	int	$const8	6		%read{6,6} %write{2147483647,-1}
+const	int	$const9	7		%read{7,7} %write{2147483647,-1}
+const	int	$const10	8		%read{8,8} %write{2147483647,-1}
+const	int	$const11	9		%read{9,9} %write{2147483647,-1}
+const	int	$const12	10		%read{10,10} %write{2147483647,-1}
+const	int	$const13	11		%read{11,11} %write{2147483647,-1}
+const	int	$const14	12		%read{12,12} %write{2147483647,-1}
+const	int	$const15	13		%read{13,13} %write{2147483647,-1}
+const	int	$const16	14		%read{14,14} %write{2147483647,-1}
+const	int	$const17	15		%read{15,15} %write{2147483647,-1}
+const	float	$const18	0		%read{16,126} %write{2147483647,-1}
+temp	int	$tmp17	%read{17,17} %write{16,16}
+const	float[2]	$const19	0 0 		%read{20,20} %write{2147483647,-1}
+temp	int	$tmp18	%read{22,22} %write{21,21}
+temp	int	$tmp19	%read{23,23} %write{22,22}
+temp	int	$tmp20	%read{25,25} %write{24,24}
+const	string	$const20	"primvar"		%read{24,27} %write{2147483647,-1}
+const	string	$const21	"st"		%read{24,24} %write{2147483647,-1}
+temp	int	$tmp21	%read{26,26} %write{25,25}
+temp	int	$tmp22	%read{28,28} %write{27,27}
+const	string	$const22	"_polygonUV"		%read{27,27} %write{2147483647,-1}
+temp	int	$tmp23	%read{29,29} %write{28,28}
+temp	float	$tmp24	%read{33,33} %write{32,32} %derivs
+temp	float	$tmp25	%read{35,35} %write{34,34} %derivs
+const	string	$const23	"initTxParams"		%read{36,37} %write{2147483647,-1}
+const	float	$const24	1		%read{50,335} %write{2147483647,-1}
+temp	int	$tmp26	%read{39,39} %write{38,38}
+const	string	$const25	"closest"		%read{40,40} %write{2147483647,-1}
+temp	int	$tmp27	%read{42,42} %write{41,41}
+const	string	$const26	"linear"		%read{43,43} %write{2147483647,-1}
+const	string	$const27	"smartcubic"		%read{44,44} %write{2147483647,-1}
+temp	float	$tmp28	%read{68,71} %write{57,57} %derivs
+temp	float	$tmp29	%read{62,67} %write{58,58} %derivs
+const	string	$const28	"initTxCoords"		%read{59,59} %write{2147483647,-1}
+const	string	$const29	"invertCoord"		%read{61,61} %write{2147483647,-1}
+temp	float	$tmp30	%read{63,63} %write{62,62} %derivs
+temp	float	$tmp31	%read{66,66} %write{63,63} %derivs
+temp	float	$tmp32	%read{65,65} %write{64,64} %derivs
+temp	float	$tmp33	%read{66,66} %write{65,65} %derivs
+temp	int	$tmp34	%read{82,82} %write{81,81}
+temp	int	$tmp35	%read{83,87} %write{82,86}
+temp	int	$tmp36	%read{85,85} %write{84,84}
+temp	int	$tmp37	%read{86,86} %write{85,85}
+const	string	$const30	"PxrTxMipControls"		%read{88,88} %write{2147483647,-1}
+temp	int	$tmp38	%read{90,90} %write{89,89}
+const	float	$const31	2		%read{92,92} %write{2147483647,-1}
+temp	float	$tmp39	%read{92,92} %write{91,91}
+temp	int	$tmp40	%read{96,96} %write{95,95}
+temp	int	$tmp41	%read{99,99} %write{98,98}
+temp	float	$tmp42	%read{106,106} %write{104,104}
+temp	float	$tmp43	%read{104,104} %write{103,103}
+temp	float	$tmp44	%read{103,103} %write{102,102}
+temp	float	$tmp45	%read{106,106} %write{105,105}
+temp	float	$tmp46	%read{111,111} %write{109,109}
+temp	float	$tmp47	%read{109,109} %write{108,108}
+temp	float	$tmp48	%read{108,108} %write{107,107}
+temp	float	$tmp49	%read{111,111} %write{110,110}
+temp	float	$tmp50	%read{116,116} %write{114,114}
+temp	float	$tmp51	%read{114,114} %write{113,113}
+temp	float	$tmp52	%read{113,113} %write{112,112}
+temp	float	$tmp53	%read{116,116} %write{115,115}
+temp	float	$tmp54	%read{121,121} %write{119,119}
+temp	float	$tmp55	%read{119,119} %write{118,118}
+temp	float	$tmp56	%read{118,118} %write{117,117}
+temp	float	$tmp57	%read{121,121} %write{120,120}
+temp	point	$tmp58	%read{124,124} %write{122,122}
+temp	point	$tmp59	%read{124,124} %write{123,123}
+temp	point	$tmp60	%read{127,127} %write{125,125}
+temp	point	$tmp61	%read{127,127} %write{126,126}
+temp	float	$tmp62	%read{130,130} %write{128,128}
+temp	float	$tmp63	%read{130,130} %write{129,129}
+temp	float	$tmp64	%read{134,134} %write{130,130}
+temp	float	$tmp65	%read{133,133} %write{131,131}
+temp	float	$tmp66	%read{133,133} %write{132,132}
+temp	float	$tmp67	%read{134,134} %write{133,133}
+temp	float	$tmp68	%read{142,142} %write{134,134}
+temp	float	$tmp69	%read{137,137} %write{135,135}
+temp	float	$tmp70	%read{137,137} %write{136,136}
+temp	float	$tmp71	%read{141,141} %write{137,137}
+temp	float	$tmp72	%read{140,140} %write{138,138}
+temp	float	$tmp73	%read{140,140} %write{139,139}
+temp	float	$tmp74	%read{141,141} %write{140,140}
+temp	float	$tmp75	%read{142,142} %write{141,141}
+const	string	$const32	"PxrTextureLookup"		%read{144,257} %write{2147483647,-1}
+const	string	$const33	"firstchannel"		%read{148,261} %write{2147483647,-1}
+const	string	$const34	"blur"		%read{148,261} %write{2147483647,-1}
+const	string	$const35	"missingcolor"		%read{148,261} %write{2147483647,-1}
+const	string	$const36	"interp"		%read{148,261} %write{2147483647,-1}
+const	string	$const37	"width"		%read{148,261} %write{2147483647,-1}
+temp	int	$tmp76	%read{150,150} %write{149,149}
+const	string	$const38	"channels"		%read{154,267} %write{2147483647,-1}
+temp	int	$tmp77	%read{156,159} %write{155,158}
+temp	int	$tmp78	%read{158,158} %write{157,157}
+temp	int	$tmp79	%read{161,161} %write{160,160}
+temp	int	$tmp80	%read{162,166} %write{161,165}
+temp	int	$tmp81	%read{164,164} %write{163,163}
+temp	int	$tmp82	%read{165,165} %write{164,164}
+temp	float	$tmp83	%read{168,168} %write{167,167}
+temp	float	$tmp84	%read{170,170} %write{169,169}
+temp	float	$tmp85	%read{172,172} %write{171,171}
+const	string	$const39	"PxrLinearizeSRGB"		%read{175,291} %write{2147483647,-1}
+temp	int	$tmp86	%read{181,181} %write{180,180}
+const	string	$const40	"ocioDisabled"		%read{176,292} %write{2147483647,-1}
+const	string	$const41	""		%read{177,295} %write{2147483647,-1}
+temp	int	$tmp87	%read{2147483647,-1} %write{178,178}
+const	string	$const42	"user:ociocolorspacename"		%read{178,294} %write{2147483647,-1}
+temp	int	$tmp88	%read{180,180} %write{179,179}
+temp	int	$tmp89	%read{184,197} %write{184,197}
+temp	int	$tmp90	%read{182,197} %write{183,197}
+temp	float	$tmp91	%read{184,197} %write{184,197}
+const	float	$const43	0.0404499993		%read{187,303} %write{2147483647,-1}
+temp	int	$tmp92	%read{184,197} %write{184,197}
+temp	float	$tmp93	%read{184,197} %write{184,197}
+const	float	$const44	0.0773993805		%read{190,306} %write{2147483647,-1}
+temp	float	$tmp94	%read{184,197} %write{184,197}
+temp	float	$tmp95	%read{184,197} %write{184,197}
+temp	float	$tmp96	%read{184,197} %write{184,197}
+const	float	$const45	0.0549999997		%read{193,309} %write{2147483647,-1}
+temp	float	$tmp97	%read{184,197} %write{184,197}
+const	float	$const46	0.947867274		%read{194,310} %write{2147483647,-1}
+temp	float	$tmp98	%read{184,197} %write{184,197}
+const	float	$const47	2.4000001		%read{195,311} %write{2147483647,-1}
+temp	int	$tmp99	%read{199,199} %write{198,198}
+temp	int	$tmp100	%read{208,212} %write{207,211}
+temp	int	$tmp101	%read{210,210} %write{209,209}
+temp	int	$tmp102	%read{211,211} %write{210,210}
+temp	int	$tmp103	%read{219,219} %write{218,218}
+temp	int	$tmp104	%read{2147483647,-1} %write{216,216}
+temp	int	$tmp105	%read{218,218} %write{217,217}
+temp	int	$tmp106	%read{221,221} %write{220,220}
+temp	float	$tmp107	%read{224,224} %write{223,223}
+temp	float	$tmp108	%read{225,225} %write{224,224}
+temp	int	$tmp109	%read{227,227} %write{226,226}
+temp	int	$tmp110	%read{233,233} %write{232,232}
+temp	int	$tmp111	%read{236,236} %write{235,235}
+temp	int	$tmp112	%read{237,242} %write{236,241}
+temp	string	$tmp113	%read{239,239} %write{238,238}
+temp	int	$tmp114	%read{240,240} %write{239,239}
+temp	int	$tmp115	%read{241,241} %write{240,240}
+const	int	$const48	16		%read{244,244} %write{2147483647,-1}
+temp	int	$tmp116	%read{245,245} %write{244,244}
+temp	int	$tmp117	%read{247,247} %write{246,246}
+temp	int	$tmp118	%read{250,349} %write{250,349}
+temp	int	$tmp119	%read{248,349} %write{249,349}
+temp	string	$tmp120	%read{250,349} %write{250,349}
+temp	int	$tmp121	%read{250,349} %write{250,349}
+temp	color	$tmp122	%read{250,349} %write{250,349}
+temp	string	$tmp123	%read{250,349} %write{250,349}
+temp	int	$tmp124	%read{250,349} %write{250,349}
+temp	int	$tmp125	%read{250,349} %write{250,349}
+temp	int	$tmp126	%read{250,349} %write{250,349}
+temp	int	$tmp127	%read{250,349} %write{250,349}
+temp	int	$tmp128	%read{250,349} %write{250,349}
+temp	int	$tmp129	%read{250,349} %write{250,349}
+temp	int	$tmp130	%read{250,349} %write{250,349}
+temp	float	$tmp131	%read{250,349} %write{250,349}
+temp	float	$tmp132	%read{250,349} %write{250,349}
+temp	float	$tmp133	%read{250,349} %write{250,349}
+temp	int	$tmp134	%read{250,349} %write{250,349}
+temp	color	$tmp135	%read{250,349} %write{250,349}
+temp	int	$tmp136	%read{250,349} %write{250,349}
+temp	int	$tmp137	%read{2147483647,-1} %write{250,349}
+temp	int	$tmp138	%read{250,349} %write{250,349}
+temp	int	$tmp139	%read{250,349} %write{250,349}
+temp	int	$tmp140	%read{250,349} %write{250,349}
+temp	float	$tmp141	%read{250,349} %write{250,349}
+temp	int	$tmp142	%read{250,349} %write{250,349}
+temp	float	$tmp143	%read{250,349} %write{250,349}
+temp	float	$tmp144	%read{250,349} %write{250,349}
+temp	float	$tmp145	%read{250,349} %write{250,349}
+temp	float	$tmp146	%read{250,349} %write{250,349}
+temp	float	$tmp147	%read{250,349} %write{250,349}
+temp	float	$tmp148	%read{250,349} %write{250,349}
+temp	color	$tmp149	%read{250,349} %write{250,349}
+temp	color	$tmp150	%read{250,349} %write{250,349}
+temp	color	$tmp151	%read{250,349} %write{250,349}
+temp	color	$tmp152	%read{250,349} %write{250,349}
+temp	color	$tmp153	%read{250,349} %write{250,349}
+temp	color	$tmp154	%read{250,349} %write{250,349}
+temp	color	$tmp155	%read{250,349} %write{250,349}
+const	string	$const49	"levels"		%read{321,321} %write{2147483647,-1}
+temp	color	$tmp156	%read{250,349} %write{250,349}
+temp	color	$tmp157	%read{250,349} %write{250,349}
+const	color	$const50	1 1 1		%read{326,328} %write{2147483647,-1}
+const	string	$const51	"clamp"		%read{325,325} %write{2147483647,-1}
+temp	color	$tmp160	%read{250,349} %write{250,349}
+temp	int	$tmp162	%read{250,349} %write{250,349}
+temp	int	$tmp163	%read{250,349} %write{250,349}
+temp	int	$tmp165	%read{250,349} %write{250,349}
+temp	int	$tmp166	%read{250,349} %write{250,349}
+temp	color	$tmp167	%read{250,349} %write{250,349}
+temp	color	$tmp168	%read{250,349} %write{250,349}
+temp	color	$tmp169	%read{250,349} %write{250,349}
+temp	color	$tmp170	%read{250,349} %write{250,349}
+temp	color	$tmp171	%read{250,349} %write{250,349}
+temp	int	$tmp172	%read{2147483647,-1} %write{250,349}
+code outChannelsRGB.data
+# PxrProjectionLayer.osl:234
+#     output Channels outChannelsRGB = EMPTY_CHANNELS
+	aassign		outChannelsRGB.data $const2 $const1 	%filename{"PxrProjectionLayer.osl"} %line{234} %argrw{"wrr"}
+	aassign		outChannelsRGB.data $const3 $const1 	%argrw{"wrr"}
+	aassign		outChannelsRGB.data $const4 $const1 	%argrw{"wrr"}
+	aassign		outChannelsRGB.data $const5 $const1 	%argrw{"wrr"}
+	aassign		outChannelsRGB.data $const6 $const1 	%argrw{"wrr"}
+	aassign		outChannelsRGB.data $const7 $const1 	%argrw{"wrr"}
+	aassign		outChannelsRGB.data $const8 $const1 	%argrw{"wrr"}
+	aassign		outChannelsRGB.data $const9 $const1 	%argrw{"wrr"}
+	aassign		outChannelsRGB.data $const10 $const1 	%argrw{"wrr"}
+	aassign		outChannelsRGB.data $const11 $const1 	%argrw{"wrr"}
+	aassign		outChannelsRGB.data $const12 $const1 	%argrw{"wrr"}
+	aassign		outChannelsRGB.data $const13 $const1 	%argrw{"wrr"}
+	aassign		outChannelsRGB.data $const14 $const1 	%argrw{"wrr"}
+	aassign		outChannelsRGB.data $const15 $const1 	%argrw{"wrr"}
+	aassign		outChannelsRGB.data $const16 $const1 	%argrw{"wrr"}
+	aassign		outChannelsRGB.data $const17 $const1 	%argrw{"wrr"}
+code ___main___
+# PxrProjectionLayer.osl:241
+#     if (mask <= 0.0)
+	le		$tmp17 mask $const18 	%filename{"PxrProjectionLayer.osl"} %line{241} %argrw{"wrr"}
+	if		$tmp17 20 20 	%argrw{"r"}
+# PxrProjectionLayer.osl:243
+#         resultA = 0.0;
+	assign		resultA $const18 	%line{243} %argrw{"wr"}
+# PxrProjectionLayer.osl:244
+#         return;
+	exit	%line{244}
+# PxrProjectionLayer.osl:248
+#     float st[2] = {0, 0};
+	assign		st $const19 	%line{248} %argrw{"wr"}
+# PxrProjectionLayer.osl:249
+#     if (!isconnected(manifold))
+	isconnected	$tmp18 manifold 	%line{249} %argrw{"wr"}
+	eq		$tmp19 $tmp18 $const2 	%argrw{"wrr"}
+	if		$tmp19 32 36 	%argrw{"r"}
+# PxrProjectionLayer.osl:251
+#         if (!getattribute("primvar", "st", st))
+	getattribute	$tmp20 $const20 $const21 st 	%line{251} %argrw{"wrrw"}
+	eq		$tmp21 $tmp20 $const2 	%argrw{"wrr"}
+	if		$tmp21 32 32 	%argrw{"r"}
+# PxrProjectionLayer.osl:253
+#             if (!getattribute("primvar", "_polygonUV", st))
+	getattribute	$tmp22 $const20 $const22 st 	%line{253} %argrw{"wrrw"}
+	eq		$tmp23 $tmp22 $const2 	%argrw{"wrr"}
+	if		$tmp23 32 32 	%argrw{"r"}
+# PxrProjectionLayer.osl:255
+#                 st[0] = u;
+	aassign		st $const2 u 	%line{255} %argrw{"wrr"}
+# PxrProjectionLayer.osl:256
+#                 st[1] = v;
+	aassign		st $const3 v 	%line{256} %argrw{"wrr"}
+# PxrProjectionLayer.osl:262
+#         st[0] = manifold.Q.x;
+	compref		$tmp24 manifold.Q $const2 	%line{262} %argrw{"wrr"}
+	aassign		st $const2 $tmp24 	%argrw{"wrr"}
+# PxrProjectionLayer.osl:263
+#         st[1] = manifold.Q.y;
+	compref		$tmp25 manifold.Q $const3 	%line{263} %argrw{"wrr"}
+	aassign		st $const3 $tmp25 	%argrw{"wrr"}
+# PxrProjectionLayer.osl:267
+#     TxParams txparams = initTxParams(firstChannel, blur,
+	functioncall	$const23 57 	%line{267} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:83
+#     return initTxParams(firstchannel, blur, missingcolor, missingalpha, filter, 1.0);
+	functioncall	$const23 57 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h"} %line{83} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:68
+#     if (filter == 0)
+	eq		$tmp26 filter $const2 	%line{68} %argrw{"wrr"}
+	if		$tmp26 41 45 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:69
+#         interp = "closest";
+	assign		___418_interp $const25 	%line{69} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:70
+#     else if (filter == 2)
+	eq		$tmp27 filter $const4 	%line{70} %argrw{"wrr"}
+	if		$tmp27 44 45 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:71
+#         interp = "linear";
+	assign		___418_interp $const26 	%line{71} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:73
+#         interp = "smartcubic";
+	assign		___418_interp $const27 	%line{73} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:75
+#     TxParams params = {firstchannel, blur, missingcolor, missingalpha,
+	assign		___418_params.firstchannel firstChannel 	%line{75} %argrw{"wr"}
+	assign		___418_params.blur blur 	%argrw{"wr"}
+	assign		___418_params.missingcolor missingColor 	%argrw{"wr"}
+	assign		___418_params.missingalpha missingAlpha 	%argrw{"wr"}
+	assign		___418_params.interp ___418_interp 	%argrw{"wr"}
+	assign		___418_params.width $const24 	%argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:77
+#     return params;
+	assign		txparams.firstchannel ___418_params.firstchannel 	%line{77} %argrw{"wr"}
+	assign		txparams.blur ___418_params.blur 	%argrw{"wr"}
+	assign		txparams.missingcolor ___418_params.missingcolor 	%argrw{"wr"}
+	assign		txparams.missingalpha ___418_params.missingalpha 	%argrw{"wr"}
+	assign		txparams.interp ___418_params.interp 	%argrw{"wr"}
+	assign		txparams.width ___418_params.width 	%argrw{"wr"}
+# PxrProjectionLayer.osl:269
+#     TxCoords txcoords = initTxCoords(st[0], st[1], 0);
+	aref		$tmp28 st $const2 	%filename{"PxrProjectionLayer.osl"} %line{269} %argrw{"wrr"}
+	aref		$tmp29 st $const3 	%argrw{"wrr"}
+	functioncall	$const28 81 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:100
+#     float _tt = invertT ? invertCoord(tt) : tt;
+	if		$const2 67 68 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h"} %line{100} %argrw{"r"}
+	functioncall	$const29 67 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:48
+#     return floor(tt) + 1.0 - (tt - floor(tt));
+	floor		$tmp30 $tmp29 	%line{48} %argrw{"wr"}
+	add		$tmp31 $tmp30 $const24 	%argrw{"wrr"}
+	floor		$tmp32 $tmp29 	%argrw{"wr"}
+	sub		$tmp33 $tmp29 $tmp32 	%argrw{"wrr"}
+	sub		___420__tt $tmp31 $tmp33 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:100
+#     float _tt = invertT ? invertCoord(tt) : tt;
+	assign		___420__tt $tmp29 	%line{100} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:101
+#     TxCoords coords = { ss, _tt, Dx(ss), Dy(ss), Dx(_tt), Dy(_tt) };
+	assign		___420_coords.s $tmp28 	%line{101} %argrw{"wr"}
+	assign		___420_coords.t ___420__tt 	%argrw{"wr"}
+	Dx		___420_coords.dsdx $tmp28 	%argrw{"wr"} %argderivs{1}
+	Dy		___420_coords.dsdy $tmp28 	%argrw{"wr"} %argderivs{1}
+	Dx		___420_coords.dtdx ___420__tt 	%argrw{"wr"} %argderivs{1}
+	Dy		___420_coords.dtdy ___420__tt 	%argrw{"wr"} %argderivs{1}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:102
+#     return coords;
+	assign		txcoords.s ___420_coords.s 	%line{102} %argrw{"wr"}
+	assign		txcoords.t ___420_coords.t 	%argrw{"wr"}
+	assign		txcoords.dsdx ___420_coords.dsdx 	%argrw{"wr"}
+	assign		txcoords.dsdy ___420_coords.dsdy 	%argrw{"wr"}
+	assign		txcoords.dtdx ___420_coords.dtdx 	%argrw{"wr"}
+	assign		txcoords.dtdy ___420_coords.dtdy 	%argrw{"wr"}
+	return
+# PxrProjectionLayer.osl:270
+#     if (mipBias != 0 || maxResolution != 0)
+	neq		$tmp34 mipBias $const2 	%filename{"PxrProjectionLayer.osl"} %line{270} %argrw{"wrr"}
+	neq		$tmp35 $tmp34 $const2 	%argrw{"wrr"}
+	if		$tmp35 84 87 	%argrw{"r"}
+	neq		$tmp36 maxResolution $const2 	%argrw{"wrr"}
+	neq		$tmp37 $tmp36 $const2 	%argrw{"wrr"}
+	assign		$tmp35 $tmp37 	%argrw{"wr"}
+	if		$tmp35 144 144 	%argrw{"r"}
+# PxrProjectionLayer.osl:271
+#         PxrTxMipControls(mipBias, maxResolution, txcoords, txparams);
+	functioncall	$const30 144 	%line{271} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:153
+#     float bias = (mipBias != 0) ? pow(2.0, mipBias) : 1.0;
+	neq		$tmp38 mipBias $const2 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h"} %line{153} %argrw{"wrr"}
+	if		$tmp38 93 94 	%argrw{"r"}
+	assign		$tmp39 mipBias 	%argrw{"wr"}
+	pow		___429_bias $const31 $tmp39 	%argrw{"wrr"}
+	assign		___429_bias $const24 	%argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:154
+#     bias *= params.width;
+	mul		___429_bias ___429_bias txparams.width 	%line{154} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:155
+#     if (maxResolution <= 0)
+	le		$tmp40 maxResolution $const2 	%line{155} %argrw{"wrr"}
+	if		$tmp40 98 144 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:157
+#         params.width = bias;
+	assign		txparams.width ___429_bias 	%line{157} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:163
+#         float minRadius = (maxResolution > 0.0) ? 1.0 / maxResolution : 0.0;
+	gt		$tmp41 maxResolution $const18 	%line{163} %argrw{"wrr"}
+	if		$tmp41 101 102 	%argrw{"r"}
+	div		___431_minRadius $const24 maxResolution 	%argrw{"wrr"}
+	assign		___431_minRadius $const18 	%argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:165
+#         float dsdx = max(minRadius, abs(coords.dsdx * bias)) * sign(coords.dsdx);
+	mul		$tmp44 txcoords.dsdx ___429_bias 	%line{165} %argrw{"wrr"}
+	abs		$tmp43 $tmp44 	%argrw{"wr"}
+	max		$tmp42 ___431_minRadius $tmp43 	%argrw{"wrr"}
+	sign		$tmp45 txcoords.dsdx 	%argrw{"wr"}
+	mul		___431_dsdx $tmp42 $tmp45 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:166
+#         float dtdx = max(minRadius, abs(coords.dtdx * bias)) * sign(coords.dtdx);
+	mul		$tmp48 txcoords.dtdx ___429_bias 	%line{166} %argrw{"wrr"}
+	abs		$tmp47 $tmp48 	%argrw{"wr"}
+	max		$tmp46 ___431_minRadius $tmp47 	%argrw{"wrr"}
+	sign		$tmp49 txcoords.dtdx 	%argrw{"wr"}
+	mul		___431_dtdx $tmp46 $tmp49 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:167
+#         float dsdy = max(minRadius, abs(coords.dsdy * bias)) * sign(coords.dsdy);
+	mul		$tmp52 txcoords.dsdy ___429_bias 	%line{167} %argrw{"wrr"}
+	abs		$tmp51 $tmp52 	%argrw{"wr"}
+	max		$tmp50 ___431_minRadius $tmp51 	%argrw{"wrr"}
+	sign		$tmp53 txcoords.dsdy 	%argrw{"wr"}
+	mul		___431_dsdy $tmp50 $tmp53 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:168
+#         float dtdy = max(minRadius, abs(coords.dtdy * bias)) * sign(coords.dtdy);
+	mul		$tmp56 txcoords.dtdy ___429_bias 	%line{168} %argrw{"wrr"}
+	abs		$tmp55 $tmp56 	%argrw{"wr"}
+	max		$tmp54 ___431_minRadius $tmp55 	%argrw{"wrr"}
+	sign		$tmp57 txcoords.dtdy 	%argrw{"wr"}
+	mul		___431_dtdy $tmp54 $tmp57 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:169
+#         vector v0 = point(coords.dsdx, coords.dtdx, 0) - point(coords.dsdy, coords.dtdy, 0);
+	point		$tmp58 txcoords.dsdx txcoords.dtdx $const18 	%line{169} %argrw{"wrrr"}
+	point		$tmp59 txcoords.dsdy txcoords.dtdy $const18 	%argrw{"wrrr"}
+	sub		___431_v0 $tmp58 $tmp59 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:170
+#         vector v1 = point(dsdx, dtdx, 0) - point(dsdy, dtdy, 0);
+	point		$tmp60 ___431_dsdx ___431_dtdx $const18 	%line{170} %argrw{"wrrr"}
+	point		$tmp61 ___431_dsdy ___431_dtdy $const18 	%argrw{"wrrr"}
+	sub		___431_v1 $tmp60 $tmp61 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:171
+#         params.width = (v1.x*v1.x + v1.y*v1.y) / (v0.x*v0.x + v1.y*v1.y);
+	compref		$tmp62 ___431_v1 $const2 	%line{171} %argrw{"wrr"}
+	compref		$tmp63 ___431_v1 $const2 	%argrw{"wrr"}
+	mul		$tmp64 $tmp62 $tmp63 	%argrw{"wrr"}
+	compref		$tmp65 ___431_v1 $const3 	%argrw{"wrr"}
+	compref		$tmp66 ___431_v1 $const3 	%argrw{"wrr"}
+	mul		$tmp67 $tmp65 $tmp66 	%argrw{"wrr"}
+	add		$tmp68 $tmp64 $tmp67 	%argrw{"wrr"}
+	compref		$tmp69 ___431_v0 $const2 	%argrw{"wrr"}
+	compref		$tmp70 ___431_v0 $const2 	%argrw{"wrr"}
+	mul		$tmp71 $tmp69 $tmp70 	%argrw{"wrr"}
+	compref		$tmp72 ___431_v1 $const3 	%argrw{"wrr"}
+	compref		$tmp73 ___431_v1 $const3 	%argrw{"wrr"}
+	mul		$tmp74 $tmp72 $tmp73 	%argrw{"wrr"}
+	add		$tmp75 $tmp71 $tmp74 	%argrw{"wrr"}
+	div		txparams.width $tmp68 $tmp75 	%argrw{"wrr"}
+	assign		txparams.width txparams.width 	%argrw{"wr"}
+# PxrProjectionLayer.osl:274
+#     resultRGB = PxrTextureLookup(filename, txcoords, txparams);
+	functioncall	$const32 174 	%filename{"PxrProjectionLayer.osl"} %line{274} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:185
+#     int success = 0;
+	assign		___433_success $const2 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h"} %line{185} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:186
+#     int nchannels = 0;
+	assign		___433_nchannels $const2 	%line{186} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:187
+#     color finalResult = 0;
+	assign		___433_finalResult $const2 	%line{187} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:189
+#     color result = texture(filename,
+	texture		___433_result filename txcoords.s txcoords.t txcoords.dsdx txcoords.dtdx txcoords.dsdy txcoords.dtdy $const33 txparams.firstchannel $const34 txparams.blur $const35 txparams.missingcolor $const36 txparams.interp $const37 txparams.width 	%line{189} %argrw{"wrrrrrrrrrrrrrrrrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:199
+#     if (result == params.missingcolor) return result;
+	eq		$tmp76 ___433_result txparams.missingcolor 	%line{199} %argrw{"wrr"}
+	if		$tmp76 153 153 	%argrw{"r"}
+	assign		resultRGB ___433_result 	%argrw{"wr"}
+	return
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:202
+#     finalResult = result;
+	assign		___433_finalResult ___433_result 	%line{202} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:205
+#     success = gettextureinfo(filename, "channels", nchannels);
+	gettextureinfo	___433_success filename $const38 ___433_nchannels 	%line{205} %argrw{"wrrw"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:206
+#     if (success && nchannels)
+	neq		$tmp77 ___433_success $const2 	%line{206} %argrw{"wrr"}
+	if		$tmp77 159 159 	%argrw{"r"}
+	neq		$tmp78 ___433_nchannels $const2 	%argrw{"wrr"}
+	assign		$tmp77 $tmp78 	%argrw{"wr"}
+	if		$tmp77 173 173 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:208
+#         if (nchannels == 1 || nchannels == 2)
+	eq		$tmp79 ___433_nchannels $const3 	%line{208} %argrw{"wrr"}
+	neq		$tmp80 $tmp79 $const2 	%argrw{"wrr"}
+	if		$tmp80 163 166 	%argrw{"r"}
+	eq		$tmp81 ___433_nchannels $const4 	%argrw{"wrr"}
+	neq		$tmp82 $tmp81 $const2 	%argrw{"wrr"}
+	assign		$tmp80 $tmp82 	%argrw{"wr"}
+	if		$tmp80 173 173 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:211
+#             finalResult[0] = result[0];
+	compref		$tmp83 ___433_result $const2 	%line{211} %argrw{"wrr"}
+	compassign	___433_finalResult $const2 $tmp83 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:212
+#             finalResult[1] = result[0];
+	compref		$tmp84 ___433_result $const2 	%line{212} %argrw{"wrr"}
+	compassign	___433_finalResult $const3 $tmp84 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:213
+#             finalResult[2] = result[0];
+	compref		$tmp85 ___433_result $const2 	%line{213} %argrw{"wrr"}
+	compassign	___433_finalResult $const4 $tmp85 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:217
+#     return finalResult;
+	assign		resultRGB ___433_finalResult 	%line{217} %argrw{"wr"}
+# PxrProjectionLayer.osl:275
+#     if (linearize) PxrLinearizeSRGB(resultRGB);
+	if		linearize 198 198 	%filename{"PxrProjectionLayer.osl"} %line{275} %argrw{"r"}
+	functioncall	$const39 198 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:125
+#     if (ocioDisabled())
+	functioncall	$const40 181 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h"} %line{125} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:118
+#     string foo = "";
+	assign		___422_foo $const41 	%line{118} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:119
+#     getattribute("user:ociocolorspacename", foo);
+	getattribute	$tmp87 $const42 ___422_foo 	%line{119} %argrw{"wrw"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:120
+#     return int(foo == "");
+	eq		$tmp88 ___422_foo $const41 	%line{120} %argrw{"wrr"}
+	assign		$tmp86 $tmp88 	%argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:125
+#     if (ocioDisabled())
+	if		$tmp86 198 198 	%line{125} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:127
+#         for (int i = 0; i < 3; ++i)
+	for		$tmp90 184 186 197 198 	%line{127} %argrw{"r"}
+	assign		___425_i $const2 	%argrw{"wr"}
+	lt		$tmp89 ___425_i $const5 	%argrw{"wrr"}
+	neq		$tmp90 $tmp89 $const2 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:129
+#             if (inout[i] < 0.04045)
+	compref		$tmp91 resultRGB ___425_i 	%line{129} %argrw{"wrr"}
+	lt		$tmp92 $tmp91 $const43 	%argrw{"wrr"}
+	if		$tmp92 192 197 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:130
+#                 inout[i] = inout[i] * 0.07739938;
+	compref		$tmp93 resultRGB ___425_i 	%line{130} %argrw{"wrr"}
+	mul		$tmp94 $tmp93 $const44 	%argrw{"wrr"}
+	compassign	resultRGB ___425_i $tmp94 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:132
+#                 inout[i] = pow((inout[i] + 0.055) * 0.947867299, 2.4);
+	compref		$tmp96 resultRGB ___425_i 	%line{132} %argrw{"wrr"}
+	add		$tmp97 $tmp96 $const45 	%argrw{"wrr"}
+	mul		$tmp98 $tmp97 $const46 	%argrw{"wrr"}
+	pow		$tmp95 $tmp98 $const47 	%argrw{"wrr"}
+	compassign	resultRGB ___425_i $tmp95 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:127
+#         for (int i = 0; i < 3; ++i)
+	add		___425_i ___425_i $const3 	%line{127} %argrw{"wrr"}
+# PxrProjectionLayer.osl:278
+#     if (isconnected(resultA))
+	isconnected	$tmp99 resultA 	%filename{"PxrProjectionLayer.osl"} %line{278} %argrw{"wr"}
+	if		$tmp99 226 226 	%argrw{"r"}
+# PxrProjectionLayer.osl:280
+#         txparams.firstchannel += 3;
+	add		txparams.firstchannel txparams.firstchannel $const5 	%line{280} %argrw{"wrr"}
+	assign		txparams.firstchannel txparams.firstchannel 	%argrw{"wr"}
+# PxrProjectionLayer.osl:281
+#         resultA = PxrTextureLookup(filename, txcoords, txparams);
+	functioncall	$const32 205 	%line{281} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:223
+#     color missingalpha = params.missingalpha;
+	assign		___436_missingalpha txparams.missingalpha 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h"} %line{223} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:224
+#     return texture(filename,
+	texture		resultA filename txcoords.s txcoords.t txcoords.dsdx txcoords.dtdx txcoords.dsdy txcoords.dtdy $const33 txparams.firstchannel $const34 txparams.blur $const35 ___436_missingalpha $const36 txparams.interp $const37 txparams.width 	%line{224} %argrw{"wrrrrrrrrrrrrrrrrr"}
+# PxrProjectionLayer.osl:282
+#         txparams.firstchannel -= 3;
+	sub		txparams.firstchannel txparams.firstchannel $const5 	%filename{"PxrProjectionLayer.osl"} %line{282} %argrw{"wrr"}
+	assign		txparams.firstchannel txparams.firstchannel 	%argrw{"wr"}
+# PxrProjectionLayer.osl:283
+#         if (linearize && !premultiply)
+	neq		$tmp100 linearize $const2 	%line{283} %argrw{"wrr"}
+	if		$tmp100 212 212 	%argrw{"r"}
+	eq		$tmp101 premultiply $const2 	%argrw{"wrr"}
+	neq		$tmp102 $tmp101 $const2 	%argrw{"wrr"}
+	assign		$tmp100 $tmp102 	%argrw{"wr"}
+	if		$tmp100 226 226 	%argrw{"r"}
+# PxrProjectionLayer.osl:291
+#             PxrLinearizeSRGB(resultA);
+	functioncall	$const39 226 	%line{291} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:139
+#     if (ocioDisabled())
+	functioncall	$const40 219 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h"} %line{139} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:118
+#     string foo = "";
+	assign		___422_foo $const41 	%line{118} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:119
+#     getattribute("user:ociocolorspacename", foo);
+	getattribute	$tmp104 $const42 ___422_foo 	%line{119} %argrw{"wrw"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:120
+#     return int(foo == "");
+	eq		$tmp105 ___422_foo $const41 	%line{120} %argrw{"wrr"}
+	assign		$tmp103 $tmp105 	%argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:139
+#     if (ocioDisabled())
+	if		$tmp103 226 226 	%line{139} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:141
+#         if (inout < 0.04045)
+	lt		$tmp106 resultA $const43 	%line{141} %argrw{"wrr"}
+	if		$tmp106 223 226 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:142
+#             inout = inout * 0.07739938;
+	mul		resultA resultA $const44 	%line{142} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:144
+#             inout = pow((inout + 0.055) * 0.947867299, 2.4);
+	add		$tmp107 resultA $const45 	%line{144} %argrw{"wrr"}
+	mul		$tmp108 $tmp107 $const46 	%argrw{"wrr"}
+	pow		resultA $tmp108 $const47 	%argrw{"wrr"}
+# PxrProjectionLayer.osl:295
+#     if (mask < 1.0)
+	lt		$tmp109 mask $const24 	%filename{"PxrProjectionLayer.osl"} %line{295} %argrw{"wrr"}
+	if		$tmp109 232 232 	%argrw{"r"}
+# PxrProjectionLayer.osl:297
+#         resultA *= mask;
+	mul		resultA resultA mask 	%line{297} %argrw{"wrr"}
+# PxrProjectionLayer.osl:298
+#         if (premultiply)
+	if		premultiply 231 232 	%line{298} %argrw{"r"}
+# PxrProjectionLayer.osl:302
+#             resultRGB *= resultA;
+	mul		resultRGB resultRGB resultA 	%line{302} %argrw{"wrr"}
+# PxrProjectionLayer.osl:306
+#             resultRGB *= mask;
+	mul		resultRGB resultRGB mask 	%line{306} %argrw{"wrr"}
+# PxrProjectionLayer.osl:310
+#     if (isconnected(outChannelsRGB))
+	isconnected	$tmp110 outChannelsRGB 	%line{310} %argrw{"wr"}
+	if		$tmp110 350 350 	%argrw{"r"}
+# PxrProjectionLayer.osl:313
+#         int outNumChannels = arraylength(channelsFilenames);
+	arraylength	___457_outNumChannels channelsFilenames 	%line{313} %argrw{"wr"}
+# PxrProjectionLayer.osl:314
+#         if (outNumChannels == 1 && channelsFilenames[0] == "")
+	eq		$tmp111 ___457_outNumChannels $const3 	%line{314} %argrw{"wrr"}
+	neq		$tmp112 $tmp111 $const2 	%argrw{"wrr"}
+	if		$tmp112 242 242 	%argrw{"r"}
+	aref		$tmp113 channelsFilenames $const2 	%argrw{"wrr"}
+	eq		$tmp114 $tmp113 $const41 	%argrw{"wrr"}
+	neq		$tmp115 $tmp114 $const2 	%argrw{"wrr"}
+	assign		$tmp112 $tmp115 	%argrw{"wr"}
+	if		$tmp112 244 244 	%argrw{"r"}
+# PxrProjectionLayer.osl:316
+#             outNumChannels = 0;
+	assign		___457_outNumChannels $const2 	%line{316} %argrw{"wr"}
+# PxrProjectionLayer.osl:318
+#         outNumChannels = min(outNumChannels, NUM_CHANNELS - 1);
+	sub		$tmp116 $const48 $const3 	%line{318} %argrw{"wrr"}
+	min		___457_outNumChannels ___457_outNumChannels $tmp116 	%argrw{"wrr"}
+# PxrProjectionLayer.osl:320
+#         if (outNumChannels > 0)
+	gt		$tmp117 ___457_outNumChannels $const2 	%line{320} %argrw{"wrr"}
+	if		$tmp117 350 350 	%argrw{"r"}
+# PxrProjectionLayer.osl:322
+#             for (int ch = 0; ch < outNumChannels; ch++)
+	for		$tmp119 250 252 348 350 	%line{322} %argrw{"r"}
+	assign		___460_ch $const2 	%argrw{"wr"}
+	lt		$tmp118 ___460_ch ___457_outNumChannels 	%argrw{"wrr"}
+	neq		$tmp119 $tmp118 $const2 	%argrw{"wrr"}
+# PxrProjectionLayer.osl:324
+#                 if (channelsFilenames[ch] == "") continue;
+	aref		$tmp120 channelsFilenames ___460_ch 	%line{324} %argrw{"wrr"}
+	eq		$tmp121 $tmp120 $const41 	%argrw{"wrr"}
+	if		$tmp121 256 256 	%argrw{"r"}
+	continue
+# PxrProjectionLayer.osl:326
+#                 outChannelsRGB.data[ch] = PxrTextureLookup(channelsFilenames[ch],
+	aref		$tmp123 channelsFilenames ___460_ch 	%line{326} %argrw{"wrr"}
+	functioncall	$const32 287 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:185
+#     int success = 0;
+	assign		___433_success $const2 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h"} %line{185} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:186
+#     int nchannels = 0;
+	assign		___433_nchannels $const2 	%line{186} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:187
+#     color finalResult = 0;
+	assign		___433_finalResult $const2 	%line{187} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:189
+#     color result = texture(filename,
+	texture		___433_result $tmp123 txcoords.s txcoords.t txcoords.dsdx txcoords.dtdx txcoords.dsdy txcoords.dtdy $const33 txparams.firstchannel $const34 txparams.blur $const35 txparams.missingcolor $const36 txparams.interp $const37 txparams.width 	%line{189} %argrw{"wrrrrrrrrrrrrrrrrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:199
+#     if (result == params.missingcolor) return result;
+	eq		$tmp124 ___433_result txparams.missingcolor 	%line{199} %argrw{"wrr"}
+	if		$tmp124 266 266 	%argrw{"r"}
+	assign		$tmp122 ___433_result 	%argrw{"wr"}
+	return
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:202
+#     finalResult = result;
+	assign		___433_finalResult ___433_result 	%line{202} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:205
+#     success = gettextureinfo(filename, "channels", nchannels);
+	gettextureinfo	___433_success $tmp123 $const38 ___433_nchannels 	%line{205} %argrw{"wrrw"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:206
+#     if (success && nchannels)
+	neq		$tmp125 ___433_success $const2 	%line{206} %argrw{"wrr"}
+	if		$tmp125 272 272 	%argrw{"r"}
+	neq		$tmp126 ___433_nchannels $const2 	%argrw{"wrr"}
+	assign		$tmp125 $tmp126 	%argrw{"wr"}
+	if		$tmp125 286 286 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:208
+#         if (nchannels == 1 || nchannels == 2)
+	eq		$tmp127 ___433_nchannels $const3 	%line{208} %argrw{"wrr"}
+	neq		$tmp128 $tmp127 $const2 	%argrw{"wrr"}
+	if		$tmp128 276 279 	%argrw{"r"}
+	eq		$tmp129 ___433_nchannels $const4 	%argrw{"wrr"}
+	neq		$tmp130 $tmp129 $const2 	%argrw{"wrr"}
+	assign		$tmp128 $tmp130 	%argrw{"wr"}
+	if		$tmp128 286 286 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:211
+#             finalResult[0] = result[0];
+	compref		$tmp131 ___433_result $const2 	%line{211} %argrw{"wrr"}
+	compassign	___433_finalResult $const2 $tmp131 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:212
+#             finalResult[1] = result[0];
+	compref		$tmp132 ___433_result $const2 	%line{212} %argrw{"wrr"}
+	compassign	___433_finalResult $const3 $tmp132 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:213
+#             finalResult[2] = result[0];
+	compref		$tmp133 ___433_result $const2 	%line{213} %argrw{"wrr"}
+	compassign	___433_finalResult $const4 $tmp133 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:217
+#     return finalResult;
+	assign		$tmp122 ___433_finalResult 	%line{217} %argrw{"wr"}
+# PxrProjectionLayer.osl:326
+#                 outChannelsRGB.data[ch] = PxrTextureLookup(channelsFilenames[ch],
+	aassign		outChannelsRGB.data ___460_ch $tmp122 	%filename{"PxrProjectionLayer.osl"} %line{326} %argrw{"wrr"}
+# PxrProjectionLayer.osl:329
+#                 if (channelsLinearize[ch]) PxrLinearizeSRGB(outChannelsRGB.data[ch]);
+	aref		$tmp134 channelsLinearize ___460_ch 	%line{329} %argrw{"wrr"}
+	if		$tmp134 315 315 	%argrw{"r"}
+	aref		$tmp135 outChannelsRGB.data ___460_ch 	%argrw{"wrr"}
+	functioncall	$const39 314 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:125
+#     if (ocioDisabled())
+	functioncall	$const40 297 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h"} %line{125} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:118
+#     string foo = "";
+	assign		___422_foo $const41 	%line{118} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:119
+#     getattribute("user:ociocolorspacename", foo);
+	getattribute	$tmp137 $const42 ___422_foo 	%line{119} %argrw{"wrw"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:120
+#     return int(foo == "");
+	eq		$tmp138 ___422_foo $const41 	%line{120} %argrw{"wrr"}
+	assign		$tmp136 $tmp138 	%argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:125
+#     if (ocioDisabled())
+	if		$tmp136 314 314 	%line{125} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:127
+#         for (int i = 0; i < 3; ++i)
+	for		$tmp140 300 302 313 314 	%line{127} %argrw{"r"}
+	assign		___425_i $const2 	%argrw{"wr"}
+	lt		$tmp139 ___425_i $const5 	%argrw{"wrr"}
+	neq		$tmp140 $tmp139 $const2 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:129
+#             if (inout[i] < 0.04045)
+	compref		$tmp141 $tmp135 ___425_i 	%line{129} %argrw{"wrr"}
+	lt		$tmp142 $tmp141 $const43 	%argrw{"wrr"}
+	if		$tmp142 308 313 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:130
+#                 inout[i] = inout[i] * 0.07739938;
+	compref		$tmp143 $tmp135 ___425_i 	%line{130} %argrw{"wrr"}
+	mul		$tmp144 $tmp143 $const44 	%argrw{"wrr"}
+	compassign	$tmp135 ___425_i $tmp144 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:132
+#                 inout[i] = pow((inout[i] + 0.055) * 0.947867299, 2.4);
+	compref		$tmp146 $tmp135 ___425_i 	%line{132} %argrw{"wrr"}
+	add		$tmp147 $tmp146 $const45 	%argrw{"wrr"}
+	mul		$tmp148 $tmp147 $const46 	%argrw{"wrr"}
+	pow		$tmp145 $tmp148 $const47 	%argrw{"wrr"}
+	compassign	$tmp135 ___425_i $tmp145 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:127
+#         for (int i = 0; i < 3; ++i)
+	add		___425_i ___425_i $const3 	%line{127} %argrw{"wrr"}
+# PxrProjectionLayer.osl:329
+#                 if (channelsLinearize[ch]) PxrLinearizeSRGB(outChannelsRGB.data[ch]);
+	aassign		outChannelsRGB.data ___460_ch $tmp135 	%filename{"PxrProjectionLayer.osl"} %line{329} %argrw{"wrr"}
+# PxrProjectionLayer.osl:331
+#                 outChannelsRGB.data[ch] = levels(channelsInBlack[ch],
+	aref		$tmp150 channelsInBlack ___460_ch 	%line{331} %argrw{"wrr"}
+# PxrProjectionLayer.osl:332
+#                                                 channelsInGamma[ch],
+	aref		$tmp151 channelsInGamma ___460_ch 	%line{332} %argrw{"wrr"}
+# PxrProjectionLayer.osl:333
+#                                                 channelsInWhite[ch],
+	aref		$tmp152 channelsInWhite ___460_ch 	%line{333} %argrw{"wrr"}
+# PxrProjectionLayer.osl:334
+#                                                 channelsOutBlack[ch],
+	aref		$tmp153 channelsOutBlack ___460_ch 	%line{334} %argrw{"wrr"}
+# PxrProjectionLayer.osl:335
+#                                                 channelsOutWhite[ch],
+	aref		$tmp154 channelsOutWhite ___460_ch 	%line{335} %argrw{"wrr"}
+# PxrProjectionLayer.osl:336
+#                                                 outChannelsRGB.data[ch]);
+	aref		$tmp155 outChannelsRGB.data ___460_ch 	%line{336} %argrw{"wrr"}
+# PxrProjectionLayer.osl:331
+#                 outChannelsRGB.data[ch] = levels(channelsInBlack[ch],
+	functioncall	$const49 341 	%line{331} %argrw{"r"}
+# PxrProjectionLayer.osl:46
+#     color out = (in - inBlack) / (inWhite - inBlack);
+	sub		$tmp156 $tmp155 $tmp150 	%line{46} %argrw{"wrr"}
+	sub		$tmp157 $tmp152 $tmp150 	%argrw{"wrr"}
+	div		___446_out $tmp156 $tmp157 	%argrw{"wrr"}
+# PxrProjectionLayer.osl:48
+#     out = clamp(out, color(0), color(1));
+	functioncall	$const51 328 	%line{48} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
+	min		$tmp160 ___446_out $const50 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	max		___446_out $tmp160 $const1 	%argrw{"wrr"}
+# PxrProjectionLayer.osl:50
+#     if (inGamma != color(1.0) && inGamma != color(0.0))
+	neq		$tmp162 $tmp151 $const50 	%filename{"PxrProjectionLayer.osl"} %line{50} %argrw{"wrr"}
+	neq		$tmp163 $tmp162 $const2 	%argrw{"wrr"}
+	if		$tmp163 334 334 	%argrw{"r"}
+	neq		$tmp165 $tmp151 $const1 	%argrw{"wrr"}
+	neq		$tmp166 $tmp165 $const2 	%argrw{"wrr"}
+	assign		$tmp163 $tmp166 	%argrw{"wr"}
+	if		$tmp163 337 337 	%argrw{"r"}
+# PxrProjectionLayer.osl:51
+#         out = pow(out, 1.0/inGamma);
+	div		$tmp167 $const24 $tmp151 	%line{51} %argrw{"wrr"}
+	pow		___446_out ___446_out $tmp167 	%argrw{"wrr"}
+# PxrProjectionLayer.osl:53
+#     out = (outWhite - outBlack) * out + outBlack;
+	sub		$tmp168 $tmp154 $tmp153 	%line{53} %argrw{"wrr"}
+	mul		$tmp169 $tmp168 ___446_out 	%argrw{"wrr"}
+	add		___446_out $tmp169 $tmp153 	%argrw{"wrr"}
+# PxrProjectionLayer.osl:54
+#     return out;
+	assign		$tmp149 ___446_out 	%line{54} %argrw{"wr"}
+# PxrProjectionLayer.osl:331
+#                 outChannelsRGB.data[ch] = levels(channelsInBlack[ch],
+	aassign		outChannelsRGB.data ___460_ch $tmp149 	%line{331} %argrw{"wrr"}
+# PxrProjectionLayer.osl:338
+#                 if (premultiplyChannels) outChannelsRGB.data[ch] *= resultA;
+	if		premultiplyChannels 346 346 	%line{338} %argrw{"r"}
+	aref		$tmp170 outChannelsRGB.data ___460_ch 	%argrw{"wrr"}
+	mul		$tmp171 $tmp170 resultA 	%argrw{"wrr"}
+	aassign		outChannelsRGB.data ___460_ch $tmp171 	%argrw{"wrr"}
+# PxrProjectionLayer.osl:340
+#                 outChannelsRGB.numChannels = ch + 1;
+	add		outChannelsRGB.numChannels ___460_ch $const3 	%line{340} %argrw{"wrr"}
+	assign		outChannelsRGB.numChannels outChannelsRGB.numChannels 	%argrw{"wr"}
+# PxrProjectionLayer.osl:322
+#             for (int ch = 0; ch < outNumChannels; ch++)
+	assign		$tmp172 ___460_ch 	%line{322} %argrw{"wr"}
+	add		___460_ch ___460_ch $const3 	%argrw{"wrr"}
+# PxrProjectionLayer.osl:345
+#     resultR = resultRGB.r;
+	compref		resultR resultRGB $const2 	%line{345} %argrw{"wrr"}
+# PxrProjectionLayer.osl:346
+#     resultG = resultRGB.g;
+	compref		resultG resultRGB $const3 	%line{346} %argrw{"wrr"}
+# PxrProjectionLayer.osl:347
+#     resultB = resultRGB.b;
+	compref		resultB resultRGB $const4 	%line{347} %argrw{"wrr"}
+	end

@@ -1,0 +1,1196 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrBlackBody.osl/obj/PxrBlackBody.oso
+shader PxrBlackBody	%meta{int,rfm_nodeid,1053437} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/color"} %meta{string,rfh_classification,"Pattern/Color"} %meta{string,help,"Produces a color that represents the radiation emitted by an ideal black body heated at the given temperature in the visible<br>spectrum. This allows you to easily create plausible light colors based on standard temperature measurement. See the Color temperature article for more infomration. "} 
+param	float	temperature	6500		%meta{string,widget,"default"} %meta{string,help,"The temperature (in kelvin) of the black body.<br>Color temperatures over 6,500K are called cool colors (bluish white),<br>while lower color temperatures (2,700 to 3,000 K) are called warm colors (yellowish white through red). "} %meta{string,label,"Temperature"} %meta{float,max,50000} %meta{float,min,1000}  %read{403,445} %write{2147483647,-1}
+param	float	physicalIntensity	0		%meta{string,widget,"default"} %meta{string,help,"When set to 1, the color will emit the correct amount of energy. WARNING: Your color will become super intense. "} %meta{string,label,"Physical Intensity"} %meta{float,max,1} %meta{float,min,0}  %read{432,453} %write{2147483647,-1}
+param	float	exposure	0		%meta{string,widget,"default"} %meta{string,help,"Use exposure to adjust the amount of emited energy. Very useful if physical intensity is above zero. "} %meta{string,label,"Exposure"} %meta{float,slidermax,25} %meta{float,slidermin,-25}  %read{451,451} %write{2147483647,-1}
+oparam	color	resultRGB	0 0 0		%read{456,458} %write{455,455}
+oparam	float	resultR	0		%read{2147483647,-1} %write{456,456}
+oparam	float	resultG	0		%read{2147483647,-1} %write{457,457}
+oparam	float	resultB	0		%read{2147483647,-1} %write{458,458}
+local	color[199]	___325_bb_Rec709	%read{424,424} %write{5,203}
+local	color[199]	___325_bb_ACEScg	%read{419,419} %write{204,402}
+local	float	___325_temp	%read{419,424} %write{407,407}
+local	color	___325_rgb	%read{423,431} %write{408,430}
+local	color	___325_norm	%read{427,427} %write{409,425}
+local	string	___325_ocio	%read{2147483647,-1} %write{410,410}
+local	string	___325_cs_name	%read{415,423} %write{411,412}
+local	float	___329_lum	%read{428,430} %write{427,427}
+local	color	___330_rgb	%read{434,442} %write{431,441}
+local	float	___331_norm	%read{439,441} %write{438,438}
+local	color	tempv	%read{452,452} %write{0,442}
+local	float	physv	%read{447,454} %write{1,450}
+local	float	expv	%read{452,452} %write{2,451}
+const	color	$const1	0 0 0		%read{0,0} %write{2147483647,-1}
+const	float	$const2	0		%read{1,453} %write{2147483647,-1}
+const	string	$const3	"KtoRGB"		%read{3,3} %write{2147483647,-1}
+const	int	$const4	0		%read{5,456} %write{2147483647,-1}
+const	string	$const5	"RixKtoRGB"		%read{4,4} %write{2147483647,-1}
+const	color	$const6	1 0.00865400024 0		%read{5,6} %write{2147483647,-1}
+const	int	$const7	1		%read{6,457} %write{2147483647,-1}
+const	color	$const8	1 0.0700389966 0		%read{7,7} %write{2147483647,-1}
+const	int	$const9	2		%read{7,458} %write{2147483647,-1}
+const	color	$const10	1 0.132991999 0		%read{8,8} %write{2147483647,-1}
+const	int	$const11	3		%read{8,207} %write{2147483647,-1}
+const	color	$const12	1 0.195577994 0		%read{9,9} %write{2147483647,-1}
+const	int	$const13	4		%read{9,208} %write{2147483647,-1}
+const	color	$const14	1 0.256671011 0.00810199976		%read{10,10} %write{2147483647,-1}
+const	int	$const15	5		%read{10,209} %write{2147483647,-1}
+const	color	$const16	1 0.315616995 0.0340199992		%read{11,11} %write{2147483647,-1}
+const	int	$const17	6		%read{11,210} %write{2147483647,-1}
+const	color	$const18	1 0.372047991 0.0674630031		%read{12,12} %write{2147483647,-1}
+const	int	$const19	7		%read{12,211} %write{2147483647,-1}
+const	color	$const20	1 0.425778002 0.107639998		%read{13,13} %write{2147483647,-1}
+const	int	$const21	8		%read{13,212} %write{2147483647,-1}
+const	color	$const22	1 0.476732999 0.153626993		%read{14,14} %write{2147483647,-1}
+const	int	$const23	9		%read{14,213} %write{2147483647,-1}
+const	color	$const24	1 0.524915993 0.204468995		%read{15,15} %write{2147483647,-1}
+const	int	$const25	10		%read{15,214} %write{2147483647,-1}
+const	color	$const26	1 0.570375979 0.259243011		%read{16,16} %write{2147483647,-1}
+const	int	$const27	11		%read{16,215} %write{2147483647,-1}
+const	color	$const28	1 0.613193989 0.317088991		%read{17,17} %write{2147483647,-1}
+const	int	$const29	12		%read{17,216} %write{2147483647,-1}
+const	color	$const30	1 0.653469026 0.377229005		%read{18,18} %write{2147483647,-1}
+const	int	$const31	13		%read{18,217} %write{2147483647,-1}
+const	color	$const32	1 0.691316009 0.43897301		%read{19,19} %write{2147483647,-1}
+const	int	$const33	14		%read{19,218} %write{2147483647,-1}
+const	color	$const34	1 0.72685498 0.501716018		%read{20,20} %write{2147483647,-1}
+const	int	$const35	15		%read{20,219} %write{2147483647,-1}
+const	color	$const36	1 0.760209978 0.564939022		%read{21,21} %write{2147483647,-1}
+const	int	$const37	16		%read{21,220} %write{2147483647,-1}
+const	color	$const38	1 0.791504979 0.628199995		%read{22,22} %write{2147483647,-1}
+const	int	$const39	17		%read{22,221} %write{2147483647,-1}
+const	color	$const40	1 0.820863008 0.691129029		%read{23,23} %write{2147483647,-1}
+const	int	$const41	18		%read{23,222} %write{2147483647,-1}
+const	color	$const42	1 0.848405004 0.753421009		%read{24,24} %write{2147483647,-1}
+const	int	$const43	19		%read{24,223} %write{2147483647,-1}
+const	color	$const44	1 0.874248981 0.814824998		%read{25,25} %write{2147483647,-1}
+const	int	$const45	20		%read{25,224} %write{2147483647,-1}
+const	color	$const46	1 0.898504019 0.875141025		%read{26,26} %write{2147483647,-1}
+const	int	$const47	21		%read{26,225} %write{2147483647,-1}
+const	color	$const48	1 0.921279013 0.934213996		%read{27,27} %write{2147483647,-1}
+const	int	$const49	22		%read{27,226} %write{2147483647,-1}
+const	color	$const50	1 0.942673981 0.991922975		%read{28,28} %write{2147483647,-1}
+const	int	$const51	23		%read{28,227} %write{2147483647,-1}
+const	color	$const52	0.954033971 0.91852802 1		%read{29,29} %write{2147483647,-1}
+const	int	$const53	24		%read{29,228} %write{2147483647,-1}
+const	color	$const54	0.906681001 0.890085995 1		%read{30,30} %write{2147483647,-1}
+const	int	$const55	25		%read{30,229} %write{2147483647,-1}
+const	color	$const56	0.864965022 0.864530981 1		%read{31,31} %write{2147483647,-1}
+const	int	$const57	26		%read{31,230} %write{2147483647,-1}
+const	color	$const58	0.827996016 0.841463983 1		%read{32,32} %write{2147483647,-1}
+const	int	$const59	27		%read{32,231} %write{2147483647,-1}
+const	color	$const60	0.795054972 0.820551991 1		%read{33,33} %write{2147483647,-1}
+const	int	$const61	28		%read{33,232} %write{2147483647,-1}
+const	color	$const62	0.765554011 0.801518977 1		%read{34,34} %write{2147483647,-1}
+const	int	$const63	29		%read{34,233} %write{2147483647,-1}
+const	color	$const64	0.73901099 0.784133971 1		%read{35,35} %write{2147483647,-1}
+const	int	$const65	30		%read{35,234} %write{2147483647,-1}
+const	color	$const66	0.715029001 0.76819998 1		%read{36,36} %write{2147483647,-1}
+const	int	$const67	31		%read{36,235} %write{2147483647,-1}
+const	color	$const68	0.693274021 0.753549993 1		%read{37,37} %write{2147483647,-1}
+const	int	$const69	32		%read{37,236} %write{2147483647,-1}
+const	color	$const70	0.673466027 0.740041018 1		%read{38,38} %write{2147483647,-1}
+const	int	$const71	33		%read{38,237} %write{2147483647,-1}
+const	color	$const72	0.655369997 0.727551997 1		%read{39,39} %write{2147483647,-1}
+const	int	$const73	34		%read{39,238} %write{2147483647,-1}
+const	color	$const74	0.638783991 0.715974987 1		%read{40,40} %write{2147483647,-1}
+const	int	$const75	35		%read{40,239} %write{2147483647,-1}
+const	color	$const76	0.623537004 0.705218017 1		%read{41,41} %write{2147483647,-1}
+const	int	$const77	36		%read{41,240} %write{2147483647,-1}
+const	color	$const78	0.609480977 0.69520098 1		%read{42,42} %write{2147483647,-1}
+const	int	$const79	37		%read{42,241} %write{2147483647,-1}
+const	color	$const80	0.596489012 0.685854018 1		%read{43,43} %write{2147483647,-1}
+const	int	$const81	38		%read{43,242} %write{2147483647,-1}
+const	color	$const82	0.58445102 0.677112997 1		%read{44,44} %write{2147483647,-1}
+const	int	$const83	39		%read{44,243} %write{2147483647,-1}
+const	color	$const84	0.573270023 0.668923974 1		%read{45,45} %write{2147483647,-1}
+const	int	$const85	40		%read{45,244} %write{2147483647,-1}
+const	color	$const86	0.562861979 0.661239982 1		%read{46,46} %write{2147483647,-1}
+const	int	$const87	41		%read{46,245} %write{2147483647,-1}
+const	color	$const88	0.553153992 0.654015005 1		%read{47,47} %write{2147483647,-1}
+const	int	$const89	42		%read{47,246} %write{2147483647,-1}
+const	color	$const90	0.544080973 0.647212982 1		%read{48,48} %write{2147483647,-1}
+const	int	$const91	43		%read{48,247} %write{2147483647,-1}
+const	color	$const92	0.535584986 0.640797973 1		%read{49,49} %write{2147483647,-1}
+const	int	$const93	44		%read{49,248} %write{2147483647,-1}
+const	color	$const94	0.527615011 0.634739995 1		%read{50,50} %write{2147483647,-1}
+const	int	$const95	45		%read{50,249} %write{2147483647,-1}
+const	color	$const96	0.520125985 0.629010022 1		%read{51,51} %write{2147483647,-1}
+const	int	$const97	46		%read{51,250} %write{2147483647,-1}
+const	color	$const98	0.513077974 0.623583972 1		%read{52,52} %write{2147483647,-1}
+const	int	$const99	47		%read{52,251} %write{2147483647,-1}
+const	color	$const100	0.506434023 0.618439972 1		%read{53,53} %write{2147483647,-1}
+const	int	$const101	48		%read{53,252} %write{2147483647,-1}
+const	color	$const102	0.500163019 0.613556027 1		%read{54,54} %write{2147483647,-1}
+const	int	$const103	49		%read{54,253} %write{2147483647,-1}
+const	color	$const104	0.494233996 0.608914018 1		%read{55,55} %write{2147483647,-1}
+const	int	$const105	50		%read{55,254} %write{2147483647,-1}
+const	color	$const106	0.48862201 0.604498029 1		%read{56,56} %write{2147483647,-1}
+const	int	$const107	51		%read{56,255} %write{2147483647,-1}
+const	color	$const108	0.48330301 0.600291014 1		%read{57,57} %write{2147483647,-1}
+const	int	$const109	52		%read{57,256} %write{2147483647,-1}
+const	color	$const110	0.478255004 0.596279979 1		%read{58,58} %write{2147483647,-1}
+const	int	$const111	53		%read{58,257} %write{2147483647,-1}
+const	color	$const112	0.473459989 0.592450976 1		%read{59,59} %write{2147483647,-1}
+const	int	$const113	54		%read{59,258} %write{2147483647,-1}
+const	color	$const114	0.468899012 0.588793993 1		%read{60,60} %write{2147483647,-1}
+const	int	$const115	55		%read{60,259} %write{2147483647,-1}
+const	color	$const116	0.464556009 0.585296988 1		%read{61,61} %write{2147483647,-1}
+const	int	$const117	56		%read{61,260} %write{2147483647,-1}
+const	color	$const118	0.460417002 0.581951022 1		%read{62,62} %write{2147483647,-1}
+const	int	$const119	57		%read{62,261} %write{2147483647,-1}
+const	color	$const120	0.456467003 0.578745008 1		%read{63,63} %write{2147483647,-1}
+const	int	$const121	58		%read{63,262} %write{2147483647,-1}
+const	color	$const122	0.452695012 0.575672984 1		%read{64,64} %write{2147483647,-1}
+const	int	$const123	59		%read{64,263} %write{2147483647,-1}
+const	color	$const124	0.449090004 0.572724998 1		%read{65,65} %write{2147483647,-1}
+const	int	$const125	60		%read{65,264} %write{2147483647,-1}
+const	color	$const126	0.445641011 0.569894016 1		%read{66,66} %write{2147483647,-1}
+const	int	$const127	61		%read{66,265} %write{2147483647,-1}
+const	color	$const128	0.44233799 0.567174971 1		%read{67,67} %write{2147483647,-1}
+const	int	$const129	62		%read{67,266} %write{2147483647,-1}
+const	color	$const130	0.439172 0.564561009 1		%read{68,68} %write{2147483647,-1}
+const	int	$const131	63		%read{68,267} %write{2147483647,-1}
+const	color	$const132	0.436136007 0.562044978 1		%read{69,69} %write{2147483647,-1}
+const	int	$const133	64		%read{69,268} %write{2147483647,-1}
+const	color	$const134	0.433221996 0.559623003 1		%read{70,70} %write{2147483647,-1}
+const	int	$const135	65		%read{70,269} %write{2147483647,-1}
+const	color	$const136	0.430422992 0.557290018 1		%read{71,71} %write{2147483647,-1}
+const	int	$const137	66		%read{71,270} %write{2147483647,-1}
+const	color	$const138	0.427731991 0.555041015 1		%read{72,72} %write{2147483647,-1}
+const	int	$const139	67		%read{72,271} %write{2147483647,-1}
+const	color	$const140	0.425143003 0.552872002 1		%read{73,73} %write{2147483647,-1}
+const	int	$const141	68		%read{73,272} %write{2147483647,-1}
+const	color	$const142	0.422652006 0.550777972 1		%read{74,74} %write{2147483647,-1}
+const	int	$const143	69		%read{74,273} %write{2147483647,-1}
+const	color	$const144	0.420251995 0.548756003 1		%read{75,75} %write{2147483647,-1}
+const	int	$const145	70		%read{75,274} %write{2147483647,-1}
+const	color	$const146	0.417939007 0.546802998 1		%read{76,76} %write{2147483647,-1}
+const	int	$const147	71		%read{76,275} %write{2147483647,-1}
+const	color	$const148	0.415708989 0.544914007 1		%read{77,77} %write{2147483647,-1}
+const	int	$const149	72		%read{77,276} %write{2147483647,-1}
+const	color	$const150	0.413556993 0.543088019 1		%read{78,78} %write{2147483647,-1}
+const	int	$const151	73		%read{78,277} %write{2147483647,-1}
+const	color	$const152	0.411478996 0.541320026 1		%read{79,79} %write{2147483647,-1}
+const	int	$const153	74		%read{79,278} %write{2147483647,-1}
+const	color	$const154	0.409471005 0.539609015 1		%read{80,80} %write{2147483647,-1}
+const	int	$const155	75		%read{80,279} %write{2147483647,-1}
+const	color	$const156	0.407530993 0.537950993 1		%read{81,81} %write{2147483647,-1}
+const	int	$const157	76		%read{81,280} %write{2147483647,-1}
+const	color	$const158	0.405654013 0.536345005 1		%read{82,82} %write{2147483647,-1}
+const	int	$const159	77		%read{82,281} %write{2147483647,-1}
+const	color	$const160	0.403838992 0.534788013 1		%read{83,83} %write{2147483647,-1}
+const	int	$const161	78		%read{83,282} %write{2147483647,-1}
+const	color	$const162	0.402081013 0.533277988 1		%read{84,84} %write{2147483647,-1}
+const	int	$const163	79		%read{84,283} %write{2147483647,-1}
+const	color	$const164	0.400379002 0.531812012 1		%read{85,85} %write{2147483647,-1}
+const	int	$const165	80		%read{85,284} %write{2147483647,-1}
+const	color	$const166	0.39873001 0.530389011 1		%read{86,86} %write{2147483647,-1}
+const	int	$const167	81		%read{86,285} %write{2147483647,-1}
+const	color	$const168	0.397130996 0.529007971 1		%read{87,87} %write{2147483647,-1}
+const	int	$const169	82		%read{87,286} %write{2147483647,-1}
+const	color	$const170	0.395581007 0.527665019 1		%read{88,88} %write{2147483647,-1}
+const	int	$const171	83		%read{88,287} %write{2147483647,-1}
+const	color	$const172	0.39407599 0.526360989 1		%read{89,89} %write{2147483647,-1}
+const	int	$const173	84		%read{89,288} %write{2147483647,-1}
+const	color	$const174	0.392616004 0.525093019 1		%read{90,90} %write{2147483647,-1}
+const	int	$const175	85		%read{90,289} %write{2147483647,-1}
+const	color	$const176	0.391198009 0.523859024 1		%read{91,91} %write{2147483647,-1}
+const	int	$const177	86		%read{91,290} %write{2147483647,-1}
+const	color	$const178	0.389820993 0.522659004 1		%read{92,92} %write{2147483647,-1}
+const	int	$const179	87		%read{92,291} %write{2147483647,-1}
+const	color	$const180	0.388482004 0.521490991 1		%read{93,93} %write{2147483647,-1}
+const	int	$const181	88		%read{93,292} %write{2147483647,-1}
+const	color	$const182	0.387181014 0.520353973 1		%read{94,94} %write{2147483647,-1}
+const	int	$const183	89		%read{94,293} %write{2147483647,-1}
+const	color	$const184	0.385915011 0.519245982 1		%read{95,95} %write{2147483647,-1}
+const	int	$const185	90		%read{95,294} %write{2147483647,-1}
+const	color	$const186	0.384683996 0.518167019 1		%read{96,96} %write{2147483647,-1}
+const	int	$const187	91		%read{96,295} %write{2147483647,-1}
+const	color	$const188	0.383486003 0.517114997 1		%read{97,97} %write{2147483647,-1}
+const	int	$const189	92		%read{97,296} %write{2147483647,-1}
+const	color	$const190	0.382319987 0.516089976 1		%read{98,98} %write{2147483647,-1}
+const	int	$const191	93		%read{98,297} %write{2147483647,-1}
+const	color	$const192	0.381184012 0.515089989 1		%read{99,99} %write{2147483647,-1}
+const	int	$const193	94		%read{99,298} %write{2147483647,-1}
+const	color	$const194	0.380077004 0.514114976 1		%read{100,100} %write{2147483647,-1}
+const	int	$const195	95		%read{100,299} %write{2147483647,-1}
+const	color	$const196	0.378998995 0.513163984 1		%read{101,101} %write{2147483647,-1}
+const	int	$const197	96		%read{101,300} %write{2147483647,-1}
+const	color	$const198	0.377947986 0.512234986 1		%read{102,102} %write{2147483647,-1}
+const	int	$const199	97		%read{102,301} %write{2147483647,-1}
+const	color	$const200	0.376922011 0.511328995 1		%read{103,103} %write{2147483647,-1}
+const	int	$const201	98		%read{103,302} %write{2147483647,-1}
+const	color	$const202	0.375923008 0.510443985 1		%read{104,104} %write{2147483647,-1}
+const	int	$const203	99		%read{104,303} %write{2147483647,-1}
+const	color	$const204	0.374947011 0.509579003 1		%read{105,105} %write{2147483647,-1}
+const	int	$const205	100		%read{105,304} %write{2147483647,-1}
+const	color	$const206	0.373995006 0.508733988 1		%read{106,106} %write{2147483647,-1}
+const	int	$const207	101		%read{106,305} %write{2147483647,-1}
+const	color	$const208	0.373066008 0.507909 1		%read{107,107} %write{2147483647,-1}
+const	int	$const209	102		%read{107,306} %write{2147483647,-1}
+const	color	$const210	0.372159004 0.507102013 1		%read{108,108} %write{2147483647,-1}
+const	int	$const211	103		%read{108,307} %write{2147483647,-1}
+const	color	$const212	0.371271998 0.506313026 1		%read{109,109} %write{2147483647,-1}
+const	int	$const213	104		%read{109,308} %write{2147483647,-1}
+const	color	$const214	0.370406002 0.505541027 1		%read{110,110} %write{2147483647,-1}
+const	int	$const215	105		%read{110,309} %write{2147483647,-1}
+const	color	$const216	0.369560003 0.504786015 1		%read{111,111} %write{2147483647,-1}
+const	int	$const217	106		%read{111,310} %write{2147483647,-1}
+const	color	$const218	0.368732989 0.50404799 1		%read{112,112} %write{2147483647,-1}
+const	int	$const219	107		%read{112,311} %write{2147483647,-1}
+const	color	$const220	0.367924005 0.503324986 1		%read{113,113} %write{2147483647,-1}
+const	int	$const221	108		%read{113,312} %write{2147483647,-1}
+const	color	$const222	0.367134005 0.502617002 1		%read{114,114} %write{2147483647,-1}
+const	int	$const223	109		%read{114,313} %write{2147483647,-1}
+const	color	$const224	0.366360009 0.501924992 1		%read{115,115} %write{2147483647,-1}
+const	int	$const225	110		%read{115,314} %write{2147483647,-1}
+const	color	$const226	0.365603 0.501245975 1		%read{116,116} %write{2147483647,-1}
+const	int	$const227	111		%read{116,315} %write{2147483647,-1}
+const	color	$const228	0.364863008 0.50058198 1		%read{117,117} %write{2147483647,-1}
+const	int	$const229	112		%read{117,316} %write{2147483647,-1}
+const	color	$const230	0.364138007 0.499931008 1		%read{118,118} %write{2147483647,-1}
+const	int	$const231	113		%read{118,317} %write{2147483647,-1}
+const	color	$const232	0.363427997 0.499293 1		%read{119,119} %write{2147483647,-1}
+const	int	$const233	114		%read{119,318} %write{2147483647,-1}
+const	color	$const234	0.362733006 0.498667985 1		%read{120,120} %write{2147483647,-1}
+const	int	$const235	115		%read{120,319} %write{2147483647,-1}
+const	color	$const236	0.362051994 0.498055995 1		%read{121,121} %write{2147483647,-1}
+const	int	$const237	116		%read{121,320} %write{2147483647,-1}
+const	color	$const238	0.361384988 0.497455001 1		%read{122,122} %write{2147483647,-1}
+const	int	$const239	117		%read{122,321} %write{2147483647,-1}
+const	color	$const240	0.360731006 0.496865988 1		%read{123,123} %write{2147483647,-1}
+const	int	$const241	118		%read{123,322} %write{2147483647,-1}
+const	color	$const242	0.360091001 0.496288002 1		%read{124,124} %write{2147483647,-1}
+const	int	$const243	119		%read{124,323} %write{2147483647,-1}
+const	color	$const244	0.359463006 0.495721012 1		%read{125,125} %write{2147483647,-1}
+const	int	$const245	120		%read{125,324} %write{2147483647,-1}
+const	color	$const246	0.358848006 0.49516499 1		%read{126,126} %write{2147483647,-1}
+const	int	$const247	121		%read{126,325} %write{2147483647,-1}
+const	color	$const248	0.358244002 0.494619995 1		%read{127,127} %write{2147483647,-1}
+const	int	$const249	122		%read{127,326} %write{2147483647,-1}
+const	color	$const250	0.357652009 0.494084001 1		%read{128,128} %write{2147483647,-1}
+const	int	$const251	123		%read{128,327} %write{2147483647,-1}
+const	color	$const252	0.357071996 0.49355799 1		%read{129,129} %write{2147483647,-1}
+const	int	$const253	124		%read{129,328} %write{2147483647,-1}
+const	color	$const254	0.356501997 0.493041992 1		%read{130,130} %write{2147483647,-1}
+const	int	$const255	125		%read{130,329} %write{2147483647,-1}
+const	color	$const256	0.355942994 0.492534995 1		%read{131,131} %write{2147483647,-1}
+const	int	$const257	126		%read{131,330} %write{2147483647,-1}
+const	color	$const258	0.355394006 0.492038012 1		%read{132,132} %write{2147483647,-1}
+const	int	$const259	127		%read{132,331} %write{2147483647,-1}
+const	color	$const260	0.354856014 0.491548985 1		%read{133,133} %write{2147483647,-1}
+const	int	$const261	128		%read{133,332} %write{2147483647,-1}
+const	color	$const262	0.354326993 0.491068006 1		%read{134,134} %write{2147483647,-1}
+const	int	$const263	129		%read{134,333} %write{2147483647,-1}
+const	color	$const264	0.353807986 0.490595996 1		%read{135,135} %write{2147483647,-1}
+const	int	$const265	130		%read{135,334} %write{2147483647,-1}
+const	color	$const266	0.353298008 0.490132004 1		%read{136,136} %write{2147483647,-1}
+const	int	$const267	131		%read{136,335} %write{2147483647,-1}
+const	color	$const268	0.352797002 0.489677012 1		%read{137,137} %write{2147483647,-1}
+const	int	$const269	132		%read{137,336} %write{2147483647,-1}
+const	color	$const270	0.352304995 0.489228994 1		%read{138,138} %write{2147483647,-1}
+const	int	$const271	133		%read{138,337} %write{2147483647,-1}
+const	color	$const272	0.351821005 0.488788009 1		%read{139,139} %write{2147483647,-1}
+const	int	$const273	134		%read{139,338} %write{2147483647,-1}
+const	color	$const274	0.351345986 0.488355011 1		%read{140,140} %write{2147483647,-1}
+const	int	$const275	135		%read{140,339} %write{2147483647,-1}
+const	color	$const276	0.350879014 0.487928987 1		%read{141,141} %write{2147483647,-1}
+const	int	$const277	136		%read{141,340} %write{2147483647,-1}
+const	color	$const278	0.350419998 0.487509996 1		%read{142,142} %write{2147483647,-1}
+const	int	$const279	137		%read{142,341} %write{2147483647,-1}
+const	color	$const280	0.349969 0.487098008 1		%read{143,143} %write{2147483647,-1}
+const	int	$const281	138		%read{143,342} %write{2147483647,-1}
+const	color	$const282	0.349525005 0.486692995 1		%read{144,144} %write{2147483647,-1}
+const	int	$const283	139		%read{144,343} %write{2147483647,-1}
+const	color	$const284	0.349088997 0.486294001 1		%read{145,145} %write{2147483647,-1}
+const	int	$const285	140		%read{145,344} %write{2147483647,-1}
+const	color	$const286	0.348659992 0.485900998 1		%read{146,146} %write{2147483647,-1}
+const	int	$const287	141		%read{146,345} %write{2147483647,-1}
+const	color	$const288	0.348237991 0.485514998 1		%read{147,147} %write{2147483647,-1}
+const	int	$const289	142		%read{147,346} %write{2147483647,-1}
+const	color	$const290	0.347822011 0.485134989 1		%read{148,148} %write{2147483647,-1}
+const	int	$const291	143		%read{148,347} %write{2147483647,-1}
+const	color	$const292	0.347413987 0.484761 1		%read{149,149} %write{2147483647,-1}
+const	int	$const293	144		%read{149,348} %write{2147483647,-1}
+const	color	$const294	0.347012013 0.484391987 1		%read{150,150} %write{2147483647,-1}
+const	int	$const295	145		%read{150,349} %write{2147483647,-1}
+const	color	$const296	0.346616 0.484028995 1		%read{151,151} %write{2147483647,-1}
+const	int	$const297	146		%read{151,350} %write{2147483647,-1}
+const	color	$const298	0.34622699 0.483671993 1		%read{152,152} %write{2147483647,-1}
+const	int	$const299	147		%read{152,351} %write{2147483647,-1}
+const	color	$const300	0.345842987 0.483319998 1		%read{153,153} %write{2147483647,-1}
+const	int	$const301	148		%read{153,352} %write{2147483647,-1}
+const	color	$const302	0.345465988 0.482973993 1		%read{154,154} %write{2147483647,-1}
+const	int	$const303	149		%read{154,353} %write{2147483647,-1}
+const	color	$const304	0.345093995 0.482632011 1		%read{155,155} %write{2147483647,-1}
+const	int	$const305	150		%read{155,354} %write{2147483647,-1}
+const	color	$const306	0.344727993 0.48229599 1		%read{156,156} %write{2147483647,-1}
+const	int	$const307	151		%read{156,355} %write{2147483647,-1}
+const	color	$const308	0.344368011 0.481965005 1		%read{157,157} %write{2147483647,-1}
+const	int	$const309	152		%read{157,356} %write{2147483647,-1}
+const	color	$const310	0.344013005 0.481638014 1		%read{158,158} %write{2147483647,-1}
+const	int	$const311	153		%read{158,357} %write{2147483647,-1}
+const	color	$const312	0.343663007 0.481316 1		%read{159,159} %write{2147483647,-1}
+const	int	$const313	154		%read{159,358} %write{2147483647,-1}
+const	color	$const314	0.343318999 0.480998993 1		%read{160,160} %write{2147483647,-1}
+const	int	$const315	155		%read{160,359} %write{2147483647,-1}
+const	color	$const316	0.342979014 0.480686992 1		%read{161,161} %write{2147483647,-1}
+const	int	$const317	156		%read{161,360} %write{2147483647,-1}
+const	color	$const318	0.342644989 0.480378002 1		%read{162,162} %write{2147483647,-1}
+const	int	$const319	157		%read{162,361} %write{2147483647,-1}
+const	color	$const320	0.342314988 0.480075002 1		%read{163,163} %write{2147483647,-1}
+const	int	$const321	158		%read{163,362} %write{2147483647,-1}
+const	color	$const322	0.341989994 0.479775012 1		%read{164,164} %write{2147483647,-1}
+const	int	$const323	159		%read{164,363} %write{2147483647,-1}
+const	color	$const324	0.341670007 0.479479998 1		%read{165,165} %write{2147483647,-1}
+const	int	$const325	160		%read{165,364} %write{2147483647,-1}
+const	color	$const326	0.341354996 0.479187995 1		%read{166,166} %write{2147483647,-1}
+const	int	$const327	161		%read{166,365} %write{2147483647,-1}
+const	color	$const328	0.341042995 0.478900999 1		%read{167,167} %write{2147483647,-1}
+const	int	$const329	162		%read{167,366} %write{2147483647,-1}
+const	color	$const330	0.340736002 0.478617996 1		%read{168,168} %write{2147483647,-1}
+const	int	$const331	163		%read{168,367} %write{2147483647,-1}
+const	color	$const332	0.340434015 0.478338003 1		%read{169,169} %write{2147483647,-1}
+const	int	$const333	164		%read{169,368} %write{2147483647,-1}
+const	color	$const334	0.340135992 0.478062987 1		%read{170,170} %write{2147483647,-1}
+const	int	$const335	165		%read{170,369} %write{2147483647,-1}
+const	color	$const336	0.339841008 0.477791011 1		%read{171,171} %write{2147483647,-1}
+const	int	$const337	166		%read{171,370} %write{2147483647,-1}
+const	color	$const338	0.339551002 0.477521986 1		%read{172,172} %write{2147483647,-1}
+const	int	$const339	167		%read{172,371} %write{2147483647,-1}
+const	color	$const340	0.339264989 0.477257013 1		%read{173,173} %write{2147483647,-1}
+const	int	$const341	168		%read{173,372} %write{2147483647,-1}
+const	color	$const342	0.338981986 0.476996005 1		%read{174,174} %write{2147483647,-1}
+const	int	$const343	169		%read{174,373} %write{2147483647,-1}
+const	color	$const344	0.338703007 0.476738006 1		%read{175,175} %write{2147483647,-1}
+const	int	$const345	170		%read{175,374} %write{2147483647,-1}
+const	color	$const346	0.338427991 0.476482987 1		%read{176,176} %write{2147483647,-1}
+const	int	$const347	171		%read{176,375} %write{2147483647,-1}
+const	color	$const348	0.338156998 0.476231992 1		%read{177,177} %write{2147483647,-1}
+const	int	$const349	172		%read{177,376} %write{2147483647,-1}
+const	color	$const350	0.337888986 0.475984007 1		%read{178,178} %write{2147483647,-1}
+const	int	$const351	173		%read{178,377} %write{2147483647,-1}
+const	color	$const352	0.337624997 0.475737989 1		%read{179,179} %write{2147483647,-1}
+const	int	$const353	174		%read{179,378} %write{2147483647,-1}
+const	color	$const354	0.337363988 0.475497007 1		%read{180,180} %write{2147483647,-1}
+const	int	$const355	175		%read{180,379} %write{2147483647,-1}
+const	color	$const356	0.337107003 0.475257993 1		%read{181,181} %write{2147483647,-1}
+const	int	$const357	176		%read{181,380} %write{2147483647,-1}
+const	color	$const358	0.336852014 0.475021988 1		%read{182,182} %write{2147483647,-1}
+const	int	$const359	177		%read{182,381} %write{2147483647,-1}
+const	color	$const360	0.336600989 0.474788994 1		%read{183,183} %write{2147483647,-1}
+const	int	$const361	178		%read{183,382} %write{2147483647,-1}
+const	color	$const362	0.336353004 0.474559009 1		%read{184,184} %write{2147483647,-1}
+const	int	$const363	179		%read{184,383} %write{2147483647,-1}
+const	color	$const364	0.336109012 0.474330992 1		%read{185,185} %write{2147483647,-1}
+const	int	$const365	180		%read{185,384} %write{2147483647,-1}
+const	color	$const366	0.335866988 0.474106997 1		%read{186,186} %write{2147483647,-1}
+const	int	$const367	181		%read{186,385} %write{2147483647,-1}
+const	color	$const368	0.335628003 0.473885 1		%read{187,187} %write{2147483647,-1}
+const	int	$const369	182		%read{187,386} %write{2147483647,-1}
+const	color	$const370	0.335393012 0.473666012 1		%read{188,188} %write{2147483647,-1}
+const	int	$const371	183		%read{188,387} %write{2147483647,-1}
+const	color	$const372	0.335159987 0.473450005 1		%read{189,189} %write{2147483647,-1}
+const	int	$const373	184		%read{189,388} %write{2147483647,-1}
+const	color	$const374	0.334930003 0.473235995 1		%read{190,190} %write{2147483647,-1}
+const	int	$const375	185		%read{190,389} %write{2147483647,-1}
+const	color	$const376	0.334702998 0.473024011 1		%read{191,191} %write{2147483647,-1}
+const	int	$const377	186		%read{191,390} %write{2147483647,-1}
+const	color	$const378	0.334477991 0.472815007 1		%read{192,192} %write{2147483647,-1}
+const	int	$const379	187		%read{192,391} %write{2147483647,-1}
+const	color	$const380	0.334255993 0.472609013 1		%read{193,193} %write{2147483647,-1}
+const	int	$const381	188		%read{193,392} %write{2147483647,-1}
+const	color	$const382	0.334037006 0.472404987 1		%read{194,194} %write{2147483647,-1}
+const	int	$const383	189		%read{194,393} %write{2147483647,-1}
+const	color	$const384	0.333820999 0.472202986 1		%read{195,195} %write{2147483647,-1}
+const	int	$const385	190		%read{195,394} %write{2147483647,-1}
+const	color	$const386	0.333606988 0.472003996 1		%read{196,196} %write{2147483647,-1}
+const	int	$const387	191		%read{196,395} %write{2147483647,-1}
+const	color	$const388	0.333395004 0.471807003 1		%read{197,197} %write{2147483647,-1}
+const	int	$const389	192		%read{197,396} %write{2147483647,-1}
+const	color	$const390	0.333186001 0.471612006 1		%read{198,198} %write{2147483647,-1}
+const	int	$const391	193		%read{198,397} %write{2147483647,-1}
+const	color	$const392	0.332980007 0.471419007 1		%read{199,199} %write{2147483647,-1}
+const	int	$const393	194		%read{199,398} %write{2147483647,-1}
+const	color	$const394	0.332774997 0.471228987 1		%read{200,200} %write{2147483647,-1}
+const	int	$const395	195		%read{200,399} %write{2147483647,-1}
+const	color	$const396	0.332572997 0.471040994 1		%read{201,201} %write{2147483647,-1}
+const	int	$const397	196		%read{201,400} %write{2147483647,-1}
+const	color	$const398	0.332374007 0.470854014 1		%read{202,203} %write{2147483647,-1}
+const	int	$const399	197		%read{202,401} %write{2147483647,-1}
+const	int	$const400	198		%read{203,402} %write{2147483647,-1}
+const	color	$const401	1 0.128644004 0.0078800004		%read{204,205} %write{2147483647,-1}
+const	color	$const402	1 0.214858994 0.0148750003		%read{206,206} %write{2147483647,-1}
+const	color	$const403	1 0.297737986 0.0296010002		%read{207,207} %write{2147483647,-1}
+const	color	$const404	1 0.374978006 0.0535209998		%read{208,208} %write{2147483647,-1}
+const	color	$const405	1 0.445739001 0.0867170021		%read{209,209} %write{2147483647,-1}
+const	color	$const406	1 0.509926021 0.128335997		%read{210,210} %write{2147483647,-1}
+const	color	$const407	1 0.567816973 0.177049994		%read{211,211} %write{2147483647,-1}
+const	color	$const408	1 0.619861007 0.231382996		%read{212,212} %write{2147483647,-1}
+const	color	$const409	1 0.666576028 0.289903998		%read{213,213} %write{2147483647,-1}
+const	color	$const410	1 0.708485007 0.351328999		%read{214,214} %write{2147483647,-1}
+const	color	$const411	1 0.746087015 0.414552003		%read{215,215} %write{2147483647,-1}
+const	color	$const412	1 0.779847026 0.478652		%read{216,216} %write{2147483647,-1}
+const	color	$const413	1 0.810186982 0.542879999		%read{217,217} %write{2147483647,-1}
+const	color	$const414	1 0.837484002 0.606639028		%read{218,218} %write{2147483647,-1}
+const	color	$const415	1 0.862079024 0.669463992		%read{219,219} %write{2147483647,-1}
+const	color	$const416	1 0.884270012 0.731000006		%read{220,220} %write{2147483647,-1}
+const	color	$const417	1 0.904326022 0.790983021		%read{221,221} %write{2147483647,-1}
+const	color	$const418	1 0.922481 0.849223971		%read{222,222} %write{2147483647,-1}
+const	color	$const419	1 0.938943982 0.905593991		%read{223,223} %write{2147483647,-1}
+const	color	$const420	1 0.95389998 0.960014999		%read{224,224} %write{2147483647,-1}
+const	color	$const421	0.987707973 0.955618024 1		%read{225,225} %write{2147483647,-1}
+const	color	$const422	0.940845013 0.921952009 1		%read{226,226} %write{2147483647,-1}
+const	color	$const423	0.899833977 0.891963005 1		%read{227,227} %write{2147483647,-1}
+const	color	$const424	0.863705993 0.865109026 1		%read{228,228} %write{2147483647,-1}
+const	color	$const425	0.831686974 0.840946019 1		%read{229,229} %write{2147483647,-1}
+const	color	$const426	0.803152978 0.819108009 1		%read{230,230} %write{2147483647,-1}
+const	color	$const427	0.777595997 0.799291015 1		%read{231,231} %write{2147483647,-1}
+const	color	$const428	0.754599988 0.781241 1		%read{232,232} %write{2147483647,-1}
+const	color	$const429	0.733817995 0.764743984 1		%read{233,233} %write{2147483647,-1}
+const	color	$const430	0.714963019 0.749615014 1		%read{234,234} %write{2147483647,-1}
+const	color	$const431	0.697791994 0.735701025 1		%read{235,235} %write{2147483647,-1}
+const	color	$const432	0.682102025 0.722868025 1		%read{236,236} %write{2147483647,-1}
+const	color	$const433	0.667719007 0.711000979 1		%read{237,237} %write{2147483647,-1}
+const	color	$const434	0.654495001 0.699998975 1		%read{238,238} %write{2147483647,-1}
+const	color	$const435	0.642301023 0.689776003 1		%read{239,239} %write{2147483647,-1}
+const	color	$const436	0.631027997 0.680254996 1		%read{240,240} %write{2147483647,-1}
+const	color	$const437	0.620580018 0.671370983 1		%read{241,241} %write{2147483647,-1}
+const	color	$const438	0.61087501 0.663064003 1		%read{242,242} %write{2147483647,-1}
+const	color	$const439	0.601840019 0.655282974 1		%read{243,243} %write{2147483647,-1}
+const	color	$const440	0.593410015 0.647980988 1		%read{244,244} %write{2147483647,-1}
+const	color	$const441	0.585529983 0.641116977 1		%read{245,245} %write{2147483647,-1}
+const	color	$const442	0.578149974 0.634654999 1		%read{246,246} %write{2147483647,-1}
+const	color	$const443	0.571226001 0.62856102 1		%read{247,247} %write{2147483647,-1}
+const	color	$const444	0.564719021 0.62280798 1		%read{248,248} %write{2147483647,-1}
+const	color	$const445	0.558593988 0.617367983 1		%read{249,249} %write{2147483647,-1}
+const	color	$const446	0.552820027 0.612217009 1		%read{250,250} %write{2147483647,-1}
+const	color	$const447	0.54736799 0.607334018 1		%read{251,251} %write{2147483647,-1}
+const	color	$const448	0.542213976 0.602698982 1		%read{252,252} %write{2147483647,-1}
+const	color	$const449	0.537334025 0.598294973 1		%read{253,253} %write{2147483647,-1}
+const	color	$const450	0.532709002 0.594105005 1		%read{254,254} %write{2147483647,-1}
+const	color	$const451	0.528319001 0.590115011 1		%read{255,255} %write{2147483647,-1}
+const	color	$const452	0.524147987 0.586310983 1		%read{256,256} %write{2147483647,-1}
+const	color	$const453	0.520179987 0.582682014 1		%read{257,257} %write{2147483647,-1}
+const	color	$const454	0.516402006 0.57921499 1		%read{258,258} %write{2147483647,-1}
+const	color	$const455	0.512799978 0.575900972 1		%read{259,259} %write{2147483647,-1}
+const	color	$const456	0.509364009 0.572730005 1		%read{260,260} %write{2147483647,-1}
+const	color	$const457	0.506080985 0.569693029 1		%read{261,261} %write{2147483647,-1}
+const	color	$const458	0.502943993 0.566783011 1		%read{262,262} %write{2147483647,-1}
+const	color	$const459	0.499940991 0.56399101 1		%read{263,263} %write{2147483647,-1}
+const	color	$const460	0.497065991 0.561311007 1		%read{264,264} %write{2147483647,-1}
+const	color	$const461	0.494309992 0.55873698 1		%read{265,265} %write{2147483647,-1}
+const	color	$const462	0.491667002 0.556262016 1		%read{266,266} %write{2147483647,-1}
+const	color	$const463	0.48912999 0.553882003 1		%read{267,267} %write{2147483647,-1}
+const	color	$const464	0.486692995 0.551590979 1		%read{268,268} %write{2147483647,-1}
+const	color	$const465	0.484349012 0.549382985 1		%read{269,269} %write{2147483647,-1}
+const	color	$const466	0.482095003 0.547255993 1		%read{270,270} %write{2147483647,-1}
+const	color	$const467	0.47992599 0.545204997 1		%read{271,271} %write{2147483647,-1}
+const	color	$const468	0.477836013 0.54322499 1		%read{272,272} %write{2147483647,-1}
+const	color	$const469	0.475820988 0.541314006 1		%read{273,273} %write{2147483647,-1}
+const	color	$const470	0.473877996 0.539466977 1		%read{274,274} %write{2147483647,-1}
+const	color	$const471	0.472003996 0.53768301 1		%read{275,275} %write{2147483647,-1}
+const	color	$const472	0.470192999 0.535956979 1		%read{276,276} %write{2147483647,-1}
+const	color	$const473	0.468445003 0.534286976 1		%read{277,277} %write{2147483647,-1}
+const	color	$const474	0.466753989 0.532670975 1		%read{278,278} %write{2147483647,-1}
+const	color	$const475	0.465119004 0.531104982 1		%read{279,279} %write{2147483647,-1}
+const	color	$const476	0.463537008 0.529587984 1		%read{280,280} %write{2147483647,-1}
+const	color	$const477	0.462006003 0.528118014 1		%read{281,281} %write{2147483647,-1}
+const	color	$const478	0.460523009 0.526691973 1		%read{282,282} %write{2147483647,-1}
+const	color	$const479	0.459086001 0.525309026 1		%read{283,283} %write{2147483647,-1}
+const	color	$const480	0.457693011 0.523966014 1		%read{284,284} %write{2147483647,-1}
+const	color	$const481	0.456340998 0.522661984 1		%read{285,285} %write{2147483647,-1}
+const	color	$const482	0.455029994 0.521395981 1		%read{286,286} %write{2147483647,-1}
+const	color	$const483	0.453758001 0.520165026 1		%read{287,287} %write{2147483647,-1}
+const	color	$const484	0.45252201 0.518968999 1		%read{288,288} %write{2147483647,-1}
+const	color	$const485	0.451321989 0.51780498 1		%read{289,289} %write{2147483647,-1}
+const	color	$const486	0.45015499 0.516673028 1		%read{290,290} %write{2147483647,-1}
+const	color	$const487	0.449021012 0.515572011 1		%read{291,291} %write{2147483647,-1}
+const	color	$const488	0.447917998 0.514499009 1		%read{292,292} %write{2147483647,-1}
+const	color	$const489	0.446844995 0.513454974 1		%read{293,293} %write{2147483647,-1}
+const	color	$const490	0.445800006 0.512437999 1		%read{294,294} %write{2147483647,-1}
+const	color	$const491	0.444783002 0.511447012 1		%read{295,295} %write{2147483647,-1}
+const	color	$const492	0.443792999 0.510481 1		%read{296,296} %write{2147483647,-1}
+const	color	$const493	0.442828 0.509539008 1		%read{297,297} %write{2147483647,-1}
+const	color	$const494	0.441888005 0.508620024 1		%read{298,298} %write{2147483647,-1}
+const	color	$const495	0.440972 0.507722974 1		%read{299,299} %write{2147483647,-1}
+const	color	$const496	0.44007799 0.506848991 1		%read{300,300} %write{2147483647,-1}
+const	color	$const497	0.439206988 0.505994976 1		%read{301,301} %write{2147483647,-1}
+const	color	$const498	0.438356012 0.505160987 1		%read{302,302} %write{2147483647,-1}
+const	color	$const499	0.437527001 0.504347026 1		%read{303,303} %write{2147483647,-1}
+const	color	$const500	0.43671599 0.503551006 1		%read{304,304} %write{2147483647,-1}
+const	color	$const501	0.435925007 0.502774 1		%read{305,305} %write{2147483647,-1}
+const	color	$const502	0.435151994 0.502013981 1		%read{306,306} %write{2147483647,-1}
+const	color	$const503	0.434397995 0.501271009 1		%read{307,307} %write{2147483647,-1}
+const	color	$const504	0.433660001 0.500545025 1		%read{308,308} %write{2147483647,-1}
+const	color	$const505	0.432938993 0.499834001 1		%read{309,309} %write{2147483647,-1}
+const	color	$const506	0.432233006 0.499139011 1		%read{310,310} %write{2147483647,-1}
+const	color	$const507	0.431544006 0.498459011 1		%read{311,311} %write{2147483647,-1}
+const	color	$const508	0.430869013 0.497792989 1		%read{312,312} %write{2147483647,-1}
+const	color	$const509	0.430209011 0.497141987 1		%read{313,313} %write{2147483647,-1}
+const	color	$const510	0.429563999 0.496502995 1		%read{314,314} %write{2147483647,-1}
+const	color	$const511	0.428930998 0.495878011 1		%read{315,315} %write{2147483647,-1}
+const	color	$const512	0.428312987 0.49526599 1		%read{316,316} %write{2147483647,-1}
+const	color	$const513	0.427706003 0.49466601 1		%read{317,317} %write{2147483647,-1}
+const	color	$const514	0.427112997 0.49407801 1		%read{318,318} %write{2147483647,-1}
+const	color	$const515	0.426530987 0.493501991 1		%read{319,319} %write{2147483647,-1}
+const	color	$const516	0.425960988 0.492936999 1		%read{320,320} %write{2147483647,-1}
+const	color	$const517	0.425402999 0.492383003 1		%read{321,321} %write{2147483647,-1}
+const	color	$const518	0.424854994 0.491840005 1		%read{322,322} %write{2147483647,-1}
+const	color	$const519	0.424318999 0.49130699 1		%read{323,323} %write{2147483647,-1}
+const	color	$const520	0.423792005 0.490783989 1		%read{324,324} %write{2147483647,-1}
+const	color	$const521	0.423276007 0.490271002 1		%read{325,325} %write{2147483647,-1}
+const	color	$const522	0.422769994 0.489767998 1		%read{326,326} %write{2147483647,-1}
+const	color	$const523	0.42227301 0.489273012 1		%read{327,327} %write{2147483647,-1}
+const	color	$const524	0.42178601 0.488788009 1		%read{328,328} %write{2147483647,-1}
+const	color	$const525	0.421306998 0.488312006 1		%read{329,329} %write{2147483647,-1}
+const	color	$const526	0.420836985 0.48784399 1		%read{330,330} %write{2147483647,-1}
+const	color	$const527	0.420376003 0.487383991 1		%read{331,331} %write{2147483647,-1}
+const	color	$const528	0.419923007 0.486932993 1		%read{332,332} %write{2147483647,-1}
+const	color	$const529	0.419479012 0.486490011 1		%read{333,333} %write{2147483647,-1}
+const	color	$const530	0.419041991 0.486054003 1		%read{334,334} %write{2147483647,-1}
+const	color	$const531	0.418612987 0.485626012 1		%read{335,335} %write{2147483647,-1}
+const	color	$const532	0.418190986 0.485204995 1		%read{336,336} %write{2147483647,-1}
+const	color	$const533	0.417777002 0.484791011 1		%read{337,337} %write{2147483647,-1}
+const	color	$const534	0.417369992 0.484384 1		%read{338,338} %write{2147483647,-1}
+const	color	$const535	0.416969001 0.483983994 1		%read{339,339} %write{2147483647,-1}
+const	color	$const536	0.416575998 0.483590007 1		%read{340,340} %write{2147483647,-1}
+const	color	$const537	0.416188985 0.483202994 1		%read{341,341} %write{2147483647,-1}
+const	color	$const538	0.415807992 0.482823014 1		%read{342,342} %write{2147483647,-1}
+const	color	$const539	0.415434003 0.482448012 1		%read{343,343} %write{2147483647,-1}
+const	color	$const540	0.415066004 0.482078999 1		%read{344,344} %write{2147483647,-1}
+const	color	$const541	0.414703995 0.48171699 1		%read{345,345} %write{2147483647,-1}
+const	color	$const542	0.414346993 0.481359988 1		%read{346,346} %write{2147483647,-1}
+const	color	$const543	0.413996994 0.481007993 1		%read{347,347} %write{2147483647,-1}
+const	color	$const544	0.413652003 0.480661988 1		%read{348,348} %write{2147483647,-1}
+const	color	$const545	0.413311988 0.480322003 1		%read{349,349} %write{2147483647,-1}
+const	color	$const546	0.412977993 0.479986012 1		%read{350,350} %write{2147483647,-1}
+const	color	$const547	0.412647992 0.479656011 1		%read{351,351} %write{2147483647,-1}
+const	color	$const548	0.412324011 0.479330987 1		%read{352,352} %write{2147483647,-1}
+const	color	$const549	0.412005007 0.479009986 1		%read{353,353} %write{2147483647,-1}
+const	color	$const550	0.41169101 0.478695005 1		%read{354,354} %write{2147483647,-1}
+const	color	$const551	0.411381006 0.478383988 1		%read{355,355} %write{2147483647,-1}
+const	color	$const552	0.411076009 0.478076994 1		%read{356,356} %write{2147483647,-1}
+const	color	$const553	0.410775989 0.477775007 1		%read{357,357} %write{2147483647,-1}
+const	color	$const554	0.410479993 0.477477014 1		%read{358,358} %write{2147483647,-1}
+const	color	$const555	0.410187989 0.477183998 1		%read{359,359} %write{2147483647,-1}
+const	color	$const556	0.409900993 0.476895005 1		%read{360,360} %write{2147483647,-1}
+const	color	$const557	0.409617007 0.476610005 1		%read{361,361} %write{2147483647,-1}
+const	color	$const558	0.409337997 0.476328999 1		%read{362,362} %write{2147483647,-1}
+const	color	$const559	0.409063011 0.476051986 1		%read{363,363} %write{2147483647,-1}
+const	color	$const560	0.408791006 0.475778013 1		%read{364,364} %write{2147483647,-1}
+const	color	$const561	0.408524007 0.475508988 1		%read{365,365} %write{2147483647,-1}
+const	color	$const562	0.408259988 0.475243002 1		%read{366,366} %write{2147483647,-1}
+const	color	$const563	0.407999009 0.47498101 1		%read{367,367} %write{2147483647,-1}
+const	color	$const564	0.407743007 0.474721998 1		%read{368,368} %write{2147483647,-1}
+const	color	$const565	0.407489985 0.474467009 1		%read{369,369} %write{2147483647,-1}
+const	color	$const566	0.407240003 0.474215001 1		%read{370,370} %write{2147483647,-1}
+const	color	$const567	0.406993002 0.473966002 1		%read{371,371} %write{2147483647,-1}
+const	color	$const568	0.406749994 0.473720998 1		%read{372,372} %write{2147483647,-1}
+const	color	$const569	0.406511009 0.473479003 1		%read{373,373} %write{2147483647,-1}
+const	color	$const570	0.406273991 0.473239988 1		%read{374,374} %write{2147483647,-1}
+const	color	$const571	0.406040013 0.473004997 1		%read{375,375} %write{2147483647,-1}
+const	color	$const572	0.405809999 0.472772002 1		%read{376,376} %write{2147483647,-1}
+const	color	$const573	0.405582011 0.472541988 1		%read{377,377} %write{2147483647,-1}
+const	color	$const574	0.405357987 0.472315013 1		%read{378,378} %write{2147483647,-1}
+const	color	$const575	0.405135989 0.472090989 1		%read{379,379} %write{2147483647,-1}
+const	color	$const576	0.404917002 0.471870005 1		%read{380,380} %write{2147483647,-1}
+const	color	$const577	0.404700994 0.471652001 1		%read{381,381} %write{2147483647,-1}
+const	color	$const578	0.404487014 0.471435994 1		%read{382,382} %write{2147483647,-1}
+const	color	$const579	0.404276997 0.471222997 1		%read{383,383} %write{2147483647,-1}
+const	color	$const580	0.404067993 0.471011996 1		%read{384,384} %write{2147483647,-1}
+const	color	$const581	0.403863013 0.470804006 1		%read{385,385} %write{2147483647,-1}
+const	color	$const582	0.403659999 0.470598996 1		%read{386,386} %write{2147483647,-1}
+const	color	$const583	0.403459013 0.470396012 1		%read{387,387} %write{2147483647,-1}
+const	color	$const584	0.403261006 0.470194995 1		%read{388,388} %write{2147483647,-1}
+const	color	$const585	0.403064996 0.469996989 1		%read{389,389} %write{2147483647,-1}
+const	color	$const586	0.402871996 0.469801009 1		%read{390,390} %write{2147483647,-1}
+const	color	$const587	0.402680993 0.469608009 1		%read{391,391} %write{2147483647,-1}
+const	color	$const588	0.402491987 0.469417006 1		%read{392,392} %write{2147483647,-1}
+const	color	$const589	0.402305007 0.469227999 1		%read{393,393} %write{2147483647,-1}
+const	color	$const590	0.402121007 0.46904099 1		%read{394,394} %write{2147483647,-1}
+const	color	$const591	0.401937991 0.468856007 1		%read{395,395} %write{2147483647,-1}
+const	color	$const592	0.401757985 0.468672991 1		%read{396,396} %write{2147483647,-1}
+const	color	$const593	0.401580006 0.468493015 1		%read{397,397} %write{2147483647,-1}
+const	color	$const594	0.401403993 0.468313992 1		%read{398,398} %write{2147483647,-1}
+const	color	$const595	0.401230007 0.468138009 1		%read{399,399} %write{2147483647,-1}
+const	color	$const596	0.401057988 0.46796301 1		%read{400,400} %write{2147483647,-1}
+const	color	$const597	0.400887012 0.467790991 1		%read{401,402} %write{2147483647,-1}
+const	float	$const598	1000		%read{403,403} %write{2147483647,-1}
+temp	float	$tmp399	%read{404,404} %write{403,403}
+const	float	$const599	49000		%read{404,404} %write{2147483647,-1}
+temp	float	$tmp400	%read{406,406} %write{404,404}
+const	float	$const600	1		%read{406,454} %write{2147483647,-1}
+const	string	$const601	"clamp"		%read{405,405} %write{2147483647,-1}
+temp	float	$tmp401	%read{407,407} %write{406,406}
+const	string	$const602	""		%read{410,415} %write{2147483647,-1}
+temp	int	$tmp402	%read{413,413} %write{412,412}
+const	string	$const603	"user:ociocolorspacename"		%read{412,412} %write{2147483647,-1}
+temp	int	$tmp403	%read{414,418} %write{413,417}
+temp	int	$tmp404	%read{416,416} %write{415,415}
+temp	int	$tmp405	%read{417,417} %write{416,416}
+const	string	$const604	"catmull-rom"		%read{419,424} %write{2147483647,-1}
+const	int	$const605	199		%read{419,424} %write{2147483647,-1}
+const	color	$const606	0.272228718 0.674081743 0.0536895208		%read{420,420} %write{2147483647,-1}
+const	string	$const607	"acescg"		%read{421,423} %write{2147483647,-1}
+temp	int	$tmp406	%read{422,422} %write{421,421}
+const	color	$const608	0.212639004 0.715168655 0.0721923187		%read{425,425} %write{2147483647,-1}
+temp	int	$tmp407	%read{429,429} %write{428,428}
+temp	int	$tmp408	%read{433,433} %write{432,432}
+temp	float	$tmp409	%read{436,436} %write{434,434}
+temp	float	$tmp410	%read{436,436} %write{435,435}
+temp	float	$tmp411	%read{438,438} %write{436,436}
+temp	float	$tmp412	%read{438,438} %write{437,437}
+temp	int	$tmp413	%read{440,440} %write{439,439}
+temp	int	$tmp414	%read{444,444} %write{443,443}
+temp	float	$tmp415	%read{446,446} %write{445,445}
+const	float	$const609	4		%read{445,445} %write{2147483647,-1}
+const	float	$const610	5.66999994e-08		%read{446,446} %write{2147483647,-1}
+const	float	$const611	3.40282306e+38		%read{447,449} %write{2147483647,-1}
+temp	int	$tmp416	%read{448,448} %write{447,447}
+const	float	$const612	2		%read{451,451} %write{2147483647,-1}
+temp	color	$tmp417	%read{455,455} %write{452,452}
+temp	float	$tmp418	%read{455,455} %write{454,454}
+temp	float	$tmp419	%read{454,454} %write{453,453}
+code ___main___
+# PxrBlackBody.osl:544
+#     color tempv = color(0.0);
+	assign		tempv $const1 	%filename{"PxrBlackBody.osl"} %line{544} %argrw{"wr"}
+# PxrBlackBody.osl:545
+#     float physv = 0.0;
+	assign		physv $const2 	%line{545} %argrw{"wr"}
+# PxrBlackBody.osl:546
+#     float expv = 0.0;
+	assign		expv $const2 	%line{546} %argrw{"wr"}
+# PxrBlackBody.osl:548
+#     tempv = KtoRGB(temperature, physicalIntensity);
+	functioncall	$const3 443 	%line{548} %argrw{"r"}
+# PxrBlackBody.osl:487
+#     color rgb = RixKtoRGB(colorTemp, 0);
+	functioncall	$const5 432 	%line{487} %argrw{"r"}
+# PxrBlackBody.osl:41
+#     color bb_Rec709[NUM_KNOTS] =
+	aassign		___325_bb_Rec709 $const4 $const6 	%line{41} %argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const7 $const6 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const9 $const8 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const11 $const10 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const13 $const12 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const15 $const14 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const17 $const16 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const19 $const18 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const21 $const20 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const23 $const22 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const25 $const24 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const27 $const26 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const29 $const28 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const31 $const30 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const33 $const32 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const35 $const34 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const37 $const36 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const39 $const38 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const41 $const40 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const43 $const42 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const45 $const44 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const47 $const46 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const49 $const48 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const51 $const50 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const53 $const52 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const55 $const54 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const57 $const56 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const59 $const58 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const61 $const60 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const63 $const62 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const65 $const64 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const67 $const66 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const69 $const68 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const71 $const70 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const73 $const72 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const75 $const74 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const77 $const76 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const79 $const78 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const81 $const80 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const83 $const82 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const85 $const84 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const87 $const86 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const89 $const88 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const91 $const90 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const93 $const92 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const95 $const94 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const97 $const96 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const99 $const98 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const101 $const100 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const103 $const102 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const105 $const104 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const107 $const106 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const109 $const108 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const111 $const110 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const113 $const112 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const115 $const114 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const117 $const116 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const119 $const118 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const121 $const120 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const123 $const122 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const125 $const124 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const127 $const126 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const129 $const128 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const131 $const130 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const133 $const132 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const135 $const134 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const137 $const136 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const139 $const138 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const141 $const140 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const143 $const142 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const145 $const144 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const147 $const146 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const149 $const148 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const151 $const150 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const153 $const152 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const155 $const154 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const157 $const156 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const159 $const158 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const161 $const160 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const163 $const162 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const165 $const164 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const167 $const166 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const169 $const168 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const171 $const170 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const173 $const172 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const175 $const174 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const177 $const176 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const179 $const178 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const181 $const180 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const183 $const182 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const185 $const184 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const187 $const186 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const189 $const188 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const191 $const190 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const193 $const192 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const195 $const194 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const197 $const196 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const199 $const198 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const201 $const200 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const203 $const202 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const205 $const204 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const207 $const206 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const209 $const208 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const211 $const210 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const213 $const212 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const215 $const214 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const217 $const216 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const219 $const218 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const221 $const220 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const223 $const222 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const225 $const224 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const227 $const226 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const229 $const228 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const231 $const230 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const233 $const232 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const235 $const234 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const237 $const236 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const239 $const238 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const241 $const240 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const243 $const242 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const245 $const244 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const247 $const246 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const249 $const248 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const251 $const250 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const253 $const252 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const255 $const254 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const257 $const256 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const259 $const258 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const261 $const260 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const263 $const262 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const265 $const264 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const267 $const266 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const269 $const268 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const271 $const270 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const273 $const272 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const275 $const274 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const277 $const276 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const279 $const278 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const281 $const280 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const283 $const282 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const285 $const284 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const287 $const286 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const289 $const288 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const291 $const290 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const293 $const292 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const295 $const294 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const297 $const296 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const299 $const298 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const301 $const300 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const303 $const302 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const305 $const304 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const307 $const306 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const309 $const308 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const311 $const310 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const313 $const312 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const315 $const314 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const317 $const316 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const319 $const318 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const321 $const320 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const323 $const322 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const325 $const324 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const327 $const326 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const329 $const328 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const331 $const330 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const333 $const332 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const335 $const334 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const337 $const336 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const339 $const338 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const341 $const340 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const343 $const342 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const345 $const344 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const347 $const346 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const349 $const348 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const351 $const350 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const353 $const352 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const355 $const354 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const357 $const356 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const359 $const358 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const361 $const360 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const363 $const362 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const365 $const364 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const367 $const366 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const369 $const368 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const371 $const370 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const373 $const372 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const375 $const374 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const377 $const376 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const379 $const378 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const381 $const380 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const383 $const382 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const385 $const384 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const387 $const386 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const389 $const388 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const391 $const390 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const393 $const392 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const395 $const394 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const397 $const396 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const399 $const398 	%argrw{"wrr"}
+	aassign		___325_bb_Rec709 $const400 $const398 	%argrw{"wrr"}
+# PxrBlackBody.osl:245
+#     color bb_ACEScg[NUM_KNOTS] =
+	aassign		___325_bb_ACEScg $const4 $const401 	%line{245} %argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const7 $const401 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const9 $const402 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const11 $const403 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const13 $const404 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const15 $const405 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const17 $const406 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const19 $const407 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const21 $const408 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const23 $const409 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const25 $const410 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const27 $const411 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const29 $const412 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const31 $const413 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const33 $const414 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const35 $const415 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const37 $const416 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const39 $const417 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const41 $const418 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const43 $const419 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const45 $const420 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const47 $const421 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const49 $const422 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const51 $const423 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const53 $const424 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const55 $const425 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const57 $const426 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const59 $const427 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const61 $const428 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const63 $const429 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const65 $const430 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const67 $const431 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const69 $const432 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const71 $const433 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const73 $const434 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const75 $const435 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const77 $const436 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const79 $const437 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const81 $const438 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const83 $const439 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const85 $const440 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const87 $const441 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const89 $const442 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const91 $const443 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const93 $const444 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const95 $const445 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const97 $const446 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const99 $const447 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const101 $const448 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const103 $const449 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const105 $const450 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const107 $const451 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const109 $const452 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const111 $const453 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const113 $const454 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const115 $const455 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const117 $const456 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const119 $const457 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const121 $const458 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const123 $const459 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const125 $const460 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const127 $const461 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const129 $const462 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const131 $const463 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const133 $const464 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const135 $const465 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const137 $const466 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const139 $const467 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const141 $const468 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const143 $const469 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const145 $const470 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const147 $const471 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const149 $const472 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const151 $const473 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const153 $const474 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const155 $const475 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const157 $const476 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const159 $const477 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const161 $const478 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const163 $const479 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const165 $const480 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const167 $const481 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const169 $const482 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const171 $const483 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const173 $const484 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const175 $const485 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const177 $const486 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const179 $const487 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const181 $const488 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const183 $const489 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const185 $const490 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const187 $const491 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const189 $const492 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const191 $const493 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const193 $const494 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const195 $const495 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const197 $const496 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const199 $const497 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const201 $const498 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const203 $const499 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const205 $const500 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const207 $const501 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const209 $const502 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const211 $const503 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const213 $const504 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const215 $const505 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const217 $const506 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const219 $const507 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const221 $const508 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const223 $const509 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const225 $const510 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const227 $const511 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const229 $const512 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const231 $const513 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const233 $const514 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const235 $const515 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const237 $const516 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const239 $const517 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const241 $const518 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const243 $const519 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const245 $const520 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const247 $const521 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const249 $const522 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const251 $const523 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const253 $const524 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const255 $const525 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const257 $const526 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const259 $const527 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const261 $const528 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const263 $const529 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const265 $const530 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const267 $const531 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const269 $const532 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const271 $const533 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const273 $const534 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const275 $const535 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const277 $const536 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const279 $const537 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const281 $const538 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const283 $const539 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const285 $const540 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const287 $const541 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const289 $const542 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const291 $const543 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const293 $const544 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const295 $const545 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const297 $const546 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const299 $const547 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const301 $const548 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const303 $const549 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const305 $const550 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const307 $const551 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const309 $const552 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const311 $const553 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const313 $const554 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const315 $const555 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const317 $const556 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const319 $const557 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const321 $const558 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const323 $const559 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const325 $const560 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const327 $const561 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const329 $const562 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const331 $const563 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const333 $const564 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const335 $const565 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const337 $const566 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const339 $const567 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const341 $const568 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const343 $const569 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const345 $const570 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const347 $const571 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const349 $const572 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const351 $const573 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const353 $const574 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const355 $const575 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const357 $const576 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const359 $const577 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const361 $const578 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const363 $const579 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const365 $const580 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const367 $const581 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const369 $const582 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const371 $const583 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const373 $const584 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const375 $const585 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const377 $const586 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const379 $const587 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const381 $const588 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const383 $const589 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const385 $const590 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const387 $const591 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const389 $const592 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const391 $const593 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const393 $const594 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const395 $const595 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const397 $const596 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const399 $const597 	%argrw{"wrr"}
+	aassign		___325_bb_ACEScg $const400 $const597 	%argrw{"wrr"}
+# PxrBlackBody.osl:451
+#     float temp = clamp((colorTemp - 1000.0) / 49000.0, 0.0, 1.0);
+	sub		$tmp399 temperature $const598 	%line{451} %argrw{"wrr"}
+	div		$tmp400 $tmp399 $const599 	%argrw{"wrr"}
+	functioncall	$const601 408 	%argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
+	min		$tmp401 $tmp400 $const600 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	max		___325_temp $tmp401 $const2 	%argrw{"wrr"}
+# PxrBlackBody.osl:454
+#     color rgb = 0, norm = 1;
+	assign		___325_rgb $const4 	%filename{"PxrBlackBody.osl"} %line{454} %argrw{"wr"}
+	assign		___325_norm $const7 	%argrw{"wr"}
+# PxrBlackBody.osl:455
+#     string ocio = "";
+	assign		___325_ocio $const602 	%line{455} %argrw{"wr"}
+# PxrBlackBody.osl:456
+#     string cs_name = "";
+	assign		___325_cs_name $const602 	%line{456} %argrw{"wr"}
+# PxrBlackBody.osl:457
+#     if (getattribute("user:ociocolorspacename", cs_name) &&
+	getattribute	$tmp402 $const603 ___325_cs_name 	%line{457} %argrw{"wrw"}
+	neq		$tmp403 $tmp402 $const4 	%argrw{"wrr"}
+	if		$tmp403 418 418 	%argrw{"r"}
+# PxrBlackBody.osl:458
+#         cs_name != "")
+	neq		$tmp404 ___325_cs_name $const602 	%line{458} %argrw{"wrr"}
+	neq		$tmp405 $tmp404 $const4 	%argrw{"wrr"}
+# PxrBlackBody.osl:457
+#     if (getattribute("user:ociocolorspacename", cs_name) &&
+	assign		$tmp403 $tmp405 	%line{457} %argrw{"wr"}
+	if		$tmp403 424 426 	%argrw{"r"}
+# PxrBlackBody.osl:461
+#         rgb = spline("catmull-rom", temp, NUM_KNOTS, bb_ACEScg);
+	spline		___325_rgb $const604 ___325_temp $const605 ___325_bb_ACEScg 	%line{461} %argrw{"wrrrr"}
+# PxrBlackBody.osl:462
+#         norm = color(0.27222872,  0.67408177,  0.05368952);
+	assign		___325_norm $const606 	%line{462} %argrw{"wr"}
+# PxrBlackBody.osl:463
+#         if (cs_name != "acescg")
+	neq		$tmp406 ___325_cs_name $const607 	%line{463} %argrw{"wrr"}
+	if		$tmp406 424 424 	%argrw{"r"}
+# PxrBlackBody.osl:466
+#             rgb = transformc("acescg", cs_name, rgb);
+	transformc	___325_rgb $const607 ___325_cs_name ___325_rgb 	%line{466} %argrw{"wrrr"}
+# PxrBlackBody.osl:471
+#         rgb = spline("catmull-rom", temp, NUM_KNOTS, bb_Rec709);
+	spline		___325_rgb $const604 ___325_temp $const605 ___325_bb_Rec709 	%line{471} %argrw{"wrrrr"}
+# PxrBlackBody.osl:472
+#         norm = color(0.21263901,  0.71516868,  0.07219232);
+	assign		___325_norm $const608 	%line{472} %argrw{"wr"}
+# PxrBlackBody.osl:476
+#     if (normalize)
+	if		$const4 431 431 	%line{476} %argrw{"r"}
+# PxrBlackBody.osl:478
+#         float lum = dot(rgb, norm);
+	dot		___329_lum ___325_rgb ___325_norm 	%line{478} %argrw{"wrr"}
+# PxrBlackBody.osl:479
+#         if (lum > 0.0) rgb /= lum;
+	gt		$tmp407 ___329_lum $const2 	%line{479} %argrw{"wrr"}
+	if		$tmp407 431 431 	%argrw{"r"}
+	div		___325_rgb ___325_rgb ___329_lum 	%argrw{"wrr"}
+# PxrBlackBody.osl:482
+#     return rgb;
+	assign		___330_rgb ___325_rgb 	%line{482} %argrw{"wr"}
+# PxrBlackBody.osl:490
+#     if (physicalIntensity > 0.0)
+	gt		$tmp408 physicalIntensity $const2 	%line{490} %argrw{"wrr"}
+	if		$tmp408 442 442 	%argrw{"r"}
+# PxrBlackBody.osl:492
+#         float norm = rgb[0] + rgb[1] + rgb[2];
+	compref		$tmp409 ___330_rgb $const4 	%line{492} %argrw{"wrr"}
+	compref		$tmp410 ___330_rgb $const7 	%argrw{"wrr"}
+	add		$tmp411 $tmp409 $tmp410 	%argrw{"wrr"}
+	compref		$tmp412 ___330_rgb $const9 	%argrw{"wrr"}
+	add		___331_norm $tmp411 $tmp412 	%argrw{"wrr"}
+# PxrBlackBody.osl:493
+#         if (norm > 0.0) rgb /= norm;
+	gt		$tmp413 ___331_norm $const2 	%line{493} %argrw{"wrr"}
+	if		$tmp413 442 442 	%argrw{"r"}
+	div		___330_rgb ___330_rgb ___331_norm 	%argrw{"wrr"}
+# PxrBlackBody.osl:495
+#     return rgb;
+	assign		tempv ___330_rgb 	%line{495} %argrw{"wr"}
+# PxrBlackBody.osl:550
+#     if (physicalIntensity > 0.0)
+	gt		$tmp414 physicalIntensity $const2 	%line{550} %argrw{"wrr"}
+	if		$tmp414 450 451 	%argrw{"r"}
+# PxrBlackBody.osl:552
+#         physv = pow(temperature, 4.0) * 5.67e-8;
+	pow		$tmp415 temperature $const609 	%line{552} %argrw{"wrr"}
+	mul		physv $tmp415 $const610 	%argrw{"wrr"}
+# PxrBlackBody.osl:555
+#         if (physv > 3.402823e+38)
+	gt		$tmp416 physv $const611 	%line{555} %argrw{"wrr"}
+	if		$tmp416 450 450 	%argrw{"r"}
+# PxrBlackBody.osl:557
+#             physv = 3.402823e+38;
+	assign		physv $const611 	%line{557} %argrw{"wr"}
+# PxrBlackBody.osl:562
+#         physv = 1.0;
+	assign		physv $const600 	%line{562} %argrw{"wr"}
+# PxrBlackBody.osl:565
+#     expv = pow(2.0, exposure);
+	pow		expv $const612 exposure 	%line{565} %argrw{"wrr"}
+# PxrBlackBody.osl:567
+#     resultRGB = tempv * expv * mix(1.0, (float)physv, max(0.0, physicalIntensity));
+	mul		$tmp417 tempv expv 	%line{567} %argrw{"wrr"}
+	max		$tmp419 $const2 physicalIntensity 	%argrw{"wrr"}
+	mix		$tmp418 $const600 physv $tmp419 	%argrw{"wrrr"}
+	mul		resultRGB $tmp417 $tmp418 	%argrw{"wrr"}
+# PxrBlackBody.osl:569
+#     resultR = resultRGB[0];
+	compref		resultR resultRGB $const4 	%line{569} %argrw{"wrr"}
+# PxrBlackBody.osl:570
+#     resultG = resultRGB[1];
+	compref		resultG resultRGB $const7 	%line{570} %argrw{"wrr"}
+# PxrBlackBody.osl:571
+#     resultB = resultRGB[2];
+	compref		resultB resultRGB $const9 	%line{571} %argrw{"wrr"}
+	end

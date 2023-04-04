@@ -1,0 +1,264 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrPtexture.osl/obj/PxrPtexture.oso
+shader PxrPtexture	%meta{int,rfm_nodeid,1053401} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/texture"} %meta{string,rfh_classification,"Pattern/Texture"} %meta{string,help,"Read a ptex file."} 
+param	string	filename	""		%meta{string,widget,"assetIdInput"} %meta{string,help,"filename (string)"} %meta{string,options,"texture"} %meta{int,connectable,0} %meta{string,label,"Filename"}  %read{2,40} %write{2147483647,-1}
+param	int	firstChannel	0		%meta{string,widget,"default"} %meta{string,help,"First channel offset to be looked up for Filename.<br><br>firstChannel (int)"} %meta{int,connectable,0} %meta{string,label,"First Channel Offset"}  %read{29,40} %write{2147483647,-1}
+param	int	faceIndexOffset	0		%meta{string,widget,"default"} %meta{string,help,"faceIndexOffset (int)"} %meta{int,connectable,0} %meta{string,label,"Face Index Offset"}  %read{19,19} %write{2147483647,-1}
+param	int	invertWindingOrder	0		%meta{string,widget,"checkBox"} %meta{string,help,"Sometime an application will reverse the polygon's winding order<br>and create rendering artefacts. In that case, the face textures typically<br>look flipped.<br><br>invertWindingOrder (int)"} %meta{int,connectable,0} %meta{string,label,"Invert Winding Order"}  %read{13,16} %write{2147483647,-1}
+param	int	filter	1		%meta{string,widget,"mapper"} %meta{string,help,"filter (int)"} %meta{string,options,"Nearest:0|Box:1|Bilinear:2|Bspline:3|Mitchell:4|Catmullrom:5|Gaussian:6"} %meta{int,connectable,0} %meta{string,label,"Filter"}  %read{1,1} %write{2147483647,-1}
+param	float	blur	0		%meta{string,widget,"default"} %meta{string,help,"blur (float)"} %meta{string,label,"Blur"}  %read{29,40} %write{2147483647,-1}
+param	int	lerp	1		%meta{string,widget,"checkBox"} %meta{string,help,"lerp (int)"} %meta{int,connectable,0} %meta{string,label,"Mip Interpolate"}  %read{2147483647,-1} %write{2147483647,-1}
+param	color	missingColor	1 0 1		%meta{string,widget,"color"} %meta{string,help,"missingColor (color)"} %meta{string,label,"Missing Color"}  %read{7,7} %write{2147483647,-1}
+param	float	missingAlpha	1		%meta{string,widget,"default"} %meta{string,help,"missingAlpha (float)"} %meta{string,label,"Missing Alpha"}  %read{11,11} %write{2147483647,-1}
+param	int	linearize	0		%meta{string,widget,"checkBox"} %meta{string,help,"linearize (int)"} %meta{int,connectable,0} %meta{string,label,"Linearize"}  %read{41,41} %write{2147483647,-1}
+param	color	colorScale	1 1 1		%meta{string,page,"Adjust Output"} %meta{int,page_open,1} %meta{string,help,"colorScale (color)"} %meta{string,label,"Color Scale"}  %read{70,70} %write{2147483647,-1}
+param	color	colorOffset	0 0 0		%meta{string,page,"Adjust Output"} %meta{string,help,"colorOffset (color)"} %meta{string,label,"Color Offset"}  %read{71,71} %write{2147483647,-1}
+param	float	saturation	1		%meta{string,page,"Adjust Output"} %meta{string,help,"saturation (float)"} %meta{string,label,"Saturation"} %meta{float,min,0} %meta{float,slidermax,2}  %read{69,69} %write{2147483647,-1}
+param	float	alphaScale	1		%meta{string,page,"Adjust Output"} %meta{string,help,"alphaScale (float)"} %meta{string,label,"Alpha Scale"}  %read{72,72} %write{2147483647,-1}
+param	float	alphaOffset	0		%meta{string,page,"Adjust Output"} %meta{string,help,"alphaOffset (float)"} %meta{string,label,"Alpha Offset"}  %read{73,73} %write{2147483647,-1}
+param	float	__faceindex	0		%meta{int,lockgeom,0} %meta{string,widget,"null"} %meta{int,connectable,0}  %read{20,20} %write{2147483647,-1}
+oparam	color	resultRGB	0 0 0		%meta{string,help,"resultRGB (color)"}  %read{8,76} %write{7,71}
+oparam	float	resultR	0		%meta{string,help,"resultR (float)"}  %read{2147483647,-1} %write{8,74}
+oparam	float	resultG	0		%meta{string,help,"resultG (float)"}  %read{2147483647,-1} %write{9,75}
+oparam	float	resultB	0		%meta{string,help,"resultB (float)"}  %read{2147483647,-1} %write{10,76}
+oparam	float	resultA	0		%meta{string,help,"resultA (float)"}  %read{72,72} %write{11,73}
+global	float	u	%read{15,17} %write{2147483647,-1} %derivs
+global	float	v	%read{14,18} %write{2147483647,-1} %derivs
+local	color	___420_tmpColor	%read{67,69} %write{66,66}
+local	float	___420_intensity	%read{68,68} %write{67,67}
+local	string	___446_foo	%read{46,46} %write{44,45}
+local	int	___449_i	%read{51,64} %write{50,64}
+local	string[7]	filterNames	%read{1,1} %write{0,0}
+local	string	interp	%read{29,40} %write{1,1}
+local	int	fileExists	%read{3,5} %write{2,4}
+local	float	up	%read{29,40} %write{14,15} %derivs
+local	float	vp	%read{29,40} %write{17,18} %derivs
+local	int	faceidx	%read{29,40} %write{21,21}
+local	int	nchannels	%read{24,38} %write{22,26}
+local	float	___467_f	%read{30,30} %write{29,29}
+local	float	___468_f	%read{34,34} %write{33,33}
+const	string[7]	$const1	"closest" "linear" "linear" "smartcubic" "smartcubic" "smartcubic" "smartcubic" 		%read{0,0} %write{2147483647,-1}
+const	string	$const2	""		%read{2,46} %write{2147483647,-1}
+temp	int	$tmp1	%read{2147483647,-1} %write{4,4}
+const	string	$const3	"exists"		%read{4,4} %write{2147483647,-1}
+temp	int	$tmp2	%read{6,6} %write{5,5}
+const	int	$const4	0		%read{5,74} %write{2147483647,-1}
+const	int	$const5	1		%read{9,75} %write{2147483647,-1}
+const	int	$const6	2		%read{10,76} %write{2147483647,-1}
+temp	float	$tmp3	%read{21,21} %write{20,20}
+temp	float	$tmp4	%read{20,20} %write{19,19}
+temp	int	$tmp5	%read{2147483647,-1} %write{23,23}
+const	string	$const7	"channels"		%read{23,23} %write{2147483647,-1}
+const	int	$const8	4		%read{24,38} %write{2147483647,-1}
+temp	int	$tmp6	%read{25,25} %write{24,24}
+temp	int	$tmp7	%read{28,28} %write{27,27}
+const	string	$const9	"firstchannel"		%read{29,40} %write{2147483647,-1}
+const	string	$const10	"interp"		%read{29,40} %write{2147483647,-1}
+const	string	$const11	"blur"		%read{29,40} %write{2147483647,-1}
+const	string	$const12	"subimage"		%read{29,40} %write{2147483647,-1}
+temp	int	$tmp8	%read{32,32} %write{31,31}
+const	string	$const13	"alpha"		%read{33,40} %write{2147483647,-1}
+const	int	$const14	3		%read{35,51} %write{2147483647,-1}
+temp	int	$tmp9	%read{36,36} %write{35,35}
+temp	int	$tmp10	%read{39,39} %write{38,38}
+const	string	$const15	"PxrLinearizeSRGB"		%read{42,42} %write{2147483647,-1}
+temp	int	$tmp11	%read{48,48} %write{47,47}
+const	string	$const16	"ocioDisabled"		%read{43,43} %write{2147483647,-1}
+temp	int	$tmp12	%read{2147483647,-1} %write{45,45}
+const	string	$const17	"user:ociocolorspacename"		%read{45,45} %write{2147483647,-1}
+temp	int	$tmp13	%read{47,47} %write{46,46}
+temp	int	$tmp14	%read{51,64} %write{51,64}
+temp	int	$tmp15	%read{49,64} %write{50,64}
+temp	float	$tmp16	%read{51,64} %write{51,64}
+const	float	$const18	0.0404499993		%read{54,54} %write{2147483647,-1}
+temp	int	$tmp17	%read{51,64} %write{51,64}
+temp	float	$tmp18	%read{51,64} %write{51,64}
+const	float	$const19	0.0773993805		%read{57,57} %write{2147483647,-1}
+temp	float	$tmp19	%read{51,64} %write{51,64}
+temp	float	$tmp20	%read{51,64} %write{51,64}
+temp	float	$tmp21	%read{51,64} %write{51,64}
+const	float	$const20	0.0549999997		%read{60,60} %write{2147483647,-1}
+temp	float	$tmp22	%read{51,64} %write{51,64}
+const	float	$const21	0.947867274		%read{61,61} %write{2147483647,-1}
+temp	float	$tmp23	%read{51,64} %write{51,64}
+const	float	$const22	2.4000001		%read{62,62} %write{2147483647,-1}
+const	string	$const23	"Color_Saturate"		%read{65,65} %write{2147483647,-1}
+temp	color	$tmp24	%read{69,69} %write{68,68}
+temp	color	$tmp25	%read{71,71} %write{70,70}
+temp	float	$tmp26	%read{73,73} %write{72,72}
+code ___main___
+# PxrPtexture.osl:179
+#     string filterNames[7] = {"closest", "linear", "linear", "smartcubic", "smartcubic", "smartcubic",
+	assign		filterNames $const1 	%filename{"PxrPtexture.osl"} %line{179} %argrw{"wr"}
+# PxrPtexture.osl:181
+#     string interp = filterNames[filter];
+	aref		interp filterNames filter 	%line{181} %argrw{"wrr"}
+# PxrPtexture.osl:183
+#     int fileExists = filename != "";
+	neq		fileExists filename $const2 	%line{183} %argrw{"wrr"}
+# PxrPtexture.osl:184
+#     if (fileExists)
+	if		fileExists 5 5 	%line{184} %argrw{"r"}
+# PxrPtexture.osl:185
+#         gettextureinfo(filename, "exists", fileExists);
+	gettextureinfo	$tmp1 filename $const3 fileExists 	%line{185} %argrw{"wrrw"}
+# PxrPtexture.osl:186
+#     if (!fileExists)
+	eq		$tmp2 fileExists $const4 	%line{186} %argrw{"wrr"}
+	if		$tmp2 13 13 	%argrw{"r"}
+# PxrPtexture.osl:188
+#         resultRGB = missingColor;
+	assign		resultRGB missingColor 	%line{188} %argrw{"wr"}
+# PxrPtexture.osl:189
+#         resultR = resultRGB[0];
+	compref		resultR resultRGB $const4 	%line{189} %argrw{"wrr"}
+# PxrPtexture.osl:190
+#         resultG = resultRGB[1];
+	compref		resultG resultRGB $const5 	%line{190} %argrw{"wrr"}
+# PxrPtexture.osl:191
+#         resultB = resultRGB[2];
+	compref		resultB resultRGB $const6 	%line{191} %argrw{"wrr"}
+# PxrPtexture.osl:192
+#         resultA = missingAlpha;
+	assign		resultA missingAlpha 	%line{192} %argrw{"wr"}
+# PxrPtexture.osl:193
+#         return;
+	exit	%line{193}
+# PxrPtexture.osl:197
+#     float up = invertWindingOrder ? v : u;
+	if		invertWindingOrder 15 16 	%line{197} %argrw{"r"}
+	assign		up v 	%argrw{"wr"}
+	assign		up u 	%argrw{"wr"}
+# PxrPtexture.osl:198
+#     float vp = invertWindingOrder ? u : v;
+	if		invertWindingOrder 18 19 	%line{198} %argrw{"r"}
+	assign		vp u 	%argrw{"wr"}
+	assign		vp v 	%argrw{"wr"}
+# PxrPtexture.osl:200
+#     int faceidx = int(__faceindex + faceIndexOffset);
+	assign		$tmp4 faceIndexOffset 	%line{200} %argrw{"wr"}
+	add		$tmp3 __faceindex $tmp4 	%argrw{"wrr"}
+	assign		faceidx $tmp3 	%argrw{"wr"}
+# PxrPtexture.osl:202
+#     int nchannels = 0;
+	assign		nchannels $const4 	%line{202} %argrw{"wr"}
+# PxrPtexture.osl:203
+#     gettextureinfo(filename, "channels", nchannels);
+	gettextureinfo	$tmp5 filename $const7 nchannels 	%line{203} %argrw{"wrrw"}
+# PxrPtexture.osl:204
+#     if (nchannels > 4) nchannels = 4;
+	gt		$tmp6 nchannels $const8 	%line{204} %argrw{"wrr"}
+	if		$tmp6 27 27 	%argrw{"r"}
+	assign		nchannels $const8 	%argrw{"wr"}
+# PxrPtexture.osl:205
+#     if (nchannels == 1)
+	eq		$tmp7 nchannels $const5 	%line{205} %argrw{"wrr"}
+	if		$tmp7 31 41 	%argrw{"r"}
+# PxrPtexture.osl:208
+#         float f = texture(filename, up, vp,
+	texture		___467_f filename up vp $const9 firstChannel $const10 interp $const11 blur $const12 faceidx 	%line{208} %argrw{"wrrrrrrrrrrr"} %argderivs{2,3}
+# PxrPtexture.osl:213
+#         resultRGB = color(f);
+	assign		resultRGB ___467_f 	%line{213} %argrw{"wr"}
+# PxrPtexture.osl:215
+#     else if (nchannels == 2)
+	eq		$tmp8 nchannels $const6 	%line{215} %argrw{"wrr"}
+	if		$tmp8 35 41 	%argrw{"r"}
+# PxrPtexture.osl:218
+#         float f = texture(filename, up, vp,
+	texture		___468_f filename up vp $const13 resultA $const9 firstChannel $const10 interp $const11 blur $const12 faceidx 	%line{218} %argrw{"wrrrrwrrrrrrrr"} %argderivs{2,3}
+# PxrPtexture.osl:224
+#         resultRGB = color(f);
+	assign		resultRGB ___468_f 	%line{224} %argrw{"wr"}
+# PxrPtexture.osl:226
+#     else if (nchannels == 3)
+	eq		$tmp9 nchannels $const14 	%line{226} %argrw{"wrr"}
+	if		$tmp9 38 41 	%argrw{"r"}
+# PxrPtexture.osl:228
+#         resultRGB = texture(filename, up, vp,
+	texture		resultRGB filename up vp $const9 firstChannel $const10 interp $const11 blur $const12 faceidx 	%line{228} %argrw{"wrrrrrrrrrrr"} %argderivs{2,3}
+# PxrPtexture.osl:234
+#     else if (nchannels == 4)
+	eq		$tmp10 nchannels $const8 	%line{234} %argrw{"wrr"}
+	if		$tmp10 41 41 	%argrw{"r"}
+# PxrPtexture.osl:236
+#         resultRGB = texture(filename, up, vp,
+	texture		resultRGB filename up vp $const13 resultA $const9 firstChannel $const10 interp $const11 blur $const12 faceidx 	%line{236} %argrw{"wrrrrwrrrrrrrr"} %argderivs{2,3}
+# PxrPtexture.osl:243
+#     if (linearize) PxrLinearizeSRGB(resultRGB);
+	if		linearize 65 65 	%line{243} %argrw{"r"}
+	functioncall	$const15 65 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:125
+#     if (ocioDisabled())
+	functioncall	$const16 48 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h"} %line{125} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:118
+#     string foo = "";
+	assign		___446_foo $const2 	%line{118} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:119
+#     getattribute("user:ociocolorspacename", foo);
+	getattribute	$tmp12 $const17 ___446_foo 	%line{119} %argrw{"wrw"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:120
+#     return int(foo == "");
+	eq		$tmp13 ___446_foo $const2 	%line{120} %argrw{"wrr"}
+	assign		$tmp11 $tmp13 	%argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:125
+#     if (ocioDisabled())
+	if		$tmp11 65 65 	%line{125} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:127
+#         for (int i = 0; i < 3; ++i)
+	for		$tmp15 51 53 64 65 	%line{127} %argrw{"r"}
+	assign		___449_i $const4 	%argrw{"wr"}
+	lt		$tmp14 ___449_i $const14 	%argrw{"wrr"}
+	neq		$tmp15 $tmp14 $const4 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:129
+#             if (inout[i] < 0.04045)
+	compref		$tmp16 resultRGB ___449_i 	%line{129} %argrw{"wrr"}
+	lt		$tmp17 $tmp16 $const18 	%argrw{"wrr"}
+	if		$tmp17 59 64 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:130
+#                 inout[i] = inout[i] * 0.07739938;
+	compref		$tmp18 resultRGB ___449_i 	%line{130} %argrw{"wrr"}
+	mul		$tmp19 $tmp18 $const19 	%argrw{"wrr"}
+	compassign	resultRGB ___449_i $tmp19 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:132
+#                 inout[i] = pow((inout[i] + 0.055) * 0.947867299, 2.4);
+	compref		$tmp21 resultRGB ___449_i 	%line{132} %argrw{"wrr"}
+	add		$tmp22 $tmp21 $const20 	%argrw{"wrr"}
+	mul		$tmp23 $tmp22 $const21 	%argrw{"wrr"}
+	pow		$tmp20 $tmp23 $const22 	%argrw{"wrr"}
+	compassign	resultRGB ___449_i $tmp20 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:127
+#         for (int i = 0; i < 3; ++i)
+	add		___449_i ___449_i $const5 	%line{127} %argrw{"wrr"}
+# PxrPtexture.osl:246
+#     resultRGB = Color_Saturate(resultRGB, saturation);
+	functioncall	$const23 70 	%filename{"PxrPtexture.osl"} %line{246} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:76
+#     color tmpColor = inputColor;
+	assign		___420_tmpColor resultRGB 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{76} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:77
+#     float intensity = luminance(tmpColor);
+	luminance	___420_intensity ___420_tmpColor 	%line{77} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:78
+#     return mix(color(intensity), tmpColor, sat);
+	assign		$tmp24 ___420_intensity 	%line{78} %argrw{"wr"}
+	mix		resultRGB $tmp24 ___420_tmpColor saturation 	%argrw{"wrrr"}
+# PxrPtexture.osl:247
+#     resultRGB = resultRGB * colorScale + colorOffset;
+	mul		$tmp25 resultRGB colorScale 	%filename{"PxrPtexture.osl"} %line{247} %argrw{"wrr"}
+	add		resultRGB $tmp25 colorOffset 	%argrw{"wrr"}
+# PxrPtexture.osl:248
+#     resultA = resultA * alphaScale + alphaOffset;
+	mul		$tmp26 resultA alphaScale 	%line{248} %argrw{"wrr"}
+	add		resultA $tmp26 alphaOffset 	%argrw{"wrr"}
+# PxrPtexture.osl:251
+#     resultR = resultRGB[0];
+	compref		resultR resultRGB $const4 	%line{251} %argrw{"wrr"}
+# PxrPtexture.osl:252
+#     resultG = resultRGB[1];
+	compref		resultG resultRGB $const5 	%line{252} %argrw{"wrr"}
+# PxrPtexture.osl:253
+#     resultB = resultRGB[2];
+	compref		resultB resultRGB $const6 	%line{253} %argrw{"wrr"}
+	end

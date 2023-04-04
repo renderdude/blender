@@ -1,0 +1,700 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrThinFilm.osl/obj/PxrThinFilm.oso
+shader PxrThinFilm	%meta{int,rfm_nodeid,1053393} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/color"} %meta{string,rfh_classification,"Pattern/Color"} %meta{string,help,"Computes a thin-film interference effect on six spectral bands."} 
+param	color	inputRGB	1 1 1		%meta{string,widget,"color"} %meta{string,help,"The color that will perturbed by interference effect."} %meta{string,label,"Input Color"}  %read{17,268} %write{2147483647,-1}
+param	float	eta	1.5		%meta{string,help,"The index of refraction of the thin film. We assume the other the exterior medium is air. "} %meta{string,label,"Eta"} %meta{float,max,4} %meta{float,min,1}  %read{48,48} %write{2147483647,-1}
+param	float	spread	0.00999999978		%meta{string,help,"The index of refraction's amount of variation across the color spectrum."} %meta{int,connectable,0} %meta{string,label,"Spread"}  %read{3,65} %write{2147483647,-1}
+param	float	thickness	1896		%meta{string,help,"The thickness of the thin film in nanometers."} %meta{int,connectable,0} %meta{string,label,"Thickness"}  %read{15,15} %write{2147483647,-1}
+param	float	thicknessScale	1		%meta{string,help,"Connect a pattern here to modulate the thickness. This will multiply the *thickness* value. "} %meta{string,label,"Thickness Scale"}  %read{15,15} %write{2147483647,-1}
+param	int	frontOnly	0		%meta{string,widget,"checkBox"} %meta{string,help,"Compute only interference on front-facing points. By default, both sides are computed. "} %meta{int,connectable,0} %meta{string,label,"Front Only"}  %read{8,8} %write{2147483647,-1}
+oparam	color	resultRGB	0 0 0		%read{269,271} %write{253,268}
+oparam	float	resultR	0		%read{2147483647,-1} %write{269,269}
+oparam	float	resultG	0		%read{2147483647,-1} %write{270,270}
+oparam	float	resultB	0		%read{2147483647,-1} %write{271,271}
+global	vector	I	%read{0,0} %write{2147483647,-1}
+global	normal	N	%read{7,119} %write{2147483647,-1}
+local	float	___325_out_eps	%read{52,239} %write{52,239}
+local	float	___326_t1	%read{52,239} %write{52,239}
+local	float	___326_t2	%read{52,239} %write{52,239}
+local	float	___326_t3	%read{52,239} %write{52,239}
+local	float	___327_R2	%read{32,42} %write{18,18}
+local	float	___327_G2	%read{32,37} %write{20,20}
+local	float	___327_B2	%read{37,42} %write{22,22}
+local	float	___328_y2	%read{248,255} %write{242,242}
+local	float	___328_c2	%read{255,262} %write{244,244}
+local	float	___328_v2	%read{248,262} %write{246,246}
+local	vector	___329_Rn	%read{52,239} %write{52,239}
+local	vector	___329_Tn	%read{52,239} %write{52,239}
+local	float	___329_VdN	%read{52,239} %write{52,239}
+local	float	___329_rcos_i	%read{52,239} %write{52,239}
+local	float	___329_sign	%read{52,239} %write{52,239}
+local	float	___329_etaSq	%read{52,239} %write{52,239}
+local	float	___329_rcos_tSq	%read{52,239} %write{52,239}
+local	float	___333_rcos_t	%read{52,239} %write{52,239}
+local	float	___333_rpar	%read{52,239} %write{52,239}
+local	float	___333_rper	%read{52,239} %write{52,239}
+local	vector	Vn	%read{7,239} %write{1,1}
+local	float[6]	freq	%read{52,239} %write{2,2}
+local	float	etaBand	%read{52,239} %write{49,239}
+local	float	invEtaBand	%read{52,239} %write{52,239}
+local	float	etaBandStep	%read{52,239} %write{3,3}
+local	float[6]	rygcbv	%read{52,263} %write{25,239}
+local	float	refl	%read{52,239} %write{4,239}
+local	float	trans	%read{52,239} %write{5,239}
+local	float	shift	%read{52,239} %write{52,239}
+local	float	norm	%read{52,239} %write{52,239}
+local	float	halfSpread	%read{47,48} %write{6,6}
+local	float	NdV	%read{11,239} %write{7,7}
+local	float	___334_finalThickness	%read{52,239} %write{15,15}
+local	int	___335_w	%read{52,239} %write{51,239}
+local	float	___336_phaseShift	%read{52,239} %write{52,239}
+temp	vector	$tmp1	%read{1,1} %write{0,0}
+const	float[6]	$const1	642 580 529 491 464 439 		%read{2,2} %write{2147483647,-1}
+const	float	$const2	6		%read{3,3} %write{2147483647,-1}
+const	float	$const3	0		%read{4,226} %write{2147483647,-1}
+const	float	$const4	0.5		%read{6,225} %write{2147483647,-1}
+temp	int	$tmp2	%read{9,9} %write{8,8}
+const	int	$const5	0		%read{8,269} %write{2147483647,-1}
+temp	int	$tmp3	%read{10,14} %write{9,13}
+const	float	$const6	9.99999997e-07		%read{11,11} %write{2147483647,-1}
+temp	int	$tmp4	%read{12,12} %write{11,11}
+temp	int	$tmp5	%read{13,13} %write{12,12}
+const	string	$const7	"rgbToRYGCBV"		%read{16,16} %write{2147483647,-1}
+temp	float	$tmp6	%read{18,18} %write{17,17}
+const	float	$const8	2		%read{18,246} %write{2147483647,-1}
+const	int	$const9	1		%read{19,270} %write{2147483647,-1}
+temp	float	$tmp7	%read{20,20} %write{19,19}
+const	int	$const10	2		%read{21,271} %write{2147483647,-1}
+temp	float	$tmp8	%read{22,22} %write{21,21}
+temp	float	$tmp9	%read{24,24} %write{23,23}
+temp	float	$tmp10	%read{25,25} %write{24,24}
+temp	float	$tmp11	%read{27,27} %write{26,26}
+temp	float	$tmp12	%read{28,28} %write{27,27}
+temp	float	$tmp13	%read{30,30} %write{29,29}
+temp	float	$tmp14	%read{31,31} %write{30,30}
+const	int	$const11	4		%read{31,261} %write{2147483647,-1}
+temp	float	$tmp15	%read{34,34} %write{32,32}
+temp	float	$tmp16	%read{34,34} %write{33,33}
+temp	float	$tmp17	%read{35,35} %write{34,34}
+const	float	$const12	0.166666999		%read{35,45} %write{2147483647,-1}
+temp	float	$tmp18	%read{36,36} %write{35,35}
+temp	float	$tmp19	%read{39,39} %write{37,37}
+temp	float	$tmp20	%read{39,39} %write{38,38}
+temp	float	$tmp21	%read{40,40} %write{39,39}
+temp	float	$tmp22	%read{41,41} %write{40,40}
+const	int	$const13	3		%read{41,249} %write{2147483647,-1}
+temp	float	$tmp23	%read{44,44} %write{42,42}
+temp	float	$tmp24	%read{44,44} %write{43,43}
+temp	float	$tmp25	%read{45,45} %write{44,44}
+temp	float	$tmp26	%read{46,46} %write{45,45}
+const	int	$const14	5		%read{46,256} %write{2147483647,-1}
+const	float	$const15	1		%read{47,122} %write{2147483647,-1}
+temp	float	$tmp27	%read{49,49} %write{47,47}
+temp	float	$tmp28	%read{49,49} %write{48,48}
+const	int	$const16	6		%read{52,52} %write{2147483647,-1}
+temp	int	$tmp29	%read{52,239} %write{52,239}
+temp	int	$tmp30	%read{50,239} %write{51,239}
+temp	float	$tmp31	%read{52,239} %write{52,239}
+temp	float	$tmp32	%read{52,239} %write{52,239}
+const	string	$const17	"interference"		%read{55,55} %write{2147483647,-1}
+temp	float	$tmp33	%read{52,239} %write{52,239}
+temp	float	$tmp34	%read{52,239} %write{52,239}
+temp	float	$tmp35	%read{52,239} %write{52,239}
+temp	float	$tmp36	%read{52,239} %write{52,239}
+temp	float	$tmp37	%read{52,239} %write{52,239}
+temp	float	$tmp38	%read{52,239} %write{52,239}
+const	float	$const18	6.28318548		%read{64,198} %write{2147483647,-1}
+temp	int	$tmp39	%read{52,239} %write{52,239}
+temp	int	$tmp40	%read{52,239} %write{52,239}
+temp	int	$tmp41	%read{52,239} %write{52,239}
+temp	int	$tmp42	%read{52,239} %write{52,239}
+const	string	$const19	"RixFresnelDielectric"		%read{73,73} %write{2147483647,-1}
+const	vector	$const20	0 0 0		%read{74,98} %write{2147483647,-1}
+temp	int	$tmp43	%read{52,239} %write{52,239}
+const	float	$const21	-1		%read{80,80} %write{2147483647,-1}
+temp	int	$tmp44	%read{52,239} %write{52,239}
+temp	float	$tmp45	%read{52,239} %write{52,239}
+temp	normal	$tmp46	%read{52,239} %write{52,239}
+temp	float	$tmp47	%read{52,239} %write{52,239}
+temp	float	$tmp48	%read{52,239} %write{52,239}
+temp	float	$tmp49	%read{52,239} %write{52,239}
+temp	int	$tmp50	%read{52,239} %write{52,239}
+temp	int	$tmp51	%read{52,239} %write{52,239}
+temp	float	$tmp52	%read{52,239} %write{52,239}
+temp	float	$tmp53	%read{52,239} %write{52,239}
+temp	float	$tmp54	%read{52,239} %write{52,239}
+temp	float	$tmp55	%read{52,239} %write{52,239}
+temp	float	$tmp56	%read{52,239} %write{52,239}
+temp	float	$tmp57	%read{52,239} %write{52,239}
+temp	float	$tmp58	%read{52,239} %write{52,239}
+temp	float	$tmp59	%read{52,239} %write{52,239}
+temp	float	$tmp60	%read{52,239} %write{52,239}
+temp	float	$tmp61	%read{52,239} %write{52,239}
+temp	float	$tmp62	%read{52,239} %write{52,239}
+temp	int	$tmp63	%read{52,239} %write{52,239}
+temp	float	$tmp64	%read{52,239} %write{52,239}
+temp	float	$tmp65	%read{52,239} %write{52,239}
+temp	float	$tmp66	%read{52,239} %write{52,239}
+temp	normal	$tmp67	%read{52,239} %write{52,239}
+temp	vector	$tmp68	%read{52,239} %write{52,239}
+temp	float	$tmp69	%read{52,239} %write{52,239}
+const	string	$const22	"sinIntensity"		%read{123,205} %write{2147483647,-1}
+temp	float	$tmp70	%read{52,239} %write{52,239}
+temp	float	$tmp71	%read{52,239} %write{52,239}
+const	float	$const23	0.25		%read{127,216} %write{2147483647,-1}
+temp	float	$tmp72	%read{52,239} %write{52,239}
+temp	float	$tmp73	%read{52,239} %write{52,239}
+temp	float	$tmp74	%read{52,239} %write{52,239}
+temp	float	$tmp75	%read{52,239} %write{52,239}
+temp	float	$tmp76	%read{52,239} %write{52,239}
+temp	float	$tmp77	%read{52,239} %write{52,239}
+temp	float	$tmp78	%read{52,239} %write{52,239}
+temp	float	$tmp79	%read{52,239} %write{52,239}
+temp	float	$tmp80	%read{52,239} %write{52,239}
+temp	float	$tmp81	%read{52,239} %write{52,239}
+temp	float	$tmp82	%read{52,239} %write{52,239}
+const	float	$const24	-0.25		%read{142,224} %write{2147483647,-1}
+temp	float	$tmp83	%read{52,239} %write{52,239}
+temp	float	$tmp84	%read{52,239} %write{52,239}
+temp	float	$tmp85	%read{52,239} %write{52,239}
+temp	float	$tmp86	%read{52,239} %write{52,239}
+temp	float	$tmp87	%read{52,239} %write{52,239}
+temp	float	$tmp88	%read{52,239} %write{52,239}
+temp	float	$tmp89	%read{52,239} %write{52,239}
+temp	float	$tmp90	%read{52,239} %write{52,239}
+temp	float	$tmp91	%read{52,239} %write{52,239}
+temp	float	$tmp92	%read{52,239} %write{52,239}
+temp	float	$tmp93	%read{52,239} %write{52,239}
+temp	float	$tmp94	%read{52,239} %write{52,239}
+temp	float	$tmp95	%read{52,239} %write{52,239}
+temp	float	$tmp96	%read{52,239} %write{52,239}
+temp	float	$tmp97	%read{52,239} %write{52,239}
+temp	float	$tmp98	%read{52,239} %write{52,239}
+temp	float	$tmp99	%read{52,239} %write{52,239}
+temp	float	$tmp100	%read{52,239} %write{52,239}
+temp	float	$tmp101	%read{52,239} %write{52,239}
+temp	float	$tmp102	%read{52,239} %write{52,239}
+temp	float	$tmp103	%read{52,239} %write{52,239}
+temp	float	$tmp104	%read{52,239} %write{52,239}
+temp	float	$tmp105	%read{52,239} %write{52,239}
+temp	float	$tmp106	%read{52,239} %write{52,239}
+temp	float	$tmp107	%read{52,239} %write{52,239}
+temp	float	$tmp108	%read{52,239} %write{52,239}
+temp	float	$tmp109	%read{52,239} %write{52,239}
+temp	float	$tmp110	%read{52,239} %write{52,239}
+temp	float	$tmp111	%read{52,239} %write{52,239}
+temp	float	$tmp112	%read{52,239} %write{52,239}
+temp	float	$tmp113	%read{52,239} %write{52,239}
+temp	float	$tmp114	%read{52,239} %write{52,239}
+temp	float	$tmp115	%read{52,239} %write{52,239}
+temp	float	$tmp116	%read{52,239} %write{52,239}
+temp	float	$tmp117	%read{52,239} %write{52,239}
+temp	float	$tmp118	%read{52,239} %write{52,239}
+temp	float	$tmp119	%read{52,239} %write{52,239}
+temp	float	$tmp120	%read{52,239} %write{52,239}
+temp	float	$tmp121	%read{52,239} %write{52,239}
+temp	float	$tmp122	%read{52,239} %write{52,239}
+temp	float	$tmp123	%read{52,239} %write{52,239}
+temp	float	$tmp124	%read{52,239} %write{52,239}
+temp	float	$tmp125	%read{52,239} %write{52,239}
+temp	float	$tmp126	%read{52,239} %write{52,239}
+temp	float	$tmp127	%read{52,239} %write{52,239}
+temp	float	$tmp128	%read{52,239} %write{52,239}
+temp	float	$tmp129	%read{52,239} %write{52,239}
+temp	float	$tmp130	%read{52,239} %write{52,239}
+temp	float	$tmp131	%read{52,239} %write{52,239}
+temp	float	$tmp132	%read{52,239} %write{52,239}
+temp	float	$tmp133	%read{52,239} %write{52,239}
+temp	float	$tmp134	%read{52,239} %write{52,239}
+temp	float	$tmp135	%read{52,239} %write{52,239}
+temp	float	$tmp136	%read{52,239} %write{52,239}
+temp	float	$tmp137	%read{52,239} %write{52,239}
+temp	float	$tmp138	%read{52,239} %write{52,239}
+temp	float	$tmp139	%read{52,239} %write{52,239}
+temp	float	$tmp140	%read{52,239} %write{52,239}
+temp	float	$tmp141	%read{52,239} %write{52,239}
+temp	float	$tmp142	%read{52,239} %write{52,239}
+temp	float	$tmp143	%read{52,239} %write{52,239}
+temp	float	$tmp144	%read{52,239} %write{52,239}
+temp	float	$tmp145	%read{52,239} %write{52,239}
+temp	float	$tmp146	%read{52,239} %write{52,239}
+temp	float	$tmp147	%read{52,239} %write{52,239}
+temp	float	$tmp148	%read{52,239} %write{52,239}
+temp	float	$tmp149	%read{52,239} %write{52,239}
+temp	float	$tmp150	%read{52,239} %write{52,239}
+temp	float	$tmp151	%read{52,239} %write{52,239}
+temp	float	$tmp152	%read{52,239} %write{52,239}
+temp	float	$tmp153	%read{52,239} %write{52,239}
+temp	float	$tmp154	%read{52,239} %write{52,239}
+temp	float	$tmp155	%read{52,239} %write{52,239}
+temp	float	$tmp156	%read{52,239} %write{52,239}
+temp	float	$tmp157	%read{52,239} %write{52,239}
+temp	float	$tmp158	%read{52,239} %write{52,239}
+temp	float	$tmp159	%read{52,239} %write{52,239}
+temp	float	$tmp160	%read{52,239} %write{52,239}
+temp	float	$tmp161	%read{52,239} %write{52,239}
+temp	float	$tmp162	%read{52,239} %write{52,239}
+temp	float	$tmp163	%read{52,239} %write{52,239}
+temp	int	$tmp164	%read{2147483647,-1} %write{52,239}
+const	string	$const25	"RYGCBVtoRgb"		%read{240,240} %write{2147483647,-1}
+temp	float	$tmp165	%read{242,242} %write{241,241}
+temp	float	$tmp166	%read{244,244} %write{243,243}
+temp	float	$tmp167	%read{246,246} %write{245,245}
+temp	float	$tmp168	%read{252,252} %write{247,247}
+temp	float	$tmp169	%read{250,250} %write{248,248}
+temp	float	$tmp170	%read{250,250} %write{249,249}
+temp	float	$tmp171	%read{251,251} %write{250,250}
+const	float	$const26	0.333332986		%read{251,265} %write{2147483647,-1}
+temp	float	$tmp172	%read{252,252} %write{251,251}
+temp	float	$tmp173	%read{253,253} %write{252,252}
+temp	float	$tmp174	%read{259,259} %write{254,254}
+temp	float	$tmp175	%read{257,257} %write{255,255}
+temp	float	$tmp176	%read{257,257} %write{256,256}
+temp	float	$tmp177	%read{258,258} %write{257,257}
+temp	float	$tmp178	%read{259,259} %write{258,258}
+temp	float	$tmp179	%read{260,260} %write{259,259}
+temp	float	$tmp180	%read{266,266} %write{261,261}
+temp	float	$tmp181	%read{264,264} %write{262,262}
+temp	float	$tmp182	%read{264,264} %write{263,263}
+temp	float	$tmp183	%read{265,265} %write{264,264}
+temp	float	$tmp184	%read{266,266} %write{265,265}
+temp	float	$tmp185	%read{267,267} %write{266,266}
+code ___main___
+# PxrThinFilm.osl:179
+#     vector Vn = normalize(-I);
+	neg		$tmp1 I 	%filename{"PxrThinFilm.osl"} %line{179} %argrw{"wr"}
+	normalize	Vn $tmp1 	%argrw{"wr"}
+# PxrThinFilm.osl:182
+#     float freq[6] = {642.0, 580.0, 529.0, 491.0, 464.0, 439.0};
+	assign		freq $const1 	%line{182} %argrw{"wr"}
+# PxrThinFilm.osl:183
+#     float etaBand, invEtaBand, etaBandStep = spread / 6.0;
+	div		etaBandStep spread $const2 	%line{183} %argrw{"wrr"}
+# PxrThinFilm.osl:185
+#     float refl = 0.0;
+	assign		refl $const3 	%line{185} %argrw{"wr"}
+# PxrThinFilm.osl:186
+#     float trans = 0.0;
+	assign		trans $const3 	%line{186} %argrw{"wr"}
+# PxrThinFilm.osl:187
+#     float shift, norm, halfSpread = spread * 0.5;
+	mul		halfSpread spread $const4 	%line{187} %argrw{"wrr"}
+# PxrThinFilm.osl:189
+#     float NdV = dot(N, Vn);
+	dot		NdV N Vn 	%line{189} %argrw{"wrr"}
+# PxrThinFilm.osl:191
+#     if (!frontOnly || NdV >= 1e-6)
+	eq		$tmp2 frontOnly $const5 	%line{191} %argrw{"wrr"}
+	neq		$tmp3 $tmp2 $const5 	%argrw{"wrr"}
+	if		$tmp3 11 14 	%argrw{"r"}
+	ge		$tmp4 NdV $const6 	%argrw{"wrr"}
+	neq		$tmp5 $tmp4 $const5 	%argrw{"wrr"}
+	assign		$tmp3 $tmp5 	%argrw{"wr"}
+	if		$tmp3 268 269 	%argrw{"r"}
+# PxrThinFilm.osl:193
+#         float finalThickness = thickness * thicknessScale;
+	mul		___334_finalThickness thickness thicknessScale 	%line{193} %argrw{"wrr"}
+# PxrThinFilm.osl:196
+#         rgbToRYGCBV(inputRGB, rygcbv);
+	functioncall	$const7 47 	%line{196} %argrw{"r"}
+# PxrThinFilm.osl:64
+#     float R2 = rgb[0] * 2.0;
+	compref		$tmp6 inputRGB $const5 	%line{64} %argrw{"wrr"}
+	mul		___327_R2 $tmp6 $const8 	%argrw{"wrr"}
+# PxrThinFilm.osl:65
+#     float G2 = rgb[1] * 2.0;
+	compref		$tmp7 inputRGB $const9 	%line{65} %argrw{"wrr"}
+	mul		___327_G2 $tmp7 $const8 	%argrw{"wrr"}
+# PxrThinFilm.osl:66
+#     float B2 = rgb[2] * 2.0;
+	compref		$tmp8 inputRGB $const10 	%line{66} %argrw{"wrr"}
+	mul		___327_B2 $tmp8 $const8 	%argrw{"wrr"}
+# PxrThinFilm.osl:67
+#     rygcbv[0] = rgb[0] * 0.5;
+	compref		$tmp9 inputRGB $const5 	%line{67} %argrw{"wrr"}
+	mul		$tmp10 $tmp9 $const4 	%argrw{"wrr"}
+	aassign		rygcbv $const5 $tmp10 	%argrw{"wrr"}
+# PxrThinFilm.osl:68
+#     rygcbv[2] = rgb[1] * 0.5;
+	compref		$tmp11 inputRGB $const9 	%line{68} %argrw{"wrr"}
+	mul		$tmp12 $tmp11 $const4 	%argrw{"wrr"}
+	aassign		rygcbv $const10 $tmp12 	%argrw{"wrr"}
+# PxrThinFilm.osl:69
+#     rygcbv[4] = rgb[2] * 0.5;
+	compref		$tmp13 inputRGB $const10 	%line{69} %argrw{"wrr"}
+	mul		$tmp14 $tmp13 $const4 	%argrw{"wrr"}
+	aassign		rygcbv $const11 $tmp14 	%argrw{"wrr"}
+# PxrThinFilm.osl:70
+#     rygcbv[1] = (R2 + G2 - rgb[2]) * 0.166667;
+	add		$tmp15 ___327_R2 ___327_G2 	%line{70} %argrw{"wrr"}
+	compref		$tmp16 inputRGB $const10 	%argrw{"wrr"}
+	sub		$tmp17 $tmp15 $tmp16 	%argrw{"wrr"}
+	mul		$tmp18 $tmp17 $const12 	%argrw{"wrr"}
+	aassign		rygcbv $const9 $tmp18 	%argrw{"wrr"}
+# PxrThinFilm.osl:71
+#     rygcbv[3] = (G2 + B2 - rgb[0]) * 0.166667;
+	add		$tmp19 ___327_G2 ___327_B2 	%line{71} %argrw{"wrr"}
+	compref		$tmp20 inputRGB $const5 	%argrw{"wrr"}
+	sub		$tmp21 $tmp19 $tmp20 	%argrw{"wrr"}
+	mul		$tmp22 $tmp21 $const12 	%argrw{"wrr"}
+	aassign		rygcbv $const13 $tmp22 	%argrw{"wrr"}
+# PxrThinFilm.osl:72
+#     rygcbv[5] = (B2 + R2 - rgb[1]) * 0.166667;
+	add		$tmp23 ___327_B2 ___327_R2 	%line{72} %argrw{"wrr"}
+	compref		$tmp24 inputRGB $const9 	%argrw{"wrr"}
+	sub		$tmp25 $tmp23 $tmp24 	%argrw{"wrr"}
+	mul		$tmp26 $tmp25 $const12 	%argrw{"wrr"}
+	aassign		rygcbv $const14 $tmp26 	%argrw{"wrr"}
+# PxrThinFilm.osl:201
+#         etaBand = max(1.0 + halfSpread, eta - halfSpread);
+	add		$tmp27 $const15 halfSpread 	%line{201} %argrw{"wrr"}
+	sub		$tmp28 eta halfSpread 	%argrw{"wrr"}
+	max		etaBand $tmp27 $tmp28 	%argrw{"wrr"}
+# PxrThinFilm.osl:202
+#         for (int w = 0; w < 6; w++)
+	for		$tmp30 52 54 238 240 	%line{202} %argrw{"r"}
+	assign		___335_w $const5 	%argrw{"wr"}
+	lt		$tmp29 ___335_w $const16 	%argrw{"wrr"}
+	neq		$tmp30 $tmp29 $const5 	%argrw{"wrr"}
+# PxrThinFilm.osl:204
+#             float phaseShift = interference(freq[w], NdV, etaBand, finalThickness) * M_2PI;
+	aref		$tmp32 freq ___335_w 	%line{204} %argrw{"wrr"}
+	functioncall	$const17 64 	%argrw{"r"}
+# PxrThinFilm.osl:41
+#     float out_eps = asin(sin(in_eps) / n);
+	sin		$tmp33 NdV 	%line{41} %argrw{"wr"}
+	div		$tmp34 $tmp33 etaBand 	%argrw{"wrr"}
+	asin		___325_out_eps $tmp34 	%argrw{"wr"}
+# PxrThinFilm.osl:42
+#     return 2.0 * n * d * cos(out_eps) / lambda;
+	mul		$tmp35 $const8 etaBand 	%line{42} %argrw{"wrr"}
+	mul		$tmp36 $tmp35 ___334_finalThickness 	%argrw{"wrr"}
+	cos		$tmp37 ___325_out_eps 	%argrw{"wr"}
+	mul		$tmp38 $tmp36 $tmp37 	%argrw{"wrr"}
+	div		$tmp31 $tmp38 $tmp32 	%argrw{"wrr"}
+# PxrThinFilm.osl:204
+#             float phaseShift = interference(freq[w], NdV, etaBand, finalThickness) * M_2PI;
+	mul		___336_phaseShift $tmp31 $const18 	%line{204} %argrw{"wrr"}
+# PxrThinFilm.osl:206
+#             if (spread > 0 || w == 0)
+	gt		$tmp39 spread $const5 	%line{206} %argrw{"wrr"}
+	neq		$tmp40 $tmp39 $const5 	%argrw{"wrr"}
+	if		$tmp40 68 71 	%argrw{"r"}
+	eq		$tmp41 ___335_w $const5 	%argrw{"wrr"}
+	neq		$tmp42 $tmp41 $const5 	%argrw{"wrr"}
+	assign		$tmp40 $tmp42 	%argrw{"wr"}
+	if		$tmp40 123 123 	%argrw{"r"}
+# PxrThinFilm.osl:208
+#                 invEtaBand = 1.0 / etaBand;
+	div		invEtaBand $const15 etaBand 	%line{208} %argrw{"wrr"}
+# PxrThinFilm.osl:209
+#                 RixFresnelDielectric(Vn, N, invEtaBand, refl);
+	functioncall	$const19 122 	%line{209} %argrw{"r"}
+# PxrThinFilm.osl:86
+#     vector Rn = vector(0);
+	assign		___329_Rn $const20 	%line{86} %argrw{"wr"}
+# PxrThinFilm.osl:87
+#     vector Tn = vector(0);
+	assign		___329_Tn $const20 	%line{87} %argrw{"wr"}
+# PxrThinFilm.osl:89
+#     float VdN = dot(Nn, Vn);
+	dot		___329_VdN N Vn 	%line{89} %argrw{"wrr"}
+# PxrThinFilm.osl:91
+#     if (VdN < 0.0)
+	lt		$tmp43 ___329_VdN $const3 	%line{91} %argrw{"wrr"}
+	if		$tmp43 81 83 	%argrw{"r"}
+# PxrThinFilm.osl:93
+#         rcos_i = -VdN;
+	neg		___329_rcos_i ___329_VdN 	%line{93} %argrw{"wr"}
+# PxrThinFilm.osl:94
+#         sign = -1.0;
+	assign		___329_sign $const21 	%line{94} %argrw{"wr"}
+# PxrThinFilm.osl:98
+#         rcos_i = VdN;
+	assign		___329_rcos_i ___329_VdN 	%line{98} %argrw{"wr"}
+# PxrThinFilm.osl:99
+#         sign = 1.0;
+	assign		___329_sign $const15 	%line{99} %argrw{"wr"}
+# PxrThinFilm.osl:104
+#     if (Rn) Rn = 2.0 * VdN * Nn - Vn;
+	neq		$tmp44 ___329_Rn $const3 	%line{104} %argrw{"wrr"}
+	if		$tmp44 88 88 	%argrw{"r"}
+	mul		$tmp45 $const8 ___329_VdN 	%argrw{"wrr"}
+	mul		$tmp46 $tmp45 N 	%argrw{"wrr"}
+	sub		___329_Rn $tmp46 Vn 	%argrw{"wrr"}
+# PxrThinFilm.osl:106
+#     float etaSq = eta * eta;
+	mul		___329_etaSq invEtaBand invEtaBand 	%line{106} %argrw{"wrr"}
+# PxrThinFilm.osl:107
+#     float rcos_tSq = 1.00 - etaSq * (1.0 - rcos_i * rcos_i);
+	mul		$tmp47 ___329_rcos_i ___329_rcos_i 	%line{107} %argrw{"wrr"}
+	sub		$tmp48 $const15 $tmp47 	%argrw{"wrr"}
+	mul		$tmp49 ___329_etaSq $tmp48 	%argrw{"wrr"}
+	sub		___329_rcos_tSq $const15 $tmp49 	%argrw{"wrr"}
+# PxrThinFilm.osl:108
+#     if (rcos_tSq <= 0.0)
+	le		$tmp50 ___329_rcos_tSq $const3 	%line{108} %argrw{"wrr"}
+	if		$tmp50 99 122 	%argrw{"r"}
+# PxrThinFilm.osl:110
+#         Kr = 1.0;                  // total internal reflection
+	assign		refl $const15 	%line{110} %argrw{"wr"}
+# PxrThinFilm.osl:111
+#         if (Tn) Tn = vector(0.0);  // no refraction (transmission) dir
+	neq		$tmp51 ___329_Tn $const3 	%line{111} %argrw{"wrr"}
+	if		$tmp51 99 99 	%argrw{"r"}
+	assign		___329_Tn $const20 	%argrw{"wr"}
+# PxrThinFilm.osl:115
+#         float rcos_t = sqrt(rcos_tSq);
+	sqrt		___333_rcos_t ___329_rcos_tSq 	%line{115} %argrw{"wr"}
+# PxrThinFilm.osl:116
+#         float rpar = (eta * rcos_t - rcos_i) / (eta * rcos_t + rcos_i);
+	mul		$tmp52 invEtaBand ___333_rcos_t 	%line{116} %argrw{"wrr"}
+	sub		$tmp53 $tmp52 ___329_rcos_i 	%argrw{"wrr"}
+	mul		$tmp54 invEtaBand ___333_rcos_t 	%argrw{"wrr"}
+	add		$tmp55 $tmp54 ___329_rcos_i 	%argrw{"wrr"}
+	div		___333_rpar $tmp53 $tmp55 	%argrw{"wrr"}
+# PxrThinFilm.osl:117
+#         float rper = (eta * rcos_i - rcos_t) / (eta * rcos_i + rcos_t);
+	mul		$tmp56 invEtaBand ___329_rcos_i 	%line{117} %argrw{"wrr"}
+	sub		$tmp57 $tmp56 ___333_rcos_t 	%argrw{"wrr"}
+	mul		$tmp58 invEtaBand ___329_rcos_i 	%argrw{"wrr"}
+	add		$tmp59 $tmp58 ___333_rcos_t 	%argrw{"wrr"}
+	div		___333_rper $tmp57 $tmp59 	%argrw{"wrr"}
+# PxrThinFilm.osl:118
+#         Kr = 0.5 * (rpar * rpar + rper * rper);
+	mul		$tmp60 ___333_rpar ___333_rpar 	%line{118} %argrw{"wrr"}
+	mul		$tmp61 ___333_rper ___333_rper 	%argrw{"wrr"}
+	add		$tmp62 $tmp60 $tmp61 	%argrw{"wrr"}
+	mul		refl $const4 $tmp62 	%argrw{"wrr"}
+# PxrThinFilm.osl:119
+#         if (Tn) Tn = sign * (eta * rcos_i - rcos_t) * Nn - eta * Vn;
+	neq		$tmp63 ___329_Tn $const3 	%line{119} %argrw{"wrr"}
+	if		$tmp63 122 122 	%argrw{"r"}
+	mul		$tmp64 invEtaBand ___329_rcos_i 	%argrw{"wrr"}
+	sub		$tmp65 $tmp64 ___333_rcos_t 	%argrw{"wrr"}
+	mul		$tmp66 ___329_sign $tmp65 	%argrw{"wrr"}
+	mul		$tmp67 $tmp66 N 	%argrw{"wrr"}
+	mul		$tmp68 invEtaBand Vn 	%argrw{"wrr"}
+	sub		___329_Tn $tmp67 $tmp68 	%argrw{"wrr"}
+# PxrThinFilm.osl:210
+#                 trans = 1.0 - refl;
+	sub		trans $const15 refl 	%line{210} %argrw{"wrr"}
+# PxrThinFilm.osl:213
+#             shift = sinIntensity(refl, trans, M_2PI, phaseShift) -
+	functioncall	$const22 150 	%line{213} %argrw{"r"}
+# PxrThinFilm.osl:49
+#     float t1 = a * a * (w * 0.5 - 0.25 * sin(w));
+	mul		$tmp70 refl refl 	%line{49} %argrw{"wrr"}
+	mul		$tmp71 $const18 $const4 	%argrw{"wrr"}
+	sin		$tmp72 $const18 	%argrw{"wr"}
+	mul		$tmp73 $const23 $tmp72 	%argrw{"wrr"}
+	sub		$tmp74 $tmp71 $tmp73 	%argrw{"wrr"}
+	mul		___326_t1 $tmp70 $tmp74 	%argrw{"wrr"}
+# PxrThinFilm.osl:50
+#     float t2 = b * b * (w * 0.5 - 0.25 * sin(w + s));
+	mul		$tmp75 trans trans 	%line{50} %argrw{"wrr"}
+	mul		$tmp76 $const18 $const4 	%argrw{"wrr"}
+	add		$tmp78 $const18 ___336_phaseShift 	%argrw{"wrr"}
+	sin		$tmp77 $tmp78 	%argrw{"wr"}
+	mul		$tmp79 $const23 $tmp77 	%argrw{"wrr"}
+	sub		$tmp80 $tmp76 $tmp79 	%argrw{"wrr"}
+	mul		___326_t2 $tmp75 $tmp80 	%argrw{"wrr"}
+# PxrThinFilm.osl:51
+#     float t3 = 2 * a * b * (-0.25 * sin(2.0 * w + s) + w * 0.5 * cos(s));
+	mul		$tmp81 $const8 refl 	%line{51} %argrw{"wrr"}
+	mul		$tmp82 $tmp81 trans 	%argrw{"wrr"}
+	mul		$tmp84 $const8 $const18 	%argrw{"wrr"}
+	add		$tmp85 $tmp84 ___336_phaseShift 	%argrw{"wrr"}
+	sin		$tmp83 $tmp85 	%argrw{"wr"}
+	mul		$tmp86 $const24 $tmp83 	%argrw{"wrr"}
+	mul		$tmp87 $const18 $const4 	%argrw{"wrr"}
+	cos		$tmp88 ___336_phaseShift 	%argrw{"wr"}
+	mul		$tmp89 $tmp87 $tmp88 	%argrw{"wrr"}
+	add		$tmp90 $tmp86 $tmp89 	%argrw{"wrr"}
+	mul		___326_t3 $tmp82 $tmp90 	%argrw{"wrr"}
+# PxrThinFilm.osl:52
+#     return (t1 + t2 + t3);
+	add		$tmp91 ___326_t1 ___326_t2 	%line{52} %argrw{"wrr"}
+	add		$tmp69 $tmp91 ___326_t3 	%argrw{"wrr"}
+# PxrThinFilm.osl:214
+#                     sinIntensity(refl, trans, 0.0, phaseShift);
+	functioncall	$const22 177 	%line{214} %argrw{"r"}
+# PxrThinFilm.osl:49
+#     float t1 = a * a * (w * 0.5 - 0.25 * sin(w));
+	mul		$tmp93 refl refl 	%line{49} %argrw{"wrr"}
+	mul		$tmp94 $const3 $const4 	%argrw{"wrr"}
+	sin		$tmp95 $const3 	%argrw{"wr"}
+	mul		$tmp96 $const23 $tmp95 	%argrw{"wrr"}
+	sub		$tmp97 $tmp94 $tmp96 	%argrw{"wrr"}
+	mul		___326_t1 $tmp93 $tmp97 	%argrw{"wrr"}
+# PxrThinFilm.osl:50
+#     float t2 = b * b * (w * 0.5 - 0.25 * sin(w + s));
+	mul		$tmp98 trans trans 	%line{50} %argrw{"wrr"}
+	mul		$tmp99 $const3 $const4 	%argrw{"wrr"}
+	add		$tmp101 $const3 ___336_phaseShift 	%argrw{"wrr"}
+	sin		$tmp100 $tmp101 	%argrw{"wr"}
+	mul		$tmp102 $const23 $tmp100 	%argrw{"wrr"}
+	sub		$tmp103 $tmp99 $tmp102 	%argrw{"wrr"}
+	mul		___326_t2 $tmp98 $tmp103 	%argrw{"wrr"}
+# PxrThinFilm.osl:51
+#     float t3 = 2 * a * b * (-0.25 * sin(2.0 * w + s) + w * 0.5 * cos(s));
+	mul		$tmp104 $const8 refl 	%line{51} %argrw{"wrr"}
+	mul		$tmp105 $tmp104 trans 	%argrw{"wrr"}
+	mul		$tmp107 $const8 $const3 	%argrw{"wrr"}
+	add		$tmp108 $tmp107 ___336_phaseShift 	%argrw{"wrr"}
+	sin		$tmp106 $tmp108 	%argrw{"wr"}
+	mul		$tmp109 $const24 $tmp106 	%argrw{"wrr"}
+	mul		$tmp110 $const3 $const4 	%argrw{"wrr"}
+	cos		$tmp111 ___336_phaseShift 	%argrw{"wr"}
+	mul		$tmp112 $tmp110 $tmp111 	%argrw{"wrr"}
+	add		$tmp113 $tmp109 $tmp112 	%argrw{"wrr"}
+	mul		___326_t3 $tmp105 $tmp113 	%argrw{"wrr"}
+# PxrThinFilm.osl:52
+#     return (t1 + t2 + t3);
+	add		$tmp114 ___326_t1 ___326_t2 	%line{52} %argrw{"wrr"}
+	add		$tmp92 $tmp114 ___326_t3 	%argrw{"wrr"}
+# PxrThinFilm.osl:213
+#             shift = sinIntensity(refl, trans, M_2PI, phaseShift) -
+	sub		shift $tmp69 $tmp92 	%line{213} %argrw{"wrr"}
+# PxrThinFilm.osl:216
+#             norm = sinIntensity(refl, trans, M_2PI, 0.0) - sinIntensity(refl, trans, 0.0, 0.0);
+	functioncall	$const22 205 	%line{216} %argrw{"r"}
+# PxrThinFilm.osl:49
+#     float t1 = a * a * (w * 0.5 - 0.25 * sin(w));
+	mul		$tmp116 refl refl 	%line{49} %argrw{"wrr"}
+	mul		$tmp117 $const18 $const4 	%argrw{"wrr"}
+	sin		$tmp118 $const18 	%argrw{"wr"}
+	mul		$tmp119 $const23 $tmp118 	%argrw{"wrr"}
+	sub		$tmp120 $tmp117 $tmp119 	%argrw{"wrr"}
+	mul		___326_t1 $tmp116 $tmp120 	%argrw{"wrr"}
+# PxrThinFilm.osl:50
+#     float t2 = b * b * (w * 0.5 - 0.25 * sin(w + s));
+	mul		$tmp121 trans trans 	%line{50} %argrw{"wrr"}
+	mul		$tmp122 $const18 $const4 	%argrw{"wrr"}
+	add		$tmp124 $const18 $const3 	%argrw{"wrr"}
+	sin		$tmp123 $tmp124 	%argrw{"wr"}
+	mul		$tmp125 $const23 $tmp123 	%argrw{"wrr"}
+	sub		$tmp126 $tmp122 $tmp125 	%argrw{"wrr"}
+	mul		___326_t2 $tmp121 $tmp126 	%argrw{"wrr"}
+# PxrThinFilm.osl:51
+#     float t3 = 2 * a * b * (-0.25 * sin(2.0 * w + s) + w * 0.5 * cos(s));
+	mul		$tmp127 $const8 refl 	%line{51} %argrw{"wrr"}
+	mul		$tmp128 $tmp127 trans 	%argrw{"wrr"}
+	mul		$tmp130 $const8 $const18 	%argrw{"wrr"}
+	add		$tmp131 $tmp130 $const3 	%argrw{"wrr"}
+	sin		$tmp129 $tmp131 	%argrw{"wr"}
+	mul		$tmp132 $const24 $tmp129 	%argrw{"wrr"}
+	mul		$tmp133 $const18 $const4 	%argrw{"wrr"}
+	cos		$tmp134 $const3 	%argrw{"wr"}
+	mul		$tmp135 $tmp133 $tmp134 	%argrw{"wrr"}
+	add		$tmp136 $tmp132 $tmp135 	%argrw{"wrr"}
+	mul		___326_t3 $tmp128 $tmp136 	%argrw{"wrr"}
+# PxrThinFilm.osl:52
+#     return (t1 + t2 + t3);
+	add		$tmp137 ___326_t1 ___326_t2 	%line{52} %argrw{"wrr"}
+	add		$tmp115 $tmp137 ___326_t3 	%argrw{"wrr"}
+# PxrThinFilm.osl:216
+#             norm = sinIntensity(refl, trans, M_2PI, 0.0) - sinIntensity(refl, trans, 0.0, 0.0);
+	functioncall	$const22 232 	%line{216} %argrw{"r"}
+# PxrThinFilm.osl:49
+#     float t1 = a * a * (w * 0.5 - 0.25 * sin(w));
+	mul		$tmp139 refl refl 	%line{49} %argrw{"wrr"}
+	mul		$tmp140 $const3 $const4 	%argrw{"wrr"}
+	sin		$tmp141 $const3 	%argrw{"wr"}
+	mul		$tmp142 $const23 $tmp141 	%argrw{"wrr"}
+	sub		$tmp143 $tmp140 $tmp142 	%argrw{"wrr"}
+	mul		___326_t1 $tmp139 $tmp143 	%argrw{"wrr"}
+# PxrThinFilm.osl:50
+#     float t2 = b * b * (w * 0.5 - 0.25 * sin(w + s));
+	mul		$tmp144 trans trans 	%line{50} %argrw{"wrr"}
+	mul		$tmp145 $const3 $const4 	%argrw{"wrr"}
+	add		$tmp147 $const3 $const3 	%argrw{"wrr"}
+	sin		$tmp146 $tmp147 	%argrw{"wr"}
+	mul		$tmp148 $const23 $tmp146 	%argrw{"wrr"}
+	sub		$tmp149 $tmp145 $tmp148 	%argrw{"wrr"}
+	mul		___326_t2 $tmp144 $tmp149 	%argrw{"wrr"}
+# PxrThinFilm.osl:51
+#     float t3 = 2 * a * b * (-0.25 * sin(2.0 * w + s) + w * 0.5 * cos(s));
+	mul		$tmp150 $const8 refl 	%line{51} %argrw{"wrr"}
+	mul		$tmp151 $tmp150 trans 	%argrw{"wrr"}
+	mul		$tmp153 $const8 $const3 	%argrw{"wrr"}
+	add		$tmp154 $tmp153 $const3 	%argrw{"wrr"}
+	sin		$tmp152 $tmp154 	%argrw{"wr"}
+	mul		$tmp155 $const24 $tmp152 	%argrw{"wrr"}
+	mul		$tmp156 $const3 $const4 	%argrw{"wrr"}
+	cos		$tmp157 $const3 	%argrw{"wr"}
+	mul		$tmp158 $tmp156 $tmp157 	%argrw{"wrr"}
+	add		$tmp159 $tmp155 $tmp158 	%argrw{"wrr"}
+	mul		___326_t3 $tmp151 $tmp159 	%argrw{"wrr"}
+# PxrThinFilm.osl:52
+#     return (t1 + t2 + t3);
+	add		$tmp160 ___326_t1 ___326_t2 	%line{52} %argrw{"wrr"}
+	add		$tmp138 $tmp160 ___326_t3 	%argrw{"wrr"}
+# PxrThinFilm.osl:216
+#             norm = sinIntensity(refl, trans, M_2PI, 0.0) - sinIntensity(refl, trans, 0.0, 0.0);
+	sub		norm $tmp115 $tmp138 	%line{216} %argrw{"wrr"}
+# PxrThinFilm.osl:218
+#             rygcbv[w] = shift / norm * rygcbv[w];
+	div		$tmp161 shift norm 	%line{218} %argrw{"wrr"}
+	aref		$tmp162 rygcbv ___335_w 	%argrw{"wrr"}
+	mul		$tmp163 $tmp161 $tmp162 	%argrw{"wrr"}
+	aassign		rygcbv ___335_w $tmp163 	%argrw{"wrr"}
+# PxrThinFilm.osl:219
+#             etaBand += etaBandStep;
+	add		etaBand etaBand etaBandStep 	%line{219} %argrw{"wrr"}
+# PxrThinFilm.osl:202
+#         for (int w = 0; w < 6; w++)
+	assign		$tmp164 ___335_w 	%line{202} %argrw{"wr"}
+	add		___335_w ___335_w $const9 	%argrw{"wrr"}
+# PxrThinFilm.osl:223
+#         RYGCBVtoRgb(rygcbv, resultRGB);
+	functioncall	$const25 268 	%line{223} %argrw{"r"}
+# PxrThinFilm.osl:78
+#     float y2 = rygcbv[1] * 2.0, c2 = rygcbv[3] * 2.0, v2 = rygcbv[5] * 2.0;
+	aref		$tmp165 rygcbv $const9 	%line{78} %argrw{"wrr"}
+	mul		___328_y2 $tmp165 $const8 	%argrw{"wrr"}
+	aref		$tmp166 rygcbv $const13 	%argrw{"wrr"}
+	mul		___328_c2 $tmp166 $const8 	%argrw{"wrr"}
+	aref		$tmp167 rygcbv $const14 	%argrw{"wrr"}
+	mul		___328_v2 $tmp167 $const8 	%argrw{"wrr"}
+# PxrThinFilm.osl:79
+#     rgb[0] = rygcbv[0] + (v2 + y2 - rygcbv[3]) * 0.333333;
+	aref		$tmp168 rygcbv $const5 	%line{79} %argrw{"wrr"}
+	add		$tmp169 ___328_v2 ___328_y2 	%argrw{"wrr"}
+	aref		$tmp170 rygcbv $const13 	%argrw{"wrr"}
+	sub		$tmp171 $tmp169 $tmp170 	%argrw{"wrr"}
+	mul		$tmp172 $tmp171 $const26 	%argrw{"wrr"}
+	add		$tmp173 $tmp168 $tmp172 	%argrw{"wrr"}
+	compassign	resultRGB $const5 $tmp173 	%argrw{"wrr"}
+# PxrThinFilm.osl:80
+#     rgb[1] = rygcbv[2] + (y2 + c2 - rygcbv[5]) * 0.333333;
+	aref		$tmp174 rygcbv $const10 	%line{80} %argrw{"wrr"}
+	add		$tmp175 ___328_y2 ___328_c2 	%argrw{"wrr"}
+	aref		$tmp176 rygcbv $const14 	%argrw{"wrr"}
+	sub		$tmp177 $tmp175 $tmp176 	%argrw{"wrr"}
+	mul		$tmp178 $tmp177 $const26 	%argrw{"wrr"}
+	add		$tmp179 $tmp174 $tmp178 	%argrw{"wrr"}
+	compassign	resultRGB $const9 $tmp179 	%argrw{"wrr"}
+# PxrThinFilm.osl:81
+#     rgb[2] = rygcbv[4] + (c2 + v2 - rygcbv[1]) * 0.333333;
+	aref		$tmp180 rygcbv $const11 	%line{81} %argrw{"wrr"}
+	add		$tmp181 ___328_c2 ___328_v2 	%argrw{"wrr"}
+	aref		$tmp182 rygcbv $const9 	%argrw{"wrr"}
+	sub		$tmp183 $tmp181 $tmp182 	%argrw{"wrr"}
+	mul		$tmp184 $tmp183 $const26 	%argrw{"wrr"}
+	add		$tmp185 $tmp180 $tmp184 	%argrw{"wrr"}
+	compassign	resultRGB $const10 $tmp185 	%argrw{"wrr"}
+# PxrThinFilm.osl:227
+#         resultRGB = inputRGB;
+	assign		resultRGB inputRGB 	%line{227} %argrw{"wr"}
+# PxrThinFilm.osl:230
+#     resultR = resultRGB[0];
+	compref		resultR resultRGB $const5 	%line{230} %argrw{"wrr"}
+# PxrThinFilm.osl:231
+#     resultG = resultRGB[1];
+	compref		resultG resultRGB $const9 	%line{231} %argrw{"wrr"}
+# PxrThinFilm.osl:232
+#     resultB = resultRGB[2];
+	compref		resultB resultRGB $const10 	%line{232} %argrw{"wrr"}
+	end

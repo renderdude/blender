@@ -4,6 +4,7 @@
 #ifndef __UTIL_PROJECTION_H__
 #define __UTIL_PROJECTION_H__
 
+#include "util/hash.h"
 #include "util/transform.h"
 
 CCL_NAMESPACE_BEGIN
@@ -16,12 +17,26 @@ typedef struct ProjectionTransform {
 #ifndef __KERNEL_GPU__
   ProjectionTransform() {}
 
+  ProjectionTransform(const ProjectionTransform &tfm)
+      : x(tfm.x), y(tfm.y), z(tfm.z), w(tfm.w)
+  {
+  }
+  
   explicit ProjectionTransform(const Transform &tfm)
       : x(tfm.x), y(tfm.y), z(tfm.z), w(make_float4(0.0f, 0.0f, 0.0f, 1.0f))
   {
   }
 #endif
 } ProjectionTransform;
+
+struct ProjectionTransformHasher{
+  size_t operator()(const ProjectionTransform& pt) const noexcept {
+    return hash_uint4(__float_as_uint(hash_float4_to_float(pt.x)),
+                      __float_as_uint(hash_float4_to_float(pt.y)),
+                      __float_as_uint(hash_float4_to_float(pt.z)),
+                      __float_as_uint(hash_float4_to_float(pt.w)));
+  }
+};
 
 typedef struct PerspectiveMotionTransform {
   ProjectionTransform pre;
@@ -165,6 +180,17 @@ ccl_device_inline ProjectionTransform operator*(const Transform &a, const Projec
 {
   return ProjectionTransform(a) * b;
 }
+
+ccl_device_inline bool operator==(const ProjectionTransform &A, const ProjectionTransform &B)
+{
+  return memcmp(&A, &B, sizeof(ProjectionTransform)) == 0;
+}
+
+ccl_device_inline bool operator!=(const ProjectionTransform &A, const ProjectionTransform &B)
+{
+  return !(A == B);
+}
+
 
 ccl_device_inline void print_projection(const char *label, const ProjectionTransform &t)
 {

@@ -1,0 +1,46 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrShadedSide.osl/obj/PxrShadedSide.oso
+shader PxrShadedSide	%meta{int,rfm_nodeid,1053302} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/geometry"} %meta{string,rfh_classification,"Pattern/Geometry"} %meta{int,rfc_nodeid,1037671} %meta{string,rfc_description,"Xpxrshadedside"} 
+param	int	invert	0		%meta{string,label,"Invert"} %meta{string,widget,"checkBox"} %meta{string,help,"If the side we want is on the opposite side, turn this on to invert it."} %meta{int,connectable,0}  %read{7,7} %write{2147483647,-1}
+oparam	float	resultF	0		%meta{string,widget,"null"}  %read{2147483647,-1} %write{11,11}
+global	vector	I	%read{2,2} %write{2147483647,-1}
+global	normal	Ng	%read{2,2} %write{2147483647,-1}
+local	int	___325_resultI	%read{9,10} %write{1,9}
+temp	int	$tmp1	%read{11,11} %write{10,10}
+const	string	$const1	"RISShadedSide"		%read{0,0} %write{2147483647,-1}
+const	int	$const2	1		%read{1,9} %write{2147483647,-1}
+temp	float	$tmp2	%read{3,3} %write{2,2}
+const	int	$const3	0		%read{3,5} %write{2147483647,-1}
+temp	int	$tmp3	%read{4,4} %write{3,3}
+temp	int	$tmp4	%read{8,8} %write{7,7}
+code ___main___
+# PxrShadedSide.osl:63
+#     resultF = RISShadedSide(invert);
+	functioncall	$const1 11 	%filename{"PxrShadedSide.osl"} %line{63} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:58
+#     int resultI = 1;
+	assign		___325_resultI $const2 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h"} %line{58} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:62
+#     if(dot(I, Ng) > 0)
+	dot		$tmp2 I Ng 	%line{62} %argrw{"wrr"}
+	gt		$tmp3 $tmp2 $const3 	%argrw{"wrr"}
+	if		$tmp3 6 7 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:63
+#         resultI = 0;
+	assign		___325_resultI $const3 	%line{63} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:65
+#         resultI = 1;
+	assign		___325_resultI $const2 	%line{65} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:67
+#     if (invert == 1) resultI = 1 - resultI;
+	eq		$tmp4 invert $const2 	%line{67} %argrw{"wrr"}
+	if		$tmp4 10 10 	%argrw{"r"}
+	sub		___325_resultI $const2 ___325_resultI 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:69
+#     return resultI;
+	assign		$tmp1 ___325_resultI 	%line{69} %argrw{"wr"}
+# PxrShadedSide.osl:63
+#     resultF = RISShadedSide(invert);
+	assign		resultF $tmp1 	%filename{"PxrShadedSide.osl"} %line{63} %argrw{"wr"}
+	end

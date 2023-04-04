@@ -1,0 +1,186 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrMatteID.osl/obj/PxrMatteID.oso
+shader PxrMatteID	%meta{int,rfm_nodeid,1053257} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/utility"} %meta{string,rfh_classification,"Pattern/Utility"} 
+param	int	inputAOV	0		%meta{string,widget,"default"} %meta{string,help,"This input can only be used to daisy-chain other nodes that<br>don't produce any output<br><br>inputAOV (int)"} %meta{string,label,"Input AOV"} %meta{string,readOnly,"True"}  %read{2,2} %write{2147483647,-1}
+param	int	enable	1		%meta{string,widget,"checkBox"} %meta{string,help,"Controls MatteID AOV output<br><br>enable (int)"} %meta{int,connectable,1} %meta{string,label,"Enable"}  %read{3,3} %write{2147483647,-1}
+param	color	matteTexture0	0 0 0		%meta{string,widget,"color"} %meta{string,help,"Assign a texture to a specific MatteID AOV<br><br>matteTexture0 (color)"} %meta{string,label,"Matte Texture 0"}  %read{14,16} %write{2147483647,-1}
+param	color	matteTexture1	0 0 0		%meta{string,widget,"color"} %meta{string,help,"Assign a texture to a specific MatteID AOV<br><br>matteTexture1 (color)"} %meta{string,label,"Matte Texture 1"}  %read{17,19} %write{2147483647,-1}
+param	color	matteTexture2	0 0 0		%meta{string,widget,"color"} %meta{string,help,"Assign a texture to a specific MatteID AOV<br><br>matteTexture2 (color)"} %meta{string,label,"Matte Texture 2"}  %read{20,22} %write{2147483647,-1}
+param	color	matteTexture3	0 0 0		%meta{string,widget,"color"} %meta{string,help,"Assign a texture to a specific MatteID AOV<br><br>matteTexture3 (color)"} %meta{string,label,"Matte Texture 3"}  %read{23,25} %write{2147483647,-1}
+param	color	matteTexture4	0 0 0		%meta{string,widget,"color"} %meta{string,help,"Assign a texture to a specific MatteID AOV<br><br>matteTexture4 (color)"} %meta{string,label,"Matte Texture 4"}  %read{26,28} %write{2147483647,-1}
+param	color	matteTexture5	0 0 0		%meta{string,widget,"color"} %meta{string,help,"Assign a texture to a specific MatteID AOV<br><br>matteTexture5 (color)"} %meta{string,label,"Matte Texture 5"}  %read{29,31} %write{2147483647,-1}
+param	color	matteTexture6	0 0 0		%meta{string,widget,"color"} %meta{string,help,"Assign a texture to a specific MatteID AOV<br><br>matteTexture6 (color)"} %meta{string,label,"Matte Texture 6"}  %read{32,34} %write{2147483647,-1}
+param	color	matteTexture7	0 0 0		%meta{string,widget,"color"} %meta{string,help,"Assign a texture to a specific MatteID AOV<br><br>matteTexture7 (color)"} %meta{string,label,"Matte Texture 7"}  %read{35,37} %write{2147483647,-1}
+oparam	int	resultAOV	0		%read{2147483647,-1} %write{38,38}
+global	closure color	Ci	%read{42,61} %write{42,61}
+local	string[8]	s_texattrs	%read{2147483647,-1} %write{0,0}
+local	string[8]	s_matteid	%read{42,61} %write{1,1}
+local	int	foo	%read{2147483647,-1} %write{2,2}
+local	color[8]	mtex	%read{42,61} %write{6,37}
+local	color	attrColor	%read{42,61} %write{39,61}
+local	int	___325_d	%read{42,61} %write{41,61}
+local	int	___326_ok	%read{42,61} %write{42,61}
+const	string[8]	$const1	"matteTexture0" "matteTexture1" "matteTexture2" "matteTexture3" "matteTexture4" "matteTexture5" "matteTexture6" "matteTexture7" 		%read{0,0} %write{2147483647,-1}
+const	string[8]	$const2	"MatteID0" "MatteID1" "MatteID2" "MatteID3" "MatteID4" "MatteID5" "MatteID6" "MatteID7" 		%read{1,1} %write{2147483647,-1}
+temp	int	$tmp1	%read{4,4} %write{3,3}
+const	int	$const3	0		%read{3,43} %write{2147483647,-1}
+const	color	$const4	-1 -1 -1		%read{6,48} %write{2147483647,-1}
+const	int	$const5	1		%read{7,61} %write{2147483647,-1}
+const	int	$const6	2		%read{8,22} %write{2147483647,-1}
+const	int	$const7	3		%read{9,25} %write{2147483647,-1}
+const	int	$const8	4		%read{10,28} %write{2147483647,-1}
+const	int	$const9	5		%read{11,31} %write{2147483647,-1}
+const	int	$const10	6		%read{12,34} %write{2147483647,-1}
+const	int	$const11	7		%read{13,37} %write{2147483647,-1}
+temp	int	$tmp10	%read{15,15} %write{14,14}
+temp	int	$tmp11	%read{18,18} %write{17,17}
+temp	int	$tmp12	%read{21,21} %write{20,20}
+temp	int	$tmp13	%read{24,24} %write{23,23}
+temp	int	$tmp14	%read{27,27} %write{26,26}
+temp	int	$tmp15	%read{30,30} %write{29,29}
+temp	int	$tmp16	%read{33,33} %write{32,32}
+temp	int	$tmp17	%read{36,36} %write{35,35}
+const	int	$const12	19		%read{38,38} %write{2147483647,-1}
+const	int	$const13	8		%read{42,42} %write{2147483647,-1}
+temp	int	$tmp18	%read{42,61} %write{42,61}
+temp	int	$tmp19	%read{40,61} %write{41,61}
+temp	string	$tmp20	%read{42,61} %write{42,61}
+temp	color	$tmp21	%read{42,61} %write{42,61}
+temp	int	$tmp23	%read{42,61} %write{42,61}
+temp	closure color	$tmp24	%read{42,61} %write{42,61}
+temp	string	$tmp25	%read{42,61} %write{42,61}
+const	string	$const14	"debug"		%read{51,57} %write{2147483647,-1}
+temp	color	$tmp26	%read{42,61} %write{42,61}
+temp	color	$tmp27	%read{42,61} %write{42,61}
+temp	closure color	$tmp28	%read{42,61} %write{42,61}
+temp	closure color	$tmp29	%read{42,61} %write{42,61}
+temp	string	$tmp30	%read{42,61} %write{42,61}
+temp	closure color	$tmp31	%read{42,61} %write{42,61}
+temp	int	$tmp32	%read{2147483647,-1} %write{42,61}
+code ___main___
+# PxrMatteID.osl:120
+#     string s_texattrs[8] = {"matteTexture0", "matteTexture1", "matteTexture2",
+	assign		s_texattrs $const1 	%filename{"PxrMatteID.osl"} %line{120} %argrw{"wr"}
+# PxrMatteID.osl:123
+#     string s_matteid[8] = {"MatteID0", "MatteID1", "MatteID2", "MatteID3",
+	assign		s_matteid $const2 	%line{123} %argrw{"wr"}
+# PxrMatteID.osl:128
+#     int foo = inputAOV;
+	assign		foo inputAOV 	%line{128} %argrw{"wr"}
+# PxrMatteID.osl:131
+#     if (!enable)
+	eq		$tmp1 enable $const3 	%line{131} %argrw{"wrr"}
+	if		$tmp1 6 6 	%argrw{"r"}
+# PxrMatteID.osl:132
+#         return;
+	exit	%line{132}
+# PxrMatteID.osl:135
+#     color mtex[8] = {INVALIDC, INVALIDC, INVALIDC, INVALIDC,
+	aassign		mtex $const3 $const4 	%line{135} %argrw{"wrr"}
+	aassign		mtex $const5 $const4 	%argrw{"wrr"}
+	aassign		mtex $const6 $const4 	%argrw{"wrr"}
+	aassign		mtex $const7 $const4 	%argrw{"wrr"}
+	aassign		mtex $const8 $const4 	%argrw{"wrr"}
+	aassign		mtex $const9 $const4 	%argrw{"wrr"}
+	aassign		mtex $const10 $const4 	%argrw{"wrr"}
+	aassign		mtex $const11 $const4 	%argrw{"wrr"}
+# PxrMatteID.osl:137
+#     if (isconnected(matteTexture0))
+	isconnected	$tmp10 matteTexture0 	%line{137} %argrw{"wr"}
+	if		$tmp10 17 17 	%argrw{"r"}
+# PxrMatteID.osl:138
+#         mtex[0] = matteTexture0;
+	aassign		mtex $const3 matteTexture0 	%line{138} %argrw{"wrr"}
+# PxrMatteID.osl:139
+#     if (isconnected(matteTexture1))
+	isconnected	$tmp11 matteTexture1 	%line{139} %argrw{"wr"}
+	if		$tmp11 20 20 	%argrw{"r"}
+# PxrMatteID.osl:140
+#         mtex[1] = matteTexture1;
+	aassign		mtex $const5 matteTexture1 	%line{140} %argrw{"wrr"}
+# PxrMatteID.osl:141
+#     if (isconnected(matteTexture2))
+	isconnected	$tmp12 matteTexture2 	%line{141} %argrw{"wr"}
+	if		$tmp12 23 23 	%argrw{"r"}
+# PxrMatteID.osl:142
+#         mtex[2] = matteTexture2;
+	aassign		mtex $const6 matteTexture2 	%line{142} %argrw{"wrr"}
+# PxrMatteID.osl:143
+#     if (isconnected(matteTexture3))
+	isconnected	$tmp13 matteTexture3 	%line{143} %argrw{"wr"}
+	if		$tmp13 26 26 	%argrw{"r"}
+# PxrMatteID.osl:144
+#         mtex[3] = matteTexture3;
+	aassign		mtex $const7 matteTexture3 	%line{144} %argrw{"wrr"}
+# PxrMatteID.osl:145
+#     if (isconnected(matteTexture4))
+	isconnected	$tmp14 matteTexture4 	%line{145} %argrw{"wr"}
+	if		$tmp14 29 29 	%argrw{"r"}
+# PxrMatteID.osl:146
+#         mtex[4] = matteTexture4;
+	aassign		mtex $const8 matteTexture4 	%line{146} %argrw{"wrr"}
+# PxrMatteID.osl:147
+#     if (isconnected(matteTexture5))
+	isconnected	$tmp15 matteTexture5 	%line{147} %argrw{"wr"}
+	if		$tmp15 32 32 	%argrw{"r"}
+# PxrMatteID.osl:148
+#         mtex[5] = matteTexture5;
+	aassign		mtex $const9 matteTexture5 	%line{148} %argrw{"wrr"}
+# PxrMatteID.osl:149
+#     if (isconnected(matteTexture6))
+	isconnected	$tmp16 matteTexture6 	%line{149} %argrw{"wr"}
+	if		$tmp16 35 35 	%argrw{"r"}
+# PxrMatteID.osl:150
+#         mtex[6] = matteTexture6;
+	aassign		mtex $const10 matteTexture6 	%line{150} %argrw{"wrr"}
+# PxrMatteID.osl:151
+#     if (isconnected(matteTexture7))
+	isconnected	$tmp17 matteTexture7 	%line{151} %argrw{"wr"}
+	if		$tmp17 38 38 	%argrw{"r"}
+# PxrMatteID.osl:152
+#         mtex[7] = matteTexture7;
+	aassign		mtex $const11 matteTexture7 	%line{152} %argrw{"wrr"}
+# PxrMatteID.osl:155
+#     resultAOV = 19;
+	assign		resultAOV $const12 	%line{155} %argrw{"wr"}
+# PxrMatteID.osl:157
+#     color attrColor = 0;
+	assign		attrColor $const3 	%line{157} %argrw{"wr"}
+# PxrMatteID.osl:158
+#     for (int d = 0; d < 8; d++)
+	for		$tmp19 42 44 60 62 	%line{158} %argrw{"r"}
+	assign		___325_d $const3 	%argrw{"wr"}
+	lt		$tmp18 ___325_d $const13 	%argrw{"wrr"}
+	neq		$tmp19 $tmp18 $const3 	%argrw{"wrr"}
+# PxrMatteID.osl:163
+#         int ok = getattribute(s_matteid[d], attrColor);
+	aref		$tmp20 s_matteid ___325_d 	%line{163} %argrw{"wrr"}
+	getattribute	___326_ok $tmp20 attrColor 	%argrw{"wrw"}
+# PxrMatteID.osl:165
+#         if (ok)
+	if		___326_ok 60 60 	%line{165} %argrw{"r"}
+# PxrMatteID.osl:168
+#             if (mtex[d] != INVALIDC)
+	aref		$tmp21 mtex ___325_d 	%line{168} %argrw{"wrr"}
+	neq		$tmp23 $tmp21 $const4 	%argrw{"wrr"}
+	if		$tmp23 56 60 	%argrw{"r"}
+# PxrMatteID.osl:170
+#                 Ci += attrColor * mtex[d] * debug(s_matteid[d]);
+	aref		$tmp25 s_matteid ___325_d 	%line{170} %argrw{"wrr"}
+	closure		$tmp24 $const14 $tmp25 	%argrw{"wrr"}
+	aref		$tmp26 mtex ___325_d 	%argrw{"wrr"}
+	mul		$tmp27 attrColor $tmp26 	%argrw{"wrr"}
+	mul		$tmp28 $tmp24 $tmp27 	%argrw{"wrr"}
+	add		Ci Ci $tmp28 	%argrw{"wrr"}
+# PxrMatteID.osl:174
+#                 Ci += attrColor * debug(s_matteid[d]);
+	aref		$tmp30 s_matteid ___325_d 	%line{174} %argrw{"wrr"}
+	closure		$tmp29 $const14 $tmp30 	%argrw{"wrr"}
+	mul		$tmp31 $tmp29 attrColor 	%argrw{"wrr"}
+	add		Ci Ci $tmp31 	%argrw{"wrr"}
+# PxrMatteID.osl:158
+#     for (int d = 0; d < 8; d++)
+	assign		$tmp32 ___325_d 	%line{158} %argrw{"wr"}
+	add		___325_d ___325_d $const5 	%argrw{"wrr"}
+	end

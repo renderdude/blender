@@ -1,0 +1,510 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrDispTransform.osl/obj/PxrDispTransform.oso
+shader PxrDispTransform	%meta{int,rfm_nodeid,1053340} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/displace"} %meta{string,rfh_classification,"Pattern/Displace"} %meta{string,help,"Transforms the displacement values."} 
+param	int	dispType	1		%meta{string,widget,"mapper"} %meta{string,help,"Specify the displacement value type.  If it is a float procedural, pick Scalar.<br>If it is vector procedural, pick Generic Vector.  If the vector displacement<br>map is extracted using Mudbox or Zbrush, pick Mudbox Vector or Zbrush Vector<br>respectively.<br><br>dispType (int)"} %meta{string,options,"Scalar:1|Generic Vector:2|Mudbox Vector:3|ZBrush Vector:4"} %meta{int,connectable,0} %meta{string,label,"Displacement Type"}  %read{12,174} %write{2147483647,-1}
+param	float	dispScalar	0		%meta{string,widget,"default"} %meta{string,help,"Connect a scalar displacement texture or value.<br><br>dispScalar (float)"} %meta{string,label,"Scalar Displacement"}  %read{14,14} %write{2147483647,-1}
+param	vector	dispVector	0 0 0		%meta{string,widget,"default"} %meta{string,help,"Connect a vector displacement texture or value.<br><br>dispVector (vector)"} %meta{string,label,"Vector Displacement"}  %read{16,16} %write{2147483647,-1}
+param	int	vectorSpace	3		%meta{string,widget,"mapper"} %meta{string,help,"Specify which space the vector was created in.  For Mudbox<br>and Zbrush vector type, this would be the space that the<br>vector displacement was exported from.  For Mudbox,<br>vector displacement needs to be exported in Absolute<br>Tangent, not Relative Tangent.<br><br>vectorSpace (int)"} %meta{string,conditionalVisOp,"notEqualTo"} %meta{string,conditionalVisPath,"../dispType"} %meta{string,conditionalVisValue,"1"} %meta{string,options,"World:1|Object:2|Tangent:3|Current:4"} %meta{int,connectable,0} %meta{string,label,"Vector Space"}  %read{93,137} %write{2147483647,-1}
+param	float	dispHeight	1		%meta{string,widget,"default"} %meta{string,help,"Displacement height applies to the displacement value that is displacing out.<br><br>dispHeight (float)"} %meta{string,label,"Displacement Height"}  %read{31,87} %write{2147483647,-1}
+param	float	dispDepth	1		%meta{string,widget,"default"} %meta{string,help,"Displacement depth applies to the displacement value that is displacing in.<br><br>dispDepth (float)"} %meta{string,label,"Displacement Depth"}  %read{30,63} %write{2147483647,-1}
+param	int	dispRemapMode	1		%meta{string,widget,"mapper"} %meta{string,help,"Specify how to remap the displacement values.<br>\"None\" - Reads the displacement value as is without any remapping.  Use Displacement Height to<br>scale the displacement.<br>\"Centered\" - The displacement value is centered at the Displacement Center specified.<br>If the value is equal to the center, there is no displacement.<br>Any values below that center will be displacing in whereas any values above the<br>center will be displacing out.<br>\"Interpolate Depth and Height\" - Fits the displacement depth and height specified<br>through a catmull-rom spline (spline(\"catmullrom\", -depth, -depth, 0, height, height).<br><br>dispRemapMode (int)"} %meta{string,options,"None:1|Centered:2|Interpolate Depth And Height:3"} %meta{int,connectable,0} %meta{string,label,"Remapping Mode"}  %read{18,59} %write{2147483647,-1}
+param	float	dispCenter	0.5		%meta{string,widget,"default"} %meta{string,help,"Displacement center for the \"Centered\" Remapping Mode.<br><br>dispCenter (float)"} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisPath,"../dispRemapMode"} %meta{string,conditionalVisValue,"2"} %meta{int,connectable,0} %meta{string,label,"Displacement Center"}  %read{7,33} %write{2147483647,-1}
+param	string	dispScaleSpace	"object"		%meta{string,widget,"default"} %meta{string,houdiniui,"oplist"} %meta{string,page,"Advanced"} %meta{string,help,"Space in which displacement units are measured.  E.g. \"world\", \"object\", or user-defined<br>coordinate system.<br><br>dispScaleSpace (string)"} %meta{int,connectable,0} %meta{string,label,"Displacement Scale Space"}  %read{162,170} %write{2147483647,-1}
+param	int	useDispDirection	0		%meta{string,widget,"checkBox"} %meta{string,page,"Advanced"} %meta{string,help,"Displace along the displacement direction provided below instead of along the surface normal.<br><br>useDispDirection (int)"} %meta{int,connectable,0} %meta{string,label,"Use Displacement Direction"}  %read{144,153} %write{2147483647,-1}
+param	vector	dispDirection	0 0 0		%meta{string,widget,"default"} %meta{string,page,"Advanced"} %meta{string,help,"Displacement will be in the direction this points to rather than along<br>the surface normal.  Note that the displacement director vector will<br>be normalized before its use.<br><br>dispDirection (vector)"} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisPath,"../useDispDirection"} %meta{string,conditionalVisValue,"1"} %meta{string,label,"Displacement Direction"}  %read{140,143} %write{2147483647,-1}
+param	string	dispDirectionSpace	"object"		%meta{string,widget,"default"} %meta{string,houdiniui,"oplist"} %meta{string,page,"Advanced"} %meta{string,help,"Space in which displacement direction vectors are in.  E.g. \"world\", \"object\", or user-defined<br>coordinate system.<br><br>dispDirectionSpace (string)"} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisPath,"../useDispDirection"} %meta{string,conditionalVisValue,"1"} %meta{int,connectable,0} %meta{string,label,"Displacement Direction Space"}  %read{147,160} %write{2147483647,-1}
+oparam	vector	resultXYZ	0 0 0		%meta{string,help,"resultXYZ (vector)"}  %read{34,179} %write{15,179}
+oparam	float	resultF	0		%meta{string,help,"resultF (float)"}  %read{27,177} %write{14,176}
+global	normal	N	%read{0,0} %write{2147483647,-1}
+local	matrix	___326_scaleMatrix	%read{171,171} %write{170,170}
+local	normal	Nn	%read{108,152} %write{0,0}
+local	vector	Tn	%read{107,117} %write{1,1}
+local	float	unitScale	%read{92,128} %write{2,89}
+local	vector	unitScaleV	%read{4,89} %write{3,4}
+local	float[5]	knots	%read{70,82} %write{5,67}
+local	float	k	%read{71,82} %write{6,81}
+local	float	lScale	%read{30,55} %write{7,7}
+local	float	rScale	%read{31,56} %write{9,9}
+local	vector	tangent	%read{108,121} %write{10,118}
+local	vector	biTangent	%read{112,123} %write{11,119}
+local	vector	dispDir	%read{151,151} %write{142,143}
+local	normal	dispNormal	%read{160,177} %write{151,160}
+local	float	spaceScaleFactor	%read{176,178} %write{161,173}
+temp	int	$tmp1	%read{2147483647,-1} %write{1,1}
+const	string	$const1	"builtin"		%read{1,1} %write{2147483647,-1}
+const	string	$const2	"Tn"		%read{1,1} %write{2147483647,-1}
+const	float	$const3	1		%read{2,161} %write{2147483647,-1}
+const	vector	$const4	1 0 0		%read{3,3} %write{2147483647,-1}
+const	string	$const5	"object"		%read{4,136} %write{2147483647,-1}
+const	string	$const6	"common"		%read{4,170} %write{2147483647,-1}
+const	float[5]	$const7	0 0 0 0 0 		%read{5,5} %write{2147483647,-1}
+const	float	$const8	0		%read{6,65} %write{2147483647,-1}
+temp	float	$tmp2	%read{9,9} %write{8,8}
+const	vector	$const9	0 0 0		%read{10,140} %write{2147483647,-1}
+const	int	$const10	1		%read{12,174} %write{2147483647,-1}
+temp	int	$tmp3	%read{13,13} %write{12,12}
+const	int	$const11	2		%read{18,134} %write{2147483647,-1}
+temp	int	$tmp4	%read{19,19} %write{18,18}
+temp	int	$tmp5	%read{20,24} %write{19,23}
+const	int	$const12	0		%read{19,166} %write{2147483647,-1}
+temp	int	$tmp6	%read{22,22} %write{21,21}
+temp	int	$tmp7	%read{23,23} %write{22,22}
+temp	int	$tmp8	%read{26,26} %write{25,25}
+temp	float	$tmp9	%read{32,32} %write{30,31}
+temp	int	$tmp10	%read{29,29} %write{28,28}
+temp	vector	$tmp11	%read{34,34} %write{33,33}
+temp	float	$tmp12	%read{41,41} %write{35,35}
+temp	float	$tmp13	%read{41,41} %write{39,40}
+temp	float	$tmp14	%read{37,37} %write{36,36}
+temp	int	$tmp15	%read{38,38} %write{37,37}
+temp	float	$tmp16	%read{42,42} %write{41,41}
+temp	float	$tmp17	%read{49,49} %write{43,43}
+temp	float	$tmp18	%read{49,49} %write{47,48}
+temp	float	$tmp19	%read{45,45} %write{44,44}
+temp	int	$tmp20	%read{46,46} %write{45,45}
+temp	float	$tmp21	%read{50,50} %write{49,49}
+temp	float	$tmp22	%read{57,57} %write{51,51}
+temp	float	$tmp23	%read{57,57} %write{55,56}
+temp	float	$tmp24	%read{53,53} %write{52,52}
+temp	int	$tmp25	%read{54,54} %write{53,53}
+temp	float	$tmp26	%read{58,58} %write{57,57}
+const	int	$const13	3		%read{59,105} %write{2147483647,-1}
+temp	int	$tmp27	%read{60,60} %write{59,59}
+temp	float	$tmp28	%read{62,62} %write{61,61}
+temp	float	$tmp29	%read{64,64} %write{63,63}
+const	int	$const14	4		%read{67,129} %write{2147483647,-1}
+temp	int	$tmp30	%read{69,69} %write{68,68}
+const	string	$const15	"linear"		%read{70,81} %write{2147483647,-1}
+const	int	$const16	5		%read{70,82} %write{2147483647,-1}
+const	string	$const17	"catmull-rom"		%read{71,82} %write{2147483647,-1}
+temp	float	$tmp31	%read{73,73} %write{72,72}
+temp	float	$tmp32	%read{75,75} %write{74,74}
+temp	float	$tmp33	%read{77,77} %write{76,76}
+temp	float	$tmp34	%read{79,79} %write{78,78}
+temp	float	$tmp35	%read{81,81} %write{80,80}
+temp	float	$tmp36	%read{83,83} %write{82,82}
+temp	int	$tmp37	%read{85,85} %write{84,84}
+temp	vector	$tmp38	%read{88,88} %write{87,87}
+temp	int	$tmp39	%read{91,91} %write{90,90}
+temp	int	$tmp40	%read{94,94} %write{93,93}
+temp	int	$tmp41	%read{95,104} %write{94,103}
+temp	int	$tmp42	%read{97,97} %write{96,96}
+temp	int	$tmp43	%read{98,102} %write{97,101}
+temp	int	$tmp44	%read{100,100} %write{99,99}
+temp	int	$tmp45	%read{101,101} %write{100,100}
+temp	int	$tmp46	%read{103,103} %write{102,102}
+temp	int	$tmp47	%read{106,106} %write{105,105}
+temp	float	$tmp48	%read{110,110} %write{109,109}
+temp	vector	$tmp49	%read{113,113} %write{110,110}
+temp	float	$tmp50	%read{112,112} %write{111,111}
+temp	vector	$tmp51	%read{113,113} %write{112,112}
+temp	vector	$tmp52	%read{116,116} %write{113,113}
+temp	float	$tmp53	%read{115,115} %write{114,114}
+temp	normal	$tmp54	%read{116,116} %write{115,115}
+temp	vector	$tmp55	%read{118,118} %write{117,117}
+temp	float	$tmp56	%read{121,121} %write{120,120}
+temp	vector	$tmp57	%read{124,124} %write{121,121}
+temp	float	$tmp58	%read{123,123} %write{122,122}
+temp	vector	$tmp59	%read{124,124} %write{123,123}
+temp	vector	$tmp60	%read{127,127} %write{124,124}
+temp	float	$tmp61	%read{126,126} %write{125,125}
+temp	normal	$tmp62	%read{127,127} %write{126,126}
+temp	int	$tmp63	%read{130,130} %write{129,129}
+const	vector	$const18	1 -1 -1		%read{131,131} %write{2147483647,-1}
+temp	int	$tmp65	%read{133,133} %write{132,132}
+temp	int	$tmp66	%read{135,135} %write{134,134}
+temp	int	$tmp67	%read{138,138} %write{137,137}
+const	string	$const19	"world"		%read{139,139} %write{2147483647,-1}
+temp	int	$tmp69	%read{141,141} %write{140,140}
+temp	int	$tmp70	%read{145,145} %write{144,144}
+temp	int	$tmp71	%read{146,150} %write{145,149}
+const	string	$const20	""		%read{147,162} %write{2147483647,-1}
+temp	int	$tmp72	%read{148,148} %write{147,147}
+temp	int	$tmp73	%read{149,149} %write{148,148}
+temp	int	$tmp74	%read{154,154} %write{153,153}
+temp	int	$tmp75	%read{155,159} %write{154,158}
+temp	int	$tmp76	%read{157,157} %write{156,156}
+temp	int	$tmp77	%read{158,158} %write{157,157}
+temp	int	$tmp78	%read{163,163} %write{162,162}
+temp	int	$tmp79	%read{164,168} %write{163,167}
+temp	int	$tmp80	%read{166,166} %write{165,165}
+temp	int	$tmp81	%read{167,167} %write{166,166}
+const	string	$const21	"SpaceScale"		%read{169,169} %write{2147483647,-1}
+temp	float	$tmp82	%read{173,173} %write{172,172}
+temp	float	$tmp83	%read{172,172} %write{171,171}
+const	float	$const22	0.333333343		%read{173,173} %write{2147483647,-1}
+temp	int	$tmp84	%read{175,175} %write{174,174}
+temp	vector	$tmp85	%read{179,179} %write{178,178}
+code ___main___
+# PxrDispTransform.osl:223
+#     normal Nn = N;
+	assign		Nn N 	%filename{"PxrDispTransform.osl"} %line{223} %argrw{"wr"}
+# PxrDispTransform.osl:225
+#     getattribute("builtin", "Tn", Tn);
+	getattribute	$tmp1 $const1 $const2 Tn 	%line{225} %argrw{"wrrw"}
+# PxrDispTransform.osl:230
+#     float unitScale = 1.0;
+	assign		unitScale $const3 	%line{230} %argrw{"wr"}
+# PxrDispTransform.osl:231
+#     vector unitScaleV = vector(1, 0, 0);
+	assign		unitScaleV $const4 	%line{231} %argrw{"wr"}
+# PxrDispTransform.osl:232
+#     unitScaleV = transform("object", "common", unitScaleV);
+	transformv	unitScaleV $const5 $const6 unitScaleV 	%line{232} %argrw{"wrrr"}
+# PxrDispTransform.osl:238
+#     float knots[5] = {0, 0, 0, 0, 0};
+	assign		knots $const7 	%line{238} %argrw{"wr"}
+# PxrDispTransform.osl:239
+#     float k = 0.0;
+	assign		k $const8 	%line{239} %argrw{"wr"}
+# PxrDispTransform.osl:243
+#     float lScale = 1.0 / (dispCenter);
+	div		lScale $const3 dispCenter 	%line{243} %argrw{"wrr"}
+# PxrDispTransform.osl:244
+#     float rScale = 1.0 / (1.0 - (dispCenter));
+	sub		$tmp2 $const3 dispCenter 	%line{244} %argrw{"wrr"}
+	div		rScale $const3 $tmp2 	%argrw{"wrr"}
+# PxrDispTransform.osl:246
+#     vector tangent = vector(0.0);
+	assign		tangent $const9 	%line{246} %argrw{"wr"}
+# PxrDispTransform.osl:247
+#     vector biTangent = vector(0.0);
+	assign		biTangent $const9 	%line{247} %argrw{"wr"}
+# PxrDispTransform.osl:252
+#         if (dispType == TYPE_SCALAR)
+	eq		$tmp3 dispType $const10 	%line{252} %argrw{"wrr"}
+	if		$tmp3 16 18 	%argrw{"r"}
+# PxrDispTransform.osl:255
+#             resultF = dispScalar;
+	assign		resultF dispScalar 	%line{255} %argrw{"wr"}
+# PxrDispTransform.osl:256
+#             resultXYZ = vector(0.0);
+	assign		resultXYZ $const9 	%line{256} %argrw{"wr"}
+# PxrDispTransform.osl:260
+#             resultXYZ = dispVector;
+	assign		resultXYZ dispVector 	%line{260} %argrw{"wr"}
+# PxrDispTransform.osl:261
+#             resultF = 0.0;
+	assign		resultF $const8 	%line{261} %argrw{"wr"}
+# PxrDispTransform.osl:265
+#         if ((dispRemapMode == REMAP_CENTERED) && (dispCenter != 0.0))
+	eq		$tmp4 dispRemapMode $const11 	%line{265} %argrw{"wrr"}
+	neq		$tmp5 $tmp4 $const12 	%argrw{"wrr"}
+	if		$tmp5 24 24 	%argrw{"r"}
+	neq		$tmp6 dispCenter $const8 	%argrw{"wrr"}
+	neq		$tmp7 $tmp6 $const12 	%argrw{"wrr"}
+	assign		$tmp5 $tmp7 	%argrw{"wr"}
+	if		$tmp5 59 89 	%argrw{"r"}
+# PxrDispTransform.osl:267
+#             if (dispType == TYPE_SCALAR)   // scalar displacement
+	eq		$tmp8 dispType $const10 	%line{267} %argrw{"wrr"}
+	if		$tmp8 33 59 	%argrw{"r"}
+# PxrDispTransform.osl:269
+#                 resultF -= dispCenter;
+	sub		resultF resultF dispCenter 	%line{269} %argrw{"wrr"}
+# PxrDispTransform.osl:271
+#                 resultF *= (resultF <= 0.0) ? (dispDepth * lScale)
+	le		$tmp10 resultF $const8 	%line{271} %argrw{"wrr"}
+	if		$tmp10 31 32 	%argrw{"r"}
+	mul		$tmp9 dispDepth lScale 	%argrw{"wrr"}
+# PxrDispTransform.osl:272
+#                            : (dispHeight * rScale);
+	mul		$tmp9 dispHeight rScale 	%line{272} %argrw{"wrr"}
+	mul		resultF resultF $tmp9 	%argrw{"wrr"}
+# PxrDispTransform.osl:276
+#                 resultXYZ -= vector(dispCenter);
+	assign		$tmp11 dispCenter 	%line{276} %argrw{"wr"}
+	sub		resultXYZ resultXYZ $tmp11 	%argrw{"wrr"}
+# PxrDispTransform.osl:279
+#                 resultXYZ[0] *= (resultXYZ[0] <= 0.0) ?
+	compref		$tmp12 resultXYZ $const12 	%line{279} %argrw{"wrr"}
+	compref		$tmp14 resultXYZ $const12 	%argrw{"wrr"}
+	le		$tmp15 $tmp14 $const8 	%argrw{"wrr"}
+	if		$tmp15 40 41 	%argrw{"r"}
+# PxrDispTransform.osl:280
+#                                 (dispDepth * lScale) : (dispHeight * rScale);
+	mul		$tmp13 dispDepth lScale 	%line{280} %argrw{"wrr"}
+	mul		$tmp13 dispHeight rScale 	%argrw{"wrr"}
+	mul		$tmp16 $tmp12 $tmp13 	%argrw{"wrr"}
+# PxrDispTransform.osl:279
+#                 resultXYZ[0] *= (resultXYZ[0] <= 0.0) ?
+	compassign	resultXYZ $const12 $tmp16 	%line{279} %argrw{"wrr"}
+# PxrDispTransform.osl:281
+#                 resultXYZ[1] *= (resultXYZ[1] <= 0.0) ?
+	compref		$tmp17 resultXYZ $const10 	%line{281} %argrw{"wrr"}
+	compref		$tmp19 resultXYZ $const10 	%argrw{"wrr"}
+	le		$tmp20 $tmp19 $const8 	%argrw{"wrr"}
+	if		$tmp20 48 49 	%argrw{"r"}
+# PxrDispTransform.osl:282
+#                                 (dispDepth * lScale) : (dispHeight * rScale);
+	mul		$tmp18 dispDepth lScale 	%line{282} %argrw{"wrr"}
+	mul		$tmp18 dispHeight rScale 	%argrw{"wrr"}
+	mul		$tmp21 $tmp17 $tmp18 	%argrw{"wrr"}
+# PxrDispTransform.osl:281
+#                 resultXYZ[1] *= (resultXYZ[1] <= 0.0) ?
+	compassign	resultXYZ $const10 $tmp21 	%line{281} %argrw{"wrr"}
+# PxrDispTransform.osl:283
+#                 resultXYZ[2] *= (resultXYZ[2] <= 0.0) ?
+	compref		$tmp22 resultXYZ $const11 	%line{283} %argrw{"wrr"}
+	compref		$tmp24 resultXYZ $const11 	%argrw{"wrr"}
+	le		$tmp25 $tmp24 $const8 	%argrw{"wrr"}
+	if		$tmp25 56 57 	%argrw{"r"}
+# PxrDispTransform.osl:284
+#                                 (dispDepth * lScale) : (dispHeight * rScale);
+	mul		$tmp23 dispDepth lScale 	%line{284} %argrw{"wrr"}
+	mul		$tmp23 dispHeight rScale 	%argrw{"wrr"}
+	mul		$tmp26 $tmp22 $tmp23 	%argrw{"wrr"}
+# PxrDispTransform.osl:283
+#                 resultXYZ[2] *= (resultXYZ[2] <= 0.0) ?
+	compassign	resultXYZ $const11 $tmp26 	%line{283} %argrw{"wrr"}
+# PxrDispTransform.osl:287
+#         else if (dispRemapMode == REMAP_INTERPOLATE)
+	eq		$tmp27 dispRemapMode $const13 	%line{287} %argrw{"wrr"}
+	if		$tmp27 84 89 	%argrw{"r"}
+# PxrDispTransform.osl:290
+#             knots[0] = -dispDepth;
+	neg		$tmp28 dispDepth 	%line{290} %argrw{"wr"}
+	aassign		knots $const12 $tmp28 	%argrw{"wrr"}
+# PxrDispTransform.osl:291
+#             knots[1] = -dispDepth;
+	neg		$tmp29 dispDepth 	%line{291} %argrw{"wr"}
+	aassign		knots $const10 $tmp29 	%argrw{"wrr"}
+# PxrDispTransform.osl:292
+#             knots[2] = 0.0;
+	aassign		knots $const11 $const8 	%line{292} %argrw{"wrr"}
+# PxrDispTransform.osl:293
+#             knots[3] = dispHeight;
+	aassign		knots $const13 dispHeight 	%line{293} %argrw{"wrr"}
+# PxrDispTransform.osl:294
+#             knots[4] = dispHeight;
+	aassign		knots $const14 dispHeight 	%line{294} %argrw{"wrr"}
+# PxrDispTransform.osl:296
+#             if (dispType == TYPE_SCALAR)
+	eq		$tmp30 dispType $const10 	%line{296} %argrw{"wrr"}
+	if		$tmp30 72 84 	%argrw{"r"}
+# PxrDispTransform.osl:298
+#                 k = splineinverse("linear", resultF, 5, knots);
+	splineinverse	k $const15 resultF $const16 knots 	%line{298} %argrw{"wrrrr"}
+# PxrDispTransform.osl:299
+#                 resultF = spline("catmull-rom", k, 5, knots);
+	spline		resultF $const17 k $const16 knots 	%line{299} %argrw{"wrrrr"}
+# PxrDispTransform.osl:303
+#                 k = splineinverse("linear", resultXYZ[0], 5, knots);
+	compref		$tmp31 resultXYZ $const12 	%line{303} %argrw{"wrr"}
+	splineinverse	k $const15 $tmp31 $const16 knots 	%argrw{"wrrrr"}
+# PxrDispTransform.osl:304
+#                 resultXYZ[0] = spline("catmull-rom", k, 5, knots);
+	spline		$tmp32 $const17 k $const16 knots 	%line{304} %argrw{"wrrrr"}
+	compassign	resultXYZ $const12 $tmp32 	%argrw{"wrr"}
+# PxrDispTransform.osl:305
+#                 k = splineinverse("linear", resultXYZ[1], 5, knots);
+	compref		$tmp33 resultXYZ $const10 	%line{305} %argrw{"wrr"}
+	splineinverse	k $const15 $tmp33 $const16 knots 	%argrw{"wrrrr"}
+# PxrDispTransform.osl:306
+#                 resultXYZ[1] = spline("catmull-rom", k, 5, knots);
+	spline		$tmp34 $const17 k $const16 knots 	%line{306} %argrw{"wrrrr"}
+	compassign	resultXYZ $const10 $tmp34 	%argrw{"wrr"}
+# PxrDispTransform.osl:307
+#                 k = splineinverse("linear", resultXYZ[2], 5, knots);
+	compref		$tmp35 resultXYZ $const11 	%line{307} %argrw{"wrr"}
+	splineinverse	k $const15 $tmp35 $const16 knots 	%argrw{"wrrrr"}
+# PxrDispTransform.osl:308
+#                 resultXYZ[2] = spline("catmull-rom", k, 5, knots);
+	spline		$tmp36 $const17 k $const16 knots 	%line{308} %argrw{"wrrrr"}
+	compassign	resultXYZ $const11 $tmp36 	%argrw{"wrr"}
+# PxrDispTransform.osl:314
+#             if (dispType == TYPE_SCALAR)
+	eq		$tmp37 dispType $const10 	%line{314} %argrw{"wrr"}
+	if		$tmp37 87 89 	%argrw{"r"}
+# PxrDispTransform.osl:315
+#                 resultF *= dispHeight;
+	mul		resultF resultF dispHeight 	%line{315} %argrw{"wrr"}
+# PxrDispTransform.osl:317
+#                 resultXYZ *= vector(dispHeight);
+	assign		$tmp38 dispHeight 	%line{317} %argrw{"wr"}
+	mul		resultXYZ resultXYZ $tmp38 	%argrw{"wrr"}
+# PxrDispTransform.osl:321
+#         unitScale = length(unitScaleV);
+	length		unitScale unitScaleV 	%line{321} %argrw{"wr"}
+# PxrDispTransform.osl:322
+#         if (dispType == TYPE_SCALAR)
+	eq		$tmp39 dispType $const10 	%line{322} %argrw{"wrr"}
+	if		$tmp39 93 132 	%argrw{"r"}
+# PxrDispTransform.osl:324
+#             resultF *= unitScale;
+	mul		resultF resultF unitScale 	%line{324} %argrw{"wrr"}
+# PxrDispTransform.osl:328
+#             if (vectorSpace == SPACE_TANGENT &&
+	eq		$tmp40 vectorSpace $const13 	%line{328} %argrw{"wrr"}
+	neq		$tmp41 $tmp40 $const12 	%argrw{"wrr"}
+	if		$tmp41 104 104 	%argrw{"r"}
+# PxrDispTransform.osl:329
+#                 (dispType == TYPE_MUDBOX_VECTOR ||
+	eq		$tmp42 dispType $const13 	%line{329} %argrw{"wrr"}
+	neq		$tmp43 $tmp42 $const12 	%argrw{"wrr"}
+	if		$tmp43 99 102 	%argrw{"r"}
+# PxrDispTransform.osl:330
+#                  dispType == TYPE_ZBRUSH_VECTOR))
+	eq		$tmp44 dispType $const14 	%line{330} %argrw{"wrr"}
+	neq		$tmp45 $tmp44 $const12 	%argrw{"wrr"}
+# PxrDispTransform.osl:329
+#                 (dispType == TYPE_MUDBOX_VECTOR ||
+	assign		$tmp43 $tmp45 	%line{329} %argrw{"wr"}
+	neq		$tmp46 $tmp43 $const12 	%argrw{"wrr"}
+# PxrDispTransform.osl:328
+#             if (vectorSpace == SPACE_TANGENT &&
+	assign		$tmp41 $tmp46 	%line{328} %argrw{"wr"}
+	if		$tmp41 129 132 	%argrw{"r"}
+# PxrDispTransform.osl:333
+#                 if (dispType == TYPE_MUDBOX_VECTOR)
+	eq		$tmp47 dispType $const13 	%line{333} %argrw{"wrr"}
+	if		$tmp47 117 128 	%argrw{"r"}
+# PxrDispTransform.osl:336
+#                     tangent = normalize(Tn);
+	normalize	tangent Tn 	%line{336} %argrw{"wr"}
+# PxrDispTransform.osl:338
+#                     biTangent = cross(Nn, tangent);
+	cross		biTangent Nn tangent 	%line{338} %argrw{"wrr"}
+# PxrDispTransform.osl:342
+#                     resultXYZ = tangent * resultXYZ[0]  +
+	compref		$tmp48 resultXYZ $const12 	%line{342} %argrw{"wrr"}
+	mul		$tmp49 tangent $tmp48 	%argrw{"wrr"}
+# PxrDispTransform.osl:343
+#                                    biTangent * resultXYZ[2] +
+	compref		$tmp50 resultXYZ $const11 	%line{343} %argrw{"wrr"}
+	mul		$tmp51 biTangent $tmp50 	%argrw{"wrr"}
+# PxrDispTransform.osl:342
+#                     resultXYZ = tangent * resultXYZ[0]  +
+	add		$tmp52 $tmp49 $tmp51 	%line{342} %argrw{"wrr"}
+# PxrDispTransform.osl:344
+#                                    Nn * resultXYZ[1];
+	compref		$tmp53 resultXYZ $const10 	%line{344} %argrw{"wrr"}
+	mul		$tmp54 Nn $tmp53 	%argrw{"wrr"}
+# PxrDispTransform.osl:343
+#                                    biTangent * resultXYZ[2] +
+	add		resultXYZ $tmp52 $tmp54 	%line{343} %argrw{"wrr"}
+# PxrDispTransform.osl:349
+#                     tangent = normalize(-Tn);
+	neg		$tmp55 Tn 	%line{349} %argrw{"wr"}
+	normalize	tangent $tmp55 	%argrw{"wr"}
+# PxrDispTransform.osl:351
+#                     biTangent = cross(Nn, tangent);
+	cross		biTangent Nn tangent 	%line{351} %argrw{"wrr"}
+# PxrDispTransform.osl:355
+#                     resultXYZ = tangent * resultXYZ[0]  +
+	compref		$tmp56 resultXYZ $const12 	%line{355} %argrw{"wrr"}
+	mul		$tmp57 tangent $tmp56 	%argrw{"wrr"}
+# PxrDispTransform.osl:356
+#                                    biTangent * resultXYZ[1] +
+	compref		$tmp58 resultXYZ $const10 	%line{356} %argrw{"wrr"}
+	mul		$tmp59 biTangent $tmp58 	%argrw{"wrr"}
+# PxrDispTransform.osl:355
+#                     resultXYZ = tangent * resultXYZ[0]  +
+	add		$tmp60 $tmp57 $tmp59 	%line{355} %argrw{"wrr"}
+# PxrDispTransform.osl:357
+#                                    Nn * resultXYZ[2];
+	compref		$tmp61 resultXYZ $const11 	%line{357} %argrw{"wrr"}
+	mul		$tmp62 Nn $tmp61 	%argrw{"wrr"}
+# PxrDispTransform.osl:356
+#                                    biTangent * resultXYZ[1] +
+	add		resultXYZ $tmp60 $tmp62 	%line{356} %argrw{"wrr"}
+# PxrDispTransform.osl:360
+#                 resultXYZ *= unitScale;
+	mul		resultXYZ resultXYZ unitScale 	%line{360} %argrw{"wrr"}
+# PxrDispTransform.osl:366
+#                 if (dispType == TYPE_ZBRUSH_VECTOR)
+	eq		$tmp63 dispType $const14 	%line{366} %argrw{"wrr"}
+	if		$tmp63 132 132 	%argrw{"r"}
+# PxrDispTransform.osl:367
+#                     resultXYZ *= vector(1,-1,-1);
+	mul		resultXYZ resultXYZ $const18 	%line{367} %argrw{"wrr"}
+# PxrDispTransform.osl:376
+#     if (dispType != TYPE_SCALAR)
+	neq		$tmp65 dispType $const10 	%line{376} %argrw{"wrr"}
+	if		$tmp65 140 140 	%argrw{"r"}
+# PxrDispTransform.osl:378
+#         if (vectorSpace == SPACE_OBJECT)
+	eq		$tmp66 vectorSpace $const11 	%line{378} %argrw{"wrr"}
+	if		$tmp66 137 140 	%argrw{"r"}
+# PxrDispTransform.osl:380
+#             resultXYZ = transform("object", "common", resultXYZ);
+	transformv	resultXYZ $const5 $const6 resultXYZ 	%line{380} %argrw{"wrrr"}
+# PxrDispTransform.osl:382
+#         else if (vectorSpace == SPACE_WORLD)
+	eq		$tmp67 vectorSpace $const10 	%line{382} %argrw{"wrr"}
+	if		$tmp67 140 140 	%argrw{"r"}
+# PxrDispTransform.osl:384
+#             resultXYZ = transform("world", "common", resultXYZ);
+	transformv	resultXYZ $const19 $const6 resultXYZ 	%line{384} %argrw{"wrrr"}
+# PxrDispTransform.osl:392
+#     vector dispDir = dispDirection == vector(0) ? Nn : dispDirection;
+	eq		$tmp69 dispDirection $const9 	%line{392} %argrw{"wrr"}
+	if		$tmp69 143 144 	%argrw{"r"}
+	assign		dispDir Nn 	%argrw{"wr"}
+	assign		dispDir dispDirection 	%argrw{"wr"}
+# PxrDispTransform.osl:395
+#     if (useDispDirection == 1 && dispDirectionSpace != "")
+	eq		$tmp70 useDispDirection $const10 	%line{395} %argrw{"wrr"}
+	neq		$tmp71 $tmp70 $const12 	%argrw{"wrr"}
+	if		$tmp71 150 150 	%argrw{"r"}
+	neq		$tmp72 dispDirectionSpace $const20 	%argrw{"wrr"}
+	neq		$tmp73 $tmp72 $const12 	%argrw{"wrr"}
+	assign		$tmp71 $tmp73 	%argrw{"wr"}
+	if		$tmp71 152 153 	%argrw{"r"}
+# PxrDispTransform.osl:397
+#         dispNormal = normalize(dispDir);
+	normalize	dispNormal dispDir 	%line{397} %argrw{"wr"}
+# PxrDispTransform.osl:401
+#         dispNormal = Nn;
+	assign		dispNormal Nn 	%line{401} %argrw{"wr"}
+# PxrDispTransform.osl:404
+#     if (useDispDirection == 1 && dispDirectionSpace != "")
+	eq		$tmp74 useDispDirection $const10 	%line{404} %argrw{"wrr"}
+	neq		$tmp75 $tmp74 $const12 	%argrw{"wrr"}
+	if		$tmp75 159 159 	%argrw{"r"}
+	neq		$tmp76 dispDirectionSpace $const20 	%argrw{"wrr"}
+	neq		$tmp77 $tmp76 $const12 	%argrw{"wrr"}
+	assign		$tmp75 $tmp77 	%argrw{"wr"}
+	if		$tmp75 161 161 	%argrw{"r"}
+# PxrDispTransform.osl:406
+#         dispNormal = transform(dispDirectionSpace, "common", dispNormal);
+	transformn	dispNormal dispDirectionSpace $const6 dispNormal 	%line{406} %argrw{"wrrr"}
+# PxrDispTransform.osl:412
+#     float spaceScaleFactor = 1.0;
+	assign		spaceScaleFactor $const3 	%line{412} %argrw{"wr"}
+# PxrDispTransform.osl:414
+#     if (dispScaleSpace != "" && dispScaleSpace != "common")
+	neq		$tmp78 dispScaleSpace $const20 	%line{414} %argrw{"wrr"}
+	neq		$tmp79 $tmp78 $const12 	%argrw{"wrr"}
+	if		$tmp79 168 168 	%argrw{"r"}
+	neq		$tmp80 dispScaleSpace $const6 	%argrw{"wrr"}
+	neq		$tmp81 $tmp80 $const12 	%argrw{"wrr"}
+	assign		$tmp79 $tmp81 	%argrw{"wr"}
+	if		$tmp79 174 174 	%argrw{"r"}
+# PxrDispTransform.osl:415
+#         spaceScaleFactor = SpaceScale(dispScaleSpace, "common");
+	functioncall	$const21 174 	%line{415} %argrw{"r"}
+# PxrDispTransform.osl:59
+#     matrix scaleMatrix = matrix (fromSpace, toSpace);
+	matrix		___326_scaleMatrix dispScaleSpace $const6 	%line{59} %argrw{"wrr"}
+# PxrDispTransform.osl:60
+#     return pow(abs(determinant(scaleMatrix)), 0.333333333);
+	determinant	$tmp83 ___326_scaleMatrix 	%line{60} %argrw{"wr"}
+	abs		$tmp82 $tmp83 	%argrw{"wr"}
+	pow		spaceScaleFactor $tmp82 $const22 	%argrw{"wrr"}
+# PxrDispTransform.osl:417
+#     if (dispType == TYPE_SCALAR)
+	eq		$tmp84 dispType $const10 	%line{417} %argrw{"wrr"}
+	if		$tmp84 178 180 	%argrw{"r"}
+# PxrDispTransform.osl:419
+#         resultF *= spaceScaleFactor;
+	mul		resultF resultF spaceScaleFactor 	%line{419} %argrw{"wrr"}
+# PxrDispTransform.osl:422
+#         resultXYZ = resultF * dispNormal;
+	mul		resultXYZ resultF dispNormal 	%line{422} %argrw{"wrr"}
+# PxrDispTransform.osl:426
+#         resultXYZ *= vector(spaceScaleFactor);
+	assign		$tmp85 spaceScaleFactor 	%line{426} %argrw{"wr"}
+	mul		resultXYZ resultXYZ $tmp85 	%argrw{"wrr"}
+	end

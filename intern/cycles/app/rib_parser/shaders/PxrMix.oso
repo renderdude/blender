@@ -1,0 +1,46 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrMix.osl/obj/PxrMix.oso
+shader PxrMix	%meta{int,rfm_nodeid,1053392} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/color"} %meta{string,rfh_classification,"Pattern/Color"} %meta{string,help,"This node mixes two colors according to the given mixer percentage. A mixer value of 0 results in Color 1. "} 
+param	color	color1	0 0 0		%meta{string,widget,"color"} %meta{string,help,"color1 (color)"} %meta{string,label,"Color 1"}  %read{5,5} %write{2147483647,-1}
+param	color	color2	1 1 1		%meta{string,widget,"color"} %meta{string,help,"color2 (color)"} %meta{string,label,"Color 2"}  %read{5,5} %write{2147483647,-1}
+param	float	mixer	0		%meta{string,widget,"default"} %meta{string,help,"mixer (float)"} %meta{string,label,"Mixer"} %meta{float,max,1} %meta{float,min,0}  %read{3,5} %write{2147483647,-1}
+param	int	clampMixer	0		%meta{string,widget,"checkBox"} %meta{string,help,"Keep the mixer signal between 0.0 and 1.0."} %meta{int,connectable,0} %meta{string,label,"Clamp Mixer"}  %read{0,0} %write{2147483647,-1}
+oparam	color	resultRGB	0 0 0		%meta{string,help,"resultRGB (color)"}  %read{6,8} %write{5,5}
+oparam	float	resultR	0		%meta{string,help,"resultR (float)"}  %read{2147483647,-1} %write{6,6}
+oparam	float	resultG	0		%meta{string,help,"resultG (float)"}  %read{2147483647,-1} %write{7,7}
+oparam	float	resultB	0		%meta{string,help,"resultB (float)"}  %read{2147483647,-1} %write{8,8}
+const	int	$const1	1		%read{0,7} %write{2147483647,-1}
+temp	int	$tmp1	%read{1,1} %write{0,0}
+temp	float	$tmp2	%read{2147483647,-1} %write{4,4}
+const	float	$const2	0		%read{4,4} %write{2147483647,-1}
+const	float	$const3	1		%read{3,3} %write{2147483647,-1}
+const	string	$const4	"clamp"		%read{2,2} %write{2147483647,-1}
+temp	float	$tmp3	%read{4,4} %write{3,3}
+const	int	$const5	0		%read{6,6} %write{2147483647,-1}
+const	int	$const6	2		%read{8,8} %write{2147483647,-1}
+code ___main___
+# PxrMix.osl:94
+#     if (clampMixer == 1)
+	eq		$tmp1 clampMixer $const1 	%filename{"PxrMix.osl"} %line{94} %argrw{"wrr"}
+	if		$tmp1 5 5 	%argrw{"r"}
+# PxrMix.osl:96
+#         clamp(mixer, 0.0, 1.0);
+	functioncall	$const4 5 	%line{96} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
+	min		$tmp3 mixer $const3 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	max		$tmp2 $tmp3 $const2 	%argrw{"wrr"}
+# PxrMix.osl:99
+#     resultRGB = mix(color1, color2, mixer);
+	mix		resultRGB color1 color2 mixer 	%filename{"PxrMix.osl"} %line{99} %argrw{"wrrr"}
+# PxrMix.osl:101
+#     resultR = resultRGB[0];
+	compref		resultR resultRGB $const5 	%line{101} %argrw{"wrr"}
+# PxrMix.osl:102
+#     resultG = resultRGB[1];
+	compref		resultG resultRGB $const1 	%line{102} %argrw{"wrr"}
+# PxrMix.osl:103
+#     resultB = resultRGB[2];
+	compref		resultB resultRGB $const6 	%line{103} %argrw{"wrr"}
+	end

@@ -1,0 +1,1676 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrProjector.osl/obj/PxrProjector.oso
+shader PxrProjector	%meta{int,rfm_nodeid,1053426} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/manifold"} %meta{string,rfh_classification,"Pattern/Manifold"} %meta{string,help,"Computes mapping coordinates for Camera, Spherical, Cylindrical and Planar projections."} 
+param	int	projection	0		%meta{string,widget,"mapper"} %meta{string,help,"projection (int)"} %meta{string,options,"Camera:0|Spherical:1|Cylindrical:2|Planar:3"} %meta{int,connectable,0} %meta{string,label,"Projection"}  %read{54,401} %write{2147483647,-1}
+param	string	coordsys	""		%meta{string,widget,"string"} %meta{string,houdiniui,"oplist"} %meta{string,help,"Name of coordinate system transform.<br>Standard coordinate systems : \"object\", \"world\", \"screen\", \"NDC\".<br><br>coordsys (string)"} %meta{int,connectable,0} %meta{string,label,"Coordinate System"}  %read{20,34} %write{2147483647,-1} %derivs
+param	int	use	0		%meta{string,widget,"mapper"} %meta{string,help,"use (int)"} %meta{string,options,"Current position (P + N):0|Undisplaced position (Po + Non):1|Deform (__Pref + __Nref):2|Deform & transform (__WPref + __WNref):3"} %meta{int,connectable,0} %meta{string,label,"Use"}  %read{2,10} %write{2147483647,-1}
+param	int	frontOnly	1		%meta{string,widget,"checkBox"} %meta{string,page,"Occlusion"} %meta{int,page_open,1} %meta{string,help,"frontOnly (int)"} %meta{int,connectable,0} %meta{string,label,"frontOnly"}  %read{35,35} %write{2147483647,-1}
+param	float	frontFalloff	0		%meta{string,widget,"default"} %meta{string,page,"Occlusion"} %meta{string,help,"frontFalloff (float)"} %meta{int,connectable,0} %meta{string,label,"Front Falloff"} %meta{float,min,0} %meta{float,slidermax,1}  %read{36,36} %write{2147483647,-1}
+param	int	traceOcclusion	0		%meta{string,widget,"checkBox"} %meta{string,page,"Occlusion"} %meta{string,help,"traceOcclusion (int)"} %meta{int,connectable,0} %meta{string,label,"Trace Occlusion"}  %read{38,616} %write{2147483647,-1}
+param	float	traceMaxDistance	10000		%meta{string,widget,"default"} %meta{string,page,"Occlusion"} %meta{string,help,"traceMaxDistance (float)"} %meta{int,connectable,0} %meta{string,label,"Trace Max Distance"}  %read{640,640} %write{2147483647,-1}
+param	string	traceSet	""		%meta{string,widget,"string"} %meta{string,page,"Occlusion"} %meta{string,help,"A trace set for occlusion testing<br><br>traceSet (string)"} %meta{int,connectable,0} %meta{string,label,"Trace Set"}  %read{640,640} %write{2147483647,-1}
+param	int	resolutionX	2048		%meta{string,widget,"default"} %meta{string,page,"Camera"} %meta{int,page_open,1} %meta{string,help,"resolutionX (int)"} %meta{int,connectable,0} %meta{string,label,"Horizontal Resolution"}  %read{39,39} %write{2147483647,-1}
+param	int	resolutionY	1556		%meta{string,widget,"default"} %meta{string,page,"Camera"} %meta{string,help,"resolutionY (int)"} %meta{int,connectable,0} %meta{string,label,"Vertical resolution"}  %read{40,40} %write{2147483647,-1}
+param	int	overscanX	0		%meta{string,widget,"default"} %meta{string,page,"Camera"} %meta{string,help,"Horizontal overscan in pixels<br><br>overscanX (int)"} %meta{int,connectable,0} %meta{string,label,"Horizontal Overscan"} %meta{int,min,0} %meta{int,slidermax,512}  %read{50,50} %write{2147483647,-1}
+param	int	overscanY	0		%meta{string,widget,"default"} %meta{string,page,"Camera"} %meta{string,help,"Vertical overscan in pixels<br><br>overscanY (int)"} %meta{int,connectable,0} %meta{string,label,"Vectical Overscan"} %meta{int,min,0} %meta{int,slidermax,512}  %read{51,51} %write{2147483647,-1}
+param	int	isOrthographic	0		%meta{string,widget,"mapper"} %meta{string,page,"Camera"} %meta{string,help,"isOrthographic (int)"} %meta{string,options,"Perspective:0|Orthographic:1"} %meta{int,connectable,0} %meta{string,label,"Camera Type"}  %read{52,52} %write{2147483647,-1}
+param	float	orthographicWidth	70		%meta{string,widget,"default"} %meta{string,page,"Camera"} %meta{string,help,"orthographicWidth (float)"} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisPath,"../isOrthographic"} %meta{string,conditionalVisValue,"1"} %meta{int,connectable,0} %meta{string,label,"Orthographic Width"} %meta{float,min,0} %meta{float,slidermax,100}  %read{53,53} %write{2147483647,-1}
+param	float	focalLength	50		%meta{string,widget,"default"} %meta{string,page,"Camera"} %meta{string,help,"focalLength (float)"} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisPath,"../isOrthographic"} %meta{string,conditionalVisValue,"0"} %meta{int,connectable,0} %meta{string,label,"Focal Length"} %meta{float,max,2000} %meta{float,min,2.5}  %read{41,41} %write{2147483647,-1}
+param	float	apertureX	0.980000019		%meta{string,widget,"default"} %meta{string,page,"Camera"} %meta{string,help,"apertureX (float)"} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisPath,"../isOrthographic"} %meta{string,conditionalVisValue,"0"} %meta{int,connectable,0} %meta{string,label,"Horizontal Aperture"}  %read{42,42} %write{2147483647,-1}
+param	float	apertureY	0.735000014		%meta{string,widget,"default"} %meta{string,page,"Camera"} %meta{string,help,"apertureY (float)"} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisPath,"../isOrthographic"} %meta{string,conditionalVisValue,"0"} %meta{int,connectable,0} %meta{string,label,"Vertical Aperture"}  %read{43,43} %write{2147483647,-1}
+param	float	nearClipPlane	0.00999999978		%meta{string,widget,"default"} %meta{string,page,"Camera"} %meta{string,help,"nearClipPlane (float)"} %meta{int,connectable,0} %meta{string,label,"Near Clip Plane"}  %read{44,44} %write{2147483647,-1}
+param	float	farClipPlane	10000		%meta{string,widget,"default"} %meta{string,page,"Camera"} %meta{string,help,"farClipPlane (float)"} %meta{int,connectable,0} %meta{string,label,"Far Clip Plane"}  %read{45,45} %write{2147483647,-1}
+param	int	filmFit	0		%meta{string,widget,"mapper"} %meta{string,page,"Camera"} %meta{string,help,"filmFit (int)"} %meta{string,options,"Fill:0|Horizontal:1|Vertical:2|overscan:3"} %meta{int,connectable,0} %meta{string,label,"Film Fit"}  %read{46,46} %write{2147483647,-1}
+param	int	clampTo	1		%meta{string,widget,"mapper"} %meta{string,page,"Camera"} %meta{string,help,"clampTo (int)"} %meta{string,options,"Off:0|Frustum:1|Texture:2"} %meta{int,connectable,0} %meta{string,label,"Clamp To"}  %read{47,47} %write{2147483647,-1}
+param	int	planarClampTo	0		%meta{string,widget,"mapper"} %meta{string,page,"Planar"} %meta{int,page_open,1} %meta{string,help,"planarClampTo (int)"} %meta{string,options,"Off:0|XY:1|XZ:2|YZ:3|XYZ:4"} %meta{int,connectable,0} %meta{string,label,"Clamp To"}  %read{48,48} %write{2147483647,-1}
+param	int	coordSysType	0		%meta{string,widget,"mapper"} %meta{string,page,"Planar"} %meta{string,help,"coordSysType (int)"} %meta{string,options,"Generic:0|Maya place3dTexture:1"} %meta{int,connectable,0} %meta{string,label,"CoordSys Type"}  %read{49,49} %write{2147483647,-1}
+param	float	angle	0		%meta{string,widget,"default"} %meta{string,page,"2D Parameters"} %meta{string,help,"Rotation angle around origin<br><br>angle (float)"} %meta{string,label,"Angle"} %meta{float,max,360} %meta{float,min,0}  %read{596,600} %write{2147483647,-1}
+param	float	scaleS	1		%meta{string,widget,"default"} %meta{string,page,"2D Parameters"} %meta{string,help,"Frequency of feature in S<br><br>scaleS (float)"} %meta{string,label,"Scale S"} %meta{float,max,10} %meta{float,min,-10}  %read{586,592} %write{2147483647,-1}
+param	float	scaleT	1		%meta{string,widget,"default"} %meta{string,page,"2D Parameters"} %meta{string,help,"Frequency of feature in T<br><br>scaleT (float)"} %meta{string,label,"Scale T"} %meta{float,max,10} %meta{float,min,-10}  %read{589,593} %write{2147483647,-1}
+param	float	offsetS	0		%meta{string,widget,"default"} %meta{string,page,"2D Parameters"} %meta{string,help,"Offset from origin in S<br><br>offsetS (float)"} %meta{string,label,"Offset S"} %meta{float,max,10} %meta{float,min,-10}  %read{587,587} %write{2147483647,-1}
+param	float	offsetT	0		%meta{string,widget,"default"} %meta{string,page,"2D Parameters"} %meta{string,help,"Offset from origin in T<br><br>offsetT (float)"} %meta{string,label,"Offset T"} %meta{float,max,10} %meta{float,min,-10}  %read{590,590} %write{2147483647,-1}
+param	int	invertT	0		%meta{string,widget,"checkBox"} %meta{string,page,"2D Parameters"} %meta{string,help,"Flip along T.<br><br>invertT (int)"} %meta{int,connectable,0} %meta{string,label,"Invert T"}  %read{574,574} %write{2147483647,-1}
+param	int	verbose	0		%meta{string,widget,"checkBox"} %meta{string,page,"Advanced"} %meta{string,help,"verbose (int)"} %meta{int,connectable,0} %meta{string,label,"Verbose"}  %read{2147483647,-1} %write{2147483647,-1}
+param	float	frontOnlyTolerance	0.00100000005		%meta{string,page,"Advanced"} %meta{string,help,"frontOnlyTolerance (float)"} %meta{int,connectable,0} %meta{string,label,"Front Only Tolerance"} %meta{float,max,0.100000001} %meta{float,min,0}  %read{37,37} %write{2147483647,-1}
+oparam	struct Manifold	result			%meta{string,help,"result (struct)"}  %read{2147483647,-1} %write{2147483647,-1} %struct{"Manifold"} %structfields{Q,QN,Qradius} %structfieldtypes{"pnf"} %structnfields{3}
+oparam	point	result.Q	0 0 0		%meta{string,help,"result (struct)"}  %read{114,615} %write{113,613} %mystruct{result} %mystructfield{0}
+oparam	normal	result.QN	0 0 0		%meta{string,help,"result (struct)"}  %read{2147483647,-1} %write{2147483647,-1} %mystruct{result} %mystructfield{1}
+oparam	float	result.Qradius	0		%meta{string,help,"result (struct)"}  %read{189,595} %write{188,595} %mystruct{result} %mystructfield{2}
+oparam	float	resultS	0		%meta{string,help,"resultS (float)"}  %read{2147483647,-1} %write{614,614}
+oparam	float	resultT	0		%meta{string,help,"resultT (float)"}  %read{2147483647,-1} %write{615,615}
+oparam	float	resultMask	0		%meta{string,help,"resultMask (float)"}  %read{112,643} %write{97,643}
+global	point	P	%read{0,640} %write{2147483647,-1} %derivs
+global	normal	N	%read{1,627} %write{2147483647,-1}
+local	vector	___392_vec1	%read{26,27} %write{25,26}
+local	float	___392_scale	%read{30,30} %write{29,29}
+local	float	___425_scale	%read{118,118} %write{57,92}
+local	float	___425_resX	%read{62,64} %write{59,59}
+local	float	___425_resY	%read{62,67} %write{61,61}
+local	float	___425_texAspectRatio	%read{75,180} %write{62,62}
+local	float	___425_apertureX	%read{69,90} %write{65,65}
+local	float	___425_apertureY	%read{69,89} %write{68,68}
+local	float	___425_gateAspectRatio	%read{145,183} %write{69,69}
+local	float	___425_aperture	%read{92,92} %write{70,90}
+local	float	___425_zinv	%read{130,188} %write{93,118}
+local	float	___425_Pdepth	%read{278,281} %write{94,277}
+local	point	___425_Qcenter	%read{99,99} %write{95,95}
+local	point	___425_pcsys	%read{267,276} %write{96,96} %derivs
+local	float	___431_dotn	%read{106,109} %write{101,101}
+local	point	___425_Qf	%read{144,258} %write{136,187}
+local	point	___445_Qcenter	%read{293,293} %write{290,290}
+local	float	___446_dotn	%read{300,303} %write{295,295}
+local	float	___445_zinv	%read{327,327} %write{326,326}
+local	float	___448_dotn	%read{356,359} %write{351,351}
+local	point	___447_pcyl	%read{381,381} %write{377,377}
+local	point	___447_cscyl	%read{381,381} %write{380,380}
+local	float	___447_zinv	%read{385,385} %write{384,384}
+local	float	___450_zpos	%read{410,410} %write{406,407} %derivs
+local	float	___451_dotn	%read{423,426} %write{420,420}
+local	float	___450_coordsysScaleFactor	%read{434,440} %write{431,432}
+local	int	___457_autobias	%read{625,625} %write{623,624}
+local	float	___459_biasT	%read{631,631} %write{630,630}
+local	float	___460_biasR	%read{634,634} %write{633,633}
+local	float	___461_bias	%read{638,638} %write{636,637}
+local	point	inputManifoldRw.Q	%read{20,439} %write{15,21} %mystruct{inputManifoldRw} %mystructfield{0} %derivs
+local	normal	inputManifoldRw.QN	%read{22,420} %write{16,24} %mystruct{inputManifoldRw} %mystructfield{1}
+local	float	inputManifoldRw.Qradius	%read{30,385} %write{17,32} %mystruct{inputManifoldRw} %mystructfield{2}
+local	point	Pin	%read{15,15} %write{0,12} %derivs
+local	normal	Nin	%read{16,16} %write{1,13}
+local	point	coordsysPos	%read{273,379} %write{33,33} %derivs
+local	string	params.coordsys	%read{272,412} %write{34,34} %mystruct{params} %mystructfield{0} %derivs
+local	int	params.frontOnly	%read{98,414} %write{35,35} %mystruct{params} %mystructfield{1}
+local	float	params.frontFalloff	%read{103,423} %write{36,36} %mystruct{params} %mystructfield{2}
+local	float	params.frontOnlyTolerance	%read{105,425} %write{37,37} %mystruct{params} %mystructfield{3}
+local	int	params.traceOcclusion	%read{399,399} %write{38,38} %mystruct{params} %mystructfield{4}
+local	int	params.resolutionX	%read{58,63} %write{39,39} %mystruct{params} %mystructfield{5}
+local	int	params.resolutionY	%read{60,66} %write{40,40} %mystruct{params} %mystructfield{6}
+local	float	params.focalLength	%read{71,91} %write{41,41} %mystruct{params} %mystructfield{7}
+local	float	params.apertureX	%read{65,65} %write{42,42} %mystruct{params} %mystructfield{8}
+local	float	params.apertureY	%read{68,68} %write{43,43} %mystruct{params} %mystructfield{9}
+local	float	params.nearClipPlane	%read{278,278} %write{44,44} %mystruct{params} %mystructfield{10}
+local	float	params.farClipPlane	%read{281,281} %write{45,45} %mystruct{params} %mystructfield{11}
+local	int	params.filmFit	%read{73,169} %write{46,46} %mystruct{params} %mystructfield{12}
+local	int	params.clampTo	%read{202,275} %write{47,47} %mystruct{params} %mystructfield{13}
+local	int	params.planarClampTo	%read{458,536} %write{48,48} %mystruct{params} %mystructfield{14}
+local	int	params.coordSysType	%read{404,429} %write{49,49} %mystruct{params} %mystructfield{15}
+local	int	params.overscanX	%read{58,58} %write{50,50} %mystruct{params} %mystructfield{16}
+local	int	params.overscanY	%read{60,60} %write{51,51} %mystruct{params} %mystructfield{17}
+local	int	params.isOrthographic	%read{119,266} %write{52,52} %mystruct{params} %mystructfield{18}
+local	float	params.orthographicWidth	%read{121,126} %write{53,53} %mystruct{params} %mystructfield{19}
+local	vector	rtDir	%read{286,640} %write{272,411} %derivs
+local	float	invT	%read{589,589} %write{583,584}
+local	float	___469_rx	%read{612,612} %write{606,606}
+local	float	___469_ry	%read{613,613} %write{611,611}
+local	float	___469_cs	%read{603,610} %write{601,601}
+local	float	___469_sn	%read{605,608} %write{601,601}
+local	float	___470_bias	%read{640,640} %write{631,638}
+const	int	$const1	1		%read{2,641} %write{2147483647,-1}
+temp	int	$tmp1	%read{3,3} %write{2,2}
+temp	int	$tmp2	%read{2147483647,-1} %write{4,4}
+const	string	$const2	"primvar"		%read{4,13} %write{2147483647,-1}
+const	string	$const3	"P"		%read{4,4} %write{2147483647,-1}
+temp	int	$tmp3	%read{2147483647,-1} %write{5,5}
+const	string	$const4	"builtin"		%read{5,633} %write{2147483647,-1}
+const	string	$const5	"Non"		%read{5,5} %write{2147483647,-1}
+const	int	$const6	2		%read{6,566} %write{2147483647,-1}
+temp	int	$tmp4	%read{7,7} %write{6,6}
+temp	int	$tmp5	%read{2147483647,-1} %write{8,8}
+const	string	$const7	"__Pref"		%read{8,8} %write{2147483647,-1}
+temp	int	$tmp6	%read{2147483647,-1} %write{9,9}
+const	string	$const8	"__Nref"		%read{9,9} %write{2147483647,-1}
+const	int	$const9	3		%read{10,510} %write{2147483647,-1}
+temp	int	$tmp7	%read{11,11} %write{10,10}
+temp	int	$tmp8	%read{2147483647,-1} %write{12,12}
+const	string	$const10	"__WPref"		%read{12,12} %write{2147483647,-1}
+temp	int	$tmp9	%read{2147483647,-1} %write{13,13}
+const	string	$const11	"__WNref"		%read{13,13} %write{2147483647,-1}
+const	string	$const12	"Manifold_Construct"		%read{14,14} %write{2147483647,-1}
+const	float	$const13	0		%read{17,628} %write{2147483647,-1}
+const	string	$const14	"Manifold_Transform"		%read{18,19} %write{2147483647,-1}
+const	string	$const15	"common"		%read{20,412} %write{2147483647,-1}
+temp	normal	$tmp10	%read{23,23} %write{22,22}
+const	vector	$const16	1 1 1		%read{25,25} %write{2147483647,-1}
+temp	float	$tmp11	%read{29,29} %write{27,27}
+temp	float	$tmp12	%read{29,29} %write{28,28}
+const	float	$const17	3		%read{28,28} %write{2147483647,-1}
+temp	int	$tmp13	%read{2147483647,-1} %write{32,32}
+const	string	$const18	"Pradius"		%read{32,32} %write{2147483647,-1}
+const	point	$const19	0 0 0		%read{33,33} %write{2147483647,-1}
+const	int	$const20	0		%read{54,625} %write{2147483647,-1}
+temp	int	$tmp15	%read{55,55} %write{54,54}
+const	string	$const21	"cameraProjection"		%read{56,56} %write{2147483647,-1}
+const	float	$const22	1		%read{57,578} %write{2147483647,-1}
+temp	int	$tmp16	%read{59,59} %write{58,58}
+temp	int	$tmp17	%read{61,61} %write{60,60}
+temp	float	$tmp18	%read{64,64} %write{63,63}
+temp	float	$tmp19	%read{65,65} %write{64,64}
+temp	float	$tmp20	%read{67,67} %write{66,66}
+temp	float	$tmp21	%read{68,68} %write{67,67}
+temp	int	$tmp22	%read{72,72} %write{71,71}
+temp	int	$tmp23	%read{74,74} %write{73,73}
+temp	int	$tmp24	%read{76,76} %write{75,75}
+temp	int	$tmp25	%read{80,80} %write{79,79}
+temp	int	$tmp26	%read{83,83} %write{82,82}
+temp	int	$tmp27	%read{86,86} %write{85,85}
+temp	int	$tmp28	%read{88,88} %write{87,87}
+const	float	$const23	0.0393701009		%read{91,91} %write{2147483647,-1}
+temp	float	$tmp29	%read{92,92} %write{91,91}
+temp	vector	$tmp30	%read{101,101} %write{100,100}
+temp	vector	$tmp31	%read{100,100} %write{99,99}
+temp	float	$tmp32	%read{112,112} %write{106,110}
+const	string	$const24	"frontOnlyMask"		%read{102,352} %write{2147483647,-1}
+temp	int	$tmp33	%read{104,104} %write{103,103}
+temp	float	$tmp34	%read{106,106} %write{105,105}
+temp	float	$tmp35	%read{109,109} %write{108,108}
+temp	int	$tmp36	%read{110,110} %write{109,109}
+const	point	$const25	-1 1 1		%read{113,113} %write{2147483647,-1}
+temp	float	$tmp38	%read{118,118} %write{117,117}
+const	float	$const26	9.99999997e-07		%read{117,445} %write{2147483647,-1}
+temp	float	$tmp39	%read{117,117} %write{116,116}
+temp	float	$tmp40	%read{116,116} %write{115,115}
+temp	float	$tmp41	%read{123,123} %write{120,120}
+temp	float	$tmp42	%read{122,122} %write{121,121}
+temp	float	$tmp43	%read{123,123} %write{122,122}
+temp	float	$tmp44	%read{124,124} %write{123,123}
+temp	float	$tmp45	%read{127,127} %write{125,125}
+temp	float	$tmp46	%read{127,127} %write{126,126}
+temp	float	$tmp47	%read{128,128} %write{127,127}
+temp	float	$tmp48	%read{131,131} %write{129,129}
+temp	float	$tmp49	%read{131,131} %write{130,130}
+temp	float	$tmp50	%read{132,132} %write{131,131}
+temp	float	$tmp51	%read{134,134} %write{133,133}
+temp	int	$tmp52	%read{138,138} %write{137,137}
+temp	int	$tmp53	%read{140,140} %write{139,139}
+temp	float	$tmp54	%read{142,142} %write{141,141}
+temp	float	$tmp55	%read{143,143} %write{142,142}
+temp	float	$tmp56	%read{145,145} %write{144,144}
+temp	float	$tmp57	%read{146,146} %write{145,145}
+temp	float	$tmp58	%read{148,148} %write{147,147}
+temp	float	$tmp59	%read{149,149} %write{148,148}
+temp	float	$tmp60	%read{151,151} %write{150,150}
+temp	float	$tmp61	%read{152,152} %write{151,151}
+temp	int	$tmp62	%read{154,154} %write{153,153}
+temp	float	$tmp63	%read{156,156} %write{155,155}
+temp	float	$tmp64	%read{157,157} %write{156,156}
+temp	float	$tmp65	%read{159,159} %write{158,158}
+temp	float	$tmp66	%read{160,160} %write{159,159}
+temp	int	$tmp67	%read{162,162} %write{161,161}
+temp	float	$tmp68	%read{164,164} %write{163,163}
+temp	float	$tmp69	%read{165,165} %write{164,164}
+temp	float	$tmp70	%read{167,167} %write{166,166}
+temp	float	$tmp71	%read{168,168} %write{167,167}
+temp	int	$tmp72	%read{170,170} %write{169,169}
+temp	int	$tmp73	%read{172,172} %write{171,171}
+temp	float	$tmp74	%read{174,174} %write{173,173}
+temp	float	$tmp75	%read{175,175} %write{174,174}
+temp	float	$tmp76	%read{177,177} %write{176,176}
+temp	float	$tmp77	%read{178,178} %write{177,177}
+temp	float	$tmp78	%read{180,180} %write{179,179}
+temp	float	$tmp79	%read{181,181} %write{180,180}
+temp	float	$tmp80	%read{183,183} %write{182,182}
+temp	float	$tmp81	%read{184,184} %write{183,183}
+const	point	$const27	0.5 0.5 0		%read{185,187} %write{2147483647,-1}
+const	string	$const28	"makeCoordsSafe"		%read{190,444} %write{2147483647,-1}
+temp	float	$tmp84	%read{196,196} %write{195,195}
+temp	float	$tmp85	%read{194,194} %write{192,192}
+const	float	$const29	-9999		%read{195,454} %write{2147483647,-1}
+const	float	$const30	9999		%read{194,453} %write{2147483647,-1}
+const	string	$const31	"clamp"		%read{193,452} %write{2147483647,-1}
+temp	float	$tmp86	%read{195,195} %write{194,194}
+temp	float	$tmp87	%read{201,201} %write{200,200}
+temp	float	$tmp88	%read{199,199} %write{197,197}
+temp	float	$tmp89	%read{200,200} %write{199,199}
+temp	int	$tmp90	%read{203,203} %write{202,202}
+temp	float	$tmp91	%read{233,233} %write{231,232}
+temp	float	$tmp92	%read{205,205} %write{204,204}
+temp	int	$tmp93	%read{206,206} %write{205,205}
+temp	int	$tmp94	%read{207,212} %write{206,211}
+temp	float	$tmp95	%read{209,209} %write{208,208}
+temp	int	$tmp96	%read{210,210} %write{209,209}
+temp	int	$tmp97	%read{211,211} %write{210,210}
+temp	int	$tmp98	%read{213,218} %write{212,217}
+temp	float	$tmp99	%read{215,215} %write{214,214}
+temp	int	$tmp100	%read{216,216} %write{215,215}
+temp	int	$tmp101	%read{217,217} %write{216,216}
+temp	int	$tmp102	%read{219,224} %write{218,223}
+temp	float	$tmp103	%read{221,221} %write{220,220}
+temp	int	$tmp104	%read{222,222} %write{221,221}
+temp	int	$tmp105	%read{223,223} %write{222,222}
+temp	int	$tmp106	%read{225,230} %write{224,229}
+temp	float	$tmp107	%read{227,227} %write{226,226}
+temp	int	$tmp108	%read{228,228} %write{227,227}
+temp	int	$tmp109	%read{229,229} %write{228,228}
+temp	int	$tmp110	%read{235,235} %write{234,234}
+temp	float	$tmp111	%read{265,265} %write{263,264}
+temp	float	$tmp112	%read{237,237} %write{236,236}
+temp	int	$tmp113	%read{238,238} %write{237,237}
+temp	int	$tmp114	%read{239,244} %write{238,243}
+temp	float	$tmp115	%read{241,241} %write{240,240}
+temp	int	$tmp116	%read{242,242} %write{241,241}
+temp	int	$tmp117	%read{243,243} %write{242,242}
+temp	int	$tmp118	%read{245,250} %write{244,249}
+temp	float	$tmp119	%read{247,247} %write{246,246}
+temp	int	$tmp120	%read{248,248} %write{247,247}
+temp	int	$tmp121	%read{249,249} %write{248,248}
+temp	int	$tmp122	%read{251,256} %write{250,255}
+temp	float	$tmp123	%read{253,253} %write{252,252}
+temp	int	$tmp124	%read{254,254} %write{253,253}
+temp	int	$tmp125	%read{255,255} %write{254,254}
+temp	int	$tmp126	%read{257,262} %write{256,261}
+temp	float	$tmp127	%read{259,259} %write{258,258}
+temp	int	$tmp128	%read{260,260} %write{259,259}
+temp	int	$tmp129	%read{261,261} %write{260,260}
+temp	vector	$tmp130	%read{272,272} %write{271,271} %derivs
+temp	point	$tmp131	%read{270,270} %write{269,269} %derivs
+temp	float	$tmp132	%read{269,269} %write{267,267} %derivs
+temp	float	$tmp133	%read{269,269} %write{268,268} %derivs
+temp	vector	$tmp134	%read{271,271} %write{270,270} %derivs
+temp	vector	$tmp135	%read{274,274} %write{273,273} %derivs
+temp	float	$tmp136	%read{277,277} %write{276,276}
+temp	int	$tmp137	%read{279,279} %write{278,278}
+temp	int	$tmp138	%read{280,284} %write{279,283}
+temp	int	$tmp139	%read{282,282} %write{281,281}
+temp	int	$tmp140	%read{283,283} %write{282,282}
+temp	float	$tmp141	%read{285,285} %write{284,284}
+temp	int	$tmp142	%read{288,288} %write{287,287}
+const	string	$const32	"sphericalProjection"		%read{289,289} %write{2147483647,-1}
+temp	vector	$tmp143	%read{295,295} %write{294,294}
+temp	vector	$tmp144	%read{294,294} %write{293,293}
+temp	float	$tmp145	%read{306,306} %write{300,304}
+temp	int	$tmp146	%read{298,298} %write{297,297}
+temp	float	$tmp147	%read{300,300} %write{299,299}
+temp	float	$tmp148	%read{303,303} %write{302,302}
+temp	int	$tmp149	%read{304,304} %write{303,303}
+const	float	$const33	0.5		%read{313,441} %write{2147483647,-1}
+temp	float	$tmp150	%read{312,312} %write{311,311}
+temp	float	$tmp151	%read{311,311} %write{308,308}
+temp	float	$tmp152	%read{310,310} %write{309,309}
+temp	float	$tmp153	%read{311,311} %write{310,310}
+const	float	$const34	6.28318548		%read{312,367} %write{2147483647,-1}
+temp	float	$tmp154	%read{313,313} %write{312,312}
+temp	float	$tmp155	%read{322,322} %write{313,313}
+temp	float	$tmp156	%read{320,320} %write{319,319}
+temp	float	$tmp157	%read{319,319} %write{314,314}
+temp	float	$tmp158	%read{319,319} %write{318,318}
+temp	vector	$tmp159	%read{318,318} %write{317,317}
+temp	float	$tmp160	%read{317,317} %write{315,315}
+temp	float	$tmp161	%read{317,317} %write{316,316}
+const	float	$const35	3.14159274		%read{320,599} %write{2147483647,-1}
+temp	float	$tmp162	%read{321,321} %write{320,320}
+temp	float	$tmp163	%read{322,322} %write{321,321}
+temp	float	$tmp164	%read{326,326} %write{325,325}
+temp	float	$tmp165	%read{325,325} %write{324,324}
+temp	float	$tmp166	%read{335,335} %write{334,334}
+temp	float	$tmp167	%read{333,333} %write{331,331}
+temp	float	$tmp168	%read{334,334} %write{333,333}
+temp	float	$tmp169	%read{340,340} %write{339,339}
+temp	float	$tmp170	%read{338,338} %write{336,336}
+temp	float	$tmp171	%read{339,339} %write{338,338}
+temp	int	$tmp172	%read{343,343} %write{342,342}
+const	string	$const36	"cylindricalProjection"		%read{344,344} %write{2147483647,-1}
+temp	point	$tmp173	%read{347,347} %write{346,346} %derivs
+temp	float	$tmp174	%read{346,346} %write{345,345} %derivs
+temp	vector	$tmp175	%read{348,348} %write{347,347} %derivs
+temp	float	$tmp176	%read{362,362} %write{356,360}
+temp	int	$tmp177	%read{354,354} %write{353,353}
+temp	float	$tmp178	%read{356,356} %write{355,355}
+temp	float	$tmp179	%read{359,359} %write{358,358}
+temp	int	$tmp180	%read{360,360} %write{359,359}
+temp	float	$tmp181	%read{367,367} %write{366,366}
+temp	float	$tmp182	%read{366,366} %write{363,363}
+temp	float	$tmp183	%read{365,365} %write{364,364}
+temp	float	$tmp184	%read{366,366} %write{365,365}
+temp	float	$tmp185	%read{368,368} %write{367,367}
+temp	float	$tmp186	%read{373,373} %write{368,368}
+temp	float	$tmp187	%read{370,370} %write{369,369}
+temp	float	$tmp188	%read{371,371} %write{370,370}
+temp	float	$tmp189	%read{372,372} %write{371,371}
+temp	float	$tmp190	%read{373,373} %write{372,372}
+temp	float	$tmp191	%read{377,377} %write{375,375}
+temp	float	$tmp192	%read{377,377} %write{376,376}
+temp	float	$tmp193	%read{380,380} %write{378,378}
+temp	float	$tmp194	%read{380,380} %write{379,379}
+temp	float	$tmp195	%read{384,384} %write{383,383}
+temp	float	$tmp196	%read{383,383} %write{382,382}
+temp	vector	$tmp197	%read{382,382} %write{381,381}
+temp	float	$tmp198	%read{393,393} %write{392,392}
+temp	float	$tmp199	%read{391,391} %write{389,389}
+temp	float	$tmp200	%read{392,392} %write{391,391}
+temp	float	$tmp201	%read{398,398} %write{397,397}
+temp	float	$tmp202	%read{396,396} %write{394,394}
+temp	float	$tmp203	%read{397,397} %write{396,396}
+temp	int	$tmp204	%read{402,402} %write{401,401}
+const	string	$const37	"planarProjection"		%read{403,403} %write{2147483647,-1}
+temp	int	$tmp205	%read{405,405} %write{404,404}
+temp	point	$tmp206	%read{411,411} %write{410,410} %derivs
+temp	float	$tmp207	%read{410,410} %write{408,408} %derivs
+temp	float	$tmp208	%read{410,410} %write{409,409} %derivs
+temp	vector	$tmp209	%read{2147483647,-1} %write{412,412}
+temp	vector	$tmp210	%read{420,420} %write{419,419}
+temp	point	$tmp211	%read{418,418} %write{417,417}
+temp	float	$tmp212	%read{417,417} %write{415,415}
+temp	float	$tmp213	%read{417,417} %write{416,416}
+const	float	$const38	1e+10		%read{417,417} %write{2147483647,-1}
+temp	vector	$tmp214	%read{419,419} %write{418,418}
+temp	int	$tmp215	%read{422,422} %write{421,421}
+temp	float	$tmp216	%read{424,424} %write{423,423}
+temp	float	$tmp217	%read{426,426} %write{425,425}
+temp	int	$tmp218	%read{427,427} %write{426,426}
+temp	float	$tmp219	%read{428,428} %write{427,427}
+temp	int	$tmp220	%read{430,430} %write{429,429}
+temp	float	$tmp221	%read{434,434} %write{433,433}
+temp	float	$tmp222	%read{435,435} %write{434,434}
+temp	float	$tmp223	%read{442,442} %write{435,435}
+temp	float	$tmp224	%read{437,437} %write{436,436}
+temp	float	$tmp225	%read{438,438} %write{437,437}
+temp	float	$tmp226	%read{442,442} %write{438,438}
+temp	float	$tmp227	%read{440,440} %write{439,439}
+temp	float	$tmp228	%read{441,441} %write{440,440}
+temp	float	$tmp229	%read{442,442} %write{441,441}
+temp	float	$tmp230	%read{450,450} %write{449,449}
+temp	float	$tmp231	%read{448,448} %write{446,446}
+temp	float	$tmp232	%read{449,449} %write{448,448}
+temp	float	$tmp233	%read{455,455} %write{454,454}
+temp	float	$tmp234	%read{453,453} %write{451,451}
+temp	float	$tmp235	%read{454,454} %write{453,453}
+temp	int	$tmp236	%read{457,457} %write{456,456}
+temp	int	$tmp237	%read{459,459} %write{458,458}
+temp	float	$tmp238	%read{483,483} %write{481,482}
+temp	float	$tmp239	%read{461,461} %write{460,460}
+temp	int	$tmp240	%read{462,462} %write{461,461}
+temp	int	$tmp241	%read{463,468} %write{462,467}
+temp	float	$tmp242	%read{465,465} %write{464,464}
+temp	int	$tmp243	%read{466,466} %write{465,465}
+temp	int	$tmp244	%read{467,467} %write{466,466}
+temp	int	$tmp245	%read{469,474} %write{468,473}
+temp	float	$tmp246	%read{471,471} %write{470,470}
+temp	int	$tmp247	%read{472,472} %write{471,471}
+temp	int	$tmp248	%read{473,473} %write{472,472}
+temp	int	$tmp249	%read{475,480} %write{474,479}
+temp	float	$tmp250	%read{477,477} %write{476,476}
+temp	int	$tmp251	%read{478,478} %write{477,477}
+temp	int	$tmp252	%read{479,479} %write{478,478}
+temp	int	$tmp253	%read{485,485} %write{484,484}
+temp	float	$tmp254	%read{509,509} %write{507,508}
+temp	float	$tmp255	%read{487,487} %write{486,486}
+temp	int	$tmp256	%read{488,488} %write{487,487}
+temp	int	$tmp257	%read{489,494} %write{488,493}
+temp	float	$tmp258	%read{491,491} %write{490,490}
+temp	int	$tmp259	%read{492,492} %write{491,491}
+temp	int	$tmp260	%read{493,493} %write{492,492}
+temp	int	$tmp261	%read{495,500} %write{494,499}
+temp	float	$tmp262	%read{497,497} %write{496,496}
+temp	int	$tmp263	%read{498,498} %write{497,497}
+temp	int	$tmp264	%read{499,499} %write{498,498}
+temp	int	$tmp265	%read{501,506} %write{500,505}
+temp	float	$tmp266	%read{503,503} %write{502,502}
+temp	int	$tmp267	%read{504,504} %write{503,503}
+temp	int	$tmp268	%read{505,505} %write{504,504}
+temp	int	$tmp269	%read{511,511} %write{510,510}
+temp	float	$tmp270	%read{535,535} %write{533,534}
+temp	float	$tmp271	%read{513,513} %write{512,512}
+temp	int	$tmp272	%read{514,514} %write{513,513}
+temp	int	$tmp273	%read{515,520} %write{514,519}
+temp	float	$tmp274	%read{517,517} %write{516,516}
+temp	int	$tmp275	%read{518,518} %write{517,517}
+temp	int	$tmp276	%read{519,519} %write{518,518}
+temp	int	$tmp277	%read{521,526} %write{520,525}
+temp	float	$tmp278	%read{523,523} %write{522,522}
+temp	int	$tmp279	%read{524,524} %write{523,523}
+temp	int	$tmp280	%read{525,525} %write{524,524}
+temp	int	$tmp281	%read{527,532} %write{526,531}
+temp	float	$tmp282	%read{529,529} %write{528,528}
+temp	int	$tmp283	%read{530,530} %write{529,529}
+temp	int	$tmp284	%read{531,531} %write{530,530}
+const	int	$const39	4		%read{536,536} %write{2147483647,-1}
+temp	int	$tmp285	%read{537,537} %write{536,536}
+temp	float	$tmp286	%read{573,573} %write{571,572}
+temp	float	$tmp287	%read{539,539} %write{538,538}
+temp	int	$tmp288	%read{540,540} %write{539,539}
+temp	int	$tmp289	%read{541,546} %write{540,545}
+temp	float	$tmp290	%read{543,543} %write{542,542}
+temp	int	$tmp291	%read{544,544} %write{543,543}
+temp	int	$tmp292	%read{545,545} %write{544,544}
+temp	int	$tmp293	%read{547,552} %write{546,551}
+temp	float	$tmp294	%read{549,549} %write{548,548}
+temp	int	$tmp295	%read{550,550} %write{549,549}
+temp	int	$tmp296	%read{551,551} %write{550,550}
+temp	int	$tmp297	%read{553,558} %write{552,557}
+temp	float	$tmp298	%read{555,555} %write{554,554}
+temp	int	$tmp299	%read{556,556} %write{555,555}
+temp	int	$tmp300	%read{557,557} %write{556,556}
+temp	int	$tmp301	%read{559,564} %write{558,563}
+temp	float	$tmp302	%read{561,561} %write{560,560}
+temp	int	$tmp303	%read{562,562} %write{561,561}
+temp	int	$tmp304	%read{563,563} %write{562,562}
+temp	int	$tmp305	%read{565,570} %write{564,569}
+temp	float	$tmp306	%read{567,567} %write{566,566}
+temp	int	$tmp307	%read{568,568} %write{567,567}
+temp	int	$tmp308	%read{569,569} %write{568,568}
+temp	int	$tmp309	%read{575,575} %write{574,574}
+temp	float	$tmp310	%read{578,578} %write{577,577}
+temp	float	$tmp311	%read{577,577} %write{576,576}
+temp	float	$tmp312	%read{583,583} %write{578,578}
+temp	float	$tmp313	%read{582,582} %write{579,579}
+temp	float	$tmp314	%read{582,582} %write{581,581}
+temp	float	$tmp315	%read{581,581} %write{580,580}
+temp	float	$tmp316	%read{583,583} %write{582,582}
+temp	float	$tmp317	%read{586,586} %write{585,585}
+temp	float	$tmp318	%read{587,587} %write{586,586}
+temp	float	$tmp319	%read{588,588} %write{587,587}
+temp	float	$tmp320	%read{590,590} %write{589,589}
+temp	float	$tmp321	%read{591,591} %write{590,590}
+temp	float	$tmp322	%read{594,594} %write{592,592}
+temp	float	$tmp323	%read{594,594} %write{593,593}
+temp	int	$tmp324	%read{597,597} %write{596,596}
+temp	float	$tmp325	%read{601,601} %write{600,600}
+const	string	$const40	"radians"		%read{598,598} %write{2147483647,-1}
+const	float	$const41	180		%read{599,599} %write{2147483647,-1}
+temp	float	$tmp326	%read{600,600} %write{599,599}
+temp	float	$tmp327	%read{603,603} %write{602,602}
+temp	float	$tmp328	%read{606,606} %write{603,603}
+temp	float	$tmp329	%read{605,605} %write{604,604}
+temp	float	$tmp330	%read{606,606} %write{605,605}
+temp	float	$tmp331	%read{608,608} %write{607,607}
+temp	float	$tmp332	%read{611,611} %write{608,608}
+temp	float	$tmp333	%read{610,610} %write{609,609}
+temp	float	$tmp334	%read{611,611} %write{610,610}
+temp	int	$tmp335	%read{617,621} %write{616,620}
+temp	int	$tmp336	%read{619,619} %write{618,618}
+temp	int	$tmp337	%read{620,620} %write{619,619}
+const	string	$const42	"getTraceBias"		%read{622,622} %write{2147483647,-1}
+temp	int	$tmp338	%read{2147483647,-1} %write{624,624}
+const	string	$const43	"trace:autobias"		%read{624,624} %write{2147483647,-1}
+temp	int	$tmp339	%read{626,626} %write{625,625}
+temp	float	$tmp340	%read{628,628} %write{627,627}
+temp	int	$tmp341	%read{629,629} %write{628,628}
+temp	int	$tmp342	%read{2147483647,-1} %write{630,630}
+const	string	$const44	"biasT"		%read{630,630} %write{2147483647,-1}
+temp	int	$tmp343	%read{2147483647,-1} %write{633,633}
+const	string	$const45	"biasR"		%read{633,633} %write{2147483647,-1}
+const	float	$const46	0.00999999978		%read{636,636} %write{2147483647,-1}
+temp	int	$tmp344	%read{2147483647,-1} %write{637,637}
+const	string	$const47	"trace:bias"		%read{637,637} %write{2147483647,-1}
+temp	int	$tmp345	%read{641,641} %write{640,640}
+const	string	$const48	"mindist"		%read{640,640} %write{2147483647,-1}
+const	string	$const49	"maxdist"		%read{640,640} %write{2147483647,-1}
+const	string	$const50	"traceset"		%read{640,640} %write{2147483647,-1}
+temp	int	$tmp346	%read{642,642} %write{641,641}
+temp	float	$tmp347	%read{643,643} %write{642,642}
+code ___main___
+# PxrProjector.osl:776
+#     point Pin = P;
+	assign		Pin P 	%filename{"PxrProjector.osl"} %line{776} %argrw{"wr"}
+# PxrProjector.osl:777
+#     normal Nin = N;
+	assign		Nin N 	%line{777} %argrw{"wr"}
+# PxrProjector.osl:778
+#     if (use == k_use_Po)
+	eq		$tmp1 use $const1 	%line{778} %argrw{"wrr"}
+	if		$tmp1 6 14 	%argrw{"r"}
+# PxrProjector.osl:781
+#         getattribute("primvar", "P", Pin);
+	getattribute	$tmp2 $const2 $const3 Pin 	%line{781} %argrw{"wrrw"}
+# PxrProjector.osl:782
+#         getattribute("builtin", "Non", Nin);
+	getattribute	$tmp3 $const4 $const5 Nin 	%line{782} %argrw{"wrrw"}
+# PxrProjector.osl:784
+#     else if (use == k_use_Pref)
+	eq		$tmp4 use $const6 	%line{784} %argrw{"wrr"}
+	if		$tmp4 10 14 	%argrw{"r"}
+# PxrProjector.osl:786
+#         getattribute("primvar", "__Pref", Pin);
+	getattribute	$tmp5 $const2 $const7 Pin 	%line{786} %argrw{"wrrw"}
+# PxrProjector.osl:787
+#         getattribute("primvar", "__Nref", Nin);
+	getattribute	$tmp6 $const2 $const8 Nin 	%line{787} %argrw{"wrrw"}
+# PxrProjector.osl:789
+#     else if (use == k_use_WPref)
+	eq		$tmp7 use $const9 	%line{789} %argrw{"wrr"}
+	if		$tmp7 14 14 	%argrw{"r"}
+# PxrProjector.osl:791
+#         getattribute("primvar", "__WPref", Pin);
+	getattribute	$tmp8 $const2 $const10 Pin 	%line{791} %argrw{"wrrw"}
+# PxrProjector.osl:792
+#         getattribute("primvar", "__WNref", Nin);
+	getattribute	$tmp9 $const2 $const11 Nin 	%line{792} %argrw{"wrrw"}
+# PxrProjector.osl:794
+#     Manifold_Construct(Pin, Nin, inputManifoldRw);
+	functioncall	$const12 18 	%line{794} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:69
+#     m.Q = inP;
+	assign		inputManifoldRw.Q Pin 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{69} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:70
+#     m.QN = inN;
+	assign		inputManifoldRw.QN Nin 	%line{70} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:71
+#     m.Qradius = 0.0;
+	assign		inputManifoldRw.Qradius $const13 	%line{71} %argrw{"wr"}
+# PxrProjector.osl:795
+#     Manifold_Transform(inputManifoldRw, coordsys);
+	functioncall	$const14 32 	%filename{"PxrProjector.osl"} %line{795} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:91
+#     Manifold_Transform(ioManifold, "common", toSpace);
+	functioncall	$const14 32 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{91} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:78
+#     ioManifold.Q = transform(fromSpace, toSpace, ioManifold.Q);
+	transform	inputManifoldRw.Q $const15 coordsys inputManifoldRw.Q 	%line{78} %argrw{"wrrr"}
+	assign		inputManifoldRw.Q inputManifoldRw.Q 	%argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:79
+#     ioManifold.QN = normalize(transform(fromSpace, toSpace, ioManifold.QN));
+	transformn	$tmp10 $const15 coordsys inputManifoldRw.QN 	%line{79} %argrw{"wrrr"}
+	normalize	inputManifoldRw.QN $tmp10 	%argrw{"wr"}
+	assign		inputManifoldRw.QN inputManifoldRw.QN 	%argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:81
+#     vector vec1 = vector(1.0);
+	assign		___392_vec1 $const16 	%line{81} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:82
+#     vec1 = transform(fromSpace, toSpace, vec1);
+	transformv	___392_vec1 $const15 coordsys ___392_vec1 	%line{82} %argrw{"wrrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:83
+#     float scale = length(vec1) / sqrt(3.0);
+	length		$tmp11 ___392_vec1 	%line{83} %argrw{"wr"}
+	sqrt		$tmp12 $const17 	%argrw{"wr"}
+	div		___392_scale $tmp11 $tmp12 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:84
+#     ioManifold.Qradius *= scale;
+	mul		inputManifoldRw.Qradius inputManifoldRw.Qradius ___392_scale 	%line{84} %argrw{"wrr"}
+	assign		inputManifoldRw.Qradius inputManifoldRw.Qradius 	%argrw{"wr"}
+# PxrProjector.osl:796
+#     getattribute("builtin", "Pradius", inputManifoldRw.Qradius);
+	getattribute	$tmp13 $const4 $const18 inputManifoldRw.Qradius 	%filename{"PxrProjector.osl"} %line{796} %argrw{"wrrw"}
+# PxrProjector.osl:798
+#     point coordsysPos = transform(coordsys, "common", point(0));
+	transform	coordsysPos coordsys $const15 $const19 	%line{798} %argrw{"wrrr"}
+# PxrProjector.osl:799
+#     Params params = {coordsys, frontOnly, frontFalloff, frontOnlyTolerance,
+	assign		params.coordsys coordsys 	%line{799} %argrw{"wr"}
+	assign		params.frontOnly frontOnly 	%argrw{"wr"}
+	assign		params.frontFalloff frontFalloff 	%argrw{"wr"}
+	assign		params.frontOnlyTolerance frontOnlyTolerance 	%argrw{"wr"}
+	assign		params.traceOcclusion traceOcclusion 	%argrw{"wr"}
+	assign		params.resolutionX resolutionX 	%argrw{"wr"}
+	assign		params.resolutionY resolutionY 	%argrw{"wr"}
+	assign		params.focalLength focalLength 	%argrw{"wr"}
+	assign		params.apertureX apertureX 	%argrw{"wr"}
+	assign		params.apertureY apertureY 	%argrw{"wr"}
+	assign		params.nearClipPlane nearClipPlane 	%argrw{"wr"}
+	assign		params.farClipPlane farClipPlane 	%argrw{"wr"}
+	assign		params.filmFit filmFit 	%argrw{"wr"}
+	assign		params.clampTo clampTo 	%argrw{"wr"}
+	assign		params.planarClampTo planarClampTo 	%argrw{"wr"}
+	assign		params.coordSysType coordSysType 	%argrw{"wr"}
+	assign		params.overscanX overscanX 	%argrw{"wr"}
+	assign		params.overscanY overscanY 	%argrw{"wr"}
+	assign		params.isOrthographic isOrthographic 	%argrw{"wr"}
+	assign		params.orthographicWidth orthographicWidth 	%argrw{"wr"}
+# PxrProjector.osl:806
+#     if (projection == k_camera)
+	eq		$tmp15 projection $const20 	%line{806} %argrw{"wrr"}
+	if		$tmp15 287 574 	%argrw{"r"}
+# PxrProjector.osl:808
+#         cameraProjection(P, inputManifoldRw, coordsysPos, params,
+	functioncall	$const21 287 	%line{808} %argrw{"r"}
+# PxrProjector.osl:134
+#     float scale = 1.0;
+	assign		___425_scale $const22 	%line{134} %argrw{"wr"}
+# PxrProjector.osl:135
+#     float resX = (float)(params.resolutionX + params.overscanX);
+	add		$tmp16 params.resolutionX params.overscanX 	%line{135} %argrw{"wrr"}
+	assign		___425_resX $tmp16 	%argrw{"wr"}
+# PxrProjector.osl:136
+#     float resY = (float)(params.resolutionY + params.overscanY);
+	add		$tmp17 params.resolutionY params.overscanY 	%line{136} %argrw{"wrr"}
+	assign		___425_resY $tmp17 	%argrw{"wr"}
+# PxrProjector.osl:137
+#     float texAspectRatio = resX / resY;
+	div		___425_texAspectRatio ___425_resX ___425_resY 	%line{137} %argrw{"wrr"}
+# PxrProjector.osl:138
+#     float apertureX = params.apertureX * (resX / (float)params.resolutionX);
+	assign		$tmp18 params.resolutionX 	%line{138} %argrw{"wr"}
+	div		$tmp19 ___425_resX $tmp18 	%argrw{"wrr"}
+	mul		___425_apertureX params.apertureX $tmp19 	%argrw{"wrr"}
+# PxrProjector.osl:139
+#     float apertureY = params.apertureY * (resY / (float)params.resolutionY);
+	assign		$tmp20 params.resolutionY 	%line{139} %argrw{"wr"}
+	div		$tmp21 ___425_resY $tmp20 	%argrw{"wrr"}
+	mul		___425_apertureY params.apertureY $tmp21 	%argrw{"wrr"}
+# PxrProjector.osl:140
+#     float gateAspectRatio = apertureX / apertureY;
+	div		___425_gateAspectRatio ___425_apertureX ___425_apertureY 	%line{140} %argrw{"wrr"}
+# PxrProjector.osl:141
+#     float aperture = 1.0;
+	assign		___425_aperture $const22 	%line{141} %argrw{"wr"}
+# PxrProjector.osl:142
+#     if (params.focalLength > 0)
+	gt		$tmp22 params.focalLength $const20 	%line{142} %argrw{"wrr"}
+	if		$tmp22 93 93 	%argrw{"r"}
+# PxrProjector.osl:146
+#         if (params.filmFit == k_fill)
+	eq		$tmp23 params.filmFit $const20 	%line{146} %argrw{"wrr"}
+	if		$tmp23 79 91 	%argrw{"r"}
+# PxrProjector.osl:148
+#             aperture = texAspectRatio >= 1.0 ? apertureX : apertureY;
+	ge		$tmp24 ___425_texAspectRatio $const22 	%line{148} %argrw{"wrr"}
+	if		$tmp24 78 79 	%argrw{"r"}
+	assign		___425_aperture ___425_apertureX 	%argrw{"wr"}
+	assign		___425_aperture ___425_apertureY 	%argrw{"wr"}
+# PxrProjector.osl:150
+#         else if (params.filmFit == k_horizontal)
+	eq		$tmp25 params.filmFit $const1 	%line{150} %argrw{"wrr"}
+	if		$tmp25 82 91 	%argrw{"r"}
+# PxrProjector.osl:152
+#             aperture = apertureX;
+	assign		___425_aperture ___425_apertureX 	%line{152} %argrw{"wr"}
+# PxrProjector.osl:154
+#         else if (params.filmFit == k_vertical)
+	eq		$tmp26 params.filmFit $const6 	%line{154} %argrw{"wrr"}
+	if		$tmp26 85 91 	%argrw{"r"}
+# PxrProjector.osl:156
+#             aperture = apertureY;
+	assign		___425_aperture ___425_apertureY 	%line{156} %argrw{"wr"}
+# PxrProjector.osl:158
+#         else if (params.filmFit == k_overscan)
+	eq		$tmp27 params.filmFit $const9 	%line{158} %argrw{"wrr"}
+	if		$tmp27 91 91 	%argrw{"r"}
+# PxrProjector.osl:160
+#             aperture = texAspectRatio >= 1.0 ? apertureY : apertureX;
+	ge		$tmp28 ___425_texAspectRatio $const22 	%line{160} %argrw{"wrr"}
+	if		$tmp28 90 91 	%argrw{"r"}
+	assign		___425_aperture ___425_apertureY 	%argrw{"wr"}
+	assign		___425_aperture ___425_apertureX 	%argrw{"wr"}
+# PxrProjector.osl:166
+#         scale = MM_TO_INCH * params.focalLength / aperture;
+	mul		$tmp29 $const23 params.focalLength 	%line{166} %argrw{"wrr"}
+	div		___425_scale $tmp29 ___425_aperture 	%argrw{"wrr"}
+# PxrProjector.osl:169
+#     float zinv = 1.0, Pdepth = 0.0;
+	assign		___425_zinv $const22 	%line{169} %argrw{"wr"}
+	assign		___425_Pdepth $const13 	%argrw{"wr"}
+# PxrProjector.osl:170
+#     point Qcenter = 0, pcsys = in.Q;
+	assign		___425_Qcenter $const20 	%line{170} %argrw{"wr"}
+	assign		___425_pcsys inputManifoldRw.Q 	%argrw{"wr"}
+# PxrProjector.osl:172
+#     outMask = 1.0;
+	assign		resultMask $const22 	%line{172} %argrw{"wr"}
+# PxrProjector.osl:173
+#     if (params.frontOnly)
+	if		params.frontOnly 113 113 	%line{173} %argrw{"r"}
+# PxrProjector.osl:175
+#         float dotn = dot(in.QN, normalize(Qcenter - in.Q));
+	sub		$tmp31 ___425_Qcenter inputManifoldRw.Q 	%line{175} %argrw{"wrr"}
+	normalize	$tmp30 $tmp31 	%argrw{"wr"}
+	dot		___431_dotn inputManifoldRw.QN $tmp30 	%argrw{"wrr"}
+# PxrProjector.osl:176
+#         outMask *= frontOnlyMask(params, dotn);
+	functioncall	$const24 112 	%line{176} %argrw{"r"}
+# PxrProjector.osl:99
+#     if (params.frontFalloff > 0.0)
+	gt		$tmp33 params.frontFalloff $const13 	%line{99} %argrw{"wrr"}
+	if		$tmp33 108 112 	%argrw{"r"}
+# PxrProjector.osl:100
+#         return smoothstep(-params.frontOnlyTolerance, params.frontFalloff, NdotV);
+	neg		$tmp34 params.frontOnlyTolerance 	%line{100} %argrw{"wr"}
+	smoothstep	$tmp32 $tmp34 params.frontFalloff ___431_dotn 	%argrw{"wrrr"}
+	return
+# PxrProjector.osl:102
+#         return (NdotV >= -params.frontOnlyTolerance);
+	neg		$tmp35 params.frontOnlyTolerance 	%line{102} %argrw{"wr"}
+	ge		$tmp36 ___431_dotn $tmp35 	%argrw{"wrr"}
+	assign		$tmp32 $tmp36 	%argrw{"wr"}
+	return
+# PxrProjector.osl:176
+#         outMask *= frontOnlyMask(params, dotn);
+	mul		resultMask resultMask $tmp32 	%line{176} %argrw{"wrr"}
+# PxrProjector.osl:180
+#     out.Q = in.Q * point(-1.0, 1.0, 1.0);
+	mul		result.Q inputManifoldRw.Q $const25 	%line{180} %argrw{"wrr"}
+	assign		result.Q result.Q 	%argrw{"wr"}
+# PxrProjector.osl:181
+#     zinv = scale / max(1e-6, abs(out.Q[2]));
+	compref		$tmp40 result.Q $const6 	%line{181} %argrw{"wrr"}
+	abs		$tmp39 $tmp40 	%argrw{"wr"}
+	max		$tmp38 $const26 $tmp39 	%argrw{"wrr"}
+	div		___425_zinv ___425_scale $tmp38 	%argrw{"wrr"}
+# PxrProjector.osl:183
+#     if (params.isOrthographic)
+	if		params.isOrthographic 133 136 	%line{183} %argrw{"r"}
+# PxrProjector.osl:186
+#         out.Q[0] /= -(params.orthographicWidth * texAspectRatio);
+	compref		$tmp41 result.Q $const20 	%line{186} %argrw{"wrr"}
+	mul		$tmp42 params.orthographicWidth ___425_texAspectRatio 	%argrw{"wrr"}
+	neg		$tmp43 $tmp42 	%argrw{"wr"}
+	div		$tmp44 $tmp41 $tmp43 	%argrw{"wrr"}
+	compassign	result.Q $const20 $tmp44 	%argrw{"wrr"}
+# PxrProjector.osl:187
+#         out.Q[1] /= -params.orthographicWidth;
+	compref		$tmp45 result.Q $const1 	%line{187} %argrw{"wrr"}
+	neg		$tmp46 params.orthographicWidth 	%argrw{"wr"}
+	div		$tmp47 $tmp45 $tmp46 	%argrw{"wrr"}
+	compassign	result.Q $const1 $tmp47 	%argrw{"wrr"}
+# PxrProjector.osl:188
+#         out.Q[2] = out.Q[2] * (-zinv);
+	compref		$tmp48 result.Q $const6 	%line{188} %argrw{"wrr"}
+	neg		$tmp49 ___425_zinv 	%argrw{"wr"}
+	mul		$tmp50 $tmp48 $tmp49 	%argrw{"wrr"}
+	compassign	result.Q $const6 $tmp50 	%argrw{"wrr"}
+# PxrProjector.osl:192
+#         out.Q = out.Q * (-zinv);
+	neg		$tmp51 ___425_zinv 	%line{192} %argrw{"wr"}
+	mul		result.Q result.Q $tmp51 	%argrw{"wrr"}
+	assign		result.Q result.Q 	%argrw{"wr"}
+# PxrProjector.osl:195
+#     point Qf = out.Q;
+	assign		___425_Qf result.Q 	%line{195} %argrw{"wr"}
+# PxrProjector.osl:196
+#     if (params.filmFit == k_fill)
+	eq		$tmp52 params.filmFit $const20 	%line{196} %argrw{"wrr"}
+	if		$tmp52 153 185 	%argrw{"r"}
+# PxrProjector.osl:198
+#         if (texAspectRatio >= 1.0)
+	ge		$tmp53 ___425_texAspectRatio $const22 	%line{198} %argrw{"wrr"}
+	if		$tmp53 147 153 	%argrw{"r"}
+# PxrProjector.osl:200
+#             out.Q[1] *= texAspectRatio;
+	compref		$tmp54 result.Q $const1 	%line{200} %argrw{"wrr"}
+	mul		$tmp55 $tmp54 ___425_texAspectRatio 	%argrw{"wrr"}
+	compassign	result.Q $const1 $tmp55 	%argrw{"wrr"}
+# PxrProjector.osl:201
+#             Qf[1] *= gateAspectRatio;
+	compref		$tmp56 ___425_Qf $const1 	%line{201} %argrw{"wrr"}
+	mul		$tmp57 $tmp56 ___425_gateAspectRatio 	%argrw{"wrr"}
+	compassign	___425_Qf $const1 $tmp57 	%argrw{"wrr"}
+# PxrProjector.osl:205
+#             out.Q[0] /= texAspectRatio;
+	compref		$tmp58 result.Q $const20 	%line{205} %argrw{"wrr"}
+	div		$tmp59 $tmp58 ___425_texAspectRatio 	%argrw{"wrr"}
+	compassign	result.Q $const20 $tmp59 	%argrw{"wrr"}
+# PxrProjector.osl:206
+#             Qf[0] /= gateAspectRatio;
+	compref		$tmp60 ___425_Qf $const20 	%line{206} %argrw{"wrr"}
+	div		$tmp61 $tmp60 ___425_gateAspectRatio 	%argrw{"wrr"}
+	compassign	___425_Qf $const20 $tmp61 	%argrw{"wrr"}
+# PxrProjector.osl:209
+#     else if (params.filmFit == k_horizontal)
+	eq		$tmp62 params.filmFit $const1 	%line{209} %argrw{"wrr"}
+	if		$tmp62 161 185 	%argrw{"r"}
+# PxrProjector.osl:211
+#         out.Q[1] *= texAspectRatio;
+	compref		$tmp63 result.Q $const1 	%line{211} %argrw{"wrr"}
+	mul		$tmp64 $tmp63 ___425_texAspectRatio 	%argrw{"wrr"}
+	compassign	result.Q $const1 $tmp64 	%argrw{"wrr"}
+# PxrProjector.osl:212
+#         Qf[1] *= gateAspectRatio;
+	compref		$tmp65 ___425_Qf $const1 	%line{212} %argrw{"wrr"}
+	mul		$tmp66 $tmp65 ___425_gateAspectRatio 	%argrw{"wrr"}
+	compassign	___425_Qf $const1 $tmp66 	%argrw{"wrr"}
+# PxrProjector.osl:214
+#     else if (params.filmFit == k_vertical)
+	eq		$tmp67 params.filmFit $const6 	%line{214} %argrw{"wrr"}
+	if		$tmp67 169 185 	%argrw{"r"}
+# PxrProjector.osl:216
+#         out.Q[0] /= texAspectRatio;
+	compref		$tmp68 result.Q $const20 	%line{216} %argrw{"wrr"}
+	div		$tmp69 $tmp68 ___425_texAspectRatio 	%argrw{"wrr"}
+	compassign	result.Q $const20 $tmp69 	%argrw{"wrr"}
+# PxrProjector.osl:217
+#         Qf[0] /= gateAspectRatio;
+	compref		$tmp70 ___425_Qf $const20 	%line{217} %argrw{"wrr"}
+	div		$tmp71 $tmp70 ___425_gateAspectRatio 	%argrw{"wrr"}
+	compassign	___425_Qf $const20 $tmp71 	%argrw{"wrr"}
+# PxrProjector.osl:219
+#     else if (params.filmFit == k_overscan)
+	eq		$tmp72 params.filmFit $const9 	%line{219} %argrw{"wrr"}
+	if		$tmp72 185 185 	%argrw{"r"}
+# PxrProjector.osl:221
+#         if (texAspectRatio >= 1.0)
+	ge		$tmp73 ___425_texAspectRatio $const22 	%line{221} %argrw{"wrr"}
+	if		$tmp73 179 185 	%argrw{"r"}
+# PxrProjector.osl:223
+#             out.Q[0] /= texAspectRatio;
+	compref		$tmp74 result.Q $const20 	%line{223} %argrw{"wrr"}
+	div		$tmp75 $tmp74 ___425_texAspectRatio 	%argrw{"wrr"}
+	compassign	result.Q $const20 $tmp75 	%argrw{"wrr"}
+# PxrProjector.osl:224
+#             Qf[0] /= gateAspectRatio;
+	compref		$tmp76 ___425_Qf $const20 	%line{224} %argrw{"wrr"}
+	div		$tmp77 $tmp76 ___425_gateAspectRatio 	%argrw{"wrr"}
+	compassign	___425_Qf $const20 $tmp77 	%argrw{"wrr"}
+# PxrProjector.osl:228
+#             out.Q[1] *= texAspectRatio;
+	compref		$tmp78 result.Q $const1 	%line{228} %argrw{"wrr"}
+	mul		$tmp79 $tmp78 ___425_texAspectRatio 	%argrw{"wrr"}
+	compassign	result.Q $const1 $tmp79 	%argrw{"wrr"}
+# PxrProjector.osl:229
+#             Qf[1] *= gateAspectRatio;
+	compref		$tmp80 ___425_Qf $const1 	%line{229} %argrw{"wrr"}
+	mul		$tmp81 $tmp80 ___425_gateAspectRatio 	%argrw{"wrr"}
+	compassign	___425_Qf $const1 $tmp81 	%argrw{"wrr"}
+# PxrProjector.osl:232
+#     out.Q += point(0.5, 0.5, 0.0);
+	add		result.Q result.Q $const27 	%line{232} %argrw{"wrr"}
+	assign		result.Q result.Q 	%argrw{"wr"}
+# PxrProjector.osl:233
+#     Qf += point(0.5, 0.5, 0.0);
+	add		___425_Qf ___425_Qf $const27 	%line{233} %argrw{"wrr"}
+# PxrProjector.osl:234
+#     out.Qradius = in.Qradius * zinv;
+	mul		result.Qradius inputManifoldRw.Qradius ___425_zinv 	%line{234} %argrw{"wrr"}
+	assign		result.Qradius result.Qradius 	%argrw{"wr"}
+# PxrProjector.osl:235
+#     makeCoordsSafe(out.Q, out.Qradius);
+	functioncall	$const28 202 	%line{235} %argrw{"r"}
+# PxrProjector.osl:113
+#     Qradius = max(1e-6, Qradius);
+	max		result.Qradius $const26 result.Qradius 	%line{113} %argrw{"wrr"}
+# PxrProjector.osl:114
+#     Q[0] = clamp(Q[0], -0.9999e4, 0.9999e4);
+	compref		$tmp85 result.Q $const20 	%line{114} %argrw{"wrr"}
+	functioncall	$const31 196 	%argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
+	min		$tmp86 $tmp85 $const30 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	max		$tmp84 $tmp86 $const29 	%argrw{"wrr"}
+# PxrProjector.osl:114
+#     Q[0] = clamp(Q[0], -0.9999e4, 0.9999e4);
+	compassign	result.Q $const20 $tmp84 	%filename{"PxrProjector.osl"} %line{114} %argrw{"wrr"}
+# PxrProjector.osl:115
+#     Q[1] = clamp(Q[1], -0.9999e4, 0.9999e4);
+	compref		$tmp88 result.Q $const1 	%line{115} %argrw{"wrr"}
+	functioncall	$const31 201 	%argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
+	min		$tmp89 $tmp88 $const30 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	max		$tmp87 $tmp89 $const29 	%argrw{"wrr"}
+# PxrProjector.osl:115
+#     Q[1] = clamp(Q[1], -0.9999e4, 0.9999e4);
+	compassign	result.Q $const1 $tmp87 	%filename{"PxrProjector.osl"} %line{115} %argrw{"wrr"}
+# PxrProjector.osl:238
+#     if (params.clampTo == k_frustum)
+	eq		$tmp90 params.clampTo $const1 	%line{238} %argrw{"wrr"}
+	if		$tmp90 234 266 	%argrw{"r"}
+# PxrProjector.osl:240
+#         outMask *= (Qf[0] >= 0.0 && Qf[0] <= 1.0 && Qf[1] >= 0.0 &&
+	compref		$tmp92 ___425_Qf $const20 	%line{240} %argrw{"wrr"}
+	ge		$tmp93 $tmp92 $const13 	%argrw{"wrr"}
+	neq		$tmp94 $tmp93 $const20 	%argrw{"wrr"}
+	if		$tmp94 212 212 	%argrw{"r"}
+	compref		$tmp95 ___425_Qf $const20 	%argrw{"wrr"}
+	le		$tmp96 $tmp95 $const22 	%argrw{"wrr"}
+	neq		$tmp97 $tmp96 $const20 	%argrw{"wrr"}
+	assign		$tmp94 $tmp97 	%argrw{"wr"}
+	neq		$tmp98 $tmp94 $const20 	%argrw{"wrr"}
+	if		$tmp98 218 218 	%argrw{"r"}
+	compref		$tmp99 ___425_Qf $const1 	%argrw{"wrr"}
+	ge		$tmp100 $tmp99 $const13 	%argrw{"wrr"}
+	neq		$tmp101 $tmp100 $const20 	%argrw{"wrr"}
+	assign		$tmp98 $tmp101 	%argrw{"wr"}
+	neq		$tmp102 $tmp98 $const20 	%argrw{"wrr"}
+	if		$tmp102 224 224 	%argrw{"r"}
+# PxrProjector.osl:241
+#                     Qf[1] <= 1.0 && Qf[2] > 0.0)
+	compref		$tmp103 ___425_Qf $const1 	%line{241} %argrw{"wrr"}
+	le		$tmp104 $tmp103 $const22 	%argrw{"wrr"}
+	neq		$tmp105 $tmp104 $const20 	%argrw{"wrr"}
+# PxrProjector.osl:240
+#         outMask *= (Qf[0] >= 0.0 && Qf[0] <= 1.0 && Qf[1] >= 0.0 &&
+	assign		$tmp102 $tmp105 	%line{240} %argrw{"wr"}
+	neq		$tmp106 $tmp102 $const20 	%argrw{"wrr"}
+# PxrProjector.osl:241
+#                     Qf[1] <= 1.0 && Qf[2] > 0.0)
+	if		$tmp106 230 230 	%line{241} %argrw{"r"}
+	compref		$tmp107 ___425_Qf $const6 	%argrw{"wrr"}
+	gt		$tmp108 $tmp107 $const13 	%argrw{"wrr"}
+	neq		$tmp109 $tmp108 $const20 	%argrw{"wrr"}
+	assign		$tmp106 $tmp109 	%argrw{"wr"}
+# PxrProjector.osl:242
+#                    ? 1.0
+	if		$tmp106 232 233 	%line{242} %argrw{"r"}
+	assign		$tmp91 $const22 	%argrw{"wr"}
+	assign		$tmp91 $const13 	%argrw{"wr"}
+# PxrProjector.osl:243
+#                    : 0.0;
+	mul		resultMask resultMask $tmp91 	%line{243} %argrw{"wrr"}
+# PxrProjector.osl:245
+#     else if (params.clampTo == k_texture)
+	eq		$tmp110 params.clampTo $const6 	%line{245} %argrw{"wrr"}
+	if		$tmp110 266 266 	%argrw{"r"}
+# PxrProjector.osl:247
+#         outMask *= (out.Q[0] >= 0.0 && out.Q[0] <= 1.0 &&
+	compref		$tmp112 result.Q $const20 	%line{247} %argrw{"wrr"}
+	ge		$tmp113 $tmp112 $const13 	%argrw{"wrr"}
+	neq		$tmp114 $tmp113 $const20 	%argrw{"wrr"}
+	if		$tmp114 244 244 	%argrw{"r"}
+	compref		$tmp115 result.Q $const20 	%argrw{"wrr"}
+	le		$tmp116 $tmp115 $const22 	%argrw{"wrr"}
+	neq		$tmp117 $tmp116 $const20 	%argrw{"wrr"}
+	assign		$tmp114 $tmp117 	%argrw{"wr"}
+	neq		$tmp118 $tmp114 $const20 	%argrw{"wrr"}
+	if		$tmp118 250 250 	%argrw{"r"}
+# PxrProjector.osl:248
+#                     out.Q[1] >= 0.0 && out.Q[1] <= 1.0 &&
+	compref		$tmp119 result.Q $const1 	%line{248} %argrw{"wrr"}
+	ge		$tmp120 $tmp119 $const13 	%argrw{"wrr"}
+	neq		$tmp121 $tmp120 $const20 	%argrw{"wrr"}
+# PxrProjector.osl:247
+#         outMask *= (out.Q[0] >= 0.0 && out.Q[0] <= 1.0 &&
+	assign		$tmp118 $tmp121 	%line{247} %argrw{"wr"}
+	neq		$tmp122 $tmp118 $const20 	%argrw{"wrr"}
+# PxrProjector.osl:248
+#                     out.Q[1] >= 0.0 && out.Q[1] <= 1.0 &&
+	if		$tmp122 256 256 	%line{248} %argrw{"r"}
+	compref		$tmp123 result.Q $const1 	%argrw{"wrr"}
+	le		$tmp124 $tmp123 $const22 	%argrw{"wrr"}
+	neq		$tmp125 $tmp124 $const20 	%argrw{"wrr"}
+	assign		$tmp122 $tmp125 	%argrw{"wr"}
+	neq		$tmp126 $tmp122 $const20 	%argrw{"wrr"}
+	if		$tmp126 262 262 	%argrw{"r"}
+# PxrProjector.osl:249
+#                     Qf[2] > 0.0)
+	compref		$tmp127 ___425_Qf $const6 	%line{249} %argrw{"wrr"}
+	gt		$tmp128 $tmp127 $const13 	%argrw{"wrr"}
+	neq		$tmp129 $tmp128 $const20 	%argrw{"wrr"}
+# PxrProjector.osl:248
+#                     out.Q[1] >= 0.0 && out.Q[1] <= 1.0 &&
+	assign		$tmp126 $tmp129 	%line{248} %argrw{"wr"}
+# PxrProjector.osl:250
+#                    ? 1.0
+	if		$tmp126 264 265 	%line{250} %argrw{"r"}
+	assign		$tmp111 $const22 	%argrw{"wr"}
+	assign		$tmp111 $const13 	%argrw{"wr"}
+# PxrProjector.osl:251
+#                    : 0.0;
+	mul		resultMask resultMask $tmp111 	%line{251} %argrw{"wrr"}
+# PxrProjector.osl:255
+#     if (params.isOrthographic)
+	if		params.isOrthographic 273 275 	%line{255} %argrw{"r"}
+# PxrProjector.osl:257
+#                                 vector(point(pcsys[0], pcsys[1], 1) - pcsys));
+	compref		$tmp132 ___425_pcsys $const20 	%line{257} %argrw{"wrr"}
+	compref		$tmp133 ___425_pcsys $const1 	%argrw{"wrr"}
+	point		$tmp131 $tmp132 $tmp133 $const22 	%argrw{"wrrr"}
+	sub		$tmp134 $tmp131 ___425_pcsys 	%argrw{"wrr"}
+	assign		$tmp130 $tmp134 	%argrw{"wr"}
+# PxrProjector.osl:256
+#         outTraceDir = transform(params.coordsys, "common",
+	transformv	rtDir params.coordsys $const15 $tmp130 	%line{256} %argrw{"wrrr"}
+# PxrProjector.osl:259
+#         outTraceDir = vector(coordsysPos - Pc);
+	sub		$tmp135 coordsysPos P 	%line{259} %argrw{"wrr"}
+	assign		rtDir $tmp135 	%argrw{"wr"}
+# PxrProjector.osl:262
+#     if (params.clampTo)
+	if		params.clampTo 286 286 	%line{262} %argrw{"r"}
+# PxrProjector.osl:264
+#         Pdepth = -pcsys[2];
+	compref		$tmp136 ___425_pcsys $const6 	%line{264} %argrw{"wrr"}
+	neg		___425_Pdepth $tmp136 	%argrw{"wr"}
+# PxrProjector.osl:265
+#         outMask *= (Pdepth >= params.nearClipPlane &&
+	ge		$tmp137 ___425_Pdepth params.nearClipPlane 	%line{265} %argrw{"wrr"}
+	neq		$tmp138 $tmp137 $const20 	%argrw{"wrr"}
+	if		$tmp138 284 284 	%argrw{"r"}
+# PxrProjector.osl:266
+#                     Pdepth <= params.farClipPlane);
+	le		$tmp139 ___425_Pdepth params.farClipPlane 	%line{266} %argrw{"wrr"}
+	neq		$tmp140 $tmp139 $const20 	%argrw{"wrr"}
+# PxrProjector.osl:265
+#         outMask *= (Pdepth >= params.nearClipPlane &&
+	assign		$tmp138 $tmp140 	%line{265} %argrw{"wr"}
+# PxrProjector.osl:266
+#                     Pdepth <= params.farClipPlane);
+	assign		$tmp141 $tmp138 	%line{266} %argrw{"wr"}
+	mul		resultMask resultMask $tmp141 	%argrw{"wrr"}
+# PxrProjector.osl:269
+#     outTraceDir = normalize(outTraceDir);
+	normalize	rtDir rtDir 	%line{269} %argrw{"wr"}
+# PxrProjector.osl:811
+#     else if (projection == k_spherical)
+	eq		$tmp142 projection $const1 	%line{811} %argrw{"wrr"}
+	if		$tmp142 342 574 	%argrw{"r"}
+# PxrProjector.osl:813
+#         sphericalProjection(P, inputManifoldRw, coordsysPos, params,
+	functioncall	$const32 342 	%line{813} %argrw{"r"}
+# PxrProjector.osl:288
+#     point Qcenter = 0;
+	assign		___445_Qcenter $const20 	%line{288} %argrw{"wr"}
+# PxrProjector.osl:290
+#     outMask = 1.0;
+	assign		resultMask $const22 	%line{290} %argrw{"wr"}
+# PxrProjector.osl:291
+#     if (params.frontOnly)
+	if		params.frontOnly 307 307 	%line{291} %argrw{"r"}
+# PxrProjector.osl:293
+#         float dotn = dot(in.QN, normalize(Qcenter - in.Q));
+	sub		$tmp144 ___445_Qcenter inputManifoldRw.Q 	%line{293} %argrw{"wrr"}
+	normalize	$tmp143 $tmp144 	%argrw{"wr"}
+	dot		___446_dotn inputManifoldRw.QN $tmp143 	%argrw{"wrr"}
+# PxrProjector.osl:294
+#         outMask *= frontOnlyMask(params, dotn);
+	functioncall	$const24 306 	%line{294} %argrw{"r"}
+# PxrProjector.osl:99
+#     if (params.frontFalloff > 0.0)
+	gt		$tmp146 params.frontFalloff $const13 	%line{99} %argrw{"wrr"}
+	if		$tmp146 302 306 	%argrw{"r"}
+# PxrProjector.osl:100
+#         return smoothstep(-params.frontOnlyTolerance, params.frontFalloff, NdotV);
+	neg		$tmp147 params.frontOnlyTolerance 	%line{100} %argrw{"wr"}
+	smoothstep	$tmp145 $tmp147 params.frontFalloff ___446_dotn 	%argrw{"wrrr"}
+	return
+# PxrProjector.osl:102
+#         return (NdotV >= -params.frontOnlyTolerance);
+	neg		$tmp148 params.frontOnlyTolerance 	%line{102} %argrw{"wr"}
+	ge		$tmp149 ___446_dotn $tmp148 	%argrw{"wrr"}
+	assign		$tmp145 $tmp149 	%argrw{"wr"}
+	return
+# PxrProjector.osl:294
+#         outMask *= frontOnlyMask(params, dotn);
+	mul		resultMask resultMask $tmp145 	%line{294} %argrw{"wrr"}
+# PxrProjector.osl:297
+#     outTraceDir = coordsysPos - Pc;
+	sub		rtDir coordsysPos P 	%line{297} %argrw{"wrr"}
+# PxrProjector.osl:299
+#     out.Q = point(0.5 + atan2(in.Q[0], -in.Q[2]) / M_2PI,
+	compref		$tmp151 inputManifoldRw.Q $const20 	%line{299} %argrw{"wrr"}
+	compref		$tmp152 inputManifoldRw.Q $const6 	%argrw{"wrr"}
+	neg		$tmp153 $tmp152 	%argrw{"wr"}
+	atan2		$tmp150 $tmp151 $tmp153 	%argrw{"wrr"}
+	div		$tmp154 $tmp150 $const34 	%argrw{"wrr"}
+	add		$tmp155 $const33 $tmp154 	%argrw{"wrr"}
+# PxrProjector.osl:300
+#                   0.5 - atan2(in.Q[1],
+	compref		$tmp157 inputManifoldRw.Q $const1 	%line{300} %argrw{"wrr"}
+# PxrProjector.osl:301
+#                   length(vector(in.Q[0], 0.0, in.Q[2]))) / M_PI, 0.0);
+	compref		$tmp160 inputManifoldRw.Q $const20 	%line{301} %argrw{"wrr"}
+	compref		$tmp161 inputManifoldRw.Q $const6 	%argrw{"wrr"}
+	vector		$tmp159 $tmp160 $const13 $tmp161 	%argrw{"wrrr"}
+	length		$tmp158 $tmp159 	%argrw{"wr"}
+# PxrProjector.osl:300
+#                   0.5 - atan2(in.Q[1],
+	atan2		$tmp156 $tmp157 $tmp158 	%line{300} %argrw{"wrr"}
+# PxrProjector.osl:301
+#                   length(vector(in.Q[0], 0.0, in.Q[2]))) / M_PI, 0.0);
+	div		$tmp162 $tmp156 $const35 	%line{301} %argrw{"wrr"}
+# PxrProjector.osl:300
+#                   0.5 - atan2(in.Q[1],
+	sub		$tmp163 $const33 $tmp162 	%line{300} %argrw{"wrr"}
+# PxrProjector.osl:299
+#     out.Q = point(0.5 + atan2(in.Q[0], -in.Q[2]) / M_2PI,
+	point		result.Q $tmp155 $tmp163 $const13 	%line{299} %argrw{"wrrr"}
+	assign		result.Q result.Q 	%argrw{"wr"}
+# PxrProjector.osl:302
+#     float zinv = 1.0 / max(1e-6, length(outTraceDir));
+	length		$tmp165 rtDir 	%line{302} %argrw{"wr"}
+	max		$tmp164 $const26 $tmp165 	%argrw{"wrr"}
+	div		___445_zinv $const22 $tmp164 	%argrw{"wrr"}
+# PxrProjector.osl:303
+#     out.Qradius = in.Qradius * zinv;
+	mul		result.Qradius inputManifoldRw.Qradius ___445_zinv 	%line{303} %argrw{"wrr"}
+	assign		result.Qradius result.Qradius 	%argrw{"wr"}
+# PxrProjector.osl:304
+#     makeCoordsSafe(out.Q, out.Qradius);
+	functioncall	$const28 341 	%line{304} %argrw{"r"}
+# PxrProjector.osl:113
+#     Qradius = max(1e-6, Qradius);
+	max		result.Qradius $const26 result.Qradius 	%line{113} %argrw{"wrr"}
+# PxrProjector.osl:114
+#     Q[0] = clamp(Q[0], -0.9999e4, 0.9999e4);
+	compref		$tmp167 result.Q $const20 	%line{114} %argrw{"wrr"}
+	functioncall	$const31 335 	%argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
+	min		$tmp168 $tmp167 $const30 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	max		$tmp166 $tmp168 $const29 	%argrw{"wrr"}
+# PxrProjector.osl:114
+#     Q[0] = clamp(Q[0], -0.9999e4, 0.9999e4);
+	compassign	result.Q $const20 $tmp166 	%filename{"PxrProjector.osl"} %line{114} %argrw{"wrr"}
+# PxrProjector.osl:115
+#     Q[1] = clamp(Q[1], -0.9999e4, 0.9999e4);
+	compref		$tmp170 result.Q $const1 	%line{115} %argrw{"wrr"}
+	functioncall	$const31 340 	%argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
+	min		$tmp171 $tmp170 $const30 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	max		$tmp169 $tmp171 $const29 	%argrw{"wrr"}
+# PxrProjector.osl:115
+#     Q[1] = clamp(Q[1], -0.9999e4, 0.9999e4);
+	compassign	result.Q $const1 $tmp169 	%filename{"PxrProjector.osl"} %line{115} %argrw{"wrr"}
+# PxrProjector.osl:306
+#     outTraceDir = normalize(outTraceDir);
+	normalize	rtDir rtDir 	%line{306} %argrw{"wr"}
+# PxrProjector.osl:816
+#     else if (projection == k_cylindrical)
+	eq		$tmp172 projection $const6 	%line{816} %argrw{"wrr"}
+	if		$tmp172 401 574 	%argrw{"r"}
+# PxrProjector.osl:818
+#         cylindricalProjection(P, inputManifoldRw, coordsysPos, params,
+	functioncall	$const36 401 	%line{818} %argrw{"r"}
+# PxrProjector.osl:324
+#     outTraceDir = normalize(point(0.0, in.Q[1], 0.0) - in.Q);
+	compref		$tmp174 inputManifoldRw.Q $const1 	%line{324} %argrw{"wrr"}
+	point		$tmp173 $const13 $tmp174 $const13 	%argrw{"wrrr"}
+	sub		$tmp175 $tmp173 inputManifoldRw.Q 	%argrw{"wrr"}
+	normalize	rtDir $tmp175 	%argrw{"wr"}
+# PxrProjector.osl:329
+#     outMask = 1.0;
+	assign		resultMask $const22 	%line{329} %argrw{"wr"}
+# PxrProjector.osl:330
+#     if (params.frontOnly)
+	if		params.frontOnly 363 363 	%line{330} %argrw{"r"}
+# PxrProjector.osl:332
+#         float dotn = dot(in.QN, outTraceDir);
+	dot		___448_dotn inputManifoldRw.QN rtDir 	%line{332} %argrw{"wrr"}
+# PxrProjector.osl:333
+#         outMask *= frontOnlyMask(params, dotn);
+	functioncall	$const24 362 	%line{333} %argrw{"r"}
+# PxrProjector.osl:99
+#     if (params.frontFalloff > 0.0)
+	gt		$tmp177 params.frontFalloff $const13 	%line{99} %argrw{"wrr"}
+	if		$tmp177 358 362 	%argrw{"r"}
+# PxrProjector.osl:100
+#         return smoothstep(-params.frontOnlyTolerance, params.frontFalloff, NdotV);
+	neg		$tmp178 params.frontOnlyTolerance 	%line{100} %argrw{"wr"}
+	smoothstep	$tmp176 $tmp178 params.frontFalloff ___448_dotn 	%argrw{"wrrr"}
+	return
+# PxrProjector.osl:102
+#         return (NdotV >= -params.frontOnlyTolerance);
+	neg		$tmp179 params.frontOnlyTolerance 	%line{102} %argrw{"wr"}
+	ge		$tmp180 ___448_dotn $tmp179 	%argrw{"wrr"}
+	assign		$tmp176 $tmp180 	%argrw{"wr"}
+	return
+# PxrProjector.osl:333
+#         outMask *= frontOnlyMask(params, dotn);
+	mul		resultMask resultMask $tmp176 	%line{333} %argrw{"wrr"}
+# PxrProjector.osl:337
+#     out.Q = point(0.5 + atan2(in.Q[0], -in.Q[2]) / M_2PI,
+	compref		$tmp182 inputManifoldRw.Q $const20 	%line{337} %argrw{"wrr"}
+	compref		$tmp183 inputManifoldRw.Q $const6 	%argrw{"wrr"}
+	neg		$tmp184 $tmp183 	%argrw{"wr"}
+	atan2		$tmp181 $tmp182 $tmp184 	%argrw{"wrr"}
+	div		$tmp185 $tmp181 $const34 	%argrw{"wrr"}
+	add		$tmp186 $const33 $tmp185 	%argrw{"wrr"}
+# PxrProjector.osl:338
+#                     -in.Q[1] * 0.5 + 0.5,
+	compref		$tmp187 inputManifoldRw.Q $const1 	%line{338} %argrw{"wrr"}
+	neg		$tmp188 $tmp187 	%argrw{"wr"}
+	mul		$tmp189 $tmp188 $const33 	%argrw{"wrr"}
+	add		$tmp190 $tmp189 $const33 	%argrw{"wrr"}
+# PxrProjector.osl:337
+#     out.Q = point(0.5 + atan2(in.Q[0], -in.Q[2]) / M_2PI,
+	point		result.Q $tmp186 $tmp190 $const13 	%line{337} %argrw{"wrrr"}
+	assign		result.Q result.Q 	%argrw{"wr"}
+# PxrProjector.osl:340
+#     point pcyl = point(Pc[0], 0.0, Pc[2]);
+	compref		$tmp191 P $const20 	%line{340} %argrw{"wrr"}
+	compref		$tmp192 P $const6 	%argrw{"wrr"}
+	point		___447_pcyl $tmp191 $const13 $tmp192 	%argrw{"wrrr"}
+# PxrProjector.osl:341
+#     point cscyl = point(coordsysPos[0], 0.0, coordsysPos[2]);
+	compref		$tmp193 coordsysPos $const20 	%line{341} %argrw{"wrr"}
+	compref		$tmp194 coordsysPos $const6 	%argrw{"wrr"}
+	point		___447_cscyl $tmp193 $const13 $tmp194 	%argrw{"wrrr"}
+# PxrProjector.osl:342
+#     float zinv = 1.0 / max(1e-6, length(pcyl - cscyl));
+	sub		$tmp197 ___447_pcyl ___447_cscyl 	%line{342} %argrw{"wrr"}
+	length		$tmp196 $tmp197 	%argrw{"wr"}
+	max		$tmp195 $const26 $tmp196 	%argrw{"wrr"}
+	div		___447_zinv $const22 $tmp195 	%argrw{"wrr"}
+# PxrProjector.osl:343
+#     out.Qradius = in.Qradius * zinv;
+	mul		result.Qradius inputManifoldRw.Qradius ___447_zinv 	%line{343} %argrw{"wrr"}
+	assign		result.Qradius result.Qradius 	%argrw{"wr"}
+# PxrProjector.osl:344
+#     makeCoordsSafe(out.Q, out.Qradius);
+	functioncall	$const28 399 	%line{344} %argrw{"r"}
+# PxrProjector.osl:113
+#     Qradius = max(1e-6, Qradius);
+	max		result.Qradius $const26 result.Qradius 	%line{113} %argrw{"wrr"}
+# PxrProjector.osl:114
+#     Q[0] = clamp(Q[0], -0.9999e4, 0.9999e4);
+	compref		$tmp199 result.Q $const20 	%line{114} %argrw{"wrr"}
+	functioncall	$const31 393 	%argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
+	min		$tmp200 $tmp199 $const30 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	max		$tmp198 $tmp200 $const29 	%argrw{"wrr"}
+# PxrProjector.osl:114
+#     Q[0] = clamp(Q[0], -0.9999e4, 0.9999e4);
+	compassign	result.Q $const20 $tmp198 	%filename{"PxrProjector.osl"} %line{114} %argrw{"wrr"}
+# PxrProjector.osl:115
+#     Q[1] = clamp(Q[1], -0.9999e4, 0.9999e4);
+	compref		$tmp202 result.Q $const1 	%line{115} %argrw{"wrr"}
+	functioncall	$const31 398 	%argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
+	min		$tmp203 $tmp202 $const30 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	max		$tmp201 $tmp203 $const29 	%argrw{"wrr"}
+# PxrProjector.osl:115
+#     Q[1] = clamp(Q[1], -0.9999e4, 0.9999e4);
+	compassign	result.Q $const1 $tmp201 	%filename{"PxrProjector.osl"} %line{115} %argrw{"wrr"}
+# PxrProjector.osl:346
+#     if (params.traceOcclusion)
+	if		params.traceOcclusion 401 401 	%line{346} %argrw{"r"}
+# PxrProjector.osl:349
+#         outTraceDir = transform(params.coordsys, "common", outTraceDir);
+	transformv	rtDir params.coordsys $const15 rtDir 	%line{349} %argrw{"wrrr"}
+# PxrProjector.osl:821
+#     else if (projection == k_planar)
+	eq		$tmp204 projection $const9 	%line{821} %argrw{"wrr"}
+	if		$tmp204 574 574 	%argrw{"r"}
+# PxrProjector.osl:823
+#         planarProjection(inputManifoldRw, coordsysPos, params,
+	functioncall	$const37 574 	%line{823} %argrw{"r"}
+# PxrProjector.osl:368
+#     float zpos = params.coordSysType == k_place3dCoordsys ? 1.0 : 0.0;
+	eq		$tmp205 params.coordSysType $const1 	%line{368} %argrw{"wrr"}
+	if		$tmp205 407 408 	%argrw{"r"}
+	assign		___450_zpos $const22 	%argrw{"wr"}
+	assign		___450_zpos $const13 	%argrw{"wr"}
+# PxrProjector.osl:369
+#     Qrt = point(in.Q[0], in.Q[1], zpos) - in.Q;
+	compref		$tmp207 inputManifoldRw.Q $const20 	%line{369} %argrw{"wrr"}
+	compref		$tmp208 inputManifoldRw.Q $const1 	%argrw{"wrr"}
+	point		$tmp206 $tmp207 $tmp208 ___450_zpos 	%argrw{"wrrr"}
+	sub		rtDir $tmp206 inputManifoldRw.Q 	%argrw{"wrr"}
+# PxrProjector.osl:370
+#     transform(params.coordsys, "common", Qrt);
+	transformv	$tmp209 params.coordsys $const15 rtDir 	%line{370} %argrw{"wrrr"}
+# PxrProjector.osl:373
+#     outMask = 1.0;
+	assign		resultMask $const22 	%line{373} %argrw{"wr"}
+# PxrProjector.osl:374
+#     if (params.frontOnly)
+	if		params.frontOnly 429 429 	%line{374} %argrw{"r"}
+# PxrProjector.osl:376
+#         float dotn = dot(in.QN, normalize(point(in.Q[0], in.Q[1], 1.e10) - in.Q));
+	compref		$tmp212 inputManifoldRw.Q $const20 	%line{376} %argrw{"wrr"}
+	compref		$tmp213 inputManifoldRw.Q $const1 	%argrw{"wrr"}
+	point		$tmp211 $tmp212 $tmp213 $const38 	%argrw{"wrrr"}
+	sub		$tmp214 $tmp211 inputManifoldRw.Q 	%argrw{"wrr"}
+	normalize	$tmp210 $tmp214 	%argrw{"wr"}
+	dot		___451_dotn inputManifoldRw.QN $tmp210 	%argrw{"wrr"}
+# PxrProjector.osl:377
+#         if (params.frontFalloff > 0.0)
+	gt		$tmp215 params.frontFalloff $const13 	%line{377} %argrw{"wrr"}
+	if		$tmp215 425 429 	%argrw{"r"}
+# PxrProjector.osl:378
+#             outMask *= smoothstep(0.0, params.frontFalloff, dotn);
+	smoothstep	$tmp216 $const13 params.frontFalloff ___451_dotn 	%line{378} %argrw{"wrrr"}
+	mul		resultMask resultMask $tmp216 	%argrw{"wrr"}
+# PxrProjector.osl:380
+#             outMask *= (dotn >= -params.frontOnlyTolerance);
+	neg		$tmp217 params.frontOnlyTolerance 	%line{380} %argrw{"wr"}
+	ge		$tmp218 ___451_dotn $tmp217 	%argrw{"wrr"}
+	assign		$tmp219 $tmp218 	%argrw{"wr"}
+	mul		resultMask resultMask $tmp219 	%argrw{"wrr"}
+# PxrProjector.osl:384
+#     float coordsysScaleFactor = params.coordSysType == k_place3dCoordsys ? 0.5 : 1.0;
+	eq		$tmp220 params.coordSysType $const1 	%line{384} %argrw{"wrr"}
+	if		$tmp220 432 433 	%argrw{"r"}
+	assign		___450_coordsysScaleFactor $const33 	%argrw{"wr"}
+	assign		___450_coordsysScaleFactor $const22 	%argrw{"wr"}
+# PxrProjector.osl:385
+#     out.Q = point(in.Q[0] * coordsysScaleFactor + 0.5,
+	compref		$tmp221 inputManifoldRw.Q $const20 	%line{385} %argrw{"wrr"}
+	mul		$tmp222 $tmp221 ___450_coordsysScaleFactor 	%argrw{"wrr"}
+	add		$tmp223 $tmp222 $const33 	%argrw{"wrr"}
+# PxrProjector.osl:386
+#                   in.Q[1] * coordsysScaleFactor + 0.5,
+	compref		$tmp224 inputManifoldRw.Q $const1 	%line{386} %argrw{"wrr"}
+	mul		$tmp225 $tmp224 ___450_coordsysScaleFactor 	%argrw{"wrr"}
+	add		$tmp226 $tmp225 $const33 	%argrw{"wrr"}
+# PxrProjector.osl:387
+#                   in.Q[2] * coordsysScaleFactor + 0.5);
+	compref		$tmp227 inputManifoldRw.Q $const6 	%line{387} %argrw{"wrr"}
+	mul		$tmp228 $tmp227 ___450_coordsysScaleFactor 	%argrw{"wrr"}
+	add		$tmp229 $tmp228 $const33 	%argrw{"wrr"}
+# PxrProjector.osl:385
+#     out.Q = point(in.Q[0] * coordsysScaleFactor + 0.5,
+	point		result.Q $tmp223 $tmp226 $tmp229 	%line{385} %argrw{"wrrr"}
+	assign		result.Q result.Q 	%argrw{"wr"}
+# PxrProjector.osl:390
+#     makeCoordsSafe(out.Q, out.Qradius);
+	functioncall	$const28 456 	%line{390} %argrw{"r"}
+# PxrProjector.osl:113
+#     Qradius = max(1e-6, Qradius);
+	max		result.Qradius $const26 result.Qradius 	%line{113} %argrw{"wrr"}
+# PxrProjector.osl:114
+#     Q[0] = clamp(Q[0], -0.9999e4, 0.9999e4);
+	compref		$tmp231 result.Q $const20 	%line{114} %argrw{"wrr"}
+	functioncall	$const31 450 	%argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
+	min		$tmp232 $tmp231 $const30 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	max		$tmp230 $tmp232 $const29 	%argrw{"wrr"}
+# PxrProjector.osl:114
+#     Q[0] = clamp(Q[0], -0.9999e4, 0.9999e4);
+	compassign	result.Q $const20 $tmp230 	%filename{"PxrProjector.osl"} %line{114} %argrw{"wrr"}
+# PxrProjector.osl:115
+#     Q[1] = clamp(Q[1], -0.9999e4, 0.9999e4);
+	compref		$tmp234 result.Q $const1 	%line{115} %argrw{"wrr"}
+	functioncall	$const31 455 	%argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
+	min		$tmp235 $tmp234 $const30 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	max		$tmp233 $tmp235 $const29 	%argrw{"wrr"}
+# PxrProjector.osl:115
+#     Q[1] = clamp(Q[1], -0.9999e4, 0.9999e4);
+	compassign	result.Q $const1 $tmp233 	%filename{"PxrProjector.osl"} %line{115} %argrw{"wrr"}
+# PxrProjector.osl:392
+#     if (outMask > 0.0)
+	gt		$tmp236 resultMask $const13 	%line{392} %argrw{"wrr"}
+	if		$tmp236 574 574 	%argrw{"r"}
+# PxrProjector.osl:394
+#         if (params.planarClampTo == k_XY)
+	eq		$tmp237 params.planarClampTo $const1 	%line{394} %argrw{"wrr"}
+	if		$tmp237 484 574 	%argrw{"r"}
+# PxrProjector.osl:396
+#             outMask *= (out.Q[0] >= 0.0 && out.Q[0] <= 1.0 &&
+	compref		$tmp239 result.Q $const20 	%line{396} %argrw{"wrr"}
+	ge		$tmp240 $tmp239 $const13 	%argrw{"wrr"}
+	neq		$tmp241 $tmp240 $const20 	%argrw{"wrr"}
+	if		$tmp241 468 468 	%argrw{"r"}
+	compref		$tmp242 result.Q $const20 	%argrw{"wrr"}
+	le		$tmp243 $tmp242 $const22 	%argrw{"wrr"}
+	neq		$tmp244 $tmp243 $const20 	%argrw{"wrr"}
+	assign		$tmp241 $tmp244 	%argrw{"wr"}
+	neq		$tmp245 $tmp241 $const20 	%argrw{"wrr"}
+	if		$tmp245 474 474 	%argrw{"r"}
+# PxrProjector.osl:397
+#                         out.Q[1] >= 0.0 && out.Q[1] <= 1.0)
+	compref		$tmp246 result.Q $const1 	%line{397} %argrw{"wrr"}
+	ge		$tmp247 $tmp246 $const13 	%argrw{"wrr"}
+	neq		$tmp248 $tmp247 $const20 	%argrw{"wrr"}
+# PxrProjector.osl:396
+#             outMask *= (out.Q[0] >= 0.0 && out.Q[0] <= 1.0 &&
+	assign		$tmp245 $tmp248 	%line{396} %argrw{"wr"}
+	neq		$tmp249 $tmp245 $const20 	%argrw{"wrr"}
+# PxrProjector.osl:397
+#                         out.Q[1] >= 0.0 && out.Q[1] <= 1.0)
+	if		$tmp249 480 480 	%line{397} %argrw{"r"}
+	compref		$tmp250 result.Q $const1 	%argrw{"wrr"}
+	le		$tmp251 $tmp250 $const22 	%argrw{"wrr"}
+	neq		$tmp252 $tmp251 $const20 	%argrw{"wrr"}
+	assign		$tmp249 $tmp252 	%argrw{"wr"}
+# PxrProjector.osl:398
+#                         ? 1.0
+	if		$tmp249 482 483 	%line{398} %argrw{"r"}
+	assign		$tmp238 $const22 	%argrw{"wr"}
+	assign		$tmp238 $const13 	%argrw{"wr"}
+# PxrProjector.osl:399
+#                         : 0.0;
+	mul		resultMask resultMask $tmp238 	%line{399} %argrw{"wrr"}
+# PxrProjector.osl:401
+#         else if (params.planarClampTo == k_XZ)
+	eq		$tmp253 params.planarClampTo $const6 	%line{401} %argrw{"wrr"}
+	if		$tmp253 510 574 	%argrw{"r"}
+# PxrProjector.osl:403
+#             outMask *= (out.Q[0] >= 0.0 && out.Q[0] <= 1.0 &&
+	compref		$tmp255 result.Q $const20 	%line{403} %argrw{"wrr"}
+	ge		$tmp256 $tmp255 $const13 	%argrw{"wrr"}
+	neq		$tmp257 $tmp256 $const20 	%argrw{"wrr"}
+	if		$tmp257 494 494 	%argrw{"r"}
+	compref		$tmp258 result.Q $const20 	%argrw{"wrr"}
+	le		$tmp259 $tmp258 $const22 	%argrw{"wrr"}
+	neq		$tmp260 $tmp259 $const20 	%argrw{"wrr"}
+	assign		$tmp257 $tmp260 	%argrw{"wr"}
+	neq		$tmp261 $tmp257 $const20 	%argrw{"wrr"}
+	if		$tmp261 500 500 	%argrw{"r"}
+# PxrProjector.osl:404
+#                         out.Q[2] >= 0.0 && out.Q[2] <= 1.0)
+	compref		$tmp262 result.Q $const6 	%line{404} %argrw{"wrr"}
+	ge		$tmp263 $tmp262 $const13 	%argrw{"wrr"}
+	neq		$tmp264 $tmp263 $const20 	%argrw{"wrr"}
+# PxrProjector.osl:403
+#             outMask *= (out.Q[0] >= 0.0 && out.Q[0] <= 1.0 &&
+	assign		$tmp261 $tmp264 	%line{403} %argrw{"wr"}
+	neq		$tmp265 $tmp261 $const20 	%argrw{"wrr"}
+# PxrProjector.osl:404
+#                         out.Q[2] >= 0.0 && out.Q[2] <= 1.0)
+	if		$tmp265 506 506 	%line{404} %argrw{"r"}
+	compref		$tmp266 result.Q $const6 	%argrw{"wrr"}
+	le		$tmp267 $tmp266 $const22 	%argrw{"wrr"}
+	neq		$tmp268 $tmp267 $const20 	%argrw{"wrr"}
+	assign		$tmp265 $tmp268 	%argrw{"wr"}
+# PxrProjector.osl:405
+#                         ? 1.0
+	if		$tmp265 508 509 	%line{405} %argrw{"r"}
+	assign		$tmp254 $const22 	%argrw{"wr"}
+	assign		$tmp254 $const13 	%argrw{"wr"}
+# PxrProjector.osl:406
+#                         : 0.0;
+	mul		resultMask resultMask $tmp254 	%line{406} %argrw{"wrr"}
+# PxrProjector.osl:408
+#         else if (params.planarClampTo == k_YZ)
+	eq		$tmp269 params.planarClampTo $const9 	%line{408} %argrw{"wrr"}
+	if		$tmp269 536 574 	%argrw{"r"}
+# PxrProjector.osl:410
+#             outMask *= (out.Q[1] >= 0.0 && out.Q[1] <= 1.0 &&
+	compref		$tmp271 result.Q $const1 	%line{410} %argrw{"wrr"}
+	ge		$tmp272 $tmp271 $const13 	%argrw{"wrr"}
+	neq		$tmp273 $tmp272 $const20 	%argrw{"wrr"}
+	if		$tmp273 520 520 	%argrw{"r"}
+	compref		$tmp274 result.Q $const1 	%argrw{"wrr"}
+	le		$tmp275 $tmp274 $const22 	%argrw{"wrr"}
+	neq		$tmp276 $tmp275 $const20 	%argrw{"wrr"}
+	assign		$tmp273 $tmp276 	%argrw{"wr"}
+	neq		$tmp277 $tmp273 $const20 	%argrw{"wrr"}
+	if		$tmp277 526 526 	%argrw{"r"}
+# PxrProjector.osl:411
+#                         out.Q[2] >= 0.0 && out.Q[2] <= 1.0)
+	compref		$tmp278 result.Q $const6 	%line{411} %argrw{"wrr"}
+	ge		$tmp279 $tmp278 $const13 	%argrw{"wrr"}
+	neq		$tmp280 $tmp279 $const20 	%argrw{"wrr"}
+# PxrProjector.osl:410
+#             outMask *= (out.Q[1] >= 0.0 && out.Q[1] <= 1.0 &&
+	assign		$tmp277 $tmp280 	%line{410} %argrw{"wr"}
+	neq		$tmp281 $tmp277 $const20 	%argrw{"wrr"}
+# PxrProjector.osl:411
+#                         out.Q[2] >= 0.0 && out.Q[2] <= 1.0)
+	if		$tmp281 532 532 	%line{411} %argrw{"r"}
+	compref		$tmp282 result.Q $const6 	%argrw{"wrr"}
+	le		$tmp283 $tmp282 $const22 	%argrw{"wrr"}
+	neq		$tmp284 $tmp283 $const20 	%argrw{"wrr"}
+	assign		$tmp281 $tmp284 	%argrw{"wr"}
+# PxrProjector.osl:412
+#                         ? 1.0
+	if		$tmp281 534 535 	%line{412} %argrw{"r"}
+	assign		$tmp270 $const22 	%argrw{"wr"}
+	assign		$tmp270 $const13 	%argrw{"wr"}
+# PxrProjector.osl:413
+#                         : 0.0;
+	mul		resultMask resultMask $tmp270 	%line{413} %argrw{"wrr"}
+# PxrProjector.osl:415
+#         else if (params.planarClampTo == k_XYZ)
+	eq		$tmp285 params.planarClampTo $const39 	%line{415} %argrw{"wrr"}
+	if		$tmp285 574 574 	%argrw{"r"}
+# PxrProjector.osl:417
+#             outMask *= (out.Q[0] >= 0.0 && out.Q[0] <= 1.0 &&
+	compref		$tmp287 result.Q $const20 	%line{417} %argrw{"wrr"}
+	ge		$tmp288 $tmp287 $const13 	%argrw{"wrr"}
+	neq		$tmp289 $tmp288 $const20 	%argrw{"wrr"}
+	if		$tmp289 546 546 	%argrw{"r"}
+	compref		$tmp290 result.Q $const20 	%argrw{"wrr"}
+	le		$tmp291 $tmp290 $const22 	%argrw{"wrr"}
+	neq		$tmp292 $tmp291 $const20 	%argrw{"wrr"}
+	assign		$tmp289 $tmp292 	%argrw{"wr"}
+	neq		$tmp293 $tmp289 $const20 	%argrw{"wrr"}
+	if		$tmp293 552 552 	%argrw{"r"}
+# PxrProjector.osl:418
+#                         out.Q[1] >= 0.0 && out.Q[1] <= 1.0 &&
+	compref		$tmp294 result.Q $const1 	%line{418} %argrw{"wrr"}
+	ge		$tmp295 $tmp294 $const13 	%argrw{"wrr"}
+	neq		$tmp296 $tmp295 $const20 	%argrw{"wrr"}
+# PxrProjector.osl:417
+#             outMask *= (out.Q[0] >= 0.0 && out.Q[0] <= 1.0 &&
+	assign		$tmp293 $tmp296 	%line{417} %argrw{"wr"}
+	neq		$tmp297 $tmp293 $const20 	%argrw{"wrr"}
+# PxrProjector.osl:418
+#                         out.Q[1] >= 0.0 && out.Q[1] <= 1.0 &&
+	if		$tmp297 558 558 	%line{418} %argrw{"r"}
+	compref		$tmp298 result.Q $const1 	%argrw{"wrr"}
+	le		$tmp299 $tmp298 $const22 	%argrw{"wrr"}
+	neq		$tmp300 $tmp299 $const20 	%argrw{"wrr"}
+	assign		$tmp297 $tmp300 	%argrw{"wr"}
+	neq		$tmp301 $tmp297 $const20 	%argrw{"wrr"}
+	if		$tmp301 564 564 	%argrw{"r"}
+# PxrProjector.osl:419
+#                         out.Q[2] >= 0.0 && out.Q[2] <= 1.0)
+	compref		$tmp302 result.Q $const6 	%line{419} %argrw{"wrr"}
+	ge		$tmp303 $tmp302 $const13 	%argrw{"wrr"}
+	neq		$tmp304 $tmp303 $const20 	%argrw{"wrr"}
+# PxrProjector.osl:418
+#                         out.Q[1] >= 0.0 && out.Q[1] <= 1.0 &&
+	assign		$tmp301 $tmp304 	%line{418} %argrw{"wr"}
+	neq		$tmp305 $tmp301 $const20 	%argrw{"wrr"}
+# PxrProjector.osl:419
+#                         out.Q[2] >= 0.0 && out.Q[2] <= 1.0)
+	if		$tmp305 570 570 	%line{419} %argrw{"r"}
+	compref		$tmp306 result.Q $const6 	%argrw{"wrr"}
+	le		$tmp307 $tmp306 $const22 	%argrw{"wrr"}
+	neq		$tmp308 $tmp307 $const20 	%argrw{"wrr"}
+	assign		$tmp305 $tmp308 	%argrw{"wr"}
+# PxrProjector.osl:420
+#                         ? 1.0
+	if		$tmp305 572 573 	%line{420} %argrw{"r"}
+	assign		$tmp286 $const22 	%argrw{"wr"}
+	assign		$tmp286 $const13 	%argrw{"wr"}
+# PxrProjector.osl:421
+#                         : 0.0;
+	mul		resultMask resultMask $tmp286 	%line{421} %argrw{"wrr"}
+# PxrProjector.osl:830
+#     if (invertT != 0)
+	neq		$tmp309 invertT $const20 	%line{830} %argrw{"wrr"}
+	if		$tmp309 584 585 	%argrw{"r"}
+# PxrProjector.osl:831
+#         invT = floor(result.Q[1]) + 1.0 - (result.Q[1] - floor(result.Q[1]));
+	compref		$tmp311 result.Q $const1 	%line{831} %argrw{"wrr"}
+	floor		$tmp310 $tmp311 	%argrw{"wr"}
+	add		$tmp312 $tmp310 $const22 	%argrw{"wrr"}
+	compref		$tmp313 result.Q $const1 	%argrw{"wrr"}
+	compref		$tmp315 result.Q $const1 	%argrw{"wrr"}
+	floor		$tmp314 $tmp315 	%argrw{"wr"}
+	sub		$tmp316 $tmp313 $tmp314 	%argrw{"wrr"}
+	sub		invT $tmp312 $tmp316 	%argrw{"wrr"}
+# PxrProjector.osl:833
+#         invT = result.Q[1];
+	compref		invT result.Q $const1 	%line{833} %argrw{"wrr"}
+# PxrProjector.osl:836
+#     result.Q[0] = scaleS * result.Q[0] + offsetS;
+	compref		$tmp317 result.Q $const20 	%line{836} %argrw{"wrr"}
+	mul		$tmp318 scaleS $tmp317 	%argrw{"wrr"}
+	add		$tmp319 $tmp318 offsetS 	%argrw{"wrr"}
+	compassign	result.Q $const20 $tmp319 	%argrw{"wrr"}
+# PxrProjector.osl:837
+#     result.Q[1] = scaleT * invT + offsetT;
+	mul		$tmp320 scaleT invT 	%line{837} %argrw{"wrr"}
+	add		$tmp321 $tmp320 offsetT 	%argrw{"wrr"}
+	compassign	result.Q $const1 $tmp321 	%argrw{"wrr"}
+# PxrProjector.osl:838
+#     result.Qradius = min(scaleS * result.Qradius, scaleT * result.Qradius);
+	mul		$tmp322 scaleS result.Qradius 	%line{838} %argrw{"wrr"}
+	mul		$tmp323 scaleT result.Qradius 	%argrw{"wrr"}
+	min		result.Qradius $tmp322 $tmp323 	%argrw{"wrr"}
+	assign		result.Qradius result.Qradius 	%argrw{"wr"}
+# PxrProjector.osl:841
+#     if (angle != 0.0)
+	neq		$tmp324 angle $const13 	%line{841} %argrw{"wrr"}
+	if		$tmp324 614 614 	%argrw{"r"}
+# PxrProjector.osl:845
+#         sincos(radians(angle), sn, cs);
+	functioncall	$const40 601 	%line{845} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:88
+# float  radians (float x)  { return x*(M_PI/180.0); }
+	div		$tmp326 $const35 $const41 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{88} %argrw{"wrr"}
+	mul		$tmp325 angle $tmp326 	%argrw{"wrr"}
+# PxrProjector.osl:845
+#         sincos(radians(angle), sn, cs);
+	sincos		$tmp325 ___469_sn ___469_cs 	%filename{"PxrProjector.osl"} %line{845} %argrw{"rww"}
+# PxrProjector.osl:846
+#         rx = result.Q[0] * cs - result.Q[1] * sn;
+	compref		$tmp327 result.Q $const20 	%line{846} %argrw{"wrr"}
+	mul		$tmp328 $tmp327 ___469_cs 	%argrw{"wrr"}
+	compref		$tmp329 result.Q $const1 	%argrw{"wrr"}
+	mul		$tmp330 $tmp329 ___469_sn 	%argrw{"wrr"}
+	sub		___469_rx $tmp328 $tmp330 	%argrw{"wrr"}
+# PxrProjector.osl:847
+#         ry = result.Q[0] * sn + result.Q[1] * cs;
+	compref		$tmp331 result.Q $const20 	%line{847} %argrw{"wrr"}
+	mul		$tmp332 $tmp331 ___469_sn 	%argrw{"wrr"}
+	compref		$tmp333 result.Q $const1 	%argrw{"wrr"}
+	mul		$tmp334 $tmp333 ___469_cs 	%argrw{"wrr"}
+	add		___469_ry $tmp332 $tmp334 	%argrw{"wrr"}
+# PxrProjector.osl:848
+#         result.Q[0] = rx;
+	compassign	result.Q $const20 ___469_rx 	%line{848} %argrw{"wrr"}
+# PxrProjector.osl:849
+#         result.Q[1] = ry;
+	compassign	result.Q $const1 ___469_ry 	%line{849} %argrw{"wrr"}
+# PxrProjector.osl:853
+#     resultS = result.Q[0];
+	compref		resultS result.Q $const20 	%line{853} %argrw{"wrr"}
+# PxrProjector.osl:854
+#     resultT = result.Q[1];
+	compref		resultT result.Q $const1 	%line{854} %argrw{"wrr"}
+# PxrProjector.osl:857
+#     if (traceOcclusion && resultMask > 0.0)
+	neq		$tmp335 traceOcclusion $const20 	%line{857} %argrw{"wrr"}
+	if		$tmp335 621 621 	%argrw{"r"}
+	gt		$tmp336 resultMask $const13 	%argrw{"wrr"}
+	neq		$tmp337 $tmp336 $const20 	%argrw{"wrr"}
+	assign		$tmp335 $tmp337 	%argrw{"wr"}
+	if		$tmp335 644 644 	%argrw{"r"}
+# PxrProjector.osl:859
+#         float bias = getTraceBias(N, rtDir);
+	functioncall	$const42 640 	%line{859} %argrw{"r"}
+# PxrProjector.osl:436
+#     int autobias = 0;
+	assign		___457_autobias $const20 	%line{436} %argrw{"wr"}
+# PxrProjector.osl:438
+#     getattribute("trace:autobias", autobias);
+	getattribute	$tmp338 $const43 ___457_autobias 	%line{438} %argrw{"wrw"}
+# PxrProjector.osl:439
+#     if (autobias != 0)
+	neq		$tmp339 ___457_autobias $const20 	%line{439} %argrw{"wrr"}
+	if		$tmp339 636 640 	%argrw{"r"}
+# PxrProjector.osl:441
+#         if (dot(Nn, dir) < 0.0)
+	dot		$tmp340 N rtDir 	%line{441} %argrw{"wrr"}
+	lt		$tmp341 $tmp340 $const13 	%argrw{"wrr"}
+	if		$tmp341 633 636 	%argrw{"r"}
+# PxrProjector.osl:444
+#             getattribute("builtin", "biasT", biasT);
+	getattribute	$tmp342 $const4 $const44 ___459_biasT 	%line{444} %argrw{"wrrw"}
+# PxrProjector.osl:445
+#             return biasT;
+	assign		___470_bias ___459_biasT 	%line{445} %argrw{"wr"}
+	return
+# PxrProjector.osl:450
+#             getattribute("builtin", "biasR", biasR);
+	getattribute	$tmp343 $const4 $const45 ___460_biasR 	%line{450} %argrw{"wrrw"}
+# PxrProjector.osl:451
+#             return biasR;
+	assign		___470_bias ___460_biasR 	%line{451} %argrw{"wr"}
+	return
+# PxrProjector.osl:456
+#         float bias = 0.01;
+	assign		___461_bias $const46 	%line{456} %argrw{"wr"}
+# PxrProjector.osl:457
+#         getattribute("trace:bias", bias);
+	getattribute	$tmp344 $const47 ___461_bias 	%line{457} %argrw{"wrw"}
+# PxrProjector.osl:458
+#         return bias;
+	assign		___470_bias ___461_bias 	%line{458} %argrw{"wr"}
+	return
+# PxrProjector.osl:860
+#         resultMask *= 1 - trace(P, rtDir,
+	trace		$tmp345 P rtDir $const48 ___470_bias $const49 traceMaxDistance $const50 traceSet 	%line{860} %argrw{"wrrrrrrrr"} %argderivs{1,2}
+	sub		$tmp346 $const1 $tmp345 	%argrw{"wrr"}
+# PxrProjector.osl:863
+#                                 "traceset", traceSet);
+	assign		$tmp347 $tmp346 	%line{863} %argrw{"wr"}
+	mul		resultMask resultMask $tmp347 	%argrw{"wrr"}
+	end

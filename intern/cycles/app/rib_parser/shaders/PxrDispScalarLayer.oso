@@ -1,0 +1,226 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrDispScalarLayer.osl/obj/PxrDispScalarLayer.oso
+shader PxrDispScalarLayer	%meta{int,rfm_nodeid,1053341} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/displace"} %meta{string,rfh_classification,"Pattern/Displace"} %meta{string,help,"Layer scalar (float) displacement textures/values."} 
+param	float	overallAmount	1		%meta{string,widget,"default"} %meta{string,help,"Controls the gain amount of the final layered result.  This is handy when we<br>want to layer several layered displacement textures by adjusting the amount that<br>controls each group of layered displacements.<br><br>overallAmount (float)"} %meta{string,label,"Overall Gain"}  %read{77,77} %write{2147483647,-1}
+param	int	baseLayerEnabled	1		%meta{string,widget,"checkBox"} %meta{string,page,"Base Layer"} %meta{int,page_open,1} %meta{string,help,"Enable the base layer.  By default, this is on.  But for some case such as<br>debugging, we can disable the base layer.  It if is off, it won't be<br>contributing to the layered displacement result.<br><br>baseLayerEnabled (int)"} %meta{int,connectable,0} %meta{string,label,"Enabled"}  %read{20,20} %write{2147483647,-1}
+param	float	baseLayerAmount	1		%meta{string,widget,"default"} %meta{string,page,"Base Layer"} %meta{string,help,"Gain amount for the base displacement layer.<br><br>baseLayerAmount (float)"} %meta{string,label,"Base Layer Gain"}  %read{22,22} %write{2147483647,-1}
+param	float	baseLayerDispScalar	0		%meta{string,widget,"default"} %meta{string,page,"Base Layer"} %meta{string,help,"Connection to the scalar displacement.<br><br>baseLayerDispScalar (float)"} %meta{string,label,"Base Layer Scalar"}  %read{22,22} %write{2147483647,-1}
+param	int	layer1Enabled	1		%meta{string,widget,"checkBox"} %meta{string,page,"Layer 1"} %meta{int,page_open,1} %meta{string,help,"Enable this layer.<br><br>layer1Enabled (int)"} %meta{int,connectable,0} %meta{string,label,"Enabled"}  %read{0,0} %write{2147483647,-1}
+param	float	layer1Amount	1		%meta{string,widget,"default"} %meta{string,page,"Layer 1"} %meta{string,help,"Gain amount for each displacement layer.<br><br>layer1Amount (float)"} %meta{string,label,"Layer 1 Gain"}  %read{4,4} %write{2147483647,-1}
+param	float	layer1DispScalar	0		%meta{string,widget,"default"} %meta{string,page,"Layer 1"} %meta{string,help,"Connection to the scalar displacement.<br><br>layer1DispScalar (float)"} %meta{string,label,"Layer 1 Scalar"}  %read{8,8} %write{2147483647,-1}
+param	float	layer1Mask	1		%meta{string,widget,"default"} %meta{string,page,"Layer 1"} %meta{string,help,"Mask for this layer.<br><br>layer1Mask (float)"} %meta{string,label,"Layer 1 Mask"}  %read{12,12} %write{2147483647,-1}
+param	int	layer1Comp	1		%meta{string,widget,"mapper"} %meta{string,page,"Layer 1"} %meta{string,help,"Choose how this layer's displacement combines with the base layer.<br><br>layer1Comp (int)"} %meta{string,options,"Add:1|Over:2|Subtract:3|Multiply:4|Average:5|Min:6|Max:7"} %meta{int,connectable,0} %meta{string,label,"Layer 1 Operation"}  %read{16,16} %write{2147483647,-1}
+param	int	layer2Enabled	0		%meta{string,widget,"checkBox"} %meta{string,page,"Layer 2"} %meta{string,help,"Enable this layer.<br><br>layer2Enabled (int)"} %meta{int,connectable,0} %meta{string,label,"Enabled"}  %read{1,1} %write{2147483647,-1}
+param	float	layer2Amount	1		%meta{string,widget,"default"} %meta{string,page,"Layer 2"} %meta{string,help,"Gain amount for each displacement layer.<br><br>layer2Amount (float)"} %meta{string,label,"Layer 2 Gain"}  %read{5,5} %write{2147483647,-1}
+param	float	layer2DispScalar	0		%meta{string,widget,"default"} %meta{string,page,"Layer 2"} %meta{string,help,"Connection to the scalar displacement.<br><br>layer2DispScalar (float)"} %meta{string,label,"Layer 2 Scalar"}  %read{9,9} %write{2147483647,-1}
+param	float	layer2Mask	1		%meta{string,widget,"default"} %meta{string,page,"Layer 2"} %meta{string,help,"Mask for this layer.<br><br>layer2Mask (float)"} %meta{string,label,"Layer 2 Mask"}  %read{13,13} %write{2147483647,-1}
+param	int	layer2Comp	1		%meta{string,widget,"mapper"} %meta{string,page,"Layer 2"} %meta{string,help,"Choose how this layer's displacement combines with the layer 1.<br>If layer 1 is disabled, it will combine with the previous layer.<br><br>layer2Comp (int)"} %meta{string,options,"Add:1|Over:2|Subtract:3|Multiply:4|Average:5|Min:6|Max:7"} %meta{int,connectable,0} %meta{string,label,"Layer 2 Operation"}  %read{17,17} %write{2147483647,-1}
+param	int	layer3Enabled	0		%meta{string,widget,"checkBox"} %meta{string,page,"Layer 3"} %meta{string,help,"Enable this layer.<br><br>layer3Enabled (int)"} %meta{int,connectable,0} %meta{string,label,"Enabled"}  %read{2,2} %write{2147483647,-1}
+param	float	layer3Amount	1		%meta{string,widget,"default"} %meta{string,page,"Layer 3"} %meta{string,help,"Gain amount for each displacement layer.<br><br>layer3Amount (float)"} %meta{string,label,"Layer 3 Gain"}  %read{6,6} %write{2147483647,-1}
+param	float	layer3DispScalar	0		%meta{string,widget,"default"} %meta{string,page,"Layer 3"} %meta{string,help,"Connection to the scalar displacement.<br><br>layer3DispScalar (float)"} %meta{string,label,"Layer 3 Scalar"}  %read{10,10} %write{2147483647,-1}
+param	float	layer3Mask	1		%meta{string,widget,"default"} %meta{string,page,"Layer 3"} %meta{string,help,"Mask for this layer.<br><br>layer3Mask (float)"} %meta{string,label,"Layer 3 Mask"}  %read{14,14} %write{2147483647,-1}
+param	int	layer3Comp	1		%meta{string,widget,"mapper"} %meta{string,page,"Layer 3"} %meta{string,help,"Choose how this layer's displacement combines with the layer 2.<br>If layer 2 is disabled, it will combine with the previous layer.<br><br>layer3Comp (int)"} %meta{string,options,"Add:1|Over:2|Subtract:3|Multiply:4|Average:5|Min:6|Max:7"} %meta{int,connectable,0} %meta{string,label,"Layer 3 Operation"}  %read{18,18} %write{2147483647,-1}
+param	int	layer4Enabled	0		%meta{string,widget,"checkBox"} %meta{string,page,"Layer 4"} %meta{string,help,"Enable this layer.<br><br>layer4Enabled (int)"} %meta{int,connectable,0} %meta{string,label,"Enabled"}  %read{3,3} %write{2147483647,-1}
+param	float	layer4Amount	1		%meta{string,widget,"default"} %meta{string,page,"Layer 4"} %meta{string,help,"Gain amount for each displacement layer.<br><br>layer4Amount (float)"} %meta{string,label,"Layer 4 Gain"}  %read{7,7} %write{2147483647,-1}
+param	float	layer4DispScalar	0		%meta{string,widget,"default"} %meta{string,page,"Layer 4"} %meta{string,help,"Connection to the scalar displacement.<br><br>layer4DispScalar (float)"} %meta{string,label,"Layer 4 Scalar"}  %read{11,11} %write{2147483647,-1}
+param	float	layer4Mask	1		%meta{string,widget,"default"} %meta{string,page,"Layer 4"} %meta{string,help,"Mask for this layer.<br><br>layer4Mask (float)"} %meta{string,label,"Layer 4 Mask"}  %read{15,15} %write{2147483647,-1}
+param	int	layer4Comp	1		%meta{string,widget,"mapper"} %meta{string,page,"Layer 4"} %meta{string,help,"Choose how this layer's displacement combines with the layer 3.<br>If layer 3 is disabled, it will combine with the previous layer.<br><br>layer4Comp (int)"} %meta{string,options,"Add:1|Over:2|Multiply:3|Average:4|Min:5|Max:6"} %meta{int,connectable,0} %meta{string,label,"Layer 4 Operation"}  %read{19,19} %write{2147483647,-1}
+oparam	float	resultF	0		%meta{string,help,"resultF (float)"}  %read{26,77} %write{22,77}
+local	float	___326_outputScalar	%read{26,76} %write{26,76}
+local	int[4]	enabled	%read{26,76} %write{0,3}
+local	float[4]	amounts	%read{26,76} %write{4,7}
+local	float[4]	dispScalars	%read{26,76} %write{8,11}
+local	float[4]	masks	%read{26,76} %write{12,15}
+local	int[4]	comps	%read{26,76} %write{16,19}
+local	int	___327_l	%read{26,76} %write{25,76}
+const	int	$const1	0		%read{0,27} %write{2147483647,-1}
+const	int	$const2	1		%read{1,76} %write{2147483647,-1}
+const	int	$const3	2		%read{2,41} %write{2147483647,-1}
+const	int	$const4	3		%read{3,45} %write{2147483647,-1}
+temp	int	$tmp1	%read{21,21} %write{20,20}
+const	float	$const5	0		%read{23,35} %write{2147483647,-1}
+const	int	$const6	4		%read{26,50} %write{2147483647,-1}
+temp	int	$tmp2	%read{26,76} %write{26,76}
+temp	int	$tmp3	%read{24,76} %write{25,76}
+temp	int	$tmp4	%read{26,76} %write{26,76}
+temp	float	$tmp5	%read{26,76} %write{26,76}
+temp	float	$tmp6	%read{26,76} %write{26,76}
+temp	int	$tmp7	%read{26,76} %write{26,76}
+temp	float	$tmp8	%read{26,76} %write{26,76}
+const	string	$const7	"computeLayerDispScalars"		%read{34,34} %write{2147483647,-1}
+temp	int	$tmp9	%read{26,76} %write{26,76}
+temp	float	$tmp10	%read{26,76} %write{26,76}
+temp	float	$tmp11	%read{26,76} %write{26,76}
+temp	int	$tmp12	%read{26,76} %write{26,76}
+temp	float	$tmp13	%read{26,76} %write{26,76}
+temp	int	$tmp14	%read{26,76} %write{26,76}
+temp	float	$tmp15	%read{26,76} %write{26,76}
+temp	float	$tmp16	%read{26,76} %write{26,76}
+temp	int	$tmp17	%read{26,76} %write{26,76}
+temp	float	$tmp18	%read{26,76} %write{26,76}
+const	float	$const8	1		%read{53,53} %write{2147483647,-1}
+temp	float	$tmp19	%read{26,76} %write{26,76}
+const	int	$const9	5		%read{55,55} %write{2147483647,-1}
+temp	int	$tmp20	%read{26,76} %write{26,76}
+const	float	$const10	0.5		%read{59,59} %write{2147483647,-1}
+temp	float	$tmp21	%read{26,76} %write{26,76}
+temp	float	$tmp22	%read{26,76} %write{26,76}
+temp	float	$tmp23	%read{26,76} %write{26,76}
+const	int	$const11	6		%read{61,61} %write{2147483647,-1}
+temp	int	$tmp24	%read{26,76} %write{26,76}
+temp	float	$tmp25	%read{26,76} %write{26,76}
+temp	float	$tmp26	%read{26,76} %write{26,76}
+const	int	$const12	7		%read{66,66} %write{2147483647,-1}
+temp	int	$tmp27	%read{26,76} %write{26,76}
+temp	float	$tmp28	%read{26,76} %write{26,76}
+temp	float	$tmp29	%read{26,76} %write{26,76}
+temp	float	$tmp30	%read{26,76} %write{26,76}
+temp	float	$tmp31	%read{26,76} %write{26,76}
+temp	int	$tmp32	%read{2147483647,-1} %write{26,76}
+code ___main___
+# PxrDispScalarLayer.osl:302
+#     int enabled[MAXLAYERS] = {layer1Enabled, layer2Enabled,
+	aassign		enabled $const1 layer1Enabled 	%filename{"PxrDispScalarLayer.osl"} %line{302} %argrw{"wrr"}
+	aassign		enabled $const2 layer2Enabled 	%argrw{"wrr"}
+	aassign		enabled $const3 layer3Enabled 	%argrw{"wrr"}
+	aassign		enabled $const4 layer4Enabled 	%argrw{"wrr"}
+# PxrDispScalarLayer.osl:304
+#     float amounts[MAXLAYERS] = {layer1Amount, layer2Amount,
+	aassign		amounts $const1 layer1Amount 	%line{304} %argrw{"wrr"}
+	aassign		amounts $const2 layer2Amount 	%argrw{"wrr"}
+	aassign		amounts $const3 layer3Amount 	%argrw{"wrr"}
+	aassign		amounts $const4 layer4Amount 	%argrw{"wrr"}
+# PxrDispScalarLayer.osl:306
+#     float dispScalars[MAXLAYERS] = {layer1DispScalar, layer2DispScalar,
+	aassign		dispScalars $const1 layer1DispScalar 	%line{306} %argrw{"wrr"}
+	aassign		dispScalars $const2 layer2DispScalar 	%argrw{"wrr"}
+	aassign		dispScalars $const3 layer3DispScalar 	%argrw{"wrr"}
+	aassign		dispScalars $const4 layer4DispScalar 	%argrw{"wrr"}
+# PxrDispScalarLayer.osl:308
+#     float masks[MAXLAYERS] = {layer1Mask, layer2Mask, layer3Mask, layer4Mask};
+	aassign		masks $const1 layer1Mask 	%line{308} %argrw{"wrr"}
+	aassign		masks $const2 layer2Mask 	%argrw{"wrr"}
+	aassign		masks $const3 layer3Mask 	%argrw{"wrr"}
+	aassign		masks $const4 layer4Mask 	%argrw{"wrr"}
+# PxrDispScalarLayer.osl:309
+#     int comps[MAXLAYERS] = {layer1Comp, layer2Comp, layer3Comp, layer4Comp};
+	aassign		comps $const1 layer1Comp 	%line{309} %argrw{"wrr"}
+	aassign		comps $const2 layer2Comp 	%argrw{"wrr"}
+	aassign		comps $const3 layer3Comp 	%argrw{"wrr"}
+	aassign		comps $const4 layer4Comp 	%argrw{"wrr"}
+# PxrDispScalarLayer.osl:312
+#     if (baseLayerEnabled == 1)
+	eq		$tmp1 baseLayerEnabled $const2 	%line{312} %argrw{"wrr"}
+	if		$tmp1 23 24 	%argrw{"r"}
+# PxrDispScalarLayer.osl:313
+#         resultF = baseLayerAmount * baseLayerDispScalar;
+	mul		resultF baseLayerAmount baseLayerDispScalar 	%line{313} %argrw{"wrr"}
+# PxrDispScalarLayer.osl:315
+#         resultF = 0.0;
+	assign		resultF $const5 	%line{315} %argrw{"wr"}
+# PxrDispScalarLayer.osl:318
+#     for (int l=0; l < MAXLAYERS; l++)
+	for		$tmp3 26 28 75 77 	%line{318} %argrw{"r"}
+	assign		___327_l $const1 	%argrw{"wr"}
+	lt		$tmp2 ___327_l $const6 	%argrw{"wrr"}
+	neq		$tmp3 $tmp2 $const1 	%argrw{"wrr"}
+# PxrDispScalarLayer.osl:320
+#         if (enabled[l])
+	aref		$tmp4 enabled ___327_l 	%line{320} %argrw{"wrr"}
+	if		$tmp4 75 75 	%argrw{"r"}
+# PxrDispScalarLayer.osl:323
+#                                               dispScalars[l],
+	aref		$tmp5 dispScalars ___327_l 	%line{323} %argrw{"wrr"}
+# PxrDispScalarLayer.osl:324
+#                                               amounts[l],
+	aref		$tmp6 amounts ___327_l 	%line{324} %argrw{"wrr"}
+# PxrDispScalarLayer.osl:325
+#                                               comps[l], masks[l]);
+	aref		$tmp7 comps ___327_l 	%line{325} %argrw{"wrr"}
+	aref		$tmp8 masks ___327_l 	%argrw{"wrr"}
+# PxrDispScalarLayer.osl:322
+#             resultF = computeLayerDispScalars(resultF,
+	functioncall	$const7 75 	%line{322} %argrw{"r"}
+# PxrDispScalarLayer.osl:57
+#     float outputScalar = 0.0;
+	assign		___326_outputScalar $const5 	%line{57} %argrw{"wr"}
+# PxrDispScalarLayer.osl:59
+#     if (comp == C_ADD)
+	eq		$tmp9 $tmp7 $const2 	%line{59} %argrw{"wrr"}
+	if		$tmp9 41 74 	%argrw{"r"}
+# PxrDispScalarLayer.osl:60
+#         outputScalar = mix(bottom, bottom + amount * top, mask);
+	mul		$tmp10 $tmp6 $tmp5 	%line{60} %argrw{"wrr"}
+	add		$tmp11 resultF $tmp10 	%argrw{"wrr"}
+	mix		___326_outputScalar resultF $tmp11 $tmp8 	%argrw{"wrrr"}
+# PxrDispScalarLayer.osl:61
+#     else if (comp == C_OVER)
+	eq		$tmp12 $tmp7 $const3 	%line{61} %argrw{"wrr"}
+	if		$tmp12 45 74 	%argrw{"r"}
+# PxrDispScalarLayer.osl:62
+#         outputScalar = mix(bottom, amount * top, mask);
+	mul		$tmp13 $tmp6 $tmp5 	%line{62} %argrw{"wrr"}
+	mix		___326_outputScalar resultF $tmp13 $tmp8 	%argrw{"wrrr"}
+# PxrDispScalarLayer.osl:63
+#     else if (comp == C_SUBTRACT)
+	eq		$tmp14 $tmp7 $const4 	%line{63} %argrw{"wrr"}
+	if		$tmp14 50 74 	%argrw{"r"}
+# PxrDispScalarLayer.osl:64
+#         outputScalar = mix(bottom, bottom - amount * top, mask);
+	mul		$tmp15 $tmp6 $tmp5 	%line{64} %argrw{"wrr"}
+	sub		$tmp16 resultF $tmp15 	%argrw{"wrr"}
+	mix		___326_outputScalar resultF $tmp16 $tmp8 	%argrw{"wrrr"}
+# PxrDispScalarLayer.osl:65
+#     else if (comp == C_MULTIPLY)
+	eq		$tmp17 $tmp7 $const6 	%line{65} %argrw{"wrr"}
+	if		$tmp17 55 74 	%argrw{"r"}
+# PxrDispScalarLayer.osl:66
+#         outputScalar = bottom * mix(1.0, amount * top, mask);
+	mul		$tmp19 $tmp6 $tmp5 	%line{66} %argrw{"wrr"}
+	mix		$tmp18 $const8 $tmp19 $tmp8 	%argrw{"wrrr"}
+	mul		___326_outputScalar resultF $tmp18 	%argrw{"wrr"}
+# PxrDispScalarLayer.osl:67
+#     else if (comp == C_AVERAGE)
+	eq		$tmp20 $tmp7 $const9 	%line{67} %argrw{"wrr"}
+	if		$tmp20 61 74 	%argrw{"r"}
+# PxrDispScalarLayer.osl:68
+#         outputScalar = mix(bottom, 0.5*(bottom + amount * top), mask);
+	mul		$tmp21 $tmp6 $tmp5 	%line{68} %argrw{"wrr"}
+	add		$tmp22 resultF $tmp21 	%argrw{"wrr"}
+	mul		$tmp23 $const10 $tmp22 	%argrw{"wrr"}
+	mix		___326_outputScalar resultF $tmp23 $tmp8 	%argrw{"wrrr"}
+# PxrDispScalarLayer.osl:69
+#     else if (comp == C_MIN)
+	eq		$tmp24 $tmp7 $const11 	%line{69} %argrw{"wrr"}
+	if		$tmp24 66 74 	%argrw{"r"}
+# PxrDispScalarLayer.osl:70
+#         outputScalar = mix(bottom, min(bottom, amount * top), mask);
+	mul		$tmp26 $tmp6 $tmp5 	%line{70} %argrw{"wrr"}
+	min		$tmp25 resultF $tmp26 	%argrw{"wrr"}
+	mix		___326_outputScalar resultF $tmp25 $tmp8 	%argrw{"wrrr"}
+# PxrDispScalarLayer.osl:71
+#     else if (comp == C_MAX)
+	eq		$tmp27 $tmp7 $const12 	%line{71} %argrw{"wrr"}
+	if		$tmp27 71 74 	%argrw{"r"}
+# PxrDispScalarLayer.osl:72
+#         outputScalar = mix(bottom, max(bottom, amount * top), mask);
+	mul		$tmp29 $tmp6 $tmp5 	%line{72} %argrw{"wrr"}
+	max		$tmp28 resultF $tmp29 	%argrw{"wrr"}
+	mix		___326_outputScalar resultF $tmp28 $tmp8 	%argrw{"wrrr"}
+# PxrDispScalarLayer.osl:74
+#         outputScalar = mix(bottom, bottom + amount * top, mask);
+	mul		$tmp30 $tmp6 $tmp5 	%line{74} %argrw{"wrr"}
+	add		$tmp31 resultF $tmp30 	%argrw{"wrr"}
+	mix		___326_outputScalar resultF $tmp31 $tmp8 	%argrw{"wrrr"}
+# PxrDispScalarLayer.osl:76
+#     return outputScalar;
+	assign		resultF ___326_outputScalar 	%line{76} %argrw{"wr"}
+# PxrDispScalarLayer.osl:318
+#     for (int l=0; l < MAXLAYERS; l++)
+	assign		$tmp32 ___327_l 	%line{318} %argrw{"wr"}
+	add		___327_l ___327_l $const2 	%argrw{"wrr"}
+# PxrDispScalarLayer.osl:330
+#     resultF *= overallAmount;
+	mul		resultF resultF overallAmount 	%line{330} %argrw{"wrr"}
+	end

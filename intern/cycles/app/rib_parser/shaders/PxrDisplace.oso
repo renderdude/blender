@@ -1,0 +1,48 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrDisplace.osl/obj/PxrDisplace.oso
+shader PxrDisplace
+param	int	enabled	1		%read{0,0} %write{2147483647,-1}
+param	float	dispAmount	1		%read{6,10} %write{2147483647,-1}
+param	float	dispScalar	0		%meta{string,vstructmember,"inputMaterial.dispScalar"}  %read{5,5} %write{2147483647,-1}
+param	vector	dispVector	0 0 0		%meta{string,vstructmember,"inputMaterial.dispVector"}  %read{8,8} %write{2147483647,-1}
+param	vector	modelDispVector	0 0 0		%meta{string,vstructmember,"inputMaterial.modelDispVector"}  %read{10,10} %write{2147483647,-1}
+param	float	inputMaterial	0		%meta{string,widget,"null"}  %read{2147483647,-1} %write{2147483647,-1}
+oparam	vector	result	0 0 0		%read{7,11} %write{7,11}
+global	normal	N	%read{3,3} %write{2147483647,-1}
+local	normal	Nin	%read{5,5} %write{3,4}
+temp	int	$tmp1	%read{1,1} %write{0,0}
+const	int	$const1	0		%read{0,0} %write{2147483647,-1}
+temp	int	$tmp2	%read{2147483647,-1} %write{4,4}
+const	string	$const2	"primvar"		%read{4,4} %write{2147483647,-1}
+const	string	$const3	"Ndsp"		%read{4,4} %write{2147483647,-1}
+temp	normal	$tmp3	%read{6,6} %write{5,5}
+temp	normal	$tmp4	%read{7,7} %write{6,6}
+temp	vector	$tmp5	%read{9,9} %write{8,8}
+temp	vector	$tmp6	%read{11,11} %write{10,10}
+code ___main___
+# PxrDisplace.osl:68
+#     if (!enabled) return;
+	eq		$tmp1 enabled $const1 	%filename{"PxrDisplace.osl"} %line{68} %argrw{"wrr"}
+	if		$tmp1 3 3 	%argrw{"r"}
+	exit
+# PxrDisplace.osl:70
+#     normal Nin = N;
+	assign		Nin N 	%line{70} %argrw{"wr"}
+# PxrDisplace.osl:71
+#     getattribute("primvar", "Ndsp", Nin);
+	getattribute	$tmp2 $const2 $const3 Nin 	%line{71} %argrw{"wrrw"}
+# PxrDisplace.osl:73
+#     result += Nin * dispScalar * dispAmount;
+	mul		$tmp3 Nin dispScalar 	%line{73} %argrw{"wrr"}
+	mul		$tmp4 $tmp3 dispAmount 	%argrw{"wrr"}
+	add		result result $tmp4 	%argrw{"wrr"}
+# PxrDisplace.osl:74
+#     result += dispVector * dispAmount;
+	mul		$tmp5 dispVector dispAmount 	%line{74} %argrw{"wrr"}
+	add		result result $tmp5 	%argrw{"wrr"}
+# PxrDisplace.osl:75
+#     result += modelDispVector * dispAmount;
+	mul		$tmp6 modelDispVector dispAmount 	%line{75} %argrw{"wrr"}
+	add		result result $tmp6 	%argrw{"wrr"}
+	end

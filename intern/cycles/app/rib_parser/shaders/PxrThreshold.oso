@@ -1,0 +1,253 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrThreshold.osl/obj/PxrThreshold.oso
+shader PxrThreshold	%meta{int,rfm_nodeid,1053439} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/color"} %meta{string,rfh_classification,"Pattern/Color"} %meta{string,help,"Thresholds an input color pattern to create a black and white mask. The falloff will define a gradual transition from black to white. The output is always between 0 and 1. "} 
+param	color	inputRGB	0 0 0		%meta{string,widget,"color"} %meta{string,help,"The color pattern you would like to threshold."} %meta{string,label,"Input Color"}  %read{6,25} %write{2147483647,-1}
+param	int	channel	3		%meta{string,widget,"mapper"} %meta{string,options,"Red:0|Green:1|Blue:2|Luminance:3|Average:4"} %meta{string,help,"The input channel this node will operate on."} %meta{int,connectable,0} %meta{string,label,"Channel"}  %read{4,24} %write{2147483647,-1}
+param	float	threshold	0.5		%meta{string,widget,"default"} %meta{string,help,"The value at which the transition from black to white will take place."} %meta{string,label,"Threshold"} %meta{float,max,1} %meta{float,min,0}  %read{2,3} %write{2147483647,-1}
+param	float	transitionWidth	0.0500000007		%meta{string,widget,"default"} %meta{string,help,"This control allows you to create a sharp or progressive transitions. The transition width is centered on the threshold value. "} %meta{string,label,"Transition Width"} %meta{float,max,0.25} %meta{float,min,0}  %read{0,0} %write{2147483647,-1}
+param	int	transitionProfile	1		%meta{string,widget,"mapper"} %meta{string,options,"Linear:0|Smooth:1|Gaussian:2"} %meta{string,help,"The interpolation from black to white can be computed with three different curves: Linear, Smooth or Gaussian. "} %meta{int,connectable,0} %meta{string,label,"Transition Profile"}  %read{26,82} %write{2147483647,-1}
+param	int	invert	0		%meta{string,label,"Invert"} %meta{string,widget,"checkBox"} %meta{int,connectable,0} %meta{string,help,"Invert the result"}  %read{84,84} %write{2147483647,-1}
+oparam	color	resultRGB	0 0 0		%read{87,89} %write{86,86}
+oparam	float	resultR	0		%read{2147483647,-1} %write{87,87}
+oparam	float	resultG	0		%read{2147483647,-1} %write{88,88}
+oparam	float	resultB	0		%read{2147483647,-1} %write{89,89}
+local	float	___269_result	%read{38,38} %write{36,37}
+local	float	___270_xclamped	%read{34,34} %write{33,33}
+local	float	x	%read{32,86} %write{6,85}
+local	float	Min	%read{29,83} %write{2,2}
+local	float	Max	%read{29,83} %write{3,3}
+local	float	width	%read{2,3} %write{1,1}
+temp	float	$tmp1	%read{1,1} %write{0,0}
+const	float	$const1	0		%read{0,75} %write{2147483647,-1}
+const	float	$const2	0.5		%read{1,1} %write{2147483647,-1}
+const	int	$const3	0		%read{4,87} %write{2147483647,-1}
+temp	int	$tmp2	%read{5,5} %write{4,4}
+const	int	$const4	1		%read{7,88} %write{2147483647,-1}
+temp	int	$tmp3	%read{8,8} %write{7,7}
+const	int	$const5	2		%read{10,89} %write{2147483647,-1}
+temp	int	$tmp4	%read{11,11} %write{10,10}
+const	int	$const6	3		%read{13,13} %write{2147483647,-1}
+temp	int	$tmp5	%read{14,14} %write{13,13}
+const	int	$const7	4		%read{16,16} %write{2147483647,-1}
+temp	int	$tmp6	%read{17,17} %write{16,16}
+temp	float	$tmp7	%read{20,20} %write{18,18}
+temp	float	$tmp8	%read{20,20} %write{19,19}
+temp	float	$tmp9	%read{22,22} %write{20,20}
+temp	float	$tmp10	%read{22,22} %write{21,21}
+temp	float	$tmp11	%read{23,23} %write{22,22}
+const	float	$const8	3		%read{23,23} %write{2147483647,-1}
+const	string	$const9	"PxrThreshold: Illegal channel value: %d (using luminance)."		%read{24,24} %write{2147483647,-1}
+temp	int	$tmp12	%read{27,27} %write{26,26}
+const	string	$const10	"linearstep"		%read{28,28} %write{2147483647,-1}
+temp	int	$tmp13	%read{30,30} %write{29,29}
+const	string	$const11	"clamp"		%read{31,31} %write{2147483647,-1}
+temp	float	$tmp14	%read{33,33} %write{32,32}
+temp	float	$tmp15	%read{36,36} %write{34,34}
+temp	float	$tmp16	%read{36,36} %write{35,35}
+temp	int	$tmp17	%read{40,40} %write{39,39}
+temp	int	$tmp18	%read{43,43} %write{42,42}
+const	string	$const12	"RixGaussStep"		%read{44,44} %write{2147483647,-1}
+temp	int	$tmp19	%read{46,46} %write{45,45}
+temp	int	$tmp20	%read{48,48} %write{47,47}
+temp	int	$tmp21	%read{52,52} %write{51,51}
+const	float	$const13	1		%read{53,85} %write{2147483647,-1}
+temp	float	$tmp22	%read{57,57} %write{55,55}
+temp	float	$tmp23	%read{57,57} %write{56,56}
+temp	float	$tmp24	%read{58,58} %write{57,57}
+temp	int	$tmp25	%read{60,60} %write{59,59}
+temp	int	$tmp26	%read{62,62} %write{61,61}
+temp	int	$tmp27	%read{66,66} %write{65,65}
+temp	float	$tmp28	%read{71,71} %write{69,69}
+temp	float	$tmp29	%read{71,71} %write{70,70}
+const	string	$const14	"RixBoxStep"		%read{72,72} %write{2147483647,-1}
+temp	int	$tmp30	%read{74,74} %write{73,73}
+const	float	$const15	2		%read{81,81} %write{2147483647,-1}
+const	float	$const16	-8		%read{79,79} %write{2147483647,-1}
+temp	float	$tmp31	%read{80,80} %write{79,79}
+temp	float	$tmp32	%read{81,81} %write{80,80}
+const	string	$const17	"PxrThreshold: Illegal profile value: %d (using smooth)."		%read{82,82} %write{2147483647,-1}
+code ___main___
+# PxrThreshold.osl:142
+#     width = max(0.0, transitionWidth) * 0.5;
+	max		$tmp1 $const1 transitionWidth 	%filename{"PxrThreshold.osl"} %line{142} %argrw{"wrr"}
+	mul		width $tmp1 $const2 	%argrw{"wrr"}
+# PxrThreshold.osl:143
+#     Min = threshold - width;
+	sub		Min threshold width 	%line{143} %argrw{"wrr"}
+# PxrThreshold.osl:144
+#     Max = threshold + width;
+	add		Max threshold width 	%line{144} %argrw{"wrr"}
+# PxrThreshold.osl:146
+#     if (channel == k_red)
+	eq		$tmp2 channel $const3 	%line{146} %argrw{"wrr"}
+	if		$tmp2 7 26 	%argrw{"r"}
+# PxrThreshold.osl:148
+#         x = inputRGB[0];
+	compref		x inputRGB $const3 	%line{148} %argrw{"wrr"}
+# PxrThreshold.osl:150
+#     else if (channel == k_green)
+	eq		$tmp3 channel $const4 	%line{150} %argrw{"wrr"}
+	if		$tmp3 10 26 	%argrw{"r"}
+# PxrThreshold.osl:152
+#         x = inputRGB[1];
+	compref		x inputRGB $const4 	%line{152} %argrw{"wrr"}
+# PxrThreshold.osl:154
+#     else if (channel == k_blue)
+	eq		$tmp4 channel $const5 	%line{154} %argrw{"wrr"}
+	if		$tmp4 13 26 	%argrw{"r"}
+# PxrThreshold.osl:156
+#         x = inputRGB[2];
+	compref		x inputRGB $const5 	%line{156} %argrw{"wrr"}
+# PxrThreshold.osl:158
+#     else if (channel == k_luminance)
+	eq		$tmp5 channel $const6 	%line{158} %argrw{"wrr"}
+	if		$tmp5 16 26 	%argrw{"r"}
+# PxrThreshold.osl:160
+#         x = luminance(inputRGB);
+	luminance	x inputRGB 	%line{160} %argrw{"wr"}
+# PxrThreshold.osl:162
+#     else if (channel == k_average)
+	eq		$tmp6 channel $const7 	%line{162} %argrw{"wrr"}
+	if		$tmp6 24 26 	%argrw{"r"}
+# PxrThreshold.osl:164
+#         x = (inputRGB[0] + inputRGB[1] + inputRGB[2]) / 3.0;
+	compref		$tmp7 inputRGB $const3 	%line{164} %argrw{"wrr"}
+	compref		$tmp8 inputRGB $const4 	%argrw{"wrr"}
+	add		$tmp9 $tmp7 $tmp8 	%argrw{"wrr"}
+	compref		$tmp10 inputRGB $const5 	%argrw{"wrr"}
+	add		$tmp11 $tmp9 $tmp10 	%argrw{"wrr"}
+	div		x $tmp11 $const8 	%argrw{"wrr"}
+# PxrThreshold.osl:168
+#         warning("PxrThreshold: Illegal channel value: %d (using luminance).", channel);
+	warning		$const9 channel 	%line{168} %argrw{"rr"}
+# PxrThreshold.osl:169
+#         x = luminance(inputRGB);
+	luminance	x inputRGB 	%line{169} %argrw{"wr"}
+# PxrThreshold.osl:172
+#     if (transitionProfile == k_linear)
+	eq		$tmp12 transitionProfile $const3 	%line{172} %argrw{"wrr"}
+	if		$tmp12 39 84 	%argrw{"r"}
+# PxrThreshold.osl:174
+#         x = linearstep(Min, Max, x);
+	functioncall	$const10 39 	%line{174} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:361
+#     if (edge0 != edge1) {
+	neq		$tmp13 Min Max 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{361} %argrw{"wrr"}
+	if		$tmp13 37 38 	%argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:362
+#         float xclamped = clamp (x, edge0, edge1);
+	functioncall	$const11 34 	%line{362} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
+	min		$tmp14 x Max 	%line{163} %argrw{"wrr"}
+	max		___270_xclamped $tmp14 Min 	%argrw{"wrr"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:363
+#         result = (xclamped - edge0) / (edge1 - edge0);
+	sub		$tmp15 ___270_xclamped Min 	%line{363} %argrw{"wrr"}
+	sub		$tmp16 Max Min 	%argrw{"wrr"}
+	div		___269_result $tmp15 $tmp16 	%argrw{"wrr"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:365
+#         result = step (edge0, x);
+	step		___269_result Min x 	%line{365} %argrw{"wrr"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:367
+#     return result;
+	assign		x ___269_result 	%line{367} %argrw{"wr"}
+# PxrThreshold.osl:176
+#     else if (transitionProfile == k_smooth)
+	eq		$tmp17 transitionProfile $const4 	%filename{"PxrThreshold.osl"} %line{176} %argrw{"wrr"}
+	if		$tmp17 42 84 	%argrw{"r"}
+# PxrThreshold.osl:178
+#         x = smoothstep(Min, Max, x);
+	smoothstep	x Min Max x 	%line{178} %argrw{"wrrr"}
+# PxrThreshold.osl:180
+#     else if (transitionProfile == k_gaussian)
+	eq		$tmp18 transitionProfile $const5 	%line{180} %argrw{"wrr"}
+	if		$tmp18 82 84 	%argrw{"r"}
+# PxrThreshold.osl:182
+#         x = RixGaussStep(Min, Max, x);
+	functioncall	$const12 82 	%line{182} %argrw{"r"}
+# PxrThreshold.osl:58
+#     if (min < max)
+	lt		$tmp19 Min Max 	%line{58} %argrw{"wrr"}
+	if		$tmp19 59 79 	%argrw{"r"}
+# PxrThreshold.osl:60
+#         if (val < min) return 0.0;
+	lt		$tmp20 x Min 	%line{60} %argrw{"wrr"}
+	if		$tmp20 51 51 	%argrw{"r"}
+	assign		x $const1 	%argrw{"wr"}
+	return
+# PxrThreshold.osl:61
+#         if (val >= max) return 1.0;
+	ge		$tmp21 x Max 	%line{61} %argrw{"wrr"}
+	if		$tmp21 55 55 	%argrw{"r"}
+	assign		x $const13 	%argrw{"wr"}
+	return
+# PxrThreshold.osl:62
+#         val = 1.0 - (val - min) / (max - min);
+	sub		$tmp22 x Min 	%line{62} %argrw{"wrr"}
+	sub		$tmp23 Max Min 	%argrw{"wrr"}
+	div		$tmp24 $tmp22 $tmp23 	%argrw{"wrr"}
+	sub		x $const13 $tmp24 	%argrw{"wrr"}
+# PxrThreshold.osl:64
+#     else if (min > max)
+	gt		$tmp25 Min Max 	%line{64} %argrw{"wrr"}
+	if		$tmp25 72 79 	%argrw{"r"}
+# PxrThreshold.osl:66
+#         if (val <= max) return 1.0;
+	le		$tmp26 x Max 	%line{66} %argrw{"wrr"}
+	if		$tmp26 65 65 	%argrw{"r"}
+	assign		x $const13 	%argrw{"wr"}
+	return
+# PxrThreshold.osl:67
+#         if (val > min) return 0.0;
+	gt		$tmp27 x Min 	%line{67} %argrw{"wrr"}
+	if		$tmp27 69 69 	%argrw{"r"}
+	assign		x $const1 	%argrw{"wr"}
+	return
+# PxrThreshold.osl:68
+#         val = (val - max) / (min - max);
+	sub		$tmp28 x Max 	%line{68} %argrw{"wrr"}
+	sub		$tmp29 Min Max 	%argrw{"wrr"}
+	div		x $tmp28 $tmp29 	%argrw{"wrr"}
+# PxrThreshold.osl:71
+#         return RixBoxStep(min, val);
+	functioncall	$const14 78 	%line{71} %argrw{"r"}
+# PxrThreshold.osl:50
+#     return val < min ? 0.0 : 1.0;
+	lt		$tmp30 x Min 	%line{50} %argrw{"wrr"}
+	if		$tmp30 76 77 	%argrw{"r"}
+	assign		x $const1 	%argrw{"wr"}
+	assign		x $const13 	%argrw{"wr"}
+	return
+# PxrThreshold.osl:71
+#         return RixBoxStep(min, val);
+	return	%line{71}
+# PxrThreshold.osl:73
+#     return pow(2.0, -8.0 * val * val);
+	mul		$tmp31 $const16 x 	%line{73} %argrw{"wrr"}
+	mul		$tmp32 $tmp31 x 	%argrw{"wrr"}
+	pow		x $const15 $tmp32 	%argrw{"wrr"}
+# PxrThreshold.osl:186
+#         warning("PxrThreshold: Illegal profile value: %d (using smooth).", transitionProfile);
+	warning		$const17 transitionProfile 	%line{186} %argrw{"rr"}
+# PxrThreshold.osl:187
+#         x = smoothstep(Min, Max, x);
+	smoothstep	x Min Max x 	%line{187} %argrw{"wrrr"}
+# PxrThreshold.osl:190
+#     if (invert) x = 1.0 - x;
+	if		invert 86 86 	%line{190} %argrw{"r"}
+	sub		x $const13 x 	%argrw{"wrr"}
+# PxrThreshold.osl:192
+#     resultRGB = color(x);
+	assign		resultRGB x 	%line{192} %argrw{"wr"}
+# PxrThreshold.osl:194
+#     resultR = resultRGB[0];
+	compref		resultR resultRGB $const3 	%line{194} %argrw{"wrr"}
+# PxrThreshold.osl:195
+#     resultG = resultRGB[1];
+	compref		resultG resultRGB $const4 	%line{195} %argrw{"wrr"}
+# PxrThreshold.osl:196
+#     resultB = resultRGB[2];
+	compref		resultB resultRGB $const5 	%line{196} %argrw{"wrr"}
+	end

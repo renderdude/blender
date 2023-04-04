@@ -19,7 +19,8 @@ class OIIOOutputDriver : public OutputDriver {
   virtual ~OIIOOutputDriver();
 
   void write_render_tile(const Tile &tile) override;
-
+  void update_filepath( std::string new_path ) { filepath_ = new_path; }
+  
  protected:
   string filepath_;
   string pass_;

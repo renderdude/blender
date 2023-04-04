@@ -1,0 +1,997 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrHexTileManifold.osl/obj/PxrHexTileManifold.oso
+shader PxrHexTileManifold	%meta{int,rfm_nodeid,1233479} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/manifold"} %meta{string,rfh_classification,"Pattern/Manifold"} %meta{string,help,"Randomized Texture Splatting"} 
+param	float	gridFrequency	1		%meta{string,help,"Global Frequency of cell grid."} %meta{string,label,"Grid Frequency"} %meta{float,min,0.100000001} %meta{float,slidermax,16} %meta{int,connectable,0}  %read{37,37} %write{2147483647,-1} %derivs
+param	float	textureFrequency	1		%meta{string,help,"Secondary scale of texture in the cell."} %meta{string,label,"Texture Frequency"} %meta{float,min,0.100000001} %meta{float,slidermax,1}  %read{119,293} %write{2147483647,-1}
+param	float	blendWidth	1		%meta{string,label,"Blend Width"} %meta{string,help,"Exponentiated blending as described by Burley.<br>The exponent varies from 8 (blendWidth = 0.0) to 1 (blendWidth = 1.0)."} %meta{float,min,0} %meta{float,max,1}  %read{309,311} %write{2147483647,-1}
+param	float	translateJitter	1		%meta{string,page,"Offsets"} %meta{string,label,"Translate Jitter"} %meta{int,page_open,1} %meta{string,help,"Amount of random offset."} %meta{float,min,0} %meta{float,slidermax,1} %meta{int,connectable,0}  %read{303,305} %write{2147483647,-1}
+param	float	rotateJitter	1		%meta{string,page,"Offsets"} %meta{string,label,"Rotate Jitter"} %meta{string,help,"Amount of random rotation."} %meta{float,min,0} %meta{float,slidermax,1} %meta{int,connectable,0}  %read{126,195} %write{2147483647,-1}
+param	float	scaleJitter	0.100000001		%meta{string,page,"Offsets"} %meta{string,label,"Scale Jitter"} %meta{string,help,"Amount of random scale."} %meta{float,min,0} %meta{float,slidermax,1} %meta{int,connectable,0}  %read{122,287} %write{2147483647,-1}
+param	float	customRotation	0		%meta{string,page,"Advanced"} %meta{string,label,"Custom Rotation"} %meta{string,help,"Connectable rotation."} %meta{int,connectable,1}  %read{82,82} %write{2147483647,-1}
+param	vector	customOrientation	0 0 0		%meta{string,page,"Advanced"} %meta{string,label,"Custom Orientation"} %meta{string,help,"Connectable orientation."} %meta{int,connectable,1}  %read{35,36} %write{2147483647,-1}
+param	int	invertT	1		%meta{string,label,"Invert T"} %meta{string,widget,"checkBox"} %meta{int,connectable,0}  %read{24,24} %write{2147483647,-1}
+param	float	s	0		%meta{int,lockgeom,0} %meta{string,widget,"null"} %meta{int,connectable,0}  %read{32,340} %write{2147483647,-1} %derivs
+param	float	t	0		%meta{int,lockgeom,0} %meta{string,widget,"null"} %meta{int,connectable,0}  %read{26,340} %write{2147483647,-1} %derivs
+oparam	struct PxrManifoldMulti	resultMulti			%meta{string,help,"resultMulti (struct)"} %meta{string,readOnly,"True"}  %read{2147483647,-1} %write{2147483647,-1} %struct{"PxrManifoldMulti"} %structfields{minNumTextures,numTextures,textureOrder,stAlpha0,stAlpha1,stAlpha2,stAlpha3,tileidRunflag0,tileidRunflag1,tileidRunflag2,tileidRunflag3,Tn,Bn,radius,hextile0,hextile1,hextile2,hextile3} %structfieldtypes{"iiippppppppv[4]v[4]fp[4]p[4]p[4]p[4]"} %structnfields{18}
+oparam	int	resultMulti.minNumTextures	0		%meta{string,help,"resultMulti (struct)"} %meta{string,readOnly,"True"}  %read{2147483647,-1} %write{337,337} %mystruct{resultMulti} %mystructfield{0}
+oparam	int	resultMulti.numTextures	0		%meta{string,help,"resultMulti (struct)"} %meta{string,readOnly,"True"}  %read{2147483647,-1} %write{338,338} %mystruct{resultMulti} %mystructfield{1}
+oparam	int	resultMulti.textureOrder	0		%meta{string,help,"resultMulti (struct)"} %meta{string,readOnly,"True"}  %read{2147483647,-1} %write{339,339} %mystruct{resultMulti} %mystructfield{2}
+oparam	point	resultMulti.stAlpha0	-1 -1 -1		%meta{string,help,"resultMulti (struct)"} %meta{string,readOnly,"True"}  %read{341,341} %write{340,341} %mystruct{resultMulti} %mystructfield{3}
+oparam	point	resultMulti.stAlpha1	-1 -1 -1		%meta{string,help,"resultMulti (struct)"} %meta{string,readOnly,"True"}  %read{2147483647,-1} %write{2147483647,-1} %mystruct{resultMulti} %mystructfield{4}
+oparam	point	resultMulti.stAlpha2	-1 -1 -1		%meta{string,help,"resultMulti (struct)"} %meta{string,readOnly,"True"}  %read{2147483647,-1} %write{2147483647,-1} %mystruct{resultMulti} %mystructfield{5}
+oparam	point	resultMulti.stAlpha3	-1 -1 -1		%meta{string,help,"resultMulti (struct)"} %meta{string,readOnly,"True"}  %read{2147483647,-1} %write{2147483647,-1} %mystruct{resultMulti} %mystructfield{6}
+oparam	point	resultMulti.tileidRunflag0	0 0 0		%meta{string,help,"resultMulti (struct)"} %meta{string,readOnly,"True"}  %read{2147483647,-1} %write{342,342} %mystruct{resultMulti} %mystructfield{7}
+oparam	point	resultMulti.tileidRunflag1	0 0 0		%meta{string,help,"resultMulti (struct)"} %meta{string,readOnly,"True"}  %read{2147483647,-1} %write{2147483647,-1} %mystruct{resultMulti} %mystructfield{8}
+oparam	point	resultMulti.tileidRunflag2	0 0 0		%meta{string,help,"resultMulti (struct)"} %meta{string,readOnly,"True"}  %read{2147483647,-1} %write{2147483647,-1} %mystruct{resultMulti} %mystructfield{9}
+oparam	point	resultMulti.tileidRunflag3	0 0 0		%meta{string,help,"resultMulti (struct)"} %meta{string,readOnly,"True"}  %read{2147483647,-1} %write{2147483647,-1} %mystruct{resultMulti} %mystructfield{10}
+oparam	vector[4]	resultMulti.Tn	0 0 0		%meta{string,help,"resultMulti (struct)"} %meta{string,readOnly,"True"}  %read{2147483647,-1} %write{0,3} %mystruct{resultMulti} %mystructfield{11} %initexpr
+oparam	vector[4]	resultMulti.Bn	0 0 0		%meta{string,help,"resultMulti (struct)"} %meta{string,readOnly,"True"}  %read{2147483647,-1} %write{4,7} %mystruct{resultMulti} %mystructfield{12} %initexpr
+oparam	float	resultMulti.radius	0		%meta{string,help,"resultMulti (struct)"} %meta{string,readOnly,"True"}  %read{2147483647,-1} %write{343,343} %mystruct{resultMulti} %mystructfield{13}
+oparam	point[4]	resultMulti.hextile0	0 0 0		%meta{string,help,"resultMulti (struct)"} %meta{string,readOnly,"True"}  %read{2147483647,-1} %write{8,347} %mystruct{resultMulti} %mystructfield{14} %initexpr
+oparam	point[4]	resultMulti.hextile1	0 0 0		%meta{string,help,"resultMulti (struct)"} %meta{string,readOnly,"True"}  %read{2147483647,-1} %write{12,15} %mystruct{resultMulti} %mystructfield{15} %initexpr
+oparam	point[4]	resultMulti.hextile2	0 0 0		%meta{string,help,"resultMulti (struct)"} %meta{string,readOnly,"True"}  %read{2147483647,-1} %write{16,19} %mystruct{resultMulti} %mystructfield{16} %initexpr
+oparam	point[4]	resultMulti.hextile3	0 0 0		%meta{string,help,"resultMulti (struct)"} %meta{string,readOnly,"True"}  %read{2147483647,-1} %write{20,23} %mystruct{resultMulti} %mystructfield{17} %initexpr
+global	normal	N	%read{33,67} %write{2147483647,-1}
+global	vector	dPdu	%read{56,63} %write{2147483647,-1}
+global	vector	dPdv	%read{57,64} %write{2147483647,-1}
+local	float	___356_cosAng	%read{213,268} %write{210,258}
+local	float	___356_sinAng	%read{215,266} %write{210,258}
+local	float	___417_dsdu	%read{46,64} %write{42,42}
+local	float	___417_dtdu	%read{47,59} %write{43,43}
+local	float	___417_dsdv	%read{47,62} %write{44,44}
+local	float	___417_dtdv	%read{46,58} %write{45,45}
+local	float	___417_det	%read{49,66} %write{48,48}
+local	float	___709_cellRotation	%read{130,334} %write{82,82}
+local	float	___709_r1	%read{203,333} %write{83,186}
+local	float	___709_r2	%read{227,333} %write{84,194}
+local	float	___709_r3	%read{251,333} %write{85,202}
+local	float	___709_s	%read{92,118} %write{86,86}
+local	float	___709_t	%read{90,118} %write{87,87}
+local	float	___709_Yscale	%read{90,90} %write{88,88}
+local	float	___709_invYscale	%read{142,156} %write{89,89}
+local	float	___709_cellY	%read{91,96} %write{90,90}
+local	float	___709_cellX	%read{93,95} %write{92,92}
+local	float	___709_cellXInt	%read{95,109} %write{93,93}
+local	float	___709_cellYInt	%read{96,110} %write{94,94}
+local	float	___709_cellXFract	%read{102,106} %write{95,95}
+local	float	___709_cellYFract	%read{103,106} %write{96,96}
+local	point	___709_cellV1	%read{137,297} %write{97,111}
+local	point	___709_cellV2	%read{144,299} %write{99,99}
+local	point	___709_cellV3	%read{151,301} %write{101,101}
+local	float	___709_cellW1	%read{112,331} %write{103,318}
+local	float	___709_cellW2	%read{115,331} %write{104,319}
+local	float	___709_cellW3	%read{113,331} %write{105,320}
+local	point	___709_textureST1	%read{158,326} %write{116,306}
+local	point	___709_textureST2	%read{159,327} %write{117,307}
+local	point	___709_textureST3	%read{160,328} %write{118,308}
+local	point	___711_cellOffset1	%read{158,294} %write{143,143}
+local	point	___711_cellOffset2	%read{159,295} %write{150,150}
+local	point	___711_cellOffset3	%read{160,296} %write{157,157}
+local	point	___711_origin1	%read{212,294} %write{158,291}
+local	point	___711_origin2	%read{236,295} %write{159,292}
+local	point	___711_origin3	%read{260,296} %write{160,293}
+local	point	___711_noiseV1	%read{180,277} %write{162,162}
+local	point	___711_noiseV2	%read{188,281} %write{164,164}
+local	point	___711_noiseV3	%read{196,285} %write{166,166}
+local	float	___712_angle	%read{183,199} %write{176,178}
+local	point	___709_noiseV1	%read{303,306} %write{298,303}
+local	point	___709_noiseV2	%read{304,307} %write{300,304}
+local	point	___709_noiseV3	%read{305,308} %write{302,305}
+local	float	___715_transExp	%read{312,314} %write{311,311}
+local	float	___715_normW	%read{318,320} %write{317,317}
+local	point	Q	%read{37,79} %write{32,37} %derivs
+local	normal	QN	%read{2147483647,-1} %write{33,33}
+local	float	Qradius	%read{2147483647,-1} %write{34,34}
+local	vector	cellOrientation	%read{38,38} %write{35,35}
+local	int	useCustomOrientation	%read{134,177} %write{36,36}
+local	vector	STOrientation	%read{72,75} %write{38,72}
+local	vector	U	%read{70,75} %write{56,71}
+local	vector	V	%read{2147483647,-1} %write{57,66}
+local	vector	W	%read{68,74} %write{67,69}
+local	float	orientationAngleST	%read{178,178} %write{77,77}
+local	point	hxt.s	%read{325,344} %write{324,325} %mystruct{hxt} %mystructfield{0}
+local	point	hxt.t	%read{330,345} %write{329,330} %mystruct{hxt} %mystructfield{1}
+local	point	hxt.w	%read{332,346} %write{331,332} %mystruct{hxt} %mystructfield{2}
+local	point	hxt.r	%read{336,347} %write{335,336} %mystruct{hxt} %mystructfield{3}
+const	vector	$const1	0 0 0		%read{0,7} %write{2147483647,-1}
+const	int	$const2	0		%read{0,344} %write{2147483647,-1}
+const	int	$const3	1		%read{1,345} %write{2147483647,-1}
+const	int	$const4	2		%read{2,346} %write{2147483647,-1}
+const	int	$const5	3		%read{3,347} %write{2147483647,-1}
+const	point	$const6	0 0 0		%read{8,23} %write{2147483647,-1}
+const	point	$const7	-1 -1 -1		%read{10,22} %write{2147483647,-1}
+temp	float	$tmp25	%read{32,32} %write{30,31} %derivs
+const	string	$const8	"invertCoord"		%read{25,25} %write{2147483647,-1}
+temp	float	$tmp26	%read{27,27} %write{26,26} %derivs
+const	float	$const9	1		%read{27,340} %write{2147483647,-1}
+temp	float	$tmp27	%read{30,30} %write{27,27} %derivs
+temp	float	$tmp28	%read{29,29} %write{28,28} %derivs
+temp	float	$tmp29	%read{30,30} %write{29,29} %derivs
+const	float	$const10	0		%read{32,343} %write{2147483647,-1}
+temp	float	$tmp30	%read{42,44} %write{39,39} %derivs
+temp	float	$tmp31	%read{43,45} %write{40,40} %derivs
+const	string	$const11	"ComputeCoordinateSystemFromUvMap"		%read{41,41} %write{2147483647,-1}
+temp	float	$tmp32	%read{48,48} %write{46,46}
+temp	float	$tmp33	%read{48,48} %write{47,47}
+temp	int	$tmp34	%read{50,50} %write{49,49}
+temp	int	$tmp35	%read{51,55} %write{50,54}
+temp	int	$tmp36	%read{53,53} %write{52,52}
+temp	int	$tmp37	%read{54,54} %write{53,53}
+temp	vector	$tmp38	%read{60,60} %write{58,58}
+temp	vector	$tmp39	%read{60,60} %write{59,59}
+temp	vector	$tmp40	%read{61,61} %write{60,60}
+temp	float	$tmp41	%read{63,63} %write{62,62}
+temp	vector	$tmp42	%read{65,65} %write{63,63}
+temp	vector	$tmp43	%read{65,65} %write{64,64}
+temp	vector	$tmp44	%read{66,66} %write{65,65}
+temp	vector	$tmp45	%read{69,69} %write{68,68}
+const	string	$const12	"current"		%read{68,70} %write{2147483647,-1}
+const	string	$const13	"object"		%read{68,70} %write{2147483647,-1}
+temp	vector	$tmp46	%read{71,71} %write{70,70}
+temp	float	$tmp47	%read{77,77} %write{76,76}
+temp	float	$tmp48	%read{76,76} %write{74,74}
+temp	vector	$tmp49	%read{74,74} %write{73,73}
+temp	float	$tmp50	%read{76,76} %write{75,75}
+const	float	$const14	1.57079995		%read{77,77} %write{2147483647,-1}
+temp	point	$tmp51	%read{86,87} %write{80,80}
+temp	float	$tmp52	%read{80,80} %write{78,78}
+temp	float	$tmp53	%read{80,80} %write{79,79}
+const	string	$const15	"hexTile"		%read{81,81} %write{2147483647,-1}
+const	float	$const16	1.15470052		%read{88,88} %write{2147483647,-1}
+const	float	$const17	0.866025388		%read{89,89} %write{2147483647,-1}
+const	float	$const18	0.5		%read{91,197} %write{2147483647,-1}
+temp	float	$tmp54	%read{92,92} %write{91,91}
+temp	float	$tmp55	%read{99,99} %write{98,98}
+temp	float	$tmp56	%read{101,101} %write{100,100}
+temp	float	$tmp57	%read{103,103} %write{102,102}
+temp	float	$tmp58	%read{107,107} %write{106,106}
+temp	int	$tmp59	%read{108,108} %write{107,107}
+temp	float	$tmp60	%read{111,111} %write{109,109}
+temp	float	$tmp61	%read{111,111} %write{110,110}
+temp	float	$tmp62	%read{115,115} %write{114,114}
+temp	int	$tmp63	%read{120,120} %write{119,119}
+temp	int	$tmp64	%read{121,124} %write{120,123}
+temp	int	$tmp65	%read{123,123} %write{122,122}
+temp	int	$tmp66	%read{125,128} %write{124,127}
+temp	int	$tmp67	%read{127,127} %write{126,126}
+temp	int	$tmp68	%read{129,132} %write{128,131}
+temp	int	$tmp69	%read{131,131} %write{130,130}
+temp	int	$tmp70	%read{133,136} %write{132,135}
+temp	int	$tmp71	%read{135,135} %write{134,134}
+temp	float	$tmp72	%read{140,140} %write{137,137}
+temp	float	$tmp73	%read{139,139} %write{138,138}
+temp	float	$tmp74	%read{140,140} %write{139,139}
+temp	float	$tmp75	%read{143,143} %write{140,140}
+temp	float	$tmp76	%read{142,142} %write{141,141}
+temp	float	$tmp77	%read{143,143} %write{142,142}
+temp	float	$tmp78	%read{147,147} %write{144,144}
+temp	float	$tmp79	%read{146,146} %write{145,145}
+temp	float	$tmp80	%read{147,147} %write{146,146}
+temp	float	$tmp81	%read{150,150} %write{147,147}
+temp	float	$tmp82	%read{149,149} %write{148,148}
+temp	float	$tmp83	%read{150,150} %write{149,149}
+temp	float	$tmp84	%read{154,154} %write{151,151}
+temp	float	$tmp85	%read{153,153} %write{152,152}
+temp	float	$tmp86	%read{154,154} %write{153,153}
+temp	float	$tmp87	%read{157,157} %write{154,154}
+temp	float	$tmp88	%read{156,156} %write{155,155}
+temp	float	$tmp89	%read{157,157} %write{156,156}
+const	point	$const19	123.456001 867.530884 555.121216		%read{161,165} %write{2147483647,-1}
+temp	point	$tmp91	%read{162,162} %write{161,161}
+temp	point	$tmp93	%read{164,164} %write{163,163}
+temp	point	$tmp95	%read{166,166} %write{165,165}
+temp	int	$tmp96	%read{168,171} %write{167,170}
+temp	int	$tmp97	%read{170,170} %write{169,169}
+temp	int	$tmp98	%read{172,175} %write{171,174}
+temp	int	$tmp99	%read{174,174} %write{173,173}
+const	float	$const20	6.28318548		%read{179,195} %write{2147483647,-1}
+temp	float	$tmp100	%read{182,182} %write{179,179}
+temp	float	$tmp101	%read{181,181} %write{180,180}
+temp	float	$tmp102	%read{182,182} %write{181,181}
+temp	float	$tmp103	%read{183,183} %write{182,182}
+temp	float	$tmp104	%read{186,186} %write{183,183}
+const	string	$const21	"degrees"		%read{184,200} %write{2147483647,-1}
+const	float	$const22	180		%read{185,256} %write{2147483647,-1}
+const	float	$const23	3.14159274		%read{185,256} %write{2147483647,-1}
+temp	float	$tmp105	%read{186,186} %write{185,185}
+temp	float	$tmp106	%read{190,190} %write{187,187}
+temp	float	$tmp107	%read{189,189} %write{188,188}
+temp	float	$tmp108	%read{190,190} %write{189,189}
+temp	float	$tmp109	%read{191,191} %write{190,190}
+temp	float	$tmp110	%read{194,194} %write{191,191}
+temp	float	$tmp111	%read{194,194} %write{193,193}
+temp	float	$tmp112	%read{198,198} %write{195,195}
+temp	float	$tmp113	%read{197,197} %write{196,196}
+temp	float	$tmp114	%read{198,198} %write{197,197}
+temp	float	$tmp115	%read{199,199} %write{198,198}
+temp	float	$tmp116	%read{202,202} %write{199,199}
+temp	float	$tmp117	%read{202,202} %write{201,201}
+temp	float	$tmp118	%read{205,209} %write{203,203}
+const	string	$const24	"Math_RotateZ"		%read{204,259} %write{2147483647,-1}
+temp	int	$tmp119	%read{206,206} %write{205,205}
+temp	float	$tmp120	%read{210,210} %write{209,209}
+const	string	$const25	"radians"		%read{207,255} %write{2147483647,-1}
+temp	float	$tmp121	%read{209,209} %write{208,208}
+temp	float	$tmp122	%read{213,213} %write{212,212}
+temp	float	$tmp123	%read{216,216} %write{213,213}
+temp	float	$tmp124	%read{215,215} %write{214,214}
+temp	float	$tmp125	%read{216,216} %write{215,215}
+temp	float	$tmp126	%read{223,223} %write{216,216}
+temp	float	$tmp127	%read{218,218} %write{217,217}
+temp	float	$tmp128	%read{221,221} %write{218,218}
+temp	float	$tmp129	%read{220,220} %write{219,219}
+temp	float	$tmp130	%read{221,221} %write{220,220}
+temp	float	$tmp131	%read{223,223} %write{221,221}
+temp	float	$tmp132	%read{223,223} %write{222,222}
+temp	float	$tmp133	%read{229,233} %write{227,227}
+temp	int	$tmp134	%read{230,230} %write{229,229}
+temp	float	$tmp135	%read{234,234} %write{233,233}
+temp	float	$tmp136	%read{233,233} %write{232,232}
+temp	float	$tmp137	%read{237,237} %write{236,236}
+temp	float	$tmp138	%read{240,240} %write{237,237}
+temp	float	$tmp139	%read{239,239} %write{238,238}
+temp	float	$tmp140	%read{240,240} %write{239,239}
+temp	float	$tmp141	%read{247,247} %write{240,240}
+temp	float	$tmp142	%read{242,242} %write{241,241}
+temp	float	$tmp143	%read{245,245} %write{242,242}
+temp	float	$tmp144	%read{244,244} %write{243,243}
+temp	float	$tmp145	%read{245,245} %write{244,244}
+temp	float	$tmp146	%read{247,247} %write{245,245}
+temp	float	$tmp147	%read{247,247} %write{246,246}
+temp	float	$tmp148	%read{253,257} %write{251,251}
+temp	int	$tmp149	%read{254,254} %write{253,253}
+temp	float	$tmp150	%read{258,258} %write{257,257}
+temp	float	$tmp151	%read{257,257} %write{256,256}
+temp	float	$tmp152	%read{261,261} %write{260,260}
+temp	float	$tmp153	%read{264,264} %write{261,261}
+temp	float	$tmp154	%read{263,263} %write{262,262}
+temp	float	$tmp155	%read{264,264} %write{263,263}
+temp	float	$tmp156	%read{271,271} %write{264,264}
+temp	float	$tmp157	%read{266,266} %write{265,265}
+temp	float	$tmp158	%read{269,269} %write{266,266}
+temp	float	$tmp159	%read{268,268} %write{267,267}
+temp	float	$tmp160	%read{269,269} %write{268,268}
+temp	float	$tmp161	%read{271,271} %write{269,269}
+temp	float	$tmp162	%read{271,271} %write{270,270}
+temp	int	$tmp163	%read{276,276} %write{275,275}
+temp	float	$tmp164	%read{280,280} %write{279,279}
+const	float	$const26	2		%read{278,286} %write{2147483647,-1}
+temp	float	$tmp165	%read{278,278} %write{277,277}
+temp	float	$tmp166	%read{279,279} %write{278,278}
+temp	float	$tmp167	%read{284,284} %write{283,283}
+temp	float	$tmp168	%read{282,282} %write{281,281}
+temp	float	$tmp169	%read{283,283} %write{282,282}
+temp	float	$tmp170	%read{288,288} %write{287,287}
+temp	float	$tmp171	%read{286,286} %write{285,285}
+temp	float	$tmp172	%read{287,287} %write{286,286}
+temp	int	$tmp173	%read{290,290} %write{289,289}
+const	vector	$const27	555.121216 1234.56702 8675.30859		%read{297,301} %write{2147483647,-1}
+temp	point	$tmp175	%read{298,298} %write{297,297}
+temp	point	$tmp177	%read{300,300} %write{299,299}
+temp	point	$tmp179	%read{302,302} %write{301,301}
+temp	int	$tmp180	%read{310,310} %write{309,309}
+const	float	$const28	8		%read{311,311} %write{2147483647,-1}
+temp	float	$tmp181	%read{316,316} %write{315,315}
+temp	float	$tmp182	%read{317,317} %write{316,316}
+temp	float	$tmp183	%read{324,324} %write{321,321}
+temp	float	$tmp184	%read{324,324} %write{322,322}
+temp	float	$tmp185	%read{324,324} %write{323,323}
+temp	float	$tmp186	%read{329,329} %write{326,326}
+temp	float	$tmp187	%read{329,329} %write{327,327}
+temp	float	$tmp188	%read{329,329} %write{328,328}
+temp	point	$tmp189	%read{335,335} %write{333,333}
+temp	point	$tmp190	%read{335,335} %write{334,334}
+const	point	$const29	0 0 1		%read{342,342} %write{2147483647,-1}
+code resultMulti.Tn
+# PxrHexTileManifold.osl:130
+#     output PxrManifoldMulti resultMulti = MULTIMANIFOLD_ZERO
+	aassign		resultMulti.Tn $const2 $const1 	%filename{"PxrHexTileManifold.osl"} %line{130} %argrw{"wrr"}
+	aassign		resultMulti.Tn $const3 $const1 	%argrw{"wrr"}
+	aassign		resultMulti.Tn $const4 $const1 	%argrw{"wrr"}
+	aassign		resultMulti.Tn $const5 $const1 	%argrw{"wrr"}
+code resultMulti.Bn
+# PxrHexTileManifold.osl:130
+#     output PxrManifoldMulti resultMulti = MULTIMANIFOLD_ZERO
+	aassign		resultMulti.Bn $const2 $const1 	%filename{"PxrHexTileManifold.osl"} %line{130} %argrw{"wrr"}
+	aassign		resultMulti.Bn $const3 $const1 	%argrw{"wrr"}
+	aassign		resultMulti.Bn $const4 $const1 	%argrw{"wrr"}
+	aassign		resultMulti.Bn $const5 $const1 	%argrw{"wrr"}
+code resultMulti.hextile0
+# PxrHexTileManifold.osl:130
+#     output PxrManifoldMulti resultMulti = MULTIMANIFOLD_ZERO
+	aassign		resultMulti.hextile0 $const2 $const6 	%filename{"PxrHexTileManifold.osl"} %line{130} %argrw{"wrr"}
+	aassign		resultMulti.hextile0 $const3 $const6 	%argrw{"wrr"}
+	aassign		resultMulti.hextile0 $const4 $const7 	%argrw{"wrr"}
+	aassign		resultMulti.hextile0 $const5 $const6 	%argrw{"wrr"}
+code resultMulti.hextile1
+# PxrHexTileManifold.osl:130
+#     output PxrManifoldMulti resultMulti = MULTIMANIFOLD_ZERO
+	aassign		resultMulti.hextile1 $const2 $const6 	%filename{"PxrHexTileManifold.osl"} %line{130} %argrw{"wrr"}
+	aassign		resultMulti.hextile1 $const3 $const6 	%argrw{"wrr"}
+	aassign		resultMulti.hextile1 $const4 $const7 	%argrw{"wrr"}
+	aassign		resultMulti.hextile1 $const5 $const6 	%argrw{"wrr"}
+code resultMulti.hextile2
+# PxrHexTileManifold.osl:130
+#     output PxrManifoldMulti resultMulti = MULTIMANIFOLD_ZERO
+	aassign		resultMulti.hextile2 $const2 $const6 	%filename{"PxrHexTileManifold.osl"} %line{130} %argrw{"wrr"}
+	aassign		resultMulti.hextile2 $const3 $const6 	%argrw{"wrr"}
+	aassign		resultMulti.hextile2 $const4 $const7 	%argrw{"wrr"}
+	aassign		resultMulti.hextile2 $const5 $const6 	%argrw{"wrr"}
+code resultMulti.hextile3
+# PxrHexTileManifold.osl:130
+#     output PxrManifoldMulti resultMulti = MULTIMANIFOLD_ZERO
+	aassign		resultMulti.hextile3 $const2 $const6 	%filename{"PxrHexTileManifold.osl"} %line{130} %argrw{"wrr"}
+	aassign		resultMulti.hextile3 $const3 $const6 	%argrw{"wrr"}
+	aassign		resultMulti.hextile3 $const4 $const7 	%argrw{"wrr"}
+	aassign		resultMulti.hextile3 $const5 $const6 	%argrw{"wrr"}
+code ___main___
+# PxrHexTileManifold.osl:138
+#     point Q = point(s, invertT ? invertCoord(t) : t, 0);
+	if		invertT 31 32 	%filename{"PxrHexTileManifold.osl"} %line{138} %argrw{"r"}
+	functioncall	$const8 31 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:48
+#     return floor(tt) + 1.0 - (tt - floor(tt));
+	floor		$tmp26 t 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h"} %line{48} %argrw{"wr"}
+	add		$tmp27 $tmp26 $const9 	%argrw{"wrr"}
+	floor		$tmp28 t 	%argrw{"wr"}
+	sub		$tmp29 t $tmp28 	%argrw{"wrr"}
+	sub		$tmp25 $tmp27 $tmp29 	%argrw{"wrr"}
+# PxrHexTileManifold.osl:138
+#     point Q = point(s, invertT ? invertCoord(t) : t, 0);
+	assign		$tmp25 t 	%filename{"PxrHexTileManifold.osl"} %line{138} %argrw{"wr"}
+	point		Q s $tmp25 $const10 	%argrw{"wrrr"}
+# PxrHexTileManifold.osl:139
+#     normal QN = N;
+	assign		QN N 	%line{139} %argrw{"wr"}
+# PxrHexTileManifold.osl:140
+#     float Qradius = 0;
+	assign		Qradius $const2 	%line{140} %argrw{"wr"}
+# PxrHexTileManifold.osl:142
+#     vector cellOrientation = vector(customOrientation);
+	assign		cellOrientation customOrientation 	%line{142} %argrw{"wr"}
+# PxrHexTileManifold.osl:143
+#     int useCustomOrientation = isconnected(customOrientation);
+	isconnected	useCustomOrientation customOrientation 	%line{143} %argrw{"wr"}
+# PxrHexTileManifold.osl:145
+#     Q *= gridFrequency;
+	mul		Q Q gridFrequency 	%line{145} %argrw{"wrr"}
+# PxrHexTileManifold.osl:147
+#     vector STOrientation = cellOrientation;
+	assign		STOrientation cellOrientation 	%line{147} %argrw{"wr"}
+# PxrHexTileManifold.osl:150
+#     ComputeCoordinateSystemFromUvMap(Q[0],Q[1],U,V,W);
+	compref		$tmp30 Q $const2 	%line{150} %argrw{"wrr"}
+	compref		$tmp31 Q $const3 	%argrw{"wrr"}
+	functioncall	$const11 68 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTangentSpace.h:53
+#     float dsdu = Dx(s);
+	Dx		___417_dsdu $tmp30 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTangentSpace.h"} %line{53} %argrw{"wr"} %argderivs{1}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTangentSpace.h:54
+#     float dtdu = Dx(t);
+	Dx		___417_dtdu $tmp31 	%line{54} %argrw{"wr"} %argderivs{1}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTangentSpace.h:55
+#     float dsdv = Dy(s);
+	Dy		___417_dsdv $tmp30 	%line{55} %argrw{"wr"} %argderivs{1}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTangentSpace.h:56
+#     float dtdv = Dy(t);
+	Dy		___417_dtdv $tmp31 	%line{56} %argrw{"wr"} %argderivs{1}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTangentSpace.h:69
+#     float det = dsdu * dtdv - dtdu * dsdv;
+	mul		$tmp32 ___417_dsdu ___417_dtdv 	%line{69} %argrw{"wrr"}
+	mul		$tmp33 ___417_dtdu ___417_dsdv 	%argrw{"wrr"}
+	sub		___417_det $tmp32 $tmp33 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTangentSpace.h:71
+#     if (isnan(det) || det == 0) {
+	isnan		$tmp34 ___417_det 	%line{71} %argrw{"wr"}
+	neq		$tmp35 $tmp34 $const2 	%argrw{"wrr"}
+	if		$tmp35 52 55 	%argrw{"r"}
+	eq		$tmp36 ___417_det $const2 	%argrw{"wrr"}
+	neq		$tmp37 $tmp36 $const2 	%argrw{"wrr"}
+	assign		$tmp35 $tmp37 	%argrw{"wr"}
+	if		$tmp35 58 67 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTangentSpace.h:76
+#         U = dPdu;
+	assign		U dPdu 	%line{76} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTangentSpace.h:77
+#         V = dPdv;
+	assign		V dPdv 	%line{77} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTangentSpace.h:84
+#         U = ( dtdv * dPdu - dtdu * dPdv) / det;
+	mul		$tmp38 ___417_dtdv dPdu 	%line{84} %argrw{"wrr"}
+	mul		$tmp39 ___417_dtdu dPdv 	%argrw{"wrr"}
+	sub		$tmp40 $tmp38 $tmp39 	%argrw{"wrr"}
+	div		U $tmp40 ___417_det 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTangentSpace.h:85
+#         V = (-dsdv * dPdu + dsdu * dPdv) / det;
+	neg		$tmp41 ___417_dsdv 	%line{85} %argrw{"wr"}
+	mul		$tmp42 $tmp41 dPdu 	%argrw{"wrr"}
+	mul		$tmp43 ___417_dsdu dPdv 	%argrw{"wrr"}
+	add		$tmp44 $tmp42 $tmp43 	%argrw{"wrr"}
+	div		V $tmp44 ___417_det 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTangentSpace.h:90
+#     W = N;
+	assign		W N 	%line{90} %argrw{"wr"}
+# PxrHexTileManifold.osl:156
+#     W = normalize(transform("current","object",W));
+	transformv	$tmp45 $const12 $const13 W 	%filename{"PxrHexTileManifold.osl"} %line{156} %argrw{"wrrr"}
+	normalize	W $tmp45 	%argrw{"wr"}
+# PxrHexTileManifold.osl:157
+#     U = normalize(transform("current","object",U));
+	transformv	$tmp46 $const12 $const13 U 	%line{157} %argrw{"wrrr"}
+	normalize	U $tmp46 	%argrw{"wr"}
+# PxrHexTileManifold.osl:160
+#     STOrientation = cross(W, STOrientation);
+	cross		STOrientation W STOrientation 	%line{160} %argrw{"wrr"}
+# PxrHexTileManifold.osl:164
+#     float orientationAngleST = atan2(dot(cross(STOrientation, U), W),
+	cross		$tmp49 STOrientation U 	%line{164} %argrw{"wrr"}
+	dot		$tmp48 $tmp49 W 	%argrw{"wrr"}
+# PxrHexTileManifold.osl:165
+#                                         dot(U, STOrientation)) - 1.5708;
+	dot		$tmp50 U STOrientation 	%line{165} %argrw{"wrr"}
+# PxrHexTileManifold.osl:164
+#     float orientationAngleST = atan2(dot(cross(STOrientation, U), W),
+	atan2		$tmp47 $tmp48 $tmp50 	%line{164} %argrw{"wrr"}
+# PxrHexTileManifold.osl:165
+#                                         dot(U, STOrientation)) - 1.5708;
+	sub		orientationAngleST $tmp47 $const14 	%line{165} %argrw{"wrr"}
+# PxrHexTileManifold.osl:169
+#     hexTile(point(Q[0], Q[1], 0.0),
+	compref		$tmp52 Q $const2 	%line{169} %argrw{"wrr"}
+	compref		$tmp53 Q $const3 	%argrw{"wrr"}
+	point		$tmp51 $tmp52 $tmp53 $const10 	%argrw{"wrrr"}
+	functioncall	$const15 337 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:94
+#     float cellRotation = rotation;
+	assign		___709_cellRotation customRotation 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h"} %line{94} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:95
+#     float r1 = 0, r2 = 0, r3 = 0;
+	assign		___709_r1 $const2 	%line{95} %argrw{"wr"}
+	assign		___709_r2 $const2 	%argrw{"wr"}
+	assign		___709_r3 $const2 	%argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:97
+#     float s = pIn[0];
+	compref		___709_s $tmp51 $const2 	%line{97} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:98
+#     float t = pIn[1];
+	compref		___709_t $tmp51 $const3 	%line{98} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:104
+#     float Yscale = 1.154700538;
+	assign		___709_Yscale $const16 	%line{104} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:105
+#     float invYscale = 0.866025404;
+	assign		___709_invYscale $const17 	%line{105} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:107
+#     float cellY = t * Yscale;
+	mul		___709_cellY ___709_t ___709_Yscale 	%line{107} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:109
+#     float cellX = s - cellY * 0.5;
+	mul		$tmp54 ___709_cellY $const18 	%line{109} %argrw{"wrr"}
+	sub		___709_cellX ___709_s $tmp54 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:110
+#     float cellXInt = floor(cellX);
+	floor		___709_cellXInt ___709_cellX 	%line{110} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:111
+#     float cellYInt = floor(cellY);
+	floor		___709_cellYInt ___709_cellY 	%line{111} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:112
+#     float cellXFract = cellX - cellXInt;
+	sub		___709_cellXFract ___709_cellX ___709_cellXInt 	%line{112} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:113
+#     float cellYFract = cellY - cellYInt;
+	sub		___709_cellYFract ___709_cellY ___709_cellYInt 	%line{113} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:118
+#     point cellV1 = point(cellXInt,   cellYInt,   0.0);
+	point		___709_cellV1 ___709_cellXInt ___709_cellYInt $const10 	%line{118} %argrw{"wrrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:119
+#     point cellV2 = point(cellXInt+1, cellYInt,   0.0);
+	add		$tmp55 ___709_cellXInt $const9 	%line{119} %argrw{"wrr"}
+	point		___709_cellV2 $tmp55 ___709_cellYInt $const10 	%argrw{"wrrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:120
+#     point cellV3 = point(cellXInt,   cellYInt+1, 0.0);
+	add		$tmp56 ___709_cellYInt $const9 	%line{120} %argrw{"wrr"}
+	point		___709_cellV3 ___709_cellXInt $tmp56 $const10 	%argrw{"wrrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:121
+#     float cellW1 = 1.0 - cellXFract - cellYFract;
+	sub		$tmp57 $const9 ___709_cellXFract 	%line{121} %argrw{"wrr"}
+	sub		___709_cellW1 $tmp57 ___709_cellYFract 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:122
+#     float cellW2 = cellXFract;
+	assign		___709_cellW2 ___709_cellXFract 	%line{122} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:123
+#     float cellW3 = cellYFract;
+	assign		___709_cellW3 ___709_cellYFract 	%line{123} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:127
+#     if (cellXFract + cellYFract > 1.0) {
+	add		$tmp58 ___709_cellXFract ___709_cellYFract 	%line{127} %argrw{"wrr"}
+	gt		$tmp59 $tmp58 $const9 	%argrw{"wrr"}
+	if		$tmp59 116 116 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:128
+#         cellV1 = point(cellXInt+1, cellYInt+1, 0.0);
+	add		$tmp60 ___709_cellXInt $const9 	%line{128} %argrw{"wrr"}
+	add		$tmp61 ___709_cellYInt $const9 	%argrw{"wrr"}
+	point		___709_cellV1 $tmp60 $tmp61 $const10 	%argrw{"wrrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:129
+#         cellW1 = -cellW1;
+	neg		___709_cellW1 ___709_cellW1 	%line{129} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:130
+#         cellW2 = 1.0 - cellW3;
+	sub		___709_cellW2 $const9 ___709_cellW3 	%line{130} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:131
+#         cellW3 = 1.0 - cellW1 - cellW2;
+	sub		$tmp62 $const9 ___709_cellW1 	%line{131} %argrw{"wrr"}
+	sub		___709_cellW3 $tmp62 ___709_cellW2 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:135
+#     point textureST1 = point(s, t, 0.0);
+	point		___709_textureST1 ___709_s ___709_t $const10 	%line{135} %argrw{"wrrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:136
+#     point textureST2 = point(s, t, 0.0);
+	point		___709_textureST2 ___709_s ___709_t $const10 	%line{136} %argrw{"wrrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:137
+#     point textureST3 = point(s, t, 0.0);
+	point		___709_textureST3 ___709_s ___709_t $const10 	%line{137} %argrw{"wrrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:139
+#     if (texFreq != 1.0 ||
+	neq		$tmp63 textureFrequency $const9 	%line{139} %argrw{"wrr"}
+	neq		$tmp64 $tmp63 $const2 	%argrw{"wrr"}
+	if		$tmp64 122 124 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:140
+#         scaleJitter ||
+	neq		$tmp65 scaleJitter $const10 	%line{140} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:139
+#     if (texFreq != 1.0 ||
+	assign		$tmp64 $tmp65 	%line{139} %argrw{"wr"}
+	neq		$tmp66 $tmp64 $const2 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:140
+#         scaleJitter ||
+	if		$tmp66 126 128 	%line{140} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:141
+#         rotateJitter ||
+	neq		$tmp67 rotateJitter $const10 	%line{141} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:140
+#         scaleJitter ||
+	assign		$tmp66 $tmp67 	%line{140} %argrw{"wr"}
+	neq		$tmp68 $tmp66 $const2 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:141
+#         rotateJitter ||
+	if		$tmp68 130 132 	%line{141} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:142
+#         cellRotation ||
+	neq		$tmp69 ___709_cellRotation $const10 	%line{142} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:141
+#         rotateJitter ||
+	assign		$tmp68 $tmp69 	%line{141} %argrw{"wr"}
+	neq		$tmp70 $tmp68 $const2 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:142
+#         cellRotation ||
+	if		$tmp70 134 136 	%line{142} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:143
+#         useOrientation) {
+	neq		$tmp71 useCustomOrientation $const2 	%line{143} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:142
+#         cellRotation ||
+	assign		$tmp70 $tmp71 	%line{142} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:139
+#     if (texFreq != 1.0 ||
+	if		$tmp70 297 297 	%line{139} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:147
+#         point cellOffset1 = point(cellV1[0] + cellV1[1] * 0.5,
+	compref		$tmp72 ___709_cellV1 $const2 	%line{147} %argrw{"wrr"}
+	compref		$tmp73 ___709_cellV1 $const3 	%argrw{"wrr"}
+	mul		$tmp74 $tmp73 $const18 	%argrw{"wrr"}
+	add		$tmp75 $tmp72 $tmp74 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:148
+#                                   cellV1[1] * invYscale,
+	compref		$tmp76 ___709_cellV1 $const3 	%line{148} %argrw{"wrr"}
+	mul		$tmp77 $tmp76 ___709_invYscale 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:147
+#         point cellOffset1 = point(cellV1[0] + cellV1[1] * 0.5,
+	point		___711_cellOffset1 $tmp75 $tmp77 $const10 	%line{147} %argrw{"wrrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:150
+#         point cellOffset2 = point(cellV2[0] + cellV2[1] * 0.5,
+	compref		$tmp78 ___709_cellV2 $const2 	%line{150} %argrw{"wrr"}
+	compref		$tmp79 ___709_cellV2 $const3 	%argrw{"wrr"}
+	mul		$tmp80 $tmp79 $const18 	%argrw{"wrr"}
+	add		$tmp81 $tmp78 $tmp80 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:151
+#                                   cellV2[1] * invYscale,
+	compref		$tmp82 ___709_cellV2 $const3 	%line{151} %argrw{"wrr"}
+	mul		$tmp83 $tmp82 ___709_invYscale 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:150
+#         point cellOffset2 = point(cellV2[0] + cellV2[1] * 0.5,
+	point		___711_cellOffset2 $tmp81 $tmp83 $const10 	%line{150} %argrw{"wrrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:153
+#         point cellOffset3 = point(cellV3[0] + cellV3[1] * 0.5,
+	compref		$tmp84 ___709_cellV3 $const2 	%line{153} %argrw{"wrr"}
+	compref		$tmp85 ___709_cellV3 $const3 	%argrw{"wrr"}
+	mul		$tmp86 $tmp85 $const18 	%argrw{"wrr"}
+	add		$tmp87 $tmp84 $tmp86 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:154
+#                                   cellV3[1] * invYscale,
+	compref		$tmp88 ___709_cellV3 $const3 	%line{154} %argrw{"wrr"}
+	mul		$tmp89 $tmp88 ___709_invYscale 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:153
+#         point cellOffset3 = point(cellV3[0] + cellV3[1] * 0.5,
+	point		___711_cellOffset3 $tmp87 $tmp89 $const10 	%line{153} %argrw{"wrrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:158
+#         point origin1 = textureST1 - cellOffset1;
+	sub		___711_origin1 ___709_textureST1 ___711_cellOffset1 	%line{158} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:159
+#         point origin2 = textureST2 - cellOffset2;
+	sub		___711_origin2 ___709_textureST2 ___711_cellOffset2 	%line{159} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:160
+#         point origin3 = textureST3 - cellOffset3;
+	sub		___711_origin3 ___709_textureST3 ___711_cellOffset3 	%line{160} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:163
+#         point noiseV1 = cellnoise(cellV1 * point(123.456, 867.5309, 555.1212));
+	mul		$tmp91 ___709_cellV1 $const19 	%line{163} %argrw{"wrr"}
+	cellnoise	___711_noiseV1 $tmp91 	%argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:164
+#         point noiseV2 = cellnoise(cellV2 * point(123.456, 867.5309, 555.1212));
+	mul		$tmp93 ___709_cellV2 $const19 	%line{164} %argrw{"wrr"}
+	cellnoise	___711_noiseV2 $tmp93 	%argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:165
+#         point noiseV3 = cellnoise(cellV3 * point(123.456, 867.5309, 555.1212));
+	mul		$tmp95 ___709_cellV3 $const19 	%line{165} %argrw{"wrr"}
+	cellnoise	___711_noiseV3 $tmp95 	%argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:168
+#         if (rotateJitter || cellRotation || useOrientation)
+	neq		$tmp96 rotateJitter $const10 	%line{168} %argrw{"wrr"}
+	if		$tmp96 169 171 	%argrw{"r"}
+	neq		$tmp97 ___709_cellRotation $const10 	%argrw{"wrr"}
+	assign		$tmp96 $tmp97 	%argrw{"wr"}
+	neq		$tmp98 $tmp96 $const2 	%argrw{"wrr"}
+	if		$tmp98 173 175 	%argrw{"r"}
+	neq		$tmp99 useCustomOrientation $const2 	%argrw{"wrr"}
+	assign		$tmp98 $tmp99 	%argrw{"wr"}
+	if		$tmp98 275 275 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:170
+#             float angle = 0.0;
+	assign		___712_angle $const10 	%line{170} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:171
+#             if (useOrientation)
+	if		useCustomOrientation 179 179 	%line{171} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:172
+#                 angle = orientation;
+	assign		___712_angle orientationAngleST 	%line{172} %argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:174
+#             r1 = degrees(M_2PI * rotateJitter * (noiseV1[0]-0.5) + angle);
+	mul		$tmp100 $const20 rotateJitter 	%line{174} %argrw{"wrr"}
+	compref		$tmp101 ___711_noiseV1 $const2 	%argrw{"wrr"}
+	sub		$tmp102 $tmp101 $const18 	%argrw{"wrr"}
+	mul		$tmp103 $tmp100 $tmp102 	%argrw{"wrr"}
+	add		$tmp104 $tmp103 ___712_angle 	%argrw{"wrr"}
+	functioncall	$const21 187 	%argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:83
+# float  degrees (float x)  { return x*(180.0/M_PI); }
+	div		$tmp105 $const22 $const23 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{83} %argrw{"wrr"}
+	mul		___709_r1 $tmp104 $tmp105 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:175
+#             r2 = degrees(M_2PI * rotateJitter * (noiseV2[0]-0.5) + angle);
+	mul		$tmp106 $const20 rotateJitter 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h"} %line{175} %argrw{"wrr"}
+	compref		$tmp107 ___711_noiseV2 $const2 	%argrw{"wrr"}
+	sub		$tmp108 $tmp107 $const18 	%argrw{"wrr"}
+	mul		$tmp109 $tmp106 $tmp108 	%argrw{"wrr"}
+	add		$tmp110 $tmp109 ___712_angle 	%argrw{"wrr"}
+	functioncall	$const21 195 	%argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:83
+# float  degrees (float x)  { return x*(180.0/M_PI); }
+	div		$tmp111 $const22 $const23 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{83} %argrw{"wrr"}
+	mul		___709_r2 $tmp110 $tmp111 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:176
+#             r3 = degrees(M_2PI * rotateJitter * (noiseV3[0]-0.5) + angle);
+	mul		$tmp112 $const20 rotateJitter 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h"} %line{176} %argrw{"wrr"}
+	compref		$tmp113 ___711_noiseV3 $const2 	%argrw{"wrr"}
+	sub		$tmp114 $tmp113 $const18 	%argrw{"wrr"}
+	mul		$tmp115 $tmp112 $tmp114 	%argrw{"wrr"}
+	add		$tmp116 $tmp115 ___712_angle 	%argrw{"wrr"}
+	functioncall	$const21 203 	%argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:83
+# float  degrees (float x)  { return x*(180.0/M_PI); }
+	div		$tmp117 $const22 $const23 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{83} %argrw{"wrr"}
+	mul		___709_r3 $tmp116 $tmp117 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:178
+#             origin1 = Math_RotateZ(cellRotation + r1, origin1);
+	add		$tmp118 ___709_cellRotation ___709_r1 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h"} %line{178} %argrw{"wrr"}
+	functioncall	$const24 227 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:309
+#     if (angle != 0.0) {
+	neq		$tmp119 $tmp118 $const10 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{309} %argrw{"wrr"}
+	if		$tmp119 225 227 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:311
+#         sincos(radians(angle), sinAng, cosAng);
+	functioncall	$const25 210 	%line{311} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:88
+# float  radians (float x)  { return x*(M_PI/180.0); }
+	div		$tmp121 $const23 $const22 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{88} %argrw{"wrr"}
+	mul		$tmp120 $tmp118 $tmp121 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:311
+#         sincos(radians(angle), sinAng, cosAng);
+	sincos		$tmp120 ___356_sinAng ___356_cosAng 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{311} %argrw{"rww"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:312
+#         return Math_RotateZ(sinAng, cosAng, Q);
+	functioncall	$const24 224 	%line{312} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:301
+#     return point(cosAng * Q[0] - sinAng * Q[1],
+	compref		$tmp122 ___711_origin1 $const2 	%line{301} %argrw{"wrr"}
+	mul		$tmp123 ___356_cosAng $tmp122 	%argrw{"wrr"}
+	compref		$tmp124 ___711_origin1 $const3 	%argrw{"wrr"}
+	mul		$tmp125 ___356_sinAng $tmp124 	%argrw{"wrr"}
+	sub		$tmp126 $tmp123 $tmp125 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:302
+#                  sinAng * Q[0] + cosAng * Q[1],
+	compref		$tmp127 ___711_origin1 $const2 	%line{302} %argrw{"wrr"}
+	mul		$tmp128 ___356_sinAng $tmp127 	%argrw{"wrr"}
+	compref		$tmp129 ___711_origin1 $const3 	%argrw{"wrr"}
+	mul		$tmp130 ___356_cosAng $tmp129 	%argrw{"wrr"}
+	add		$tmp131 $tmp128 $tmp130 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:303
+#                  Q[2]);
+	compref		$tmp132 ___711_origin1 $const4 	%line{303} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:301
+#     return point(cosAng * Q[0] - sinAng * Q[1],
+	point		___711_origin1 $tmp126 $tmp131 $tmp132 	%line{301} %argrw{"wrrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:312
+#         return Math_RotateZ(sinAng, cosAng, Q);
+	return	%line{312}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:314
+#         return Q;
+	assign		___711_origin1 ___711_origin1 	%line{314} %argrw{"wr"}
+	return
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:179
+#             origin2 = Math_RotateZ(cellRotation + r2, origin2);
+	add		$tmp133 ___709_cellRotation ___709_r2 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h"} %line{179} %argrw{"wrr"}
+	functioncall	$const24 251 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:309
+#     if (angle != 0.0) {
+	neq		$tmp134 $tmp133 $const10 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{309} %argrw{"wrr"}
+	if		$tmp134 249 251 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:311
+#         sincos(radians(angle), sinAng, cosAng);
+	functioncall	$const25 234 	%line{311} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:88
+# float  radians (float x)  { return x*(M_PI/180.0); }
+	div		$tmp136 $const23 $const22 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{88} %argrw{"wrr"}
+	mul		$tmp135 $tmp133 $tmp136 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:311
+#         sincos(radians(angle), sinAng, cosAng);
+	sincos		$tmp135 ___356_sinAng ___356_cosAng 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{311} %argrw{"rww"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:312
+#         return Math_RotateZ(sinAng, cosAng, Q);
+	functioncall	$const24 248 	%line{312} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:301
+#     return point(cosAng * Q[0] - sinAng * Q[1],
+	compref		$tmp137 ___711_origin2 $const2 	%line{301} %argrw{"wrr"}
+	mul		$tmp138 ___356_cosAng $tmp137 	%argrw{"wrr"}
+	compref		$tmp139 ___711_origin2 $const3 	%argrw{"wrr"}
+	mul		$tmp140 ___356_sinAng $tmp139 	%argrw{"wrr"}
+	sub		$tmp141 $tmp138 $tmp140 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:302
+#                  sinAng * Q[0] + cosAng * Q[1],
+	compref		$tmp142 ___711_origin2 $const2 	%line{302} %argrw{"wrr"}
+	mul		$tmp143 ___356_sinAng $tmp142 	%argrw{"wrr"}
+	compref		$tmp144 ___711_origin2 $const3 	%argrw{"wrr"}
+	mul		$tmp145 ___356_cosAng $tmp144 	%argrw{"wrr"}
+	add		$tmp146 $tmp143 $tmp145 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:303
+#                  Q[2]);
+	compref		$tmp147 ___711_origin2 $const4 	%line{303} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:301
+#     return point(cosAng * Q[0] - sinAng * Q[1],
+	point		___711_origin2 $tmp141 $tmp146 $tmp147 	%line{301} %argrw{"wrrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:312
+#         return Math_RotateZ(sinAng, cosAng, Q);
+	return	%line{312}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:314
+#         return Q;
+	assign		___711_origin2 ___711_origin2 	%line{314} %argrw{"wr"}
+	return
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:180
+#             origin3 = Math_RotateZ(cellRotation + r3, origin3);
+	add		$tmp148 ___709_cellRotation ___709_r3 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h"} %line{180} %argrw{"wrr"}
+	functioncall	$const24 275 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:309
+#     if (angle != 0.0) {
+	neq		$tmp149 $tmp148 $const10 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{309} %argrw{"wrr"}
+	if		$tmp149 273 275 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:311
+#         sincos(radians(angle), sinAng, cosAng);
+	functioncall	$const25 258 	%line{311} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:88
+# float  radians (float x)  { return x*(M_PI/180.0); }
+	div		$tmp151 $const23 $const22 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{88} %argrw{"wrr"}
+	mul		$tmp150 $tmp148 $tmp151 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:311
+#         sincos(radians(angle), sinAng, cosAng);
+	sincos		$tmp150 ___356_sinAng ___356_cosAng 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{311} %argrw{"rww"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:312
+#         return Math_RotateZ(sinAng, cosAng, Q);
+	functioncall	$const24 272 	%line{312} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:301
+#     return point(cosAng * Q[0] - sinAng * Q[1],
+	compref		$tmp152 ___711_origin3 $const2 	%line{301} %argrw{"wrr"}
+	mul		$tmp153 ___356_cosAng $tmp152 	%argrw{"wrr"}
+	compref		$tmp154 ___711_origin3 $const3 	%argrw{"wrr"}
+	mul		$tmp155 ___356_sinAng $tmp154 	%argrw{"wrr"}
+	sub		$tmp156 $tmp153 $tmp155 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:302
+#                  sinAng * Q[0] + cosAng * Q[1],
+	compref		$tmp157 ___711_origin3 $const2 	%line{302} %argrw{"wrr"}
+	mul		$tmp158 ___356_sinAng $tmp157 	%argrw{"wrr"}
+	compref		$tmp159 ___711_origin3 $const3 	%argrw{"wrr"}
+	mul		$tmp160 ___356_cosAng $tmp159 	%argrw{"wrr"}
+	add		$tmp161 $tmp158 $tmp160 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:303
+#                  Q[2]);
+	compref		$tmp162 ___711_origin3 $const4 	%line{303} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:301
+#     return point(cosAng * Q[0] - sinAng * Q[1],
+	point		___711_origin3 $tmp156 $tmp161 $tmp162 	%line{301} %argrw{"wrrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:312
+#         return Math_RotateZ(sinAng, cosAng, Q);
+	return	%line{312}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:314
+#         return Q;
+	assign		___711_origin3 ___711_origin3 	%line{314} %argrw{"wr"}
+	return
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:184
+#         if (scaleJitter) {
+	neq		$tmp163 scaleJitter $const10 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h"} %line{184} %argrw{"wrr"}
+	if		$tmp163 289 289 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:185
+#             origin1 *= mix(1.0, 2.0 * noiseV1[1], scaleJitter);
+	compref		$tmp165 ___711_noiseV1 $const3 	%line{185} %argrw{"wrr"}
+	mul		$tmp166 $const26 $tmp165 	%argrw{"wrr"}
+	mix		$tmp164 $const9 $tmp166 scaleJitter 	%argrw{"wrrr"}
+	mul		___711_origin1 ___711_origin1 $tmp164 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:186
+#             origin2 *= mix(1.0, 2.0 * noiseV2[1], scaleJitter);
+	compref		$tmp168 ___711_noiseV2 $const3 	%line{186} %argrw{"wrr"}
+	mul		$tmp169 $const26 $tmp168 	%argrw{"wrr"}
+	mix		$tmp167 $const9 $tmp169 scaleJitter 	%argrw{"wrrr"}
+	mul		___711_origin2 ___711_origin2 $tmp167 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:187
+#             origin3 *= mix(1.0, 2.0 * noiseV3[1], scaleJitter);
+	compref		$tmp171 ___711_noiseV3 $const3 	%line{187} %argrw{"wrr"}
+	mul		$tmp172 $const26 $tmp171 	%argrw{"wrr"}
+	mix		$tmp170 $const9 $tmp172 scaleJitter 	%argrw{"wrrr"}
+	mul		___711_origin3 ___711_origin3 $tmp170 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:190
+#         if (texFreq != 1.0) {
+	neq		$tmp173 textureFrequency $const9 	%line{190} %argrw{"wrr"}
+	if		$tmp173 294 294 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:191
+#             origin1 *= texFreq;
+	mul		___711_origin1 ___711_origin1 textureFrequency 	%line{191} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:192
+#             origin2 *= texFreq;
+	mul		___711_origin2 ___711_origin2 textureFrequency 	%line{192} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:193
+#             origin3 *= texFreq;
+	mul		___711_origin3 ___711_origin3 textureFrequency 	%line{193} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:197
+#         textureST1 = origin1 + cellOffset1;
+	add		___709_textureST1 ___711_origin1 ___711_cellOffset1 	%line{197} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:198
+#         textureST2 = origin2 + cellOffset2;
+	add		___709_textureST2 ___711_origin2 ___711_cellOffset2 	%line{198} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:199
+#         textureST3 = origin3 + cellOffset3;
+	add		___709_textureST3 ___711_origin3 ___711_cellOffset3 	%line{199} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:203
+#     point noiseV1 = cellnoise(cellV1 * vector(555.1212, 1234.567, 8675.309));
+	mul		$tmp175 ___709_cellV1 $const27 	%line{203} %argrw{"wrr"}
+	cellnoise	___709_noiseV1 $tmp175 	%argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:204
+#     point noiseV2 = cellnoise(cellV2 * vector(555.1212, 1234.567, 8675.309));
+	mul		$tmp177 ___709_cellV2 $const27 	%line{204} %argrw{"wrr"}
+	cellnoise	___709_noiseV2 $tmp177 	%argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:205
+#     point noiseV3 = cellnoise(cellV3 * vector(555.1212, 1234.567, 8675.309));
+	mul		$tmp179 ___709_cellV3 $const27 	%line{205} %argrw{"wrr"}
+	cellnoise	___709_noiseV3 $tmp179 	%argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:206
+#     noiseV1 *= translateJitter;
+	mul		___709_noiseV1 ___709_noiseV1 translateJitter 	%line{206} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:207
+#     noiseV2 *= translateJitter;
+	mul		___709_noiseV2 ___709_noiseV2 translateJitter 	%line{207} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:208
+#     noiseV3 *= translateJitter;
+	mul		___709_noiseV3 ___709_noiseV3 translateJitter 	%line{208} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:211
+#     textureST1 = textureST1 + noiseV1;
+	add		___709_textureST1 ___709_textureST1 ___709_noiseV1 	%line{211} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:212
+#     textureST2 = textureST2 + noiseV2;
+	add		___709_textureST2 ___709_textureST2 ___709_noiseV2 	%line{212} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:213
+#     textureST3 = textureST3 + noiseV3;
+	add		___709_textureST3 ___709_textureST3 ___709_noiseV3 	%line{213} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:216
+#     if (blendWidth < 1.0)
+	lt		$tmp180 blendWidth $const9 	%line{216} %argrw{"wrr"}
+	if		$tmp180 321 321 	%argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:218
+#         float transExp = mix(8.0, 1.0, blendWidth);
+	mix		___715_transExp $const28 $const9 blendWidth 	%line{218} %argrw{"wrrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:219
+#         cellW1 = pow(cellW1, transExp);
+	pow		___709_cellW1 ___709_cellW1 ___715_transExp 	%line{219} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:220
+#         cellW2 = pow(cellW2, transExp);
+	pow		___709_cellW2 ___709_cellW2 ___715_transExp 	%line{220} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:221
+#         cellW3 = pow(cellW3, transExp);
+	pow		___709_cellW3 ___709_cellW3 ___715_transExp 	%line{221} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:222
+#         float normW = 1.0 / (cellW1 + cellW2 + cellW3);
+	add		$tmp181 ___709_cellW1 ___709_cellW2 	%line{222} %argrw{"wrr"}
+	add		$tmp182 $tmp181 ___709_cellW3 	%argrw{"wrr"}
+	div		___715_normW $const9 $tmp182 	%argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:223
+#         cellW1 *= normW;
+	mul		___709_cellW1 ___709_cellW1 ___715_normW 	%line{223} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:224
+#         cellW2 *= normW;
+	mul		___709_cellW2 ___709_cellW2 ___715_normW 	%line{224} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:225
+#         cellW3 *= normW;
+	mul		___709_cellW3 ___709_cellW3 ___715_normW 	%line{225} %argrw{"wrr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:229
+#     result.s = point(textureST1[0], textureST2[0], textureST3[0]);
+	compref		$tmp183 ___709_textureST1 $const2 	%line{229} %argrw{"wrr"}
+	compref		$tmp184 ___709_textureST2 $const2 	%argrw{"wrr"}
+	compref		$tmp185 ___709_textureST3 $const2 	%argrw{"wrr"}
+	point		hxt.s $tmp183 $tmp184 $tmp185 	%argrw{"wrrr"}
+	assign		hxt.s hxt.s 	%argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:230
+#     result.t = point(textureST1[1], textureST2[1], textureST3[1]);
+	compref		$tmp186 ___709_textureST1 $const3 	%line{230} %argrw{"wrr"}
+	compref		$tmp187 ___709_textureST2 $const3 	%argrw{"wrr"}
+	compref		$tmp188 ___709_textureST3 $const3 	%argrw{"wrr"}
+	point		hxt.t $tmp186 $tmp187 $tmp188 	%argrw{"wrrr"}
+	assign		hxt.t hxt.t 	%argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:231
+#     result.w = point(cellW1, cellW2, cellW3);
+	point		hxt.w ___709_cellW1 ___709_cellW2 ___709_cellW3 	%line{231} %argrw{"wrrr"}
+	assign		hxt.w hxt.w 	%argrw{"wr"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLHexTile.h:232
+#     result.r = point(r1, r2, r3) + point(cellRotation);
+	point		$tmp189 ___709_r1 ___709_r2 ___709_r3 	%line{232} %argrw{"wrrr"}
+	assign		$tmp190 ___709_cellRotation 	%argrw{"wr"}
+	add		hxt.r $tmp189 $tmp190 	%argrw{"wrr"}
+	assign		hxt.r hxt.r 	%argrw{"wr"}
+# PxrHexTileManifold.osl:180
+#     resultMulti.minNumTextures = 1;
+	assign		resultMulti.minNumTextures $const3 	%filename{"PxrHexTileManifold.osl"} %line{180} %argrw{"wr"}
+# PxrHexTileManifold.osl:181
+#     resultMulti.numTextures = 1;
+	assign		resultMulti.numTextures $const3 	%line{181} %argrw{"wr"}
+# PxrHexTileManifold.osl:182
+#     resultMulti.textureOrder = 0;
+	assign		resultMulti.textureOrder $const2 	%line{182} %argrw{"wr"}
+# PxrHexTileManifold.osl:183
+#     resultMulti.stAlpha0 = point(s, t, 1);
+	point		resultMulti.stAlpha0 s t $const9 	%line{183} %argrw{"wrrr"}
+	assign		resultMulti.stAlpha0 resultMulti.stAlpha0 	%argrw{"wr"}
+# PxrHexTileManifold.osl:184
+#     resultMulti.tileidRunflag0 = point(0, 0, 1);
+	assign		resultMulti.tileidRunflag0 $const29 	%line{184} %argrw{"wr"}
+# PxrHexTileManifold.osl:185
+#     resultMulti.radius = 0; // Will be computed by PxrMultiTexture, based on st.
+	assign		resultMulti.radius $const10 	%line{185} %argrw{"wr"}
+# PxrHexTileManifold.osl:186
+#     resultMulti.hextile0[0] = hxt.s;
+	aassign		resultMulti.hextile0 $const2 hxt.s 	%line{186} %argrw{"wrr"}
+# PxrHexTileManifold.osl:187
+#     resultMulti.hextile0[1] = hxt.t;
+	aassign		resultMulti.hextile0 $const3 hxt.t 	%line{187} %argrw{"wrr"}
+# PxrHexTileManifold.osl:188
+#     resultMulti.hextile0[2] = hxt.w;
+	aassign		resultMulti.hextile0 $const4 hxt.w 	%line{188} %argrw{"wrr"}
+# PxrHexTileManifold.osl:189
+#     resultMulti.hextile0[3] = hxt.r;
+	aassign		resultMulti.hextile0 $const5 hxt.r 	%line{189} %argrw{"wrr"}
+	end

@@ -1,0 +1,176 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrFacingRatio.osl/obj/PxrFacingRatio.oso
+shader PxrFacingRatio	%meta{int,rfm_nodeid,1053349} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/geometry"} %meta{string,rfh_classification,"Pattern/Geometry"} %meta{string,help,"Computes the facing ratio of the geometry : a simple dot product between the camera vector and the surface normal."} 
+param	int	use	0		%meta{string,widget,"mapper"} %meta{string,options,"Camera:0|Direction:1"} %meta{string,page,"Parameters"} %meta{int,page_open,1} %meta{string,help,"Traditionnaly, the facing ratio is computed using the surface normal and the camera vector : This is the Camera mode. It can also be useful to the surface normal with an arbitrary direction, for example to create a dust mask on up-facing parts of a model : This is the Direction mode."} %meta{int,connectable,0} %meta{string,label,"Use"}  %read{5,5} %write{2147483647,-1}
+param	vector	direction	0 1 0		%meta{string,widget,"default"} %meta{string,page,"Parameters"} %meta{string,help,"Only active in Direction mode. Defines an direction of your choice"} %meta{int,connectable,0} %meta{string,label,"Direction"}  %read{9,9} %write{2147483647,-1}
+param	string	coordSys	""		%meta{string,widget,"string"} %meta{string,houdiniui,"oplist"} %meta{string,page,"Parameters"} %meta{string,help,"By default, the direction is in current space. Possible coordinate systems include world, object, or an user defined coordinate system."} %meta{int,connectable,0} %meta{string,label,"Coordinate System"}  %read{10,12} %write{2147483647,-1}
+param	int	faceForward	1		%meta{string,widget,"checkBox"} %meta{string,page,"Parameters"} %meta{string,help,"The facing ratio can be negative if the normal is pointing away from the camera. This will flip the normal to always give a positive result."} %meta{int,connectable,0} %meta{string,label,"Face Forward"}  %read{15,15} %write{2147483647,-1}
+param	int	clamp	0		%meta{string,widget,"checkBox"} %meta{string,page,"Parameters"} %meta{string,help,"Clamps the result between 0 and 1."} %meta{int,connectable,0} %meta{string,label,"clamp"}  %read{22,22} %write{2147483647,-1}
+param	int	invert	0		%meta{string,widget,"checkBox"} %meta{string,page,"Parameters"} %meta{string,help,"Inverts the facing ratio : black becomes white and vice-versa."} %meta{int,connectable,0} %meta{string,label,"Invert"}  %read{31,61} %write{2147483647,-1}
+param	int	mode	0		%meta{string,widget,"mapper"} %meta{string,options,"Gamma:0|Refraction Index:1"} %meta{string,page,"Parameters"} %meta{string,help,"Artistic mode uses Face and Edge Color and Fresnel Exponent. Physical mode uses Refractive Index and Extinction Coefficient as in PxrLM Bxdf."} %meta{int,connectable,0} %meta{string,label,"Mode"}  %read{26,26} %write{2147483647,-1}
+param	float	gamma	1		%meta{string,widget,"default"} %meta{string,page,"Parameters"} %meta{string,help,"A simple gamma function to shape the facing ratio. A value of 1.0 is neutral"} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisPath,"mode"} %meta{string,conditionalVisValue,"0"} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisPath,"mode"} %meta{int,conditionalVisValue,0} %meta{string,label,"Gamma"} %meta{float,max,4} %meta{float,min,0.00999999978}  %read{28,35} %write{2147483647,-1}
+param	float	ior	1.5		%meta{string,page,"Parameters"} %meta{string,help,"Refractive Index is the dielectric index of refraction for the material. Values for this parameter typically lie in the range 1 - 3."} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisPath,"mode"} %meta{string,conditionalVisValue,"1"} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisPath,"mode"} %meta{int,conditionalVisValue,1} %meta{string,label,"Refraction Index"}  %read{38,42} %write{2147483647,-1}
+param	normal	bumpNormal	0 0 0		%meta{string,widget,"default"} %meta{string,page,"Parameters"} %meta{string,help,"If the surface is bump-mapped, input the bump normal here. If not connected, the node will use ths shading normal."} %meta{string,label,"Bump Normal"} %meta{string,readOnly,"True"}  %read{0,4} %write{2147483647,-1}
+oparam	float	resultF	0		%meta{string,help,"resultF (float)"}  %read{17,63} %write{14,63}
+global	vector	I	%read{7,7} %write{2147483647,-1}
+global	normal	N	%read{3,3} %write{2147483647,-1}
+local	float	___325_f	%read{56,58} %write{55,55}
+local	float	___325_f2	%read{57,57} %write{56,56}
+local	normal	Nn	%read{14,14} %write{3,4}
+local	vector	Vn	%read{12,14} %write{8,13}
+local	float	___332_r0	%read{44,60} %write{43,44}
+temp	int	$tmp1	%read{1,1} %write{0,0}
+temp	int	$tmp2	%read{2,2} %write{1,1}
+const	int	$const1	0		%read{1,61} %write{2147483647,-1}
+temp	int	$tmp3	%read{6,6} %write{5,5}
+temp	vector	$tmp4	%read{8,8} %write{7,7}
+const	string	$const2	""		%read{10,10} %write{2147483647,-1}
+temp	int	$tmp5	%read{11,11} %write{10,10}
+const	string	$const3	"current"		%read{12,12} %write{2147483647,-1}
+temp	int	$tmp6	%read{16,20} %write{15,19}
+temp	int	$tmp7	%read{18,18} %write{17,17}
+temp	int	$tmp8	%read{19,19} %write{18,18}
+temp	int	$tmp9	%read{24,24} %write{23,23}
+temp	int	$tmp10	%read{27,27} %write{26,26}
+temp	int	$tmp11	%read{29,29} %write{28,28}
+const	string	$const4	"Invalid value for PxrFacingRatio.gamma: 0"		%read{30,30} %write{2147483647,-1}
+const	float	$const5	1		%read{32,63} %write{2147483647,-1}
+temp	int	$tmp12	%read{34,34} %write{33,33}
+temp	float	$tmp13	%read{36,36} %write{35,35}
+const	float	$const6	0		%read{35,53} %write{2147483647,-1}
+temp	float	$tmp14	%read{37,37} %write{36,36}
+temp	int	$tmp15	%read{39,39} %write{38,38}
+const	string	$const7	"invalid value for PxrFacingRatio.ior: 0"		%read{40,40} %write{2147483647,-1}
+temp	float	$tmp16	%read{43,43} %write{41,41}
+temp	float	$tmp17	%read{43,43} %write{42,42}
+temp	float	$tmp18	%read{59,59} %write{45,45}
+temp	float	$tmp19	%read{59,59} %write{49,58}
+const	string	$const9	"RixSchlickFresnelWeight"		%read{46,46} %write{2147483647,-1}
+temp	int	$tmp20	%read{48,48} %write{47,47}
+temp	int	$tmp21	%read{52,52} %write{51,51}
+temp	float	$tmp22	%read{58,58} %write{57,57}
+temp	float	$tmp23	%read{60,60} %write{59,59}
+temp	int	$tmp24	%read{62,62} %write{61,61}
+code ___main___
+# PxrFacingRatio.osl:181
+#     if (!isconnected(bumpNormal))
+	isconnected	$tmp1 bumpNormal 	%filename{"PxrFacingRatio.osl"} %line{181} %argrw{"wr"}
+	eq		$tmp2 $tmp1 $const1 	%argrw{"wrr"}
+	if		$tmp2 4 5 	%argrw{"r"}
+# PxrFacingRatio.osl:184
+#         Nn = N;
+	assign		Nn N 	%line{184} %argrw{"wr"}
+# PxrFacingRatio.osl:188
+#         Nn = bumpNormal;
+	assign		Nn bumpNormal 	%line{188} %argrw{"wr"}
+# PxrFacingRatio.osl:192
+#     if (use == k_camera)
+	eq		$tmp3 use $const1 	%line{192} %argrw{"wrr"}
+	if		$tmp3 9 14 	%argrw{"r"}
+# PxrFacingRatio.osl:194
+#         Vn = normalize(-I);
+	neg		$tmp4 I 	%line{194} %argrw{"wr"}
+	normalize	Vn $tmp4 	%argrw{"wr"}
+# PxrFacingRatio.osl:198
+#         Vn = direction;
+	assign		Vn direction 	%line{198} %argrw{"wr"}
+# PxrFacingRatio.osl:199
+#         if (coordSys != "") Vn = transform(coordSys, "current", Vn);
+	neq		$tmp5 coordSys $const2 	%line{199} %argrw{"wrr"}
+	if		$tmp5 13 13 	%argrw{"r"}
+	transformv	Vn coordSys $const3 Vn 	%argrw{"wrrr"}
+# PxrFacingRatio.osl:201
+#         Vn = normalize(Vn);
+	normalize	Vn Vn 	%line{201} %argrw{"wr"}
+# PxrFacingRatio.osl:204
+#     resultF = dot(Vn, Nn);
+	dot		resultF Vn Nn 	%line{204} %argrw{"wrr"}
+# PxrFacingRatio.osl:206
+#     if (faceForward && resultF < 0) resultF = -resultF;
+	neq		$tmp6 faceForward $const1 	%line{206} %argrw{"wrr"}
+	if		$tmp6 20 20 	%argrw{"r"}
+	lt		$tmp7 resultF $const1 	%argrw{"wrr"}
+	neq		$tmp8 $tmp7 $const1 	%argrw{"wrr"}
+	assign		$tmp6 $tmp8 	%argrw{"wr"}
+	if		$tmp6 22 22 	%argrw{"r"}
+	neg		resultF resultF 	%argrw{"wr"}
+# PxrFacingRatio.osl:208
+#     if (clamp) resultF = resultF < 0 ? 0 : resultF;
+	if		clamp 26 26 	%line{208} %argrw{"r"}
+	lt		$tmp9 resultF $const1 	%argrw{"wrr"}
+	if		$tmp9 26 26 	%argrw{"r"}
+	assign		resultF $const1 	%argrw{"wr"}
+# PxrFacingRatio.osl:210
+#     if (mode == 0)
+	eq		$tmp10 mode $const1 	%line{210} %argrw{"wrr"}
+	if		$tmp10 38 64 	%argrw{"r"}
+# PxrFacingRatio.osl:212
+#         if (gamma == 0)
+	eq		$tmp11 gamma $const1 	%line{212} %argrw{"wrr"}
+	if		$tmp11 31 31 	%argrw{"r"}
+# PxrFacingRatio.osl:214
+#             warning("Invalid value for PxrFacingRatio.gamma: 0");
+	warning		$const4 	%line{214} %argrw{"r"}
+# PxrFacingRatio.osl:217
+#         if (invert) resultF = 1.0 - resultF;
+	if		invert 33 33 	%line{217} %argrw{"r"}
+	sub		resultF $const5 resultF 	%argrw{"wrr"}
+# PxrFacingRatio.osl:219
+#         if (gamma != 1.0) resultF = pow(resultF, 1.0 / max(gamma, 0.0));
+	neq		$tmp12 gamma $const5 	%line{219} %argrw{"wrr"}
+	if		$tmp12 38 38 	%argrw{"r"}
+	max		$tmp13 gamma $const6 	%argrw{"wrr"}
+	div		$tmp14 $const5 $tmp13 	%argrw{"wrr"}
+	pow		resultF resultF $tmp14 	%argrw{"wrr"}
+# PxrFacingRatio.osl:223
+#         if (ior == 0)
+	eq		$tmp15 ior $const1 	%line{223} %argrw{"wrr"}
+	if		$tmp15 41 41 	%argrw{"r"}
+# PxrFacingRatio.osl:225
+#             warning("invalid value for PxrFacingRatio.ior: 0");
+	warning		$const7 	%line{225} %argrw{"r"}
+# PxrFacingRatio.osl:228
+#         float r0 = ((1.0 - ior) / (1 + ior));
+	sub		$tmp16 $const5 ior 	%line{228} %argrw{"wrr"}
+	add		$tmp17 $const5 ior 	%argrw{"wrr"}
+	div		___332_r0 $tmp16 $tmp17 	%argrw{"wrr"}
+# PxrFacingRatio.osl:229
+#         r0 *= r0;
+	mul		___332_r0 ___332_r0 ___332_r0 	%line{229} %argrw{"wrr"}
+# PxrFacingRatio.osl:231
+#         resultF = r0 + (1.0 - r0) * RixSchlickFresnelWeight(resultF);
+	sub		$tmp18 $const5 ___332_r0 	%line{231} %argrw{"wrr"}
+	functioncall	$const9 59 	%argrw{"r"}
+# PxrFacingRatio.osl:43
+#     if (NdV <= 0.0) return 1.0;
+	le		$tmp20 resultF $const6 	%line{43} %argrw{"wrr"}
+	if		$tmp20 51 51 	%argrw{"r"}
+	assign		$tmp19 $const5 	%argrw{"wr"}
+	return
+# PxrFacingRatio.osl:44
+#     if (NdV >= 1.0) return 0.0;  // dot prod can be slightly larger than 1.0
+	ge		$tmp21 resultF $const5 	%line{44} %argrw{"wrr"}
+	if		$tmp21 55 55 	%argrw{"r"}
+	assign		$tmp19 $const6 	%argrw{"wr"}
+	return
+# PxrFacingRatio.osl:45
+#     float f = 1.0 - NdV;
+	sub		___325_f $const5 resultF 	%line{45} %argrw{"wrr"}
+# PxrFacingRatio.osl:46
+#     float f2 = f * f;
+	mul		___325_f2 ___325_f ___325_f 	%line{46} %argrw{"wrr"}
+# PxrFacingRatio.osl:47
+#     return f2 * f2 * f;  // pow(f, 5); -- result between 0.0 and 1.0
+	mul		$tmp22 ___325_f2 ___325_f2 	%line{47} %argrw{"wrr"}
+	mul		$tmp19 $tmp22 ___325_f 	%argrw{"wrr"}
+# PxrFacingRatio.osl:231
+#         resultF = r0 + (1.0 - r0) * RixSchlickFresnelWeight(resultF);
+	mul		$tmp23 $tmp18 $tmp19 	%line{231} %argrw{"wrr"}
+	add		resultF ___332_r0 $tmp23 	%argrw{"wrr"}
+# PxrFacingRatio.osl:233
+#         if (invert == 0) resultF = 1.0 - resultF;
+	eq		$tmp24 invert $const1 	%line{233} %argrw{"wrr"}
+	if		$tmp24 64 64 	%argrw{"r"}
+	sub		resultF $const5 resultF 	%argrw{"wrr"}
+	end

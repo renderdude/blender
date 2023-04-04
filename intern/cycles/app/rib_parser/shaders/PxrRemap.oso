@@ -1,0 +1,242 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrRemap.osl/obj/PxrRemap.oso
+shader PxrRemap	%meta{int,rfm_nodeid,1053394} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/color"} %meta{string,rfh_classification,"Pattern/Color"} 
+param	color	inputRGB	0 0 0		%meta{string,widget,"color"} %meta{string,help,"The input color to remap."} %meta{string,label,"Input Color"}  %read{6,14} %write{2147483647,-1}
+param	float	inputMin	0		%meta{string,widget,"default"} %meta{string,page,"Input Range"} %meta{int,page_open,1} %meta{string,label,"Input Min"} %meta{float,slidermax,1} %meta{float,slidermin,-1}  %read{0,15} %write{2147483647,-1}
+param	float	inputMax	1		%meta{string,widget,"default"} %meta{string,page,"Input Range"} %meta{string,label,"Input Max"} %meta{float,slidermax,2} %meta{float,slidermin,0}  %read{0,15} %write{2147483647,-1}
+param	int	clampInput	1		%meta{string,widget,"checkBox"} %meta{string,page,"Input Range"} %meta{int,connectable,0} %meta{string,label,"Clamp Input"}  %read{18,18} %write{2147483647,-1}
+param	color	bias	0.5 0.5 0.5		%meta{string,widget,"color"} %meta{string,page,"Remap"} %meta{int,page_open,1} %meta{string,help,"A normalized gamma correction factor. Values greater than .5 lighten the result, values less than .5 make it darker. "} %meta{string,label,"Bias"}  %read{23,23} %write{2147483647,-1}
+param	color	gain	0.5 0.5 0.5		%meta{string,widget,"color"} %meta{string,page,"Remap"} %meta{string,help,"Used to favor dark areas when the value is less than .5 and light areas when the value is greater than .5. "} %meta{string,label,"Gain"}  %read{36,36} %write{2147483647,-1}
+param	float	outputMin	0		%meta{string,widget,"default"} %meta{string,page,"Output Range"} %meta{int,page_open,1} %meta{string,label,"Output Min"} %meta{int,slider,1} %meta{float,slidermax,1} %meta{float,slidermin,-1}  %read{80,80} %write{2147483647,-1}
+param	float	outputMax	1		%meta{string,widget,"default"} %meta{string,page,"Output Range"} %meta{string,label,"Output Max"} %meta{int,slider,1} %meta{float,slidermax,2} %meta{float,slidermin,0}  %read{81,81} %write{2147483647,-1}
+param	int	clampOutput	1		%meta{string,widget,"checkBox"} %meta{string,page,"Output Range"} %meta{int,connectable,0} %meta{string,label,"Clamp Output"}  %read{83,83} %write{2147483647,-1}
+oparam	color	resultRGB	0 0 0		%meta{string,help,"resultRGB (color)"}  %read{20,89} %write{4,86}
+oparam	float	resultR	0		%meta{string,help,"resultR (float)"}  %read{2147483647,-1} %write{87,87}
+oparam	float	resultG	0		%meta{string,help,"resultG (float)"}  %read{2147483647,-1} %write{88,88}
+oparam	float	resultB	0		%meta{string,help,"resultB (float)"}  %read{2147483647,-1} %write{89,89}
+oparam	float	resultA	0		%meta{string,help,"resultA (float)"}  %read{2147483647,-1} %write{2147483647,-1}
+local	color	___325_result	%read{31,33} %write{29,32}
+local	color	___326_result	%read{77,79} %write{40,78}
+local	color	___326_gain	%read{40,75} %write{37,37}
+local	int	___327_ch	%read{40,75} %write{39,75}
+local	int	___332_ch	%read{4,12} %write{3,12}
+temp	int	$tmp1	%read{1,1} %write{0,0}
+const	int	$const1	0		%read{3,87} %write{2147483647,-1}
+const	int	$const2	3		%read{4,40} %write{2147483647,-1}
+temp	int	$tmp2	%read{4,12} %write{4,12}
+temp	int	$tmp3	%read{2,12} %write{3,12}
+temp	int	$tmp4	%read{4,12} %write{4,12}
+temp	float	$tmp5	%read{4,12} %write{4,12}
+temp	int	$tmp6	%read{4,12} %write{4,12}
+const	int	$const3	1		%read{10,88} %write{2147483647,-1}
+temp	color	$tmp7	%read{14,14} %write{13,13}
+temp	color	$tmp8	%read{17,17} %write{14,14}
+temp	color	$tmp9	%read{17,17} %write{16,16}
+temp	float	$tmp10	%read{16,16} %write{15,15}
+const	color	$const4	0 0 0		%read{21,86} %write{2147483647,-1}
+const	color	$const5	1 1 1		%read{20,85} %write{2147483647,-1}
+const	string	$const6	"clamp"		%read{19,84} %write{2147483647,-1}
+temp	color	$tmp13	%read{21,21} %write{20,20}
+const	string	$const7	"colorBias"		%read{22,22} %write{2147483647,-1}
+temp	color	$tmp15	%read{24,24} %write{23,23}
+const	color	$const8	9.99999975e-05 9.99999975e-05 9.99999975e-05		%read{23,37} %write{2147483647,-1}
+temp	color	$tmp17	%read{25,25} %write{24,24}
+const	float	$const9	2		%read{25,69} %write{2147483647,-1}
+temp	color	$tmp18	%read{27,27} %write{25,25}
+const	float	$const10	1		%read{26,72} %write{2147483647,-1}
+temp	color	$tmp19	%read{27,27} %write{26,26}
+temp	color	$tmp20	%read{28,28} %write{27,27}
+temp	color	$tmp21	%read{29,29} %write{28,28}
+temp	color	$tmp24	%read{32,32} %write{31,31}
+const	string	$const11	"colorGain"		%read{34,34} %write{2147483647,-1}
+const	color	$const12	0.999899983 0.999899983 0.999899983		%read{36,36} %write{2147483647,-1}
+temp	color	$tmp27	%read{37,37} %write{36,36}
+temp	int	$tmp28	%read{40,75} %write{40,75}
+temp	int	$tmp29	%read{38,75} %write{39,75}
+temp	float	$tmp30	%read{40,75} %write{40,75}
+const	float	$const13	0.5		%read{43,43} %write{2147483647,-1}
+temp	int	$tmp31	%read{40,75} %write{40,75}
+temp	float	$tmp32	%read{40,75} %write{40,75}
+temp	float	$tmp33	%read{40,75} %write{40,75}
+temp	float	$tmp34	%read{40,75} %write{40,75}
+temp	float	$tmp35	%read{40,75} %write{40,75}
+temp	float	$tmp36	%read{40,75} %write{40,75}
+temp	float	$tmp37	%read{40,75} %write{40,75}
+temp	float	$tmp38	%read{40,75} %write{40,75}
+temp	float	$tmp39	%read{40,75} %write{40,75}
+temp	float	$tmp40	%read{40,75} %write{40,75}
+temp	float	$tmp41	%read{40,75} %write{40,75}
+temp	float	$tmp42	%read{40,75} %write{40,75}
+temp	float	$tmp43	%read{40,75} %write{40,75}
+temp	float	$tmp44	%read{40,75} %write{40,75}
+temp	float	$tmp45	%read{40,75} %write{40,75}
+temp	float	$tmp46	%read{40,75} %write{40,75}
+temp	float	$tmp47	%read{40,75} %write{40,75}
+temp	float	$tmp48	%read{40,75} %write{40,75}
+temp	float	$tmp49	%read{40,75} %write{40,75}
+temp	float	$tmp50	%read{40,75} %write{40,75}
+temp	float	$tmp51	%read{40,75} %write{40,75}
+temp	float	$tmp52	%read{40,75} %write{40,75}
+temp	float	$tmp53	%read{40,75} %write{40,75}
+temp	float	$tmp54	%read{40,75} %write{40,75}
+temp	float	$tmp55	%read{40,75} %write{40,75}
+temp	float	$tmp56	%read{40,75} %write{40,75}
+temp	float	$tmp57	%read{40,75} %write{40,75}
+temp	float	$tmp58	%read{40,75} %write{40,75}
+temp	float	$tmp59	%read{40,75} %write{40,75}
+temp	color	$tmp62	%read{78,78} %write{77,77}
+temp	color	$tmp63	%read{82,82} %write{80,80}
+temp	color	$tmp64	%read{82,82} %write{81,81}
+temp	color	$tmp67	%read{86,86} %write{85,85}
+const	int	$const14	2		%read{89,89} %write{2147483647,-1}
+code ___main___
+# PxrRemap.osl:171
+#     if (inputMin == inputMax)
+	eq		$tmp1 inputMin inputMax 	%filename{"PxrRemap.osl"} %line{171} %argrw{"wrr"}
+	if		$tmp1 13 22 	%argrw{"r"}
+# PxrRemap.osl:173
+#         for (int ch = 0; ch < 3; ++ch) resultRGB[ch] = inputRGB[ch] < inputMin ? 0 : 1;
+	for		$tmp3 4 6 12 13 	%line{173} %argrw{"r"}
+	assign		___332_ch $const1 	%argrw{"wr"}
+	lt		$tmp2 ___332_ch $const2 	%argrw{"wrr"}
+	neq		$tmp3 $tmp2 $const1 	%argrw{"wrr"}
+	compref		$tmp5 inputRGB ___332_ch 	%argrw{"wrr"}
+	lt		$tmp6 $tmp5 inputMin 	%argrw{"wrr"}
+	if		$tmp6 10 11 	%argrw{"r"}
+	assign		$tmp4 $const1 	%argrw{"wr"}
+	assign		$tmp4 $const3 	%argrw{"wr"}
+	compassign	resultRGB ___332_ch $tmp4 	%argrw{"wrr"}
+	add		___332_ch ___332_ch $const3 	%argrw{"wrr"}
+# PxrRemap.osl:177
+#         resultRGB = (inputRGB - color(inputMin)) / color(inputMax - inputMin);
+	assign		$tmp7 inputMin 	%line{177} %argrw{"wr"}
+	sub		$tmp8 inputRGB $tmp7 	%argrw{"wrr"}
+	sub		$tmp10 inputMax inputMin 	%argrw{"wrr"}
+	assign		$tmp9 $tmp10 	%argrw{"wr"}
+	div		resultRGB $tmp8 $tmp9 	%argrw{"wrr"}
+# PxrRemap.osl:178
+#         if (clampInput) resultRGB = clamp(resultRGB, color(0), color(1));
+	if		clampInput 22 22 	%line{178} %argrw{"r"}
+	functioncall	$const6 22 	%argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
+	min		$tmp13 resultRGB $const5 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	max		resultRGB $tmp13 $const4 	%argrw{"wrr"}
+# PxrRemap.osl:182
+#     resultRGB = colorBias(resultRGB, bias);
+	functioncall	$const7 34 	%filename{"PxrRemap.osl"} %line{182} %argrw{"r"}
+# PxrRemap.osl:39
+#     color result = input / ((color(1) / max(bias, color(1e-4)) - 2.0) * (1.0 - input) + 1.0);
+	max		$tmp15 bias $const8 	%line{39} %argrw{"wrr"}
+	div		$tmp17 $const5 $tmp15 	%argrw{"wrr"}
+	sub		$tmp18 $tmp17 $const9 	%argrw{"wrr"}
+	sub		$tmp19 $const10 resultRGB 	%argrw{"wrr"}
+	mul		$tmp20 $tmp18 $tmp19 	%argrw{"wrr"}
+	add		$tmp21 $tmp20 $const10 	%argrw{"wrr"}
+	div		___325_result resultRGB $tmp21 	%argrw{"wrr"}
+# PxrRemap.osl:40
+#     result = clamp(result, color(0), color(1));
+	functioncall	$const6 33 	%line{40} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
+	min		$tmp24 ___325_result $const5 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	max		___325_result $tmp24 $const4 	%argrw{"wrr"}
+# PxrRemap.osl:41
+#     return result;
+	assign		resultRGB ___325_result 	%filename{"PxrRemap.osl"} %line{41} %argrw{"wr"}
+# PxrRemap.osl:183
+#     resultRGB = colorGain(resultRGB, gain);
+	functioncall	$const11 80 	%line{183} %argrw{"r"}
+# PxrRemap.osl:47
+#     gain = clamp(gg, color(0.0001), color(0.9999));
+	functioncall	$const6 38 	%line{47} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
+	min		$tmp27 gain $const12 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	max		___326_gain $tmp27 $const8 	%argrw{"wrr"}
+# PxrRemap.osl:50
+#     for (int ch = 0; ch < 3; ++ch)
+	for		$tmp29 40 42 75 76 	%filename{"PxrRemap.osl"} %line{50} %argrw{"r"}
+	assign		___327_ch $const1 	%argrw{"wr"}
+	lt		$tmp28 ___327_ch $const2 	%argrw{"wrr"}
+	neq		$tmp29 $tmp28 $const1 	%argrw{"wrr"}
+# PxrRemap.osl:52
+#         if (input[ch] < 0.5)
+	compref		$tmp30 resultRGB ___327_ch 	%line{52} %argrw{"wrr"}
+	lt		$tmp31 $tmp30 $const13 	%argrw{"wrr"}
+	if		$tmp31 56 75 	%argrw{"r"}
+# PxrRemap.osl:54
+#             result[ch] = input[ch] / ((1.0 / gain[ch] - 2.0) * (1.0 - 2.0 * input[ch]) + 1.0);
+	compref		$tmp32 resultRGB ___327_ch 	%line{54} %argrw{"wrr"}
+	compref		$tmp33 ___326_gain ___327_ch 	%argrw{"wrr"}
+	div		$tmp34 $const10 $tmp33 	%argrw{"wrr"}
+	sub		$tmp35 $tmp34 $const9 	%argrw{"wrr"}
+	compref		$tmp36 resultRGB ___327_ch 	%argrw{"wrr"}
+	mul		$tmp37 $const9 $tmp36 	%argrw{"wrr"}
+	sub		$tmp38 $const10 $tmp37 	%argrw{"wrr"}
+	mul		$tmp39 $tmp35 $tmp38 	%argrw{"wrr"}
+	add		$tmp40 $tmp39 $const10 	%argrw{"wrr"}
+	div		$tmp41 $tmp32 $tmp40 	%argrw{"wrr"}
+	compassign	___326_result ___327_ch $tmp41 	%argrw{"wrr"}
+# PxrRemap.osl:58
+#             result[ch] = ((1.0 / gain[ch] - 2.0) * (1.0 - 2.0 * input[ch]) - input[ch]) /
+	compref		$tmp42 ___326_gain ___327_ch 	%line{58} %argrw{"wrr"}
+	div		$tmp43 $const10 $tmp42 	%argrw{"wrr"}
+	sub		$tmp44 $tmp43 $const9 	%argrw{"wrr"}
+	compref		$tmp45 resultRGB ___327_ch 	%argrw{"wrr"}
+	mul		$tmp46 $const9 $tmp45 	%argrw{"wrr"}
+	sub		$tmp47 $const10 $tmp46 	%argrw{"wrr"}
+	mul		$tmp48 $tmp44 $tmp47 	%argrw{"wrr"}
+	compref		$tmp49 resultRGB ___327_ch 	%argrw{"wrr"}
+	sub		$tmp50 $tmp48 $tmp49 	%argrw{"wrr"}
+# PxrRemap.osl:59
+#                          ((1.0 / gain[ch] - 2.0) * (1.0 - 2.0 * input[ch]) - 1.0);
+	compref		$tmp51 ___326_gain ___327_ch 	%line{59} %argrw{"wrr"}
+	div		$tmp52 $const10 $tmp51 	%argrw{"wrr"}
+	sub		$tmp53 $tmp52 $const9 	%argrw{"wrr"}
+	compref		$tmp54 resultRGB ___327_ch 	%argrw{"wrr"}
+	mul		$tmp55 $const9 $tmp54 	%argrw{"wrr"}
+	sub		$tmp56 $const10 $tmp55 	%argrw{"wrr"}
+	mul		$tmp57 $tmp53 $tmp56 	%argrw{"wrr"}
+	sub		$tmp58 $tmp57 $const10 	%argrw{"wrr"}
+# PxrRemap.osl:58
+#             result[ch] = ((1.0 / gain[ch] - 2.0) * (1.0 - 2.0 * input[ch]) - input[ch]) /
+	div		$tmp59 $tmp50 $tmp58 	%line{58} %argrw{"wrr"}
+	compassign	___326_result ___327_ch $tmp59 	%argrw{"wrr"}
+# PxrRemap.osl:50
+#     for (int ch = 0; ch < 3; ++ch)
+	add		___327_ch ___327_ch $const3 	%line{50} %argrw{"wrr"}
+# PxrRemap.osl:63
+#     result = clamp(result, color(0), color(1));
+	functioncall	$const6 79 	%line{63} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
+	min		$tmp62 ___326_result $const5 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	max		___326_result $tmp62 $const4 	%argrw{"wrr"}
+# PxrRemap.osl:64
+#     return result;
+	assign		resultRGB ___326_result 	%filename{"PxrRemap.osl"} %line{64} %argrw{"wr"}
+# PxrRemap.osl:186
+#     resultRGB = mix(color(outputMin), color(outputMax), resultRGB);
+	assign		$tmp63 outputMin 	%line{186} %argrw{"wr"}
+	assign		$tmp64 outputMax 	%argrw{"wr"}
+	mix		resultRGB $tmp63 $tmp64 resultRGB 	%argrw{"wrrr"}
+# PxrRemap.osl:187
+#     if (clampOutput) resultRGB = clamp(resultRGB, color(0), color(1));
+	if		clampOutput 87 87 	%line{187} %argrw{"r"}
+	functioncall	$const6 87 	%argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
+	min		$tmp67 resultRGB $const5 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	max		resultRGB $tmp67 $const4 	%argrw{"wrr"}
+# PxrRemap.osl:189
+#     resultR = resultRGB[0];
+	compref		resultR resultRGB $const1 	%filename{"PxrRemap.osl"} %line{189} %argrw{"wrr"}
+# PxrRemap.osl:190
+#     resultG = resultRGB[1];
+	compref		resultG resultRGB $const3 	%line{190} %argrw{"wrr"}
+# PxrRemap.osl:191
+#     resultB = resultRGB[2];
+	compref		resultB resultRGB $const14 	%line{191} %argrw{"wrr"}
+	end

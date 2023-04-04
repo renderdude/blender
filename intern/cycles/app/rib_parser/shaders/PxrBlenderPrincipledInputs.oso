@@ -1,0 +1,246 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrBlenderPrincipledInputs.osl/obj/PxrBlenderPrincipledInputs.oso
+shader PxrBlenderPrincipledInputs	%meta{int,rfm_nodeid,1233491} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/utility"} %meta{string,rfh_classification,"Pattern/Utility"} %meta{string,help,"An OSL pattern for converting inputs to Blender's Principled BSDF shader into compatible values for Lama."} 
+param	string	distribution	"Multiscatter GGX"		%meta{string,widget,"popup"} %meta{int,connectable,0} %meta{string,label,"Distribution"} %meta{string,options,"Multiscatter GGX|GGX"}  %read{2147483647,-1} %write{2147483647,-1}
+param	string	subsurface_method	"burley"		%meta{string,widget,"popup"} %meta{int,connectable,0} %meta{string,label,"Subsurface Method"} %meta{string,options,"burley|random walk"}  %read{2147483647,-1} %write{2147483647,-1}
+param	color	BaseColor	0.800000012 0.800000012 0.800000012		%meta{string,widget,"color"} %meta{string,label,"Base Color"} %meta{string,help,"Diffuse or metal surface color."}  %read{11,63} %write{2147483647,-1}
+param	float	Subsurface	0		%meta{int,slider,1} %meta{float,min,0} %meta{float,slidermax,1} %meta{string,label,"Subsurface"} %meta{string,help,"Mix between diffuse and subsurface scattering. Rather than being a simple mix between Diffuse and Subsurface Scattering, it acts as a multiplier for the Subsurface Radius."}  %read{38,54} %write{2147483647,-1}
+param	vector	SubsurfaceRadius	1 0.200000003 0.100000001		%meta{string,label,"Subsurface Radius"} %meta{string,help,"Average distance that light scatters below the surface. Higher radius gives a softer appearance, as light bleeds into shadows and through the object. The scattering distance is specified separately for the RGB channels, to render materials such as skin where red light scatters deeper. The X, Y and Z values are mapped to the R, G and B values, respectively."}  %read{54,54} %write{2147483647,-1}
+param	color	SubsurfaceColor	0.800000012 0.800000012 0.800000012		%meta{string,label,"Subsurface Color"} %meta{string,widget,"color"} %meta{string,help,"Subsurface scattering base color."}  %read{50,50} %write{2147483647,-1}
+param	float	Metallic	0		%meta{int,slider,1} %meta{float,min,0} %meta{float,max,1} %meta{string,label,"Metallic"} %meta{string,help,"Blends between a non-metallic and metallic material model. A value of 1.0 gives a fully specular reflection tinted with the base color, without diffuse reflection or transmission. At 0.0 the material consists of a diffuse or transmissive base layer, with a specular reflection layer on top."}  %read{17,63} %write{2147483647,-1}
+param	float	Specular	0.5		%meta{int,slider,1} %meta{float,min,0} %meta{float,slidermax,1} %meta{string,label,"Specular"} %meta{string,help,"Amount of dielectric specular reflection. Specifies facing (along normal) reflectivity in the most common 0 - 8% range."}  %read{59,59} %write{2147483647,-1}
+param	float	SpecularTint	0		%meta{int,slider,1} %meta{float,min,0} %meta{float,slidermax,1} %meta{string,label,"Specular Tint"} %meta{string,help,"Tints the facing specular reflection using the base color, while glancing reflection remains white.<br><br>Normal dielectrics have colorless reflection, so this parameter is not technically physically correct and is provided for faking the appearance of materials with complex surface structure."}  %read{55,57} %write{2147483647,-1}
+param	float	Roughness	0.400000006		%meta{int,slider,1} %meta{float,min,0} %meta{float,max,1} %meta{string,label,"Roughness"} %meta{string,help,"Specifies microfacet roughness of the surface for diffuse and specular reflection."}  %read{34,34} %write{2147483647,-1}
+param	float	Anisotropic	0		%meta{int,slider,1} %meta{float,min,0} %meta{float,max,1} %meta{string,label,"Anisotropic"} %meta{string,help,"Specifies microfacet roughness of the surface for diffuse and specular reflection."}  %read{65,65} %write{2147483647,-1}
+param	float	AnisotropicRotation	0		%meta{int,slider,1} %meta{float,slidermin,-1} %meta{float,slidermax,1} %meta{string,label,"Anisotropic Rotation"} %meta{string,help,"Rotates the direction of anisotropy, with 1.0 going full circle."}  %read{66,66} %write{2147483647,-1}
+param	float	Sheen	0		%meta{int,slider,1} %meta{float,min,0} %meta{float,slidermax,1} %meta{string,label,"Sheen"} %meta{string,help,"Amount of soft velvet like reflection near edges, for simulating materials such as cloth."}  %read{48,48} %write{2147483647,-1}
+param	float	SheenTint	0.5		%meta{int,slider,1} %meta{float,min,0} %meta{float,slidermax,1} %meta{string,label,"Sheen Tint"} %meta{string,help,"Mix between white and using base color for sheen reflection."}  %read{44,46} %write{2147483647,-1}
+param	float	Clearcoat	0		%meta{int,slider,1} %meta{float,min,0} %meta{float,slidermax,1} %meta{string,label,"Clearcoat"} %meta{string,help,"Extra white specular layer on top of others. This is useful for materials like car paint and the like."}  %read{68,68} %write{2147483647,-1}
+param	float	ClearcoatRoughness	0.0299999993		%meta{int,slider,1} %meta{float,min,0} %meta{float,max,1} %meta{string,label,"Clearcoat Roughness"} %meta{string,help,"Roughness of clearcoat specular."}  %read{69,69} %write{2147483647,-1}
+param	float	IOR	1.45000005		%meta{int,slider,1} %meta{float,min,9.99999975e-06} %meta{float,slidermax,1} %meta{string,label,"IOR"} %meta{string,help,"Index of refraction for transmission."}  %read{10,10} %write{2147483647,-1}
+param	float	Transmission	0		%meta{int,slider,1} %meta{float,min,0} %meta{float,max,1} %meta{string,label,"Transmission"} %meta{string,help,"Mix between fully opaque surface at zero and fully glass like transmission at one."}  %read{21,26} %write{2147483647,-1}
+param	color	Emission	0 0 0		%meta{string,widget,"color"} %meta{string,label,"Emission"} %meta{string,help,"Light emission from the surface, like the Emission shader."}  %read{70,71} %write{2147483647,-1}
+param	normal	Normal	0 0 0		%meta{string,label,"Normal"} %meta{string,help,"Controls the normals of the base layers."}  %read{2,2} %write{0,0} %initexpr
+param	normal	ClearcoatNormal	0 0 0		%meta{string,label,"Clearcoat Normal"} %meta{string,help,"Controls the normals of the Clearcoat layer."}  %read{6,6} %write{1,1} %initexpr
+oparam	color	out_baseColor	0 0 0		%read{2147483647,-1} %write{49,49}
+oparam	color	out_sssColor	0 0 0		%read{2147483647,-1} %write{53,53}
+oparam	color	out_sssRadius	0 0 0		%read{2147483647,-1} %write{54,54}
+oparam	color	out_sheenColor	0 0 0		%read{2147483647,-1} %write{47,47}
+oparam	color	out_specF0	0 0 0		%read{2147483647,-1} %write{64,64}
+oparam	float	out_roughness	0		%read{2147483647,-1} %write{34,34}
+oparam	float	out_anisotropic	0		%read{2147483647,-1} %write{65,65}
+oparam	float	out_anisotropicRotation	0		%read{2147483647,-1} %write{66,66}
+oparam	float	out_eta	0		%read{2147483647,-1} %write{67,67}
+oparam	float	out_clearcoat	0		%read{2147483647,-1} %write{68,68}
+oparam	float	out_clearcoatRoughness	0		%read{2147483647,-1} %write{69,69}
+oparam	color	out_emissionColor	0 0 0		%read{2147483647,-1} %write{71,71}
+oparam	float	out_emissionMix	0		%read{2147483647,-1} %write{72,72}
+oparam	float	out_diffuseWeight	0		%read{35,35} %write{24,24}
+oparam	float	out_sssMix	0		%read{2147483647,-1} %write{42,43}
+oparam	float	out_finalTransmission	0		%read{33,33} %write{32,32}
+oparam	float	out_specularWeight	0		%read{2147483647,-1} %write{33,33}
+oparam	float	out_sheenWeight	0		%read{2147483647,-1} %write{48,48}
+oparam	normal	out_normal	0 0 0		%read{2147483647,-1} %write{5,5}
+oparam	normal	out_clearcoatNormal	0 0 0		%read{2147483647,-1} %write{9,9}
+global	normal	N	%read{0,9} %write{2147483647,-1}
+local	float	f	%read{67,67} %write{10,10}
+local	float	m_cdlum	%read{12,14} %write{11,11}
+local	color	m_ctint	%read{46,57} %write{14,15}
+local	color	tmp_col	%read{60,60} %write{58,58}
+local	float	elum	%read{71,72} %write{70,70}
+temp	int	$tmp1	%read{3,3} %write{2,2}
+temp	int	$tmp2	%read{4,4} %write{3,3}
+const	int	$const1	0		%read{3,43} %write{2147483647,-1}
+temp	int	$tmp3	%read{7,7} %write{6,6}
+temp	int	$tmp4	%read{8,8} %write{7,7}
+const	float	$const2	9.99999975e-06		%read{10,38} %write{2147483647,-1}
+const	float	$const3	0		%read{12,30} %write{2147483647,-1}
+temp	int	$tmp5	%read{13,13} %write{12,12}
+const	color	$const4	0 0 0		%read{15,15} %write{2147483647,-1}
+const	float	$const5	1		%read{17,61} %write{2147483647,-1}
+temp	float	$tmp6	%read{19,19} %write{18,18}
+const	string	$const6	"clamp"		%read{16,28} %write{2147483647,-1}
+temp	float	$tmp7	%read{18,18} %write{17,17}
+temp	float	$tmp8	%read{24,24} %write{19,19}
+temp	float	$tmp9	%read{23,23} %write{22,22}
+temp	float	$tmp10	%read{22,22} %write{21,21}
+temp	float	$tmp11	%read{24,24} %write{23,23}
+temp	float	$tmp12	%read{32,32} %write{27,27}
+temp	float	$tmp13	%read{27,27} %write{26,26}
+temp	float	$tmp14	%read{31,31} %write{30,30}
+temp	float	$tmp15	%read{30,30} %write{29,29}
+temp	float	$tmp16	%read{32,32} %write{31,31}
+temp	int	$tmp17	%read{36,36} %write{35,35}
+temp	int	$tmp18	%read{37,41} %write{36,40}
+temp	int	$tmp19	%read{39,39} %write{38,38}
+temp	int	$tmp20	%read{40,40} %write{39,39}
+const	int	$const7	1		%read{42,42} %write{2147483647,-1}
+const	color	$const8	1 1 1		%read{45,56} %write{2147483647,-1}
+temp	float	$tmp22	%read{45,45} %write{44,44}
+temp	color	$tmp23	%read{47,47} %write{45,45}
+temp	color	$tmp24	%read{47,47} %write{46,46}
+temp	color	$tmp25	%read{53,53} %write{50,50}
+temp	float	$tmp26	%read{52,52} %write{51,51}
+temp	color	$tmp27	%read{53,53} %write{52,52}
+temp	float	$tmp29	%read{56,56} %write{55,55}
+temp	color	$tmp30	%read{58,58} %write{56,56}
+temp	color	$tmp31	%read{58,58} %write{57,57}
+const	float	$const9	0.0799999982		%read{59,59} %write{2147483647,-1}
+temp	float	$tmp32	%read{60,60} %write{59,59}
+temp	color	$tmp33	%read{62,62} %write{60,60}
+temp	float	$tmp34	%read{62,62} %write{61,61}
+temp	color	$tmp35	%read{64,64} %write{62,62}
+temp	color	$tmp36	%read{64,64} %write{63,63}
+const	float	$const10	0.25		%read{68,68} %write{2147483647,-1}
+code Normal
+# PxrBlenderPrincipledInputs.osl:188
+#     normal Normal = N
+	assign		Normal N 	%filename{"PxrBlenderPrincipledInputs.osl"} %line{188} %argrw{"wr"}
+code ClearcoatNormal
+# PxrBlenderPrincipledInputs.osl:193
+#     normal ClearcoatNormal = N
+	assign		ClearcoatNormal N 	%filename{"PxrBlenderPrincipledInputs.osl"} %line{193} %argrw{"wr"}
+code ___main___
+# PxrBlenderPrincipledInputs.osl:220
+#     if (!isconnected(Normal))
+	isconnected	$tmp1 Normal 	%filename{"PxrBlenderPrincipledInputs.osl"} %line{220} %argrw{"wr"}
+	eq		$tmp2 $tmp1 $const1 	%argrw{"wrr"}
+	if		$tmp2 6 6 	%argrw{"r"}
+# PxrBlenderPrincipledInputs.osl:221
+#         out_normal = N;
+	assign		out_normal N 	%line{221} %argrw{"wr"}
+# PxrBlenderPrincipledInputs.osl:222
+#     if (!isconnected(ClearcoatNormal))
+	isconnected	$tmp3 ClearcoatNormal 	%line{222} %argrw{"wr"}
+	eq		$tmp4 $tmp3 $const1 	%argrw{"wrr"}
+	if		$tmp4 10 10 	%argrw{"r"}
+# PxrBlenderPrincipledInputs.osl:223
+#         out_clearcoatNormal = N;
+	assign		out_clearcoatNormal N 	%line{223} %argrw{"wr"}
+# PxrBlenderPrincipledInputs.osl:224
+#     float f = max(IOR, 1e-5);
+	max		f IOR $const2 	%line{224} %argrw{"wrr"}
+# PxrBlenderPrincipledInputs.osl:225
+#     float m_cdlum = luminance(BaseColor);
+	luminance	m_cdlum BaseColor 	%line{225} %argrw{"wr"}
+# PxrBlenderPrincipledInputs.osl:226
+#     color m_ctint = m_cdlum > 0.0 ? BaseColor / m_cdlum :
+	gt		$tmp5 m_cdlum $const3 	%line{226} %argrw{"wrr"}
+	if		$tmp5 15 16 	%argrw{"r"}
+	div		m_ctint BaseColor m_cdlum 	%argrw{"wrr"}
+	assign		m_ctint $const4 	%argrw{"wr"}
+# PxrBlenderPrincipledInputs.osl:229
+#     out_diffuseWeight = (1.0 - clamp(Metallic, 0.0, 1.0)) * (1.0 - clamp(Transmission, 0.0, 1.0));
+	functioncall	$const6 19 	%line{229} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
+	min		$tmp7 Metallic $const5 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	max		$tmp6 $tmp7 $const3 	%argrw{"wrr"}
+# PxrBlenderPrincipledInputs.osl:229
+#     out_diffuseWeight = (1.0 - clamp(Metallic, 0.0, 1.0)) * (1.0 - clamp(Transmission, 0.0, 1.0));
+	sub		$tmp8 $const5 $tmp6 	%filename{"PxrBlenderPrincipledInputs.osl"} %line{229} %argrw{"wrr"}
+	functioncall	$const6 23 	%argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
+	min		$tmp10 Transmission $const5 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	max		$tmp9 $tmp10 $const3 	%argrw{"wrr"}
+# PxrBlenderPrincipledInputs.osl:229
+#     out_diffuseWeight = (1.0 - clamp(Metallic, 0.0, 1.0)) * (1.0 - clamp(Transmission, 0.0, 1.0));
+	sub		$tmp11 $const5 $tmp9 	%filename{"PxrBlenderPrincipledInputs.osl"} %line{229} %argrw{"wrr"}
+	mul		out_diffuseWeight $tmp8 $tmp11 	%argrw{"wrr"}
+# PxrBlenderPrincipledInputs.osl:230
+#     out_finalTransmission = clamp(Transmission, 0.0, 1.0) * (1.0 - clamp(Metallic, 0.0, 1.0));
+	functioncall	$const6 28 	%line{230} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
+	min		$tmp13 Transmission $const5 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	max		$tmp12 $tmp13 $const3 	%argrw{"wrr"}
+# PxrBlenderPrincipledInputs.osl:230
+#     out_finalTransmission = clamp(Transmission, 0.0, 1.0) * (1.0 - clamp(Metallic, 0.0, 1.0));
+	functioncall	$const6 31 	%filename{"PxrBlenderPrincipledInputs.osl"} %line{230} %argrw{"r"}
+# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
+	min		$tmp15 Metallic $const5 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	max		$tmp14 $tmp15 $const3 	%argrw{"wrr"}
+# PxrBlenderPrincipledInputs.osl:230
+#     out_finalTransmission = clamp(Transmission, 0.0, 1.0) * (1.0 - clamp(Metallic, 0.0, 1.0));
+	sub		$tmp16 $const5 $tmp14 	%filename{"PxrBlenderPrincipledInputs.osl"} %line{230} %argrw{"wrr"}
+	mul		out_finalTransmission $tmp12 $tmp16 	%argrw{"wrr"}
+# PxrBlenderPrincipledInputs.osl:231
+#     out_specularWeight = (1.0 - out_finalTransmission);
+	sub		out_specularWeight $const5 out_finalTransmission 	%line{231} %argrw{"wrr"}
+# PxrBlenderPrincipledInputs.osl:232
+#     out_roughness = Roughness;
+	assign		out_roughness Roughness 	%line{232} %argrw{"wr"}
+# PxrBlenderPrincipledInputs.osl:234
+#     out_sssMix = out_diffuseWeight > 1e-5 && Subsurface > 1e-5 ? 1 : 0;
+	gt		$tmp17 out_diffuseWeight $const2 	%line{234} %argrw{"wrr"}
+	neq		$tmp18 $tmp17 $const1 	%argrw{"wrr"}
+	if		$tmp18 41 41 	%argrw{"r"}
+	gt		$tmp19 Subsurface $const2 	%argrw{"wrr"}
+	neq		$tmp20 $tmp19 $const1 	%argrw{"wrr"}
+	assign		$tmp18 $tmp20 	%argrw{"wr"}
+	if		$tmp18 43 44 	%argrw{"r"}
+	assign		out_sssMix $const7 	%argrw{"wr"}
+	assign		out_sssMix $const1 	%argrw{"wr"}
+# PxrBlenderPrincipledInputs.osl:235
+#     out_sheenColor = color(1.0, 1.0, 1.0) * (1.0 - SheenTint) + m_ctint * SheenTint;
+	sub		$tmp22 $const5 SheenTint 	%line{235} %argrw{"wrr"}
+	mul		$tmp23 $const8 $tmp22 	%argrw{"wrr"}
+	mul		$tmp24 m_ctint SheenTint 	%argrw{"wrr"}
+	add		out_sheenColor $tmp23 $tmp24 	%argrw{"wrr"}
+# PxrBlenderPrincipledInputs.osl:236
+#     out_sheenWeight = Sheen;
+	assign		out_sheenWeight Sheen 	%line{236} %argrw{"wr"}
+# PxrBlenderPrincipledInputs.osl:237
+#     out_baseColor = BaseColor;
+	assign		out_baseColor BaseColor 	%line{237} %argrw{"wr"}
+# PxrBlenderPrincipledInputs.osl:238
+#     out_sssColor = SubsurfaceColor * Subsurface + BaseColor * (1.0 - Subsurface);
+	mul		$tmp25 SubsurfaceColor Subsurface 	%line{238} %argrw{"wrr"}
+	sub		$tmp26 $const5 Subsurface 	%argrw{"wrr"}
+	mul		$tmp27 BaseColor $tmp26 	%argrw{"wrr"}
+	add		out_sssColor $tmp25 $tmp27 	%argrw{"wrr"}
+# PxrBlenderPrincipledInputs.osl:239
+#     out_sssRadius = Subsurface * SubsurfaceRadius;
+	mul		out_sssRadius Subsurface SubsurfaceRadius 	%line{239} %argrw{"wrr"}
+# PxrBlenderPrincipledInputs.osl:241
+#     color tmp_col = color(1.0, 1.0, 1.0) * (1.0 - SpecularTint) + m_ctint * SpecularTint;
+	sub		$tmp29 $const5 SpecularTint 	%line{241} %argrw{"wrr"}
+	mul		$tmp30 $const8 $tmp29 	%argrw{"wrr"}
+	mul		$tmp31 m_ctint SpecularTint 	%argrw{"wrr"}
+	add		tmp_col $tmp30 $tmp31 	%argrw{"wrr"}
+# PxrBlenderPrincipledInputs.osl:242
+#     out_specF0 = (Specular * 0.08 * tmp_col) * (1.0 - Metallic) + BaseColor * Metallic;
+	mul		$tmp32 Specular $const9 	%line{242} %argrw{"wrr"}
+	mul		$tmp33 $tmp32 tmp_col 	%argrw{"wrr"}
+	sub		$tmp34 $const5 Metallic 	%argrw{"wrr"}
+	mul		$tmp35 $tmp33 $tmp34 	%argrw{"wrr"}
+	mul		$tmp36 BaseColor Metallic 	%argrw{"wrr"}
+	add		out_specF0 $tmp35 $tmp36 	%argrw{"wrr"}
+# PxrBlenderPrincipledInputs.osl:243
+#     out_anisotropic = Anisotropic;
+	assign		out_anisotropic Anisotropic 	%line{243} %argrw{"wr"}
+# PxrBlenderPrincipledInputs.osl:244
+#     out_anisotropicRotation = AnisotropicRotation;
+	assign		out_anisotropicRotation AnisotropicRotation 	%line{244} %argrw{"wr"}
+# PxrBlenderPrincipledInputs.osl:246
+#     out_eta = f;
+	assign		out_eta f 	%line{246} %argrw{"wr"}
+# PxrBlenderPrincipledInputs.osl:248
+#     out_clearcoat = Clearcoat * 0.25;   // based on burley
+	mul		out_clearcoat Clearcoat $const10 	%line{248} %argrw{"wrr"}
+# PxrBlenderPrincipledInputs.osl:249
+#     out_clearcoatRoughness = ClearcoatRoughness;    // blender looks like a beckmann dist
+	assign		out_clearcoatRoughness ClearcoatRoughness 	%line{249} %argrw{"wr"}
+# PxrBlenderPrincipledInputs.osl:251
+#     float elum = luminance(Emission);
+	luminance	elum Emission 	%line{251} %argrw{"wr"}
+# PxrBlenderPrincipledInputs.osl:252
+#     out_emissionColor = Emission / elum;
+	div		out_emissionColor Emission elum 	%line{252} %argrw{"wrr"}
+# PxrBlenderPrincipledInputs.osl:253
+#     out_emissionMix = elum;
+	assign		out_emissionMix elum 	%line{253} %argrw{"wr"}
+	end

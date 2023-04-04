@@ -1,0 +1,69 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrToFloat.osl/obj/PxrToFloat.oso
+shader PxrToFloat	%meta{int,rfm_nodeid,1053435} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/utility"} %meta{string,rfh_classification,"Pattern/Utility"} %meta{string,help,"Produces a single float output from a triple float input. The index specifies which of the 3 floats to pull from the triple. "} 
+param	color	input	0 0 0		%meta{string,widget,"color"} %meta{string,help,"The triple float input to convert."} %meta{string,label,"Input"}  %read{2,17} %write{2147483647,-1}
+param	int	mode	0		%meta{string,widget,"mapper"} %meta{string,options,"Channel 0:0|Channel 1:1|Channel 2:2|Luminance:3|Average:4"} %meta{string,help,"Which of the 3 floats will be output."} %meta{int,connectable,0} %meta{string,label,"Mode"}  %read{0,12} %write{2147483647,-1}
+oparam	float	resultF	0		%meta{string,help,"resultF (float)"}  %read{2147483647,-1} %write{2,20}
+const	int	$const1	0		%read{0,14} %write{2147483647,-1}
+temp	int	$tmp1	%read{1,1} %write{0,0}
+const	int	$const2	1		%read{3,15} %write{2147483647,-1}
+temp	int	$tmp2	%read{4,4} %write{3,3}
+const	int	$const3	2		%read{6,17} %write{2147483647,-1}
+temp	int	$tmp3	%read{7,7} %write{6,6}
+const	int	$const4	3		%read{9,9} %write{2147483647,-1}
+temp	int	$tmp4	%read{10,10} %write{9,9}
+const	int	$const5	4		%read{12,12} %write{2147483647,-1}
+temp	int	$tmp5	%read{13,13} %write{12,12}
+temp	float	$tmp6	%read{16,16} %write{14,14}
+temp	float	$tmp7	%read{16,16} %write{15,15}
+temp	float	$tmp8	%read{18,18} %write{16,16}
+temp	float	$tmp9	%read{18,18} %write{17,17}
+temp	float	$tmp10	%read{19,19} %write{18,18}
+const	float	$const6	3		%read{19,19} %write{2147483647,-1}
+const	float	$const7	0.5		%read{20,20} %write{2147483647,-1}
+code ___main___
+# PxrToFloat.osl:73
+#     if (mode == k_channel0)
+	eq		$tmp1 mode $const1 	%filename{"PxrToFloat.osl"} %line{73} %argrw{"wrr"}
+	if		$tmp1 3 21 	%argrw{"r"}
+# PxrToFloat.osl:74
+#         resultF = input[0];
+	compref		resultF input $const1 	%line{74} %argrw{"wrr"}
+# PxrToFloat.osl:75
+#     else if (mode == k_channel1)
+	eq		$tmp2 mode $const2 	%line{75} %argrw{"wrr"}
+	if		$tmp2 6 21 	%argrw{"r"}
+# PxrToFloat.osl:76
+#         resultF = input[1];
+	compref		resultF input $const2 	%line{76} %argrw{"wrr"}
+# PxrToFloat.osl:77
+#     else if (mode == k_channel2)
+	eq		$tmp3 mode $const3 	%line{77} %argrw{"wrr"}
+	if		$tmp3 9 21 	%argrw{"r"}
+# PxrToFloat.osl:78
+#         resultF = input[2];
+	compref		resultF input $const3 	%line{78} %argrw{"wrr"}
+# PxrToFloat.osl:79
+#     else if (mode == k_luminance)
+	eq		$tmp4 mode $const4 	%line{79} %argrw{"wrr"}
+	if		$tmp4 12 21 	%argrw{"r"}
+# PxrToFloat.osl:80
+#         resultF = luminance(input);
+	luminance	resultF input 	%line{80} %argrw{"wr"}
+# PxrToFloat.osl:81
+#     else if (mode == k_average)
+	eq		$tmp5 mode $const5 	%line{81} %argrw{"wrr"}
+	if		$tmp5 20 21 	%argrw{"r"}
+# PxrToFloat.osl:82
+#         resultF = (input[0] + input[1] + input[2]) / 3.0;
+	compref		$tmp6 input $const1 	%line{82} %argrw{"wrr"}
+	compref		$tmp7 input $const2 	%argrw{"wrr"}
+	add		$tmp8 $tmp6 $tmp7 	%argrw{"wrr"}
+	compref		$tmp9 input $const3 	%argrw{"wrr"}
+	add		$tmp10 $tmp8 $tmp9 	%argrw{"wrr"}
+	div		resultF $tmp10 $const6 	%argrw{"wrr"}
+# PxrToFloat.osl:84
+#         resultF = 0.5;
+	assign		resultF $const7 	%line{84} %argrw{"wr"}
+	end

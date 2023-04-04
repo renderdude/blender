@@ -27,8 +27,14 @@
 #  include "hydra/file_reader.h"
 #endif
 
+#include "cycles_standalone.h"
+
 #include "app/cycles_xml.h"
+#include "app/rib_parser/parser.h"
+#include "app/rib_parser/ri_api.h"
 #include "app/oiio_output_driver.h"
+
+#include "tev/display_driver.h"
 
 #ifdef WITH_CYCLES_STANDALONE_GUI
 #  include "opengl/display_driver.h"
@@ -36,19 +42,6 @@
 #endif
 
 CCL_NAMESPACE_BEGIN
-
-struct Options {
-  Session *session;
-  Scene *scene;
-  string filepath;
-  int width, height;
-  SceneParams scene_params;
-  SessionParams session_params;
-  bool quiet;
-  bool show_help, interactive, pause;
-  string output_filepath;
-  string output_pass;
-} options;
 
 static void session_print(const string &str)
 {
@@ -83,30 +76,43 @@ static void session_print_status()
   session_print(status);
 }
 
-static BufferParams &session_buffer_params()
+static void session_buffer_params()
 {
-  static BufferParams buffer_params;
-  buffer_params.width = options.width;
-  buffer_params.height = options.height;
-  buffer_params.full_width = options.width;
-  buffer_params.full_height = options.height;
-
-  return buffer_params;
+  options.buffer_params = new BufferParams;
+  options.buffer_params->width = options.width;
+  options.buffer_params->height = options.height;
+  options.buffer_params->full_width = options.width;
+  options.buffer_params->full_height = options.height;
 }
 
 static void scene_init()
 {
+  bool rib_mode = false;
   options.scene = options.session->scene;
+  Ri ri_api(options.session);
 
   /* Read XML or USD */
-#ifdef WITH_USD
-  if (!string_endswith(string_to_lower(options.filepath), ".xml")) {
-    HD_CYCLES_NS::HdCyclesFileReader::read(options.session, options.filepath.c_str());
+  if (string_endswith(string_to_lower(options.filepath), ".xml")) {
+    xml_read_file(options.scene, options.filepath.c_str());
+  }
+  else if (string_endswith(string_to_lower(options.filepath), ".rib")) {
+    session_buffer_params();
+    std::vector<std::string> filenames;
+    ri_api.add_default_search_paths(path_dirname(options.filepath));
+    filenames.push_back(options.filepath);
+    parse_files(&ri_api, filenames);
+    ri_api.CropWindow(options.crop_window[0], options.crop_window[1], options.crop_window[2], options.crop_window[3], File_Loc());
+    ri_api.export_to_cycles();
+    rib_mode = true;
   }
   else
-#endif
   {
-    xml_read_file(options.scene, options.filepath.c_str());
+#ifdef WITH_USD
+    HD_CYCLES_NS::HdCyclesFileReader::read(options.session, options.filepath.c_str());
+#else
+    fprintf(stderr, "Unknown file type: %s\n", options.filepath.c_str());
+    exit(EXIT_FAILURE);
+#endif
   }
 
   /* Camera width/height override? */
@@ -120,7 +126,12 @@ static void scene_init()
   }
 
   /* Calculate Viewplane */
-  options.scene->camera->compute_auto_viewplane();
+  if (!rib_mode)
+    options.scene->camera->compute_auto_viewplane();
+  
+  session_buffer_params();
+  if (rib_mode)
+    ri_api.adjust_buffer_parameters(options.buffer_params);
 }
 
 static void session_init()
@@ -130,20 +141,25 @@ static void session_init()
 
 #ifdef WITH_CYCLES_STANDALONE_GUI
   if (!options.session_params.background) {
+    if (options.display_type == "gl")
     options.session->set_display_driver(make_unique<OpenGLDisplayDriver>(
         window_opengl_context_enable, window_opengl_context_disable));
   }
 #endif
 
-  if (!options.output_filepath.empty()) {
+      if (!options.output_filepath.empty()) {
     options.session->set_output_driver(make_unique<OIIOOutputDriver>(
         options.output_filepath, options.output_pass, session_print));
   }
 
-  if (options.session_params.background && !options.quiet)
+  if (options.session_params.background) {
+    if (options.display_type == "tev")
+      options.session->set_display_driver(make_unique<TEVDisplayDriver>(options.display_server));
+    else if (!options.quiet)
     options.session->progress.set_update_callback(function_bind(&session_print_status));
+  }
 #ifdef WITH_CYCLES_STANDALONE_GUI
-  else
+  else if (options.display_type == "gl")
     options.session->progress.set_update_callback(function_bind(&window_redraw));
 #endif
 
@@ -155,7 +171,7 @@ static void session_init()
   pass->set_name(ustring(options.output_pass.c_str()));
   pass->set_type(PASS_COMBINED);
 
-  options.session->reset(options.session_params, session_buffer_params());
+  options.session->reset(options.session_params, *options.buffer_params);
   options.session->start();
 }
 
@@ -172,7 +188,7 @@ static void session_exit()
   }
 }
 
-#ifdef WITH_CYCLES_STANDALONE_GUI
+#if defined(WITH_CYCLES_STANDALONE_GUI)
 static void display_info(Progress &progress)
 {
   static double latency = 0.0;
@@ -247,7 +263,7 @@ static void motion(int x, int y, int button)
     options.session->scene->camera->need_flags_update = true;
     options.session->scene->camera->need_device_update = true;
 
-    options.session->reset(options.session_params, session_buffer_params());
+    options.session->reset(options.session_params, *options.buffer_params);
   }
 }
 
@@ -264,7 +280,7 @@ static void resize(int width, int height)
     options.session->scene->camera->need_flags_update = true;
     options.session->scene->camera->need_device_update = true;
 
-    options.session->reset(options.session_params, session_buffer_params());
+    options.session->reset(options.session_params, *options.buffer_params);
   }
 }
 
@@ -276,7 +292,7 @@ static void keyboard(unsigned char key)
 
   /* Reset */
   else if (key == 'r')
-    options.session->reset(options.session_params, session_buffer_params());
+    options.session->reset(options.session_params, *options.buffer_params);
 
   /* Cancel */
   else if (key == 27)  // escape
@@ -313,7 +329,7 @@ static void keyboard(unsigned char key)
     options.session->scene->camera->need_flags_update = true;
     options.session->scene->camera->need_device_update = true;
 
-    options.session->reset(options.session_params, session_buffer_params());
+    options.session->reset(options.session_params, *options.buffer_params);
   }
 
   /* Set Max Bounces */
@@ -339,7 +355,7 @@ static void keyboard(unsigned char key)
 
     options.session->scene->integrator->set_max_bounce(bounce);
 
-    options.session->reset(options.session_params, session_buffer_params());
+    options.session->reset(options.session_params, *options.buffer_params);
   }
 }
 #endif
@@ -354,8 +370,8 @@ static int files_parse(int argc, const char *argv[])
 
 static void options_parse(int argc, const char **argv)
 {
-  options.width = 1024;
-  options.height = 512;
+  options.width = 0;
+  options.height = 0;
   options.filepath = "";
   options.session = NULL;
   options.quiet = false;
@@ -396,6 +412,12 @@ static void options_parse(int argc, const char **argv)
              &ssname,
              "Shading system to use: svm, osl",
 #endif
+             "--display-type %s",
+             &options.display_type,
+             "Display type to use: gl, tev",
+             "--display-server %s",
+             &options.display_server,
+             "For tev display, host:port of the tev application",
              "--background",
              &options.session_params.background,
              "Render in background, without user interface",
@@ -419,6 +441,12 @@ static void options_parse(int argc, const char **argv)
              "Window height in pixel",
              "--tile-size %d",
              &options.session_params.tile_size,
+             "Tile size in pixels",
+             "--crop-window %f %f %f %f",
+             &options.crop_window[0],
+             &options.crop_window[1],
+             &options.crop_window[2],
+             &options.crop_window[3],
              "Tile size in pixels",
              "--list-devices",
              &list,
@@ -482,8 +510,18 @@ static void options_parse(int argc, const char **argv)
   else if (ssname == "svm")
     options.scene_params.shadingsystem = SHADINGSYSTEM_SVM;
 
-#ifndef WITH_CYCLES_STANDALONE_GUI
+#if !defined(WITH_CYCLES_STANDALONE_GUI)
   options.session_params.background = true;
+#else
+  if (options.display_type != "" && options.display_type != "gl" &&
+      options.display_type != "tev") {
+    std::cerr << "Found \"" << options.display_type << "\" for display type. "
+              << "Only \"gl\" or \"tev\" are excepted. Turning off display output" << std::endl;
+    options.display_type = "";
+  }
+  if (options.display_type == "" || options.display_type == "tev")
+  options.session_params.background = true;
+
 #endif
 
   if (options.session_params.tile_size > 0) {
@@ -536,15 +574,14 @@ int main(int argc, const char **argv)
   path_init();
   options_parse(argc, argv);
 
-#ifdef WITH_CYCLES_STANDALONE_GUI
   if (options.session_params.background) {
-#endif
     session_init();
     options.session->wait();
     session_exit();
-#ifdef WITH_CYCLES_STANDALONE_GUI
   }
+#if defined(WITH_CYCLES_STANDALONE_GUI)
   else {
+    if (options.display_type == "gl") {
     string title = "Cycles: " + path_filename(options.filepath);
 
     /* init/exit are callback so they run while GL is initialized */
@@ -557,6 +594,7 @@ int main(int argc, const char **argv)
                      display,
                      keyboard,
                      motion);
+  }
   }
 #endif
 

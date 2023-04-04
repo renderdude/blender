@@ -1,0 +1,47 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrColorSpace.osl/obj/PxrColorSpace.oso
+shader PxrColorSpace	%meta{int,rfm_nodeid,1233490} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/color"} %meta{string,rfh_classification,"Pattern/Color"} %meta{string,help,"Convert the input color to OCIO's 'rendering' colorspace."} 
+param	color	inputColor	0 0 0		%meta{string,label,"input Color"}  %read{0,0} %write{2147483647,-1}
+param	string	colorspace	"Disabled"		%meta{string,label,"ColorSpace"} %meta{string,widget,"popup"} %meta{int,connectable,0} %meta{string,options,"ocio_colorspaces"} %meta{int,editable,1} %meta{string,help,"OCIO convert from specified color space to scene-linear."}  %read{1,4} %write{2147483647,-1}
+oparam	color	resultRGB	0 0 0		%read{4,9} %write{0,4}
+oparam	color	resultR	0 0 0		%read{2147483647,-1} %write{6,6}
+oparam	color	resultG	0 0 0		%read{2147483647,-1} %write{8,8}
+oparam	color	resultB	0 0 0		%read{2147483647,-1} %write{10,10}
+const	string	$const1	"Disabled"		%read{1,1} %write{2147483647,-1}
+temp	int	$tmp1	%read{2,2} %write{1,1}
+const	string	$const2	"toColorSpace"		%read{3,3} %write{2147483647,-1}
+const	string	$const3	"rendering"		%read{4,4} %write{2147483647,-1}
+const	int	$const4	0		%read{5,5} %write{2147483647,-1}
+temp	float	$tmp2	%read{6,6} %write{5,5}
+const	int	$const5	1		%read{7,7} %write{2147483647,-1}
+temp	float	$tmp3	%read{8,8} %write{7,7}
+const	int	$const6	2		%read{9,9} %write{2147483647,-1}
+temp	float	$tmp4	%read{10,10} %write{9,9}
+code ___main___
+# PxrColorSpace.osl:66
+#     resultRGB = inputColor;
+	assign		resultRGB inputColor 	%filename{"PxrColorSpace.osl"} %line{66} %argrw{"wr"}
+# PxrColorSpace.osl:67
+#     if (colorspace != OCIO_DISABLED)
+	neq		$tmp1 colorspace $const1 	%line{67} %argrw{"wrr"}
+	if		$tmp1 5 5 	%argrw{"r"}
+# PxrColorSpace.osl:68
+#         toColorSpace(colorspace, resultRGB);
+	functioncall	$const2 5 	%line{68} %argrw{"r"}
+# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:157
+#     inout = transformc(inputColorSpace, "rendering", inout);
+	transformc	resultRGB colorspace $const3 resultRGB 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{157} %argrw{"wrrr"}
+# PxrColorSpace.osl:69
+#     resultR = resultRGB[0];
+	compref		$tmp2 resultRGB $const4 	%filename{"PxrColorSpace.osl"} %line{69} %argrw{"wrr"}
+	assign		resultR $tmp2 	%argrw{"wr"}
+# PxrColorSpace.osl:70
+#     resultG = resultRGB[1];
+	compref		$tmp3 resultRGB $const5 	%line{70} %argrw{"wrr"}
+	assign		resultG $tmp3 	%argrw{"wr"}
+# PxrColorSpace.osl:71
+#     resultB = resultRGB[2];
+	compref		$tmp4 resultRGB $const6 	%line{71} %argrw{"wrr"}
+	assign		resultB $tmp4 	%argrw{"wr"}
+	end

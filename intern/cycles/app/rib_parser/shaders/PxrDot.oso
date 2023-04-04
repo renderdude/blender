@@ -1,0 +1,12 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
+# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrDot.osl/obj/PxrDot.oso
+shader PxrDot	%meta{int,rfm_nodeid,1053387} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/geometry"} %meta{string,rfh_classification,"Pattern/Geometry"} %meta{string,help,"Computes the dot product of two vectors."} 
+param	vector	vector1	0 0 0		%meta{string,widget,"default"} %meta{string,help,"The first vector in the dot product calculation."} %meta{string,label,"Vector 1"}  %read{0,0} %write{2147483647,-1}
+param	vector	vector2	0 0 0		%meta{string,widget,"default"} %meta{string,help,"The second vector in the dot product calculation."} %meta{string,label,"Vector 2"}  %read{0,0} %write{2147483647,-1}
+oparam	float	result	0		%meta{string,help,"result (float)"}  %read{2147483647,-1} %write{0,0}
+code ___main___
+# PxrDot.osl:64
+#     result = dot(vector1, vector2);
+	dot		result vector1 vector2 	%filename{"PxrDot.osl"} %line{64} %argrw{"wrr"}
+	end
