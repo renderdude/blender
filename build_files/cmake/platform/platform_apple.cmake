@@ -320,6 +320,7 @@ endif()
 if(WITH_CYCLES AND WITH_CYCLES_EMBREE)
   find_package(Embree 3.8.0 REQUIRED)
 endif()
+add_bundled_libraries(embree/lib)
 
 if(WITH_OPENIMAGEDENOISE)
   find_package(OpenImageDenoise REQUIRED)
