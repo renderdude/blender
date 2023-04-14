@@ -16,6 +16,8 @@
 
 #include "BKE_paint.h"
 #include "BKE_pbvh.h"
+
+#include "BLI_implicit_sharing.hh"
 #include "BLI_bitmap.h"
 #include "BLI_compiler_attrs.h"
 #include "BLI_compiler_compat.h"
@@ -147,6 +149,7 @@ struct SculptUndoNodeGeometry {
   CustomData ldata;
   CustomData pdata;
   int *poly_offset_indices;
+  blender::ImplicitSharingInfo *poly_offsets_sharing_info;
   int totvert;
   int totedge;
   int totloop;
@@ -227,6 +230,7 @@ struct SculptUndoNode {
 struct SculptRakeData {
   float follow_dist;
   float follow_co[3];
+  float angle;
 };
 
 /**
@@ -1247,6 +1251,7 @@ SculptBrushTestFn SCULPT_brush_test_init_with_falloff_shape(SculptSession *ss,
                                                             char falloff_shape);
 const float *SCULPT_brush_frontface_normal_from_falloff_shape(SculptSession *ss,
                                                               char falloff_shape);
+void SCULPT_cube_tip_init(Sculpt *sd, Object *ob, Brush *brush, float mat[4][4]);
 
 /**
  * Return a multiplier for brush strength on a particular vertex.

@@ -418,7 +418,7 @@ class USERPREF_PT_edit_objects_duplicate_data(EditingPanel, CenterAlignMixIn, Pa
         col.prop(edit, "use_duplicate_surface", text="Surface")
         col.prop(edit, "use_duplicate_text", text="Text")
         # col.prop(edit, "use_duplicate_texture", text="Texture")  # Not implemented.
-        col.prop(edit, "use_duplicate_volume", text="Volume")
+        col.prop(edit, "use_duplicate_volume", text="Volume", text_ctxt=i18n_contexts.id_id)
 
 
 class USERPREF_PT_edit_cursor(EditingPanel, CenterAlignMixIn, Panel):
@@ -1951,7 +1951,7 @@ class USERPREF_PT_addons(AddOnPanel, Panel):
 
         addon_user_dirs = tuple(
             p for p in (
-                *[os.path.join(pref_p, "addons") for pref_p in bpy.utils.script_path_user()],
+                *[os.path.join(pref_p, "addons") for pref_p in bpy.utils.script_paths_pref()],
                 bpy.utils.user_resource('SCRIPTS', path="addons"),
             )
             if p
@@ -2205,12 +2205,12 @@ class StudioLightPanelMixin:
 
         row.template_icon(layout.icon(studio_light), scale=3.0)
         col = row.column()
-        op = col.operator("preferences.studiolight_uninstall", text="", icon='REMOVE')
-        op.index = studio_light.index
+        props = col.operator("preferences.studiolight_uninstall", text="", icon='REMOVE')
+        props.index = studio_light.index
 
         if studio_light.type == 'STUDIO':
-            op = col.operator("preferences.studiolight_copy_settings", text="", icon='IMPORT')
-            op.index = studio_light.index
+            props = col.operator("preferences.studiolight_copy_settings", text="", icon='IMPORT')
+            props.index = studio_light.index
 
         box.label(text=studio_light.name)
 
@@ -2247,9 +2247,9 @@ class USERPREF_PT_studiolight_lights(StudioLightPanel, StudioLightPanelMixin, Pa
 
     def draw_header_preset(self, _context):
         layout = self.layout
-        op = layout.operator("preferences.studiolight_install", icon='IMPORT', text="Install...")
-        op.type = 'STUDIO'
-        op.filter_glob = ".sl"
+        props = layout.operator("preferences.studiolight_install", icon='IMPORT', text="Install...")
+        props.type = 'STUDIO'
+        props.filter_glob = ".sl"
         layout.separator()
 
     def get_error_message(self):
