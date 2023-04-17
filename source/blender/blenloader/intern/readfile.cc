@@ -1981,16 +1981,7 @@ static void direct_link_id_common(
     /* When actually reading a file, we do want to reset/re-generate session UUIDS.
      * In undo case, we want to re-use existing ones. */
     id->session_uuid = MAIN_ID_SESSION_UUID_UNSET;
-
-    /* Runtime IDs should never be written in .blend files (except memfiles from undo). */
-    BLI_assert((id->tag & LIB_TAG_RUNTIME) == 0);
   }
-
-  /* No-main and other types of special IDs should never be written in .blend files. */
-  /* NOTE: `NO_MAIN` is commented for now as some code paths may still generate embedded IDs with
-   * this tag, see #103389. Related to #88555. */
-  BLI_assert(
-      (id->tag & (/*LIB_TAG_NO_MAIN |*/ LIB_TAG_NO_USER_REFCOUNT | LIB_TAG_NOT_ALLOCATED)) == 0);
 
   if ((tag & LIB_TAG_TEMP_MAIN) == 0) {
     BKE_lib_libblock_session_uuid_ensure(id);
@@ -3113,6 +3104,7 @@ static void read_libblock_undo_restore_at_old_address(FileData *fd, Main *main, 
    * lib-linking to restore some data that should never be affected by undo, e.g. the 3D cursor of
    * #Scene. */
   id_old->orig_id = id;
+  id_old->tag |= LIB_TAG_UNDO_OLD_ID_REREAD_IN_PLACE;
 
   BLI_addtail(new_lb, id_old);
   BLI_addtail(old_lb, id);
@@ -3131,17 +3123,20 @@ static bool read_libblock_undo_restore(
       return true;
     }
   }
+  else if (id_type->flags & IDTYPE_FLAGS_NO_MEMFILE_UNDO) {
+    /* Skip reading any 'no undo' datablocks (typically UI-like ones), existing ones are kept.
+     * See `setup_app_data` for details. */
+    CLOG_INFO(&LOG_UNDO,
+              2,
+              "UNDO: skip restore datablock %s, 'NO_MEMFILE_UNDO' type of ID",
+              id->name);
+    return true;
+  }
   else if (bhead->code == ID_LINK_PLACEHOLDER) {
     /* Restore linked datablock. */
     if (read_libblock_undo_restore_linked(fd, main, id, bhead)) {
       return true;
     }
-  }
-  else if (id_type->flags & IDTYPE_FLAGS_NO_MEMFILE_UNDO) {
-    /* Skip reading any UI datablocks, existing ones are kept. We don't
-     * support pointers from other datablocks to UI datablocks so those
-     * we also don't put UI datablocks in fd->libmap. */
-    return true;
   }
 
   /* Restore local datablocks. */
