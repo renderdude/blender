@@ -4178,6 +4178,9 @@ def km_grease_pencil_stroke_weight_mode(params):
         # Brush size
         ("wm.radial_control", {"type": 'F', "value": 'PRESS'},
          {"properties": [("data_path_primary", 'tool_settings.gpencil_weight_paint.brush.size')]}),
+        # Brush weight
+        ("wm.radial_control", {"type": 'F', "value": 'PRESS', "ctrl": True},
+         {"properties": [("data_path_primary", 'tool_settings.gpencil_weight_paint.brush.weight')]}),
         # Increase/Decrease brush size
         ("brush.scale_size", {"type": 'LEFT_BRACKET', "value": 'PRESS', "repeat": True},
          {"properties": [("scalar", 0.9)]}),
@@ -4197,6 +4200,10 @@ def km_grease_pencil_stroke_weight_mode(params):
         op_menu("VIEW3D_MT_gpencil_animation", {"type": 'I', "value": 'PRESS'}),
         # Context menu
         *_template_items_context_panel("VIEW3D_PT_gpencil_weight_context_menu", params.context_menu_event),
+        # Toggle Add/Subtract for weight draw tool
+        ("gpencil.weight_toggle_direction", {"type": 'D', "value": 'PRESS'}, None),
+        # Weight sample
+        ("gpencil.weight_sample", {"type": params.action_mouse, "value": 'PRESS', "ctrl": True}, None),
     ])
 
     if params.select_mouse == 'LEFTMOUSE':
@@ -4218,6 +4225,59 @@ def km_grease_pencil_stroke_weight_draw(_params):
 
     items.extend([
         # Draw
+        ("gpencil.weight_paint", {"type": 'LEFTMOUSE', "value": 'PRESS'},
+         {"properties": [("wait_for_input", False)]}),
+        ("gpencil.weight_paint", {"type": 'LEFTMOUSE', "value": 'PRESS', "ctrl": True},
+         {"properties": [("wait_for_input", False)]}),
+    ])
+
+    return keymap
+
+
+def km_grease_pencil_stroke_weight_blur(_params):
+    items = []
+    keymap = (
+        "Grease Pencil Stroke Weight (Blur)",
+        {"space_type": 'EMPTY', "region_type": 'WINDOW'},
+        {"items": items},
+    )
+
+    items.extend([
+        # Blur
+        ("gpencil.weight_paint", {"type": 'LEFTMOUSE', "value": 'PRESS'},
+         {"properties": [("wait_for_input", False)]}),
+    ])
+
+    return keymap
+
+
+def km_grease_pencil_stroke_weight_average(_params):
+    items = []
+    keymap = (
+        "Grease Pencil Stroke Weight (Average)",
+        {"space_type": 'EMPTY', "region_type": 'WINDOW'},
+        {"items": items},
+    )
+
+    items.extend([
+        # Average
+        ("gpencil.weight_paint", {"type": 'LEFTMOUSE', "value": 'PRESS'},
+         {"properties": [("wait_for_input", False)]}),
+    ])
+
+    return keymap
+
+
+def km_grease_pencil_stroke_weight_smear(_params):
+    items = []
+    keymap = (
+        "Grease Pencil Stroke Weight (Smear)",
+        {"space_type": 'EMPTY', "region_type": 'WINDOW'},
+        {"items": items},
+    )
+
+    items.extend([
+        # Smear
         ("gpencil.weight_paint", {"type": 'LEFTMOUSE', "value": 'PRESS'},
          {"properties": [("wait_for_input", False)]}),
     ])
@@ -6228,8 +6288,7 @@ def km_view3d_rotate_modal(_params):
     )
 
     items.extend([
-        ("CONFIRM", {"type": 'MIDDLEMOUSE', "value": 'RELEASE', "any": True}, None),
-        ("CONFIRM", {"type": 'ESC', "value": 'PRESS', "any": True}, None),
+        ("CANCEL", {"type": 'RIGHTMOUSE', "value": 'PRESS', "any": True}, None),
         ("AXIS_SNAP_ENABLE", {"type": 'LEFT_ALT', "value": 'PRESS', "any": True}, None),
         ("AXIS_SNAP_DISABLE", {"type": 'LEFT_ALT', "value": 'RELEASE', "any": True}, None),
         ("AXIS_SNAP_ENABLE", {"type": 'RIGHT_ALT', "value": 'PRESS', "any": True}, None),
@@ -6248,8 +6307,7 @@ def km_view3d_move_modal(_params):
     )
 
     items.extend([
-        ("CONFIRM", {"type": 'MIDDLEMOUSE', "value": 'RELEASE', "any": True}, None),
-        ("CONFIRM", {"type": 'ESC', "value": 'PRESS', "any": True}, None),
+        ("CANCEL", {"type": 'RIGHTMOUSE', "value": 'PRESS', "any": True}, None),
     ])
 
     return keymap
@@ -6264,8 +6322,7 @@ def km_view3d_zoom_modal(_params):
     )
 
     items.extend([
-        ("CONFIRM", {"type": 'MIDDLEMOUSE', "value": 'RELEASE', "any": True}, None),
-        ("CONFIRM", {"type": 'ESC', "value": 'PRESS', "any": True}, None),
+        ("CANCEL", {"type": 'RIGHTMOUSE', "value": 'PRESS', "any": True}, None),
     ])
 
     return keymap
@@ -6280,8 +6337,7 @@ def km_view3d_dolly_modal(_params):
     )
 
     items.extend([
-        ("CONFIRM", {"type": 'MIDDLEMOUSE', "value": 'RELEASE', "any": True}, None),
-        ("CONFIRM", {"type": 'ESC', "value": 'PRESS', "any": True}, None),
+        ("CANCEL", {"type": 'RIGHTMOUSE', "value": 'PRESS', "any": True}, None),
     ])
 
     return keymap
@@ -6784,6 +6840,17 @@ def km_3d_view_tool_cursor(params):
             # Don't use `tool_maybe_tweak_event` since it conflicts with `PRESS` that places the cursor.
             ("transform.translate", params.tool_tweak_event,
              {"properties": [("release_confirm", True), ("cursor_transform", True)]}),
+        ]},
+    )
+
+
+def km_3d_view_tool_text_select(params):
+    return (
+        "3D View Tool: Edit Text, Select Text",
+        {"space_type": 'VIEW_3D', "region_type": 'WINDOW'},
+        {"items": [
+            ("font.selection_set", {"type": 'LEFTMOUSE', "value": 'PRESS'}, None),
+            ("font.select_word", {"type": 'LEFTMOUSE', "value": 'DOUBLE_CLICK'}, None),
         ]},
     )
 
@@ -8115,6 +8182,9 @@ def generate_keymaps(params=None):
         km_grease_pencil_stroke_sculpt_clone(params),
         km_grease_pencil_stroke_weight_mode(params),
         km_grease_pencil_stroke_weight_draw(params),
+        km_grease_pencil_stroke_weight_blur(params),
+        km_grease_pencil_stroke_weight_average(params),
+        km_grease_pencil_stroke_weight_smear(params),
         km_grease_pencil_stroke_vertex_mode(params),
         km_grease_pencil_stroke_vertex_draw(params),
         km_grease_pencil_stroke_vertex_blur(params),
@@ -8201,6 +8271,7 @@ def generate_keymaps(params=None):
         *(km_node_editor_tool_select_circle(params, fallback=fallback) for fallback in (False, True)),
         km_node_editor_tool_links_cut(params),
         km_3d_view_tool_cursor(params),
+        km_3d_view_tool_text_select(params),
         *(km_3d_view_tool_select(params, fallback=fallback) for fallback in (False, True)),
         *(km_3d_view_tool_select_box(params, fallback=fallback) for fallback in (False, True)),
         *(km_3d_view_tool_select_circle(params, fallback=fallback) for fallback in (False, True)),

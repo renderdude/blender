@@ -551,7 +551,7 @@ static Mesh *arrayModifier_doArray(ArrayModifierData *amd,
 
   /* Initialize a result dm */
   result = BKE_mesh_new_nomain_from_template(
-      mesh, result_nverts, result_nedges, result_nloops, result_npolys);
+      mesh, result_nverts, result_nedges, result_npolys, result_nloops);
   float(*result_positions)[3] = BKE_mesh_vert_positions_for_write(result);
   blender::MutableSpan<int2> result_edges = result->edges_for_write();
   blender::MutableSpan<int> result_poly_offsets = result->poly_offsets_for_write();
@@ -684,6 +684,36 @@ static Mesh *arrayModifier_doArray(ArrayModifierData *amd,
           (*dmloopuv)[0] += uv_offset[0];
           (*dmloopuv)[1] += uv_offset[1];
         }
+      }
+    }
+  }
+
+  if (!use_merge && !mesh->runtime->subsurf_optimal_display_edges.is_empty()) {
+    const BoundedBitSpan src = mesh->runtime->subsurf_optimal_display_edges;
+
+    result->runtime->subsurf_optimal_display_edges.resize(result->totedge);
+    MutableBoundedBitSpan dst = result->runtime->subsurf_optimal_display_edges;
+    for (const int i : IndexRange(count)) {
+      dst.slice({i * mesh->totedge, mesh->totedge}).copy_from(src);
+    }
+
+    if (start_cap_mesh) {
+      MutableBitSpan cap_bits = dst.slice(
+          {result_nedges - start_cap_nedges - end_cap_nedges, start_cap_mesh->totedge});
+      if (start_cap_mesh->runtime->subsurf_optimal_display_edges.is_empty()) {
+        cap_bits.set_all(true);
+      }
+      else {
+        cap_bits.copy_from(start_cap_mesh->runtime->subsurf_optimal_display_edges);
+      }
+    }
+    if (end_cap_mesh) {
+      MutableBitSpan cap_bits = dst.slice({result_nedges - end_cap_nedges, end_cap_mesh->totedge});
+      if (end_cap_mesh->runtime->subsurf_optimal_display_edges.is_empty()) {
+        cap_bits.set_all(true);
+      }
+      else {
+        cap_bits.copy_from(end_cap_mesh->runtime->subsurf_optimal_display_edges);
       }
     }
   }

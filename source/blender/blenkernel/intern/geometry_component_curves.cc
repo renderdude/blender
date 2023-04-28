@@ -33,7 +33,7 @@ GeometryComponent *CurveComponent::copy() const
 {
   CurveComponent *new_component = new CurveComponent();
   if (curves_ != nullptr) {
-    new_component->curves_ = BKE_curves_copy_for_eval(curves_, false);
+    new_component->curves_ = BKE_curves_copy_for_eval(curves_);
     new_component->ownership_ = GeometryOwnershipType::Owned;
   }
   return new_component;
@@ -41,7 +41,7 @@ GeometryComponent *CurveComponent::copy() const
 
 void CurveComponent::clear()
 {
-  BLI_assert(this->is_mutable());
+  BLI_assert(this->is_mutable() || this->is_expired());
   if (curves_ != nullptr) {
     if (ownership_ == GeometryOwnershipType::Owned) {
       BKE_id_free(nullptr, curves_);
@@ -87,7 +87,7 @@ Curves *CurveComponent::get_for_write()
 {
   BLI_assert(this->is_mutable());
   if (ownership_ == GeometryOwnershipType::ReadOnly) {
-    curves_ = BKE_curves_copy_for_eval(curves_, false);
+    curves_ = BKE_curves_copy_for_eval(curves_);
     ownership_ = GeometryOwnershipType::Owned;
   }
   return curves_;
@@ -107,7 +107,7 @@ void CurveComponent::ensure_owns_direct_data()
 {
   BLI_assert(this->is_mutable());
   if (ownership_ != GeometryOwnershipType::Owned) {
-    curves_ = BKE_curves_copy_for_eval(curves_, false);
+    curves_ = BKE_curves_copy_for_eval(curves_);
     ownership_ = GeometryOwnershipType::Owned;
   }
 }
@@ -372,7 +372,7 @@ static ComponentAttributeProviders create_attribute_providers_for_curve()
                                                  ATTR_DOMAIN_POINT,
                                                  CD_PROP_FLOAT3,
                                                  CD_PROP_FLOAT3,
-                                                 BuiltinAttributeProvider::NonCreatable,
+                                                 BuiltinAttributeProvider::Creatable,
                                                  BuiltinAttributeProvider::NonDeletable,
                                                  point_access,
                                                  tag_component_positions_changed);

@@ -5586,8 +5586,6 @@ GHOST_SystemWayland::GHOST_SystemWayland(bool background)
 #  endif
       display_destroy_and_free_all();
       throw std::runtime_error("Wayland: unable to find libdecor!");
-
-      use_libdecor = true;
     }
   }
   else {
@@ -5610,7 +5608,7 @@ GHOST_SystemWayland::GHOST_SystemWayland(bool background)
   (void)background;
 #endif
   {
-    GWL_XDG_Decor_System &decor = *display_->xdg_decor;
+    const GWL_XDG_Decor_System &decor = *display_->xdg_decor;
     if (!decor.shell) {
       display_destroy_and_free_all();
       throw std::runtime_error("Wayland: unable to access xdg_shell!");
@@ -5784,8 +5782,14 @@ GHOST_TSuccess GHOST_SystemWayland::getModifierKeys(GHOST_ModifierKeys &keys) co
     }
     const GWL_ModifierInfo &mod_info = g_modifier_info_table[i];
     const bool val = (state & (1 << seat->xkb_keymap_mod_index[i])) != 0;
-    bool val_l = seat->key_depressed.mods[GHOST_KEY_MODIFIER_TO_INDEX(mod_info.key_l)] > 0;
-    bool val_r = seat->key_depressed.mods[GHOST_KEY_MODIFIER_TO_INDEX(mod_info.key_r)] > 0;
+    /* NOTE(@ideasman42): it's important to write the XKB state back to #GWL_KeyboardDepressedState
+     * otherwise changes to modifiers in the future wont generate events.
+     * This can cause modifiers to be stuck when switching between windows in GNOME because
+     * window activation is handled before the keyboard enter callback runs, see: #107314. */
+    int16_t &depressed_l = seat->key_depressed.mods[GHOST_KEY_MODIFIER_TO_INDEX(mod_info.key_l)];
+    int16_t &depressed_r = seat->key_depressed.mods[GHOST_KEY_MODIFIER_TO_INDEX(mod_info.key_r)];
+    bool val_l = depressed_l > 0;
+    bool val_r = depressed_r > 0;
 
     /* This shouldn't be needed, but guard against any possibility of modifiers being stuck.
      * Warn so if this happens it can be investigated. */
@@ -5798,6 +5802,7 @@ GHOST_TSuccess GHOST_SystemWayland::getModifierKeys(GHOST_ModifierKeys &keys) co
         }
         /* Picking the left is arbitrary. */
         val_l = true;
+        depressed_l = 1;
       }
     }
     else {
@@ -5809,6 +5814,8 @@ GHOST_TSuccess GHOST_SystemWayland::getModifierKeys(GHOST_ModifierKeys &keys) co
         }
         val_l = false;
         val_r = false;
+        depressed_l = 0;
+        depressed_r = 0;
       }
     }
 
@@ -6071,10 +6078,8 @@ static GHOST_TSuccess getCursorPositionClientRelative_impl(
     /* As the cursor is restored at the warped location,
      * apply warping when requesting the cursor location. */
     GHOST_Rect wrap_bounds{};
-    if (win->getCursorGrabModeIsWarp()) {
-      if (win->getCursorGrabBounds(wrap_bounds) == GHOST_kFailure) {
-        win->getClientBounds(wrap_bounds);
-      }
+    if (win->getCursorGrabBounds(wrap_bounds) == GHOST_kFailure) {
+      win->getClientBounds(wrap_bounds);
     }
     int xy_wrap[2] = {
         seat_state_pointer->xy[0],
@@ -6302,7 +6307,7 @@ GHOST_IContext *GHOST_SystemWayland::createOffscreenContext(GHOST_GLSettings glS
                                                  wl_surface,
                                                  display_->wl_display,
                                                  1,
-                                                 0,
+                                                 2,
                                                  debug_context);
 
     if (!context->initializeDrawingContext()) {
@@ -6680,10 +6685,9 @@ GHOST_TSuccess GHOST_SystemWayland::cursor_shape_custom_set(uint8_t *bitmap,
   static constexpr uint32_t transparent = 0x00000000;
 
   uint8_t datab = 0, maskb = 0;
-  uint32_t *pixel;
 
   for (int y = 0; y < sizey; ++y) {
-    pixel = &static_cast<uint32_t *>(cursor->custom_data)[y * sizex];
+    uint32_t *pixel = &static_cast<uint32_t *>(cursor->custom_data)[y * sizex];
     for (int x = 0; x < sizex; ++x) {
       if ((x % 8) == 0) {
         datab = *bitmap++;
