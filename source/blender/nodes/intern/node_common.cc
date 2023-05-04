@@ -37,7 +37,7 @@
 #include "NOD_socket_declarations.hh"
 #include "NOD_socket_declarations_geometry.hh"
 #include "node_common.h"
-#include "node_util.h"
+#include "node_util.hh"
 
 using blender::Map;
 using blender::MultiValueMap;
@@ -115,7 +115,8 @@ bool nodeGroupPoll(const bNodeTree *nodetree,
 
   for (const bNode *node : grouptree->all_nodes()) {
     if (node->typeinfo->poll_instance &&
-        !node->typeinfo->poll_instance(node, nodetree, r_disabled_hint)) {
+        !node->typeinfo->poll_instance(node, nodetree, r_disabled_hint))
+    {
       return false;
     }
   }
