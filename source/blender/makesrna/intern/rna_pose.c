@@ -505,7 +505,7 @@ static void rna_pose_bgroup_name_index_get(PointerRNA *ptr, char *value, int ind
   grp = BLI_findlink(&pose->agroups, index - 1);
 
   if (grp) {
-    BLI_strncpy(value, grp->name, sizeof(grp->name));
+    strcpy(value, grp->name);
   }
   else {
     value[0] = '\0';
@@ -537,14 +537,17 @@ static void rna_pose_bgroup_name_index_set(PointerRNA *ptr, const char *value, s
   *index = 0;
 }
 
-static void rna_pose_pgroup_name_set(PointerRNA *ptr, const char *value, char *result, int maxlen)
+static void rna_pose_pgroup_name_set(PointerRNA *ptr,
+                                     const char *value,
+                                     char *result,
+                                     int result_maxncpy)
 {
   bPose *pose = (bPose *)ptr->data;
   bActionGroup *grp;
 
   for (grp = pose->agroups.first; grp; grp = grp->next) {
     if (STREQ(grp->name, value)) {
-      BLI_strncpy(result, value, maxlen);
+      BLI_strncpy(result, value, result_maxncpy);
       return;
     }
   }

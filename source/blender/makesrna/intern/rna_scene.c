@@ -1513,18 +1513,18 @@ static void rna_ImageFormatSettings_color_management_set(PointerRNA *ptr, int va
 
 static int rna_SceneRender_file_ext_length(PointerRNA *ptr)
 {
-  RenderData *rd = (RenderData *)ptr->data;
-  char ext[8];
-  ext[0] = '\0';
-  BKE_image_path_ensure_ext_from_imformat(ext, &rd->im_format);
-  return strlen(ext);
+  const RenderData *rd = (RenderData *)ptr->data;
+  const char *ext_array[BKE_IMAGE_PATH_EXT_MAX];
+  int ext_num = BKE_image_path_ext_from_imformat(&rd->im_format, ext_array);
+  return ext_num ? strlen(ext_array[0]) : 0;
 }
 
-static void rna_SceneRender_file_ext_get(PointerRNA *ptr, char *str)
+static void rna_SceneRender_file_ext_get(PointerRNA *ptr, char *value)
 {
-  RenderData *rd = (RenderData *)ptr->data;
-  str[0] = '\0';
-  BKE_image_path_ensure_ext_from_imformat(str, &rd->im_format);
+  const RenderData *rd = (RenderData *)ptr->data;
+  const char *ext_array[BKE_IMAGE_PATH_EXT_MAX];
+  int ext_num = BKE_image_path_ext_from_imformat(&rd->im_format, ext_array);
+  strcpy(value, ext_num ? ext_array[0] : "");
 }
 
 #  ifdef WITH_FFMPEG
@@ -2521,7 +2521,7 @@ void rna_ViewLayer_active_lightgroup_index_set(PointerRNA *ptr, int value)
 static void rna_ViewLayerLightgroup_name_get(PointerRNA *ptr, char *value)
 {
   ViewLayerLightgroup *lightgroup = (ViewLayerLightgroup *)ptr->data;
-  BLI_strncpy(value, lightgroup->name, sizeof(lightgroup->name));
+  strcpy(value, lightgroup->name);
 }
 
 static int rna_ViewLayerLightgroup_name_length(PointerRNA *ptr)
@@ -2912,6 +2912,7 @@ static void rna_def_view3d_cursor(BlenderRNA *brna)
       prop, "Transform Matrix", "Matrix combining location and rotation of the cursor");
   RNA_def_property_float_funcs(
       prop, "rna_View3DCursor_matrix_get", "rna_View3DCursor_matrix_set", NULL);
+  RNA_def_property_update(prop, NC_WINDOW, NULL);
 }
 
 static void rna_def_tool_settings(BlenderRNA *brna)
@@ -3219,7 +3220,7 @@ static void rna_def_tool_settings(BlenderRNA *brna)
   prop = RNA_def_property(srna, "use_proportional_fcurve", PROP_BOOLEAN, PROP_NONE);
   RNA_def_property_boolean_sdna(prop, NULL, "proportional_fcurve", 0);
   RNA_def_property_ui_text(
-      prop, "Proportional Editing FCurves", "Proportional editing in FCurve editor");
+      prop, "Proportional Editing F-Curves", "Proportional editing in F-Curve editor");
   RNA_def_property_ui_icon(prop, ICON_PROP_OFF, 1);
   RNA_def_property_update(prop, NC_SCENE | ND_TOOLSETTINGS, NULL); /* header redraw */
 
@@ -4058,14 +4059,18 @@ static void rna_def_curve_paint_settings(BlenderRNA *brna)
       {CURVE_PAINT_SURFACE_PLANE_NORMAL_VIEW,
        "NORMAL_VIEW",
        0,
-       "Normal/View",
-       "Display perpendicular to the surface"},
+       "Normal to Surface",
+       "Draw in a plane perpendicular to the surface"},
       {CURVE_PAINT_SURFACE_PLANE_NORMAL_SURFACE,
        "NORMAL_SURFACE",
        0,
-       "Normal/Surface",
-       "Display aligned to the surface"},
-      {CURVE_PAINT_SURFACE_PLANE_VIEW, "VIEW", 0, "View", "Display aligned to the viewport"},
+       "Tangent to Surface",
+       "Draw in the surface plane"},
+      {CURVE_PAINT_SURFACE_PLANE_VIEW,
+       "VIEW",
+       0,
+       "View",
+       "Draw in a plane aligned to the viewport"},
       {0, NULL, 0, NULL, NULL},
   };
 
@@ -4437,7 +4442,7 @@ void rna_def_view_layer_common(BlenderRNA *brna, StructRNA *srna, const bool sce
                                "rna_ViewLayer_active_aov_index_get",
                                "rna_ViewLayer_active_aov_index_set",
                                "rna_ViewLayer_active_aov_index_range");
-    RNA_def_property_ui_text(prop, "Active AOV Index", "Index of active aov");
+    RNA_def_property_ui_text(prop, "Active AOV Index", "Index of active AOV");
     RNA_def_property_update(prop, NC_SCENE | ND_RENDER_OPTIONS, NULL);
 
     prop = RNA_def_property(srna, "lightgroups", PROP_COLLECTION, PROP_NONE);
