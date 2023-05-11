@@ -16,7 +16,7 @@
 namespace blender::bke::sim {
 
 GeometrySimulationStateItem::GeometrySimulationStateItem(GeometrySet geometry)
-    : geometry_(std::move(geometry))
+    : geometry(std::move(geometry))
 {
 }
 
@@ -69,7 +69,7 @@ void ModifierSimulationCache::try_discover_bake(const StringRefNull meta_dir,
         continue;
       }
       char modified_file_name[FILENAME_MAX];
-      BLI_strncpy(modified_file_name, dir_entry.relname, sizeof(modified_file_name));
+      STRNCPY(modified_file_name, dir_entry.relname);
       BLI_str_replace_char(modified_file_name, '_', '.');
 
       const SubFrame frame = std::stof(modified_file_name);
@@ -200,6 +200,15 @@ void ModifierSimulationState::ensure_bake_loaded() const
                                         *owner_->bdata_sharing_,
                                         const_cast<ModifierSimulationState &>(*this));
   bake_loaded_ = true;
+}
+
+void ModifierSimulationCache::clear_prev_states()
+{
+  std::lock_guard lock(states_at_frames_mutex_);
+  std::unique_ptr<ModifierSimulationStateAtFrame> temp = std::move(states_at_frames_.last());
+  states_at_frames_.clear_and_shrink();
+  bdata_sharing_.reset();
+  states_at_frames_.append(std::move(temp));
 }
 
 void ModifierSimulationCache::reset()

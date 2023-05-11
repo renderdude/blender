@@ -61,6 +61,8 @@
 
 #include "atomic_ops.h"
 
+#include "lib_intern.h"
+
 #define OVERRIDE_AUTO_CHECK_DELAY 0.2 /* 200ms between auto-override checks. */
 //#define DEBUG_OVERRIDE_TIMEIT
 
@@ -277,9 +279,11 @@ static ID *lib_override_library_create_from(Main *bmain,
   id_us_min(local_id);
 
   /* TODO: Handle this properly in LIB_NO_MAIN case as well (i.e. resync case). Or offload to
-   * generic ID copy code? */
-  if ((lib_id_copy_flags & LIB_ID_CREATE_NO_MAIN) == 0) {
-    local_id->lib = owner_library;
+   * generic ID copy code? Would probably be better to have a version of #BKE_id_copy_ex that takes
+   * an extra `target_lib` parameter. */
+  local_id->lib = owner_library;
+  if ((lib_id_copy_flags & LIB_ID_CREATE_NO_MAIN) != 0 && owner_library == nullptr) {
+    lib_id_copy_ensure_local(bmain, reference_id, local_id, 0);
   }
 
   BKE_lib_override_library_init(local_id, reference_id);
@@ -4323,7 +4327,7 @@ void BKE_lib_override_library_update(Main *bmain, ID *local)
    * different from reference linked ID. But local ID names need to be unique in a given type
    * list of Main, so we cannot always keep it identical, which is why we need this special
    * manual handling here. */
-  BLI_strncpy(tmp_id->name, local->name, sizeof(tmp_id->name));
+  STRNCPY(tmp_id->name, local->name);
 
   /* Those ugly loop-back pointers again. Luckily we only need to deal with the shape keys here,
    * collections' parents are fully runtime and reconstructed later. */
@@ -4333,7 +4337,7 @@ void BKE_lib_override_library_update(Main *bmain, ID *local)
     tmp_key->id.flag |= (local_key->id.flag & LIB_EMBEDDED_DATA_LIB_OVERRIDE);
     BKE_main_namemap_remove_name(bmain, &tmp_key->id, tmp_key->id.name + 2);
     tmp_key->id.lib = local_key->id.lib;
-    BLI_strncpy(tmp_key->id.name, local_key->id.name, sizeof(tmp_key->id.name));
+    STRNCPY(tmp_key->id.name, local_key->id.name);
   }
 
   PointerRNA rnaptr_src, rnaptr_dst, rnaptr_storage_stack, *rnaptr_storage = nullptr;

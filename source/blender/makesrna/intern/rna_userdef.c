@@ -361,7 +361,7 @@ static void rna_userdef_script_directory_name_set(PointerRNA *ptr, const char *v
     value = DATA_("Untitled");
   }
 
-  BLI_strncpy_utf8(script_dir->name, value, sizeof(script_dir->name));
+  STRNCPY_UTF8(script_dir->name, value);
   BLI_uniquename(&U.script_directories,
                  script_dir,
                  value,
@@ -880,7 +880,7 @@ static StructRNA *rna_AddonPref_register(Main *bmain,
     return NULL;
   }
 
-  BLI_strncpy(dummy_apt.idname, dummy_addon.module, sizeof(dummy_apt.idname));
+  STRNCPY(dummy_apt.idname, dummy_addon.module);
   if (strlen(identifier) >= sizeof(dummy_apt.idname)) {
     BKE_reportf(reports,
                 RPT_ERROR,
@@ -3562,6 +3562,12 @@ static void rna_def_userdef_theme_space_action(BlenderRNA *brna)
   RNA_def_property_array(prop, 4);
   RNA_def_property_ui_text(
       prop, "Interpolation Line", "Color of lines showing non-bezier interpolation modes");
+  RNA_def_property_update(prop, 0, "rna_userdef_theme_update");
+
+  prop = RNA_def_property(srna, "simulated_frames", PROP_FLOAT, PROP_COLOR_GAMMA);
+  RNA_def_property_float_sdna(prop, NULL, "simulated_frames");
+  RNA_def_property_array(prop, 4);
+  RNA_def_property_ui_text(prop, "Simulated Frames", "");
   RNA_def_property_update(prop, 0, "rna_userdef_theme_update");
 }
 
