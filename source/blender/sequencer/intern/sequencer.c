@@ -568,12 +568,12 @@ static Sequence *seq_dupli(const Scene *scene_src,
     BLI_assert_unreachable();
   }
 
-  /* When using SEQ_DUPE_UNIQUE_NAME, it is mandatory to add new sequences in relevant container
+  /* When using #SEQ_DUPE_UNIQUE_NAME, it is mandatory to add new sequences in relevant container
    * (scene or meta's one), *before* checking for unique names. Otherwise the meta's list is empty
-   * and hence we miss all seqs in that meta that have already been duplicated (see #55668).
-   * Note that unique name check itself could be done at a later step in calling code, once all
-   * seqs have bee duplicated (that was first, simpler solution), but then handling of animation
-   * data will be broken (see #60194). */
+   * and hence we miss all sequence-strips in that meta that have already been duplicated,
+   * (see #55668). Note that unique name check itself could be done at a later step in calling
+   * code, once all sequence-strips have bee duplicated (that was first, simpler solution),
+   * but then handling of animation data will be broken (see #60194). */
   if (new_seq_list != NULL) {
     BLI_addtail(new_seq_list, seqn);
   }
@@ -860,25 +860,25 @@ static bool seq_read_lib_cb(Sequence *seq, void *user_data)
   BlendLibReader *reader = data->reader;
   Scene *sce = data->scene;
 
-  IDP_BlendReadLib(reader, sce->id.lib, seq->prop);
+  IDP_BlendReadLib(reader, &sce->id, seq->prop);
 
   if (seq->ipo) {
     /* XXX: deprecated - old animation system. */
-    BLO_read_id_address(reader, sce->id.lib, &seq->ipo);
+    BLO_read_id_address(reader, &sce->id, &seq->ipo);
   }
   seq->scene_sound = NULL;
   if (seq->scene) {
-    BLO_read_id_address(reader, sce->id.lib, &seq->scene);
+    BLO_read_id_address(reader, &sce->id, &seq->scene);
     seq->scene_sound = NULL;
   }
   if (seq->clip) {
-    BLO_read_id_address(reader, sce->id.lib, &seq->clip);
+    BLO_read_id_address(reader, &sce->id, &seq->clip);
   }
   if (seq->mask) {
-    BLO_read_id_address(reader, sce->id.lib, &seq->mask);
+    BLO_read_id_address(reader, &sce->id, &seq->mask);
   }
   if (seq->scene_camera) {
-    BLO_read_id_address(reader, sce->id.lib, &seq->scene_camera);
+    BLO_read_id_address(reader, &sce->id, &seq->scene_camera);
   }
   if (seq->sound) {
     seq->scene_sound = NULL;
@@ -886,7 +886,7 @@ static bool seq_read_lib_cb(Sequence *seq, void *user_data)
       seq->type = SEQ_TYPE_SOUND_RAM;
     }
     else {
-      BLO_read_id_address(reader, sce->id.lib, &seq->sound);
+      BLO_read_id_address(reader, &sce->id, &seq->sound);
     }
     if (seq->sound) {
       id_us_plus_no_lib((ID *)seq->sound);
@@ -895,7 +895,7 @@ static bool seq_read_lib_cb(Sequence *seq, void *user_data)
   }
   if (seq->type == SEQ_TYPE_TEXT) {
     TextVars *t = seq->effectdata;
-    BLO_read_id_address(reader, sce->id.lib, &t->text_font);
+    BLO_read_id_address(reader, &sce->id, &t->text_font);
   }
   BLI_listbase_clear(&seq->anims);
 

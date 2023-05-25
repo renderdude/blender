@@ -1655,7 +1655,7 @@ static void rna_def_modifier_gpenciloffset(BlenderRNA *brna)
   prop = RNA_def_property(srna, "rotation", PROP_FLOAT, PROP_EULER);
   RNA_def_property_float_sdna(prop, NULL, "rot");
   RNA_def_property_ui_text(prop, "Rotation", "Values for changes in rotation");
-  RNA_def_property_ui_range(prop, -FLT_MAX, FLT_MAX, 1, RNA_TRANSLATION_PREC_DEFAULT);
+  RNA_def_property_ui_range(prop, -FLT_MAX, FLT_MAX, 100, RNA_TRANSLATION_PREC_DEFAULT);
   RNA_def_property_update(prop, 0, "rna_GpencilModifier_update");
 
   prop = RNA_def_property(srna, "scale", PROP_FLOAT, PROP_XYZ);
@@ -1673,7 +1673,7 @@ static void rna_def_modifier_gpenciloffset(BlenderRNA *brna)
   prop = RNA_def_property(srna, "random_rotation", PROP_FLOAT, PROP_EULER);
   RNA_def_property_float_sdna(prop, NULL, "rnd_rot");
   RNA_def_property_ui_text(prop, "Random Rotation", "Value for changes in rotation");
-  RNA_def_property_ui_range(prop, -FLT_MAX, FLT_MAX, 1, RNA_TRANSLATION_PREC_DEFAULT);
+  RNA_def_property_ui_range(prop, -FLT_MAX, FLT_MAX, 100, RNA_TRANSLATION_PREC_DEFAULT);
   RNA_def_property_update(prop, 0, "rna_GpencilModifier_update");
 
   prop = RNA_def_property(srna, "random_scale", PROP_FLOAT, PROP_XYZ);
@@ -2371,7 +2371,7 @@ static void rna_def_modifier_gpencilarray(BlenderRNA *brna)
   prop = RNA_def_property(srna, "random_rotation", PROP_FLOAT, PROP_EULER);
   RNA_def_property_float_sdna(prop, NULL, "rnd_rot");
   RNA_def_property_ui_text(prop, "Random Rotation", "Value for changes in rotation");
-  RNA_def_property_ui_range(prop, -FLT_MAX, FLT_MAX, 1, RNA_TRANSLATION_PREC_DEFAULT);
+  RNA_def_property_ui_range(prop, -FLT_MAX, FLT_MAX, 100, RNA_TRANSLATION_PREC_DEFAULT);
   RNA_def_property_update(prop, 0, "rna_GpencilModifier_update");
 
   prop = RNA_def_property(srna, "random_scale", PROP_FLOAT, PROP_XYZ);
@@ -2957,7 +2957,7 @@ static void rna_def_modifier_gpencilhook(BlenderRNA *brna)
 
   prop = RNA_def_property(srna, "falloff_curve", PROP_POINTER, PROP_NONE);
   RNA_def_property_pointer_sdna(prop, NULL, "curfalloff");
-  RNA_def_property_ui_text(prop, "Falloff Curve", "Custom light falloff curve");
+  RNA_def_property_ui_text(prop, "Falloff Curve", "Custom falloff curve");
   RNA_def_property_update(prop, 0, "rna_GpencilModifier_update");
 
   prop = RNA_def_property(srna, "center", PROP_FLOAT, PROP_NONE);
@@ -3870,7 +3870,8 @@ static void rna_def_modifier_gpencillineart(BlenderRNA *brna)
   RNA_def_property_update(prop, 0, "rna_GpencilModifier_update");
 
   prop = RNA_def_property(srna, "target_layer", PROP_STRING, PROP_NONE);
-  RNA_def_property_ui_text(prop, "Layer", "Grease Pencil layer assigned to the generated strokes");
+  RNA_def_property_ui_text(
+      prop, "Layer", "Grease Pencil layer to which assign the generated strokes");
   RNA_def_property_update(prop, 0, "rna_GpencilModifier_update");
 
   prop = RNA_def_property(srna, "source_vertex_group", PROP_STRING, PROP_NONE);
@@ -3967,7 +3968,7 @@ static void rna_def_modifier_gpencillineart(BlenderRNA *brna)
   RNA_def_property_ui_text(
       prop,
       "Image Boundary Trimming",
-      "Trim all edges right at the boundary of image(including overscan region)");
+      "Trim all edges right at the boundary of image (including overscan region)");
 
   prop = RNA_def_property(srna, "use_back_face_culling", PROP_BOOLEAN, PROP_NONE);
   RNA_def_property_boolean_sdna(prop, NULL, "calculation_flags", LRT_USE_BACK_FACE_CULLING);

@@ -153,7 +153,7 @@ void AssetList::setup()
   const bool use_asset_indexer = !USER_EXPERIMENTAL_TEST(&U, no_asset_indexing);
   filelist_setindexer(files, use_asset_indexer ? &file_indexer_asset : &file_indexer_noop);
 
-  char path[FILE_MAXDIR] = "";
+  char path[FILE_MAX_LIBEXTRA] = "";
   if (!asset_lib_path.empty()) {
     STRNCPY(path, asset_lib_path.c_str());
   }
@@ -218,9 +218,10 @@ void AssetList::ensurePreviewsJob(const bContext *C)
   int numfiles = filelist_files_ensure(files);
 
   filelist_cache_previews_set(files, true);
-  filelist_file_cache_slidingwindow_set(files, 128);
   /* TODO fetch all previews for now. */
-  filelist_file_cache_block(files, numfiles / 2);
+  /* Add one extra entry to ensure nothing is lost because of integer division. */
+  filelist_file_cache_slidingwindow_set(files, numfiles / 2 + 1);
+  filelist_file_cache_block(files, 0);
   filelist_cache_previews_update(files);
 
   {

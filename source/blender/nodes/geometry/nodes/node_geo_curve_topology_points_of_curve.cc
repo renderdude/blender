@@ -10,24 +10,20 @@ namespace blender::nodes::node_geo_curve_topology_points_of_curve_cc {
 
 static void node_declare(NodeDeclarationBuilder &b)
 {
-  b.add_input<decl::Int>(N_("Curve Index"))
+  b.add_input<decl::Int>("Curve Index")
       .implicit_field(implicit_field_inputs::index)
-      .description(N_("The curve to retrieve data from. Defaults to the curve from the context"));
-  b.add_input<decl::Float>(N_("Weights"))
-      .supports_field()
-      .hide_value()
-      .description(N_("Values used to sort the curve's points. Uses indices by default"));
-  b.add_input<decl::Int>(N_("Sort Index"))
+      .description("The curve to retrieve data from. Defaults to the curve from the context");
+  b.add_input<decl::Float>("Weights").supports_field().hide_value().description(
+      "Values used to sort the curve's points. Uses indices by default");
+  b.add_input<decl::Int>("Sort Index")
       .min(0)
       .supports_field()
-      .description(N_("Which of the sorted points to output"));
-  b.add_output<decl::Int>(N_("Point Index"))
+      .description("Which of the sorted points to output");
+  b.add_output<decl::Int>("Point Index")
       .field_source_reference_all()
-      .description(N_("A point of the curve, chosen by the sort index"));
-  b.add_output<decl::Int>(N_("Total"))
-      .field_source()
-      .reference_pass({0})
-      .description(N_("The number of points in the curve"));
+      .description("A point of the curve, chosen by the sort index");
+  b.add_output<decl::Int>("Total").field_source().reference_pass({0}).description(
+      "The number of points in the curve");
 }
 
 class PointsOfCurveInput final : public bke::CurvesFieldInput {
@@ -47,7 +43,7 @@ class PointsOfCurveInput final : public bke::CurvesFieldInput {
 
   GVArray get_varray_for_context(const bke::CurvesGeometry &curves,
                                  const eAttrDomain domain,
-                                 const IndexMask mask) const final
+                                 const IndexMask &mask) const final
   {
     const OffsetIndices points_by_curve = curves.points_by_curve();
 
@@ -67,12 +63,12 @@ class PointsOfCurveInput final : public bke::CurvesFieldInput {
     const bool use_sorting = !all_sort_weights.is_single();
 
     Array<int> point_of_curve(mask.min_array_size());
-    threading::parallel_for(mask.index_range(), 256, [&](const IndexRange range) {
+    mask.foreach_segment(GrainSize(256), [&](const IndexMaskSegment segment) {
       /* Reuse arrays to avoid allocation. */
       Array<float> sort_weights;
       Array<int> sort_indices;
 
-      for (const int selection_i : mask.slice(range)) {
+      for (const int selection_i : segment) {
         const int curve_i = curve_indices[selection_i];
         const int index_in_sort = indices_in_sort[selection_i];
         if (!curves.curves_range().contains(curve_i)) {
@@ -144,7 +140,7 @@ class CurvePointCountInput final : public bke::CurvesFieldInput {
 
   GVArray get_varray_for_context(const bke::CurvesGeometry &curves,
                                  const eAttrDomain domain,
-                                 const IndexMask /*mask*/) const final
+                                 const IndexMask & /*mask*/) const final
   {
     if (domain != ATTR_DOMAIN_CURVE) {
       return {};
@@ -201,7 +197,7 @@ class CurveStartPointInput final : public bke::CurvesFieldInput {
 
   GVArray get_varray_for_context(const bke::CurvesGeometry &curves,
                                  const eAttrDomain /*domain*/,
-                                 const IndexMask /*mask*/) const final
+                                 const IndexMask & /*mask*/) const final
   {
     return VArray<int>::ForSpan(curves.offsets());
   }

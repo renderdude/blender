@@ -1286,8 +1286,8 @@ static int ptcache_frame_from_filename(const char *filename, const char *ext)
 
   /* could crash if trying to copy a string out of this range */
   if (len > ext_len) {
-    /* using frame_len here gives compile error (vla) */
-    char num[/* frame_len */ 6 + 1];
+    /* Using frame_len here gives compile error (VLA). */
+    char num[/*frame_len*/ 6 + 1];
     STRNCPY(num, filename + len - ext_len);
 
     return atoi(num);
@@ -3531,7 +3531,7 @@ void BKE_ptcache_disk_cache_rename(PTCacheID *pid, const char *name_src, const c
         if (frame != -1) {
           BLI_path_join(old_path_full, sizeof(old_path_full), path, de->d_name);
           ptcache_filepath(pid, new_path_full, frame, true, true);
-          BLI_rename(old_path_full, new_path_full);
+          BLI_rename_overwrite(old_path_full, new_path_full);
         }
       }
     }

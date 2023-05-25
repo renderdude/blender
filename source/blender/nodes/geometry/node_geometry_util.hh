@@ -13,9 +13,7 @@
 
 #include "DNA_node_types.h"
 
-#include "BKE_node.h"
-
-#include "BLT_translation.h"
+#include "BKE_node.hh"
 
 #include "NOD_geometry.h"
 #include "NOD_geometry_exec.hh"
@@ -94,7 +92,7 @@ void separate_geometry(GeometrySet &geometry_set,
 
 void get_closest_in_bvhtree(BVHTreeFromMesh &tree_data,
                             const VArray<float3> &positions,
-                            const IndexMask mask,
+                            const IndexMask &mask,
                             const MutableSpan<int> r_indices,
                             const MutableSpan<float> r_distances_sq,
                             const MutableSpan<float3> r_positions);
@@ -125,7 +123,7 @@ class EvaluateAtIndexInput final : public bke::GeometryFieldInput {
   EvaluateAtIndexInput(Field<int> index_field, GField value_field, eAttrDomain value_field_domain);
 
   GVArray get_varray_for_context(const bke::GeometryFieldContext &context,
-                                 const IndexMask mask) const final;
+                                 const IndexMask &mask) const final;
 
   std::optional<eAttrDomain> preferred_domain(const GeometryComponent & /*component*/) const final
   {
@@ -151,7 +149,7 @@ void simulation_state_to_values(const Span<NodeSimulationItem> node_simulation_i
 
 void copy_with_checked_indices(const GVArray &src,
                                const VArray<int> &indices,
-                               IndexMask mask,
+                               const IndexMask &mask,
                                GMutableSpan dst);
 
 }  // namespace blender::nodes

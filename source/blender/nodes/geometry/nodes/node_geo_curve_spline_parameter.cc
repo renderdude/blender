@@ -10,19 +10,14 @@ namespace blender::nodes::node_geo_curve_spline_parameter_cc {
 
 static void node_declare(NodeDeclarationBuilder &b)
 {
-  b.add_output<decl::Float>(N_("Factor"))
-      .field_source()
-      .description(
-          N_("For points, the portion of the spline's total length at the control point. For "
-             "Splines, the factor of that spline within the entire curve"));
-  b.add_output<decl::Float>(N_("Length"))
-      .field_source()
-      .description(
-          N_("For points, the distance along the control point's spline, For splines, the "
-             "distance along the entire curve"));
-  b.add_output<decl::Int>(N_("Index"))
-      .field_source()
-      .description(N_("Each control point's index on its spline"));
+  b.add_output<decl::Float>("Factor").field_source().description(
+      "For points, the portion of the spline's total length at the control point. For "
+      "Splines, the factor of that spline within the entire curve");
+  b.add_output<decl::Float>("Length").field_source().description(
+      "For points, the distance along the control point's spline, For splines, the "
+      "distance along the entire curve");
+  b.add_output<decl::Int>("Index").field_source().description(
+      "Each control point's index on its spline");
 }
 
 /**
@@ -181,7 +176,7 @@ class CurveParameterFieldInput final : public bke::CurvesFieldInput {
 
   GVArray get_varray_for_context(const bke::CurvesGeometry &curves,
                                  const eAttrDomain domain,
-                                 const IndexMask /*mask*/) const final
+                                 const IndexMask & /*mask*/) const final
   {
     switch (domain) {
       case ATTR_DOMAIN_POINT:
@@ -215,7 +210,7 @@ class CurveLengthParameterFieldInput final : public bke::CurvesFieldInput {
 
   GVArray get_varray_for_context(const bke::CurvesGeometry &curves,
                                  const eAttrDomain domain,
-                                 const IndexMask /*mask*/) const final
+                                 const IndexMask & /*mask*/) const final
   {
     switch (domain) {
       case ATTR_DOMAIN_POINT:
@@ -249,7 +244,7 @@ class IndexOnSplineFieldInput final : public bke::CurvesFieldInput {
 
   GVArray get_varray_for_context(const bke::CurvesGeometry &curves,
                                  const eAttrDomain domain,
-                                 const IndexMask /*mask*/) const final
+                                 const IndexMask & /*mask*/) const final
   {
     if (domain != ATTR_DOMAIN_POINT) {
       return {};

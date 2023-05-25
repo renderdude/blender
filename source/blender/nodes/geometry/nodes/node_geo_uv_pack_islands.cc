@@ -13,21 +13,16 @@ namespace blender::nodes::node_geo_uv_pack_islands_cc {
 
 static void node_declare(NodeDeclarationBuilder &b)
 {
-  b.add_input<decl::Vector>(N_("UV")).hide_value().supports_field();
-  b.add_input<decl::Bool>(N_("Selection"))
+  b.add_input<decl::Vector>("UV").hide_value().supports_field();
+  b.add_input<decl::Bool>("Selection")
       .default_value(true)
       .hide_value()
       .supports_field()
-      .description(N_("Faces to consider when packing islands"));
-  b.add_input<decl::Float>(N_("Margin"))
-      .default_value(0.001f)
-      .min(0.0f)
-      .max(1.0f)
-      .description(N_("Space between islands"));
-  b.add_input<decl::Bool>(N_("Rotate"))
-      .default_value(true)
-      .description(N_("Rotate islands for best fit"));
-  b.add_output<decl::Vector>(N_("UV")).field_source_reference_all();
+      .description("Faces to consider when packing islands");
+  b.add_input<decl::Float>("Margin").default_value(0.001f).min(0.0f).max(1.0f).description(
+      "Space between islands");
+  b.add_input<decl::Bool>("Rotate").default_value(true).description("Rotate islands for best fit");
+  b.add_output<decl::Vector>("UV").field_source_reference_all();
 }
 
 static VArray<float3> construct_uv_gvarray(const Mesh &mesh,
@@ -57,7 +52,7 @@ static VArray<float3> construct_uv_gvarray(const Mesh &mesh,
   evaluator.evaluate();
 
   geometry::ParamHandle *handle = geometry::uv_parametrizer_construct_begin();
-  for (const int poly_index : selection) {
+  selection.foreach_index([&](const int poly_index) {
     const IndexRange poly = polys[poly_index];
     Array<geometry::ParamKey, 16> mp_vkeys(poly.size());
     Array<bool, 16> mp_pin(poly.size());
@@ -81,7 +76,7 @@ static VArray<float3> construct_uv_gvarray(const Mesh &mesh,
                                        mp_uv.data(),
                                        mp_pin.data(),
                                        mp_select.data());
-  }
+  });
   geometry::uv_parametrizer_construct_end(handle, true, true, nullptr);
 
   geometry::uv_parametrizer_pack(handle, margin, rotate, true);
@@ -115,7 +110,7 @@ class PackIslandsFieldInput final : public bke::MeshFieldInput {
 
   GVArray get_varray_for_context(const Mesh &mesh,
                                  const eAttrDomain domain,
-                                 const IndexMask /*mask*/) const final
+                                 const IndexMask & /*mask*/) const final
   {
     return construct_uv_gvarray(mesh, selection_field_, uv_field_, rotate_, margin_, domain);
   }

@@ -86,8 +86,6 @@ struct IDProperty *IDP_NewString(const char *st, const char *name) ATTR_WARN_UNU
  */
 void IDP_AssignStringMaxSize(struct IDProperty *prop, const char *st, int maxncpy) ATTR_NONNULL();
 void IDP_AssignString(struct IDProperty *prop, const char *st) ATTR_NONNULL();
-void IDP_ConcatStringC(struct IDProperty *prop, const char *st) ATTR_NONNULL();
-void IDP_ConcatString(struct IDProperty *str1, struct IDProperty *append) ATTR_NONNULL();
 void IDP_FreeString(struct IDProperty *prop) ATTR_NONNULL();
 
 /*-------- ID Type -------*/
@@ -315,7 +313,7 @@ void IDP_BlendReadData_impl(struct BlendDataReader *reader,
                             struct IDProperty **prop,
                             const char *caller_func_id);
 #define IDP_BlendDataRead(reader, prop) IDP_BlendReadData_impl(reader, prop, __func__)
-void IDP_BlendReadLib(struct BlendLibReader *reader, struct Library *lib, struct IDProperty *prop);
+void IDP_BlendReadLib(struct BlendLibReader *reader, struct ID *self_id, struct IDProperty *prop);
 void IDP_BlendReadExpand(struct BlendExpander *expander, struct IDProperty *prop);
 
 typedef enum eIDPropertyUIDataType {

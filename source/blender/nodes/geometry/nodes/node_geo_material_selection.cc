@@ -16,13 +16,13 @@ namespace blender::nodes::node_geo_material_selection_cc {
 
 static void node_declare(NodeDeclarationBuilder &b)
 {
-  b.add_input<decl::Material>(N_("Material")).hide_label(true);
-  b.add_output<decl::Bool>(N_("Selection")).field_source();
+  b.add_input<decl::Material>("Material").hide_label(true);
+  b.add_output<decl::Bool>("Selection").field_source();
 }
 
 static VArray<bool> select_mesh_faces_by_material(const Mesh &mesh,
                                                   const Material *material,
-                                                  const IndexMask face_mask)
+                                                  const IndexMask &face_mask)
 {
   Vector<int> slots;
   for (const int slot_i : IndexRange(mesh.totcol)) {
@@ -68,7 +68,7 @@ class MaterialSelectionFieldInput final : public bke::GeometryFieldInput {
   }
 
   GVArray get_varray_for_context(const bke::GeometryFieldContext &context,
-                                 const IndexMask mask) const final
+                                 const IndexMask &mask) const final
   {
     if (context.type() != GEO_COMPONENT_TYPE_MESH) {
       return {};

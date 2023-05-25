@@ -29,19 +29,19 @@ namespace blender::nodes::node_geo_blur_attribute_cc {
 
 static void node_declare(NodeDeclarationBuilder &b)
 {
-  b.add_input<decl::Float>(N_("Value"), "Value_Float")
+  b.add_input<decl::Float>("Value", "Value_Float")
       .supports_field()
       .hide_value()
       .is_default_link_socket();
-  b.add_input<decl::Int>(N_("Value"), "Value_Int")
+  b.add_input<decl::Int>("Value", "Value_Int")
       .supports_field()
       .hide_value()
       .is_default_link_socket();
-  b.add_input<decl::Vector>(N_("Value"), "Value_Vector")
+  b.add_input<decl::Vector>("Value", "Value_Vector")
       .supports_field()
       .hide_value()
       .is_default_link_socket();
-  b.add_input<decl::Color>(N_("Value"), "Value_Color")
+  b.add_input<decl::Color>("Value", "Value_Color")
       .supports_field()
       .hide_value()
       .is_default_link_socket();
@@ -49,25 +49,21 @@ static void node_declare(NodeDeclarationBuilder &b)
   b.add_input<decl::Int>("Iterations")
       .default_value(1)
       .min(0)
-      .description(N_("How many times to blur the values for all elements"));
+      .description("How many times to blur the values for all elements");
   b.add_input<decl::Float>("Weight")
       .default_value(1.0f)
       .subtype(PROP_FACTOR)
       .min(0.0f)
       .max(1.0f)
       .supports_field()
-      .description(N_("Relative mix weight of neighboring elements"));
+      .description("Relative mix weight of neighboring elements");
 
-  b.add_output<decl::Float>(N_("Value"), "Value_Float")
+  b.add_output<decl::Float>("Value", "Value_Float").field_source_reference_all().dependent_field();
+  b.add_output<decl::Int>("Value", "Value_Int").field_source_reference_all().dependent_field();
+  b.add_output<decl::Vector>("Value", "Value_Vector")
       .field_source_reference_all()
       .dependent_field();
-  b.add_output<decl::Int>(N_("Value"), "Value_Int").field_source_reference_all().dependent_field();
-  b.add_output<decl::Vector>(N_("Value"), "Value_Vector")
-      .field_source_reference_all()
-      .dependent_field();
-  b.add_output<decl::Color>(N_("Value"), "Value_Color")
-      .field_source_reference_all()
-      .dependent_field();
+  b.add_output<decl::Color>("Value", "Value_Color").field_source_reference_all().dependent_field();
 }
 
 static void node_layout(uiLayout *layout, bContext * /*C*/, PointerRNA *ptr)
@@ -119,135 +115,144 @@ static void node_update(bNodeTree *ntree, bNode *node)
   bNodeSocket *socket_value_vector = socket_value_int32->next;
   bNodeSocket *socket_value_color4f = socket_value_vector->next;
 
-  nodeSetSocketAvailability(ntree, socket_value_float, data_type == CD_PROP_FLOAT);
-  nodeSetSocketAvailability(ntree, socket_value_int32, data_type == CD_PROP_INT32);
-  nodeSetSocketAvailability(ntree, socket_value_vector, data_type == CD_PROP_FLOAT3);
-  nodeSetSocketAvailability(ntree, socket_value_color4f, data_type == CD_PROP_COLOR);
+  bke::nodeSetSocketAvailability(ntree, socket_value_float, data_type == CD_PROP_FLOAT);
+  bke::nodeSetSocketAvailability(ntree, socket_value_int32, data_type == CD_PROP_INT32);
+  bke::nodeSetSocketAvailability(ntree, socket_value_vector, data_type == CD_PROP_FLOAT3);
+  bke::nodeSetSocketAvailability(ntree, socket_value_color4f, data_type == CD_PROP_COLOR);
 
   bNodeSocket *out_socket_value_float = (bNodeSocket *)node->outputs.first;
   bNodeSocket *out_socket_value_int32 = out_socket_value_float->next;
   bNodeSocket *out_socket_value_vector = out_socket_value_int32->next;
   bNodeSocket *out_socket_value_color4f = out_socket_value_vector->next;
 
-  nodeSetSocketAvailability(ntree, out_socket_value_float, data_type == CD_PROP_FLOAT);
-  nodeSetSocketAvailability(ntree, out_socket_value_int32, data_type == CD_PROP_INT32);
-  nodeSetSocketAvailability(ntree, out_socket_value_vector, data_type == CD_PROP_FLOAT3);
-  nodeSetSocketAvailability(ntree, out_socket_value_color4f, data_type == CD_PROP_COLOR);
+  bke::nodeSetSocketAvailability(ntree, out_socket_value_float, data_type == CD_PROP_FLOAT);
+  bke::nodeSetSocketAvailability(ntree, out_socket_value_int32, data_type == CD_PROP_INT32);
+  bke::nodeSetSocketAvailability(ntree, out_socket_value_vector, data_type == CD_PROP_FLOAT3);
+  bke::nodeSetSocketAvailability(ntree, out_socket_value_color4f, data_type == CD_PROP_COLOR);
 }
 
-static Array<Vector<int>> build_vert_to_vert_by_edge_map(const Span<int2> edges,
-                                                         const int verts_num)
+static void build_vert_to_vert_by_edge_map(const Span<int2> edges,
+                                           const int verts_num,
+                                           Array<int> &r_offsets,
+                                           Array<int> &r_indices)
 {
-  Array<Vector<int>> map(verts_num);
-  for (const int2 &edge : edges) {
-    map[edge[0]].append(edge[1]);
-    map[edge[1]].append(edge[0]);
-  }
-  return map;
-}
-
-static Array<Vector<int>> build_edge_to_edge_by_vert_map(const Span<int2> edges,
-                                                         const int verts_num,
-                                                         const IndexMask edge_mask)
-{
-  Array<Vector<int>> map(edges.size());
-  Array<Vector<int>> vert_to_edge_map = bke::mesh_topology::build_vert_to_edge_map(edges,
-                                                                                   verts_num);
-
-  threading::parallel_for(edge_mask.index_range(), 1024, [&](IndexRange range) {
-    for (const int edge_i : edge_mask.slice(range)) {
-
-      Vector<int> &self_edges = map[edge_i];
-      const Span<int> vert_1_edges = vert_to_edge_map[edges[edge_i][0]];
-      const Span<int> vert_2_edges = vert_to_edge_map[edges[edge_i][1]];
-
-      self_edges.reserve(vert_1_edges.size() - 1 + vert_2_edges.size() - 1);
-
-      for (const int i : vert_1_edges) {
-        if (i != edge_i) {
-          self_edges.append(i);
-        }
-      }
-      for (const int i : vert_2_edges) {
-        if (i != edge_i) {
-          self_edges.append(i);
-        }
+  bke::mesh::build_vert_to_edge_map(edges, verts_num, r_offsets, r_indices);
+  const OffsetIndices<int> offsets(r_offsets);
+  threading::parallel_for(IndexRange(verts_num), 2048, [&](const IndexRange range) {
+    for (const int vert : range) {
+      MutableSpan<int> neighbors = r_indices.as_mutable_span().slice(offsets[vert]);
+      for (const int i : neighbors.index_range()) {
+        neighbors[i] = bke::mesh::edge_other_vert(edges[neighbors[i]], vert);
       }
     }
   });
-  return map;
 }
 
-static Array<Vector<int>> build_face_to_edge_by_loop_map(const OffsetIndices<int> polys,
-                                                         const Span<int> corner_edges,
-                                                         const int edges_num)
+static void build_edge_to_edge_by_vert_map(const Span<int2> edges,
+                                           const int verts_num,
+                                           Array<int> &r_offsets,
+                                           Array<int> &r_indices)
 {
-  Array<Vector<int>> map(edges_num);
-  for (const int i : polys.index_range()) {
-    for (const int edge : corner_edges.slice(polys[i])) {
-      map[edge].append(i);
+  Array<int> vert_to_edge_offset_data;
+  Array<int> vert_to_edge_indices;
+  const GroupedSpan<int> vert_to_edge = bke::mesh::build_vert_to_edge_map(
+      edges, verts_num, vert_to_edge_offset_data, vert_to_edge_indices);
+  const OffsetIndices<int> vert_to_edge_offsets(vert_to_edge_offset_data);
+
+  r_offsets = Array<int>(edges.size() + 1, 0);
+  threading::parallel_for(edges.index_range(), 1024, [&](const IndexRange range) {
+    for (const int edge_i : range) {
+      const int2 edge = edges[edge_i];
+      r_offsets[edge_i] = vert_to_edge_offsets[edge[0]].size() - 1 +
+                          vert_to_edge_offsets[edge[1]].size() - 1;
     }
-  }
-  return map;
-}
+  });
+  const OffsetIndices offsets = offset_indices::accumulate_counts_to_offsets(r_offsets);
+  r_indices.reinitialize(offsets.total_size());
 
-static Array<Vector<int>> build_face_to_face_by_edge_map(const OffsetIndices<int> polys,
-                                                         const Span<int> corner_edges,
-                                                         const int edges_num,
-                                                         const IndexMask poly_mask)
-{
-  Array<Vector<int>> map(polys.size());
-  Array<Vector<int>> faces_by_edge = build_face_to_edge_by_loop_map(
-      polys, corner_edges, edges_num);
-
-  threading::parallel_for(poly_mask.index_range(), 1024, [&](IndexRange range) {
-    for (const int poly_i : poly_mask.slice(range)) {
-      for (const int edge : corner_edges.slice(polys[poly_i])) {
-        if (faces_by_edge[edge].size() > 1) {
-          for (const int neighbor : faces_by_edge[edge]) {
-            if (neighbor != poly_i) {
-              map[poly_i].append(neighbor);
-            }
+  threading::parallel_for(edges.index_range(), 1024, [&](const IndexRange range) {
+    for (const int edge_i : range) {
+      const int2 edge = edges[edge_i];
+      MutableSpan<int> neighbors = r_indices.as_mutable_span().slice(offsets[edge_i]);
+      int count = 0;
+      for (const Span<int> neighbor_edges : {vert_to_edge[edge[0]], vert_to_edge[edge[1]]}) {
+        for (const int neighbor_edge : neighbor_edges) {
+          if (neighbor_edge != edge_i) {
+            neighbors[count] = neighbor_edge;
+            count++;
           }
         }
       }
     }
   });
-  return map;
 }
 
-static Array<Vector<int>> create_mesh_map(const Mesh &mesh,
-                                          const eAttrDomain domain,
-                                          const IndexMask mask)
+static void build_face_to_face_by_edge_map(const OffsetIndices<int> polys,
+                                           const Span<int> corner_edges,
+                                           const int edges_num,
+                                           Array<int> &r_offsets,
+                                           Array<int> &r_indices)
+{
+  Array<int> edge_to_poly_offsets;
+  Array<int> edge_to_poly_indices;
+  const GroupedSpan<int> edge_to_poly_map = bke::mesh::build_edge_to_poly_map(
+      polys, corner_edges, edges_num, edge_to_poly_offsets, edge_to_poly_indices);
+
+  r_offsets = Array<int>(polys.size() + 1, 0);
+  for (const int poly_i : polys.index_range()) {
+    for (const int edge : corner_edges.slice(polys[poly_i])) {
+      for (const int neighbor : edge_to_poly_map[edge]) {
+        if (neighbor != poly_i) {
+          r_offsets[poly_i]++;
+        }
+      }
+    }
+  }
+  const OffsetIndices offsets = offset_indices::accumulate_counts_to_offsets(r_offsets);
+  r_indices.reinitialize(offsets.total_size());
+
+  threading::parallel_for(polys.index_range(), 1024, [&](IndexRange range) {
+    for (const int poly_i : range) {
+      MutableSpan<int> neighbors = r_indices.as_mutable_span().slice(offsets[poly_i]);
+      int count = 0;
+      for (const int edge : corner_edges.slice(polys[poly_i])) {
+        for (const int neighbor : edge_to_poly_map[edge]) {
+          if (neighbor != poly_i) {
+            neighbors[count] = neighbor;
+            count++;
+          }
+        }
+      }
+    }
+  });
+}
+
+static GroupedSpan<int> create_mesh_map(const Mesh &mesh,
+                                        const eAttrDomain domain,
+                                        Array<int> &r_offsets,
+                                        Array<int> &r_indices)
 {
   switch (domain) {
-    case ATTR_DOMAIN_POINT: {
-      const Span<int2> edges = mesh.edges();
-      const int verts_num = mesh.totvert;
-      return build_vert_to_vert_by_edge_map(edges, verts_num);
-    }
-    case ATTR_DOMAIN_EDGE: {
-      const Span<int2> edges = mesh.edges();
-      const int verts_num = mesh.totvert;
-      return build_edge_to_edge_by_vert_map(edges, verts_num, mask);
-    }
-    case ATTR_DOMAIN_FACE: {
-      const OffsetIndices polys = mesh.polys();
-      const int edges_num = mesh.totedge;
-      return build_face_to_face_by_edge_map(polys, mesh.corner_edges(), edges_num, mask);
-    }
-    case ATTR_DOMAIN_CORNER: {
-      return {};
-    }
+    case ATTR_DOMAIN_POINT:
+      build_vert_to_vert_by_edge_map(mesh.edges(), mesh.totvert, r_offsets, r_indices);
+      break;
+    case ATTR_DOMAIN_EDGE:
+      build_edge_to_edge_by_vert_map(mesh.edges(), mesh.totvert, r_offsets, r_indices);
+      break;
+    case ATTR_DOMAIN_FACE:
+      build_face_to_face_by_edge_map(
+          mesh.polys(), mesh.corner_edges(), mesh.totedge, r_offsets, r_indices);
+      break;
     default:
       BLI_assert_unreachable();
-      return {};
+      break;
   }
+  return {OffsetIndices<int>(r_offsets), r_indices};
 }
 
 template<typename T>
 static Span<T> blur_on_mesh_exec(const Span<float> neighbor_weights,
-                                 const Span<Vector<int>> neighbors_map,
+                                 const GroupedSpan<int> neighbors_map,
                                  const int iterations,
                                  const MutableSpan<T> buffer_a,
                                  const MutableSpan<T> buffer_b)
@@ -283,10 +288,11 @@ static GSpan blur_on_mesh(const Mesh &mesh,
                           const GMutableSpan buffer_a,
                           const GMutableSpan buffer_b)
 {
-  Array<Vector<int>> neighbors_map = create_mesh_map(mesh, domain, neighbor_weights.index_range());
-  if (neighbors_map.is_empty()) {
-    return buffer_a;
-  }
+  Array<int> neighbor_offsets;
+  Array<int> neighbor_indices;
+  const GroupedSpan<int> neighbors_map = create_mesh_map(
+      mesh, domain, neighbor_offsets, neighbor_indices);
+
   GSpan result_buffer;
   bke::attribute_math::convert_to_static_type(buffer_a.type(), [&](auto dummy) {
     using T = decltype(dummy);
@@ -389,7 +395,7 @@ class BlurAttributeFieldInput final : public bke::GeometryFieldInput {
   }
 
   GVArray get_varray_for_context(const bke::GeometryFieldContext &context,
-                                 const IndexMask /*mask*/) const final
+                                 const IndexMask & /*mask*/) const final
   {
     const int64_t domain_size = context.attributes()->domain_size(context.domain());
 

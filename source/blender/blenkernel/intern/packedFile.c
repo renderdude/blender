@@ -286,8 +286,7 @@ void BKE_packedfile_pack_all(Main *bmain, ReportList *reports, bool verbose)
 int BKE_packedfile_write_to_file(ReportList *reports,
                                  const char *ref_file_name,
                                  const char *filepath_rel,
-                                 PackedFile *pf,
-                                 const bool guimode)
+                                 PackedFile *pf)
 {
   int file, number;
   int ret_value = RET_OK;
@@ -295,9 +294,6 @@ int BKE_packedfile_write_to_file(ReportList *reports,
   char filepath[FILE_MAX];
   char filepath_temp[FILE_MAX];
   /*      void *data; */
-
-  if (guimode) {
-  }  // XXX  waitcursor(1);
 
   STRNCPY(filepath, filepath_rel);
   BLI_path_abs(filepath, ref_file_name);
@@ -335,7 +331,7 @@ int BKE_packedfile_write_to_file(ReportList *reports,
 
   if (remove_tmp) {
     if (ret_value == RET_ERROR) {
-      if (BLI_rename(filepath_temp, filepath) != 0) {
+      if (BLI_rename_overwrite(filepath_temp, filepath) != 0) {
         BKE_reportf(reports,
                     RPT_ERROR,
                     "Error restoring temp file (check files '%s' '%s')",
@@ -349,9 +345,6 @@ int BKE_packedfile_write_to_file(ReportList *reports,
       }
     }
   }
-
-  if (guimode) {
-  }  // XXX waitcursor(0);
 
   return ret_value;
 }
@@ -441,7 +434,7 @@ char *BKE_packedfile_unpack_to_file(ReportList *reports,
         ATTR_FALLTHROUGH;
       }
       case PF_WRITE_LOCAL:
-        if (BKE_packedfile_write_to_file(reports, ref_file_name, local_name, pf, 1) == RET_OK) {
+        if (BKE_packedfile_write_to_file(reports, ref_file_name, local_name, pf) == RET_OK) {
           temp = local_name;
         }
         break;
@@ -461,7 +454,7 @@ char *BKE_packedfile_unpack_to_file(ReportList *reports,
         ATTR_FALLTHROUGH;
       }
       case PF_WRITE_ORIGINAL:
-        if (BKE_packedfile_write_to_file(reports, ref_file_name, abs_name, pf, 1) == RET_OK) {
+        if (BKE_packedfile_write_to_file(reports, ref_file_name, abs_name, pf) == RET_OK) {
           temp = abs_name;
         }
         break;
@@ -481,9 +474,9 @@ char *BKE_packedfile_unpack_to_file(ReportList *reports,
 static void unpack_generate_paths(const char *filepath,
                                   ID *id,
                                   char *r_abspath,
+                                  size_t abspath_maxncpy,
                                   char *r_relpath,
-                                  size_t abspathlen,
-                                  size_t relpathlen)
+                                  size_t relpath_maxncpy)
 {
   const short id_type = GS(id->name);
   char temp_filename[FILE_MAX];
@@ -545,13 +538,13 @@ static void unpack_generate_paths(const char *filepath,
         break;
     }
     if (dir_name) {
-      BLI_path_join(r_relpath, relpathlen, "//", dir_name, temp_filename);
+      BLI_path_join(r_relpath, relpath_maxncpy, "//", dir_name, temp_filename);
     }
   }
 
   {
-    size_t len = BLI_strncpy_rlen(r_abspath, temp_dirname, abspathlen);
-    BLI_strncpy(r_abspath + len, temp_filename, abspathlen - len);
+    size_t len = BLI_strncpy_rlen(r_abspath, temp_dirname, abspath_maxncpy);
+    BLI_strncpy(r_abspath + len, temp_filename, abspath_maxncpy - len);
   }
 }
 
@@ -567,7 +560,7 @@ char *BKE_packedfile_unpack(Main *bmain,
 
   if (id != NULL) {
     unpack_generate_paths(
-        orig_file_path, id, absname, localname, sizeof(absname), sizeof(localname));
+        orig_file_path, id, absname, sizeof(absname), localname, sizeof(localname));
     new_name = BKE_packedfile_unpack_to_file(
         reports, BKE_main_blendfile_path(bmain), absname, localname, pf, how);
   }

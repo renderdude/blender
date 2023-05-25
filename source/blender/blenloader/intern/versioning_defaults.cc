@@ -50,7 +50,7 @@
 #include "BKE_main_namemap.h"
 #include "BKE_material.h"
 #include "BKE_mesh.hh"
-#include "BKE_node.h"
+#include "BKE_node.hh"
 #include "BKE_node_runtime.hh"
 #include "BKE_node_tree_update.h"
 #include "BKE_paint.h"
@@ -637,7 +637,7 @@ void BLO_update_defaults_startup_blend(Main *bmain, const char *app_template)
      * its values are overwritten by #BKE_brush_sculpt_reset below. */
     brush->alpha = 1.0;
 
-    /* Enable antialiasing by default */
+    /* Enable anti-aliasing by default. */
     brush->sampling_flag |= BRUSH_PAINT_ANTIALIASING;
   }
 

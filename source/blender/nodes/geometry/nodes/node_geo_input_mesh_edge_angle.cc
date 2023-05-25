@@ -14,13 +14,13 @@ namespace blender::nodes::node_geo_input_mesh_edge_angle_cc {
 
 static void node_declare(NodeDeclarationBuilder &b)
 {
-  b.add_output<decl::Float>(N_("Unsigned Angle"))
+  b.add_output<decl::Float>("Unsigned Angle")
       .field_source()
       .description(
           "The shortest angle in radians between two faces where they meet at an edge. Flat edges "
           "and Non-manifold edges have an angle of zero. Computing this value is faster than the "
           "signed angle");
-  b.add_output<decl::Float>(N_("Signed Angle"))
+  b.add_output<decl::Float>("Signed Angle")
       .field_source()
       .description(
           "The signed angle in radians between two faces where they meet at an edge. Flat edges "
@@ -64,7 +64,7 @@ class AngleFieldInput final : public bke::MeshFieldInput {
 
   GVArray get_varray_for_context(const Mesh &mesh,
                                  const eAttrDomain domain,
-                                 const IndexMask /*mask*/) const final
+                                 const IndexMask & /*mask*/) const final
   {
     const Span<float3> positions = mesh.vert_positions();
     const OffsetIndices polys = mesh.polys();
@@ -114,7 +114,7 @@ class SignedAngleFieldInput final : public bke::MeshFieldInput {
 
   GVArray get_varray_for_context(const Mesh &mesh,
                                  const eAttrDomain domain,
-                                 const IndexMask /*mask*/) const final
+                                 const IndexMask & /*mask*/) const final
   {
     const Span<float3> positions = mesh.vert_positions();
     const Span<int2> edges = mesh.edges();

@@ -11,17 +11,15 @@ namespace blender::nodes::node_geo_mesh_topology_offset_corner_in_face_cc {
 
 static void node_declare(NodeDeclarationBuilder &b)
 {
-  b.add_input<decl::Int>(N_("Corner Index"))
+  b.add_input<decl::Int>("Corner Index")
       .implicit_field(implicit_field_inputs::index)
-      .description(
-          N_("The corner to retrieve data from. Defaults to the corner from the context"));
-  b.add_input<decl::Int>(N_("Offset"))
-      .supports_field()
-      .description(N_("The number of corners to move around the face before finding the result, "
-                      "circling around the start of the face if necessary"));
-  b.add_output<decl::Int>(N_("Corner Index"))
+      .description("The corner to retrieve data from. Defaults to the corner from the context");
+  b.add_input<decl::Int>("Offset").supports_field().description(
+      "The number of corners to move around the face before finding the result, "
+      "circling around the start of the face if necessary");
+  b.add_output<decl::Int>("Corner Index")
       .field_source_reference_all()
-      .description(N_("The index of the offset corner"));
+      .description("The index of the offset corner");
 }
 
 class OffsetCornerInFaceFieldInput final : public bke::MeshFieldInput {
@@ -39,7 +37,7 @@ class OffsetCornerInFaceFieldInput final : public bke::MeshFieldInput {
 
   GVArray get_varray_for_context(const Mesh &mesh,
                                  const eAttrDomain domain,
-                                 const IndexMask mask) const final
+                                 const IndexMask &mask) const final
   {
     const IndexRange corner_range(mesh.totloop);
     const OffsetIndices polys = mesh.polys();
@@ -52,7 +50,7 @@ class OffsetCornerInFaceFieldInput final : public bke::MeshFieldInput {
     const VArray<int> corner_indices = evaluator.get_evaluated<int>(0);
     const VArray<int> offsets = evaluator.get_evaluated<int>(1);
 
-    Array<int> loop_to_poly_map = bke::mesh_topology::build_loop_to_poly_map(polys);
+    Array<int> loop_to_poly_map = bke::mesh::build_loop_to_poly_map(polys);
 
     Array<int> offset_corners(mask.min_array_size());
     threading::parallel_for(mask.index_range(), 2048, [&](const IndexRange range) {

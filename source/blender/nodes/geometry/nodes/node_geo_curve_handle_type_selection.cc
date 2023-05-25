@@ -13,7 +13,7 @@ NODE_STORAGE_FUNCS(NodeGeometryCurveSelectHandles)
 
 static void node_declare(NodeDeclarationBuilder &b)
 {
-  b.add_output<decl::Bool>(N_("Selection")).field_source();
+  b.add_output<decl::Bool>("Selection").field_source();
 }
 
 static void node_layout(uiLayout *layout, bContext * /*C*/, PointerRNA *ptr)
@@ -86,7 +86,7 @@ class HandleTypeFieldInput final : public bke::CurvesFieldInput {
 
   GVArray get_varray_for_context(const bke::CurvesGeometry &curves,
                                  const eAttrDomain domain,
-                                 IndexMask mask) const final
+                                 const IndexMask &mask) const final
   {
     if (domain != ATTR_DOMAIN_POINT) {
       return {};

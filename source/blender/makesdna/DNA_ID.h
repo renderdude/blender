@@ -855,11 +855,13 @@ enum {
   LIB_TAG_NEED_LINK = 1 << 16,
   /**
    * ID is being re-used from the old Main (instead of read from memfile), during memfile undo
-   * processing.
+   * processing, because it was detected as unchanged.
+   *
+   * \note: Also means that such ID does not need to be lib-linked during undo readfile process.
    *
    * RESET_AFTER_USE
    */
-  LIB_TAG_UNDO_OLD_ID_REUSED = 1 << 17,
+  LIB_TAG_UNDO_OLD_ID_REUSED_UNCHANGED = 1 << 17,
   /**
    * ID has be re-read in-place, the ID address is the same as in the old BMain, but the content is
    * different.
@@ -1069,11 +1071,13 @@ typedef enum IDRecalcFlag {
   /* The node tree has changed in a way that affects its output nodes. */
   ID_RECALC_NTREE_OUTPUT = (1 << 25),
 
+  /* Hierarchy of collection and object within collection changed. */
+  ID_RECALC_HIERARCHY = (1 << 26),
+
   /* Provisioned flags.
    *
    * Not for actual use. The idea of them is to have all bits of the `IDRecalcFlag` defined to a
    * known value, silencing sanitizer warnings when checking bits of the ID_RECALC_ALL. */
-  ID_RECALC_PROVISION_26 = (1 << 26),
   ID_RECALC_PROVISION_27 = (1 << 27),
   ID_RECALC_PROVISION_28 = (1 << 28),
   ID_RECALC_PROVISION_29 = (1 << 29),

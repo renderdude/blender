@@ -335,7 +335,7 @@ static void polyfill_to_obj(const char *id,
   FILE *f;
   uint i;
 
-  BLI_snprintf(path, sizeof(path), "%s.obj", id);
+  SNPRINTF(path, "%s.obj", id);
 
   f = fopen(path, "w");
   if (!f) {
@@ -428,14 +428,14 @@ TEST(polyfill2d, SquareCW)
   TEST_POLYFILL_TEMPLATE_STATIC(poly, POLYFILL2D_TEST_NOP);
 }
 
-/* Starfleet insigna */
+/* Star-fleet insignia. */
 TEST(polyfill2d, Starfleet)
 {
   const float poly[][2] = {{0, 0}, {0.6f, 0.4f}, {1, 0}, {0.5f, 1}};
   TEST_POLYFILL_TEMPLATE_STATIC(poly, POLYFILL2D_TEST_NOP);
 }
 
-/* Starfleet insigna with repeated point */
+/* Star-fleet insignia with repeated point. */
 TEST(polyfill2d, StarfleetDegenerate)
 {
   const float poly[][2] = {{0, 0}, {0.6f, 0.4f}, {0.6f, 0.4f}, {1, 0}, {0.5f, 1}};

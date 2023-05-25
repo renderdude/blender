@@ -267,6 +267,7 @@ set(SRC_KERNEL_INTEGRATOR_HEADERS
   integrator/displacement_shader.h
   integrator/init_from_bake.h
   integrator/init_from_camera.h
+  integrator/intersect_dedicated_light.h
   integrator/intersect_closest.h
   integrator/intersect_shadow.h
   integrator/intersect_subsurface.h
@@ -280,7 +281,9 @@ set(SRC_KERNEL_INTEGRATOR_HEADERS
   integrator/shade_shadow.h
   integrator/shade_surface.h
   integrator/shade_volume.h
+  integrator/shade_dedicated_light.h
   integrator/shadow_catcher.h
+  integrator/shadow_linking.h
   integrator/shadow_state_template.h
   integrator/state_flow.h
   integrator/state.h
@@ -847,6 +850,7 @@ if(WITH_CYCLES_DEVICE_ONEAPI)
     -DWITH_ONEAPI
     -ffast-math
     -O2
+    -D__KERNEL_LOCAL_ATOMIC_SORT__
     -o"${cycles_kernel_oneapi_lib}"
     -I"${CMAKE_CURRENT_SOURCE_DIR}/.."
     ${SYCL_CPP_FLAGS}

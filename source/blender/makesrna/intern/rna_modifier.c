@@ -2431,7 +2431,7 @@ static void rna_def_modifier_wave(BlenderRNA *brna)
   RNA_def_property_ui_text(
       prop,
       "Time Offset",
-      "Either the starting frame (for positive speed) or ending frame (for negative speed.)");
+      "Either the starting frame (for positive speed) or ending frame (for negative speed)");
   RNA_def_property_update(prop, 0, "rna_Modifier_update");
 
   prop = RNA_def_property(srna, "lifetime", PROP_FLOAT, PROP_TIME);
@@ -3336,7 +3336,7 @@ static void rna_def_modifier_correctivesmooth(BlenderRNA *brna)
   RNA_def_property_float_sdna(prop, NULL, "lambda");
   RNA_def_property_range(prop, -FLT_MAX, FLT_MAX);
   RNA_def_property_ui_range(prop, 0.0, 1.0, 5, 3);
-  RNA_def_property_ui_text(prop, "Lambda Factor", "Smooth factor effect");
+  RNA_def_property_ui_text(prop, "Lambda Factor", "Smooth effect factor");
   RNA_def_property_update(prop, 0, "rna_CorrectiveSmoothModifier_update");
 
   prop = RNA_def_property(srna, "iterations", PROP_INT, PROP_NONE);
@@ -3440,7 +3440,7 @@ static void rna_def_modifier_laplaciansmooth(BlenderRNA *brna)
   RNA_def_property_float_sdna(prop, NULL, "lambda");
   RNA_def_property_range(prop, -FLT_MAX, FLT_MAX);
   RNA_def_property_ui_range(prop, -1000.0, 1000.0, 5, 3);
-  RNA_def_property_ui_text(prop, "Lambda Factor", "Smooth factor effect");
+  RNA_def_property_ui_text(prop, "Lambda Factor", "Smooth effect factor");
   RNA_def_property_update(prop, 0, "rna_Modifier_update");
 
   prop = RNA_def_property(srna, "lambda_border", PROP_FLOAT, PROP_NONE);
@@ -3991,6 +3991,7 @@ static void rna_def_modifier_dynamic_paint(BlenderRNA *brna)
   RNA_def_property_clear_flag(prop, PROP_ANIMATABLE);
   RNA_def_property_enum_sdna(prop, NULL, "type");
   RNA_def_property_enum_items(prop, rna_enum_prop_dynamicpaint_type_items);
+  RNA_def_property_translation_context(prop, BLT_I18NCONTEXT_ID_SIMULATION);
   RNA_def_property_ui_text(prop, "Type", "");
 
   RNA_define_lib_overridable(false);
@@ -4499,6 +4500,7 @@ static void rna_def_modifier_simpledeform(BlenderRNA *brna)
   RNA_def_property_enum_sdna(prop, NULL, "mode");
   RNA_def_property_enum_items(prop, simple_deform_mode_items);
   RNA_def_property_ui_text(prop, "Mode", "");
+  RNA_def_property_translation_context(prop, BLT_I18NCONTEXT_OPERATOR_DEFAULT);
   RNA_def_property_update(prop, 0, "rna_Modifier_update");
 
   prop = RNA_def_property(srna, "vertex_group", PROP_STRING, PROP_NONE);
@@ -4766,7 +4768,7 @@ static void rna_def_modifier_solidify(BlenderRNA *brna)
   RNA_def_property_boolean_sdna(prop, NULL, "flag", MOD_SOLIDIFY_NONMANIFOLD_FLAT_FACES);
   RNA_def_property_ui_text(prop,
                            "Flat Faces",
-                           "Make faces use the minimal vertex weight assigned to their vertices"
+                           "Make faces use the minimal vertex weight assigned to their vertices "
                            "(ensures new faces remain parallel to their original ones, slow, "
                            "disable when not needed)");
   RNA_def_property_update(prop, 0, "rna_Modifier_update");
@@ -7034,6 +7036,11 @@ static void rna_def_modifier_nodes(BlenderRNA *brna)
   RNA_def_property_pointer_funcs(prop, NULL, NULL, NULL, "rna_NodesModifier_node_group_poll");
   RNA_def_property_flag(prop, PROP_EDITABLE);
   RNA_def_property_update(prop, 0, "rna_NodesModifier_node_group_update");
+
+  prop = RNA_def_property(srna, "simulation_bake_directory", PROP_STRING, PROP_DIRPATH);
+  RNA_def_property_ui_text(
+      prop, "Simulation Bake Directory", "Location on disk where the bake data is stored");
+  RNA_def_property_update(prop, 0, NULL);
 
   RNA_define_lib_overridable(false);
 }

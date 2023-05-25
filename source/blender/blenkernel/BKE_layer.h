@@ -16,10 +16,6 @@
 extern "C" {
 #endif
 
-#define TODO_LAYER_OVERRIDE  /* CollectionOverride */
-#define TODO_LAYER_OPERATORS /* collection mamanger and property panel operators */
-#define TODO_LAYER           /* generic todo */
-
 struct Base;
 struct BlendDataReader;
 struct BlendLibReader;
@@ -275,7 +271,7 @@ void BKE_view_layer_blend_write(struct BlendWriter *writer,
                                 struct ViewLayer *view_layer);
 void BKE_view_layer_blend_read_data(struct BlendDataReader *reader, struct ViewLayer *view_layer);
 void BKE_view_layer_blend_read_lib(struct BlendLibReader *reader,
-                                   struct Library *lib,
+                                   struct ID *self_id,
                                    struct ViewLayer *view_layer);
 
 /* iterators */

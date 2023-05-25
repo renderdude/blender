@@ -102,7 +102,7 @@ static float get_aspect_scaled_extent(const rctf &extent, const UVPackIsland_Par
 }
 
 /**
- * \return true iff `b` is a preferred layout over `a`, given the packing parameters supplied.
+ * \return true if `b` is a preferred layout over `a`, given the packing parameters supplied.
  */
 static bool is_larger(const rctf &a, const rctf &b, const UVPackIsland_Params &params)
 {
@@ -211,6 +211,12 @@ void PackIsland::calculate_pre_rotation_(const UVPackIsland_Params &params)
   if (!can_rotate_(params)) {
     return; /* Nothing to do. */
   }
+  if (params.rotate_method == ED_UVPACK_ROTATION_CARDINAL) {
+    /* Arbitrary rotations are not allowed. */
+    return;
+  }
+  BLI_assert(params.rotate_method == ED_UVPACK_ROTATION_ANY ||
+             params.rotate_method == ED_UVPACK_ROTATION_AXIS_ALIGNED);
 
   /* As a heuristic to improve layout efficiency, #PackIsland's are first rotated by an arbitrary
    * angle to minimize the area of the enclosing AABB. This angle is stored in the `pre_rotate_`
@@ -325,7 +331,7 @@ void PackIsland::place_(const float scale, const uv_phi phi)
 
 UVPackIsland_Params::UVPackIsland_Params()
 {
-  rotate = false;
+  rotate_method = ED_UVPACK_ROTATION_NONE;
   scale_to_fit = true;
   only_selected_uvs = false;
   only_selected_faces = false;
@@ -364,22 +370,23 @@ class UVAABBIsland {
  * Technically, the algorithm here is only `O(n)`, In practice, to get reasonable results,
  * the input must be pre-sorted, which costs an additional `O(nlogn)` time complexity.
  */
-static void pack_islands_alpaca_turbo(const int64_t start_index,
+static void pack_islands_alpaca_turbo(const int64_t exclude_index,
+                                      const rctf &exclude,
                                       const Span<UVAABBIsland *> islands,
                                       const float target_aspect_y,
                                       MutableSpan<uv_phi> r_phis,
                                       rctf *r_extent)
 {
   /* Exclude an initial AABB near the origin. */
-  float next_u1 = r_extent->xmax;
-  float next_v1 = r_extent->ymax;
+  float next_u1 = exclude.xmax;
+  float next_v1 = exclude.ymax;
   bool zigzag = next_u1 < next_v1 * target_aspect_y; /* Horizontal or Vertical strip? */
 
   float u0 = zigzag ? next_u1 : 0.0f;
   float v0 = zigzag ? 0.0f : next_v1;
 
-  /* Visit every island in order. */
-  for (int64_t index = start_index; index < islands.size(); index++) {
+  /* Visit every island in order, except the excluded islands at the start. */
+  for (int64_t index = exclude_index; index < islands.size(); index++) {
     UVAABBIsland *island = islands[index];
     const float dsm_u = island->uv_diagonal.x;
     const float dsm_v = island->uv_diagonal.y;
@@ -474,15 +481,16 @@ static void update_hole_rotate(float2 &hole,
  * Also adds the concept of a "Hole", which is unused space that can be filled.
  * Tracking the "Hole" has a slight performance cost, while improving packing efficiency.
  */
-static void pack_islands_alpaca_rotate(const int64_t start_index,
+static void pack_islands_alpaca_rotate(const int64_t exclude_index,
+                                       const rctf &exclude,
                                        const Span<UVAABBIsland *> islands,
                                        const float target_aspect_y,
                                        MutableSpan<uv_phi> r_phis,
                                        rctf *r_extent)
 {
   /* Exclude an initial AABB near the origin. */
-  float next_u1 = r_extent->xmax;
-  float next_v1 = r_extent->ymax;
+  float next_u1 = exclude.xmax;
+  float next_v1 = exclude.ymax;
   bool zigzag = next_u1 / target_aspect_y < next_v1; /* Horizontal or Vertical strip? */
 
   /* Track an AABB "hole" which may be filled at any time. */
@@ -493,8 +501,8 @@ static void pack_islands_alpaca_rotate(const int64_t start_index,
   float u0 = zigzag ? next_u1 : 0.0f;
   float v0 = zigzag ? 0.0f : next_v1;
 
-  /* Visit every island in order. */
-  for (int64_t index = start_index; index < islands.size(); index++) {
+  /* Visit every island in order, except the excluded islands at the start. */
+  for (int64_t index = exclude_index; index < islands.size(); index++) {
     UVAABBIsland *island = islands[index];
     uv_phi &phi = r_phis[island->index];
     const float uvdiag_x = island->uv_diagonal.x * island->aspect_y;
@@ -579,7 +587,8 @@ static void pack_islands_alpaca_rotate(const int64_t start_index,
 /**
  * Use a fast algorithm to pack the supplied `aabbs`.
  */
-static void pack_islands_fast(const int64_t start_index,
+static void pack_islands_fast(const int64_t exclude_index,
+                              const rctf &exclude,
                               const Span<UVAABBIsland *> aabbs,
                               const bool rotate,
                               const float target_aspect_y,
@@ -587,10 +596,10 @@ static void pack_islands_fast(const int64_t start_index,
                               rctf *r_extent)
 {
   if (rotate) {
-    pack_islands_alpaca_rotate(start_index, aabbs, target_aspect_y, r_phis, r_extent);
+    pack_islands_alpaca_rotate(exclude_index, exclude, aabbs, target_aspect_y, r_phis, r_extent);
   }
   else {
-    pack_islands_alpaca_turbo(start_index, aabbs, target_aspect_y, r_phis, r_extent);
+    pack_islands_alpaca_turbo(exclude_index, exclude, aabbs, target_aspect_y, r_phis, r_extent);
   }
 }
 
@@ -1078,8 +1087,8 @@ class UVMinimumEnclosingSquareFinder {
 
 /**
  * Find the minimum bounding square that encloses the UVs as specified in `r_phis`.
- * If that square is smaller than `r_max_u` and `r_max_v`, then update `r_phis` accordingly.
- * \return True if `r_phis`, `r_max_u` and `r_max_v` are modified.
+ * If that square is smaller than `r_extent`, then update `r_phis` accordingly.
+ * \return True if `r_phis` and `r_extent` are modified.
  */
 static bool rotate_inside_square(const Span<UVAABBIsland *> island_indices,
                                  const Span<PackIsland *> islands,
@@ -1092,8 +1101,8 @@ static bool rotate_inside_square(const Span<UVAABBIsland *> island_indices,
   if (island_indices.size() == 0) {
     return false; /* Nothing to do. */
   }
-  if (!params.rotate) {
-    return false; /* Unable to rotate. */
+  if (params.rotate_method != ED_UVPACK_ROTATION_ANY) {
+    return false; /* Unable to rotate by arbitrary angle. */
   }
   if (params.shape_method == ED_UVPACK_SHAPE_AABB) {
     /* AABB margin calculations are not preserved under rotations. */
@@ -1131,13 +1140,15 @@ static bool rotate_inside_square(const Span<UVAABBIsland *> island_indices,
     }
   }
 
+  /* Now we have all the points in the correct space, compute the 2D convex hull. */
   const float(*source)[2] = reinterpret_cast<const float(*)[2]>(square_finder.points.data());
 
-  square_finder.indices.resize(square_finder.points.size());
+  square_finder.indices.resize(square_finder.points.size()); /* Allocate worst-case.*/
   int convex_size = BLI_convexhull_2d(
       source, int(square_finder.points.size()), square_finder.indices.data());
-  square_finder.indices.resize(convex_size);
+  square_finder.indices.resize(convex_size); /* Resize to actual size.*/
 
+  /* Run the computation to find the best angle. (Slow!) */
   const float quad_180 = square_finder.update(DEG2RADF(-180.0f));
   square_finder.update_recursive(DEG2RADF(-180.0f), quad_180, DEG2RADF(180.0f), quad_180);
 
@@ -1145,17 +1156,21 @@ static bool rotate_inside_square(const Span<UVAABBIsland *> island_indices,
     return false; /* Nothing to do. */
   }
 
-  /* Transform phis. */
+  /* Transform phis, rotate by best_angle, then translate back to the origin. No scale. */
   for (const int64_t j : island_indices.index_range()) {
     const int64_t i = island_indices[j]->index;
     const PackIsland *island = islands[i];
-    const float island_scale = island->can_scale_(params) ? scale : 1.0f;
-    island->build_transformation(island_scale, square_finder.best_angle, matrix);
+    const float identity_scale = 1.0f; /* Don't rescale the placement, just rotate. */
+    island->build_transformation(identity_scale, square_finder.best_angle, matrix);
     r_phis[i].rotation += square_finder.best_angle;
     mul_m2_v2(matrix, r_phis[i].translation);
     r_phis[i].translation.x -= square_finder.best_bounds.xmin;
     r_phis[i].translation.y -= square_finder.best_bounds.ymin;
   }
+
+  /* Write back new extent, translated to the origin. */
+  r_extent->xmin = 0.0f;
+  r_extent->ymin = 0.0f;
   r_extent->xmax = BLI_rctf_size_x(&square_finder.best_bounds);
   r_extent->ymax = BLI_rctf_size_y(&square_finder.best_bounds);
   return true; /* `r_phis` and `r_extent` were modified. */
@@ -1184,6 +1199,9 @@ static int64_t pack_island_xatlas(const Span<UVAABBIsland *> island_indices,
                                   MutableSpan<uv_phi> r_phis,
                                   rctf *r_extent)
 {
+  if (params.shape_method == ED_UVPACK_SHAPE_AABB) {
+    return 0; /* Not yet supported. */
+  }
   blender::Array<uv_phi> phis(r_phis.size());
   Occupancy occupancy(guess_initial_scale(islands, scale, margin));
   rctf extent = {0.0f, 0.0f, 0.0f, 0.0f};
@@ -1377,7 +1395,6 @@ static float pack_islands_scale_margin(const Span<PackIsland *> islands,
    */
 
   const bool all_can_rotate = can_rotate(islands, params);
-  bool all_can_translate = true;
 
   /* First, copy information from our input into the AABB structure. */
   Array<UVAABBIsland *> aabbs(islands.size());
@@ -1386,7 +1403,6 @@ static float pack_islands_scale_margin(const Span<PackIsland *> islands,
     float island_scale = scale;
     if (!pack_island->can_scale_(params)) {
       island_scale = 1.0f;
-      all_can_translate = false;
     }
     UVAABBIsland *aabb = new UVAABBIsland();
     aabb->index = i;
@@ -1446,7 +1462,27 @@ static float pack_islands_scale_margin(const Span<PackIsland *> islands,
                      });
   }
 
-  /* Partition `islands`, largest islands will go to a slow packer, the rest alpaca_turbo.
+  /* If some of the islands are locked, we build a summary about them here. */
+  rctf locked_bounds;              /* AABB of islands which can't translate. */
+  int64_t locked_island_count = 0; /* Index of first non-locked island. */
+  for (int64_t i = 0; i < islands.size(); i++) {
+    PackIsland *pack_island = islands[i];
+    if (pack_island->can_translate_(params)) {
+      break;
+    }
+    if (i == 0) {
+      float2 bottom_left = pack_island->pivot_ - pack_island->half_diagonal_;
+      locked_bounds.xmin = bottom_left.x;
+      locked_bounds.xmax = bottom_left.x;
+      locked_bounds.ymin = bottom_left.y;
+      locked_bounds.ymax = bottom_left.y;
+    }
+    float2 top_right = pack_island->pivot_ + pack_island->half_diagonal_;
+    BLI_rctf_do_minmax_v(&locked_bounds, top_right);
+    locked_island_count = i + 1;
+  }
+
+  /* Partition `islands`, largest islands will go to a slow packer, the rest the fast packer.
    * See discussion above for details. */
   int64_t alpaca_cutoff = 1024; /* Regular situation, pack `32 * 32` islands with slow packer. */
   int64_t alpaca_cutoff_fast = 81; /* Reduce problem size, only `N = 9 * 9` with slow packer. */
@@ -1455,55 +1491,54 @@ static float pack_islands_scale_margin(const Span<PackIsland *> islands,
       alpaca_cutoff = alpaca_cutoff_fast;
     }
   }
-  int64_t max_box_pack = std::min(alpaca_cutoff, islands.size());
-
+  Span<UVAABBIsland *> slow_aabbs = aabbs.as_span().take_front(
+      std::min(alpaca_cutoff, islands.size()));
   rctf extent = {0.0f, 1e30f, 0.0f, 1e30f};
 
-  if (all_can_translate) {
-    pack_islands_fast(0,
-                      aabbs.as_span().take_front(max_box_pack),
-                      all_can_rotate,
-                      params.target_aspect_y,
-                      r_phis,
-                      &extent);
-  }
+  /* Call the "fast" packer, which can sometimes give optimal results. */
+  pack_islands_fast(locked_island_count,
+                    locked_bounds,
+                    slow_aabbs,
+                    all_can_rotate,
+                    params.target_aspect_y,
+                    r_phis,
+                    &extent);
 
-  if (all_can_translate) {
-    pack_islands_optimal_pack(aabbs.as_span().take_front(max_box_pack), params, r_phis, &extent);
+  /* Call the "optimal" packer. */
+  if (locked_island_count == 0) {
+    pack_islands_optimal_pack(slow_aabbs, params, r_phis, &extent);
   }
 
   /* Call box_pack_2d (slow for large N.) */
-  if (all_can_translate) {
-    pack_island_box_pack_2d(aabbs.as_span().take_front(max_box_pack), params, r_phis, &extent);
+  if (locked_island_count == 0) { /* box_pack_2d doesn't yet support locked islands. */
+    pack_island_box_pack_2d(slow_aabbs, params, r_phis, &extent);
   }
 
   /* Call xatlas (slow for large N.) */
-  switch (params.shape_method) {
-    case ED_UVPACK_SHAPE_CONVEX:
-    case ED_UVPACK_SHAPE_CONCAVE:
-      max_box_pack = pack_island_xatlas(aabbs.as_span().take_front(max_box_pack),
-                                        islands,
-                                        scale,
-                                        margin,
-                                        params,
-                                        r_phis,
-                                        &extent);
-      break;
-    default:
-      break;
+  int64_t max_xatlas = pack_island_xatlas(
+      slow_aabbs, islands, scale, margin, params, r_phis, &extent);
+  if (max_xatlas) {
+    slow_aabbs = aabbs.as_span().take_front(max_xatlas);
   }
 
-  /* At this stage, `max_u` and `max_v` contain the box_pack/xatlas UVs. */
+  /* At this stage, `extent` contains the optimal/box_pack/xatlas UVs. */
 
   if (all_can_rotate) {
-    rotate_inside_square(
-        aabbs.as_span().take_front(max_box_pack), islands, params, scale, margin, r_phis, &extent);
+    /* Attempt to improve the layout even further by finding the minimal-bounding-square. */
+    rotate_inside_square(slow_aabbs, islands, params, scale, margin, r_phis, &extent);
   }
 
-  /* Call fast packer for remaining islands. */
-  pack_islands_fast(max_box_pack, aabbs, all_can_rotate, params.target_aspect_y, r_phis, &extent);
+  /* Call fast packer for remaining islands, excluding everything already placed. */
+  rctf final_extent = {0.0f, 1e30f, 0.0f, 1e30f};
+  pack_islands_fast(slow_aabbs.size(),
+                    extent,
+                    aabbs,
+                    all_can_rotate,
+                    params.target_aspect_y,
+                    r_phis,
+                    &final_extent);
 
-  return get_aspect_scaled_extent(extent, params);
+  return get_aspect_scaled_extent(final_extent, params);
 }
 
 /** Find the optimal scale to pack islands into the unit square.
@@ -1511,6 +1546,7 @@ static float pack_islands_scale_margin(const Span<PackIsland *> islands,
  */
 static float pack_islands_margin_fraction(const Span<PackIsland *> &islands,
                                           const float margin_fraction,
+                                          const bool rescale_margin,
                                           const UVPackIsland_Params &params)
 {
 
@@ -1587,8 +1623,8 @@ static float pack_islands_margin_fraction(const Span<PackIsland *> &islands,
 
     /* Evaluate our `f`. */
     blender::Array<uv_phi> *phis_target = (phis_low == &phis_a) ? &phis_b : &phis_a;
-    const float max_uv = pack_islands_scale_margin(
-        islands, scale, margin_fraction, params, *phis_target);
+    const float margin = rescale_margin ? margin_fraction * scale : margin_fraction;
+    const float max_uv = pack_islands_scale_margin(islands, scale, margin, params, *phis_target);
     const float value = sqrtf(max_uv) - 1.0f;
 
     if (value <= 0.0f) {
@@ -1747,17 +1783,25 @@ class OverlapMerger {
     sub_params.merge_overlap = false;
     const float result = pack_islands(sub_islands, sub_params);
 
-    /* Must loop backwards! */
+    /* Must loop backwards, or we will miss sub-sub-islands. */
     for (int64_t i = merge_trace.size() - 3; i >= 0; i -= 3) {
       PackIsland *sub_a = merge_trace[i];
       PackIsland *sub_b = merge_trace[i + 1];
       PackIsland *merge = merge_trace[i + 2];
+
+      /* Copy `angle`, `pre_translate` and `pre_rotate` from merged island to sub islands. */
       sub_a->angle = merge->angle;
       sub_b->angle = merge->angle;
       sub_a->pre_translate = merge->pre_translate;
       sub_b->pre_translate = merge->pre_translate;
       sub_a->pre_rotate_ = merge->pre_rotate_;
       sub_b->pre_rotate_ = merge->pre_rotate_;
+
+      /* If the merged island is pinned, the sub-islands are also pinned to correct scaling. */
+      if (merge->pinned) {
+        sub_a->pinned = true;
+        sub_b->pinned = true;
+      }
       delete merge;
     }
 
@@ -1793,11 +1837,27 @@ float pack_islands(const Span<PackIsland *> &islands, const UVPackIsland_Params 
 
   finalize_geometry(islands, params);
 
+  /* Count the number of islands which can scale and which can translate. */
+  int64_t can_scale_count = 0;
+  int64_t can_translate_count = 0;
+  for (const int64_t i : islands.index_range()) {
+    if (islands[i]->can_scale_(params)) {
+      can_scale_count++;
+    }
+    if (islands[i]->can_translate_(params)) {
+      can_translate_count++;
+    }
+  }
+
+  if (can_translate_count == 0) {
+    return 1.0f; /* Nothing to do, all islands are locked. */
+  }
+
   if (params.margin_method == ED_UVPACK_MARGIN_FRACTION && params.margin > 0.0f &&
-      params.scale_to_fit)
+      can_scale_count > 0)
   {
     /* Uses a line search on scale. ~10x slower than other method. */
-    return pack_islands_margin_fraction(islands, params.margin, params);
+    return pack_islands_margin_fraction(islands, params.margin, false, params);
   }
 
   float margin = params.margin;
@@ -1807,28 +1867,24 @@ float pack_islands(const Span<PackIsland *> &islands, const UVPackIsland_Params 
     case ED_UVPACK_MARGIN_SCALED: /* Default for Blender 3.3 and later. */
       margin = calc_margin_from_aabb_length_sum(islands, params);
       break;
-    case ED_UVPACK_MARGIN_FRACTION:      /* Added as an option in Blender 3.4. */
-      BLI_assert(params.margin == 0.0f); /* Other (slower) cases are handled above. */
+    case ED_UVPACK_MARGIN_FRACTION: /* Added as an option in Blender 3.4. */
+      /* Most other cases are handled above, unless pinning is involved. */
       break;
     default:
       BLI_assert_unreachable();
   }
 
-  /* TODO: Only line-search if *some* islands can scale and *some* are locked. */
-  switch (params.pin_method) {
-    case ED_UVPACK_PIN_LOCK_ALL:
-    case ED_UVPACK_PIN_LOCK_SCALE:
-    case ED_UVPACK_PIN_LOCK_ROTATION_SCALE:
-      return pack_islands_margin_fraction(islands, margin, params);
-    default:
-      break;
+  if (can_scale_count > 0 && can_scale_count != islands.size()) {
+    /* Search for the best scale parameter. (slow) */
+    return pack_islands_margin_fraction(islands, margin, true, params);
   }
 
+  /* Either all of the islands can scale, or none of them can.
+   * In either case, we pack them all tight to the origin. */
   blender::Array<uv_phi> phis(islands.size());
-
   const float scale = 1.0f;
   const float max_uv = pack_islands_scale_margin(islands, scale, margin, params, phis);
-  const float result = params.scale_to_fit ? 1.0f / max_uv : 1.0f;
+  const float result = can_scale_count > 0 ? 1.0f / max_uv : 1.0f;
   for (const int64_t i : islands.index_range()) {
     BLI_assert(result == 1.0f || islands[i]->can_scale_(params));
     islands[i]->place_(scale, phis[i]);
@@ -1877,7 +1933,7 @@ void PackIsland::build_inverse_transformation(const float scale,
 
 bool PackIsland::can_rotate_(const UVPackIsland_Params &params) const
 {
-  if (!params.rotate) {
+  if (params.rotate_method == ED_UVPACK_ROTATION_NONE) {
     return false;
   }
   if (!pinned) {

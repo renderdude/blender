@@ -11,9 +11,9 @@ namespace blender::nodes::node_geo_set_curve_normal_cc {
 
 static void node_declare(NodeDeclarationBuilder &b)
 {
-  b.add_input<decl::Geometry>(N_("Curve")).supported_type(GEO_COMPONENT_TYPE_CURVE);
-  b.add_input<decl::Bool>(N_("Selection")).default_value(true).hide_value().field_on_all();
-  b.add_output<decl::Geometry>(N_("Curve")).propagate_all();
+  b.add_input<decl::Geometry>("Curve").supported_type(GEO_COMPONENT_TYPE_CURVE);
+  b.add_input<decl::Bool>("Selection").default_value(true).hide_value().field_on_all();
+  b.add_output<decl::Geometry>("Curve").propagate_all();
 }
 
 static void node_layout(uiLayout *layout, bContext * /*C*/, PointerRNA *ptr)
@@ -35,7 +35,7 @@ static void set_normal_mode(bke::CurvesGeometry &curves,
   evaluator.set_selection(selection_field);
   evaluator.evaluate();
   const IndexMask selection = evaluator.get_evaluated_selection_as_mask();
-  curves.normal_mode_for_write().fill_indices(selection.indices(), mode);
+  index_mask::masked_fill<int8_t>(curves.normal_mode_for_write(), mode, selection);
   curves.tag_normals_changed();
 }
 

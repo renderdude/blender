@@ -16,9 +16,9 @@ namespace blender::nodes::node_shader_color_ramp_cc {
 static void sh_node_valtorgb_declare(NodeDeclarationBuilder &b)
 {
   b.is_function_node();
-  b.add_input<decl::Float>(N_("Fac")).default_value(0.5f).min(0.0f).max(1.0f).subtype(PROP_FACTOR);
-  b.add_output<decl::Color>(N_("Color"));
-  b.add_output<decl::Float>(N_("Alpha"));
+  b.add_input<decl::Float>("Fac").default_value(0.5f).min(0.0f).max(1.0f).subtype(PROP_FACTOR);
+  b.add_output<decl::Color>("Color");
+  b.add_output<decl::Float>("Alpha");
 }
 
 static void node_shader_init_valtorgb(bNodeTree * /*ntree*/, bNode *node)
@@ -105,19 +105,19 @@ class ColorBandFunction : public mf::MultiFunction {
     this->set_signature(&signature);
   }
 
-  void call(IndexMask mask, mf::Params params, mf::Context /*context*/) const override
+  void call(const IndexMask &mask, mf::Params params, mf::Context /*context*/) const override
   {
     const VArray<float> &values = params.readonly_single_input<float>(0, "Value");
     MutableSpan<ColorGeometry4f> colors = params.uninitialized_single_output<ColorGeometry4f>(
         1, "Color");
     MutableSpan<float> alphas = params.uninitialized_single_output<float>(2, "Alpha");
 
-    for (int64_t i : mask) {
+    mask.foreach_index([&](const int64_t i) {
       ColorGeometry4f color;
       BKE_colorband_evaluate(&color_band_, values[i], color);
       colors[i] = color;
       alphas[i] = color.a;
-    }
+    });
   }
 };
 
@@ -139,7 +139,7 @@ void register_node_type_sh_valtorgb()
   sh_fn_node_type_base(&ntype, SH_NODE_VALTORGB, "Color Ramp", NODE_CLASS_CONVERTER);
   ntype.declare = file_ns::sh_node_valtorgb_declare;
   ntype.initfunc = file_ns::node_shader_init_valtorgb;
-  node_type_size_preset(&ntype, NODE_SIZE_LARGE);
+  blender::bke::node_type_size_preset(&ntype, blender::bke::eNodeSizePreset::LARGE);
   node_type_storage(&ntype, "ColorBand", node_free_standard_storage, node_copy_standard_storage);
   ntype.gpu_fn = file_ns::gpu_shader_valtorgb;
   ntype.build_multi_function = file_ns::sh_node_valtorgb_build_multi_function;

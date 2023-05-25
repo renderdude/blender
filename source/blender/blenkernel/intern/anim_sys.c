@@ -131,8 +131,8 @@ KeyingSet *BKE_keyingset_add(
   /* allocate new KeyingSet */
   ks = MEM_callocN(sizeof(KeyingSet), "KeyingSet");
 
-  STRNCPY(ks->idname, (idname) ? idname : (name) ? name : DATA_("KeyingSet"));
-  STRNCPY(ks->name, (name) ? name : (idname) ? idname : DATA_("Keying Set"));
+  STRNCPY_UTF8(ks->idname, (idname) ? idname : (name) ? name : DATA_("KeyingSet"));
+  STRNCPY_UTF8(ks->name, (name) ? name : (idname) ? idname : DATA_("Keying Set"));
 
   ks->flag = flag;
   ks->keyingflag = keyingflag;
@@ -329,7 +329,7 @@ void BKE_keyingsets_blend_read_lib(BlendLibReader *reader, ID *id, ListBase *lis
 {
   LISTBASE_FOREACH (KeyingSet *, ks, list) {
     LISTBASE_FOREACH (KS_Path *, ksp, &ks->paths) {
-      BLO_read_id_address(reader, id->lib, &ksp->id);
+      BLO_read_id_address(reader, id, &ksp->id);
     }
   }
 }
@@ -641,8 +641,8 @@ static int animsys_quaternion_evaluate_fcurves(PathResolvedRNA quat_rna,
   }
 
   if (fcurve_offset < 4) {
-    /* This quaternion was incompletely keyed, so the result is a mixture of the unit quaterion and
-     * values from FCurves. This means that it's almost certainly no longer of unit length. */
+    /* This quaternion was incompletely keyed, so the result is a mixture of the unit quaternion
+     * and values from FCurves. This means that it's almost certainly no longer of unit length. */
     normalize_qt(r_quaternion);
   }
 
@@ -3250,8 +3250,8 @@ static void animsys_create_action_track_strip(const AnimData *adt,
    * and this setting doesn't work. */
   r_action_strip->flag |= NLASTRIP_FLAG_USR_INFLUENCE;
 
-  /* Unless extendmode is Nothing (might be useful for flattening NLA evaluation), disable range.
-   * Extendmode Nothing and Hold will behave as normal. Hold Forward will behave just like Hold.
+  /* Unless `extendmode` is Nothing (might be useful for flattening NLA evaluation), disable range.
+   * Extend-mode Nothing and Hold will behave as normal. Hold Forward will behave just like Hold.
    */
   if (r_action_strip->extendmode != NLASTRIP_EXTEND_NOTHING) {
     r_action_strip->flag |= NLASTRIP_FLAG_NO_TIME_MAP;

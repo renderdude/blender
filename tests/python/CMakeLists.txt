@@ -646,7 +646,7 @@ add_blender_test(
 endif()
 
 # SVG Import
-if(True)
+if(TRUE)
   if(NOT OPENIMAGEIO_IDIFF)
     message(WARNING "Disabling SVG tests because OIIO idiff does not exist")
   else()
@@ -687,6 +687,7 @@ if(WITH_CYCLES OR WITH_OPENGL_RENDER_TESTS)
       image_texture_limit
       integrator
       light
+      light_linking
       mesh
       pointcloud
       shader

@@ -9,6 +9,7 @@
 #define __RNA_TYPES_H__
 
 #include "../blenlib/BLI_sys_types.h"
+#include "../blenlib/BLI_utildefines.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -81,6 +82,7 @@ typedef enum PropertyUnit {
   PROP_UNIT_POWER = (11 << 16),        /* W */
   PROP_UNIT_TEMPERATURE = (12 << 16),  /* C */
 } PropertyUnit;
+ENUM_OPERATORS(PropertyUnit, PROP_UNIT_TEMPERATURE)
 
 /**
  * Use values besides #PROP_SCALE_LINEAR
@@ -286,11 +288,11 @@ typedef enum PropertyFlag {
 
   /** This is an IDProperty, not a DNA one. */
   PROP_IDPROPERTY = (1 << 10),
-  /** For dynamic arrays, and retvals of type string. */
+  /** For dynamic arrays & return values of type string. */
   PROP_DYNAMIC = (1 << 17),
   /** For enum that shouldn't be contextual */
   PROP_ENUM_NO_CONTEXT = (1 << 24),
-  /** For enums not to be translated (e.g. viewlayers' names in nodes). */
+  /** For enums not to be translated (e.g. view-layers' names in nodes). */
   PROP_ENUM_NO_TRANSLATE = (1 << 29),
 
   /**
@@ -367,6 +369,7 @@ typedef enum ParameterFlag {
    */
   PARM_PYFUNC_OPTIONAL = (1 << 3),
 } ParameterFlag;
+ENUM_OPERATORS(ParameterFlag, PARM_PYFUNC_OPTIONAL)
 
 struct CollectionPropertyIterator;
 struct Link;

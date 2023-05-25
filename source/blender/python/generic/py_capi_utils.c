@@ -607,7 +607,7 @@ void PyC_LineSpit(void)
 
   /* NOTE: allow calling from outside python (RNA). */
   if (!PyC_IsInterpreterActive()) {
-    fprintf(stderr, "python line lookup failed, interpreter inactive\n");
+    fprintf(stderr, "Python line lookup failed, interpreter inactive\n");
     return;
   }
 
@@ -621,7 +621,7 @@ void PyC_StackSpit(void)
 {
   /* NOTE: allow calling from outside python (RNA). */
   if (!PyC_IsInterpreterActive()) {
-    fprintf(stderr, "python line lookup failed, interpreter inactive\n");
+    fprintf(stderr, "Python line lookup failed, interpreter inactive\n");
     return;
   }
 
@@ -940,7 +940,7 @@ PyObject *PyC_ExceptionBuffer(void)
   PySys_SetObject("stdout", stdout_backup);
   PySys_SetObject("stderr", stderr_backup);
 
-  Py_DECREF(stdout_backup); /* now sys owns the ref again */
+  Py_DECREF(stdout_backup); /* Now `sys` owns the reference again. */
   Py_DECREF(stderr_backup);
 
   Py_DECREF(string_io_mod);
@@ -1096,7 +1096,7 @@ PyObject *PyC_DefaultNameSpace(const char *filename)
   PyObject *builtins = PyEval_GetBuiltins();
   PyObject *mod_main = PyModule_New("__main__");
   PyDict_SetItemString(modules, "__main__", mod_main);
-  Py_DECREF(mod_main); /* sys.modules owns now */
+  Py_DECREF(mod_main); /* `sys.modules` owns now. */
   PyModule_AddStringConstant(mod_main, "__name__", "__main__");
   if (filename) {
     /* __file__ mainly for nice UI'ness

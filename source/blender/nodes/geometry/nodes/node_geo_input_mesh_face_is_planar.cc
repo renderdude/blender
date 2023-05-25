@@ -18,8 +18,9 @@ static void node_declare(NodeDeclarationBuilder &b)
       .default_value(0.01f)
       .subtype(PROP_DISTANCE)
       .supports_field()
-      .description(N_("The distance a point can be from the surface before the face is no longer "
-                      "considered planar"))
+      .description(
+          "The distance a point can be from the surface before the face is no longer "
+          "considered planar")
       .min(0.0f);
   b.add_output<decl::Bool>("Planar").field_source();
 }
@@ -37,7 +38,7 @@ class PlanarFieldInput final : public bke::MeshFieldInput {
 
   GVArray get_varray_for_context(const Mesh &mesh,
                                  const eAttrDomain domain,
-                                 IndexMask /*mask*/) const final
+                                 const IndexMask & /*mask*/) const final
   {
     const Span<float3> positions = mesh.vert_positions();
     const OffsetIndices polys = mesh.polys();

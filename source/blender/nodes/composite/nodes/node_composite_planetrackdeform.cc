@@ -9,8 +9,6 @@
 #include "BLI_math_matrix_types.hh"
 #include "BLI_math_vector_types.hh"
 
-#include "BLT_translation.h"
-
 #include "DNA_defaults.h"
 #include "DNA_movieclip_types.h"
 #include "DNA_tracking_types.h"
@@ -41,9 +39,9 @@ NODE_STORAGE_FUNCS(NodePlaneTrackDeformData)
 
 static void cmp_node_planetrackdeform_declare(NodeDeclarationBuilder &b)
 {
-  b.add_input<decl::Color>(N_("Image")).compositor_skip_realization();
-  b.add_output<decl::Color>(N_("Image"));
-  b.add_output<decl::Float>(N_("Plane"));
+  b.add_input<decl::Color>("Image").compositor_skip_realization();
+  b.add_output<decl::Color>("Image");
+  b.add_output<decl::Float>("Plane");
 }
 
 static void init(const bContext *C, PointerRNA *ptr)

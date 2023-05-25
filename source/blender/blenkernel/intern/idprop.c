@@ -416,28 +416,6 @@ void IDP_AssignString(IDProperty *prop, const char *st)
   IDP_AssignStringMaxSize(prop, st, 0);
 }
 
-void IDP_ConcatStringC(IDProperty *prop, const char *st)
-{
-  BLI_assert(prop->type == IDP_STRING);
-
-  int newlen = prop->len + (int)strlen(st);
-  /* We have to remember that prop->len includes the null byte for strings.
-   * so there's no need to add +1 to the resize function. */
-  IDP_ResizeArray(prop, newlen);
-  strcat(prop->data.pointer, st);
-}
-
-void IDP_ConcatString(IDProperty *str1, IDProperty *append)
-{
-  BLI_assert(append->type == IDP_STRING);
-
-  /* Since ->len for strings includes the NULL byte, we have to subtract one or
-   * we'll get an extra null byte after each concatenation operation. */
-  int newlen = str1->len + append->len - 1;
-  IDP_ResizeArray(str1, newlen);
-  strcat(str1->data.pointer, append->data.pointer);
-}
-
 void IDP_FreeString(IDProperty *prop)
 {
   BLI_assert(prop->type == IDP_STRING);
@@ -1495,7 +1473,7 @@ void IDP_BlendReadData_impl(BlendDataReader *reader, IDProperty **prop, const ch
   }
 }
 
-void IDP_BlendReadLib(BlendLibReader *reader, Library *lib, IDProperty *prop)
+void IDP_BlendReadLib(BlendLibReader *reader, ID *self_id, IDProperty *prop)
 {
   if (!prop) {
     return;
@@ -1504,7 +1482,8 @@ void IDP_BlendReadLib(BlendLibReader *reader, Library *lib, IDProperty *prop)
   switch (prop->type) {
     case IDP_ID: /* PointerProperty */
     {
-      void *newaddr = BLO_read_get_new_id_address(reader, lib, IDP_Id(prop));
+      void *newaddr = BLO_read_get_new_id_address(
+          reader, self_id, ID_IS_LINKED(self_id), IDP_Id(prop));
       if (IDP_Id(prop) && !newaddr && G.debug) {
         printf("Error while loading \"%s\". Data not found in file!\n", prop->name);
       }
@@ -1515,14 +1494,14 @@ void IDP_BlendReadLib(BlendLibReader *reader, Library *lib, IDProperty *prop)
     {
       IDProperty *idp_array = IDP_IDPArray(prop);
       for (int i = 0; i < prop->len; i++) {
-        IDP_BlendReadLib(reader, lib, &(idp_array[i]));
+        IDP_BlendReadLib(reader, self_id, &(idp_array[i]));
       }
       break;
     }
     case IDP_GROUP: /* PointerProperty */
     {
       LISTBASE_FOREACH (IDProperty *, loop, &prop->data.group) {
-        IDP_BlendReadLib(reader, lib, loop);
+        IDP_BlendReadLib(reader, self_id, loop);
       }
       break;
     }

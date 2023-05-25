@@ -15,9 +15,9 @@ NODE_STORAGE_FUNCS(NodeGeometryCurveSetHandles)
 
 static void node_declare(NodeDeclarationBuilder &b)
 {
-  b.add_input<decl::Geometry>(N_("Curve")).supported_type(GEO_COMPONENT_TYPE_CURVE);
-  b.add_input<decl::Bool>(N_("Selection")).default_value(true).hide_value().field_on_all();
-  b.add_output<decl::Geometry>(N_("Curve")).propagate_all();
+  b.add_input<decl::Geometry>("Curve").supported_type(GEO_COMPONENT_TYPE_CURVE);
+  b.add_input<decl::Bool>("Selection").default_value(true).hide_value().field_on_all();
+  b.add_output<decl::Geometry>("Curve").propagate_all();
 }
 
 static void node_layout(uiLayout *layout, bContext * /*C*/, PointerRNA *ptr)
@@ -63,10 +63,12 @@ static void set_handle_type(bke::CurvesGeometry &curves,
   const IndexMask selection = evaluator.get_evaluated_selection_as_mask();
 
   if (mode & GEO_NODE_CURVE_HANDLE_LEFT) {
-    curves.handle_types_left_for_write().fill_indices(selection.indices(), new_handle_type);
+    index_mask::masked_fill<int8_t>(
+        curves.handle_types_left_for_write(), new_handle_type, selection);
   }
   if (mode & GEO_NODE_CURVE_HANDLE_RIGHT) {
-    curves.handle_types_right_for_write().fill_indices(selection.indices(), new_handle_type);
+    index_mask::masked_fill<int8_t>(
+        curves.handle_types_right_for_write(), new_handle_type, selection);
   }
 
   /* Eagerly calculate automatically derived handle positions if necessary. */

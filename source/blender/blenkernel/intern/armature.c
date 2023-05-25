@@ -104,7 +104,7 @@ static void armature_copy_data(Main *UNUSED(bmain), ID *id_dst, const ID *id_src
 
   BLI_duplicatelist(&armature_dst->bonebase, &armature_src->bonebase);
 
-  /* Duplicate the childrens' lists */
+  /* Duplicate the children's lists. */
   bone_dst = armature_dst->bonebase.first;
   for (bone_src = armature_src->bonebase.first; bone_src; bone_src = bone_src->next) {
     bone_dst->parent = NULL;
@@ -261,12 +261,12 @@ static void armature_blend_read_data(BlendDataReader *reader, ID *id)
   BKE_armature_bone_hash_make(arm);
 }
 
-static void lib_link_bones(BlendLibReader *reader, Library *lib, Bone *bone)
+static void lib_link_bones(BlendLibReader *reader, ID *self_id, Bone *bone)
 {
-  IDP_BlendReadLib(reader, lib, bone->prop);
+  IDP_BlendReadLib(reader, self_id, bone->prop);
 
   LISTBASE_FOREACH (Bone *, curbone, &bone->childbase) {
-    lib_link_bones(reader, lib, curbone);
+    lib_link_bones(reader, self_id, curbone);
   }
 }
 
@@ -274,7 +274,7 @@ static void armature_blend_read_lib(BlendLibReader *reader, ID *id)
 {
   bArmature *arm = (bArmature *)id;
   LISTBASE_FOREACH (Bone *, curbone, &arm->bonebase) {
-    lib_link_bones(reader, id->lib, curbone);
+    lib_link_bones(reader, id, curbone);
   }
 }
 
@@ -2493,7 +2493,7 @@ void BKE_pose_where_is_bone(struct Depsgraph *depsgraph,
   /* pose_mat(b) = pose_mat(b-1) * yoffs(b-1) * d_root(b) * bone_mat(b) * chan_mat(b) */
   BKE_armature_mat_bone_to_pose(pchan, pchan->chan_mat, pchan->pose_mat);
 
-  /* Only rootbones get the cyclic offset (unless user doesn't want that). */
+  /* Only root-bones get the cyclic offset (unless user doesn't want that). */
   /* XXX That could be a problem for snapping and other "reverse transform" features... */
   if (!pchan->parent) {
     if ((pchan->bone->flag & BONE_NO_CYCLICOFFSET) == 0) {
