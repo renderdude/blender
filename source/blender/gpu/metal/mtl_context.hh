@@ -536,10 +536,6 @@ class MTLCommandBufferManager {
   friend class MTLContext;
 
  public:
-  /* Event to coordinate sequential execution across all "main" command buffers. */
-  static id<MTLEvent> sync_event;
-  static uint64_t event_signal_val;
-
   /* Counter for active command buffers. */
   static int num_active_cmd_bufs;
 
@@ -578,6 +574,13 @@ class MTLCommandBufferManager {
   int encoder_count_ = 0;
   int vertex_submitted_count_ = 0;
   bool empty_ = true;
+
+  /** Debug groups. */
+  /* Stack tracking all calls to push_debug_group. */
+  std::vector<std::string> debug_group_stack;
+  /* Stack tracking calls resulting in active API calls to pushDebugGroup on the current command
+   * buffer. */
+  std::vector<std::string> debug_group_pushed_stack;
 
  public:
   MTLCommandBufferManager(MTLContext &context)
@@ -643,6 +646,9 @@ class MTLCommandBufferManager {
   id<MTLCommandBuffer> ensure_begin();
 
   void register_encoder_counters();
+
+  /* Debug group management. */
+  void unfold_pending_debug_groups();
 };
 
 /** MTLContext -- Core render loop and state management. **/
