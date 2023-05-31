@@ -159,11 +159,11 @@ if(WITH_CYCLES_STANDALONE)
       set_property(TARGET cycles APPEND_STRING PROPERTY LINK_FLAGS
         " -framework Cocoa -framework CoreAudio -framework AudioUnit -framework AudioToolbox -framework ForceFeedback -framework CoreVideo")
     endif()
-  #set_target_properties(cycles PROPERTIES
-  #  XCODE_GENERATE_SCHEME TRUE
-  #  XCODE_SCHEME_WORKING_DIRECTORY "/Users/mbolsta"
-  #  XCODE_SCHEME_ARGUMENTS "--display-type tev;--display-server 127.0.0.1:14158;--shadingsys osl;--samples 16;--tile-size 64;--threads 0;/Users/mbolsta/osl_test.ris1.0001.rib"
-  #)
+  set_target_properties(cycles PROPERTIES
+    XCODE_GENERATE_SCHEME TRUE
+    XCODE_SCHEME_WORKING_DIRECTORY "/Users/mbolsta"
+    XCODE_SCHEME_ARGUMENTS "--display-type tev;--display-server 127.0.0.1:14158;--shadingsys osl;--samples 16;--tile-size 64;--threads 0;/Users/mbolsta/osl_test.ris1.0001.rib"
+  )
   endif()
 
   if(UNIX AND NOT APPLE)
