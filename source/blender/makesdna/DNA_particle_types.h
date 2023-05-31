@@ -1,5 +1,6 @@
-/* SPDX-License-Identifier: GPL-2.0-or-later
- * Copyright 2007 by Janne Karhu. All rights reserved. */
+/* SPDX-FileCopyrightText: 2007 by Janne Karhu. All rights reserved.
+ *
+ * SPDX-License-Identifier: GPL-2.0-or-later */
 
 /** \file
  * \ingroup DNA
@@ -560,12 +561,12 @@ typedef enum eParticleShapeFlag {
 /* #ParticleSettings.ren_as */
 #define PART_DRAW_NOT 0
 #define PART_DRAW_DOT 1
-#define PART_DRAW_HALO 1 /* deprecated */
+#define PART_DRAW_HALO 1
 #define PART_DRAW_CIRC 2
 #define PART_DRAW_CROSS 3
 #define PART_DRAW_AXIS 4
-#define PART_DRAW_LINE 5 /* deprecated */
-#define PART_DRAW_PATH 6 /* only for hair */
+#define PART_DRAW_LINE 5
+#define PART_DRAW_PATH 6
 #define PART_DRAW_OB 7
 #define PART_DRAW_GR 8
 #define PART_DRAW_BB 9 /* deprecated */

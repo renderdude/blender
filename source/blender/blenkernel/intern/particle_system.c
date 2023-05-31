@@ -1,6 +1,7 @@
-/* SPDX-License-Identifier: GPL-2.0-or-later
- * Copyright 2007 Janne Karhu. All rights reserved.
- *           2011-2012 AutoCRC (adaptive time step, Classical SPH). */
+/* SPDX-FileCopyrightText: 2007 Janne Karhu. All rights reserved.
+ * SPDX-FileCopyrightText: 2011-2012 AutoCRC (adaptive time step, Classical SPH).
+ *
+ * SPDX-License-Identifier: GPL-2.0-or-later */
 
 /** \file
  * \ingroup bke
@@ -4639,7 +4640,7 @@ void psys_changed_type(Object *ob, ParticleSystem *psys)
   }
 
   if (part->type == PART_HAIR) {
-    if (ELEM(part->ren_as, PART_DRAW_PATH, PART_DRAW_OB, PART_DRAW_GR) == 0) {
+    if (ELEM(part->ren_as, PART_DRAW_NOT, PART_DRAW_PATH, PART_DRAW_OB, PART_DRAW_GR) == 0) {
       part->ren_as = PART_DRAW_PATH;
     }
 
@@ -4661,11 +4662,6 @@ void psys_changed_type(Object *ob, ParticleSystem *psys)
 
     CLAMP(part->path_start, 0.0f, MAX2(100.0f, part->end + part->lifetime));
     CLAMP(part->path_end, 0.0f, MAX2(100.0f, part->end + part->lifetime));
-
-    if (ELEM(part->ren_as, part->draw_as, PART_DRAW_PATH)) {
-      part->ren_as = PART_DRAW_NOT;
-      part->draw_as = PART_DRAW_DOT;
-    }
   }
 
   psys_reset(psys, PSYS_RESET_ALL);

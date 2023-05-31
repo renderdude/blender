@@ -1,4 +1,6 @@
-/* SPDX-License-Identifier: GPL-2.0-or-later */
+/* SPDX-FileCopyrightText: 2023 Blender Foundation
+ *
+ * SPDX-License-Identifier: GPL-2.0-or-later */
 
 /** \file
  * \ingroup blenloader
@@ -9,7 +11,6 @@
 #include "CLG_log.h"
 
 #include "DNA_movieclip_types.h"
-#include "DNA_particle_types.h"
 
 #include "BLI_assert.h"
 #include "BLI_listbase.h"
@@ -119,18 +120,6 @@ void blo_do_versions_400(FileData * /*fd*/, Library * /*lib*/, Main *bmain)
     LISTBASE_FOREACH (bNodeTree *, ntree, &bmain->nodetrees) {
       if (ntree->type == NTREE_GEOMETRY) {
         version_geometry_nodes_add_realize_instance_nodes(ntree);
-      }
-    }
-  }
-
-  if (!MAIN_VERSION_ATLEAST(bmain, 400, 4)) {
-    LISTBASE_FOREACH (ParticleSettings *, part, &bmain->particles) {
-      /* Replace unsupported particle render types. */
-      if (ELEM(part->ren_as, PART_DRAW_HALO, PART_DRAW_LINE) ||
-          ((part->type == PART_EMITTER) && (part->ren_as == PART_DRAW_PATH)))
-      {
-        part->ren_as = PART_DRAW_NOT;
-        part->draw_as = PART_DRAW_DOT;
       }
     }
   }

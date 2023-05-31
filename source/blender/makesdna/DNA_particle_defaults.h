@@ -1,4 +1,6 @@
-/* SPDX-License-Identifier: GPL-2.0-or-later */
+/* SPDX-FileCopyrightText: 2023 Blender Foundation
+ *
+ * SPDX-License-Identifier: GPL-2.0-or-later */
 
 /** \file
  * \ingroup DNA
@@ -17,8 +19,8 @@
   { \
     .type = PART_EMITTER, \
     .distr = PART_DISTR_JIT, \
-    .draw_as = PART_DRAW_DOT, \
-    .ren_as = PART_DRAW_NOT, \
+    .draw_as = PART_DRAW_REND, \
+    .ren_as = PART_DRAW_HALO, \
     .bb_uv_split = 1, \
     .flag = PART_EDISTR | PART_TRAND | PART_HIDE_ADVANCED_HAIR, \
  \

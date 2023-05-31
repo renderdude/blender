@@ -1,5 +1,6 @@
-/* SPDX-License-Identifier: GPL-2.0-or-later
- * Copyright 2011 AutoCRC (adaptive time step). */
+/* SPDX-FileCopyrightText: 2011 AutoCRC (adaptive time step).
+ *
+ * SPDX-License-Identifier: GPL-2.0-or-later */
 
 /** \file
  * \ingroup RNA
@@ -90,6 +91,8 @@ static const EnumPropertyItem part_hair_draw_as_items[] = {
 
 static const EnumPropertyItem part_ren_as_items[] = {
     {PART_DRAW_NOT, "NONE", 0, "None", ""},
+    {PART_DRAW_HALO, "HALO", 0, "Halo", ""},
+    {PART_DRAW_LINE, "LINE", 0, "Line", ""},
     {PART_DRAW_PATH, "PATH", 0, "Path", ""},
     {PART_DRAW_OB, "OBJECT", 0, "Object", ""},
     {PART_DRAW_GR, "COLLECTION", 0, "Collection", ""},
@@ -97,8 +100,9 @@ static const EnumPropertyItem part_ren_as_items[] = {
 };
 
 #ifdef RNA_RUNTIME
-static const EnumPropertyItem part_emitter_ren_as_items[] = {
+static const EnumPropertyItem part_hair_ren_as_items[] = {
     {PART_DRAW_NOT, "NONE", 0, "None", ""},
+    {PART_DRAW_PATH, "PATH", 0, "Path", ""},
     {PART_DRAW_OB, "OBJECT", 0, "Object", ""},
     {PART_DRAW_GR, "COLLECTION", 0, "Collection", ""},
     {0, NULL, 0, NULL, NULL},
@@ -1390,10 +1394,10 @@ static const EnumPropertyItem *rna_Particle_ren_as_itemf(bContext *UNUSED(C),
   ParticleSettings *part = (ParticleSettings *)ptr->owner_id;
 
   if (part->type == PART_HAIR) {
-    return part_ren_as_items;
+    return part_hair_ren_as_items;
   }
   else {
-    return part_emitter_ren_as_items;
+    return part_ren_as_items;
   }
 }
 
