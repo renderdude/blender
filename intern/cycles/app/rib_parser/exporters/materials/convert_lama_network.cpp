@@ -380,8 +380,10 @@ void LamaNetwork::split_nodegraph()
     bool is_bsdf = true;
     bool needs_splitting = false;
 
-    if (shader_type->strings[1] == "LamaEmission")
+    if (shader_type->strings[1] == "LamaEmission") {
       is_bsdf = false;
+      _has_emission_node = true;
+    }
     else if (shader_type->strings[1] != "LamaSurface") {
       if (shader_type->strings[1] == "LamaAdd" || shader_type->strings[1] == "LamaMix") {
         std::string mat1 = params.get_parameter("material1")->strings[0];

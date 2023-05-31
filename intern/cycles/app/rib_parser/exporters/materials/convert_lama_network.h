@@ -19,6 +19,7 @@ class LamaNetwork {
   }
 
   Vector_Dictionary convert();
+  bool has_emission() { return _has_emission_node; }
 
  private:
   bool generate_osl(std::string shader_name);
@@ -59,6 +60,7 @@ class LamaNetwork {
   }
 
   bool _a_node_was_split = false;
+  bool _has_emission_node = false;
   Vector_Dictionary &_shader_graph;
   Vector_Dictionary _lama_shader_graph;
   std::string _mtlx_def;

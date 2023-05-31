@@ -291,6 +291,9 @@ void RIBCyclesMaterials::populate_shader_graph(Vector_Dictionary sg)
   LamaNetwork lama(sg);
   Vector_Dictionary shader_graph = lama.convert();
 
+  if (lama.has_emission())
+    _shader->set_emission_sampling_method(EmissionSampling::EMISSION_SAMPLING_NONE);
+  
   std::string shader_id = shader_graph.first;
   std::string shader_name, shader_type, handle;
   std::string shader_path = path_get("shader");
