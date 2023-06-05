@@ -36,6 +36,27 @@ set(LIB
   cycles_util
 )
 
+include (CheckCXXSourceCompiles)
+
+check_cxx_source_compiles ("
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+int main() {
+   int fd = open(\"foo\", O_RDONLY);
+   struct stat s;
+   fstat(fd, &s);
+   size_t len = s.st_size;
+   void *ptr = mmap(0, len, PROT_READ, MAP_FILE | MAP_SHARED, fd, 0);
+   munmap(ptr, len);   
+}
+" HAVE_MMAP)
+
+if (HAVE_MMAP)
+  add_definitions(-DHAVE_MMAP)
+ENDIF ()
+
 if(WITH_ALEMBIC)
   add_definitions(-DWITH_ALEMBIC)
   list(APPEND INC_SYS

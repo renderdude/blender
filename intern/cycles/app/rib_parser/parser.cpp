@@ -3,16 +3,24 @@
 #include "scene/scene.h"
 #include "util/projection.h"
 #include "util/transform.h"
+
+#ifdef HAVE_MMAP
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#endif
+
+#include <chrono>
 #include <cstdlib>
 #include <fcntl.h>
-#include <sstream>
-#include <sys/stat.h>
-
 #include <fstream>
 #include <functional>
 #include <iostream>
 #include <memory>
+#include <sstream>
 #include <string>
+#include <sys/stat.h>
 #include <utility>
 #include <vector>
 
@@ -246,7 +254,7 @@ Tokenizer::~Tokenizer()
 #ifdef HAVE_MMAP
   if (unmapPtr && unmapLength > 0)
     if (munmap(unmapPtr, unmapLength) != 0)
-      error_callback(string_printf("munmap: %s", error_string()).c_str(), nullptr);
+      std::cerr << "Error with mumap" << std::endl;
 #elif defined(IS_WINDOWS)
   if (unmapPtr && UnmapViewOfFile(unmapPtr) == 0)
     error_callback(string_printf("UnmapViewOfFile: %s", error_string()).c_str(), nullptr);
@@ -1545,6 +1553,8 @@ void parse(Ri *target, std::unique_ptr<Tokenizer> t)
 
 void parse_files(Ri *target, std::vector<std::string> filenames)
 {
+  auto start = std::chrono::high_resolution_clock::now();
+
   auto tok_error = [](const char *msg, const File_Loc *loc) {
     std::cerr << loc << " " << msg << std::endl;
     exit(-1);
@@ -1570,6 +1580,15 @@ void parse_files(Ri *target, std::vector<std::string> filenames)
   }
 
   target->end_of_files();
+
+  auto stop = std::chrono::high_resolution_clock::now();
+
+  // Get duration. Substart timepoints to
+  // get duration. To cast it to proper unit
+  // use duration cast method
+  auto duration = duration_cast<std::chrono::seconds>(stop - start);
+
+  std::cout << "Time taken by parsing: " << duration.count() << " seconds" << std::endl;
 }
 
 void parse_string(Ri *target, std::string str)
