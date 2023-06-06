@@ -3330,7 +3330,9 @@ static bool ui_textedit_copypaste(uiBut *but, uiHandleButtonData *data, const in
     char *buf = static_cast<char *>(
         MEM_mallocN(sizeof(char) * (sellen + 1), "ui_textedit_copypaste"));
 
-    BLI_strncpy(buf, data->str + but->selsta, sellen + 1);
+    memcpy(buf, data->str + but->selsta, sellen);
+    buf[sellen] = '\0';
+
     WM_clipboard_text_set(buf, false);
     MEM_freeN(buf);
 
@@ -8857,7 +8859,7 @@ uiBut *UI_region_active_but_prop_get(const ARegion *region,
   else {
     memset(r_ptr, 0, sizeof(*r_ptr));
     *r_prop = nullptr;
-    *r_index = -1;
+    *r_index = 0;
   }
 
   return activebut;
