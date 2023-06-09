@@ -945,11 +945,11 @@ class VIEW3D_MT_editor_menus(Menu):
                          tool_settings.use_gpencil_select_mask_stroke or
                          tool_settings.use_gpencil_select_mask_segment)
                 ):
-                    layout.menu("VIEW3D_MT_select_gpencil")
+                    layout.menu("VIEW3D_MT_select_edit_gpencil")
                 elif mode_string == 'EDIT_GPENCIL':
-                    layout.menu("VIEW3D_MT_select_gpencil")
+                    layout.menu("VIEW3D_MT_select_edit_gpencil")
                 elif mode_string == 'VERTEX_GPENCIL':
-                    layout.menu("VIEW3D_MT_select_gpencil")
+                    layout.menu("VIEW3D_MT_select_edit_gpencil")
         elif mode_string in {'PAINT_WEIGHT', 'PAINT_VERTEX', 'PAINT_TEXTURE'}:
             mesh = obj.data
             if mesh.use_paint_mask:
@@ -2028,7 +2028,7 @@ class VIEW3D_MT_select_edit_gpencil(Menu):
         layout.operator("grease_pencil.select_all", text="None").action = 'DESELECT'
         layout.operator("grease_pencil.select_all", text="Invert").action = 'INVERT'
 
-        layout.separator()     
+        layout.separator()
 
 
 class VIEW3D_MT_select_paint_mask(Menu):
@@ -2103,7 +2103,7 @@ class VIEW3D_MT_select_edit_curves(Menu):
         layout.separator()
 
         layout.operator("curves.select_random", text="Random")
-        layout.operator("curves.select_end", text="Endpoints")
+        layout.operator("curves.select_ends", text="Endpoints")
         layout.operator("curves.select_linked", text="Linked")
 
         layout.separator()
@@ -2121,7 +2121,7 @@ class VIEW3D_MT_select_sculpt_curves(Menu):
         layout.operator("curves.select_all", text="None").action = 'DESELECT'
         layout.operator("curves.select_all", text="Invert").action = 'INVERT'
         layout.operator("sculpt_curves.select_random", text="Random")
-        layout.operator("curves.select_end", text="Endpoints")
+        layout.operator("curves.select_ends", text="Endpoints")
         layout.operator("sculpt_curves.select_grow", text="Grow")
 
 
