@@ -619,7 +619,7 @@ static Parsed_Parameter_Vector parse_parameters(
             error_callback(t, "expected Boolean value");
         }
 
-        param->payload = vector<std::string>();
+        if (!param->has_strings()) param->payload = vector<std::string>();
         param->add_string(dequote_string(t));
       }
       else if (t.token[0] == 't' && t.token == "true") {
@@ -637,7 +637,7 @@ static Parsed_Parameter_Vector parse_parameters(
             break;
         }
 
-        param->payload = vector<uint8_t>();
+        if (!param->has_bools()) param->payload = vector<uint8_t>();
         param->add_bool(true);
       }
       else if (t.token[0] == 'f' && t.token == "false") {
@@ -655,7 +655,7 @@ static Parsed_Parameter_Vector parse_parameters(
             break;
         }
 
-        param->payload = vector<uint8_t>();
+        if (!param->has_bools()) param->payload = vector<uint8_t>();
         param->add_bool(false);
       }
       else {
