@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <string_view>
+#include <variant>
 
 #include "error.h"
 #include "util/vector.h"
@@ -24,6 +25,26 @@ CCL_NAMESPACE_BEGIN
       Vertex
    };
 
+   enum class Parameter_Type
+   {
+      Boolean,
+      Bxdf,
+      Color,
+      Integer,
+      Normal,
+      Parameter,
+      Point2,
+      Point3,
+      Real,
+      String,
+      Texture,
+      Vector2,
+      Vector3,
+      Unknown
+   };
+
+   using Payload_Type = std::variant<vector< uint8_t >, vector< float >, vector< int >, vector< std::string >>;
+
    class Parsed_Parameter
    {
     public:
@@ -31,19 +52,52 @@ CCL_NAMESPACE_BEGIN
       ///@{
       Parsed_Parameter() = default;
       Parsed_Parameter( File_Loc loc ): loc( loc ) {}
+      Parsed_Parameter( Parameter_Type type, std::string name, File_Loc loc ): type(type), name(name),loc( loc )
+      {
+         switch(type){
+            case Parameter_Type::Boolean:
+               payload = vector<uint8_t>();
+               break;
+            case Parameter_Type::Color:
+            case Parameter_Type::Vector2:
+            case Parameter_Type::Vector3:
+            case Parameter_Type::Normal:
+            case Parameter_Type::Point2:
+            case Parameter_Type::Point3:
+            case Parameter_Type::Real:
+               payload = vector<float>();
+               break;
+            case Parameter_Type::Integer:
+               payload = vector<int>();
+               break;
+            case Parameter_Type::Bxdf:
+            case Parameter_Type::Parameter:
+            case Parameter_Type::String:
+            case Parameter_Type::Texture:
+               payload = vector<std::string>();
+               break;
+         }
+      }
       Parsed_Parameter( Parsed_Parameter const& pp );
       ///@}
 
       /// @name Access
       ///@{
-      std::string type, name;
+      vector<float> const& floats() const { return std::get<vector<float>>(payload);}
+      vector<float>& floats() { return std::get<vector<float>>(payload);}
+      vector<int> const& ints() const { return std::get<vector<int>>(payload);}
+      vector<int>& ints() { return std::get<vector<int>>(payload);}
+      vector<std::string> const& strings() const { return std::get<vector<std::string>>(payload);}
+      vector<std::string>& strings() { return std::get<vector<std::string>>(payload);}
+      vector<uint8_t> const& bools() const { return std::get<vector<uint8_t>>(payload);}
+      vector<uint8_t>& bools() { return std::get<vector<uint8_t>>(payload);}
+
+      Parameter_Type type = Parameter_Type::Unknown;
+      std::string name;
       int elem_per_item = 1;
       Container_Type storage = Container_Type::Constant;
       File_Loc loc;
-      vector< float > floats;
-      vector< int > ints;
-      vector< std::string > strings;
-      vector< uint8_t > bools;
+      Payload_Type payload;
       mutable bool looked_up                    = false;
       bool may_be_unused                        = false;
       ///@}
@@ -53,11 +107,16 @@ CCL_NAMESPACE_BEGIN
       floats_are( float value ) const
       {
          bool result = true;
-         for ( auto it = floats.begin(); it != floats.end() && result; ++it )
+         for ( auto it = floats().begin(); it != floats().end() && result; ++it )
             result &= ( *it == value );
 
          return result;
       }
+
+      bool has_bools() const {return std::holds_alternative<vector<uint8_t>>(payload);}
+      bool has_ints() const {return std::holds_alternative<vector<int>>(payload);}
+      bool has_floats() const {return std::holds_alternative<vector<float>>(payload);}
+      bool has_strings() const {return std::holds_alternative<vector<std::string>>(payload);}
       ///@}
       /// @name Conversion
       ///@{

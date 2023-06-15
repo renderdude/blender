@@ -11,23 +11,6 @@
 
 CCL_NAMESPACE_BEGIN
 
-   enum class Parameter_Type
-   {
-      Boolean,
-      Bxdf,
-      Color,
-      Integer,
-      Normal,
-      Parameter,
-      Point2,
-      Point3,
-      Real,
-      String,
-      Texture,
-      Vector2,
-      Vector3
-   };
-
    template < Parameter_Type PT >
    struct Parameter_Type_Traits
    {
@@ -163,10 +146,10 @@ CCL_NAMESPACE_BEGIN
       template < typename Return_Type, typename G, typename C >
       vector< Return_Type > lookup_array( const std::string& name,
                                                Parameter_Type type,
-                                               const char* typeName, int nPerItem,
+                                               int nPerItem,
                                                G getValues, C convert ) const;
 
-      void remove( const std::string& name, const char* typeName );
+      void remove( const std::string& name, Parameter_Type typeName );
       void check_parameter_types();
       static std::string to_parameter_definition( const Parsed_Parameter* p,
                                                   int indentCount );

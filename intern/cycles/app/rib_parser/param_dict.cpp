@@ -16,7 +16,7 @@ template<> struct Parameter_Type_Traits<Parameter_Type::Boolean> {
   }
   static const auto &get_values(const Parsed_Parameter &param)
   {
-    return param.bools;
+    return param.bools();
   }
 };
 
@@ -33,7 +33,7 @@ template<> struct Parameter_Type_Traits<Parameter_Type::Bxdf> {
   }
   static const auto &get_values(const Parsed_Parameter &param)
   {
-    return param.strings;
+    return param.strings();
   }
 };
 
@@ -48,7 +48,7 @@ template<> struct Parameter_Type_Traits<Parameter_Type::Color> {
 
   static const auto &get_values(const Parsed_Parameter &param)
   {
-    return param.floats;
+    return param.floats();
   }
 
   static constexpr int nPerItem = 3;
@@ -71,7 +71,7 @@ template<> struct Parameter_Type_Traits<Parameter_Type::Real> {
   }
   static const auto &get_values(const Parsed_Parameter &param)
   {
-    return param.floats;
+    return param.floats();
   }
 };
 
@@ -87,7 +87,7 @@ template<> struct Parameter_Type_Traits<Parameter_Type::Integer> {
   }
   static const auto &get_values(const Parsed_Parameter &param)
   {
-    return param.ints;
+    return param.ints();
   }
 };
 
@@ -103,7 +103,7 @@ template<> struct Parameter_Type_Traits<Parameter_Type::Point2> {
   }
   static const auto &get_values(const Parsed_Parameter &param)
   {
-    return param.floats;
+    return param.floats();
   }
 };
 
@@ -119,7 +119,7 @@ template<> struct Parameter_Type_Traits<Parameter_Type::Vector2> {
   }
   static const auto &get_values(const Parsed_Parameter &param)
   {
-    return param.floats;
+    return param.floats();
   }
 };
 
@@ -134,7 +134,7 @@ template<> struct Parameter_Type_Traits<Parameter_Type::Point3> {
 
   static const auto &get_values(const Parsed_Parameter &param)
   {
-    return param.floats;
+    return param.floats();
   }
 
   static constexpr int nPerItem = 3;
@@ -157,7 +157,7 @@ template<> struct Parameter_Type_Traits<Parameter_Type::Vector3> {
   }
   static const auto &get_values(const Parsed_Parameter &param)
   {
-    return param.floats;
+    return param.floats();
   }
 };
 
@@ -173,7 +173,7 @@ template<> struct Parameter_Type_Traits<Parameter_Type::Normal> {
   }
   static const auto &get_values(const Parsed_Parameter &param)
   {
-    return param.floats;
+    return param.floats();
   }
 };
 
@@ -189,7 +189,7 @@ template<> struct Parameter_Type_Traits<Parameter_Type::String> {
   }
   static const auto &get_values(const Parsed_Parameter &param)
   {
-    return param.strings;
+    return param.strings();
   }
 };
 
@@ -218,35 +218,35 @@ Parameter_Dictionary::Parameter_Dictionary(Parsed_Parameter_Vector p0,
 void Parameter_Dictionary::check_parameter_types()
 {
   for (const Parsed_Parameter *p : params) {
-    if (p->type == Parameter_Type_Traits<Parameter_Type::Boolean>::typeName) {
-      if (p->bools.empty()) {
+    if (p->type == Parameter_Type::Boolean) {
+      if (!p->has_bools()) {
         std::stringstream ss;
         ss << "\"" << p->name << "\":";
         ss << "non-Boolean values provided for Boolean-valued parameter";
         error_exit(&p->loc, ss.str());
       }
     }
-    else if (p->type == Parameter_Type_Traits<Parameter_Type::Boolean>::typeName ||
-             p->type == Parameter_Type_Traits<Parameter_Type::Bxdf>::typeName ||
-             p->type == Parameter_Type_Traits<Parameter_Type::Color>::typeName ||
-             p->type == Parameter_Type_Traits<Parameter_Type::Real>::typeName ||
-             p->type == Parameter_Type_Traits<Parameter_Type::Integer>::typeName ||
-             p->type == Parameter_Type_Traits<Parameter_Type::Point2>::typeName ||
-             p->type == Parameter_Type_Traits<Parameter_Type::Vector2>::typeName ||
-             p->type == Parameter_Type_Traits<Parameter_Type::Point3>::typeName ||
-             p->type == Parameter_Type_Traits<Parameter_Type::Vector3>::typeName ||
-             p->type == Parameter_Type_Traits<Parameter_Type::Normal>::typeName) {
-      if ((p->ints.empty() && p->floats.empty()) &&
-          (p->storage == Container_Type::Reference && p->strings.empty())) {
+    else if (p->type == Parameter_Type::Boolean ||
+             p->type == Parameter_Type::Bxdf ||
+             p->type == Parameter_Type::Color ||
+             p->type == Parameter_Type::Real ||
+             p->type == Parameter_Type::Integer ||
+             p->type == Parameter_Type::Point2 ||
+             p->type == Parameter_Type::Vector2 ||
+             p->type == Parameter_Type::Point3 ||
+             p->type == Parameter_Type::Vector3 ||
+             p->type == Parameter_Type::Normal) {
+      if ((!p->has_ints() && !p->has_floats()) &&
+          (p->storage == Container_Type::Reference && !p->has_strings())) {
         std::stringstream ss;
         ss << "\"" << p->name << "\":";
         ss << "non-numeric values provided for numeric-valued parameter";
         error_exit(&p->loc, ss.str());
       }
     }
-    else if (p->type == Parameter_Type_Traits<Parameter_Type::String>::typeName ||
-             p->type == "texture") {
-      if (p->strings.empty()) {
+    else if (p->type == Parameter_Type::String ||
+             p->type == Parameter_Type::Texture) {
+      if (!p->has_strings()) {
         std::stringstream ss;
         ss << "\"" << p->name << "\":";
         ss << "non-string values provided for string-valued parameter";
@@ -255,8 +255,7 @@ void Parameter_Dictionary::check_parameter_types()
     }
     else {
       std::stringstream ss;
-      ss << "\"" << p->type << "\":";
-      ss << "unknown parameter type";
+      ss << "Unknown parameter type for: " << p->name;
       error_exit(&p->loc, ss.str());
     }
   }
@@ -270,7 +269,7 @@ typename Parameter_Type_Traits<PT>::Return_Type Parameter_Dictionary::lookup_sin
   // Search _params_ for parameter _name_
   using traits = Parameter_Type_Traits<PT>;
   for (const Parsed_Parameter *p : params) {
-    if (p->name != name || p->type != traits::typeName)
+    if (p->name != name || p->type != PT)
       continue;
     // Extract parameter values from _p_
     const auto &values = traits::get_values(*p);
@@ -409,13 +408,12 @@ static vector<Return_Type> return_array(const ValuesType &values,
 template<typename Return_Type, typename G, typename C>
 vector<Return_Type> Parameter_Dictionary::lookup_array(const std::string &name,
                                                        Parameter_Type type,
-                                                       const char *typeName,
                                                        int nPerItem,
                                                        G get_values,
                                                        C convert) const
 {
   for (const Parsed_Parameter *p : params)
-    if (p->name == name && p->type == typeName)
+    if (p->name == name && p->type == type)
       return return_array<Return_Type>(get_values(*p), *p, nPerItem, convert);
 
   return {};
@@ -427,7 +425,7 @@ vector<typename Parameter_Type_Traits<PT>::Return_Type> Parameter_Dictionary::lo
 {
   using traits = Parameter_Type_Traits<PT>;
   return lookup_array<typename traits::Return_Type>(
-      name, PT, traits::typeName, traits::nPerItem, traits::get_values, traits::convert);
+      name, PT, traits::nPerItem, traits::get_values, traits::convert);
 }
 
 vector<float> Parameter_Dictionary::get_float_array(const std::string &name) const
@@ -483,29 +481,29 @@ vector<std::string> Parameter_Dictionary::get_string_array(const std::string &na
 std::string Parameter_Dictionary::get_texture(const std::string &name) const
 {
   for (const Parsed_Parameter *p : params) {
-    if (p->name != name || p->type != "texture")
+    if (p->name != name || p->type != Parameter_Type::Texture)
       continue;
 
-    if (p->strings.empty()) {
+    if (!p->has_strings()) {
       std::stringstream ss;
       ss << "No string values provided for parameter ";
       ss << "\"" << name << "\".";
       error_exit(&p->loc, ss.str());
     }
-    if (p->strings.size() > 1) {
+    if (p->strings().size() > 1) {
       std::stringstream ss;
       ss << "More than one value provided for parameter ";
       ss << "\"" << name << "\".";
       error_exit(&p->loc, ss.str());
     }
     p->looked_up = true;
-    return p->strings[0];
+    return p->strings()[0];
   }
 
   return "";
 }
 
-void Parameter_Dictionary::remove(const std::string &name, const char *typeName)
+void Parameter_Dictionary::remove(const std::string &name, Parameter_Type typeName)
 {
   for (auto iter = params.begin(); iter != params.end(); ++iter)
     if ((*iter)->name == name && (*iter)->type == typeName) {
@@ -516,64 +514,65 @@ void Parameter_Dictionary::remove(const std::string &name, const char *typeName)
 
 void Parameter_Dictionary::remove_float(const std::string &name)
 {
-  remove(name, Parameter_Type_Traits<Parameter_Type::Real>::typeName);
+  remove(name, Parameter_Type::Real);
 }
 
 void Parameter_Dictionary::remove_int(const std::string &name)
 {
-  remove(name, Parameter_Type_Traits<Parameter_Type::Integer>::typeName);
+  remove(name, Parameter_Type::Integer);
 }
 
 void Parameter_Dictionary::remove_bool(const std::string &name)
 {
-  remove(name, Parameter_Type_Traits<Parameter_Type::Boolean>::typeName);
+  remove(name, Parameter_Type::Boolean);
 }
 
 void Parameter_Dictionary::remove_point2(const std::string &name)
 {
-  remove(name, Parameter_Type_Traits<Parameter_Type::Point2>::typeName);
+  remove(name, Parameter_Type::Point2);
 }
 
 void Parameter_Dictionary::remove_vector2(const std::string &name)
 {
-  remove(name, Parameter_Type_Traits<Parameter_Type::Vector2>::typeName);
+  remove(name, Parameter_Type::Vector2);
 }
 
 void Parameter_Dictionary::remove_point3(const std::string &name)
 {
-  remove(name, Parameter_Type_Traits<Parameter_Type::Point3>::typeName);
+  remove(name, Parameter_Type::Point3);
 }
 
 void Parameter_Dictionary::remove_vector3(const std::string &name)
 {
-  remove(name, Parameter_Type_Traits<Parameter_Type::Vector3>::typeName);
+  remove(name, Parameter_Type::Vector3);
 }
 
 void Parameter_Dictionary::remove_normal(const std::string &name)
 {
-  remove(name, Parameter_Type_Traits<Parameter_Type::Normal>::typeName);
+  remove(name, Parameter_Type::Normal);
 }
 
 void Parameter_Dictionary::remove_string(const std::string &name)
 {
-  remove(name, Parameter_Type_Traits<Parameter_Type::String>::typeName);
+  remove(name, Parameter_Type::String);
 }
 
 void Parameter_Dictionary::remove_texture(const std::string &name)
 {
-  remove(name, "texture");
+  remove(name, Parameter_Type::Texture);
 }
 
 void Parameter_Dictionary::remove_spectrum(const std::string &name)
 {
-  remove(name, "spectrum");
-  remove(name, "rgb");
-  remove(name, "blackbody");
+  remove(name, Parameter_Type::Color);
+  //remove(name, "spectrum");
+  //remove(name, "rgb");
+  //remove(name, "blackbody");
 }
 
 void Parameter_Dictionary::remove_bxdf(const std::string &name)
 {
-  remove(name, Parameter_Type_Traits<Parameter_Type::Bxdf>::typeName);
+  remove(name, Parameter_Type::Bxdf);
 }
 
 void Parameter_Dictionary::rename_parameter(const std::string &before, const std::string &after)
@@ -586,20 +585,20 @@ void Parameter_Dictionary::rename_parameter(const std::string &before, const std
 void Parameter_Dictionary::rename_used_textures(const std::map<std::string, std::string> &m)
 {
   for (Parsed_Parameter *p : params) {
-    if (p->type != "texture")
+    if (p->type != Parameter_Type::Texture)
       continue;
 
-    CHECK_EQ(1, p->strings.size());
-    auto iter = m.find(p->strings[0]);
+    CHECK_EQ(1, p->strings().size());
+    auto iter = m.find(p->strings()[0]);
     if (iter != m.end())
-      p->strings[0] = iter->second;
+      p->strings()[0] = iter->second;
   }
 }
 
 void Parameter_Dictionary::report_unused() const
 {
   // type / name
-  vector<std::pair<const std::string *, const std::string *>> seen;
+  vector<std::pair<Parameter_Type, const std::string *>> seen;
 
   for (const Parsed_Parameter *p : params) {
     if (p->may_be_unused)
@@ -607,15 +606,15 @@ void Parameter_Dictionary::report_unused() const
 
     bool haveSeen = std::find_if(seen.begin(),
                                  seen.end(),
-                                 [&p](std::pair<const std::string *, const std::string *> p2) {
-                                   return *p2.first == p->type && *p2.second == p->name;
+                                 [&p](std::pair<Parameter_Type, const std::string *> p2) {
+                                   return p2.first == p->type && *p2.second == p->name;
                                  }) != seen.end();
     if (p->looked_up) {
       // A parameter may be used when creating an initial Material, say,
       // but then an override from a Shape may shadow it such that its
       // name is already in the seen array.
       if (!haveSeen)
-        seen.push_back(std::make_pair(&p->type, &p->name));
+        seen.push_back(std::make_pair(p->type, &p->name));
     }
     else if (haveSeen) {
       // It's shadowed by another parameter; that's fine.

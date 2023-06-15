@@ -1,5 +1,6 @@
 
 #include "app/rib_parser/exporters/materials/rib_to_cycles.h"
+#include "app/rib_parser/parsed_parameter.h"
 
 CCL_NAMESPACE_BEGIN
 
@@ -324,35 +325,36 @@ void PxrSurfacetoPrincipled::update_parameters(Parameter_Dictionary const &param
 
   // Transmission
   param = _parameters["refractionGain"];
-  if (param->floats[0] > 0) {  // Some Trasmission is set
-    updated_param.floats.clear();
-    updated_param.type = "float";
-    updated_param.add_float(param->floats[0]);
+  if (param->floats()[0] > 0) {  // Some Transmission is set
+    // The payload is in an undefinded state, so force it to floats
+    updated_param.payload = vector<float>();
+    updated_param.type = Parameter_Type::Real;
+    updated_param.add_float(param->floats()[0]);
     input = find_socket("transmission", _nodes.back());
     set_node_value(_nodes.back(), *input, &updated_param);
 
     param = _parameters["glassRoughness"];
-    updated_param.floats.clear();
-    updated_param.type = "float";
-    updated_param.add_float(param->floats[0]);
+    updated_param.floats().clear();
+    updated_param.type = Parameter_Type::Real;
+    updated_param.add_float(param->floats()[0]);
     input = find_socket("roughness", _nodes.back());
     set_node_value(_nodes.back(), *input, &updated_param);
 
     param = _parameters["glassIor"];
-    updated_param.floats.clear();
-    updated_param.type = "float";
-    updated_param.add_float(param->floats[0]);
+    updated_param.floats().clear();
+    updated_param.type = Parameter_Type::Real;
+    updated_param.add_float(param->floats()[0]);
     input = find_socket("ior", _nodes.back());
     set_node_value(_nodes.back(), *input, &updated_param);
 
-    updated_param.floats.clear();
-    updated_param.type = "float";
+    updated_param.floats().clear();
+    updated_param.type = Parameter_Type::Real;
     updated_param.add_float(0.);
     input = find_socket("specular", _nodes.back());
     set_node_value(_nodes.back(), *input, &updated_param);
 
-    updated_param.floats.clear();
-    updated_param.type = "color";
+    updated_param.floats().clear();
+    updated_param.type = Parameter_Type::Color;
     updated_param.add_float(1);
     updated_param.add_float(1);
     updated_param.add_float(1);
@@ -360,28 +362,30 @@ void PxrSurfacetoPrincipled::update_parameters(Parameter_Dictionary const &param
     set_node_value(_nodes.back(), *input, &updated_param);
   }
   else {
+    // The payload is in an undefinded state, so force it to floats
+    updated_param.payload = vector<float>();
     // diffuse gain
-    float gain = _parameters["diffuseGain"]->floats[0];
+    float gain = _parameters["diffuseGain"]->floats()[0];
     param = _parameters["diffuseColor"];
     if (param->storage != Container_Type::Reference) {
-      updated_param.floats.clear();
-      updated_param.type = "color";
-      updated_param.add_float(gain * param->floats[0]);
-      updated_param.add_float(gain * param->floats[1]);
-      updated_param.add_float(gain * param->floats[2]);
+      updated_param.floats().clear();
+      updated_param.type = Parameter_Type::Color;
+      updated_param.add_float(gain * param->floats()[0]);
+      updated_param.add_float(gain * param->floats()[1]);
+      updated_param.add_float(gain * param->floats()[2]);
       input = find_socket("base_color", _nodes.back());
       set_node_value(_nodes.back(), *input, &updated_param);
     }
 
     // Specular
     param = _parameters["specularFresnelMode"];
-    if (param->ints[0] == 0) {  // Artistic Mode
+    if (param->ints()[0] == 0) {  // Artistic Mode
       param = _parameters["specularFaceColor"];
       if (param->storage != Container_Type::Reference) {
-        float lum = 0.2126 * param->floats[0] + 0.7152 * param->floats[1] +
-                    0.0722 * param->floats[2];
-        updated_param.floats.clear();
-        updated_param.type = "float";
+        float lum = 0.2126 * param->floats()[0] + 0.7152 * param->floats()[1] +
+                    0.0722 * param->floats()[2];
+        updated_param.floats().clear();
+        updated_param.type = Parameter_Type::Real;
         updated_param.add_float(lum);
         input = find_socket("specular", _nodes.back());
         set_node_value(_nodes.back(), *input, &updated_param);

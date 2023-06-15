@@ -42,7 +42,7 @@ class RIBCyclesMesh {
   void populate_topology();
   void populate_shader_graph(bool initializing = false);
   void create_uv_map(Parsed_Parameter* param);
-  Shape_Scene_Entity reduce_geometry_by_faceset(Shape_Scene_Entity const& shape, vector<int>& faceset);
+  Shape_Scene_Entity reduce_geometry_by_faceset(Shape_Scene_Entity const& shape, vector<int> const& faceset);
 
   Parsed_Parameter* compute_triangulated_uniform_primvar(const Parsed_Parameter* param);
   Parsed_Parameter* compute_triangulated_face_varying_primvar(const Parsed_Parameter* param);

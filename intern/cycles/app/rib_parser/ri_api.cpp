@@ -293,7 +293,7 @@ void Ri::Attribute(const std::string &target, Parsed_Parameter_Vector params, Fi
   if (target == "Ri") {
     for (Parsed_Parameter *p : params) {
       if (p->name == "Orientation")
-        if (p->strings[0] == "inside")
+        if (p->strings()[0] == "inside")
           graphics_state.reverse_orientation = !graphics_state.reverse_orientation;
     }
   }
@@ -357,9 +357,7 @@ void Ri::Bxdf(const std::string &bxdf,
 {
   VERIFY_WORLD("Bxdf");
 
-  Parsed_Parameter *param = new Parsed_Parameter(loc);
-  param->type = "string";
-  param->name = "shader_type";
+  Parsed_Parameter *param = new Parsed_Parameter(Parameter_Type::String, "shader_type", loc);
   param->add_string("bxdf");
   param->add_string(bxdf);
   param->add_string(name);
@@ -413,10 +411,10 @@ void Ri::camera(const std::string &name, Parsed_Parameter_Vector params, File_Lo
   if (items != _rib_state.options.end()) {
     auto world_origin = items->second.find("worldorigin");
     if (world_origin != items->second.end()) {
-      if (world_origin->second->strings[0] == "worldoffset") {
+      if (world_origin->second->strings()[0] == "worldoffset") {
         auto world_offset = items->second["worldoffset"];
         _rib_state.world_offset = make_float3(
-            -world_offset->floats[0], -world_offset->floats[1], -world_offset->floats[2]);
+            -world_offset->floats()[0], -world_offset->floats()[1], -world_offset->floats()[2]);
       }
     }
   }
@@ -517,49 +515,37 @@ void Ri::Cone(
     poly_count++;
   }
 
-  Parsed_Parameter *param = new Parsed_Parameter(loc);
-  param->type = "int";
-  param->name = "vertices";
+  Parsed_Parameter *param = new Parsed_Parameter(Parameter_Type::Integer, "vertices", loc);
   for (int i = 0; i < polys.size(); ++i)
     param->add_int(polys[i]);
   params.push_back(param);
 
-  param = new Parsed_Parameter(loc);
-  param->type = "int";
-  param->name = "nvertices";
+  param = new Parsed_Parameter(Parameter_Type::Integer, "nvertices", loc);
   for (int i = 0; i < poly_count; ++i) {
     param->add_int(4);
   }
   params.push_back(param);
 
-  param = new Parsed_Parameter(loc);
+  param = new Parsed_Parameter(Parameter_Type::Point3, "P", loc);
   param->storage = Container_Type::Vertex;
-  param->type = "point";
-  param->name = "P";
   param->elem_per_item = 3;
   for (int i = 0; i < pts.size(); ++i) {
     param->add_float(pts[i]);
   }
   params.push_back(param);
 
-  param = new Parsed_Parameter(loc);
+  param = new Parsed_Parameter(Parameter_Type::Point2, "uv", loc);
   param->storage = Container_Type::Vertex;
-  param->type = "float";
-  param->name = "uv";
   param->elem_per_item = 2;
   for (int i = 0; i < uvs.size(); ++i)
     param->add_float(uvs[i]);
   params.push_back(param);
 
-  param = new Parsed_Parameter(loc);
-  param->type = "int";
-  param->name = "nfaces";
+  param = new Parsed_Parameter(Parameter_Type::Integer, "nfaces", loc);
   param->add_int(poly_count);
   params.push_back(param);
 
-  param = new Parsed_Parameter(loc);
-  param->type = "bool";
-  param->name = "smooth";
+  param = new Parsed_Parameter(Parameter_Type::Boolean, "smooth", loc);
   param->add_bool(true);
   params.push_back(param);
 
@@ -637,49 +623,37 @@ void Ri::Cylinder(float radius,
     poly_count++;
   }
 
-  Parsed_Parameter *param = new Parsed_Parameter(loc);
-  param->type = "int";
-  param->name = "vertices";
+  Parsed_Parameter *param = new Parsed_Parameter(Parameter_Type::Integer, "vertices", loc);
   for (int i = 0; i < polys.size(); ++i)
     param->add_int(polys[i]);
   params.push_back(param);
 
-  param = new Parsed_Parameter(loc);
-  param->type = "int";
-  param->name = "nvertices";
+  param = new Parsed_Parameter(Parameter_Type::Integer, "nvertices", loc);
   for (int i = 0; i < poly_count; ++i) {
     param->add_int(4);
   }
   params.push_back(param);
 
-  param = new Parsed_Parameter(loc);
+  param = new Parsed_Parameter(Parameter_Type::Point3, "P", loc);
   param->storage = Container_Type::Vertex;
-  param->type = "point";
-  param->name = "P";
   param->elem_per_item = 3;
   for (int i = 0; i < pts.size(); ++i) {
     param->add_float(pts[i]);
   }
   params.push_back(param);
 
-  param = new Parsed_Parameter(loc);
+  param = new Parsed_Parameter(Parameter_Type::Point2, "uv", loc);
   param->storage = Container_Type::Vertex;
-  param->type = "float";
-  param->name = "uv";
   param->elem_per_item = 2;
   for (int i = 0; i < uvs.size(); ++i)
     param->add_float(uvs[i]);
   params.push_back(param);
 
-  param = new Parsed_Parameter(loc);
-  param->type = "int";
-  param->name = "nfaces";
+  param = new Parsed_Parameter(Parameter_Type::Integer, "nfaces", loc);
   param->add_int(poly_count);
   params.push_back(param);
 
-  param = new Parsed_Parameter(loc);
-  param->type = "bool";
-  param->name = "smooth";
+  param = new Parsed_Parameter(Parameter_Type::Boolean, "smooth", loc);
   param->add_bool(true);
   params.push_back(param);
 
@@ -711,21 +685,15 @@ void Ri::Disk(
 {
   VERIFY_WORLD("Shape");
 
-  Parsed_Parameter *param = new Parsed_Parameter(loc);
-  param->type = "float";
-  param->name = "radius";
+  Parsed_Parameter *param = new Parsed_Parameter(Parameter_Type::Real, "radius", loc);
   param->add_float(radius);
   params.push_back(param);
 
-  param = new Parsed_Parameter(loc);
-  param->type = "float";
-  param->name = "height";
+  param = new Parsed_Parameter(Parameter_Type::Real, "height", loc);
   param->add_float(height);
   params.push_back(param);
 
-  param = new Parsed_Parameter(loc);
-  param->type = "float";
-  param->name = "phimax";
+  param = new Parsed_Parameter(Parameter_Type::Real, "phimax", loc);
   param->add_float(thetamax);
   params.push_back(param);
 
@@ -756,22 +724,16 @@ void Ri::Display(const std::string &name,
 
   Parsed_Parameter_Vector new_params;
 
-  Parsed_Parameter *param = new Parsed_Parameter(loc);
-  param->type = "string";
-  param->name = "filename";
+  Parsed_Parameter *param = new Parsed_Parameter(Parameter_Type::String, "filename", loc);
   param->add_string(name);
   new_params.push_back(param);
 
-  auto resolution = _rib_state.options["Ri"]["FormatResolution"]->ints;
-  param = new Parsed_Parameter(loc);
-  param->type = "int";
-  param->name = "xresolution";
+  auto resolution = _rib_state.options["Ri"]["FormatResolution"]->ints();
+  param = new Parsed_Parameter(Parameter_Type::Integer, "xresolution", loc);
   param->add_int((int)(resolution[0]));
   new_params.push_back(param);
 
-  param = new Parsed_Parameter(loc);
-  param->type = "int";
-  param->name = "yresolution";
+  param = new Parsed_Parameter(Parameter_Type::Integer, "yresolution", loc);
   param->add_int((int)(resolution[1]));
   new_params.push_back(param);
 
@@ -920,16 +882,14 @@ void Ri::Light(const std::string &name,
        it != graphics_state.shape_attributes.end();
        it++)
     if ((*it)->name == "sides") {
-      double_sided = (*it)->floats[0] == 2;
+      double_sided = (*it)->floats()[0] == 2;
       break;
     }
 
   Parsed_Parameter *param;
   // Lights are single-sided by default
   if (double_sided) {
-    param = new Parsed_Parameter(loc);
-    param->type = "bool";
-    param->name = "twosided";
+    param = new Parsed_Parameter(Parameter_Type::Boolean, "twosided", loc);
     param->may_be_unused = true;
     param->add_bool(true);
     params.push_back(param);
@@ -952,9 +912,7 @@ void Ri::Light(const std::string &name,
       Cylinder(0.5, -0.5, 0.5, 360, params, loc);
 
       _cylinder_light_material = new Parsed_Parameter_Vector;
-      Parsed_Parameter *param = new Parsed_Parameter(loc);
-      param->type = "string";
-      param->name = "__materialid";
+      Parsed_Parameter *param = new Parsed_Parameter(Parameter_Type::String, "__materialid", loc);
       param->may_be_unused = true;
       param->add_string(handle);
       _cylinder_light_material->push_back(param);
@@ -995,9 +953,7 @@ void Ri::Light(const std::string &name,
 
         float intensity = light_dict.get_one_float("intensity", 1.0);
         strength *= intensity;
-        param = new Parsed_Parameter(loc);
-        param->type = "float";
-        param->name = "strength";
+        param = new Parsed_Parameter(Parameter_Type::Real, "strength", loc);
         param->may_be_unused = true;
         param->add_float(strength);
         light_params.push_back(param);
@@ -1167,7 +1123,7 @@ void Ri::ObjectInstance(const std::string &name, File_Loc loc)
 
   if (_cylinder_light_material) {
     Light("PxrMeshLight",
-          (*_cylinder_light_material)[0]->strings[0],
+          (*_cylinder_light_material)[0]->strings()[0],
           *_cylinder_light_material,
           loc);
     osl_shader_group[_shader_id] = osl_parameters;
@@ -1184,9 +1140,7 @@ void Ri::ObjectInstance(const std::string &name, File_Loc loc)
 
   if (dict.find("identifier") == dict.end()) {
     Parsed_Parameter_Vector params;
-    Parsed_Parameter *param = new Parsed_Parameter(loc);
-    param->type = "string";
-    param->name = "name";
+    Parsed_Parameter *param = new Parsed_Parameter(Parameter_Type::String, "name", loc);
     param->may_be_unused = true;
     param->add_string(generate_random_alphanumeric_string());
     params.push_back(param);
@@ -1294,9 +1248,7 @@ void Ri::Pattern(const std::string &name,
 {
   VERIFY_WORLD("Pattern");
 
-  Parsed_Parameter *param = new Parsed_Parameter(loc);
-  param->type = "string";
-  param->name = "shader_type";
+  Parsed_Parameter *param = new Parsed_Parameter(Parameter_Type::String, "shader_type", loc);
   param->add_string("pattern");
   param->add_string(name);
   param->add_string(handle);
@@ -1357,33 +1309,27 @@ void Ri::PointsPolygons(std::vector<int> n_vertices,
                         Parsed_Parameter_Vector params,
                         File_Loc loc)
 {
-  Parsed_Parameter *param = new Parsed_Parameter(loc);
-  param->type = "int";
-  param->name = "vertices";
+  Parsed_Parameter *param = new Parsed_Parameter(Parameter_Type::Integer, "vertices", loc);
   for (int i = 0; i < vertices.size(); ++i)
     param->add_int(vertices[i]);
   params.push_back(param);
 
   int nfaces = n_vertices.size();
-  param = new Parsed_Parameter(loc);
-  param->type = "int";
-  param->name = "nvertices";
+  param = new Parsed_Parameter(Parameter_Type::Integer, "nvertices", loc);
   for (int i = 0; i < n_vertices.size(); ++i)
     param->add_int(n_vertices[i]);
   params.push_back(param);
 
-  param = new Parsed_Parameter(loc);
-  param->type = "int";
-  param->name = "nfaces";
+  param = new Parsed_Parameter(Parameter_Type::Integer, "nfaces", loc);
   param->add_int(nfaces);
   params.push_back(param);
 
   // Fix attributes whose storage class couldn't be determined at parsing
   // time
   for (auto &p : params) {
-    if ((p->type == "point" || p->type == "normal" || p->type == "color") &&
-        p->storage == Container_Type::Constant && p->floats.size() > 3) {
-      int num_vals = p->floats.size() / 3;
+    if ((p->type == Parameter_Type::Point3 || p->type == Parameter_Type::Normal || p->type == Parameter_Type::Color) &&
+        p->storage == Container_Type::Constant && p->floats().size() > 3) {
+      int num_vals = p->floats().size() / 3;
       if (num_vals == n_vertices.size())
         p->storage = Container_Type::Uniform;
       else if (num_vals == vertices.size())
@@ -1393,7 +1339,7 @@ void Ri::PointsPolygons(std::vector<int> n_vertices,
 
   bool has_varying_normals = false;
   for (auto &p : params) {
-    if (p->type == "normal") {
+    if (p->type == Parameter_Type::Normal) {
       if (p->storage == Container_Type::FaceVarying || p->storage == Container_Type::Varying ||
           p->storage == Container_Type::Vertex)
         has_varying_normals = true;
@@ -1402,9 +1348,7 @@ void Ri::PointsPolygons(std::vector<int> n_vertices,
   }
 
   if (has_varying_normals) {
-    param = new Parsed_Parameter(loc);
-    param->type = "bool";
-    param->name = "smooth";
+    param = new Parsed_Parameter(Parameter_Type::Boolean, "smooth", loc);
     param->add_bool(true);
     params.push_back(param);
   }
@@ -1540,9 +1484,7 @@ void Ri::Shutter(float opentime, float closetime, File_Loc loc)
 
 void Ri::Sides(int nsides, File_Loc loc)
 {
-  Parsed_Parameter *param = new Parsed_Parameter(loc);
-  param->type = "int";
-  param->name = "sides";
+  Parsed_Parameter *param = new Parsed_Parameter(Parameter_Type::Integer, "sides", loc);
   param->add_float(nsides);
   graphics_state.shape_attributes.push_back(param);
 }
@@ -1744,35 +1686,27 @@ void Ri::Sphere(float radius,
     }
   }
 
-  Parsed_Parameter *param = new Parsed_Parameter(loc);
-  param->type = "int";
-  param->name = "vertices";
+  Parsed_Parameter *param = new Parsed_Parameter(Parameter_Type::Integer, "vertices", loc);
   for (int i = 0; i < polys.size(); ++i)
     param->add_int(polys[i]);
   params.push_back(param);
 
-  param = new Parsed_Parameter(loc);
-  param->type = "int";
-  param->name = "nvertices";
+  param = new Parsed_Parameter(Parameter_Type::Integer, "nvertices", loc);
   for (int i = 0; i < poly_counts.size(); ++i) {
     param->add_int(poly_counts[i]);
   }
   params.push_back(param);
 
-  param = new Parsed_Parameter(loc);
+  param = new Parsed_Parameter(Parameter_Type::Point3, "P", loc);
   param->storage = Container_Type::Vertex;
-  param->type = "point";
-  param->name = "P";
   param->elem_per_item = 3;
   for (int i = 0; i < pts.size(); ++i) {
     param->add_float(pts[i]);
   }
   params.push_back(param);
 
-  param = new Parsed_Parameter(loc);
+  param = new Parsed_Parameter(Parameter_Type::Point2, "uv", loc);
   param->storage = Container_Type::FaceVarying;
-  param->type = "float";
-  param->name = "uv";
   param->elem_per_item = 2;
   for (int i = 0; i < uvs.size(); ++i) {
     param->add_float(uvs[i].x);
@@ -1780,22 +1714,16 @@ void Ri::Sphere(float radius,
   }
   params.push_back(param);
 
-  param = new Parsed_Parameter(loc);
-  param->type = "int";
-  param->name = "nfaces";
+  param = new Parsed_Parameter(Parameter_Type::Integer, "nfaces", loc);
   param->add_int(poly_count);
   params.push_back(param);
 
-  param = new Parsed_Parameter(loc);
-  param->type = "bool";
-  param->name = "smooth";
+  param = new Parsed_Parameter(Parameter_Type::Boolean, "smooth", loc);
   param->add_bool(true);
   params.push_back(param);
 
-  param = new Parsed_Parameter(loc);
+  param = new Parsed_Parameter(Parameter_Type::Normal, "N", loc);
   param->storage = Container_Type::Varying;
-  param->type = "normal";
-  param->name = "N";
   param->elem_per_item = 3;
   for (int i = 0; i < norms.size(); ++i)
     param->add_float(norms[i]);
@@ -1817,56 +1745,40 @@ void Ri::SubdivisionMesh(const std::string &scheme,
                          Parsed_Parameter_Vector params,
                          File_Loc loc)
 {
-  Parsed_Parameter *param = new Parsed_Parameter(loc);
-  param->type = "string";
-  param->name = "scheme";
+  Parsed_Parameter *param = new Parsed_Parameter(Parameter_Type::String, "scheme", loc);
   param->add_string(scheme);
   params.push_back(param);
 
-  param = new Parsed_Parameter(loc);
-  param->type = "int";
-  param->name = "nfaces";
+  param = new Parsed_Parameter(Parameter_Type::Integer, "nfaces", loc);
   param->add_int(nfaces);
   params.push_back(param);
 
-  param = new Parsed_Parameter(loc);
-  param->type = "int";
-  param->name = "vertices";
+  param = new Parsed_Parameter(Parameter_Type::Integer, "vertices", loc);
   for (int i = 0; i < vertices.size(); ++i)
     param->add_int(vertices[i]);
   params.push_back(param);
 
-  param = new Parsed_Parameter(loc);
-  param->type = "int";
-  param->name = "nvertices";
+  param = new Parsed_Parameter(Parameter_Type::Integer, "nvertices", loc);
   for (int i = 0; i < n_vertices.size(); ++i)
     param->add_int(n_vertices[i]);
   params.push_back(param);
 
-  param = new Parsed_Parameter(loc);
-  param->type = "string";
-  param->name = "tags";
+  param = new Parsed_Parameter(Parameter_Type::String, "tags", loc);
   for (int i = 0; i < tags.size(); ++i)
     param->add_string(tags[i]);
   params.push_back(param);
 
-  param = new Parsed_Parameter(loc);
-  param->type = "int";
-  param->name = "nargs";
+  param = new Parsed_Parameter(Parameter_Type::Integer, "nargs", loc);
   for (int i = 0; i < nargs.size(); ++i)
     param->add_int(nargs[i]);
   params.push_back(param);
 
-  param = new Parsed_Parameter(loc);
-  param->type = "int";
-  param->name = "intargs";
+  param = new Parsed_Parameter(Parameter_Type::Integer, "intargs", loc);
   for (int i = 0; i < intargs.size(); ++i)
     param->add_int(intargs[i]);
   params.push_back(param);
 
-  param = new Parsed_Parameter(loc);
-  param->type = "float";
-  param->name = "floatargs";
+  param = new Parsed_Parameter(Parameter_Type::Real, "floatargs", loc);
   for (int i = 0; i < floatargs.size(); ++i)
     param->add_float(floatargs[i]);
   params.push_back(param);
@@ -1995,24 +1907,20 @@ void Ri::WorldBegin(File_Loc loc)
   auto options = _rib_state.options["Ri"];
   auto *opt_param = options["PixelFilterName"];
   if (opt_param != nullptr) {
-    std::string name = opt_param->strings[0];
+    std::string name = opt_param->strings()[0];
     float xradius = 2, yradius = 2;
 
     auto *opt_width = options["PixelFilterWidth"];
     if (opt_width != nullptr) {
-      xradius = opt_width->floats[0];
-      yradius = opt_width->floats[1];
+      xradius = opt_width->floats()[0];
+      yradius = opt_width->floats()[1];
     }
 
-    param = new Parsed_Parameter(loc);
-    param->type = "float";
-    param->name = "xradius";
+    param = new Parsed_Parameter(Parameter_Type::Real, "xradius", loc);
     param->add_float(xradius);
     params.push_back(param);
 
-    param = new Parsed_Parameter(loc);
-    param->type = "float";
-    param->name = "yradius";
+    param = new Parsed_Parameter(Parameter_Type::Real, "yradius", loc);
     param->add_float(yradius);
     params.push_back(param);
 
@@ -2022,35 +1930,29 @@ void Ri::WorldBegin(File_Loc loc)
 
   opt_param = options["PixelVariance"];
   if (opt_param != nullptr) {
-    float pixel_var = opt_param->floats[0];
+    float pixel_var = opt_param->floats()[0];
 
-    param = new Parsed_Parameter(loc);
-    param->type = "float";
-    param->name = "pixel_variance";
+    param = new Parsed_Parameter(Parameter_Type::Real, "pixel_variance", loc);
     param->add_float(pixel_var);
     sampler.parameters.push_back(param);
   }
 
   options = _rib_state.options["searchpath"];
   opt_param = options["shader"];
-  std::string paths = opt_param->strings[0] + ":";
+  std::string paths = opt_param->strings()[0] + ":";
 
   options = _rib_state.options["hider"];
   opt_param = options["minsamples"];
   if (opt_param != nullptr) {
-    int min_samples = opt_param->ints[0];
+    int min_samples = opt_param->ints()[0];
     opt_param = options["maxsamples"];
-    int max_samples = opt_param->ints[0];
+    int max_samples = opt_param->ints()[0];
 
-    param = new Parsed_Parameter(loc);
-    param->type = "int";
-    param->name = "min_samples";
+    param = new Parsed_Parameter(Parameter_Type::Integer, "min_samples", loc);
     param->add_int(min_samples);
     sampler.parameters.push_back(param);
 
-    param = new Parsed_Parameter(loc);
-    param->type = "int";
-    param->name = "max_samples";
+    param = new Parsed_Parameter(Parameter_Type::Integer, "max_samples", loc);
     param->add_int(max_samples);
     sampler.parameters.push_back(param);
   }
@@ -2071,10 +1973,11 @@ void Ri::add_default_search_paths(std::string filepath)
   Parsed_Parameter_Vector params;
   Parsed_Parameter *param;
 
-  param = new Parsed_Parameter(File_Loc());
-  param->type = "string";
-  param->name = "shader_default";
+  param = new Parsed_Parameter(Parameter_Type::String, "shader_default", File_Loc());
+    std::cout << param->has_bools() << " " << param->has_floats() << " " << param->has_ints() << " " << param->has_strings() << " " << param->payload.index() << std::endl;
+    param->payload = vector<std::string>();
   param->add_string(filepath);
+    std::cout << param->has_bools() << " " << param->has_floats() << " " << param->has_ints() << " " << param->has_strings() << " " << param->payload.index() << std::endl;
 
   params.push_back(param);
 

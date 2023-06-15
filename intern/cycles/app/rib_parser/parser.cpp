@@ -1,14 +1,16 @@
 #include "app/cycles_xml.h"
+#include "app/rib_parser/parsed_parameter.h"
 #include "scene/camera.h"
 #include "scene/scene.h"
 #include "util/projection.h"
 #include "util/transform.h"
+#include <_types/_uint8_t.h>
 
 #ifdef HAVE_MMAP
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
+#  include <sys/mman.h>
+#  include <sys/stat.h>
+#  include <sys/types.h>
+#  include <unistd.h>
 #endif
 
 #include <chrono>
@@ -105,7 +107,7 @@ std::string read_file_contents(std::string filename)
   while (chunk < stat.st_size) {
     size_t readnow;
     readnow = read(fd, &contents[chunk], 1073741824);
-    if (readnow < 0) 
+    if (readnow < 0)
       exit(-1);
 
     chunk = chunk + readnow;
@@ -494,34 +496,35 @@ static Parsed_Parameter_Vector parse_parameters(
       exit(-1);
     }
 
+    std::string type_guess;
     // Find end of type declaration
     auto typeEnd = skipToSpace(typeBegin);
-    param->type.assign(typeBegin, typeEnd);
+    type_guess.assign(typeBegin, typeEnd);
 
     // RenderMan
     bool was_storage = false;
     // Check to see if it's a container type
-    if (param->type == "constant") {
+    if (type_guess == "constant") {
       param->storage = Container_Type::Constant;
       was_storage = true;
     }
-    else if (param->type == "facevarying") {
+    else if (type_guess == "facevarying") {
       param->storage = Container_Type::FaceVarying;
       was_storage = true;
     }
-    else if (param->type == "reference") {
+    else if (type_guess == "reference") {
       param->storage = Container_Type::Reference;
       was_storage = true;
     }
-    else if (param->type == "uniform") {
+    else if (type_guess == "uniform") {
       param->storage = Container_Type::Uniform;
       was_storage = true;
     }
-    else if (param->type == "varying") {
+    else if (type_guess == "varying") {
       param->storage = Container_Type::Varying;
       was_storage = true;
     }
-    else if (param->type == "vertex") {
+    else if (type_guess == "vertex") {
       param->storage = Container_Type::Vertex;
       was_storage = true;
     }
@@ -536,22 +539,54 @@ static Parsed_Parameter_Vector parse_parameters(
 
       // Find end of type declaration
       typeEnd = skipToSpace(typeBegin);
-      param->type.assign(typeBegin, typeEnd);
+      type_guess.assign(typeBegin, typeEnd);
     }
     // See if it's an array
-    std::vector<std::string> strings = split_string(param->type, '[');
+    std::vector<std::string> strings = split_string(type_guess, '[');
     if (strings.size() > 1) {
       // Could extract the size and check we have that many values below
-      param->type = strings[0];
+      type_guess = strings[0];
       strings = split_string(strings[1], ']');
       param->elem_per_item = atoi(strings[0].c_str());
     }
-    else {
-      if (param->type == "point" || param->type == "normal")
-        param->elem_per_item = 3;
-      else if (param->type == "uv" || param->type == "st")
-        param->elem_per_item = 2;
+
+    // Now assign the type
+    if (type_guess == "bool")
+      param->type = Parameter_Type::Boolean;
+    else if (type_guess == "bxdf")
+      param->type = Parameter_Type::Bxdf;
+    else if (type_guess == "float") {
+      if (param->elem_per_item == 2)
+        param->type = Parameter_Type::Point2;
+      else if (param->elem_per_item == 3)
+        param->type = Parameter_Type::Point3;
+      else
+        param->type = Parameter_Type::Real;
     }
+    else if (type_guess == "point") {
+      param->type = Parameter_Type::Point3;
+      param->elem_per_item = 3;
+    }
+    else if (type_guess == "normal") {
+      param->type = Parameter_Type::Normal;
+      param->elem_per_item = 3;
+    }
+    else if ((type_guess == "uv") || (type_guess == "st")) {
+      param->type = Parameter_Type::Point2;
+      param->elem_per_item = 2;
+    }
+    else if (type_guess == "color")
+      param->type = Parameter_Type::Color;
+    else if (type_guess == "string")
+      param->type = Parameter_Type::String;
+    else if (type_guess == "texture")
+      param->type = Parameter_Type::Texture;
+    else if (type_guess == "int")
+      param->type = Parameter_Type::Integer;
+    else if (type_guess == "vector")
+      param->type = Parameter_Type::Real;
+    else
+      std::cout << "Missed input type of " << type_guess << std::endl;
 
     auto nameBegin = skipSpace(typeEnd);
     if (nameBegin == decl.end()) {
@@ -565,7 +600,7 @@ static Parsed_Parameter_Vector parse_parameters(
 
     enum ValType { Unknown, String, Bool, Float, Int } valType = Unknown;
 
-    if (param->type == "int")
+    if (param->type == Parameter_Type::Integer)
       valType = Int;
 
     auto addVal = [&](const Token &t) {
@@ -584,6 +619,7 @@ static Parsed_Parameter_Vector parse_parameters(
             error_callback(t, "expected Boolean value");
         }
 
+        param->payload = vector<std::string>();
         param->add_string(dequote_string(t));
       }
       else if (t.token[0] == 't' && t.token == "true") {
@@ -601,6 +637,7 @@ static Parsed_Parameter_Vector parse_parameters(
             break;
         }
 
+        param->payload = vector<uint8_t>();
         param->add_bool(true);
       }
       else if (t.token[0] == 'f' && t.token == "false") {
@@ -618,6 +655,7 @@ static Parsed_Parameter_Vector parse_parameters(
             break;
         }
 
+        param->payload = vector<uint8_t>();
         param->add_bool(false);
       }
       else {
@@ -635,10 +673,16 @@ static Parsed_Parameter_Vector parse_parameters(
             error_callback(t, "expected Boolean value");
         }
 
-        if (valType == Int)
+        if (valType == Int) {
+          if (!param->has_ints())
+            param->payload = vector<int>();
           param->add_int(parse_int(t));
-        else
+        }
+        else {
+          if (!param->has_floats())
+            param->payload = vector<float>();
           param->add_float(parse_float(t));
+        }
       }
     };
 
@@ -1586,9 +1630,10 @@ void parse_files(Ri *target, std::vector<std::string> filenames)
   // Get duration. Substart timepoints to
   // get duration. To cast it to proper unit
   // use duration cast method
-  auto duration = duration_cast<std::chrono::seconds>(stop - start);
+  std::chrono::duration<float, std::milli> dt = stop - start;
 
-  std::cout << "Time taken by parsing: " << duration.count() << " seconds" << std::endl;
+  std::cout << "Time taken by parsing: " << dt.count()/1000.0 << " seconds" << std::endl;
+  //exit(1);
 }
 
 void parse_string(Ri *target, std::string str)

@@ -1,5 +1,6 @@
 #include "app/rib_parser/exporters/attribute.h"
 
+#include "app/rib_parser/parsed_parameter.h"
 #include "scene/attribute.h"
 #include "scene/geometry.h"
 #include "scene/scene.h"
@@ -20,24 +21,23 @@ void apply_primvars(AttributeSet &attributes,
   void *data = nullptr;
 
   TypeDesc attrType = TypeUnknown;
-  if (value->type == "float") {
-    if (value->name == "uv") {
-      attrType = TypeFloat2;
-      for (int i = 0; i < value->floats.size(); i += 2)
-        vf2.push_back(make_float2(value->floats[i], value->floats[i + 1]));
-      size = vf2.size() * sizeof(float2);
-      data = vf2.data();
-    }
-    else {
-      attrType = TypeFloat;
-      size = value->floats.size() * sizeof(float);
-      data = value->floats.data();
-    }
+  if (value->type == Parameter_Type::Real) {
+    attrType = TypeFloat;
+    size = value->floats().size() * sizeof(float);
+    data = value->floats().data();
   }
-  else if (value->type == "color") {
+  else if (value->type == Parameter_Type::Point2) {
+    attrType = TypeFloat2;
+    for (int i = 0; i < value->floats().size(); i += 2)
+      vf2.push_back(make_float2(value->floats()[i], value->floats()[i + 1]));
+    size = vf2.size() * sizeof(float2);
+    data = vf2.data();
+  }
+  else if (value->type == Parameter_Type::Color) {
     attrType = TypeVector;
-    for (int i = 0; i < value->floats.size(); i += 3)
-      vf3.push_back(make_float3(value->floats[i], value->floats[i + 1], value->floats[i + 2]));
+    for (int i = 0; i < value->floats().size(); i += 3)
+      vf3.push_back(
+          make_float3(value->floats()[i], value->floats()[i + 1], value->floats()[i + 2]));
     size = vf3.size() * sizeof(float3);
     data = vf3.data();
   }

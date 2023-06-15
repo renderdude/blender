@@ -10,55 +10,83 @@ Parsed_Parameter::Parsed_Parameter(Parsed_Parameter const &pp)
   elem_per_item = pp.elem_per_item;
   storage = pp.storage;
   loc = pp.loc;
-  floats = pp.floats;
-  ints = pp.ints;
-  for (auto s: pp.strings)
-   strings.push_back(s);
-  bools = pp.bools;
+  if (std::holds_alternative<vector<std::string>>(pp.payload)) {
+    payload = vector<std::string>();
+    for (auto s : std::get<vector<std::string>>(pp.payload)) {
+      std::get<vector<std::string>>(payload).push_back(s);
+    }
+  }
+  else {
+    payload = pp.payload;
+  }
   looked_up = pp.looked_up;
   may_be_unused = pp.may_be_unused;
 }
 
+void Parsed_Parameter::add_bool(bool v)
+{
+  assert(has_bools());
+  bools().push_back(v);
+}
+
 void Parsed_Parameter::add_float(float v)
 {
-  assert(strings.empty() && bools.empty());
-  floats.push_back(v);
+  assert(has_floats());
+  floats().push_back(v);
 }
 
 void Parsed_Parameter::add_int(int i)
 {
-  assert(strings.empty() && bools.empty());
-  ints.push_back(i);
+  assert(has_ints());
+  ints().push_back(i);
 }
 
 void Parsed_Parameter::add_string(std::string_view str)
 {
-  assert(floats.empty() && ints.empty() && bools.empty());
-  strings.push_back({str.begin(), str.end()});
-}
-
-void Parsed_Parameter::add_bool(bool v)
-{
-  assert(floats.empty() && ints.empty() && strings.empty());
-  bools.push_back(v);
+  // assert(has_strings());
+  strings().push_back({str.begin(), str.end()});
 }
 
 std::string Parsed_Parameter::to_string() const
 {
   std::stringstream ss;
-  ss << "\"" << type << " " << name << "\" [ ";
-  if (!floats.empty())
-    for (float d : floats)
-      ss << d << " ";
-  else if (!ints.empty())
-    for (int i : ints)
-      ss << i << " ";
-  else if (!strings.empty())
-    for (const auto &s : strings)
-      ss << "\"" << s << "\" ";
-  else if (!bools.empty())
-    for (bool b : bools)
+  ss << "\"";
+  switch (type) {
+    case Parameter_Type::Boolean:
+      ss << "bool";
+      break;
+    case Parameter_Type::Color:
+    case Parameter_Type::Vector2:
+    case Parameter_Type::Vector3:
+    case Parameter_Type::Normal:
+    case Parameter_Type::Point2:
+    case Parameter_Type::Point3:
+    case Parameter_Type::Real:
+      ss << "float";
+      break;
+    case Parameter_Type::Integer:
+      ss << "int";
+      break;
+    case Parameter_Type::Bxdf:
+    case Parameter_Type::Parameter:
+    case Parameter_Type::String:
+    case Parameter_Type::Texture:
+      ss << "string";
+      break;
+  }
+  ss << " " << name << "\" [ ";
+  if (std::holds_alternative<vector<uint8_t>>(payload))
+    for (bool b : bools())
       ss << (b ? "true " : "false ");
+  else if (std::holds_alternative<vector<float>>(payload))
+    for (float d : floats())
+      ss << d << " ";
+  else if (std::holds_alternative<vector<int>>(payload))
+    for (int i : ints())
+      ss << i << " ";
+  else if (std::holds_alternative<vector<std::string>>(payload))
+    for (const auto &s : strings())
+      ss << "\"" << s << "\" ";
   ss << "] ";
 
   return ss.str();

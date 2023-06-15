@@ -209,7 +209,7 @@ void RIBCyclesMaterials::update_connections(RIBtoCyclesMapping *mapping,
   for (auto pp : pv) {
     if (pp->storage == Container_Type::Reference) {
       vector<string> tokens;
-      string_split(tokens, pp->strings[0], ":");
+      string_split(tokens, pp->strings()[0], ":");
       std::string dst_socket_name = pp->name;
 
       std::string input_name = mapping->parameter_name(dst_socket_name);
@@ -309,9 +309,9 @@ void RIBCyclesMaterials::populate_shader_graph(Vector_Dictionary sg)
     auto pv = params.get_parameter_vector();
     auto pp = params.get_parameter("shader_type");
     if (pp) {
-      shader_type = pp->strings[0];
-      shader_name = pp->strings[1];
-      handle = pp->strings[2];
+      shader_type = pp->strings()[0];
+      shader_name = pp->strings()[1];
+      handle = pp->strings()[2];
       mapping = sRIBtoCycles->find(shader_name, pv);
 
       if (!mapping->create_shader_node(shader_name, shader_path, graph, _scene))
@@ -325,7 +325,7 @@ void RIBCyclesMaterials::populate_shader_graph(Vector_Dictionary sg)
     pp = params.get_parameter("__materialid");
     if (pp) {
       terminals.push_back(pv);
-      _shader->name = pp->strings[0];
+      _shader->name = pp->strings()[0];
     }
 
     mapping->update_parameters(params, connections[handle]);
@@ -339,7 +339,7 @@ void RIBCyclesMaterials::populate_shader_graph(Vector_Dictionary sg)
     if (it->second.size() > 1) {
       for (auto pp = it->second.begin(); pp != it->second.end(); ++pp) {
         if (!(*pp)->name.compare("shader_type")) {
-          shader_name = (*pp)->strings[2];
+          shader_name = (*pp)->strings()[2];
           const auto nodeIt = _nodes.find(shader_name);
           if (nodeIt == _nodes.end()) {
             fprintf(stderr, "Could not find node '%s' to connect\n", shader_name.c_str());
@@ -356,9 +356,9 @@ void RIBCyclesMaterials::populate_shader_graph(Vector_Dictionary sg)
   for (const auto &terminal_entry : terminals) {
     for (auto pp : terminal_entry) {
       if (!pp->name.compare("shader_type")) {
-        shader_type = pp->strings[0];
-        shader_name = pp->strings[1];
-        handle = pp->strings[2];
+        shader_type = pp->strings()[0];
+        shader_name = pp->strings()[1];
+        handle = pp->strings()[2];
         break;
       }
     }

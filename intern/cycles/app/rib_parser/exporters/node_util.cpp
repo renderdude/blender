@@ -19,32 +19,32 @@ template<typename DstType> DstType convert_to_cycles(Parsed_Parameter const* par
 
 template<> bool convert_to_cycles<bool>(Parsed_Parameter const* param)
 {
-  return (bool)(param->ints[0]);
+  return (bool)(param->bools()[0]);
 }
 
 template<> int convert_to_cycles<int>(Parsed_Parameter const* param)
 {
-  return param->ints[0];
+  return param->ints()[0];
 }
 
 template<> float convert_to_cycles<float>(Parsed_Parameter const* param)
 {
-  return param->floats[0];
+  return param->floats()[0];
 }
 
 template<> float2 convert_to_cycles<float2>(Parsed_Parameter const* param)
 {
-  return make_float2(param->floats[0], param->floats[1]);
+  return make_float2(param->floats()[0], param->floats()[1]);
 }
 
 template<> float3 convert_to_cycles<float3>(Parsed_Parameter const* param)
 {
-  return make_float3(param->floats[0], param->floats[1], param->floats[2]);
+  return make_float3(param->floats()[0], param->floats()[1], param->floats()[2]);
 }
 
 template<> ustring convert_to_cycles<ustring>(Parsed_Parameter const* param)
 {
-  return ustring(param->strings[0]);
+  return ustring(param->strings()[0]);
 }
 
 Transform convert_to_transform(const vector<float> &values, size_t index = 0)
@@ -65,7 +65,7 @@ Transform convert_to_transform(const vector<float> &values, size_t index = 0)
 
 template<> Transform convert_to_cycles<Transform>(Parsed_Parameter const* param)
 {
-  return convert_to_transform(param->floats);
+  return convert_to_transform(param->floats());
 }
 
 template<typename DstType> array<DstType> convert_to_cycles_array(Parsed_Parameter const* param)
@@ -77,10 +77,10 @@ template<typename DstType> array<DstType> convert_to_cycles_array(Parsed_Paramet
 template<> array<float3> convert_to_cycles_array<float3>(Parsed_Parameter const* param)
 {
   array<float3> cyclesArray;
-  cyclesArray.reserve(param->floats.size() / 3);
-  for (size_t i = 0; i < param->floats.size(); i += 3) {
+  cyclesArray.reserve(param->floats().size() / 3);
+  for (size_t i = 0; i < param->floats().size(); i += 3) {
     cyclesArray.push_back_reserved(
-        make_float3(param->floats[i], param->floats[i + 1], param->floats[i + 2]));
+        make_float3(param->floats()[i], param->floats()[i + 1], param->floats()[i + 2]));
   }
   return cyclesArray;
 }
@@ -88,8 +88,8 @@ template<> array<float3> convert_to_cycles_array<float3>(Parsed_Parameter const*
 template<> array<ustring> convert_to_cycles_array<ustring>(Parsed_Parameter const* param)
 {
   array<ustring> cyclesArray;
-  cyclesArray.reserve(param->strings.size());
-  for (const auto &element : param->strings) {
+  cyclesArray.reserve(param->strings().size());
+  for (const auto &element : param->strings()) {
     cyclesArray.push_back_reserved(ustring(element));
   }
   return cyclesArray;
@@ -98,9 +98,9 @@ template<> array<ustring> convert_to_cycles_array<ustring>(Parsed_Parameter cons
 template<> array<Transform> convert_to_cycles_array<Transform>(Parsed_Parameter const* param)
 {
   array<Transform> cyclesArray;
-  cyclesArray.reserve(param->floats.size() / 16);
-  for (size_t i = 0; i < param->floats.size(); i += 16) {
-    cyclesArray.push_back_reserved(convert_to_transform(param->floats, i));
+  cyclesArray.reserve(param->floats().size() / 16);
+  for (size_t i = 0; i < param->floats().size(); i += 16) {
+    cyclesArray.push_back_reserved(convert_to_transform(param->floats(), i));
   }
   return cyclesArray;
 }
@@ -142,7 +142,7 @@ void set_node_value(Node *node, const SocketType &socket, Parsed_Parameter const
       break;
     case SocketType::ENUM:
       // Enum's can accept a string or an int
-      if (param->strings.size() > 0) {
+      if (param->strings().size() > 0) {
         node->set(socket, convert_to_cycles<ustring>(param));
       }
       else {
