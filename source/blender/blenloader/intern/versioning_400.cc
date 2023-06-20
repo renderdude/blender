@@ -13,6 +13,8 @@
 #include "DNA_modifier_types.h"
 #include "DNA_movieclip_types.h"
 
+#include "DNA_genfile.h"
+
 #include "BLI_assert.h"
 #include "BLI_listbase.h"
 #include "BLI_set.hh"
@@ -162,7 +164,7 @@ static void versioning_replace_legacy_glossy_node(bNodeTree *ntree)
 {
   LISTBASE_FOREACH (bNode *, node, &ntree->nodes) {
     if (node->type == SH_NODE_BSDF_GLOSSY_LEGACY) {
-      strcpy(node->idname, "ShaderNodeBsdfAnisotropic");
+      STRNCPY(node->idname, "ShaderNodeBsdfAnisotropic");
       node->type = SH_NODE_BSDF_GLOSSY;
     }
   }

@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2009-2023 Blender Foundation
+#
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 from _bpy import types as bpy_types
@@ -178,7 +180,7 @@ class Object(bpy_types.ID):
     def children(self):
         """All the children of this object.
 
-        :type: tuple of `Object`
+        :type: tuple of :class:`Object`
 
         .. note:: Takes ``O(len(bpy.data.objects))`` time."""
         import bpy
@@ -189,7 +191,7 @@ class Object(bpy_types.ID):
     def children_recursive(self):
         """A list of all children from this object.
 
-        :type: tuple of `Object`
+        :type: tuple of :class:`Object`
 
         .. note:: Takes ``O(len(bpy.data.objects))`` time."""
         import bpy
@@ -213,7 +215,7 @@ class Object(bpy_types.ID):
         """
         The collections this object is in.
 
-        :type: tuple of `Collection`
+        :type: tuple of :class:`Collection`
 
         .. note:: Takes ``O(len(bpy.data.collections) + len(bpy.data.scenes))`` time."""
         import bpy
@@ -231,7 +233,7 @@ class Object(bpy_types.ID):
     def users_scene(self):
         """The scenes this object is in.
 
-        :type: tuple of `Scene`
+        :type: tuple of :class:`Scene`
 
         .. note:: Takes ``O(len(bpy.data.scenes) * len(bpy.data.objects))`` time."""
         import bpy
@@ -564,7 +566,7 @@ def _name_convention_attribute_remove(attributes, name):
 class Mesh(bpy_types.ID):
     __slots__ = ()
 
-    def from_pydata(self, vertices, edges, faces):
+    def from_pydata(self, vertices, edges, faces, shade_flat=True):
         """
         Make a mesh from a list of vertices/edges/faces
         Until we have a nicer way to make geometry, use this.
@@ -621,6 +623,9 @@ class Mesh(bpy_types.ID):
         self.polygons.foreach_set("loop_start", loop_starts)
         self.polygons.foreach_set("vertices", vertex_indices)
 
+        if shade_flat:
+            self.shade_flat()
+
         if edges_len or faces_len:
             self.update(
                 # Needed to either:
@@ -660,6 +665,22 @@ class Mesh(bpy_types.ID):
 
     def edge_creases_remove(self):
         _name_convention_attribute_remove(self.attributes, "crease_edge")
+
+    def shade_flat(self):
+        """
+        Render and display faces uniform, using face normals,
+        setting the "sharp_face" attribute true for every face
+        """
+        sharp_faces = _name_convention_attribute_ensure(self.attributes, "sharp_face", 'FACE', 'BOOLEAN')
+        for value in sharp_faces.data:
+            value.value = True
+
+    def shade_smooth(self):
+        """
+        Render and display faces smooth, using interpolated vertex normals,
+        removing the "sharp_face" attribute
+        """
+        _name_convention_attribute_remove(self.attributes, "sharp_face")
 
 
 class MeshEdge(StructRNA):
@@ -788,15 +809,14 @@ class Gizmo(StructRNA):
     # Convenience wrappers around private `_gpu` module.
     def draw_custom_shape(self, shape, *, matrix=None, select_id=None):
         """
-        Draw a shape created form :class:`bpy.types.Gizmo.draw_custom_shape`.
+        Draw a shape created form :class:`Gizmo.draw_custom_shape`.
 
         :arg shape: The cached shape to draw.
         :type shape: Undefined.
-        :arg matrix: 4x4 matrix, when not given
-           :class:`bpy.types.Gizmo.matrix_world` is used.
+        :arg matrix: 4x4 matrix, when not given :class:`Gizmo.matrix_world` is used.
         :type matrix: :class:`mathutils.Matrix`
         :arg select_id: The selection id.
-           Only use when drawing within :class:`bpy.types.Gizmo.draw_select`.
+           Only use when drawing within :class:`Gizmo.draw_select`.
         :type select_it: int
         """
         import gpu
@@ -830,7 +850,7 @@ class Gizmo(StructRNA):
     @staticmethod
     def new_custom_shape(type, verts):
         """
-        Create a new shape that can be passed to :class:`bpy.types.Gizmo.draw_custom_shape`.
+        Create a new shape that can be passed to :class:`Gizmo.draw_custom_shape`.
 
         :arg type: The type of shape to create in (POINTS, LINES, TRIS, LINE_STRIP).
         :type type: string

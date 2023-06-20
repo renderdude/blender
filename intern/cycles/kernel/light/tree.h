@@ -1,5 +1,6 @@
-/* SPDX-License-Identifier: Apache-2.0
- * Copyright 2011-2022 Blender Foundation */
+/* SPDX-FileCopyrightText: 2011-2022 Blender Foundation
+ *
+ * SPDX-License-Identifier: Apache-2.0 */
 
 /* This code implements a modified version of the paper [Importance Sampling of Many Lights with
  * Adaptive Tree Splitting](http://www.aconty.com/pdf/many-lights-hpg2018.pdf) by Alejandro Conty
@@ -760,7 +761,9 @@ ccl_device_noinline bool light_tree_sample(KernelGlobals kg,
                                          float3_to_float2(rand),
                                          time,
                                          P,
+                                         N_or_D,
                                          object_receiver,
+                                         shader_flags,
                                          bounce,
                                          path_flag,
                                          selected_emitter,
