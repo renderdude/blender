@@ -30,7 +30,7 @@
 
 #include "BKE_attribute.hh"
 #include "BKE_customdata.h"
-#include "BKE_editmesh_cache.h"
+#include "BKE_editmesh_cache.hh"
 #include "BKE_global.h"
 #include "BKE_mesh.hh"
 #include "BKE_mesh_mapping.h"
@@ -366,10 +366,11 @@ void BKE_mesh_ensure_normals_for_display(Mesh *mesh)
       break;
     case ME_WRAPPER_TYPE_BMESH: {
       BMEditMesh *em = mesh->edit_mesh;
-      EditMeshData *emd = mesh->runtime->edit_data;
-      if (emd->vertexCos) {
-        BKE_editmesh_cache_ensure_vert_normals(em, emd);
-        BKE_editmesh_cache_ensure_poly_normals(em, emd);
+      if (EditMeshData *emd = mesh->runtime->edit_data) {
+        if (emd->vertexCos) {
+          BKE_editmesh_cache_ensure_vert_normals(em, emd);
+          BKE_editmesh_cache_ensure_poly_normals(em, emd);
+        }
       }
       return;
     }
@@ -1421,7 +1422,7 @@ static void mesh_normals_loop_custom_set(Span<float3> positions,
 {
   /* We *may* make that poor #bke::mesh::normals_calc_loop() even more complex by making it
    * handling that feature too, would probably be more efficient in absolute. However, this
-   * function *is not* performance-critical, since it is mostly expected to be called by io add-ons
+   * function *is not* performance-critical, since it is mostly expected to be called by IO add-ons
    * when importing custom normals, and modifier (and perhaps from some editing tools later?). So
    * better to keep some simplicity here, and just call #bke::mesh::normals_calc_loop() twice! */
   CornerNormalSpaceArray lnors_spacearr;

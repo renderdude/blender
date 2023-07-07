@@ -29,7 +29,7 @@
 #include "BKE_mesh.hh"
 #include "BKE_mesh_mapping.h"
 #include "BKE_paint.h"
-#include "BKE_pbvh.h"
+#include "BKE_pbvh_api.hh"
 #include "BKE_subdiv_ccg.h"
 
 #include "DRW_pbvh.hh"
@@ -2699,6 +2699,40 @@ void BKE_pbvh_raycast_project_ray_root(
       BKE_pbvh_node_get_BB(pbvh->nodes, bb_min_root, bb_max_root);
     }
 
+    /* Calc rough clipping to avoid overflow later. See #109555. */
+    float mat[3][3];
+    axis_dominant_v3_to_m3(mat, ray_normal);
+    float a[3], b[3], min[3] = {FLT_MAX, FLT_MAX, FLT_MAX}, max[3] = {FLT_MIN, FLT_MIN, FLT_MIN};
+
+    /* Compute AABB bounds rotated along ray_normal.*/
+    copy_v3_v3(a, bb_min_root);
+    copy_v3_v3(b, bb_max_root);
+    mul_m3_v3(mat, a);
+    mul_m3_v3(mat, b);
+    minmax_v3v3_v3(min, max, a);
+    minmax_v3v3_v3(min, max, b);
+
+    float cent[3], vec[3];
+    float ray_start_new[3], ray_end_new[3];
+
+    float dist = max[2] - min[2];
+
+    /* Build ray interval from z dimension of bounds. */
+    mid_v3_v3v3(cent, bb_min_root, bb_max_root);
+    madd_v3_v3v3fl(ray_start_new, cent, ray_normal, -dist);
+    madd_v3_v3v3fl(ray_end_new, cent, ray_normal, dist);
+
+    /* Don't go behind existing ray_start. */
+    sub_v3_v3v3(vec, ray_end_new, ray_start);
+    if (dot_v3v3(vec, ray_normal) > 0.0f) {
+      copy_v3_v3(ray_end, ray_end_new);
+    }
+
+    sub_v3_v3v3(vec, ray_start_new, ray_start);
+    if (dot_v3v3(vec, ray_normal) > 0.0f) {
+      copy_v3_v3(ray_start, ray_start_new);
+    }
+
     /* Slightly offset min and max in case we have a zero width node
      * (due to a plane mesh for instance), or faces very close to the bounding box boundary. */
     mid_v3_v3v3(bb_center, bb_max_root, bb_min_root);
@@ -2721,6 +2755,19 @@ void BKE_pbvh_raycast_project_ray_root(
     /* unlikely to fail exiting if entering succeeded, still keep this here */
     if (!isect_ray_aabb_v3(&ray, bb_min_root, bb_max_root, &rootmin_end)) {
       return;
+    }
+
+    /* Small object sizes or small clip starts can lead to floating-point
+     * overflow. To solve this, we compute a margin using the next
+     * possible floating point value after ray start. See #109555.
+     */
+
+    float epsilon = (std::nextafter(rootmin_start, rootmin_start + 1000.0f) - rootmin_start) *
+                    +5000.0f;
+
+    if (rootmin_start == rootmin_end) {
+      rootmin_start -= epsilon;
+      rootmin_end += epsilon;
     }
 
     madd_v3_v3v3fl(ray_start, ray_start, ray_normal, rootmin_start);

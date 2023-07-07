@@ -148,7 +148,7 @@ void initTransInfo(bContext *C, TransInfo *t, wmOperator *op, const wmEvent *eve
   t->flag = 0;
 
   if (obact && !(t->options & (CTX_CURSOR | CTX_TEXTURE_SPACE)) &&
-      ELEM(object_mode, OB_MODE_EDIT, OB_MODE_EDIT_GPENCIL))
+      ELEM(object_mode, OB_MODE_EDIT, OB_MODE_EDIT_GPENCIL_LEGACY))
   {
     t->obedit_type = obact->type;
   }
@@ -657,14 +657,9 @@ void initTransInfo(bContext *C, TransInfo *t, wmOperator *op, const wmEvent *eve
     t->flag |= T_NO_CURSOR_WRAP;
   }
 
-  if (op && (t->flag & T_MODAL) && !(t->flag & T_RELEASE_CONFIRM) &&
-      ELEM(t->mode,
-           TFM_TRANSLATION,
-           TFM_RESIZE,
-           TFM_ROTATION,
-           TFM_SHRINKFATTEN,
-           TFM_EDGE_SLIDE,
-           TFM_VERT_SLIDE))
+  if (op && (t->flag & T_MODAL) &&
+      (prop = RNA_struct_find_property(op->ptr, "allow_navigation")) &&
+      RNA_property_boolean_get(op->ptr, prop))
   {
     t->vod = ED_view3d_navigation_init(C);
   }

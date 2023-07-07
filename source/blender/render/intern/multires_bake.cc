@@ -1039,7 +1039,7 @@ static void apply_tangmat_callback(const blender::Span<blender::float3> /*vert_p
 static ushort ao_random_table_1[MAX_NUMBER_OF_AO_RAYS];
 static ushort ao_random_table_2[MAX_NUMBER_OF_AO_RAYS];
 
-static void init_ao_random(void)
+static void init_ao_random()
 {
   int i;
 
@@ -1109,7 +1109,7 @@ static void create_ao_raytree(MultiresBakeRender *bkr, MAOBakeData *ao_data)
   grid_data = hidm->getGridData(hidm);
   hidm->getGridKey(hidm, &key);
 
-  /* face_side = (grid_size << 1) - 1; */ /* UNUSED */
+  // face_side = (grid_size << 1) - 1; /* UNUSED */
   faces_num = grids_num * (grid_size - 1) * (grid_size - 1);
 
   raytree = ao_data->raytree = RE_rayobject_create(

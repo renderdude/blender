@@ -1,4 +1,6 @@
-/* SPDX-License-Identifier: GPL-2.0-or-later */
+/* SPDX-FileCopyrightText: 2023 Blender Foundation
+ *
+ * SPDX-License-Identifier: GPL-2.0-or-later */
 
 /** \file
  * \ingroup edcurves
@@ -67,14 +69,9 @@ namespace blender::ed::geometry {
 /** \name Operator
  * \{ */
 
-static const asset_system::AssetRepresentation *get_context_asset(const bContext &C)
-{
-  return reinterpret_cast<const asset_system::AssetRepresentation *>(CTX_wm_asset(&C));
-}
-
 static const bNodeTree *get_node_group(const bContext &C)
 {
-  const asset_system::AssetRepresentation *asset = get_context_asset(C);
+  const asset_system::AssetRepresentation *asset = CTX_wm_asset(&C);
   if (!asset) {
     return nullptr;
   }
@@ -285,7 +282,7 @@ static char *run_node_group_get_description(bContext *C,
                                             wmOperatorType * /*ot*/,
                                             PointerRNA * /*ptr*/)
 {
-  const asset_system::AssetRepresentation *asset = get_context_asset(*C);
+  const asset_system::AssetRepresentation *asset = CTX_wm_asset(C);
   if (!asset) {
     return nullptr;
   }
@@ -298,7 +295,7 @@ static char *run_node_group_get_description(bContext *C,
 
 static bool run_node_group_poll(bContext *C)
 {
-  const asset_system::AssetRepresentation *asset = get_context_asset(*C);
+  const asset_system::AssetRepresentation *asset = CTX_wm_asset(C);
   if (!asset) {
     return false;
   }

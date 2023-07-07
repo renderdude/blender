@@ -260,11 +260,15 @@ Drawing::Drawing()
   this->runtime = MEM_new<bke::greasepencil::DrawingRuntime>(__func__);
 }
 
-Drawing::Drawing(const Drawing &other) : Drawing()
+Drawing::Drawing(const Drawing &other)
 {
+  this->base.type = GP_DRAWING;
   this->base.flag = other.base.flag;
 
   new (&this->geometry) bke::CurvesGeometry(other.geometry.wrap());
+  /* Initialize runtime data. */
+  this->runtime = MEM_new<bke::greasepencil::DrawingRuntime>(__func__);
+
   this->runtime->triangles_cache = other.runtime->triangles_cache;
 }
 
@@ -397,6 +401,11 @@ Layer &TreeNode::as_layer_for_write()
   return *reinterpret_cast<Layer *>(this);
 }
 
+LayerGroup *TreeNode::parent_group() const
+{
+  return &this->parent->wrap();
+}
+
 LayerMask::LayerMask()
 {
   this->layer_name = nullptr;
@@ -498,16 +507,70 @@ bool Layer::is_locked() const
   return this->parent_group().is_locked() || (this->base.flag & GP_LAYER_TREE_NODE_LOCKED) != 0;
 }
 
-bool Layer::insert_frame(int frame_number, const GreasePencilFrame &frame)
+bool Layer::is_editable() const
 {
-  this->tag_frames_map_changed();
-  return this->frames_for_write().add(frame_number, frame);
+  return !this->is_locked() && this->is_visible();
 }
 
-bool Layer::overwrite_frame(int frame_number, const GreasePencilFrame &frame)
+GreasePencilFrame *Layer::add_frame_internal(const int frame_number, const int drawing_index)
 {
-  this->tag_frames_map_changed();
-  return this->frames_for_write().add_overwrite(frame_number, frame);
+  BLI_assert(drawing_index != -1);
+  if (!this->frames().contains(frame_number)) {
+    GreasePencilFrame frame{};
+    frame.drawing_index = drawing_index;
+    this->frames_for_write().add(frame_number, frame);
+    this->tag_frames_map_keys_changed();
+    return this->frames_for_write().lookup_ptr(frame_number);
+  }
+  /* Overwrite null-frames. */
+  if (this->frames().lookup(frame_number).is_null()) {
+    GreasePencilFrame frame{};
+    frame.drawing_index = drawing_index;
+    this->frames_for_write().add_overwrite(frame_number, frame);
+    this->tag_frames_map_changed();
+    return this->frames_for_write().lookup_ptr(frame_number);
+  }
+  return nullptr;
+}
+
+GreasePencilFrame *Layer::add_frame(const int frame_number,
+                                    const int drawing_index,
+                                    const int duration)
+{
+  BLI_assert(duration >= 0);
+  GreasePencilFrame *frame = this->add_frame_internal(frame_number, drawing_index);
+  if (frame == nullptr) {
+    return nullptr;
+  }
+  Span<int> sorted_keys = this->sorted_keys();
+  const int end_frame_number = frame_number + duration;
+  /* Finds the next greater frame_number that is stored in the map. */
+  auto next_frame_number_it = std::upper_bound(
+      sorted_keys.begin(), sorted_keys.end(), frame_number);
+  /* If the next frame we found is at the end of the frame we're inserting, then we are done. */
+  if (next_frame_number_it != sorted_keys.end() && *next_frame_number_it == end_frame_number) {
+    return frame;
+  }
+  /* While the next frame is a null frame, remove it. */
+  while (next_frame_number_it != sorted_keys.end() &&
+         this->frames().lookup(*next_frame_number_it).is_null())
+  {
+    this->frames_for_write().remove(*next_frame_number_it);
+    this->tag_frames_map_keys_changed();
+    next_frame_number_it = std::next(next_frame_number_it);
+  }
+  /* If the duration is set to 0, the frame is marked as an implicit hold.*/
+  if (duration == 0) {
+    frame->flag |= GP_FRAME_IMPLICIT_HOLD;
+    return frame;
+  }
+  /* If the next frame comes after the end of the frame we're inserting (or if there are no more
+   * frames), add a null-frame. */
+  if (next_frame_number_it == sorted_keys.end() || *next_frame_number_it > end_frame_number) {
+    this->frames_for_write().add(end_frame_number, GreasePencilFrame::null());
+    this->tag_frames_map_keys_changed();
+  }
+  return frame;
 }
 
 Span<int> Layer::sorted_keys() const
@@ -680,7 +743,7 @@ Layer &LayerGroup::add_layer(Layer *layer)
   return *layer;
 }
 
-Layer &LayerGroup::add_layer_before(Layer *layer, Layer *link)
+Layer &LayerGroup::add_layer_before(Layer *layer, TreeNode *link)
 {
   BLI_assert(layer != nullptr && link != nullptr);
   BLI_insertlinkbefore(&this->children,
@@ -691,7 +754,7 @@ Layer &LayerGroup::add_layer_before(Layer *layer, Layer *link)
   return *layer;
 }
 
-Layer &LayerGroup::add_layer_after(Layer *layer, Layer *link)
+Layer &LayerGroup::add_layer_after(Layer *layer, TreeNode *link)
 {
   BLI_assert(layer != nullptr && link != nullptr);
   BLI_insertlinkafter(&this->children,
@@ -708,13 +771,13 @@ Layer &LayerGroup::add_layer(StringRefNull name)
   return this->add_layer(new_layer);
 }
 
-Layer &LayerGroup::add_layer_before(StringRefNull name, Layer *link)
+Layer &LayerGroup::add_layer_before(StringRefNull name, TreeNode *link)
 {
   Layer *new_layer = MEM_new<Layer>(__func__, name);
   return this->add_layer_before(new_layer, link);
 }
 
-Layer &LayerGroup::add_layer_after(StringRefNull name, Layer *link)
+Layer &LayerGroup::add_layer_after(StringRefNull name, TreeNode *link)
 {
   Layer *new_layer = MEM_new<Layer>(__func__, name);
   return this->add_layer_after(new_layer, link);
@@ -731,11 +794,11 @@ int64_t LayerGroup::num_nodes_total() const
   return this->runtime->nodes_cache_.size();
 }
 
-bool LayerGroup::unlink_layer(Layer *link)
+bool LayerGroup::unlink_node(TreeNode *link)
 {
   if (BLI_remlink_safe(&this->children, link)) {
     this->tag_nodes_cache_dirty();
-    link->base.parent = nullptr;
+    link->parent = nullptr;
     return true;
   }
   return false;
@@ -928,9 +991,7 @@ BoundBox *BKE_grease_pencil_boundbox_get(Object *ob)
   return ob->runtime.bb;
 }
 
-void BKE_grease_pencil_data_update(struct Depsgraph * /*depsgraph*/,
-                                   struct Scene * /*scene*/,
-                                   Object *object)
+void BKE_grease_pencil_data_update(Depsgraph * /*depsgraph*/, Scene * /*scene*/, Object *object)
 {
   /* Free any evaluated data and restore original data. */
   BKE_object_free_derived_caches(object);
@@ -1125,6 +1186,21 @@ void GreasePencil::add_empty_drawings(const int add_num)
   /* TODO: Update drawing user counts. */
 }
 
+bool GreasePencil::insert_blank_frame(blender::bke::greasepencil::Layer &layer,
+                                      int frame_number,
+                                      int duration,
+                                      eBezTriple_KeyframeType keytype)
+{
+  using namespace blender;
+  GreasePencilFrame *frame = layer.add_frame(frame_number, int(this->drawings().size()), duration);
+  if (frame == nullptr) {
+    return false;
+  }
+  frame->type = int8_t(keytype);
+  this->add_empty_drawings(1);
+  return true;
+}
+
 void GreasePencil::remove_drawing(const int index_to_remove)
 {
   using namespace blender::bke::greasepencil;
@@ -1213,7 +1289,7 @@ static void foreach_drawing_ex(
         break;
       }
       case EDITABLE: {
-        if (!layer->is_visible() || layer->is_locked()) {
+        if (!layer->is_editable()) {
           continue;
         }
         break;
@@ -1363,14 +1439,14 @@ blender::bke::greasepencil::Layer &GreasePencil::add_layer(
 
 blender::bke::greasepencil::Layer &GreasePencil::add_layer_after(
     blender::bke::greasepencil::LayerGroup &group,
-    blender::bke::greasepencil::Layer *layer,
+    blender::bke::greasepencil::TreeNode *link,
     const blender::StringRefNull name)
 {
   using namespace blender;
   VectorSet<StringRefNull> names = get_node_names(*this);
   std::string unique_name(name.c_str());
   unique_layer_name(names, unique_name.data());
-  return group.add_layer_after(unique_name, layer);
+  return group.add_layer_after(unique_name, link);
 }
 
 blender::bke::greasepencil::Layer &GreasePencil::add_layer(const blender::StringRefNull name)
@@ -1480,7 +1556,7 @@ void GreasePencil::remove_layer(blender::bke::greasepencil::Layer &layer)
   }
 
   /* Unlink the layer from the parent group. */
-  layer.parent_group().unlink_layer(&layer);
+  layer.parent_group().unlink_node(&layer.as_node());
 
   /* Remove drawings. */
   /* TODO: In the future this should only remove drawings when the user count hits zero. */

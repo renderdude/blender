@@ -80,10 +80,6 @@
 using blender::Vector;
 
 /* prototypes. */
-static void ui_but_to_pixelrect(rcti *rect,
-                                const ARegion *region,
-                                uiBlock *block,
-                                const uiBut *but);
 static void ui_def_but_rna__menu(bContext * /*C*/, uiLayout *layout, void *but_p);
 static void ui_def_but_rna__panel_type(bContext * /*C*/, uiLayout *layout, void *but_p);
 static void ui_def_but_rna__menu_type(bContext * /*C*/, uiLayout *layout, void *but_p);
@@ -912,6 +908,7 @@ static void ui_but_update_old_active_from_new(uiBut *oldbut, uiBut *but)
     case UI_BTYPE_VIEW_ITEM: {
       uiButViewItem *view_item_oldbut = (uiButViewItem *)oldbut;
       uiButViewItem *view_item_newbut = (uiButViewItem *)but;
+      ui_view_item_swap_button_pointers(view_item_newbut->view_item, view_item_oldbut->view_item);
       std::swap(view_item_newbut->view_item, view_item_oldbut->view_item);
       break;
     }
@@ -2069,11 +2066,7 @@ void ui_fontscale(float *points, float aspect)
   *points /= aspect;
 }
 
-/* Project button or block (but==nullptr) to pixels in region-space. */
-static void ui_but_to_pixelrect(rcti *rect,
-                                const ARegion *region,
-                                uiBlock *block,
-                                const uiBut *but)
+void ui_but_to_pixelrect(rcti *rect, const ARegion *region, const uiBlock *block, const uiBut *but)
 {
   rctf rectf;
 
@@ -2168,6 +2161,8 @@ void UI_block_draw(const bContext *C, uiBlock *block)
   UI_widgetbase_draw_cache_end();
   UI_icon_draw_cache_end();
   BLF_batch_draw_end();
+
+  ui_block_views_draw_overlays(region, block);
 
   /* restore matrix */
   GPU_matrix_pop_projection();
@@ -5011,13 +5006,13 @@ int UI_autocomplete_end(AutoComplete *autocpl, char *autoname)
 
 #define PREVIEW_TILE_PAD (0.15f * UI_UNIT_X)
 
-int UI_preview_tile_size_x(void)
+int UI_preview_tile_size_x()
 {
   const float pad = PREVIEW_TILE_PAD;
   return round_fl_to_int((96.0f / 20.0f) * UI_UNIT_X + 2.0f * pad);
 }
 
-int UI_preview_tile_size_y(void)
+int UI_preview_tile_size_y()
 {
   const uiStyle *style = UI_style_get();
   const float font_height = style->widget.points * UI_SCALE_FAC;
@@ -5027,7 +5022,7 @@ int UI_preview_tile_size_y(void)
   return round_fl_to_int(UI_preview_tile_size_y_no_label() + font_height + pad);
 }
 
-int UI_preview_tile_size_y_no_label(void)
+int UI_preview_tile_size_y_no_label()
 {
   const float pad = PREVIEW_TILE_PAD;
   return round_fl_to_int((96.0f / 20.0f) * UI_UNIT_Y + 2.0f * pad);
@@ -6848,29 +6843,29 @@ void UI_but_extra_icon_string_info_get(bContext *C, uiButExtraOpIcon *extra_icon
 
 /* Program Init/Exit */
 
-void UI_init(void)
+void UI_init()
 {
   ui_resources_init();
 }
 
-void UI_init_userdef(void)
+void UI_init_userdef()
 {
   /* Initialize UI variables from values set in the preferences. */
   uiStyleInit();
 }
 
-void UI_reinit_font(void)
+void UI_reinit_font()
 {
   uiStyleInit();
 }
 
-void UI_exit(void)
+void UI_exit()
 {
   ui_resources_free();
   ui_but_clipboard_free();
 }
 
-void UI_interface_tag_script_reload(void)
+void UI_interface_tag_script_reload()
 {
   ui_interface_tag_script_reload_queries();
 }
