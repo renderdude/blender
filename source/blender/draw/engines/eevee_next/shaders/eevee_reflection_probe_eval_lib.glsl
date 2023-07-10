@@ -9,7 +9,7 @@ vec4 reflection_probe_eval(ClosureReflection reflection,
 {
   ivec3 texture_size = textureSize(reflectionProbes, 0);
   float lod_cube_max = min(log(float(texture_size.x)) - float(probe_data.layer_subdivision) + 1.0,
-                           REFLECTION_PROBE_MIPMAP_LEVELS);
+                           float(REFLECTION_PROBE_MIPMAP_LEVELS));
 
   /* Pow2f to distributed across lod more evenly */
   float roughness = clamp(pow2f(reflection.roughness), 1e-4f, 0.9999f);
@@ -65,9 +65,9 @@ int reflection_probes_find_closest(vec3 P)
   for (int index = 1; reflection_probe_buf[index].layer != -1 && index < REFLECTION_PROBES_MAX;
        index++)
   {
-    float distance = distance(P, reflection_probe_buf[index].pos);
-    if (distance < closest_distance) {
-      closest_distance = distance;
+    float dist = distance(P, reflection_probe_buf[index].pos);
+    if (dist < closest_distance) {
+      closest_distance = dist;
       closest_index = index;
     }
   }
@@ -79,15 +79,15 @@ void reflection_probes_eval(ClosureReflection reflection, vec3 P, vec3 V, inout 
   int closest_reflection_probe = reflection_probes_find_closest(P);
   vec4 light_color = vec4(0.0);
   if (closest_reflection_probe != -1) {
-    light_color = reflection_probe_eval(
-        reflection, P, V, reflection_probe_buf[closest_reflection_probe]);
+    ReflectionProbeData probe_data = reflection_probe_buf[closest_reflection_probe];
+    light_color = reflection_probe_eval(reflection, P, V, probe_data);
   }
 
   /* Mix world lighting. */
   if (light_color.a != 1.0) {
-    light_color.rgb = mix(reflection_probe_eval(reflection, P, V, reflection_probe_buf[0]).rgb,
-                          light_color.rgb,
-                          light_color.a);
+    ReflectionProbeData probe_data = reflection_probe_buf[0];
+    light_color.rgb = mix(
+        reflection_probe_eval(reflection, P, V, probe_data).rgb, light_color.rgb, light_color.a);
   }
 
   out_specular += light_color.rgb;
