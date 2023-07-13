@@ -25,7 +25,6 @@ endif()
 set(INC
   extern
   intern/strings
-  ../../source/blender/blenlib
 )
 
 # Python is always required
@@ -35,7 +34,6 @@ set(INC_SYS
   ../../extern/mantaflow/helper/util
   ../../extern/mantaflow/helper/pwrapper
   ../../extern/mantaflow/preprocessed
-  ../guardedalloc
   ${PYTHON_INCLUDE_DIRS}
   ${ZLIB_INCLUDE_DIRS}
 )
@@ -73,7 +71,9 @@ set(SRC
 )
 
 set(LIB
+  PRIVATE bf::blenlib
   PRIVATE bf::dna
+  PRIVATE bf::intern::guardedalloc
   extern_mantaflow
 
   ${PYTHON_LINKFLAGS}

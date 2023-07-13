@@ -41,6 +41,7 @@
 #include "BKE_global.h"
 #include "BKE_idtype.h"
 #include "BKE_key.h"
+#include "BKE_lib_id.h"
 #include "BKE_main.h"
 #include "BKE_material.h"
 #include "BKE_nla.h"
@@ -1496,6 +1497,11 @@ int insert_keyframe(Main *bmain,
     return 0;
   }
 
+  if (!BKE_id_is_editable(bmain, id)) {
+    BKE_reportf(reports, RPT_ERROR, "'%s' on %s is not editable", rna_path, id->name + 2);
+    return 0;
+  }
+
   RNA_id_pointer_create(id, &id_ptr);
   if (RNA_path_resolve_property(&id_ptr, rna_path, &ptr, &prop) == false) {
     BKE_reportf(
@@ -1976,8 +1982,8 @@ static int insert_key_exec(bContext *C, wmOperator *op)
   Object *obedit = CTX_data_edit_object(C);
   bool ob_edit_mode = false;
 
-  float cfra = (float)
-                   scene->r.cfra; /* XXX for now, don't bother about all the yucky offset crap */
+  const float cfra = float(
+      scene->r.cfra); /* XXX for now, don't bother about all the yucky offset crap */
   int num_channels;
   const bool confirm = op->flag & OP_IS_INVOKE;
 
@@ -2198,8 +2204,8 @@ static int delete_key_exec(bContext *C, wmOperator *op)
 static int delete_key_using_keying_set(bContext *C, wmOperator *op, KeyingSet *ks)
 {
   Scene *scene = CTX_data_scene(C);
-  float cfra = (float)
-                   scene->r.cfra; /* XXX for now, don't bother about all the yucky offset crap */
+  float cfra = float(
+      scene->r.cfra); /* XXX for now, don't bother about all the yucky offset crap */
   int num_channels;
   const bool confirm = op->flag & OP_IS_INVOKE;
 
@@ -2536,7 +2542,6 @@ static int insert_key_button_exec(bContext *C, wmOperator *op)
   /* flags for inserting keyframes */
   flag = ANIM_get_keyframing_flags(scene, true);
 
-  /* try to insert keyframe using property retrieved from UI */
   if (!(but = UI_context_active_but_prop_get(C, &ptr, &prop, &index))) {
     /* pass event on if no active button found */
     return (OPERATOR_CANCELLED | OPERATOR_PASS_THROUGH);
@@ -2704,13 +2709,12 @@ static int delete_key_button_exec(bContext *C, wmOperator *op)
   PropertyRNA *prop = nullptr;
   Main *bmain = CTX_data_main(C);
   char *path;
-  float cfra = (float)
-                   scene->r.cfra; /* XXX for now, don't bother about all the yucky offset crap */
+  float cfra = float(
+      scene->r.cfra); /* XXX for now, don't bother about all the yucky offset crap */
   bool changed = false;
   int index;
   const bool all = RNA_boolean_get(op->ptr, "all");
 
-  /* try to insert keyframe using property retrieved from UI */
   if (!UI_context_active_but_prop_get(C, &ptr, &prop, &index)) {
     /* pass event on if no active button found */
     return (OPERATOR_CANCELLED | OPERATOR_PASS_THROUGH);
@@ -2819,7 +2823,6 @@ static int clear_key_button_exec(bContext *C, wmOperator *op)
   int index;
   const bool all = RNA_boolean_get(op->ptr, "all");
 
-  /* try to insert keyframe using property retrieved from UI */
   if (!UI_context_active_but_prop_get(C, &ptr, &prop, &index)) {
     /* pass event on if no active button found */
     return (OPERATOR_CANCELLED | OPERATOR_PASS_THROUGH);
@@ -3034,9 +3037,9 @@ bool id_frame_has_keyframe(ID *id, float frame)
     case ID_OB: /* object */
       return object_frame_has_keyframe((Object *)id, frame);
 #if 0
-/* XXX TODO... for now, just use 'normal' behavior */
-case ID_SCE: /* scene */
-break;
+    /* XXX TODO... for now, just use 'normal' behavior */
+    case ID_SCE: /* scene */
+      break;
 #endif
     default: /* 'normal type' */
     {

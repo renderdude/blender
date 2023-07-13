@@ -5,10 +5,7 @@
 set(INC
   .
   intern
-  ../blenkernel
-  ../blenlib
   ../../../intern/clog
-  ../../../intern/guardedalloc
 )
 
 set(INC_SYS
@@ -41,8 +38,10 @@ set(SRC
 )
 
 set(LIB
-  bf_blenkernel
+  PRIVATE bf::blenkernel
+  PRIVATE bf::blenlib
   PRIVATE bf::dna
+  PRIVATE bf::intern::guardedalloc
 )
 
 

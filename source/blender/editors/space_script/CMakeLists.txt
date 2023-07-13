@@ -4,14 +4,11 @@
 
 set(INC
   ../include
-  ../../blenkernel
-  ../../blenlib
   ../../blenloader
   ../../blentranslation
   ../../gpu
   ../../makesrna
   ../../windowmanager
-  ../../../../intern/guardedalloc
 
 )
 
@@ -19,15 +16,18 @@ set(INC_SYS
 )
 
 set(SRC
-  script_edit.c
-  script_ops.c
-  space_script.c
+  script_edit.cc
+  script_ops.cc
+  space_script.cc
 
   script_intern.h
 )
 
 set(LIB
+  PRIVATE bf::blenkernel
+  PRIVATE bf::blenlib
   PRIVATE bf::dna
+  PRIVATE bf::intern::guardedalloc
 )
 
 if(WITH_PYTHON)
@@ -39,4 +39,3 @@ endif()
 
 
 blender_add_lib(bf_editor_space_script "${SRC}" "${INC}" "${INC_SYS}" "${LIB}")
-

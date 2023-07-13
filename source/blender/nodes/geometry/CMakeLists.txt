@@ -7,8 +7,6 @@ set(INC
   ..
   ../intern
   ../../editors/include
-  ../../blenkernel
-  ../../blenlib
   ../../blentranslation
   ../../bmesh
   ../../depsgraph
@@ -20,7 +18,6 @@ set(INC
   ../../render
   ../../windowmanager
   ../../../../extern/fmtlib/include
-  ../../../../intern/guardedalloc
   # RNA_prototypes.h
   ${CMAKE_BINARY_DIR}/source/blender/makesrna
 )
@@ -151,6 +148,8 @@ set(SRC
   nodes/node_geo_raycast.cc
   nodes/node_geo_realize_instances.cc
   nodes/node_geo_remove_attribute.cc
+  nodes/node_geo_repeat_input.cc
+  nodes/node_geo_repeat_output.cc
   nodes/node_geo_rotate_instances.cc
   nodes/node_geo_sample_index.cc
   nodes/node_geo_sample_nearest.cc
@@ -200,10 +199,13 @@ set(SRC
 )
 
 set(LIB
+  PRIVATE bf::blenkernel
+  PRIVATE bf::blenlib
   bf_bmesh
   PRIVATE bf::dna
   bf_functions
   bf_geometry
+  PRIVATE bf::intern::guardedalloc
   bf_nodes
   extern_fmtlib
 )

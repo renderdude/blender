@@ -7,10 +7,8 @@ if(HAVE_EXECINFO_H)
 endif()
 
 set(INC
-  .
-  ..
+  PUBLIC .
   ../../../intern/eigen
-  ../../../intern/guardedalloc
 )
 
 set(INC_SYS
@@ -390,7 +388,7 @@ set(SRC
 set(LIB
   PUBLIC bf::dna
   bf_intern_eigen
-  bf_intern_guardedalloc
+  PRIVATE bf::intern::guardedalloc
   extern_wcwidth
   PRIVATE bf::intern::atomic
   ${ZLIB_LIBRARIES}
@@ -475,6 +473,7 @@ set_source_files_properties(
 )
 
 blender_add_lib(bf_blenlib "${SRC}" "${INC}" "${INC_SYS}" "${LIB}")
+add_library(bf::blenlib ALIAS bf_blenlib)
 
 if(WITH_GTESTS)
   set(TEST_SRC

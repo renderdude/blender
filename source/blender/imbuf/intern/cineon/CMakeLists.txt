@@ -6,9 +6,6 @@ set(INC
   .
   ..
   ../..
-  ../../../blenkernel
-  ../../../blenlib
-  ../../../../../intern/guardedalloc
 )
 
 set(INC_SYS
@@ -29,7 +26,10 @@ set(SRC
 )
 
 set(LIB
+  PRIVATE bf::blenkernel
+  PRIVATE bf::blenlib
   PRIVATE bf::dna
+  PRIVATE bf::intern::guardedalloc
 )
 
 if(WITH_IMAGE_CINEON)

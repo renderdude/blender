@@ -4,8 +4,6 @@
 
 set(INC
   .
-  ../blenlib
-  ../../../intern/guardedalloc
 )
 
 set(INC_SYS
@@ -49,8 +47,9 @@ set(SRC
 )
 
 set(LIB
-  bf_blenlib
+  PRIVATE bf::blenlib
   PRIVATE bf::dna
+  PRIVATE bf::intern::guardedalloc
 )
 
 if(WITH_TBB)

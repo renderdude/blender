@@ -3,10 +3,9 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 set(INC
-  .
+  PUBLIC .
   ../asset_system
   ../blenfont
-  ../blenlib
   ../blenloader
   ../blentranslation
   ../bmesh
@@ -26,7 +25,6 @@ set(INC
   ../simulation
   ../../../intern/eigen
   ../../../intern/ghost
-  ../../../intern/guardedalloc
   ../../../intern/iksolver/extern
   ../../../intern/clog
   ../../../intern/libmv
@@ -266,7 +264,6 @@ set(SRC
   intern/screen.c
   intern/shader_fx.c
   intern/shrinkwrap.cc
-  intern/simulation.cc
   intern/simulation_state.cc
   intern/simulation_state_serialize.cc
   intern/softbody.c
@@ -473,7 +470,6 @@ set(SRC
   BKE_sequencer_offscreen.h
   BKE_shader_fx.h
   BKE_shrinkwrap.h
-  BKE_simulation.h
   BKE_simulation_state.hh
   BKE_simulation_state_serialize.hh
   BKE_softbody.h
@@ -531,7 +527,7 @@ set(SRC
 set(LIB
   bf_asset_system
   bf_blenfont
-  bf_blenlib
+  PRIVATE bf::blenlib
   bf_blenloader
   bf_blentranslation
   bf_bmesh
@@ -545,7 +541,7 @@ set(LIB
   bf_imbuf
   bf_intern_clog
   bf_intern_ghost
-  bf_intern_guardedalloc
+  PRIVATE bf::intern::guardedalloc
   bf_intern_libmv  # Uses stub when disabled.
   bf_intern_mikktspace
   bf_intern_opensubdiv  # Uses stub when disabled.
@@ -816,6 +812,7 @@ endif()
 # endif()
 
 blender_add_lib(bf_blenkernel "${SRC}" "${INC}" "${INC_SYS}" "${LIB}")
+add_library(bf::blenkernel ALIAS bf_blenkernel)
 
 # RNA_prototypes.h
 add_dependencies(bf_blenkernel bf_rna)

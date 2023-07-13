@@ -4,8 +4,6 @@
 
 set(INC
   .
-  ../guardedalloc
-  ../../source/blender/blenlib
   ../../source/blender/gpu
   ../../source/blender/gpu/intern
 )
@@ -24,7 +22,9 @@ set(SRC
 )
 
 set(LIB
+  PRIVATE bf::blenlib
   PRIVATE bf::dna
+  PRIVATE bf::intern::guardedalloc
 )
 
 if(WITH_OPENCOLORIO)

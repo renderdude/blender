@@ -6,8 +6,6 @@ set(INC
   .
   intern
   ../blenfont
-  ../blenkernel
-  ../blenlib
   ../blentranslation
   ../bmesh
   ../depsgraph
@@ -16,7 +14,6 @@ set(INC
   ../render
   ../windowmanager
   ../../../intern/eigen
-  ../../../intern/guardedalloc
 
   # RNA_prototypes.h
   ${CMAKE_BINARY_DIR}/source/blender/makesrna
@@ -90,7 +87,10 @@ list(APPEND LIB
 endif()
 
 set(LIB
+  PRIVATE bf::blenkernel
+  PRIVATE bf::blenlib
   PRIVATE bf::dna
+  PRIVATE bf::intern::guardedalloc
 )
 
 blender_add_lib(bf_gpencil_modifiers_legacy "${SRC}" "${INC}" "${INC_SYS}" "${LIB}")

@@ -538,8 +538,8 @@ static void paint_brush_stroke_add_step(
    * windows for some tablets, then we just skip first touch. */
   if (tablet && (pressure >= 0.99f) &&
       ((pop->s.brush->flag & BRUSH_SPACING_PRESSURE) ||
-       BKE_brush_use_alpha_pressure(pop->s.brush) ||
-       BKE_brush_use_size_pressure(pop->s.brush))) {
+       BKE_brush_use_alpha_pressure(pop->s.brush) || BKE_brush_use_size_pressure(pop->s.brush)))
+  {
     return;
   }
 
@@ -551,8 +551,8 @@ static void paint_brush_stroke_add_step(
    * which is the sensitivity of the most sensitive pen tablet available */
   if (tablet && (pressure < 0.0002f) &&
       ((pop->s.brush->flag & BRUSH_SPACING_PRESSURE) ||
-       BKE_brush_use_alpha_pressure(pop->s.brush) ||
-       BKE_brush_use_size_pressure(pop->s.brush))) {
+       BKE_brush_use_alpha_pressure(pop->s.brush) || BKE_brush_use_size_pressure(pop->s.brush)))
+  {
     return;
   }
 #endif
@@ -984,7 +984,7 @@ void paint_stroke_free(bContext *C, wmOperator * /*op*/, PaintStroke *stroke)
   ups->stroke_active = false;
 
   if (stroke->timer) {
-    WM_event_remove_timer(CTX_wm_manager(C), CTX_wm_window(C), stroke->timer);
+    WM_event_timer_remove(CTX_wm_manager(C), CTX_wm_window(C), stroke->timer);
   }
 
   if (stroke->rng) {
@@ -1518,7 +1518,7 @@ int paint_stroke_modal(bContext *C, wmOperator *op, const wmEvent *event, PaintS
 
     if (stroke->stroke_started) {
       if (br->flag & BRUSH_AIRBRUSH) {
-        stroke->timer = WM_event_add_timer(
+        stroke->timer = WM_event_timer_add(
             CTX_wm_manager(C), CTX_wm_window(C), TIMER, stroke->brush->rate);
       }
 

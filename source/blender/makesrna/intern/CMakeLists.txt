@@ -94,7 +94,6 @@ if(WITH_EXPERIMENTAL_FEATURES)
   add_definitions(-DWITH_GREASE_PENCIL_V3)
   list(APPEND DEFSRC
     rna_grease_pencil.cc
-    rna_simulation.cc
   )
 endif()
 
@@ -238,7 +237,6 @@ set(INC
   ../../render
   ../../../../intern/clog
   ../../../../intern/cycles/blender
-  ../../../../intern/guardedalloc
   ../../../../intern/memutil
   ../../../../intern/mantaflow/extern
 
@@ -407,6 +405,10 @@ if(WITH_XR_OPENXR)
   add_definitions(-DWITH_XR_OPENXR)
 endif()
 
+if(WITH_OPENGL_BACKEND)
+  add_definitions(-DWITH_OPENGL_BACKEND)
+endif()
+
 if(WITH_METAL_BACKEND)
   add_definitions(-DWITH_METAL_BACKEND)
 endif()
@@ -430,6 +432,7 @@ blender_target_include_dirs_sys(makesrna ${INC_SYS})
 
 target_link_libraries(makesrna PRIVATE bf_dna)
 target_link_libraries(makesrna PRIVATE bf::intern::atomic)
+target_link_libraries(makesrna PRIVATE bf::intern::guardedalloc)
 target_link_libraries(makesrna PRIVATE bf_dna_blenlib)
 
 if(WIN32 AND NOT UNIX)
@@ -482,6 +485,7 @@ set(LIB
   bf_editor_sound
   bf_editor_transform
   bf_editor_undo
+  PRIVATE bf::intern::guardedalloc
 )
 
 blender_add_lib(bf_rna "${SRC}" "${INC}" "${INC_SYS}" "${LIB}")

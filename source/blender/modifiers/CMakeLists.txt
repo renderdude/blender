@@ -6,8 +6,6 @@ set(INC
   .
   intern
   ../blenfont
-  ../blenkernel
-  ../blenlib
   ../blenloader
   ../blentranslation
   ../bmesh
@@ -20,7 +18,6 @@ set(INC
   ../render
   ../windowmanager
   ../../../intern/eigen
-  ../../../intern/guardedalloc
 
   # RNA_prototypes.h
   ${CMAKE_BINARY_DIR}/source/blender/makesrna
@@ -109,9 +106,10 @@ set(SRC
 )
 
 set(LIB
-  bf_blenkernel
-  bf_blenlib
+  PRIVATE bf::blenkernel
+  PRIVATE bf::blenlib
   PUBLIC bf::dna
+  PRIVATE bf::intern::guardedalloc
 )
 
 if(WITH_ALEMBIC)

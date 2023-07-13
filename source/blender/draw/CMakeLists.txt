@@ -7,8 +7,6 @@ set(INC
   intern
 
   ../blenfont
-  ../blenkernel
-  ../blenlib
   ../blenloader
   ../blentranslation
   ../bmesh
@@ -29,7 +27,6 @@ set(INC
   ../windowmanager
 
   ../../../intern/clog
-  ../../../intern/guardedalloc
   ../../../intern/opensubdiv
 
 )
@@ -188,7 +185,7 @@ set(SRC
   engines/workbench/workbench_transparent.c
   engines/workbench/workbench_volume.c
   engines/workbench/workbench_volume_next.cc
-  engines/external/external_engine.c
+  engines/external/external_engine.cc
   engines/gpencil/gpencil_antialiasing.c
   engines/gpencil/gpencil_cache_utils.c
   engines/gpencil/gpencil_draw_data.c
@@ -354,9 +351,10 @@ set(SRC
 )
 
 set(LIB
-  bf_blenkernel
-  bf_blenlib
+  PRIVATE bf::blenkernel
+  PRIVATE bf::blenlib
   PRIVATE bf::dna
+  PRIVATE bf::intern::guardedalloc
   bf_realtime_compositor
   bf_windowmanager
   PRIVATE bf::intern::atomic

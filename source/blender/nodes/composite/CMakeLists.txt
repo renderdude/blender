@@ -7,8 +7,6 @@ set(INC
   ..
   ../intern
   ../../editors/include
-  ../../blenkernel
-  ../../blenlib
   ../../blentranslation
   ../../depsgraph
   ../../functions
@@ -20,7 +18,6 @@ set(INC
   ../../compositor/realtime_compositor
   ../../compositor/realtime_compositor/algorithms
   ../../compositor/realtime_compositor/cached_resources
-  ../../../../intern/guardedalloc
 
   # RNA_prototypes.h
   ${CMAKE_BINARY_DIR}/source/blender/makesrna
@@ -129,7 +126,10 @@ set(SRC
 )
 
 set(LIB
+  PRIVATE bf::blenkernel
+  PRIVATE bf::blenlib
   PRIVATE bf::dna
+  PRIVATE bf::intern::guardedalloc
   bf_realtime_compositor
 )
 
