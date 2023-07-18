@@ -347,7 +347,7 @@ static void rna_FloatColorAttributeValue_color_srgb_set(PointerRNA *ptr, const f
 static int rna_ByteIntAttributeValue_get(PointerRNA *ptr)
 {
   int8_t *value = (int8_t *)ptr->data;
-  return (int)(*value);
+  return int(*value);
 }
 
 static void rna_ByteIntAttributeValue_set(PointerRNA *ptr, const int new_value)
@@ -360,7 +360,7 @@ static void rna_ByteIntAttributeValue_set(PointerRNA *ptr, const int new_value)
     *value = INT8_MIN;
   }
   else {
-    *value = (int8_t)new_value;
+    *value = int8_t(new_value);
   }
 }
 

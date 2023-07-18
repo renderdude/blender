@@ -77,6 +77,7 @@ class Drawing : public ::GreasePencilDrawing {
    */
   Span<uint3> triangles() const;
   void tag_positions_changed();
+  void tag_topology_changed();
 
   /**
    * Radii of the points. Values are expected to be in blender units.
@@ -521,6 +522,15 @@ inline blender::bke::greasepencil::LayerGroup &GreasePencilLayerTreeGroup::wrap(
 inline const blender::bke::greasepencil::LayerGroup &GreasePencilLayerTreeGroup::wrap() const
 {
   return *reinterpret_cast<const blender::bke::greasepencil::LayerGroup *>(this);
+}
+
+inline const blender::bke::greasepencil::LayerGroup &GreasePencil::root_group() const
+{
+  return this->root_group_ptr->wrap();
+}
+inline blender::bke::greasepencil::LayerGroup &GreasePencil::root_group()
+{
+  return this->root_group_ptr->wrap();
 }
 
 inline bool GreasePencil::has_active_layer() const
