@@ -28,6 +28,7 @@
 #include "BLI_set.hh"
 #include "BLI_string_ref.hh"
 
+#include "BKE_grease_pencil.hh"
 #include "BKE_idprop.hh"
 #include "BKE_main.h"
 #include "BKE_mesh_legacy_convert.h"
@@ -45,7 +46,7 @@
 
 void do_versions_after_linking_400(FileData * /*fd*/, Main *bmain)
 {
-  if (!MAIN_VERSION_ATLEAST(bmain, 400, 9)) {
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 400, 9)) {
     /* Fix area light scaling. */
     LISTBASE_FOREACH (Light *, light, &bmain->lights) {
       light->energy = light->energy_deprecated;
@@ -267,20 +268,20 @@ static void version_replace_texcoord_normal_socket(bNodeTree *ntree)
 
 void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
 {
-  if (!MAIN_VERSION_ATLEAST(bmain, 400, 1)) {
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 400, 1)) {
     LISTBASE_FOREACH (Mesh *, mesh, &bmain->meshes) {
       version_mesh_legacy_to_struct_of_array_format(*mesh);
     }
     version_movieclips_legacy_camera_object(bmain);
   }
 
-  if (!MAIN_VERSION_ATLEAST(bmain, 400, 2)) {
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 400, 2)) {
     LISTBASE_FOREACH (Mesh *, mesh, &bmain->meshes) {
       BKE_mesh_legacy_bevel_weight_to_generic(mesh);
     }
   }
 
-  if (!MAIN_VERSION_ATLEAST(bmain, 400, 3)) {
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 400, 3)) {
     LISTBASE_FOREACH (bNodeTree *, ntree, &bmain->nodetrees) {
       if (ntree->type == NTREE_GEOMETRY) {
         version_geometry_nodes_add_realize_instance_nodes(ntree);
@@ -290,7 +291,7 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
 
   /* 400 4 did not require any do_version here. */
 
-  if (!MAIN_VERSION_ATLEAST(bmain, 400, 5)) {
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 400, 5)) {
     LISTBASE_FOREACH (Scene *, scene, &bmain->scenes) {
       ToolSettings *ts = scene->toolsettings;
       if (ts->snap_mode_tools != SCE_SNAP_TO_NONE) {
@@ -306,7 +307,7 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
     }
   }
 
-  if (!MAIN_VERSION_ATLEAST(bmain, 400, 6)) {
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 400, 6)) {
     LISTBASE_FOREACH (Mesh *, mesh, &bmain->meshes) {
       BKE_mesh_legacy_face_map_to_generic(mesh);
     }
@@ -317,20 +318,20 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
     FOREACH_NODETREE_END;
   }
 
-  if (!MAIN_VERSION_ATLEAST(bmain, 400, 7)) {
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 400, 7)) {
     LISTBASE_FOREACH (Mesh *, mesh, &bmain->meshes) {
       version_mesh_crease_generic(*bmain);
     }
   }
 
-  if (!MAIN_VERSION_ATLEAST(bmain, 400, 8)) {
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 400, 8)) {
     LISTBASE_FOREACH (bAction *, act, &bmain->actions) {
       act->frame_start = max_ff(act->frame_start, MINAFRAMEF);
       act->frame_end = min_ff(act->frame_end, MAXFRAMEF);
     }
   }
 
-  if (!MAIN_VERSION_ATLEAST(bmain, 400, 9)) {
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 400, 9)) {
     LISTBASE_FOREACH (Light *, light, &bmain->lights) {
       if (light->type == LA_SPOT && light->nodetree) {
         version_replace_texcoord_normal_socket(light->nodetree);
@@ -345,7 +346,7 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
     }
   }
 
-  if (!MAIN_VERSION_ATLEAST(bmain, 400, 10)) {
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 400, 10)) {
     LISTBASE_FOREACH (bScreen *, screen, &bmain->screens) {
       LISTBASE_FOREACH (ScrArea *, area, &screen->areabase) {
         LISTBASE_FOREACH (SpaceLink *, space, &area->spacedata) {
@@ -358,7 +359,7 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
     }
   }
 
-  if (!MAIN_VERSION_ATLEAST(bmain, 400, 11)) {
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 400, 11)) {
     version_vertex_weight_edit_preserve_threshold_exclusivity(bmain);
   }
 
@@ -402,6 +403,13 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
       const int R_IMF_FLAG_ZBUF_LEGACY = 1 << 0;
       LISTBASE_FOREACH (Scene *, scene, &bmain->scenes) {
         scene->r.im_format.flag &= ~R_IMF_FLAG_ZBUF_LEGACY;
+      }
+    }
+
+    /* Reset the layer opacity for all layers to 1. */
+    LISTBASE_FOREACH (GreasePencil *, grease_pencil, &bmain->grease_pencils) {
+      for (blender::bke::greasepencil::Layer *layer : grease_pencil->layers_for_write()) {
+        layer->opacity = 1.0f;
       }
     }
   }
