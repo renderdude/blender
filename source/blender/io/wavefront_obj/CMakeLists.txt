@@ -9,11 +9,9 @@ set(INC
   ../common
   ../../bmesh
   ../../bmesh/intern
-  ../../depsgraph
   ../../editors/include
   ../../makesrna
   ../../nodes
-  ../../windowmanager
 )
 
 set(INC_SYS
@@ -56,9 +54,11 @@ set(SRC
 set(LIB
   PRIVATE bf::blenkernel
   PRIVATE bf::blenlib
+  PRIVATE bf::depsgraph
   PRIVATE bf::dna
   PRIVATE bf::intern::guardedalloc
   bf_io_common
+  PRIVATE bf::windowmanager
   extern_fmtlib
 )
 

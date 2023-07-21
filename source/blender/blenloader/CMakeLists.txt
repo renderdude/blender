@@ -4,9 +4,6 @@
 
 set(INC
   .
-  ../blenfont
-  ../blentranslation
-  ../depsgraph
   ../draw
   ../editors/include
   ../gpu
@@ -15,8 +12,6 @@ set(INC
   ../nodes
   ../render
   ../sequencer
-  ../windowmanager
-  ../../../intern/clog
   ../bmesh
 
   # RNA_prototypes.h
@@ -59,10 +54,15 @@ set(SRC
 )
 
 set(LIB
+  PRIVATE bf::blenfont
   PRIVATE bf::blenkernel
   PRIVATE bf::blenlib
+  PRIVATE bf::blentranslation
+  PRIVATE bf::depsgraph
   PRIVATE bf::dna
+  PRIVATE bf::intern::clog
   PRIVATE bf::intern::guardedalloc
+  PRIVATE bf::windowmanager
 )
 
 if(WITH_BUILDINFO)

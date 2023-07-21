@@ -6,10 +6,7 @@ set(INC
   ../include
   ../../asset_system
   ../../blenloader
-  ../../blentranslation
   ../../makesrna
-  ../../windowmanager
-  ../../../../intern/clog
   ../../bmesh
 )
 
@@ -27,6 +24,7 @@ set(SRC
 set(LIB
   PRIVATE bf::blenkernel
   PRIVATE bf::blenlib
+  PRIVATE bf::blentranslation
   PRIVATE bf::dna
   bf_editor_curve
   bf_editor_curves
@@ -34,7 +32,9 @@ set(LIB
   bf_editor_mesh
   bf_editor_metaball
   bf_editor_physics
+  PRIVATE bf::intern::clog
   PRIVATE bf::intern::guardedalloc
+  PRIVATE bf::windowmanager
 )
 
 blender_add_lib(bf_editor_undo "${SRC}" "${INC}" "${INC_SYS}" "${LIB}")

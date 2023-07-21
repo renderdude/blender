@@ -6,10 +6,7 @@ set(INC
   .
   ../include
   ../../asset_system
-  ../../blenfont
   ../../blenloader
-  ../../blentranslation
-  ../../depsgraph
   ../../draw
   ../../functions
   ../../gpu
@@ -18,7 +15,6 @@ set(INC
   ../../nodes
   ../../python
   ../../render
-  ../../windowmanager
   ../../../../intern/ghost
   ../../../../extern/fmtlib/include
   ../../bmesh
@@ -94,11 +90,15 @@ set(SRC
 )
 
 set(LIB
+  PRIVATE bf::blenfont
   PRIVATE bf::blenkernel
   PRIVATE bf::blenlib
+  PRIVATE bf::blentranslation
+  PRIVATE bf::depsgraph
   PRIVATE bf::dna
   bf_editor_datafiles
   PRIVATE bf::intern::guardedalloc
+  PRIVATE bf::windowmanager
 )
 
 if(WITH_INTERNATIONAL)

@@ -5,11 +5,8 @@
 set(INC
   PUBLIC .
   ../asset_system
-  ../blenfont
   ../blenloader
-  ../blentranslation
   ../bmesh
-  ../depsgraph
   ../draw
   ../functions
   ../gpencil_modifiers_legacy
@@ -26,7 +23,6 @@ set(INC
   ../../../intern/eigen
   ../../../intern/ghost
   ../../../intern/iksolver/extern
-  ../../../intern/clog
   ../../../intern/libmv
   ../../../intern/mantaflow/extern
   ../../../intern/memutil
@@ -526,12 +522,12 @@ set(SRC
 
 set(LIB
   bf_asset_system
-  bf_blenfont
+  PRIVATE bf::blenfont
   PRIVATE bf::blenlib
   bf_blenloader
-  bf_blentranslation
+  PRIVATE bf::blentranslation
   bf_bmesh
-  bf_depsgraph
+  PRIVATE bf::depsgraph
   PRIVATE bf::dna
   bf_draw
   bf_functions
@@ -539,7 +535,7 @@ set(LIB
   bf_gpu
   bf_ikplugin
   bf_imbuf
-  bf_intern_clog
+  PRIVATE bf::intern::clog
   bf_intern_ghost
   PRIVATE bf::intern::guardedalloc
   bf_intern_libmv  # Uses stub when disabled.

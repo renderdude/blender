@@ -4,13 +4,9 @@
 
 set(INC
   ../include
-  ../../blentranslation
   ../../bmesh
-  ../../depsgraph
   ../../gpu
   ../../makesrna
-  ../../windowmanager
-  ../../../../intern/clog
   ../../../../intern/eigen
   # RNA_prototypes.h
   ${CMAKE_BINARY_DIR}/source/blender/makesrna
@@ -42,8 +38,12 @@ set(SRC
 set(LIB
   PRIVATE bf::blenkernel
   PRIVATE bf::blenlib
+  PRIVATE bf::blentranslation
+  PRIVATE bf::depsgraph
   PRIVATE bf::dna
+  PRIVATE bf::intern::clog
   PRIVATE bf::intern::guardedalloc
+  PRIVATE bf::windowmanager
 )
 
 
