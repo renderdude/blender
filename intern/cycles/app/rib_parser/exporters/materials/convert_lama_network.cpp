@@ -435,6 +435,26 @@ void LamaNetwork::split_nodegraph()
     _shader_graph.second.push_back(node);
 }
 
+void LamaNetwork::map_renderman_to_mtlx()
+{
+  // With RenderMan 25, Pixar's Lama nodes have different names for some parameters
+  // (normals mostly). So force the names back to MaterialX names.
+  for (auto &params : _shader_graph.second) {
+    for (auto &pp : params.get_parameter_vector()) {
+      if ((pp->name == "diffuseNormal") || (pp->name == "sssNormal") ||
+          (pp->name == "sheenNormal") || (pp->name == "conductorNormal") ||
+          (pp->name == "dielectricNormal"))
+      {
+        pp->name = "normal";
+      }
+      else if ((pp->name == "diffuseColor") || (pp->name == "sssColor") ||
+               (pp->name == "sheenColor") || (pp->name == "emissionColor")) {
+        pp->name = "color";
+      }
+    }
+  }
+}
+
 void LamaNetwork::match_renderman_definitions()
 {
   // There's a few cases where the renderman definition of a parameter does not
@@ -585,6 +605,7 @@ void LamaNetwork::generate_mtlx_definition()
 {
   _lama_shader_graph.first = _shader_graph.first;
 
+  map_renderman_to_mtlx();
   split_nodegraph();
   remove_external_nodes();
   find_common_references();

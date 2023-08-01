@@ -1620,6 +1620,10 @@ void parse_files(Ri *target, std::vector<std::string> filenames)
       std::unique_ptr<Tokenizer> t = Tokenizer::create_from_file(fn, tok_error);
       if (t)
         parse(target, std::move(t));
+      else {
+        std::cerr << fn << ": No such file" << std::endl;
+        exit(-1);
+      }
     }
   }
 
