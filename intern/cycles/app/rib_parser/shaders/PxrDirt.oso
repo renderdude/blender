@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
 # Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrDirt.osl/obj/PxrDirt.oso
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrDirt.osl/obj/PxrDirt.oso
 shader PxrDirt	%meta{int,rfm_nodeid,1053280} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/geometry"} %meta{string,rfh_classification,"Pattern/Geometry"} 
 param	color	occluded	1 1 1		%meta{string,widget,"color"} %meta{string,page,"Dirt Color"} %meta{int,page_open,1} %meta{string,help,"Occluded shading color. The default is white.<br><br>occluded (color)"} %meta{string,label,"Occluded"}  %read{219,219} %write{2147483647,-1}
 param	color	unoccluded	0 0 0		%meta{string,widget,"color"} %meta{string,page,"Dirt Color"} %meta{string,help,"Unoccluded shading color. The default is black.<br><br>unoccluded (color)"} %meta{string,label,"Unoccluded"}  %read{219,219} %write{2147483647,-1}
@@ -255,19 +255,19 @@ code ___main___
 # PxrDirt.osl:198
 #     CreateOrthonormalBasis(N, t0, t1);
 	functioncall	$const7 52 	%line{198} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:42
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:42
 #     float fsign = (n[2] >= 0.0) ? 1.0 : -1.0;
-	compref		$tmp7 N $const2 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h"} %line{42} %argrw{"wrr"}
+	compref		$tmp7 N $const2 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h"} %line{42} %argrw{"wrr"}
 	ge		$tmp8 $tmp7 $const3 	%argrw{"wrr"}
 	if		$tmp8 24 25 	%argrw{"r"}
 	assign		___325_fsign $const8 	%argrw{"wr"}
 	assign		___325_fsign $const9 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:43
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:43
 #     float a = -1.0 / (fsign + n[2]);
 	compref		$tmp9 N $const2 	%line{43} %argrw{"wrr"}
 	add		$tmp10 ___325_fsign $tmp9 	%argrw{"wrr"}
 	div		___325_a $const9 $tmp10 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:44
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:44
 #     v2 = vector(n[0]*n[1]*a, fsign + n[1]*n[1]*a, -n[1]);
 	compref		$tmp11 N $const10 	%line{44} %argrw{"wrr"}
 	compref		$tmp12 N $const11 	%argrw{"wrr"}
@@ -281,7 +281,7 @@ code ___main___
 	compref		$tmp20 N $const11 	%argrw{"wrr"}
 	neg		$tmp21 $tmp20 	%argrw{"wr"}
 	vector		t1 $tmp14 $tmp19 $tmp21 	%argrw{"wrrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:45
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:45
 #     v1 = vector(1.0 + fsign*n[0]*n[0]*a, fsign*v2[0], -(fsign*n[0]));
 	compref		$tmp22 N $const10 	%line{45} %argrw{"wrr"}
 	mul		$tmp23 ___325_fsign $tmp22 	%argrw{"wrr"}
@@ -321,13 +321,13 @@ code ___main___
 #         point xi = stratifiedSample(i % numStrata, numStrataX, numStrataY, offset);
 	mod		$tmp38 ___334_i numStrata 	%line{208} %argrw{"wrr"}
 	functioncall	$const13 105 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:103
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:103
 #     int sx = stratum % numStrataX;
-	mod		___331_sx $tmp38 numStrataX 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h"} %line{103} %argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:104
+	mod		___331_sx $tmp38 numStrataX 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h"} %line{103} %argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:104
 #     int sy = stratum / numStrataX;
 	div		___331_sy $tmp38 numStrataX 	%line{104} %argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:107
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:107
 #     jitter.x = M_PI * (stratum + 1 + offset.x);
 	add		$tmp39 $tmp38 $const11 	%line{107} %argrw{"wrr"}
 	compref		$tmp40 offset $const10 	%argrw{"wrr"}
@@ -335,7 +335,7 @@ code ___main___
 	add		$tmp41 $tmp42 $tmp40 	%argrw{"wrr"}
 	mul		$tmp43 $const14 $tmp41 	%argrw{"wrr"}
 	compassign	___331_jitter $const10 $tmp43 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:108
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:108
 #     jitter.y = M_E * (stratum + 1 + offset.y);
 	add		$tmp44 $tmp38 $const11 	%line{108} %argrw{"wrr"}
 	compref		$tmp45 offset $const11 	%argrw{"wrr"}
@@ -343,21 +343,21 @@ code ___main___
 	add		$tmp46 $tmp47 $tmp45 	%argrw{"wrr"}
 	mul		$tmp48 $const15 $tmp46 	%argrw{"wrr"}
 	compassign	___331_jitter $const11 $tmp48 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:109
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:109
 #     jitter.x = jitter.x - floor(jitter.x);
 	compref		$tmp49 ___331_jitter $const10 	%line{109} %argrw{"wrr"}
 	compref		$tmp51 ___331_jitter $const10 	%argrw{"wrr"}
 	floor		$tmp50 $tmp51 	%argrw{"wr"}
 	sub		$tmp52 $tmp49 $tmp50 	%argrw{"wrr"}
 	compassign	___331_jitter $const10 $tmp52 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:110
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:110
 #     jitter.y = jitter.y - floor(jitter.y);
 	compref		$tmp53 ___331_jitter $const11 	%line{110} %argrw{"wrr"}
 	compref		$tmp55 ___331_jitter $const11 	%argrw{"wrr"}
 	floor		$tmp54 $tmp55 	%argrw{"wr"}
 	sub		$tmp56 $tmp53 $tmp54 	%argrw{"wrr"}
 	compassign	___331_jitter $const11 $tmp56 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:113
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:113
 #     xi.x = (sx + jitter.x) / numStrataX;
 	compref		$tmp57 ___331_jitter $const10 	%line{113} %argrw{"wrr"}
 	assign		$tmp59 ___331_sx 	%argrw{"wr"}
@@ -365,7 +365,7 @@ code ___main___
 	assign		$tmp61 numStrataX 	%argrw{"wr"}
 	div		$tmp60 $tmp58 $tmp61 	%argrw{"wrr"}
 	compassign	___331_xi $const10 $tmp60 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:114
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:114
 #     xi.y = (sy + jitter.y) / numStrataY;
 	compref		$tmp62 ___331_jitter $const11 	%line{114} %argrw{"wrr"}
 	assign		$tmp64 ___331_sy 	%argrw{"wr"}
@@ -373,7 +373,7 @@ code ___main___
 	assign		$tmp66 numStrataY 	%argrw{"wr"}
 	div		$tmp65 $tmp63 $tmp66 	%argrw{"wrr"}
 	compassign	___331_xi $const11 $tmp65 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:115
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:115
 #     return xi;
 	assign		___335_xi ___331_xi 	%line{115} %argrw{"wr"}
 # PxrDirt.osl:211
@@ -384,46 +384,46 @@ code ___main___
 # PxrDirt.osl:212
 #             dir = distributionSpherical(xi);
 	functioncall	$const16 131 	%line{212} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:76
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:76
 #     outDir[2] = 2.0 * xi[1] - 1.0;  // cosTheta
-	compref		$tmp69 ___335_xi $const11 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h"} %line{76} %argrw{"wrr"}
+	compref		$tmp69 ___335_xi $const11 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h"} %line{76} %argrw{"wrr"}
 	mul		$tmp70 $const17 $tmp69 	%argrw{"wrr"}
 	sub		$tmp71 $tmp70 $const8 	%argrw{"wrr"}
 	compassign	___328_outDir $const2 $tmp71 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:77
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:77
 #     float sinTheta = 1.0 - outDir[2] * outDir[2];  // actually sinTheta^2 here
 	compref		$tmp72 ___328_outDir $const2 	%line{77} %argrw{"wrr"}
 	compref		$tmp73 ___328_outDir $const2 	%argrw{"wrr"}
 	mul		$tmp74 $tmp72 $tmp73 	%argrw{"wrr"}
 	sub		___328_sinTheta $const8 $tmp74 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:79
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:79
 #     if (sinTheta > 0.0)
 	gt		$tmp75 ___328_sinTheta $const3 	%line{79} %argrw{"wrr"}
 	if		$tmp75 128 130 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:81
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:81
 #         sinTheta  = sqrt(sinTheta);
 	sqrt		___328_sinTheta ___328_sinTheta 	%line{81} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:82
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:82
 #         float phi = xi[0] * M_2PI;
 	compref		$tmp76 ___335_xi $const10 	%line{82} %argrw{"wrr"}
 	mul		___329_phi $tmp76 $const18 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:83
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:83
 #         outDir[0]  = sinTheta * cos(phi);
 	cos		$tmp77 ___329_phi 	%line{83} %argrw{"wr"}
 	mul		$tmp78 ___328_sinTheta $tmp77 	%argrw{"wrr"}
 	compassign	___328_outDir $const10 $tmp78 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:84
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:84
 #         outDir[1]  = sinTheta * sin(phi);
 	sin		$tmp79 ___329_phi 	%line{84} %argrw{"wr"}
 	mul		$tmp80 ___328_sinTheta $tmp79 	%argrw{"wrr"}
 	compassign	___328_outDir $const11 $tmp80 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:88
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:88
 #         outDir[0] = 0.0;
 	compassign	___328_outDir $const10 $const3 	%line{88} %argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:89
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:89
 #         outDir[1] = 0.0;
 	compassign	___328_outDir $const11 $const3 	%line{89} %argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:91
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:91
 #     return outDir;
 	assign		dir ___328_outDir 	%line{91} %argrw{"wr"}
 # PxrDirt.osl:215
@@ -449,27 +449,27 @@ code ___main___
 # PxrDirt.osl:219
 #                 dir = distributionCosine(xi, Nn, t0, t1, cosineSpread);
 	functioncall	$const19 166 	%line{219} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:51
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:51
 #     float e1 = xi[0] * M_2PI;
-	compref		$tmp85 ___335_xi $const10 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h"} %line{51} %argrw{"wrr"}
+	compref		$tmp85 ___335_xi $const10 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h"} %line{51} %argrw{"wrr"}
 	mul		___326_e1 $tmp85 $const18 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:52
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:52
 #     float z = sqrt(xi[1]);
 	compref		$tmp86 ___335_xi $const11 	%line{52} %argrw{"wrr"}
 	sqrt		___326_z $tmp86 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:53
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:53
 #     float r = spread * sqrt(max(0.0, 1.0 - xi[1]));
 	compref		$tmp89 ___335_xi $const11 	%line{53} %argrw{"wrr"}
 	sub		$tmp90 $const8 $tmp89 	%argrw{"wrr"}
 	max		$tmp88 $const3 $tmp90 	%argrw{"wrr"}
 	sqrt		$tmp87 $tmp88 	%argrw{"wr"}
 	mul		___326_r cosineSpread $tmp87 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:54
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:54
 #     if (z < 1.e-12) z = 1.e-12;
 	lt		$tmp91 ___326_z $const20 	%line{54} %argrw{"wrr"}
 	if		$tmp91 156 156 	%argrw{"r"}
 	assign		___326_z $const20 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:55
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:55
 #     vector outDir = r * cos(e1) * t0 + r * sin(e1) * t1 + z * n;
 	cos		$tmp92 ___326_e1 	%line{55} %argrw{"wr"}
 	mul		$tmp93 ___326_r $tmp92 	%argrw{"wrr"}
@@ -480,46 +480,46 @@ code ___main___
 	add		$tmp98 $tmp94 $tmp97 	%argrw{"wrr"}
 	mul		$tmp99 ___326_z ___336_Nn 	%argrw{"wrr"}
 	add		___326_outDir $tmp98 $tmp99 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:56
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:56
 #     return normalize(outDir);
 	normalize	dir ___326_outDir 	%line{56} %argrw{"wr"}
 # PxrDirt.osl:221
 #                 dir = distributionUniform(xi, Nn, t0, t1);
 	functioncall	$const21 187 	%filename{"PxrDirt.osl"} %line{221} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:62
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:62
 #     float e1 = xi[0] * M_2PI;
-	compref		$tmp100 ___335_xi $const10 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h"} %line{62} %argrw{"wrr"}
+	compref		$tmp100 ___335_xi $const10 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h"} %line{62} %argrw{"wrr"}
 	mul		___327_e1 $tmp100 $const18 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:63
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:63
 #     float z = xi[1];
 	compref		___327_z ___335_xi $const11 	%line{63} %argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:64
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:64
 #     float r = sqrt(max(0.0, 1.0 - z * z));
 	mul		$tmp102 ___327_z ___327_z 	%line{64} %argrw{"wrr"}
 	sub		$tmp103 $const8 $tmp102 	%argrw{"wrr"}
 	max		$tmp101 $const3 $tmp103 	%argrw{"wrr"}
 	sqrt		___327_r $tmp101 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:65
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:65
 #     float x = r * cos(e1);
 	cos		$tmp104 ___327_e1 	%line{65} %argrw{"wr"}
 	mul		___327_x ___327_r $tmp104 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:66
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:66
 #     float y = r * sin(e1);
 	sin		$tmp105 ___327_e1 	%line{66} %argrw{"wr"}
 	mul		___327_y ___327_r $tmp105 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:67
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:67
 #     if (z < 1.e-12) z = 1.e-12;
 	lt		$tmp106 ___327_z $const20 	%line{67} %argrw{"wrr"}
 	if		$tmp106 181 181 	%argrw{"r"}
 	assign		___327_z $const20 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:68
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:68
 #     vector outDir = x * t0 + y * t1 + z * n;
 	mul		$tmp107 ___327_x t0 	%line{68} %argrw{"wrr"}
 	mul		$tmp108 ___327_y t1 	%argrw{"wrr"}
 	add		$tmp109 $tmp107 $tmp108 	%argrw{"wrr"}
 	mul		$tmp110 ___327_z ___336_Nn 	%argrw{"wrr"}
 	add		___327_outDir $tmp109 $tmp110 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:69
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:69
 #     return outDir;
 	assign		dir ___327_outDir 	%line{69} %argrw{"wr"}
 # PxrDirt.osl:223
@@ -529,13 +529,13 @@ code ___main___
 # PxrDirt.osl:227
 #                         "mindist", autoBias(N, dir),
 	functioncall	$const23 198 	%line{227} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:122
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:122
 #     getattribute("builtin", "biasR", biasR);
-	getattribute	$tmp113 $const24 $const25 ___332_biasR 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h"} %line{122} %argrw{"wrrw"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:123
+	getattribute	$tmp113 $const24 $const25 ___332_biasR 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h"} %line{122} %argrw{"wrrw"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:123
 #     getattribute("builtin", "biasT", biasT);
 	getattribute	$tmp114 $const24 $const26 ___332_biasT 	%line{123} %argrw{"wrrw"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:124
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:124
 #     return dot(n, dir) < 0.0 ? biasT : biasR;
 	dot		$tmp115 N dir 	%line{124} %argrw{"wrr"}
 	lt		$tmp116 $tmp115 $const3 	%argrw{"wrr"}

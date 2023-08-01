@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
 # Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrSetRange.osl/obj/PxrSetRange.oso
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrSetRange.osl/obj/PxrSetRange.oso
 shader PxrSetRange	%meta{int,rfm_nodeid,1233493} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/color"} %meta{string,rfh_classification,"Pattern/Color"} 
 param	int	operation	1		%meta{string,label,"Operation"} %meta{string,widget,"mapper"} %meta{string,options,"No operation:0|Compress:1|Expand:2|Fit:3"} %meta{int,connectable,0} %meta{string,help,"Compress: Remaps input in [0,1] to [outputMin, outputMax]<br>Expand: Remaps input in [inputMin, inputMax] to [0,1]<br>Fit: Remaps input from the range [inputMin, inputMax] to the range [outputMin, outputMax]<br>"}  %read{2,78} %write{2147483647,-1}
 param	color	input	0 0 0		%meta{string,label,"Input"} %meta{int,color_enableFilmlookVis,0}  %read{5,126} %write{2147483647,-1} %derivs
@@ -154,152 +154,152 @@ temp	float	$tmp120	%read{184,184} %write{183,183} %derivs
 temp	float	$tmp121	%read{188,188} %write{187,187} %derivs
 temp	float	$tmp122	%read{187,187} %write{186,186} %derivs
 code ___main___
-# PxrSetRange.osl:234
+# PxrSetRange.osl:189
 #     color cmin = BLACK;
-	assign		cmin $const1 	%filename{"PxrSetRange.osl"} %line{234} %argrw{"wr"}
-# PxrSetRange.osl:235
+	assign		cmin $const1 	%filename{"PxrSetRange.osl"} %line{189} %argrw{"wr"}
+# PxrSetRange.osl:190
 #     color cmax = WHITE;
-	assign		cmax $const2 	%line{235} %argrw{"wr"}
-# PxrSetRange.osl:236
+	assign		cmax $const2 	%line{190} %argrw{"wr"}
+# PxrSetRange.osl:191
 #     if (operation == k_compress)
-	eq		$tmp1 operation $const3 	%line{236} %argrw{"wrr"}
+	eq		$tmp1 operation $const3 	%line{191} %argrw{"wrr"}
 	if		$tmp1 29 127 	%argrw{"r"}
-# PxrSetRange.osl:238
+# PxrSetRange.osl:193
 #         resultRGB = compress(input, outputMin, outputMax);
-	functioncall	$const4 27 	%line{238} %argrw{"r"}
-# PxrSetRange.osl:69
+	functioncall	$const4 27 	%line{193} %argrw{"r"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:163
 #     return color(compress(x[0], lo[0], hi[0]),
-	compref		$tmp3 input $const5 	%line{69} %argrw{"wrr"}
+	compref		$tmp3 input $const5 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h"} %line{163} %argrw{"wrr"}
 	compref		$tmp4 outputMin $const5 	%argrw{"wrr"}
 	compref		$tmp5 outputMax $const5 	%argrw{"wrr"}
 	functioncall	$const4 12 	%argrw{"r"}
-# PxrSetRange.osl:64
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:158
 #     return (hi - lo) * x + lo;
-	sub		$tmp6 $tmp5 $tmp4 	%line{64} %argrw{"wrr"}
+	sub		$tmp6 $tmp5 $tmp4 	%line{158} %argrw{"wrr"}
 	mul		$tmp7 $tmp6 $tmp3 	%argrw{"wrr"}
 	add		$tmp2 $tmp7 $tmp4 	%argrw{"wrr"}
-# PxrSetRange.osl:70
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:164
 #                  compress(x[1], lo[1], hi[1]),
-	compref		$tmp9 input $const3 	%line{70} %argrw{"wrr"}
+	compref		$tmp9 input $const3 	%line{164} %argrw{"wrr"}
 	compref		$tmp10 outputMin $const3 	%argrw{"wrr"}
 	compref		$tmp11 outputMax $const3 	%argrw{"wrr"}
 	functioncall	$const4 19 	%argrw{"r"}
-# PxrSetRange.osl:64
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:158
 #     return (hi - lo) * x + lo;
-	sub		$tmp12 $tmp11 $tmp10 	%line{64} %argrw{"wrr"}
+	sub		$tmp12 $tmp11 $tmp10 	%line{158} %argrw{"wrr"}
 	mul		$tmp13 $tmp12 $tmp9 	%argrw{"wrr"}
 	add		$tmp8 $tmp13 $tmp10 	%argrw{"wrr"}
-# PxrSetRange.osl:71
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:165
 #                  compress(x[2], lo[2], hi[2]));
-	compref		$tmp15 input $const6 	%line{71} %argrw{"wrr"}
+	compref		$tmp15 input $const6 	%line{165} %argrw{"wrr"}
 	compref		$tmp16 outputMin $const6 	%argrw{"wrr"}
 	compref		$tmp17 outputMax $const6 	%argrw{"wrr"}
 	functioncall	$const4 26 	%argrw{"r"}
-# PxrSetRange.osl:64
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:158
 #     return (hi - lo) * x + lo;
-	sub		$tmp18 $tmp17 $tmp16 	%line{64} %argrw{"wrr"}
+	sub		$tmp18 $tmp17 $tmp16 	%line{158} %argrw{"wrr"}
 	mul		$tmp19 $tmp18 $tmp15 	%argrw{"wrr"}
 	add		$tmp14 $tmp19 $tmp16 	%argrw{"wrr"}
-# PxrSetRange.osl:69
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:163
 #     return color(compress(x[0], lo[0], hi[0]),
-	color		resultRGB $tmp2 $tmp8 $tmp14 	%line{69} %argrw{"wrrr"}
-# PxrSetRange.osl:239
+	color		resultRGB $tmp2 $tmp8 $tmp14 	%line{163} %argrw{"wrrr"}
+# PxrSetRange.osl:194
 #         cmin = outputMin;
-	assign		cmin outputMin 	%line{239} %argrw{"wr"}
-# PxrSetRange.osl:240
+	assign		cmin outputMin 	%filename{"PxrSetRange.osl"} %line{194} %argrw{"wr"}
+# PxrSetRange.osl:195
 #         cmax = outputMax;
-	assign		cmax outputMax 	%line{240} %argrw{"wr"}
-# PxrSetRange.osl:242
+	assign		cmax outputMax 	%line{195} %argrw{"wr"}
+# PxrSetRange.osl:197
 #     else if (operation == k_expand)
-	eq		$tmp20 operation $const6 	%line{242} %argrw{"wrr"}
+	eq		$tmp20 operation $const6 	%line{197} %argrw{"wrr"}
 	if		$tmp20 78 127 	%argrw{"r"}
-# PxrSetRange.osl:244
+# PxrSetRange.osl:199
 #         resultRGB = expand(input, inputMin, inputMax);
-	functioncall	$const7 78 	%line{244} %argrw{"r"}
-# PxrSetRange.osl:84
+	functioncall	$const7 78 	%line{199} %argrw{"r"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:178
 #     return color(expand(x[0], lo[0], hi[0]),
-	compref		$tmp22 input $const5 	%line{84} %argrw{"wrr"}
+	compref		$tmp22 input $const5 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h"} %line{178} %argrw{"wrr"}
 	compref		$tmp23 inputMin $const5 	%argrw{"wrr"}
 	compref		$tmp24 inputMax $const5 	%argrw{"wrr"}
 	functioncall	$const7 47 	%argrw{"r"}
-# PxrSetRange.osl:78
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:172
 # 	if (lo == hi) return x < lo ? 0.0 : 1.0;
-	eq		$tmp25 $tmp23 $tmp24 	%line{78} %argrw{"wrr"}
+	eq		$tmp25 $tmp23 $tmp24 	%line{172} %argrw{"wrr"}
 	if		$tmp25 43 43 	%argrw{"r"}
 	lt		$tmp26 $tmp22 $tmp23 	%argrw{"wrr"}
 	if		$tmp26 41 42 	%argrw{"r"}
 	assign		$tmp21 $const8 	%argrw{"wr"}
 	assign		$tmp21 $const9 	%argrw{"wr"}
 	return
-# PxrSetRange.osl:79
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:173
 # 	return (x - lo) / (hi - lo);
-	sub		$tmp27 $tmp22 $tmp23 	%line{79} %argrw{"wrr"}
+	sub		$tmp27 $tmp22 $tmp23 	%line{173} %argrw{"wrr"}
 	sub		$tmp28 $tmp24 $tmp23 	%argrw{"wrr"}
 	div		$tmp21 $tmp27 $tmp28 	%argrw{"wrr"}
 	return
-# PxrSetRange.osl:85
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:179
 #                  expand(x[1], lo[1], hi[1]),
-	compref		$tmp30 input $const3 	%line{85} %argrw{"wrr"}
+	compref		$tmp30 input $const3 	%line{179} %argrw{"wrr"}
 	compref		$tmp31 inputMin $const3 	%argrw{"wrr"}
 	compref		$tmp32 inputMax $const3 	%argrw{"wrr"}
 	functioncall	$const7 62 	%argrw{"r"}
-# PxrSetRange.osl:78
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:172
 # 	if (lo == hi) return x < lo ? 0.0 : 1.0;
-	eq		$tmp33 $tmp31 $tmp32 	%line{78} %argrw{"wrr"}
+	eq		$tmp33 $tmp31 $tmp32 	%line{172} %argrw{"wrr"}
 	if		$tmp33 58 58 	%argrw{"r"}
 	lt		$tmp34 $tmp30 $tmp31 	%argrw{"wrr"}
 	if		$tmp34 56 57 	%argrw{"r"}
 	assign		$tmp29 $const8 	%argrw{"wr"}
 	assign		$tmp29 $const9 	%argrw{"wr"}
 	return
-# PxrSetRange.osl:79
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:173
 # 	return (x - lo) / (hi - lo);
-	sub		$tmp35 $tmp30 $tmp31 	%line{79} %argrw{"wrr"}
+	sub		$tmp35 $tmp30 $tmp31 	%line{173} %argrw{"wrr"}
 	sub		$tmp36 $tmp32 $tmp31 	%argrw{"wrr"}
 	div		$tmp29 $tmp35 $tmp36 	%argrw{"wrr"}
 	return
-# PxrSetRange.osl:86
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:180
 #                  expand(x[2], lo[2], hi[2]));
-	compref		$tmp38 input $const6 	%line{86} %argrw{"wrr"}
+	compref		$tmp38 input $const6 	%line{180} %argrw{"wrr"}
 	compref		$tmp39 inputMin $const6 	%argrw{"wrr"}
 	compref		$tmp40 inputMax $const6 	%argrw{"wrr"}
 	functioncall	$const7 77 	%argrw{"r"}
-# PxrSetRange.osl:78
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:172
 # 	if (lo == hi) return x < lo ? 0.0 : 1.0;
-	eq		$tmp41 $tmp39 $tmp40 	%line{78} %argrw{"wrr"}
+	eq		$tmp41 $tmp39 $tmp40 	%line{172} %argrw{"wrr"}
 	if		$tmp41 73 73 	%argrw{"r"}
 	lt		$tmp42 $tmp38 $tmp39 	%argrw{"wrr"}
 	if		$tmp42 71 72 	%argrw{"r"}
 	assign		$tmp37 $const8 	%argrw{"wr"}
 	assign		$tmp37 $const9 	%argrw{"wr"}
 	return
-# PxrSetRange.osl:79
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:173
 # 	return (x - lo) / (hi - lo);
-	sub		$tmp43 $tmp38 $tmp39 	%line{79} %argrw{"wrr"}
+	sub		$tmp43 $tmp38 $tmp39 	%line{173} %argrw{"wrr"}
 	sub		$tmp44 $tmp40 $tmp39 	%argrw{"wrr"}
 	div		$tmp37 $tmp43 $tmp44 	%argrw{"wrr"}
 	return
-# PxrSetRange.osl:84
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:178
 #     return color(expand(x[0], lo[0], hi[0]),
-	color		resultRGB $tmp21 $tmp29 $tmp37 	%line{84} %argrw{"wrrr"}
-# PxrSetRange.osl:246
+	color		resultRGB $tmp21 $tmp29 $tmp37 	%line{178} %argrw{"wrrr"}
+# PxrSetRange.osl:201
 #     else if (operation == k_fit)
-	eq		$tmp45 operation $const10 	%line{246} %argrw{"wrr"}
+	eq		$tmp45 operation $const10 	%filename{"PxrSetRange.osl"} %line{201} %argrw{"wrr"}
 	if		$tmp45 126 127 	%argrw{"r"}
-# PxrSetRange.osl:248
+# PxrSetRange.osl:203
 #         resultRGB = fit(input, inputMin, inputMax, outputMin, outputMax);
-	functioncall	$const11 124 	%line{248} %argrw{"r"}
-# PxrSetRange.osl:100
+	functioncall	$const11 124 	%line{203} %argrw{"r"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:194
 #     return color(fit(x[0], a1[0], b1[0], a2[0], b2[0]),
-	compref		$tmp47 input $const5 	%line{100} %argrw{"wrr"}
+	compref		$tmp47 input $const5 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h"} %line{194} %argrw{"wrr"}
 	compref		$tmp48 inputMin $const5 	%argrw{"wrr"}
 	compref		$tmp49 inputMax $const5 	%argrw{"wrr"}
 	compref		$tmp50 outputMin $const5 	%argrw{"wrr"}
 	compref		$tmp51 outputMax $const5 	%argrw{"wrr"}
 	functioncall	$const11 95 	%argrw{"r"}
-# PxrSetRange.osl:95
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:189
 # 	return (x * (b2 - a2) - a1 * b2 + b1 * a2) / (b1 - a1);
-	sub		$tmp52 $tmp51 $tmp50 	%line{95} %argrw{"wrr"}
+	sub		$tmp52 $tmp51 $tmp50 	%line{189} %argrw{"wrr"}
 	mul		$tmp53 $tmp47 $tmp52 	%argrw{"wrr"}
 	mul		$tmp54 $tmp48 $tmp51 	%argrw{"wrr"}
 	sub		$tmp55 $tmp53 $tmp54 	%argrw{"wrr"}
@@ -307,17 +307,17 @@ code ___main___
 	add		$tmp57 $tmp55 $tmp56 	%argrw{"wrr"}
 	sub		$tmp58 $tmp49 $tmp48 	%argrw{"wrr"}
 	div		$tmp46 $tmp57 $tmp58 	%argrw{"wrr"}
-# PxrSetRange.osl:101
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:195
 #                  fit(x[1], a1[1], b1[1], a2[1], b2[1]),
-	compref		$tmp60 input $const3 	%line{101} %argrw{"wrr"}
+	compref		$tmp60 input $const3 	%line{195} %argrw{"wrr"}
 	compref		$tmp61 inputMin $const3 	%argrw{"wrr"}
 	compref		$tmp62 inputMax $const3 	%argrw{"wrr"}
 	compref		$tmp63 outputMin $const3 	%argrw{"wrr"}
 	compref		$tmp64 outputMax $const3 	%argrw{"wrr"}
 	functioncall	$const11 109 	%argrw{"r"}
-# PxrSetRange.osl:95
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:189
 # 	return (x * (b2 - a2) - a1 * b2 + b1 * a2) / (b1 - a1);
-	sub		$tmp65 $tmp64 $tmp63 	%line{95} %argrw{"wrr"}
+	sub		$tmp65 $tmp64 $tmp63 	%line{189} %argrw{"wrr"}
 	mul		$tmp66 $tmp60 $tmp65 	%argrw{"wrr"}
 	mul		$tmp67 $tmp61 $tmp64 	%argrw{"wrr"}
 	sub		$tmp68 $tmp66 $tmp67 	%argrw{"wrr"}
@@ -325,17 +325,17 @@ code ___main___
 	add		$tmp70 $tmp68 $tmp69 	%argrw{"wrr"}
 	sub		$tmp71 $tmp62 $tmp61 	%argrw{"wrr"}
 	div		$tmp59 $tmp70 $tmp71 	%argrw{"wrr"}
-# PxrSetRange.osl:102
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:196
 #                  fit(x[2], a1[2], b1[2], a2[2], b2[2]));
-	compref		$tmp73 input $const6 	%line{102} %argrw{"wrr"}
+	compref		$tmp73 input $const6 	%line{196} %argrw{"wrr"}
 	compref		$tmp74 inputMin $const6 	%argrw{"wrr"}
 	compref		$tmp75 inputMax $const6 	%argrw{"wrr"}
 	compref		$tmp76 outputMin $const6 	%argrw{"wrr"}
 	compref		$tmp77 outputMax $const6 	%argrw{"wrr"}
 	functioncall	$const11 123 	%argrw{"r"}
-# PxrSetRange.osl:95
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:189
 # 	return (x * (b2 - a2) - a1 * b2 + b1 * a2) / (b1 - a1);
-	sub		$tmp78 $tmp77 $tmp76 	%line{95} %argrw{"wrr"}
+	sub		$tmp78 $tmp77 $tmp76 	%line{189} %argrw{"wrr"}
 	mul		$tmp79 $tmp73 $tmp78 	%argrw{"wrr"}
 	mul		$tmp80 $tmp74 $tmp77 	%argrw{"wrr"}
 	sub		$tmp81 $tmp79 $tmp80 	%argrw{"wrr"}
@@ -343,59 +343,59 @@ code ___main___
 	add		$tmp83 $tmp81 $tmp82 	%argrw{"wrr"}
 	sub		$tmp84 $tmp75 $tmp74 	%argrw{"wrr"}
 	div		$tmp72 $tmp83 $tmp84 	%argrw{"wrr"}
-# PxrSetRange.osl:100
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:194
 #     return color(fit(x[0], a1[0], b1[0], a2[0], b2[0]),
-	color		resultRGB $tmp46 $tmp59 $tmp72 	%line{100} %argrw{"wrrr"}
-# PxrSetRange.osl:249
+	color		resultRGB $tmp46 $tmp59 $tmp72 	%line{194} %argrw{"wrrr"}
+# PxrSetRange.osl:204
 #         cmin = outputMin;
-	assign		cmin outputMin 	%line{249} %argrw{"wr"}
-# PxrSetRange.osl:250
+	assign		cmin outputMin 	%filename{"PxrSetRange.osl"} %line{204} %argrw{"wr"}
+# PxrSetRange.osl:205
 #         cmax = outputMax;
-	assign		cmax outputMax 	%line{250} %argrw{"wr"}
-# PxrSetRange.osl:254
+	assign		cmax outputMax 	%line{205} %argrw{"wr"}
+# PxrSetRange.osl:209
 #         resultRGB = input;
-	assign		resultRGB input 	%line{254} %argrw{"wr"}
-# PxrSetRange.osl:257
+	assign		resultRGB input 	%line{209} %argrw{"wr"}
+# PxrSetRange.osl:212
 #     if (clampResult)
-	if		clampResult 190 190 	%line{257} %argrw{"r"}
-# PxrSetRange.osl:259
+	if		clampResult 190 190 	%line{212} %argrw{"r"}
+# PxrSetRange.osl:214
 #         resultRGB = Color_filteredClamp(resultRGB, cmin, cmax, clampFilterWidth);
-	functioncall	$const12 190 	%line{259} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:210
+	functioncall	$const12 190 	%line{214} %argrw{"r"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:210
 #     if (fwidth <= 0.0) return clamp(c, cmin, cmax);
-	le		$tmp85 clampFilterWidth $const8 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{210} %argrw{"wrr"}
+	le		$tmp85 clampFilterWidth $const8 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{210} %argrw{"wrr"}
 	if		$tmp85 135 135 	%argrw{"r"}
 	functioncall	$const13 134 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp86 resultRGB cmax 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	min		$tmp86 resultRGB cmax 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
 	max		resultRGB $tmp86 cmin 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:210
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:210
 #     if (fwidth <= 0.0) return clamp(c, cmin, cmax);
-	return	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{210}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:211
+	return	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{210}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:211
 #     return color(Math_FilteredClamp(c[0], cmin[0], cmax[0], fwidth),
 	compref		$tmp88 resultRGB $const5 	%line{211} %argrw{"wrr"}
 	compref		$tmp89 cmin $const5 	%argrw{"wrr"}
 	compref		$tmp90 cmax $const5 	%argrw{"wrr"}
 	functioncall	$const14 153 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:615
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:615
 #     if (fwidth <= 0.0) return clamp(x, fmin, fmax);
-	le		$tmp91 clampFilterWidth $const8 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{615} %argrw{"wrr"}
+	le		$tmp91 clampFilterWidth $const8 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{615} %argrw{"wrr"}
 	if		$tmp91 145 145 	%argrw{"r"}
 	functioncall	$const13 144 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp92 $tmp88 $tmp90 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp92 $tmp88 $tmp90 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
 	max		$tmp87 $tmp92 $tmp89 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:615
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:615
 #     if (fwidth <= 0.0) return clamp(x, fmin, fmax);
-	return	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{615}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:616
+	return	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{615}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:616
 #     float w = filterwidth(x) * fwidth;
 	filterwidth	$tmp93 $tmp88 	%line{616} %argrw{"wr"} %argderivs{1}
 	mul		___387_w $tmp93 clampFilterWidth 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:617
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:617
 #     return mix(fmin, mix(x, fmax, smoothstep(fmax - w, fmax, x)), smoothstep(fmin, fmin + w, x));
 	sub		$tmp96 $tmp90 ___387_w 	%line{617} %argrw{"wrr"}
 	smoothstep	$tmp95 $tmp96 $tmp90 $tmp88 	%argrw{"wrrr"}
@@ -403,29 +403,29 @@ code ___main___
 	add		$tmp98 $tmp89 ___387_w 	%argrw{"wrr"}
 	smoothstep	$tmp97 $tmp89 $tmp98 $tmp88 	%argrw{"wrrr"}
 	mix		$tmp87 $tmp89 $tmp94 $tmp97 	%argrw{"wrrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:212
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:212
 #                  Math_FilteredClamp(c[1], cmin[1], cmax[1], fwidth),
-	compref		$tmp100 resultRGB $const3 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{212} %argrw{"wrr"}
+	compref		$tmp100 resultRGB $const3 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{212} %argrw{"wrr"}
 	compref		$tmp101 cmin $const3 	%argrw{"wrr"}
 	compref		$tmp102 cmax $const3 	%argrw{"wrr"}
 	functioncall	$const14 171 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:615
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:615
 #     if (fwidth <= 0.0) return clamp(x, fmin, fmax);
-	le		$tmp103 clampFilterWidth $const8 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{615} %argrw{"wrr"}
+	le		$tmp103 clampFilterWidth $const8 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{615} %argrw{"wrr"}
 	if		$tmp103 163 163 	%argrw{"r"}
 	functioncall	$const13 162 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp104 $tmp100 $tmp102 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp104 $tmp100 $tmp102 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
 	max		$tmp99 $tmp104 $tmp101 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:615
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:615
 #     if (fwidth <= 0.0) return clamp(x, fmin, fmax);
-	return	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{615}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:616
+	return	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{615}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:616
 #     float w = filterwidth(x) * fwidth;
 	filterwidth	$tmp105 $tmp100 	%line{616} %argrw{"wr"} %argderivs{1}
 	mul		___387_w $tmp105 clampFilterWidth 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:617
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:617
 #     return mix(fmin, mix(x, fmax, smoothstep(fmax - w, fmax, x)), smoothstep(fmin, fmin + w, x));
 	sub		$tmp108 $tmp102 ___387_w 	%line{617} %argrw{"wrr"}
 	smoothstep	$tmp107 $tmp108 $tmp102 $tmp100 	%argrw{"wrrr"}
@@ -433,29 +433,29 @@ code ___main___
 	add		$tmp110 $tmp101 ___387_w 	%argrw{"wrr"}
 	smoothstep	$tmp109 $tmp101 $tmp110 $tmp100 	%argrw{"wrrr"}
 	mix		$tmp99 $tmp101 $tmp106 $tmp109 	%argrw{"wrrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:213
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:213
 #                  Math_FilteredClamp(c[2], cmin[2], cmax[2], fwidth));
-	compref		$tmp112 resultRGB $const6 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{213} %argrw{"wrr"}
+	compref		$tmp112 resultRGB $const6 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{213} %argrw{"wrr"}
 	compref		$tmp113 cmin $const6 	%argrw{"wrr"}
 	compref		$tmp114 cmax $const6 	%argrw{"wrr"}
 	functioncall	$const14 189 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:615
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:615
 #     if (fwidth <= 0.0) return clamp(x, fmin, fmax);
-	le		$tmp115 clampFilterWidth $const8 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{615} %argrw{"wrr"}
+	le		$tmp115 clampFilterWidth $const8 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{615} %argrw{"wrr"}
 	if		$tmp115 181 181 	%argrw{"r"}
 	functioncall	$const13 180 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp116 $tmp112 $tmp114 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp116 $tmp112 $tmp114 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
 	max		$tmp111 $tmp116 $tmp113 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:615
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:615
 #     if (fwidth <= 0.0) return clamp(x, fmin, fmax);
-	return	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{615}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:616
+	return	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{615}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:616
 #     float w = filterwidth(x) * fwidth;
 	filterwidth	$tmp117 $tmp112 	%line{616} %argrw{"wr"} %argderivs{1}
 	mul		___387_w $tmp117 clampFilterWidth 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:617
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:617
 #     return mix(fmin, mix(x, fmax, smoothstep(fmax - w, fmax, x)), smoothstep(fmin, fmin + w, x));
 	sub		$tmp120 $tmp114 ___387_w 	%line{617} %argrw{"wrr"}
 	smoothstep	$tmp119 $tmp120 $tmp114 $tmp112 	%argrw{"wrrr"}
@@ -463,16 +463,16 @@ code ___main___
 	add		$tmp122 $tmp113 ___387_w 	%argrw{"wrr"}
 	smoothstep	$tmp121 $tmp113 $tmp122 $tmp112 	%argrw{"wrrr"}
 	mix		$tmp111 $tmp113 $tmp118 $tmp121 	%argrw{"wrrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:211
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:211
 #     return color(Math_FilteredClamp(c[0], cmin[0], cmax[0], fwidth),
-	color		resultRGB $tmp87 $tmp99 $tmp111 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{211} %argrw{"wrrr"}
-# PxrSetRange.osl:262
+	color		resultRGB $tmp87 $tmp99 $tmp111 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{211} %argrw{"wrrr"}
+# PxrSetRange.osl:217
 #     resultR = resultRGB[0];
-	compref		resultR resultRGB $const5 	%filename{"PxrSetRange.osl"} %line{262} %argrw{"wrr"}
-# PxrSetRange.osl:263
+	compref		resultR resultRGB $const5 	%filename{"PxrSetRange.osl"} %line{217} %argrw{"wrr"}
+# PxrSetRange.osl:218
 #     resultG = resultRGB[1];
-	compref		resultG resultRGB $const3 	%line{263} %argrw{"wrr"}
-# PxrSetRange.osl:264
+	compref		resultG resultRGB $const3 	%line{218} %argrw{"wrr"}
+# PxrSetRange.osl:219
 #     resultB = resultRGB[2];
-	compref		resultB resultRGB $const6 	%line{264} %argrw{"wrr"}
+	compref		resultB resultRGB $const6 	%line{219} %argrw{"wrr"}
 	end

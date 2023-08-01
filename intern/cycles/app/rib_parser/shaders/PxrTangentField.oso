@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
 # Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrTangentField.osl/obj/PxrTangentField.oso
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrTangentField.osl/obj/PxrTangentField.oso
 shader PxrTangentField	%meta{int,rfm_nodeid,1053348} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/geometry"} %meta{string,rfh_classification,"Pattern/Geometry"} %meta{string,help,"Defines a tangent field typically used to control anisotropic direction. InputRotation takes a single grayscale channel where black = 0 degrees and white = 360 degrees.InputVector takes a 2 channels map where the red channels is x and green is y. The blue channel is ignored. The vector method often gives better results by minimizing texture filtering artifacts. If such artifacts are too visible, use the 'nearest' texture filter. The 'nearest' filter disables entirely mip-mapping, so you should only us it with a low resolutiion map to avoid slowing down the renderer and consuming too much texture memory. "} 
 param	float	inputRotation	0		%meta{string,widget,"default"} %meta{string,help,"A single float value to rotate the shading tangent. This input will take precedence over inputVector"} %meta{string,label,"Input Rotation"}  %read{1,10} %write{2147483647,-1}
 param	color	inputVector	0 0 0		%meta{string,widget,"default"} %meta{string,help,"The red and green channels will be read as x and y coordinates of a 2d vector. If inputRotation is connected, this input will be ignored."} %meta{string,label,"Input Vector"}  %read{132,134} %write{2147483647,-1}
@@ -270,9 +270,9 @@ code ___main___
 	mul		$tmp5 $tmp4 rotationRange 	%argrw{"wrr"}
 	add		$tmp6 rotationOffset $tmp5 	%argrw{"wrr"}
 	functioncall	$const8 16 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:88
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:88
 # float  radians (float x)  { return x*(M_PI/180.0); }
-	div		$tmp7 $const9 $const10 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{88} %argrw{"wrr"}
+	div		$tmp7 $const9 $const10 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{88} %argrw{"wrr"}
 	mul		$tmp3 $tmp6 $tmp7 	%argrw{"wrr"}
 # PxrTangentField.osl:191
 #         rotate(dPds, radians(rotationOffset + inputRotation * 360.0 * rotationRange), P, N,
@@ -490,9 +490,9 @@ code ___main___
 # PxrTangentField.osl:210
 #         rotate(dPds, radians(rotationOffset) + rad * rotationRange, P, N, resultXYZ);
 	functioncall	$const8 154 	%line{210} %argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:88
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:88
 # float  radians (float x)  { return x*(M_PI/180.0); }
-	div		$tmp104 $const9 $const10 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{88} %argrw{"wrr"}
+	div		$tmp104 $const9 $const10 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{88} %argrw{"wrr"}
 	mul		$tmp103 rotationOffset $tmp104 	%argrw{"wrr"}
 # PxrTangentField.osl:210
 #         rotate(dPds, radians(rotationOffset) + rad * rotationRange, P, N, resultXYZ);

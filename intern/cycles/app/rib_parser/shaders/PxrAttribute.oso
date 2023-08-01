@@ -1,13 +1,13 @@
 OpenShadingLanguage 1.00
 # Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrAttribute.osl/obj/PxrAttribute.oso
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrAttribute.osl/obj/PxrAttribute.oso
 shader PxrAttribute	%meta{int,rfm_nodeid,1053260} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/utility"} %meta{string,rfh_classification,"Pattern/Utility"} 
 param	string	varname	""		%meta{string,widget,"default"} %meta{string,help,"varname (string)"} %meta{int,connectable,0} %meta{string,label,"Variable Name"}  %read{4,69} %write{2147483647,-1}
 param	string	type	"float"		%meta{string,widget,"mapper"} %meta{string,help,"type (string)"} %meta{string,options,"int:int|float:float|float2:float2|color:color|point:point|vector:vector|normal:normal"} %meta{int,connectable,0} %meta{string,label,"Variable Type"}  %read{1,54} %write{2147483647,-1}
 param	int	defaultInt	0		%meta{string,widget,"int"} %meta{string,help,"If there is an error when retrieving an attribute of type 'int', this is the value that<br>will be used.<br><br>defaultInt (int)"} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisPath,"../type"} %meta{string,conditionalVisValue,"int"} %meta{string,label,"Default Int"}  %read{3,3} %write{2147483647,-1}
 param	float	defaultFloat	0		%meta{string,widget,"float"} %meta{string,help,"If there is an error when retrieving an attribute of type 'float', this is the value that<br>will be used.<br><br>defaultFloat (float)"} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisPath,"../type"} %meta{string,conditionalVisValue,"float"} %meta{string,label,"Default Float"}  %read{12,12} %write{2147483647,-1}
 param	vector	defaultFloat3	0 0 0		%meta{string,widget,"vector"} %meta{string,help,"If there is an error when retrieving an attribute of type 'float2', 'normal', 'point' or<br>'vector', this is the value that will be used. For the type 'float2', only the first two<br>components will be used.<br><br>defaultFloat3 (vector)"} %meta{string,conditionalVisOp,"and"} %meta{string,conditionalVisLeft,"conditionalVis1"} %meta{string,conditionalVisRight,"conditionalVis2"} %meta{string,conditionalVis2Op,"and"} %meta{string,conditionalVis2Left,"conditionalVis3"} %meta{string,conditionalVis2Right,"conditionalVis4"} %meta{string,conditionalVis1Path,"../type"} %meta{string,conditionalVis1Op,"notEqualTo"} %meta{string,conditionalVis1Value,"int"} %meta{string,conditionalVis3Path,"../type"} %meta{string,conditionalVis3Op,"notEqualTo"} %meta{string,conditionalVis3Value,"float"} %meta{string,conditionalVis4Path,"../type"} %meta{string,conditionalVis4Op,"notEqualTo"} %meta{string,conditionalVis4Value,"color"} %meta{string,label,"Default Float3"}  %read{19,56} %write{2147483647,-1}
-param	color	defaultColor	0 0 0		%meta{string,widget,"color"} %meta{string,help,"If there is an error when retrieving an attribute of type 'normal', 'point' or 'vector',<br>this is the value that will be used.<br><br>defaultColor (color)"} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisPath,"../type"} %meta{string,conditionalVisValue,"color"} %meta{string,label,"Default Color"}  %read{2147483647,-1} %write{2147483647,-1}
+param	color	defaultColor	0 0 0		%meta{string,widget,"color"} %meta{string,help,"If there is an error when retrieving an attribute of type 'color',<br>this is the value that will be used.<br><br>defaultColor (color)"} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisPath,"../type"} %meta{string,conditionalVisValue,"color"} %meta{string,label,"Default Color"}  %read{32,32} %write{2147483647,-1}
 param	int	verbosity	0		%meta{string,widget,"mapper"} %meta{string,help,"Diagnostic output levels for scene debugging.<br><br>verbosity (int)"} %meta{string,options,"Silent:0|Warnings:1|Info:2"} %meta{int,connectable,0} %meta{string,label,"Verbosity"}  %read{65,65} %write{2147483647,-1}
 oparam	color	resultRGB	0 0 0		%meta{string,help,"resultRGB (color)"}  %read{2147483647,-1} %write{6,58}
 oparam	float	resultF	0		%meta{string,help,"resultF (float)"}  %read{2147483647,-1} %write{8,59}
@@ -127,8 +127,8 @@ code ___main___
 	eq		$tmp11 type $const7 	%line{159} %argrw{"wrr"}
 	if		$tmp11 38 62 	%argrw{"r"}
 # PxrAttribute.osl:161
-#         color val = color(defaultFloat3);
-	assign		___328_val defaultFloat3 	%line{161} %argrw{"wr"}
+#         color val = color(defaultColor);
+	assign		___328_val defaultColor 	%line{161} %argrw{"wr"}
 # PxrAttribute.osl:162
 #         success = getattribute(varname, val);
 	getattribute	success varname ___328_val 	%line{162} %argrw{"wrw"}

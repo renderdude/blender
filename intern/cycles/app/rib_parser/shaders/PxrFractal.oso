@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
 # Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrFractal.osl/obj/PxrFractal.oso
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrFractal.osl/obj/PxrFractal.oso
 shader PxrFractal	%meta{int,rfm_nodeid,1053421} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/texture"} %meta{string,rfh_classification,"Pattern/Texture"} %meta{string,help,"A fractal noise function."} 
 param	int	surfacePosition	0		%meta{string,widget,"mapper"} %meta{string,options,"Current Position:0|Un-Displaced Position:1"} %meta{string,help,"If you want your displacement pattern to match surface shading, use the undisplaced position. This is only active when there is no connected manifold. "} %meta{int,connectable,0} %meta{string,label,"Surface Position"}  %read{5,5} %write{2147483647,-1}
 param	int	noiseType	0		%meta{string,widget,"mapper"} %meta{string,options,"Perlin:0|Simplex:1|Gabor:2|Cell:3"} %meta{string,help,"Choose different noises for different results"} %meta{int,connectable,0} %meta{string,label,"Noise Type"}  %read{2673,5369} %write{2147483647,-1}
@@ -12,7 +12,7 @@ param	float	lacunarity	2		%meta{string,widget,"default"} %meta{string,help,"The 
 param	float	dimension	1		%meta{string,widget,"default"} %meta{string,help,"The frequency exponent. This value is used to scale the magnitude of each sucessive layer of noise using the formula 1/f^(3-2*Dimension); where f is the frequency of the noise being used for a given layer. It's called Dimension since this value relates to the fractal dimension. Bigger values are rougher, smaller values are smoother. "} %meta{string,label,"Dimension"} %meta{int,slider,1} %meta{float,slidermax,2} %meta{float,slidermin,0}  %read{2709,2709} %write{2147483647,-1} %derivs
 param	float	erosion	0		%meta{string,widget,"default"} %meta{string,help,"The frequency exponent range. The frequency exponent specified by the Dimension is itself offset as a function of the noise magnitude. This value adjusts that offset. This determines the so-called crossover scale of the fractal. 0 gives a uniform appearance. Negative values will smooth out the low valued areas, and positive values will smooth the high valued ones. "} %meta{string,label,"Erosion"} %meta{int,slider,1} %meta{float,slidermax,2} %meta{float,slidermin,-2}  %read{2711,2713} %write{2147483647,-1} %derivs
 param	float	variation	0		%meta{string,widget,"default"} %meta{string,help,"This value controls which particular variation of the appearance you get - without altering the qualities of the appearance determined by the other controls. So, for example, you can use this to animate the appearance by connecting this to Time, or create several unique instances of the appearance by setting this to differentvalues. "} %meta{string,label,"Variation"} %meta{int,slider,1} %meta{float,slidermax,2} %meta{float,slidermin,0}  %read{45,5380} %write{2147483647,-1} %derivs
-param	int	turbulent	0		%meta{string,widget,"mapper"} %meta{string,options,"Off:0|Classic:1|Detailed:2"} %meta{string,help,"Switch to a turbulent-like pattern"} %meta{int,connectable,0} %meta{string,label,"Turbulent"} %meta{int,max,1} %meta{int,min,0}  %read{25,5416} %write{2147483647,-1}
+param	int	turbulent	0		%meta{string,widget,"mapper"} %meta{string,options,"Off:0|Classic:1|Detailed:2"} %meta{string,help,"Switch to a turbulent-like pattern"} %meta{int,connectable,0} %meta{string,label,"Turbulent"} %meta{int,max,2} %meta{int,min,0}  %read{25,5416} %write{2147483647,-1}
 param	int	mode	0		%meta{string,widget,"mapper"} %meta{string,options,"Add:0|Max:1|Min:2"} %meta{string,help,"Different ways to modeOp octaves of noise"} %meta{int,connectable,0} %meta{string,label,"Mode"}  %read{5390,5405} %write{2147483647,-1}
 param	struct Manifold	manifold			%meta{string,page,""} %meta{string,widget,"default"} %meta{string,readOnly,"True"}  %read{2,2} %write{2147483647,-1} %struct{"Manifold"} %structfields{Q,QN,Qradius} %structfieldtypes{"pnf"} %structnfields{3}
 param	point	manifold.Q	0 0 0		%meta{string,page,""} %meta{string,widget,"default"} %meta{string,readOnly,"True"}  %read{12,12} %write{2147483647,-1} %mystruct{manifold} %mystructfield{0} %derivs
@@ -79,10 +79,10 @@ local	point	___474_np.result	%read{2671,5414} %write{46,5414} %mystruct{___474_n
 local	int	___474_np.periodic	%read{2247,5414} %write{47,5414} %mystruct{___474_np} %mystructfield{4}
 local	int[4]	___474_np.period	%read{2249,5414} %write{48,5414} %mystruct{___474_np} %mystructfield{5} %derivs
 local	float	___662_k	%read{5431,5433} %write{5430,5430}
-local	float	___677_n	%read{2672,5414} %write{34,5414} %derivs
+local	float	___682_n	%read{2672,5414} %write{34,5414} %derivs
 local	point	sP	%read{11,5414} %write{0,12} %derivs
 local	float	sPradius	%read{14,30} %write{1,24} %derivs
-local	float	___686_width	%read{23,24} %write{20,23} %derivs
+local	float	___691_width	%read{23,24} %write{20,23} %derivs
 local	float	noise_avg	%read{2699,5414} %write{26,27} %derivs
 local	float	sum	%read{2704,5415} %write{28,5414} %derivs
 local	float	freq	%read{30,5414} %write{29,5414} %derivs
@@ -91,8 +91,8 @@ local	float	w	%read{2699,5414} %write{31,5414} %derivs
 local	float	tmp	%read{2704,5415} %write{2699,5414} %derivs
 local	float	mag	%read{2704,5414} %write{2700,5414} %derivs
 local	int	j	%read{2704,5414} %write{2701,5414}
-local	float	___688_val	%read{2704,5414} %write{2704,5414} %derivs
-local	normal	___690_bumpN	%read{5430,5432} %write{5428,5428}
+local	float	___693_val	%read{2704,5414} %write{2704,5414} %derivs
+local	normal	___695_bumpN	%read{5430,5432} %write{5428,5428}
 const	int	$const1	0		%read{1,5401} %write{2147483647,-1}
 temp	int	$tmp1	%read{3,3} %write{2,2}
 temp	int	$tmp2	%read{4,4} %write{3,3}
@@ -2287,94 +2287,94 @@ temp	float	$tmp620	%read{5434,5434} %write{5433,5433}
 temp	color	$tmp621	%read{5437,5437} %write{5436,5436}
 temp	float	$tmp622	%read{5439,5439} %write{5438,5438} %derivs
 code ___main___
-# PxrFractal.osl:273
+# PxrFractal.osl:277
 #     point sP = P;
-	assign		sP P 	%filename{"PxrFractal.osl"} %line{273} %argrw{"wr"}
-# PxrFractal.osl:274
+	assign		sP P 	%filename{"PxrFractal.osl"} %line{277} %argrw{"wr"}
+# PxrFractal.osl:278
 #     float sPradius = 0;
-	assign		sPradius $const1 	%line{274} %argrw{"wr"}
-# PxrFractal.osl:275
+	assign		sPradius $const1 	%line{278} %argrw{"wr"}
+# PxrFractal.osl:279
 #     if (!isconnected(manifold))
-	isconnected	$tmp1 manifold 	%line{275} %argrw{"wr"}
+	isconnected	$tmp1 manifold 	%line{279} %argrw{"wr"}
 	eq		$tmp2 $tmp1 $const1 	%argrw{"wrr"}
 	if		$tmp2 12 14 	%argrw{"r"}
-# PxrFractal.osl:278
-#         if (surfacePosition == k_usePo)
-	eq		$tmp3 surfacePosition $const2 	%line{278} %argrw{"wrr"}
-	if		$tmp3 8 9 	%argrw{"r"}
-# PxrFractal.osl:280
-#             getattribute("primvar", "P", sP);
-	getattribute	$tmp4 $const3 $const4 sP 	%line{280} %argrw{"wrrw"}
 # PxrFractal.osl:282
+#         if (surfacePosition == k_usePo)
+	eq		$tmp3 surfacePosition $const2 	%line{282} %argrw{"wrr"}
+	if		$tmp3 8 9 	%argrw{"r"}
+# PxrFractal.osl:284
+#             getattribute("primvar", "P", sP);
+	getattribute	$tmp4 $const3 $const4 sP 	%line{284} %argrw{"wrrw"}
+# PxrFractal.osl:286
 #             sP = P;
-	assign		sP P 	%line{282} %argrw{"wr"}
-# PxrFractal.osl:285
-#         getattribute("builtin", "PRadius", sPradius);
-	getattribute	$tmp5 $const5 $const6 sPradius 	%line{285} %argrw{"wrrw"}
+	assign		sP P 	%line{286} %argrw{"wr"}
 # PxrFractal.osl:289
-#         sP = transform("object", sP);
-	functioncall	$const8 12 	%line{289} %argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:285
-# point  transform (string to, point p)  { return transform("common",to,p); }
-	transform	sP $const9 $const7 sP 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{285} %argrw{"wrrr"}
+#         getattribute("builtin", "PRadius", sPradius);
+	getattribute	$tmp5 $const5 $const6 sPradius 	%line{289} %argrw{"wrrw"}
 # PxrFractal.osl:293
-#         sP = manifold.Q;
-	assign		sP manifold.Q 	%filename{"PxrFractal.osl"} %line{293} %argrw{"wr"}
-# PxrFractal.osl:294
-#         sPradius = manifold.Qradius;
-	assign		sPradius manifold.Qradius 	%line{294} %argrw{"wr"}
+#         sP = transform("object", sP);
+	functioncall	$const8 12 	%line{293} %argrw{"r"}
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:285
+# point  transform (string to, point p)  { return transform("common",to,p); }
+	transform	sP $const9 $const7 sP 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{285} %argrw{"wrrr"}
 # PxrFractal.osl:297
+#         sP = manifold.Q;
+	assign		sP manifold.Q 	%filename{"PxrFractal.osl"} %line{297} %argrw{"wr"}
+# PxrFractal.osl:298
+#         sPradius = manifold.Qradius;
+	assign		sPradius manifold.Qradius 	%line{298} %argrw{"wr"}
+# PxrFractal.osl:301
 #     if (sPradius <= 0.0)
-	le		$tmp6 sPradius $const10 	%line{297} %argrw{"wrr"}
+	le		$tmp6 sPradius $const10 	%line{301} %argrw{"wrr"}
 	if		$tmp6 25 25 	%argrw{"r"}
-# PxrFractal.osl:299
+# PxrFractal.osl:303
 #         float width = max(filterwidth(P.x), filterwidth(P.y));
-	compref		$tmp8 P $const1 	%line{299} %argrw{"wrr"}
+	compref		$tmp8 P $const1 	%line{303} %argrw{"wrr"}
 	filterwidth	$tmp7 $tmp8 	%argrw{"wr"} %argderivs{1}
 	compref		$tmp10 P $const2 	%argrw{"wrr"}
 	filterwidth	$tmp9 $tmp10 	%argrw{"wr"} %argderivs{1}
-	max		___686_width $tmp7 $tmp9 	%argrw{"wrr"}
-# PxrFractal.osl:300
+	max		___691_width $tmp7 $tmp9 	%argrw{"wrr"}
+# PxrFractal.osl:304
 #         width = max(width, filterwidth(P.z));
-	compref		$tmp12 P $const11 	%line{300} %argrw{"wrr"}
+	compref		$tmp12 P $const11 	%line{304} %argrw{"wrr"}
 	filterwidth	$tmp11 $tmp12 	%argrw{"wr"} %argderivs{1}
-	max		___686_width ___686_width $tmp11 	%argrw{"wrr"}
-# PxrFractal.osl:301
-#         sPradius = 0.5 * width;
-	mul		sPradius $const12 ___686_width 	%line{301} %argrw{"wrr"}
+	max		___691_width ___691_width $tmp11 	%argrw{"wrr"}
 # PxrFractal.osl:305
+#         sPradius = 0.5 * width;
+	mul		sPradius $const12 ___691_width 	%line{305} %argrw{"wrr"}
+# PxrFractal.osl:309
 #     float noise_avg = turbulent ? k_turb_average : k_noise_average;
-	if		turbulent 27 28 	%line{305} %argrw{"r"}
+	if		turbulent 27 28 	%line{309} %argrw{"r"}
 	assign		noise_avg $const13 	%argrw{"wr"}
 	assign		noise_avg $const12 	%argrw{"wr"}
-# PxrFractal.osl:306
-#     float sum = 1.0;
-	assign		sum $const14 	%line{306} %argrw{"wr"}
-# PxrFractal.osl:307
-#     float freq = frequency;
-	assign		freq frequency 	%line{307} %argrw{"wr"}
-# PxrFractal.osl:308
-#     float fradius = sPradius * freq;
-	mul		fradius sPradius freq 	%line{308} %argrw{"wrr"}
-# PxrFractal.osl:309
-#     float w = octaveFilterWidth(fradius);
-	smoothstep	w $const15 $const14 fradius 	%line{309} %argrw{"wrrr"}
 # PxrFractal.osl:310
+#     float sum = 1.0;
+	assign		sum $const14 	%line{310} %argrw{"wr"}
+# PxrFractal.osl:311
+#     float freq = frequency;
+	assign		freq frequency 	%line{311} %argrw{"wr"}
+# PxrFractal.osl:312
+#     float fradius = sPradius * freq;
+	mul		fradius sPradius freq 	%line{312} %argrw{"wrr"}
+# PxrFractal.osl:313
+#     float w = octaveFilterWidth(fradius);
+	smoothstep	w $const15 $const14 fradius 	%line{313} %argrw{"wrrr"}
+# PxrFractal.osl:314
 #     float tmp = mix(smoothNoise(freq * sP, variation), noise_avg, w);
-	mul		$tmp14 freq sP 	%line{310} %argrw{"wrr"}
+	mul		$tmp14 freq sP 	%line{314} %argrw{"wrr"}
 	functioncall	$const16 2699 	%argrw{"r"}
-# PxrFractal.osl:230
+# PxrFractal.osl:234
 #         float n = 0;
-	assign		___677_n $const1 	%line{230} %argrw{"wr"}
-# PxrFractal.osl:231
+	assign		___682_n $const1 	%line{234} %argrw{"wr"}
+# PxrFractal.osl:235
 #         if (matchCppPattern)
-	if		matchCppPattern 2673 2693 	%line{231} %argrw{"r"}
-# PxrFractal.osl:233
+	if		matchCppPattern 2673 2693 	%line{235} %argrw{"r"}
+# PxrFractal.osl:237
 #             n = rxnoise(Q, variation);
-	functioncall	$const17 2672 	%line{233} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1443
+	functioncall	$const17 2672 	%line{237} %argrw{"r"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1443
 #     noise_parameters np = {3, 1, INPUT31(seed, t), point(0), NONPERIODIC};
-	assign		___474_np.domain $const18 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h"} %line{1443} %argrw{"wr"}
+	assign		___474_np.domain $const18 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h"} %line{1443} %argrw{"wr"}
 	assign		___474_np.range $const2 	%argrw{"wr"}
 	compref		$tmp15 $tmp14 $const1 	%argrw{"wrr"}
 	aassign		___474_np.input $const1 $tmp15 	%argrw{"wrr"}
@@ -2386,10 +2386,10 @@ code ___main___
 	assign		___474_np.result $const19 	%argrw{"wr"}
 	assign		___474_np.periodic $const1 	%argrw{"wr"}
 	assign		___474_np.period $const20 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1444
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1444
 #     rx_perlin_4(np);
 	functioncall	$const21 2671 	%line{1444} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:823
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:823
 #     gradient rxnoisegradient4[513] = {
 	aassign		___415_rxnoisegradient4.x $const1 $const22 	%line{823} %argrw{"wrr"}
 	aassign		___415_rxnoisegradient4.y $const1 $const23 	%argrw{"wrr"}
@@ -4443,10 +4443,10 @@ code ___main___
 	aassign		___415_rxnoisegradient4.y $const1554 $const23 	%argrw{"wrr"}
 	aassign		___415_rxnoisegradient4.z $const1554 $const24 	%argrw{"wrr"}
 	aassign		___415_rxnoisegradient4.t $const1554 $const25 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1338
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1338
 #     int rxnoisepermute[513] = {
 	assign		___415_rxnoisepermute $const1555 	%line{1338} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1379
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1379
 #     SETUP_DOMAIN(np.input[0], intX0, intX1, fracX0, fracX1, wgtX);
 	if		$const2 2139 2139 	%line{1379} %argrw{"r"}
 	aref		___416_v ___474_np.input $const1 	%argrw{"wrr"}
@@ -4484,7 +4484,7 @@ code ___main___
 	mul		$tmp27 $const1558 ___415_fracX0 	%argrw{"wrr"}
 	sub		$tmp28 $const1557 $tmp27 	%argrw{"wrr"}
 	mul		___415_wgtX $tmp26 $tmp28 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1380
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1380
 #     SETUP_DOMAIN(np.input[1], intY0, intY1, fracY0, fracY1, wgtY);
 	if		$const2 2175 2175 	%line{1380} %argrw{"r"}
 	aref		___423_v ___474_np.input $const2 	%argrw{"wrr"}
@@ -4522,7 +4522,7 @@ code ___main___
 	mul		$tmp38 $const1558 ___415_fracY0 	%argrw{"wrr"}
 	sub		$tmp39 $const1557 $tmp38 	%argrw{"wrr"}
 	mul		___415_wgtY $tmp37 $tmp39 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1381
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1381
 #     SETUP_DOMAIN(np.input[2], intZ0, intZ1, fracZ0, fracZ1, wgtZ);
 	if		$const2 2211 2211 	%line{1381} %argrw{"r"}
 	aref		___430_v ___474_np.input $const11 	%argrw{"wrr"}
@@ -4560,7 +4560,7 @@ code ___main___
 	mul		$tmp49 $const1558 ___415_fracZ0 	%argrw{"wrr"}
 	sub		$tmp50 $const1557 $tmp49 	%argrw{"wrr"}
 	mul		___415_wgtZ $tmp48 $tmp50 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1382
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1382
 #     SETUP_DOMAIN(np.input[3], intT0, intT1, fracT0, fracT1, wgtT);
 	if		$const2 2247 2247 	%line{1382} %argrw{"r"}
 	aref		___437_v ___474_np.input $const18 	%argrw{"wrr"}
@@ -4598,10 +4598,10 @@ code ___main___
 	mul		$tmp60 $const1558 ___415_fracT0 	%argrw{"wrr"}
 	sub		$tmp61 $const1557 $tmp60 	%argrw{"wrr"}
 	mul		___415_wgtT $tmp59 $tmp61 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1383
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1383
 #     if (np.periodic)
 	if		___474_np.periodic 2332 2332 	%line{1383} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1385
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1385
 #         SETUP_PERIOD(np.period[0], intX0, intX1);
 	if		$const2 2269 2269 	%line{1385} %argrw{"r"}
 	aref		$tmp62 ___474_np.period $const1 	%argrw{"wrr"}
@@ -4624,7 +4624,7 @@ code ___main___
 	eq		$tmp70 ___415_intX1 $tmp69 	%argrw{"wrr"}
 	if		$tmp70 2269 2269 	%argrw{"r"}
 	assign		___415_intX1 $const1 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1386
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1386
 #         SETUP_PERIOD(np.period[1], intY0, intY1);
 	if		$const2 2290 2290 	%line{1386} %argrw{"r"}
 	aref		$tmp71 ___474_np.period $const2 	%argrw{"wrr"}
@@ -4647,7 +4647,7 @@ code ___main___
 	eq		$tmp79 ___415_intY1 $tmp78 	%argrw{"wrr"}
 	if		$tmp79 2290 2290 	%argrw{"r"}
 	assign		___415_intY1 $const1 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1387
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1387
 #         SETUP_PERIOD(np.period[2], intZ0, intZ1);
 	if		$const2 2311 2311 	%line{1387} %argrw{"r"}
 	aref		$tmp80 ___474_np.period $const11 	%argrw{"wrr"}
@@ -4670,7 +4670,7 @@ code ___main___
 	eq		$tmp88 ___415_intZ1 $tmp87 	%argrw{"wrr"}
 	if		$tmp88 2311 2311 	%argrw{"r"}
 	assign		___415_intZ1 $const1 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1388
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1388
 #         SETUP_PERIOD(np.period[3], intT0, intT1);
 	if		$const2 2332 2332 	%line{1388} %argrw{"r"}
 	aref		$tmp89 ___474_np.period $const18 	%argrw{"wrr"}
@@ -4693,7 +4693,7 @@ code ___main___
 	eq		$tmp97 ___415_intT1 $tmp96 	%argrw{"wrr"}
 	if		$tmp97 2332 2332 	%argrw{"r"}
 	assign		___415_intT1 $const1 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1390
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1390
 #     SETUP_MASK(intX0, intX1);
 	if		$const2 2339 2339 	%line{1390} %argrw{"r"}
 	shl		$tmp98 $const2 $const58 	%argrw{"wrr"}
@@ -4702,7 +4702,7 @@ code ___main___
 	shl		$tmp100 $const2 $const58 	%argrw{"wrr"}
 	sub		$tmp101 $tmp100 $const2 	%argrw{"wrr"}
 	bitand		___415_intX1 ___415_intX1 $tmp101 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1391
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1391
 #     SETUP_MASK(intY0, intY1);
 	if		$const2 2346 2346 	%line{1391} %argrw{"r"}
 	shl		$tmp102 $const2 $const58 	%argrw{"wrr"}
@@ -4711,7 +4711,7 @@ code ___main___
 	shl		$tmp104 $const2 $const58 	%argrw{"wrr"}
 	sub		$tmp105 $tmp104 $const2 	%argrw{"wrr"}
 	bitand		___415_intY1 ___415_intY1 $tmp105 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1392
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1392
 #     SETUP_MASK(intZ0, intZ1);
 	if		$const2 2353 2353 	%line{1392} %argrw{"r"}
 	shl		$tmp106 $const2 $const58 	%argrw{"wrr"}
@@ -4720,7 +4720,7 @@ code ___main___
 	shl		$tmp108 $const2 $const58 	%argrw{"wrr"}
 	sub		$tmp109 $tmp108 $const2 	%argrw{"wrr"}
 	bitand		___415_intZ1 ___415_intZ1 $tmp109 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1393
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1393
 #     SETUP_MASK(intT0, intT1);
 	if		$const2 2360 2360 	%line{1393} %argrw{"r"}
 	shl		$tmp110 $const2 $const58 	%argrw{"wrr"}
@@ -4729,19 +4729,19 @@ code ___main___
 	shl		$tmp112 $const2 $const58 	%argrw{"wrr"}
 	sub		$tmp113 $tmp112 $const2 	%argrw{"wrr"}
 	bitand		___415_intT1 ___415_intT1 $tmp113 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1395
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1395
 #     int k = 0;
 	assign		___415_k $const1 	%line{1395} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1396
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1396
 #     for (i = np.range; i > 0; i--)
 	for		$tmp115 2363 2365 2669 2671 	%line{1396} %argrw{"r"}
 	assign		___415_i ___474_np.range 	%argrw{"wr"}
 	gt		$tmp114 ___415_i $const1 	%argrw{"wrr"}
 	neq		$tmp115 $tmp114 $const1 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1398
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1398
 #         it = PERMUTE(intT0);
 	aref		___415_it ___415_rxnoisepermute ___415_intT0 	%line{1398} %argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1399
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1399
 #         CalcZ(vt0, it, fracT0);
 	add		$tmp116 ___415_intZ0 ___415_it 	%line{1399} %argrw{"wrr"}
 	aref		___415_iz ___415_rxnoisepermute $tmp116 	%argrw{"wrr"}
@@ -4872,10 +4872,10 @@ code ___main___
 	sub		$tmp190 ___415_v1 ___415_vz0 	%argrw{"wrr"}
 	mul		$tmp191 ___415_wgtZ $tmp190 	%argrw{"wrr"}
 	add		___415_vt0 ___415_vz0 $tmp191 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1400
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1400
 #         it = PERMUTE(intT1);
 	aref		___415_it ___415_rxnoisepermute ___415_intT1 	%line{1400} %argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1401
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1401
 #         CalcZ(v1,  it, fracT1);
 	add		$tmp192 ___415_intZ0 ___415_it 	%line{1401} %argrw{"wrr"}
 	aref		___415_iz ___415_rxnoisepermute $tmp192 	%argrw{"wrr"}
@@ -5006,28 +5006,28 @@ code ___main___
 	sub		$tmp266 ___415_v1 ___415_vz0 	%argrw{"wrr"}
 	mul		$tmp267 ___415_wgtZ $tmp266 	%argrw{"wrr"}
 	add		___415_v1 ___415_vz0 $tmp267 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1402
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1402
 #         v1 = LERP(wgtT, vt0, v1);
 	sub		$tmp268 ___415_v1 ___415_vt0 	%line{1402} %argrw{"wrr"}
 	mul		$tmp269 ___415_wgtT $tmp268 	%argrw{"wrr"}
 	add		___415_v1 ___415_vt0 $tmp269 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1407
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1407
 #         intX0 += 7; intX1 += 7;
 	add		___415_intX0 ___415_intX0 $const53 	%line{1407} %argrw{"wrr"}
 	add		___415_intX1 ___415_intX1 $const53 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1408
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1408
 #         intY0 += 17; intY1 += 17;
 	add		___415_intY0 ___415_intY0 $const103 	%line{1408} %argrw{"wrr"}
 	add		___415_intY1 ___415_intY1 $const103 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1409
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1409
 #         intZ0 += 3; intZ1 += 3;
 	add		___415_intZ0 ___415_intZ0 $const18 	%line{1409} %argrw{"wrr"}
 	add		___415_intZ1 ___415_intZ1 $const18 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1410
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1410
 #         intT0 += 9; intT1 += 9;
 	add		___415_intT0 ___415_intT0 $const63 	%line{1410} %argrw{"wrr"}
 	add		___415_intT1 ___415_intT1 $const63 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1411
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1411
 #         SETUP_MASK(intX0, intX1);
 	if		$const2 2643 2643 	%line{1411} %argrw{"r"}
 	shl		$tmp270 $const2 $const58 	%argrw{"wrr"}
@@ -5036,7 +5036,7 @@ code ___main___
 	shl		$tmp272 $const2 $const58 	%argrw{"wrr"}
 	sub		$tmp273 $tmp272 $const2 	%argrw{"wrr"}
 	bitand		___415_intX1 ___415_intX1 $tmp273 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1412
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1412
 #         SETUP_MASK(intY0, intY1);
 	if		$const2 2650 2650 	%line{1412} %argrw{"r"}
 	shl		$tmp274 $const2 $const58 	%argrw{"wrr"}
@@ -5045,7 +5045,7 @@ code ___main___
 	shl		$tmp276 $const2 $const58 	%argrw{"wrr"}
 	sub		$tmp277 $tmp276 $const2 	%argrw{"wrr"}
 	bitand		___415_intY1 ___415_intY1 $tmp277 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1413
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1413
 #         SETUP_MASK(intZ0, intZ1);
 	if		$const2 2657 2657 	%line{1413} %argrw{"r"}
 	shl		$tmp278 $const2 $const58 	%argrw{"wrr"}
@@ -5054,7 +5054,7 @@ code ___main___
 	shl		$tmp280 $const2 $const58 	%argrw{"wrr"}
 	sub		$tmp281 $tmp280 $const2 	%argrw{"wrr"}
 	bitand		___415_intZ1 ___415_intZ1 $tmp281 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1414
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1414
 #         SETUP_MASK(intT0, intT1);
 	if		$const2 2664 2664 	%line{1414} %argrw{"r"}
 	shl		$tmp282 $const2 $const58 	%argrw{"wrr"}
@@ -5063,106 +5063,106 @@ code ___main___
 	shl		$tmp284 $const2 $const58 	%argrw{"wrr"}
 	sub		$tmp285 $tmp284 $const2 	%argrw{"wrr"}
 	bitand		___415_intT1 ___415_intT1 $tmp285 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1416
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1416
 #         np.result[k++] = 0.5 + FUDGESCALE4 * v1;
 	mul		$tmp286 $const1560 ___415_v1 	%line{1416} %argrw{"wrr"}
 	add		$tmp287 $const12 $tmp286 	%argrw{"wrr"}
 	assign		$tmp288 ___415_k 	%argrw{"wr"}
 	add		___415_k ___415_k $const2 	%argrw{"wrr"}
 	compassign	___474_np.result $tmp288 $tmp287 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1396
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1396
 #     for (i = np.range; i > 0; i--)
 	assign		$tmp289 ___415_i 	%line{1396} %argrw{"wr"}
 	sub		___415_i ___415_i $const2 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1445
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1445
 #     return np.result[0];
-	compref		___677_n ___474_np.result $const1 	%line{1445} %argrw{"wrr"}
-# PxrFractal.osl:234
-#             n = smoothstep(0.2, 0.8, n);
-	smoothstep	___677_n $const1561 $const1562 ___677_n 	%filename{"PxrFractal.osl"} %line{234} %argrw{"wrrr"}
-# PxrFractal.osl:236
-#         else if (noiseType == 0)
-	eq		$tmp290 noiseType $const1 	%line{236} %argrw{"wrr"}
-	if		$tmp290 2677 2693 	%argrw{"r"}
+	compref		___682_n ___474_np.result $const1 	%line{1445} %argrw{"wrr"}
 # PxrFractal.osl:238
+#             n = smoothstep(0.2, 0.8, n);
+	smoothstep	___682_n $const1561 $const1562 ___682_n 	%filename{"PxrFractal.osl"} %line{238} %argrw{"wrrr"}
+# PxrFractal.osl:240
+#         else if (noiseType == 0)
+	eq		$tmp290 noiseType $const1 	%line{240} %argrw{"wrr"}
+	if		$tmp290 2677 2693 	%argrw{"r"}
+# PxrFractal.osl:242
 #             n = noise("uperlin", Q, variation);
-	noise		___677_n $const1563 $tmp14 variation 	%line{238} %argrw{"wrrr"}
-# PxrFractal.osl:239
-#             n = smoothstep(0.2, 0.8, n);
-	smoothstep	___677_n $const1561 $const1562 ___677_n 	%line{239} %argrw{"wrrr"}
-# PxrFractal.osl:241
-#         else if (noiseType == 1)
-	eq		$tmp291 noiseType $const2 	%line{241} %argrw{"wrr"}
-	if		$tmp291 2681 2693 	%argrw{"r"}
+	noise		___682_n $const1563 $tmp14 variation 	%line{242} %argrw{"wrrr"}
 # PxrFractal.osl:243
-#             n = noise("usimplex", Q, variation);
-	noise		___677_n $const1564 $tmp14 variation 	%line{243} %argrw{"wrrr"}
-# PxrFractal.osl:244
-#             n = smoothstep(0.0, 1.0, n);
-	smoothstep	___677_n $const10 $const14 ___677_n 	%line{244} %argrw{"wrrr"}
-# PxrFractal.osl:246
-#         else if (noiseType == 2)
-	eq		$tmp292 noiseType $const11 	%line{246} %argrw{"wrr"}
-	if		$tmp292 2687 2693 	%argrw{"r"}
-# PxrFractal.osl:248
-#             n = noise("gabor", Q, variation,
-	noise		$tmp293 $const1565 $tmp14 variation $const1566 gaborAnisotropy $const1567 gaborDirection 	%line{248} %argrw{"wrrrrrrr"} %argderivs{2,3}
-# PxrFractal.osl:250
-#                       "direction", gaborDirection) * 0.5 + 0.5;
-	mul		$tmp294 $tmp293 $const12 	%line{250} %argrw{"wrr"}
-	add		___677_n $tmp294 $const12 	%argrw{"wrr"}
-# PxrFractal.osl:251
 #             n = smoothstep(0.2, 0.8, n);
-	smoothstep	___677_n $const1561 $const1562 ___677_n 	%line{251} %argrw{"wrrr"}
+	smoothstep	___682_n $const1561 $const1562 ___682_n 	%line{243} %argrw{"wrrr"}
+# PxrFractal.osl:245
+#         else if (noiseType == 1)
+	eq		$tmp291 noiseType $const2 	%line{245} %argrw{"wrr"}
+	if		$tmp291 2681 2693 	%argrw{"r"}
+# PxrFractal.osl:247
+#             n = noise("usimplex", Q, variation);
+	noise		___682_n $const1564 $tmp14 variation 	%line{247} %argrw{"wrrr"}
+# PxrFractal.osl:248
+#             n = smoothstep(0.0, 1.0, n);
+	smoothstep	___682_n $const10 $const14 ___682_n 	%line{248} %argrw{"wrrr"}
+# PxrFractal.osl:250
+#         else if (noiseType == 2)
+	eq		$tmp292 noiseType $const11 	%line{250} %argrw{"wrr"}
+	if		$tmp292 2687 2693 	%argrw{"r"}
+# PxrFractal.osl:252
+#             n = noise("gabor", Q, variation,
+	noise		$tmp293 $const1565 $tmp14 variation $const1566 gaborAnisotropy $const1567 gaborDirection 	%line{252} %argrw{"wrrrrrrr"} %argderivs{2,3}
+# PxrFractal.osl:254
+#                       "direction", gaborDirection) * 0.5 + 0.5;
+	mul		$tmp294 $tmp293 $const12 	%line{254} %argrw{"wrr"}
+	add		___682_n $tmp294 $const12 	%argrw{"wrr"}
 # PxrFractal.osl:255
+#             n = smoothstep(0.2, 0.8, n);
+	smoothstep	___682_n $const1561 $const1562 ___682_n 	%line{255} %argrw{"wrrr"}
+# PxrFractal.osl:259
 #             n = mix(noise("cell", Q),
-	noise		$tmp295 $const1568 $tmp14 	%line{255} %argrw{"wrr"}
-# PxrFractal.osl:256
+	noise		$tmp295 $const1568 $tmp14 	%line{259} %argrw{"wrr"}
+# PxrFractal.osl:260
 #                     noise("cell", Q + ceil(fmod(variation, 1.0))),
-	fmod		$tmp298 variation $const14 	%line{256} %argrw{"wrr"}
+	fmod		$tmp298 variation $const14 	%line{260} %argrw{"wrr"}
 	ceil		$tmp297 $tmp298 	%argrw{"wr"}
 	add		$tmp299 $tmp14 $tmp297 	%argrw{"wrr"}
 	noise		$tmp296 $const1568 $tmp299 	%argrw{"wrr"}
-# PxrFractal.osl:255
-#             n = mix(noise("cell", Q),
-	mix		___677_n $tmp295 $tmp296 variation 	%line{255} %argrw{"wrrr"}
 # PxrFractal.osl:259
-#         if (turbulent == 2) n = fabs(1.0 - n * 2.0);
-	eq		$tmp300 turbulent $const11 	%line{259} %argrw{"wrr"}
+#             n = mix(noise("cell", Q),
+	mix		___682_n $tmp295 $tmp296 variation 	%line{259} %argrw{"wrrr"}
+# PxrFractal.osl:263
+#         if (turbulent == k_turbDetailed) n = fabs(1.0 - n * 2.0);
+	eq		$tmp300 turbulent $const11 	%line{263} %argrw{"wrr"}
 	if		$tmp300 2698 2698 	%argrw{"r"}
-	mul		$tmp301 ___677_n $const1558 	%argrw{"wrr"}
+	mul		$tmp301 ___682_n $const1558 	%argrw{"wrr"}
 	sub		$tmp302 $const14 $tmp301 	%argrw{"wrr"}
-	fabs		___677_n $tmp302 	%argrw{"wr"}
-# PxrFractal.osl:260
+	fabs		___682_n $tmp302 	%argrw{"wr"}
+# PxrFractal.osl:264
 #         return n;
-	assign		$tmp13 ___677_n 	%line{260} %argrw{"wr"}
-# PxrFractal.osl:310
-#     float tmp = mix(smoothNoise(freq * sP, variation), noise_avg, w);
-	mix		tmp $tmp13 noise_avg w 	%line{310} %argrw{"wrrr"}
-# PxrFractal.osl:311
-#     float mag = 1.0;
-	assign		mag $const14 	%line{311} %argrw{"wr"}
-# PxrFractal.osl:312
-#     int j = 0;
-	assign		j $const1 	%line{312} %argrw{"wr"}
+	assign		$tmp13 ___682_n 	%line{264} %argrw{"wr"}
 # PxrFractal.osl:314
+#     float tmp = mix(smoothNoise(freq * sP, variation), noise_avg, w);
+	mix		tmp $tmp13 noise_avg w 	%line{314} %argrw{"wrrr"}
+# PxrFractal.osl:315
+#     float mag = 1.0;
+	assign		mag $const14 	%line{315} %argrw{"wr"}
+# PxrFractal.osl:316
+#     int j = 0;
+	assign		j $const1 	%line{316} %argrw{"wr"}
+# PxrFractal.osl:318
 #     for (j = 1; j < layers; j += 1)
-	for		$tmp304 2704 2706 5414 5415 	%line{314} %argrw{"r"}
+	for		$tmp304 2704 2706 5414 5415 	%line{318} %argrw{"r"}
 	assign		j $const2 	%argrw{"wr"}
 	lt		$tmp303 j layers 	%argrw{"wrr"}
 	neq		$tmp304 $tmp303 $const1 	%argrw{"wrr"}
-# PxrFractal.osl:316
+# PxrFractal.osl:320
 #         fradius *= lacunarity;
-	mul		fradius fradius lacunarity 	%line{316} %argrw{"wrr"}
-# PxrFractal.osl:317
+	mul		fradius fradius lacunarity 	%line{320} %argrw{"wrr"}
+# PxrFractal.osl:321
 #         freq *= lacunarity;
-	mul		freq freq lacunarity 	%line{317} %argrw{"wrr"}
-# PxrFractal.osl:318
+	mul		freq freq lacunarity 	%line{321} %argrw{"wrr"}
+# PxrFractal.osl:322
 #         w = octaveFilterWidth(fradius);
-	smoothstep	w $const15 $const14 fradius 	%line{318} %argrw{"wrrr"}
-# PxrFractal.osl:319
+	smoothstep	w $const15 $const14 fradius 	%line{322} %argrw{"wrrr"}
+# PxrFractal.osl:323
 #         mag = 1.0 / pow(freq, 3.0 - 2.0 * dimension + mix(-erosion, erosion, tmp / sum));
-	mul		$tmp306 $const1558 dimension 	%line{319} %argrw{"wrr"}
+	mul		$tmp306 $const1558 dimension 	%line{323} %argrw{"wrr"}
 	sub		$tmp307 $const1557 $tmp306 	%argrw{"wrr"}
 	neg		$tmp309 erosion 	%argrw{"wr"}
 	div		$tmp310 tmp sum 	%argrw{"wrr"}
@@ -5170,27 +5170,27 @@ code ___main___
 	add		$tmp311 $tmp307 $tmp308 	%argrw{"wrr"}
 	pow		$tmp305 freq $tmp311 	%argrw{"wrr"}
 	div		mag $const14 $tmp305 	%argrw{"wrr"}
-# PxrFractal.osl:320
+# PxrFractal.osl:324
 #         if (!legacyFrequency) mag *= frequency;
-	eq		$tmp312 legacyFrequency $const1 	%line{320} %argrw{"wrr"}
+	eq		$tmp312 legacyFrequency $const1 	%line{324} %argrw{"wrr"}
 	if		$tmp312 2720 2720 	%argrw{"r"}
 	mul		mag mag frequency 	%argrw{"wrr"}
-# PxrFractal.osl:321
+# PxrFractal.osl:325
 #         float val = mag * mix(smoothNoise(freq * sP, variation), noise_avg, w);
-	mul		$tmp315 freq sP 	%line{321} %argrw{"wrr"}
+	mul		$tmp315 freq sP 	%line{325} %argrw{"wrr"}
 	functioncall	$const16 5387 	%argrw{"r"}
-# PxrFractal.osl:230
+# PxrFractal.osl:234
 #         float n = 0;
-	assign		___677_n $const1 	%line{230} %argrw{"wr"}
-# PxrFractal.osl:231
+	assign		___682_n $const1 	%line{234} %argrw{"wr"}
+# PxrFractal.osl:235
 #         if (matchCppPattern)
-	if		matchCppPattern 5361 5381 	%line{231} %argrw{"r"}
-# PxrFractal.osl:233
+	if		matchCppPattern 5361 5381 	%line{235} %argrw{"r"}
+# PxrFractal.osl:237
 #             n = rxnoise(Q, variation);
-	functioncall	$const17 5360 	%line{233} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1443
+	functioncall	$const17 5360 	%line{237} %argrw{"r"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1443
 #     noise_parameters np = {3, 1, INPUT31(seed, t), point(0), NONPERIODIC};
-	assign		___474_np.domain $const18 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h"} %line{1443} %argrw{"wr"}
+	assign		___474_np.domain $const18 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h"} %line{1443} %argrw{"wr"}
 	assign		___474_np.range $const2 	%argrw{"wr"}
 	compref		$tmp316 $tmp315 $const1 	%argrw{"wrr"}
 	aassign		___474_np.input $const1 $tmp316 	%argrw{"wrr"}
@@ -5202,10 +5202,10 @@ code ___main___
 	assign		___474_np.result $const19 	%argrw{"wr"}
 	assign		___474_np.periodic $const1 	%argrw{"wr"}
 	assign		___474_np.period $const20 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1444
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1444
 #     rx_perlin_4(np);
 	functioncall	$const21 5359 	%line{1444} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:823
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:823
 #     gradient rxnoisegradient4[513] = {
 	aassign		___415_rxnoisegradient4.x $const1 $const22 	%line{823} %argrw{"wrr"}
 	aassign		___415_rxnoisegradient4.y $const1 $const23 	%argrw{"wrr"}
@@ -7259,10 +7259,10 @@ code ___main___
 	aassign		___415_rxnoisegradient4.y $const1554 $const23 	%argrw{"wrr"}
 	aassign		___415_rxnoisegradient4.z $const1554 $const24 	%argrw{"wrr"}
 	aassign		___415_rxnoisegradient4.t $const1554 $const25 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1338
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1338
 #     int rxnoisepermute[513] = {
 	assign		___415_rxnoisepermute $const1555 	%line{1338} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1379
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1379
 #     SETUP_DOMAIN(np.input[0], intX0, intX1, fracX0, fracX1, wgtX);
 	if		$const2 4827 4827 	%line{1379} %argrw{"r"}
 	aref		___416_v ___474_np.input $const1 	%argrw{"wrr"}
@@ -7300,7 +7300,7 @@ code ___main___
 	mul		$tmp328 $const1558 ___415_fracX0 	%argrw{"wrr"}
 	sub		$tmp329 $const1557 $tmp328 	%argrw{"wrr"}
 	mul		___415_wgtX $tmp327 $tmp329 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1380
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1380
 #     SETUP_DOMAIN(np.input[1], intY0, intY1, fracY0, fracY1, wgtY);
 	if		$const2 4863 4863 	%line{1380} %argrw{"r"}
 	aref		___423_v ___474_np.input $const2 	%argrw{"wrr"}
@@ -7338,7 +7338,7 @@ code ___main___
 	mul		$tmp339 $const1558 ___415_fracY0 	%argrw{"wrr"}
 	sub		$tmp340 $const1557 $tmp339 	%argrw{"wrr"}
 	mul		___415_wgtY $tmp338 $tmp340 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1381
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1381
 #     SETUP_DOMAIN(np.input[2], intZ0, intZ1, fracZ0, fracZ1, wgtZ);
 	if		$const2 4899 4899 	%line{1381} %argrw{"r"}
 	aref		___430_v ___474_np.input $const11 	%argrw{"wrr"}
@@ -7376,7 +7376,7 @@ code ___main___
 	mul		$tmp350 $const1558 ___415_fracZ0 	%argrw{"wrr"}
 	sub		$tmp351 $const1557 $tmp350 	%argrw{"wrr"}
 	mul		___415_wgtZ $tmp349 $tmp351 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1382
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1382
 #     SETUP_DOMAIN(np.input[3], intT0, intT1, fracT0, fracT1, wgtT);
 	if		$const2 4935 4935 	%line{1382} %argrw{"r"}
 	aref		___437_v ___474_np.input $const18 	%argrw{"wrr"}
@@ -7414,10 +7414,10 @@ code ___main___
 	mul		$tmp361 $const1558 ___415_fracT0 	%argrw{"wrr"}
 	sub		$tmp362 $const1557 $tmp361 	%argrw{"wrr"}
 	mul		___415_wgtT $tmp360 $tmp362 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1383
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1383
 #     if (np.periodic)
 	if		___474_np.periodic 5020 5020 	%line{1383} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1385
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1385
 #         SETUP_PERIOD(np.period[0], intX0, intX1);
 	if		$const2 4957 4957 	%line{1385} %argrw{"r"}
 	aref		$tmp363 ___474_np.period $const1 	%argrw{"wrr"}
@@ -7440,7 +7440,7 @@ code ___main___
 	eq		$tmp371 ___415_intX1 $tmp370 	%argrw{"wrr"}
 	if		$tmp371 4957 4957 	%argrw{"r"}
 	assign		___415_intX1 $const1 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1386
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1386
 #         SETUP_PERIOD(np.period[1], intY0, intY1);
 	if		$const2 4978 4978 	%line{1386} %argrw{"r"}
 	aref		$tmp372 ___474_np.period $const2 	%argrw{"wrr"}
@@ -7463,7 +7463,7 @@ code ___main___
 	eq		$tmp380 ___415_intY1 $tmp379 	%argrw{"wrr"}
 	if		$tmp380 4978 4978 	%argrw{"r"}
 	assign		___415_intY1 $const1 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1387
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1387
 #         SETUP_PERIOD(np.period[2], intZ0, intZ1);
 	if		$const2 4999 4999 	%line{1387} %argrw{"r"}
 	aref		$tmp381 ___474_np.period $const11 	%argrw{"wrr"}
@@ -7486,7 +7486,7 @@ code ___main___
 	eq		$tmp389 ___415_intZ1 $tmp388 	%argrw{"wrr"}
 	if		$tmp389 4999 4999 	%argrw{"r"}
 	assign		___415_intZ1 $const1 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1388
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1388
 #         SETUP_PERIOD(np.period[3], intT0, intT1);
 	if		$const2 5020 5020 	%line{1388} %argrw{"r"}
 	aref		$tmp390 ___474_np.period $const18 	%argrw{"wrr"}
@@ -7509,7 +7509,7 @@ code ___main___
 	eq		$tmp398 ___415_intT1 $tmp397 	%argrw{"wrr"}
 	if		$tmp398 5020 5020 	%argrw{"r"}
 	assign		___415_intT1 $const1 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1390
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1390
 #     SETUP_MASK(intX0, intX1);
 	if		$const2 5027 5027 	%line{1390} %argrw{"r"}
 	shl		$tmp399 $const2 $const58 	%argrw{"wrr"}
@@ -7518,7 +7518,7 @@ code ___main___
 	shl		$tmp401 $const2 $const58 	%argrw{"wrr"}
 	sub		$tmp402 $tmp401 $const2 	%argrw{"wrr"}
 	bitand		___415_intX1 ___415_intX1 $tmp402 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1391
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1391
 #     SETUP_MASK(intY0, intY1);
 	if		$const2 5034 5034 	%line{1391} %argrw{"r"}
 	shl		$tmp403 $const2 $const58 	%argrw{"wrr"}
@@ -7527,7 +7527,7 @@ code ___main___
 	shl		$tmp405 $const2 $const58 	%argrw{"wrr"}
 	sub		$tmp406 $tmp405 $const2 	%argrw{"wrr"}
 	bitand		___415_intY1 ___415_intY1 $tmp406 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1392
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1392
 #     SETUP_MASK(intZ0, intZ1);
 	if		$const2 5041 5041 	%line{1392} %argrw{"r"}
 	shl		$tmp407 $const2 $const58 	%argrw{"wrr"}
@@ -7536,7 +7536,7 @@ code ___main___
 	shl		$tmp409 $const2 $const58 	%argrw{"wrr"}
 	sub		$tmp410 $tmp409 $const2 	%argrw{"wrr"}
 	bitand		___415_intZ1 ___415_intZ1 $tmp410 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1393
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1393
 #     SETUP_MASK(intT0, intT1);
 	if		$const2 5048 5048 	%line{1393} %argrw{"r"}
 	shl		$tmp411 $const2 $const58 	%argrw{"wrr"}
@@ -7545,19 +7545,19 @@ code ___main___
 	shl		$tmp413 $const2 $const58 	%argrw{"wrr"}
 	sub		$tmp414 $tmp413 $const2 	%argrw{"wrr"}
 	bitand		___415_intT1 ___415_intT1 $tmp414 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1395
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1395
 #     int k = 0;
 	assign		___415_k $const1 	%line{1395} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1396
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1396
 #     for (i = np.range; i > 0; i--)
 	for		$tmp416 5051 5053 5357 5359 	%line{1396} %argrw{"r"}
 	assign		___415_i ___474_np.range 	%argrw{"wr"}
 	gt		$tmp415 ___415_i $const1 	%argrw{"wrr"}
 	neq		$tmp416 $tmp415 $const1 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1398
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1398
 #         it = PERMUTE(intT0);
 	aref		___415_it ___415_rxnoisepermute ___415_intT0 	%line{1398} %argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1399
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1399
 #         CalcZ(vt0, it, fracT0);
 	add		$tmp417 ___415_intZ0 ___415_it 	%line{1399} %argrw{"wrr"}
 	aref		___415_iz ___415_rxnoisepermute $tmp417 	%argrw{"wrr"}
@@ -7688,10 +7688,10 @@ code ___main___
 	sub		$tmp491 ___415_v1 ___415_vz0 	%argrw{"wrr"}
 	mul		$tmp492 ___415_wgtZ $tmp491 	%argrw{"wrr"}
 	add		___415_vt0 ___415_vz0 $tmp492 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1400
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1400
 #         it = PERMUTE(intT1);
 	aref		___415_it ___415_rxnoisepermute ___415_intT1 	%line{1400} %argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1401
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1401
 #         CalcZ(v1,  it, fracT1);
 	add		$tmp493 ___415_intZ0 ___415_it 	%line{1401} %argrw{"wrr"}
 	aref		___415_iz ___415_rxnoisepermute $tmp493 	%argrw{"wrr"}
@@ -7822,28 +7822,28 @@ code ___main___
 	sub		$tmp567 ___415_v1 ___415_vz0 	%argrw{"wrr"}
 	mul		$tmp568 ___415_wgtZ $tmp567 	%argrw{"wrr"}
 	add		___415_v1 ___415_vz0 $tmp568 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1402
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1402
 #         v1 = LERP(wgtT, vt0, v1);
 	sub		$tmp569 ___415_v1 ___415_vt0 	%line{1402} %argrw{"wrr"}
 	mul		$tmp570 ___415_wgtT $tmp569 	%argrw{"wrr"}
 	add		___415_v1 ___415_vt0 $tmp570 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1407
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1407
 #         intX0 += 7; intX1 += 7;
 	add		___415_intX0 ___415_intX0 $const53 	%line{1407} %argrw{"wrr"}
 	add		___415_intX1 ___415_intX1 $const53 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1408
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1408
 #         intY0 += 17; intY1 += 17;
 	add		___415_intY0 ___415_intY0 $const103 	%line{1408} %argrw{"wrr"}
 	add		___415_intY1 ___415_intY1 $const103 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1409
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1409
 #         intZ0 += 3; intZ1 += 3;
 	add		___415_intZ0 ___415_intZ0 $const18 	%line{1409} %argrw{"wrr"}
 	add		___415_intZ1 ___415_intZ1 $const18 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1410
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1410
 #         intT0 += 9; intT1 += 9;
 	add		___415_intT0 ___415_intT0 $const63 	%line{1410} %argrw{"wrr"}
 	add		___415_intT1 ___415_intT1 $const63 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1411
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1411
 #         SETUP_MASK(intX0, intX1);
 	if		$const2 5331 5331 	%line{1411} %argrw{"r"}
 	shl		$tmp571 $const2 $const58 	%argrw{"wrr"}
@@ -7852,7 +7852,7 @@ code ___main___
 	shl		$tmp573 $const2 $const58 	%argrw{"wrr"}
 	sub		$tmp574 $tmp573 $const2 	%argrw{"wrr"}
 	bitand		___415_intX1 ___415_intX1 $tmp574 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1412
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1412
 #         SETUP_MASK(intY0, intY1);
 	if		$const2 5338 5338 	%line{1412} %argrw{"r"}
 	shl		$tmp575 $const2 $const58 	%argrw{"wrr"}
@@ -7861,7 +7861,7 @@ code ___main___
 	shl		$tmp577 $const2 $const58 	%argrw{"wrr"}
 	sub		$tmp578 $tmp577 $const2 	%argrw{"wrr"}
 	bitand		___415_intY1 ___415_intY1 $tmp578 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1413
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1413
 #         SETUP_MASK(intZ0, intZ1);
 	if		$const2 5345 5345 	%line{1413} %argrw{"r"}
 	shl		$tmp579 $const2 $const58 	%argrw{"wrr"}
@@ -7870,7 +7870,7 @@ code ___main___
 	shl		$tmp581 $const2 $const58 	%argrw{"wrr"}
 	sub		$tmp582 $tmp581 $const2 	%argrw{"wrr"}
 	bitand		___415_intZ1 ___415_intZ1 $tmp582 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1414
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1414
 #         SETUP_MASK(intT0, intT1);
 	if		$const2 5352 5352 	%line{1414} %argrw{"r"}
 	shl		$tmp583 $const2 $const58 	%argrw{"wrr"}
@@ -7879,182 +7879,182 @@ code ___main___
 	shl		$tmp585 $const2 $const58 	%argrw{"wrr"}
 	sub		$tmp586 $tmp585 $const2 	%argrw{"wrr"}
 	bitand		___415_intT1 ___415_intT1 $tmp586 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1416
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1416
 #         np.result[k++] = 0.5 + FUDGESCALE4 * v1;
 	mul		$tmp587 $const1560 ___415_v1 	%line{1416} %argrw{"wrr"}
 	add		$tmp588 $const12 $tmp587 	%argrw{"wrr"}
 	assign		$tmp589 ___415_k 	%argrw{"wr"}
 	add		___415_k ___415_k $const2 	%argrw{"wrr"}
 	compassign	___474_np.result $tmp589 $tmp588 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1396
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1396
 #     for (i = np.range; i > 0; i--)
 	assign		$tmp590 ___415_i 	%line{1396} %argrw{"wr"}
 	sub		___415_i ___415_i $const2 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1445
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanNoise.h:1445
 #     return np.result[0];
-	compref		___677_n ___474_np.result $const1 	%line{1445} %argrw{"wrr"}
-# PxrFractal.osl:234
-#             n = smoothstep(0.2, 0.8, n);
-	smoothstep	___677_n $const1561 $const1562 ___677_n 	%filename{"PxrFractal.osl"} %line{234} %argrw{"wrrr"}
-# PxrFractal.osl:236
-#         else if (noiseType == 0)
-	eq		$tmp591 noiseType $const1 	%line{236} %argrw{"wrr"}
-	if		$tmp591 5365 5381 	%argrw{"r"}
+	compref		___682_n ___474_np.result $const1 	%line{1445} %argrw{"wrr"}
 # PxrFractal.osl:238
+#             n = smoothstep(0.2, 0.8, n);
+	smoothstep	___682_n $const1561 $const1562 ___682_n 	%filename{"PxrFractal.osl"} %line{238} %argrw{"wrrr"}
+# PxrFractal.osl:240
+#         else if (noiseType == 0)
+	eq		$tmp591 noiseType $const1 	%line{240} %argrw{"wrr"}
+	if		$tmp591 5365 5381 	%argrw{"r"}
+# PxrFractal.osl:242
 #             n = noise("uperlin", Q, variation);
-	noise		___677_n $const1563 $tmp315 variation 	%line{238} %argrw{"wrrr"}
-# PxrFractal.osl:239
-#             n = smoothstep(0.2, 0.8, n);
-	smoothstep	___677_n $const1561 $const1562 ___677_n 	%line{239} %argrw{"wrrr"}
-# PxrFractal.osl:241
-#         else if (noiseType == 1)
-	eq		$tmp592 noiseType $const2 	%line{241} %argrw{"wrr"}
-	if		$tmp592 5369 5381 	%argrw{"r"}
+	noise		___682_n $const1563 $tmp315 variation 	%line{242} %argrw{"wrrr"}
 # PxrFractal.osl:243
-#             n = noise("usimplex", Q, variation);
-	noise		___677_n $const1564 $tmp315 variation 	%line{243} %argrw{"wrrr"}
-# PxrFractal.osl:244
-#             n = smoothstep(0.0, 1.0, n);
-	smoothstep	___677_n $const10 $const14 ___677_n 	%line{244} %argrw{"wrrr"}
-# PxrFractal.osl:246
-#         else if (noiseType == 2)
-	eq		$tmp593 noiseType $const11 	%line{246} %argrw{"wrr"}
-	if		$tmp593 5375 5381 	%argrw{"r"}
-# PxrFractal.osl:248
-#             n = noise("gabor", Q, variation,
-	noise		$tmp594 $const1565 $tmp315 variation $const1566 gaborAnisotropy $const1567 gaborDirection 	%line{248} %argrw{"wrrrrrrr"} %argderivs{2,3}
-# PxrFractal.osl:250
-#                       "direction", gaborDirection) * 0.5 + 0.5;
-	mul		$tmp595 $tmp594 $const12 	%line{250} %argrw{"wrr"}
-	add		___677_n $tmp595 $const12 	%argrw{"wrr"}
-# PxrFractal.osl:251
 #             n = smoothstep(0.2, 0.8, n);
-	smoothstep	___677_n $const1561 $const1562 ___677_n 	%line{251} %argrw{"wrrr"}
+	smoothstep	___682_n $const1561 $const1562 ___682_n 	%line{243} %argrw{"wrrr"}
+# PxrFractal.osl:245
+#         else if (noiseType == 1)
+	eq		$tmp592 noiseType $const2 	%line{245} %argrw{"wrr"}
+	if		$tmp592 5369 5381 	%argrw{"r"}
+# PxrFractal.osl:247
+#             n = noise("usimplex", Q, variation);
+	noise		___682_n $const1564 $tmp315 variation 	%line{247} %argrw{"wrrr"}
+# PxrFractal.osl:248
+#             n = smoothstep(0.0, 1.0, n);
+	smoothstep	___682_n $const10 $const14 ___682_n 	%line{248} %argrw{"wrrr"}
+# PxrFractal.osl:250
+#         else if (noiseType == 2)
+	eq		$tmp593 noiseType $const11 	%line{250} %argrw{"wrr"}
+	if		$tmp593 5375 5381 	%argrw{"r"}
+# PxrFractal.osl:252
+#             n = noise("gabor", Q, variation,
+	noise		$tmp594 $const1565 $tmp315 variation $const1566 gaborAnisotropy $const1567 gaborDirection 	%line{252} %argrw{"wrrrrrrr"} %argderivs{2,3}
+# PxrFractal.osl:254
+#                       "direction", gaborDirection) * 0.5 + 0.5;
+	mul		$tmp595 $tmp594 $const12 	%line{254} %argrw{"wrr"}
+	add		___682_n $tmp595 $const12 	%argrw{"wrr"}
 # PxrFractal.osl:255
+#             n = smoothstep(0.2, 0.8, n);
+	smoothstep	___682_n $const1561 $const1562 ___682_n 	%line{255} %argrw{"wrrr"}
+# PxrFractal.osl:259
 #             n = mix(noise("cell", Q),
-	noise		$tmp596 $const1568 $tmp315 	%line{255} %argrw{"wrr"}
-# PxrFractal.osl:256
+	noise		$tmp596 $const1568 $tmp315 	%line{259} %argrw{"wrr"}
+# PxrFractal.osl:260
 #                     noise("cell", Q + ceil(fmod(variation, 1.0))),
-	fmod		$tmp599 variation $const14 	%line{256} %argrw{"wrr"}
+	fmod		$tmp599 variation $const14 	%line{260} %argrw{"wrr"}
 	ceil		$tmp598 $tmp599 	%argrw{"wr"}
 	add		$tmp600 $tmp315 $tmp598 	%argrw{"wrr"}
 	noise		$tmp597 $const1568 $tmp600 	%argrw{"wrr"}
-# PxrFractal.osl:255
-#             n = mix(noise("cell", Q),
-	mix		___677_n $tmp596 $tmp597 variation 	%line{255} %argrw{"wrrr"}
 # PxrFractal.osl:259
-#         if (turbulent == 2) n = fabs(1.0 - n * 2.0);
-	eq		$tmp601 turbulent $const11 	%line{259} %argrw{"wrr"}
+#             n = mix(noise("cell", Q),
+	mix		___682_n $tmp596 $tmp597 variation 	%line{259} %argrw{"wrrr"}
+# PxrFractal.osl:263
+#         if (turbulent == k_turbDetailed) n = fabs(1.0 - n * 2.0);
+	eq		$tmp601 turbulent $const11 	%line{263} %argrw{"wrr"}
 	if		$tmp601 5386 5386 	%argrw{"r"}
-	mul		$tmp602 ___677_n $const1558 	%argrw{"wrr"}
+	mul		$tmp602 ___682_n $const1558 	%argrw{"wrr"}
 	sub		$tmp603 $const14 $tmp602 	%argrw{"wrr"}
-	fabs		___677_n $tmp603 	%argrw{"wr"}
-# PxrFractal.osl:260
+	fabs		___682_n $tmp603 	%argrw{"wr"}
+# PxrFractal.osl:264
 #         return n;
-	assign		$tmp314 ___677_n 	%line{260} %argrw{"wr"}
-# PxrFractal.osl:321
+	assign		$tmp314 ___682_n 	%line{264} %argrw{"wr"}
+# PxrFractal.osl:325
 #         float val = mag * mix(smoothNoise(freq * sP, variation), noise_avg, w);
-	mix		$tmp313 $tmp314 noise_avg w 	%line{321} %argrw{"wrrr"}
-	mul		___688_val mag $tmp313 	%argrw{"wrr"}
-# PxrFractal.osl:322
+	mix		$tmp313 $tmp314 noise_avg w 	%line{325} %argrw{"wrrr"}
+	mul		___693_val mag $tmp313 	%argrw{"wrr"}
+# PxrFractal.osl:326
 #         tmp = modeOp(tmp, val);
-	functioncall	$const1569 5400 	%line{322} %argrw{"r"}
-# PxrFractal.osl:265
+	functioncall	$const1569 5400 	%line{326} %argrw{"r"}
+# PxrFractal.osl:269
 #         if (mode == 0)
-	eq		$tmp604 mode $const1 	%line{265} %argrw{"wrr"}
+	eq		$tmp604 mode $const1 	%line{269} %argrw{"wrr"}
 	if		$tmp604 5394 5400 	%argrw{"r"}
-# PxrFractal.osl:266
+# PxrFractal.osl:270
 #             return a + b;
-	add		tmp tmp ___688_val 	%line{266} %argrw{"wrr"}
+	add		tmp tmp ___693_val 	%line{270} %argrw{"wrr"}
 	return
-# PxrFractal.osl:267
+# PxrFractal.osl:271
 #         else if (mode == 1)
-	eq		$tmp605 mode $const2 	%line{267} %argrw{"wrr"}
+	eq		$tmp605 mode $const2 	%line{271} %argrw{"wrr"}
 	if		$tmp605 5398 5400 	%argrw{"r"}
-# PxrFractal.osl:268
+# PxrFractal.osl:272
 #             return max(a, b);
-	max		tmp tmp ___688_val 	%line{268} %argrw{"wrr"}
+	max		tmp tmp ___693_val 	%line{272} %argrw{"wrr"}
 	return
-# PxrFractal.osl:270
+# PxrFractal.osl:274
 #             return min(a, b);
-	min		tmp tmp ___688_val 	%line{270} %argrw{"wrr"}
+	min		tmp tmp ___693_val 	%line{274} %argrw{"wrr"}
 	return
-# PxrFractal.osl:323
-#         sum = modeOp(sum, mag);
-	functioncall	$const1569 5411 	%line{323} %argrw{"r"}
-# PxrFractal.osl:265
-#         if (mode == 0)
-	eq		$tmp606 mode $const1 	%line{265} %argrw{"wrr"}
-	if		$tmp606 5405 5411 	%argrw{"r"}
-# PxrFractal.osl:266
-#             return a + b;
-	add		sum sum mag 	%line{266} %argrw{"wrr"}
-	return
-# PxrFractal.osl:267
-#         else if (mode == 1)
-	eq		$tmp607 mode $const2 	%line{267} %argrw{"wrr"}
-	if		$tmp607 5409 5411 	%argrw{"r"}
-# PxrFractal.osl:268
-#             return max(a, b);
-	max		sum sum mag 	%line{268} %argrw{"wrr"}
-	return
-# PxrFractal.osl:270
-#             return min(a, b);
-	min		sum sum mag 	%line{270} %argrw{"wrr"}
-	return
-# PxrFractal.osl:324
-#         if (w >= 1.0)
-	ge		$tmp608 w $const14 	%line{324} %argrw{"wrr"}
-	if		$tmp608 5414 5414 	%argrw{"r"}
 # PxrFractal.osl:327
+#         sum = modeOp(sum, mag);
+	functioncall	$const1569 5411 	%line{327} %argrw{"r"}
+# PxrFractal.osl:269
+#         if (mode == 0)
+	eq		$tmp606 mode $const1 	%line{269} %argrw{"wrr"}
+	if		$tmp606 5405 5411 	%argrw{"r"}
+# PxrFractal.osl:270
+#             return a + b;
+	add		sum sum mag 	%line{270} %argrw{"wrr"}
+	return
+# PxrFractal.osl:271
+#         else if (mode == 1)
+	eq		$tmp607 mode $const2 	%line{271} %argrw{"wrr"}
+	if		$tmp607 5409 5411 	%argrw{"r"}
+# PxrFractal.osl:272
+#             return max(a, b);
+	max		sum sum mag 	%line{272} %argrw{"wrr"}
+	return
+# PxrFractal.osl:274
+#             return min(a, b);
+	min		sum sum mag 	%line{274} %argrw{"wrr"}
+	return
+# PxrFractal.osl:328
+#         if (w >= 1.0)
+	ge		$tmp608 w $const14 	%line{328} %argrw{"wrr"}
+	if		$tmp608 5414 5414 	%argrw{"r"}
+# PxrFractal.osl:331
 #             break; // Only safe case to stop early
-	break	%line{327}
-# PxrFractal.osl:314
+	break	%line{331}
+# PxrFractal.osl:318
 #     for (j = 1; j < layers; j += 1)
-	add		j j $const2 	%line{314} %argrw{"wrr"}
-# PxrFractal.osl:338
+	add		j j $const2 	%line{318} %argrw{"wrr"}
+# PxrFractal.osl:342
 #     resultF = tmp / sum;
-	div		resultF tmp sum 	%line{338} %argrw{"wrr"}
-# PxrFractal.osl:340
-#     if (turbulent == 1) resultF = fabs(1.0 - resultF * 2.0);
-	eq		$tmp609 turbulent $const2 	%line{340} %argrw{"wrr"}
+	div		resultF tmp sum 	%line{342} %argrw{"wrr"}
+# PxrFractal.osl:344
+#     if (turbulent == k_turbClassic) resultF = fabs(1.0 - resultF * 2.0);
+	eq		$tmp609 turbulent $const2 	%line{344} %argrw{"wrr"}
 	if		$tmp609 5421 5421 	%argrw{"r"}
 	mul		$tmp610 resultF $const1558 	%argrw{"wrr"}
 	sub		$tmp611 $const14 $tmp610 	%argrw{"wrr"}
 	fabs		resultF $tmp611 	%argrw{"wr"}
-# PxrFractal.osl:342
-#     resultRGB = color(resultF);
-	assign		resultRGB resultF 	%line{342} %argrw{"wr"}
-# PxrFractal.osl:344
-#     if (isconnected(resultNG))
-	isconnected	$tmp612 resultNG 	%line{344} %argrw{"wr"}
-	if		$tmp612 5436 5436 	%argrw{"r"}
 # PxrFractal.osl:346
+#     resultRGB = color(resultF);
+	assign		resultRGB resultF 	%line{346} %argrw{"wr"}
+# PxrFractal.osl:348
+#     if (isconnected(resultNG))
+	isconnected	$tmp612 resultNG 	%line{348} %argrw{"wr"}
+	if		$tmp612 5436 5436 	%argrw{"r"}
+# PxrFractal.osl:350
 #         normal bumpN = normalize(calculatenormal(P + N * (resultF - 0.5)));
-	sub		$tmp614 resultF $const12 	%line{346} %argrw{"wrr"}
+	sub		$tmp614 resultF $const12 	%line{350} %argrw{"wrr"}
 	mul		$tmp615 N $tmp614 	%argrw{"wrr"}
 	add		$tmp616 P $tmp615 	%argrw{"wrr"}
 	calculatenormal	$tmp613 $tmp616 	%argrw{"wr"} %argderivs{1}
-	normalize	___690_bumpN $tmp613 	%argrw{"wr"}
-# PxrFractal.osl:347
+	normalize	___695_bumpN $tmp613 	%argrw{"wr"}
+# PxrFractal.osl:351
 #         resultNG = surfgradFromPerturbedNormal(bumpN, N);
-	functioncall	$const1570 5436 	%line{347} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:100
+	functioncall	$const1570 5436 	%line{351} %argrw{"r"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:100
 # 	float k = dot(Nn, bN);
-	dot		___662_k N ___690_bumpN 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Bump.h"} %line{100} %argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:101
+	dot		___662_k N ___695_bumpN 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h"} %line{100} %argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:101
 # 	return (k * Nn - bN) / max(1.0e-8, abs(k));
 	mul		$tmp617 ___662_k N 	%line{101} %argrw{"wrr"}
-	sub		$tmp618 $tmp617 ___690_bumpN 	%argrw{"wrr"}
+	sub		$tmp618 $tmp617 ___695_bumpN 	%argrw{"wrr"}
 	abs		$tmp620 ___662_k 	%argrw{"wr"}
 	max		$tmp619 $const1571 $tmp620 	%argrw{"wrr"}
 	div		resultNG $tmp618 $tmp619 	%argrw{"wrr"}
-# PxrFractal.osl:350
+# PxrFractal.osl:354
 #     resultRGB = resultRGB * colorScale + colorOffset;
-	mul		$tmp621 resultRGB colorScale 	%filename{"PxrFractal.osl"} %line{350} %argrw{"wrr"}
+	mul		$tmp621 resultRGB colorScale 	%filename{"PxrFractal.osl"} %line{354} %argrw{"wrr"}
 	add		resultRGB $tmp621 colorOffset 	%argrw{"wrr"}
-# PxrFractal.osl:351
+# PxrFractal.osl:355
 #     resultF = resultF * floatScale + floatOffset;
-	mul		$tmp622 resultF floatScale 	%line{351} %argrw{"wrr"}
+	mul		$tmp622 resultF floatScale 	%line{355} %argrw{"wrr"}
 	add		resultF $tmp622 floatOffset 	%argrw{"wrr"}
 	end

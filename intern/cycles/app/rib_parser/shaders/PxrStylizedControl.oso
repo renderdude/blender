@@ -1,9 +1,8 @@
 OpenShadingLanguage 1.00
 # Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrStylizedControl.osl/obj/PxrStylizedControl.oso
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrStylizedControl.osl/obj/PxrStylizedControl.oso
 shader PxrStylizedControl	%meta{int,rfm_nodeid,1233484} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/stylized"} %meta{string,rfh_classification,"Pattern/Stylized"} %meta{string,help,"Plugs into PxrSurface utilityPattern or userColor to control Stylized Looks display filters."} 
-param	string	Version	"Sections Add"		%meta{string,readOnly,"True"}  %read{2147483647,-1} %write{2147483647,-1}
-param	color	inputRGB	1 1 0		%meta{string,label,"Albedo Color"} %meta{string,widget,"color"} %meta{string,help,"Pass Through Color, can connect Output RGB to PxrSurface Diffuse Color"} %meta{int,connectable,1}  %read{404,480} %write{2147483647,-1}
+param	color	inputRGB	1 1 0		%meta{string,label,"Albedo Color"} %meta{string,widget,"color"} %meta{string,help,"Pass Through Color, can connect Output RGB to PxrSurface Diffuse Color. Also writes to NPRalbedo AOV"} %meta{int,connectable,1}  %read{404,491} %write{2147483647,-1}
 param	int	cameraDepthType	0		%meta{string,widget,"mapper"} %meta{string,options,"Length Camera P:0|Abs Camera P Z:1|I:2"} %meta{string,help,"2 modes: length of the camera P, or absolute value of camera P Z component"} %meta{int,connectable,0} %meta{string,label,"Cam Depth Type"}  %read{407,411} %write{2147483647,-1}
 param	float	cameraDepth_scale	1		%meta{string,label,"Cam Depth Scale"} %meta{string,widget,"default"} %meta{string,help,"Scale camera depth value from Cam Depth Type"} %meta{float,min,0} %meta{float,max,10} %meta{int,connectable,0}  %read{415,415} %write{2147483647,-1}
 param	int	randomattr	0		%meta{string,widget,"mapper"} %meta{string,page,"Lines"} %meta{string,options,"id:0|integer:1"} %meta{string,help,"id takes random color float. integer takes integer values. Both for generating variance at adjacent shape nodes for resulting edge detection."} %meta{int,connectable,0} %meta{string,label,"Random Type"}  %read{2147483647,-1} %write{2147483647,-1}
@@ -16,26 +15,32 @@ param	float	lineThickness	1		%meta{string,widget,"default"} %meta{string,page,"L
 param	int	lineThickness_remap_switch	0		%meta{string,label,"Line Thickness Remap Switch"} %meta{string,widget,"checkBox"} %meta{string,page,"Lines"} %meta{string,help,"OFF: use only float Line Thickness valueON: connect upstream Pattern (fractal, texture, ...) to Line Thickness, then use remap_min and remap_max below to linearly step between the two.Example: if you have a fractal going between 0..1 plugged into Line Thickness, remap_min=0, remap_max=10, then your final line thickness will be 10 where the fractal is 1 (white), and 0 where the fractal is 0 (black)."} %meta{int,connectable,0}  %read{421,421} %write{2147483647,-1}
 param	float	lineThickness_remap_min	0		%meta{string,widget,"default"} %meta{string,page,"Lines"} %meta{string,help,"If Line Thickness From Pattern chosen from PxrStylizedLinesDisplayFilter and upstream node connected to Line Thickness, use this min value to remap upstream 0 value to. Example: if PxrFractal is plugged in upstream to Line Thickness, the 0 (black) value in the PxrFractal pattern will remap to this min."} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisPath,"lineThickness_remap_switch"} %meta{string,conditionalVisValue,"1"} %meta{string,label,"Line Thickness Remap Min"} %meta{float,max,15} %meta{float,min,0}  %read{422,422} %write{2147483647,-1}
 param	float	lineThickness_remap_max	1		%meta{string,widget,"default"} %meta{string,page,"Lines"} %meta{string,help,"If Line Thickness From Pattern chosen from PxrStylizedLinesDisplayFilter and upstream node connected to Line Thickness, use this min value to remap upstream 0 value to. Example: if PxrFractal is plugged in upstream to Line Thickness, the 1 (white) value in the PxrFractal pattern will remap to this max."} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisPath,"lineThickness_remap_switch"} %meta{string,conditionalVisValue,"1"} %meta{string,label,"Line Thickness Remap Max"} %meta{float,max,15} %meta{float,min,0}  %read{422,422} %write{2147483647,-1}
-param	float	lineMask	1		%meta{string,widget,"default"} %meta{string,page,"Lines"} %meta{string,help,"Mask out unwanted areas for resulting edge detected lines by pluging in upstream node texture or pattern or float value on slider. Writes into RED channel of NPRlineMask AOV. On Lines DisplayFilter, select Use Line Mask toggle to engage."} %meta{string,label,"Line Mask"} %meta{float,max,1} %meta{float,min,0}  %read{488,488} %write{2147483647,-1}
+param	float	lineMask	1		%meta{string,widget,"default"} %meta{string,page,"Lines"} %meta{string,help,"Mask out unwanted areas for resulting edge detected lines by pluging in upstream node texture or pattern or float value on slider. Writes into RED channel of NPRmask AOV. On Lines DisplayFilter, select Use Line Mask toggle to engage."} %meta{string,label,"Line Mask"} %meta{float,max,1} %meta{float,min,0}  %read{499,499} %write{2147483647,-1}
 param	int	sectionsMapSwitch	0		%meta{string,widget,"checkBox"} %meta{string,page,"Lines"} %meta{string,help,"Use map in sectionsMap below to define variance in image instead of random id"} %meta{int,connectable,0} %meta{string,label,"Sections Map Switch"}  %read{423,423} %write{2147483647,-1}
 param	color	sectionsMap	0 0 0		%meta{string,label,"Sections Map"} %meta{string,widget,"color"} %meta{string,page,"Lines"} %meta{string,help,"Optional color map to add lines where they don't get detected by random id per object. Example: if edge detection is desired to be triggered along the chin of a character where the random sections id is not different, plug in an upstream texture map that has 2 different colors painted in desired area, and resulting sections map will be passed to edge detection algorithm. Default of black (0,0,0) doesn't trigger change."} %meta{int,connectable,1}  %read{425,428} %write{2147483647,-1}
 param	int	sectionsMapBlackMaskSwitch	0		%meta{string,widget,"checkBox"} %meta{string,page,"Lines"} %meta{string,help,"Where its black in custom Sections Map, composit over existing sections random color."} %meta{int,connectable,0} %meta{string,label,"Sections Map Black Mask Switch"}  %read{424,424} %write{2147483647,-1}
 param	vector	sectionsHSV	0 0 1		%meta{string,label,"Sections HSV"} %meta{string,widget,"color"} %meta{string,page,"Lines"} %meta{string,help,"Tint Sections Map in HSV. 1st input = Hue, 2nd input = Saturation, 3rd input = Value"} %meta{int,connectable,1}  %read{389,389} %write{2147483647,-1}
-param	float	hatchingMask	1		%meta{string,widget,"default"} %meta{string,page,"Hatching Projections"} %meta{string,help,"Mask out unwanted areas for resulting hatching by pluging in upstream node texture or pattern. Stores value in GREEN channel of NPRlineMask AOV."} %meta{string,label,"Hatching Mask"} %meta{float,max,1} %meta{float,min,0}  %read{488,488} %write{2147483647,-1}
+param	float	hatchingMask	1		%meta{string,widget,"default"} %meta{string,page,"Hatching Projections"} %meta{string,help,"Mask out unwanted areas for resulting hatching by pluging in upstream node texture or pattern. Stores value in GREEN channel of NPRmask AOV."} %meta{string,label,"Hatching Mask"} %meta{float,max,1} %meta{float,min,0}  %read{499,499} %write{2147483647,-1}
 param	int	triplanarP	0		%meta{string,page,"Hatching Projections"} %meta{string,widget,"mapper"} %meta{string,options,"P:0|__Pref:1|Input P Triplanar:2"} %meta{string,help,"P: object space P, __Pref: if exists as primvar, Input P Triplanar: upstream PxrManifold3d connected to inputPtriplanar inputs on this node"} %meta{int,connectable,0} %meta{string,label,"P Triplanar"}  %read{431,443} %write{2147483647,-1}
 param	color	inputPtriplanar	0 0 0		%meta{string,label,"Input P Triplanar"} %meta{string,widget,"color"} %meta{string,page,"Hatching Projections"} %meta{string,help,"If using Blended Triplanar Projections in PxrStylizedHatching, optionally plug upstream point P XYZ into RGB here. Example: for a deformation animation of a character, a custom __Pref via PxrProjector or PxrManifold3d can be connected here."} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisPath,"../triplanarP"} %meta{string,conditionalVisValue,"2"} %meta{int,connectable,1}  %read{445,445} %write{2147483647,-1}
 param	int	triplanarN	0		%meta{string,page,"Hatching Projections"} %meta{string,widget,"mapper"} %meta{string,options,"N:0|__Nref:1|Input N Triplanar:2"} %meta{string,help,"N: default global N, __Nref: if exists as primvar, Input N Triplanar: any upstream XYZ for N user connects into inputNtriplanar inputs on this node"} %meta{int,connectable,0} %meta{string,label,"N Triplanar"}  %read{456,465} %write{2147483647,-1}
 param	color	inputNtriplanar	0 0 0		%meta{string,label,"Input N Triplanar"} %meta{string,widget,"color"} %meta{string,page,"Hatching Projections"} %meta{string,help,"If using Blended Triplanar Projections in PxrStylizedHatching, optionally plug upstream normal N XYZ into RGB here. Example: for a deformation animation of a character, a custom __Nref via PxrProjector or PxrManifold3d can be connected here."} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisPath,"../triplanarN"} %meta{string,conditionalVisValue,"2"} %meta{int,connectable,1}  %read{467,467} %write{2147483647,-1}
-param	color	inputTextureCoords	1 0.5 1		%meta{string,label,"Input Texture Coordinates"} %meta{string,widget,"color"} %meta{string,page,"Hatching Projections"} %meta{string,help,"If using Texture Coordinates in PxrStylizedHatchingDisplayFilter, optionally plug upstream point P XYZ into RGB here. Example: a custom camera projection is desired, plug PxrProjector upstream here."} %meta{int,connectable,1}  %read{504,504} %write{2147483647,-1}
+param	color	inputTextureCoords	1 0.5 1		%meta{string,label,"Input Texture Coordinates"} %meta{string,widget,"color"} %meta{string,page,"Hatching Projections"} %meta{string,help,"If using Texture Coordinates in PxrStylizedHatchingDisplayFilter, optionally plug upstream point P XYZ into RGB here. Example: a custom camera projection is desired, plug PxrProjector upstream here."} %meta{int,connectable,1}  %read{515,515} %write{2147483647,-1}
 param	float	triplanarScaleX	1		%meta{string,widget,"default"} %meta{string,page,"Hatching Projections"} %meta{string,help,"Scale X component of P for triplanar projections to change frequency of texture on that plane"} %meta{string,label,"Triplanar Scale X"} %meta{float,max,100} %meta{float,min,0}  %read{447,447} %write{2147483647,-1}
 param	float	triplanarScaleY	1		%meta{string,widget,"default"} %meta{string,page,"Hatching Projections"} %meta{string,help,"Scale Y component of P for triplanar projections to change frequency of texture on that plane"} %meta{string,label,"Triplanar Scale Y"} %meta{float,max,100} %meta{float,min,0}  %read{450,450} %write{2147483647,-1}
 param	float	triplanarScaleZ	1		%meta{string,widget,"default"} %meta{string,page,"Hatching Projections"} %meta{string,help,"Scale Z component of P for triplanar projections to change frequency of texture on that plane"} %meta{string,label,"Triplanar Scale Z"} %meta{float,max,100} %meta{float,min,0}  %read{453,453} %write{2147483647,-1}
+param	float	distortU	0		%meta{string,widget,"default"} %meta{string,page,"Distort"} %meta{string,help,"Input PxrFractal or other offset on U coord for Lines Distort"} %meta{string,label,"Distort U"} %meta{int,connectable,1} %meta{float,min,0} %meta{float,max,1}  %read{471,523} %write{2147483647,-1} %derivs
+param	float	distortV	0		%meta{string,widget,"default"} %meta{string,page,"Distort"} %meta{string,help,"Input PxrFractal or other offset on V coord for Lines Distort"} %meta{string,label,"Distort V"} %meta{int,connectable,1} %meta{float,min,0} %meta{float,max,1}  %read{523,523} %write{2147483647,-1}
+param	int	distortBumpSwitch	0		%meta{string,widget,"checkBox"} %meta{string,page,"Distort"} %meta{string,help,"Switch to take Distort U V inputs of fractal and apply bump mapping to surface normal output to NPRcurvature for different features on edge detection in curvature mode"} %meta{string,label,"Distort Bump Switch"} %meta{int,connectable,1} %meta{float,min,0} %meta{float,max,1}  %read{469,469} %write{2147483647,-1}
+param	float	distortScale	1		%meta{string,widget,"default"} %meta{string,page,"Distort"} %meta{string,label,"Distort Scale"} %meta{string,help,"Scale Fractal Input from distortU distortV if doing Distort Bump"} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisPath,"../distortBumpSwitch"} %meta{string,conditionalVisValue,"1"} %meta{int,connectable,1} %meta{float,min,0} %meta{float,max,100}  %read{472,472} %write{2147483647,-1} %derivs
+param	float	Toon_Mask	1		%meta{string,widget,"default"} %meta{string,page,"Toon"} %meta{string,help,"Mask out unwanted areas for Toon. Writes into BLUE channel of NPRmask AOV. On Toon DisplayFilter, select Use Toon Mask toggle to engage."} %meta{string,label,"Toon Mask"} %meta{float,max,1} %meta{float,min,0}  %read{499,499} %write{2147483647,-1}
+param	string	Version	"New AOVs"		%meta{string,readOnly,"True"} %meta{string,help,"Required AOVs:, NPRoutline, NPRsections, NPRlineNZ, NPRalbedo, NPRlineAlbedo, NPRmask, NPRlineWidth, NPRPtriplanar, NPRNtriplanar, NPRtextureCoords, NPRcurvature, NPRdistort, NPRlineOutAlpha"}  %read{2147483647,-1} %write{2147483647,-1}
 oparam	color	resultRGB	0 0 0		%read{2147483647,-1} %write{404,404}
 oparam	int	resultAOV	19		%read{2147483647,-1} %write{2147483647,-1}
-global	point	P	%read{405,434} %write{2147483647,-1}
+global	point	P	%read{405,473} %write{2147483647,-1} %derivs
 global	vector	I	%read{413,413} %write{2147483647,-1}
-global	normal	N	%read{416,508} %write{2147483647,-1}
-global	closure color	Ci	%read{470,510} %write{470,510}
+global	normal	N	%read{416,470} %write{2147483647,-1} %derivs
+global	closure color	Ci	%read{478,525} %write{478,525}
 local	float[4096]	___475_rxcellrandtable	%read{34,250} %write{14,14}
 local	int[4096]	___475_rxcellpermute	%read{34,250} %write{15,15}
 local	int	___475_i	%read{34,250} %write{33,250}
@@ -58,23 +63,25 @@ local	color	___543_HSV_tint2HSV	%read{313,400} %write{311,389}
 local	color	___543_colorFinal	%read{325,403} %write{324,402}
 local	color	___545_outputColor	%read{350,350} %write{335,349}
 local	int	id	%read{1,1} %write{0,0}
-local	color	sections	%read{269,472} %write{255,428}
+local	color	sections	%read{269,483} %write{255,428}
 local	color	HSV	%read{257,263} %write{256,256}
 local	color	RGB	%read{2147483647,-1} %write{266,266}
-local	color	lineAlbedoFinal	%read{484,484} %write{354,386}
+local	color	lineAlbedoFinal	%read{495,495} %write{354,386}
 local	point	cameraP	%read{406,409} %write{405,405}
 local	float	cameraDepth	%read{415,418} %write{406,415}
 local	point	___551_cameraI	%read{414,414} %write{413,413}
-local	color	lineNZ	%read{476,476} %write{418,418}
+local	color	lineNZ	%read{487,487} %write{418,418}
 local	color	outline	%read{2147483647,-1} %write{419,419}
-local	float	finalLineThickness	%read{492,492} %write{420,422}
+local	float	finalLineThickness	%read{503,503} %write{420,422}
 local	point	Ptransform	%read{430,430} %write{429,429}
-local	point	finalPtriplanar	%read{446,496} %write{430,454}
+local	point	finalPtriplanar	%read{446,507} %write{430,454}
 local	int	___554_success	%read{436,436} %write{433,435}
 local	point	___554_Pin	%read{440,442} %write{434,441}
-local	normal	finalNtriplanar	%read{500,500} %write{455,467}
+local	normal	finalNtriplanar	%read{511,511} %write{455,467}
 local	normal	___556_Nin	%read{464,464} %write{458,459}
 local	int	___556_success__Nref	%read{460,460} %write{459,459}
+local	normal	Nbump	%read{519,519} %write{468,475}
+local	point	___558_Pbump	%read{474,474} %write{473,473} %derivs
 temp	int	$tmp1	%read{2147483647,-1} %write{0,0}
 const	string	$const1	"builtin"		%read{0,0} %write{2147483647,-1}
 const	string	$const2	"id"		%read{0,0} %write{2147483647,-1}
@@ -95,7 +102,7 @@ const	int[4096]	$const13	4010 3071 3902 1718 115 2901 1534 1064 604 2775 2174 65
 temp	int	$tmp5	%read{18,18} %write{17,17}
 temp	float	$tmp6	%read{20,20} %write{19,19}
 const	float	$const14	9.99999975e-05		%read{20,206} %write{2147483647,-1}
-const	float	$const15	0		%read{21,488} %write{2147483647,-1}
+const	float	$const15	0		%read{21,351} %write{2147483647,-1}
 temp	int	$tmp7	%read{22,22} %write{21,21}
 const	float	$const16	-100000000		%read{23,209} %write{2147483647,-1}
 temp	int	$tmp8	%read{24,24} %write{23,23}
@@ -228,7 +235,7 @@ temp	float	$tmp127	%read{266,266} %write{262,262}
 temp	float	$tmp128	%read{265,265} %write{263,263}
 temp	float	$tmp129	%read{265,265} %write{264,264}
 temp	float	$tmp130	%read{266,266} %write{265,265}
-const	float	$const24	1		%read{267,308} %write{2147483647,-1}
+const	float	$const24	1		%read{267,523} %write{2147483647,-1}
 temp	int	$tmp131	%read{268,268} %write{267,267}
 temp	float	$tmp132	%read{270,270} %write{269,269}
 const	float	$const25	0.5		%read{270,276} %write{2147483647,-1}
@@ -333,8 +340,8 @@ temp	float	$tmp224	%read{410,410} %write{409,409}
 temp	int	$tmp225	%read{412,412} %write{411,411}
 temp	float	$tmp226	%read{418,418} %write{416,416}
 temp	float	$tmp227	%read{418,418} %write{417,417}
-const	color	$const32	1 1 1		%read{419,469} %write{2147483647,-1}
-const	color	$const33	0 0 0		%read{425,425} %write{2147483647,-1}
+const	color	$const32	1 1 1		%read{419,480} %write{2147483647,-1}
+const	color	$const33	0 0 0		%read{425,477} %write{2147483647,-1}
 temp	int	$tmp229	%read{426,426} %write{425,425}
 const	string	$const34	"common"		%read{429,455} %write{2147483647,-1}
 const	string	$const35	"object"		%read{429,455} %write{2147483647,-1}
@@ -357,61 +364,72 @@ temp	int	$tmp240	%read{461,461} %write{460,460}
 const	string	$const41	"__Nref LOOKUP FAIL"		%read{462,462} %write{2147483647,-1}
 const	string	$const42	"__Nref LOOKUP SUCCESS"		%read{463,463} %write{2147483647,-1}
 temp	int	$tmp241	%read{466,466} %write{465,465}
-temp	closure color	$tmp242	%read{469,469} %write{468,468}
-const	string	$const43	"NPRoutline"		%read{468,468} %write{2147483647,-1}
-const	string	$const44	"debug"		%read{468,507} %write{2147483647,-1}
-temp	closure color	$tmp244	%read{470,470} %write{469,469}
-temp	closure color	$tmp245	%read{473,473} %write{471,471}
-const	string	$const45	"NPRsections"		%read{471,471} %write{2147483647,-1}
-temp	color	$tmp246	%read{473,473} %write{472,472}
-temp	closure color	$tmp247	%read{474,474} %write{473,473}
-temp	closure color	$tmp248	%read{477,477} %write{475,475}
-const	string	$const46	"NPRlineNZ"		%read{475,475} %write{2147483647,-1}
-temp	color	$tmp249	%read{477,477} %write{476,476}
-temp	closure color	$tmp250	%read{478,478} %write{477,477}
-temp	closure color	$tmp251	%read{481,481} %write{479,479}
-const	string	$const47	"NPRalbedo"		%read{479,479} %write{2147483647,-1}
-temp	color	$tmp252	%read{481,481} %write{480,480}
-temp	closure color	$tmp253	%read{482,482} %write{481,481}
-temp	closure color	$tmp254	%read{485,485} %write{483,483}
-const	string	$const48	"NPRlineAlbedo"		%read{483,483} %write{2147483647,-1}
-temp	color	$tmp255	%read{485,485} %write{484,484}
-temp	closure color	$tmp256	%read{486,486} %write{485,485}
-temp	closure color	$tmp257	%read{489,489} %write{487,487}
-const	string	$const49	"NPRlineMask"		%read{487,487} %write{2147483647,-1}
-temp	color	$tmp258	%read{489,489} %write{488,488}
-temp	closure color	$tmp259	%read{490,490} %write{489,489}
-temp	closure color	$tmp260	%read{493,493} %write{491,491}
-const	string	$const50	"NPRlineWidth"		%read{491,491} %write{2147483647,-1}
-temp	color	$tmp261	%read{493,493} %write{492,492}
-temp	closure color	$tmp262	%read{494,494} %write{493,493}
-temp	closure color	$tmp263	%read{497,497} %write{495,495}
-const	string	$const51	"NPRPtriplanar"		%read{495,495} %write{2147483647,-1}
-temp	color	$tmp264	%read{497,497} %write{496,496}
-temp	closure color	$tmp265	%read{498,498} %write{497,497}
-temp	closure color	$tmp266	%read{501,501} %write{499,499}
-const	string	$const52	"NPRNtriplanar"		%read{499,499} %write{2147483647,-1}
-temp	color	$tmp267	%read{501,501} %write{500,500}
-temp	closure color	$tmp268	%read{502,502} %write{501,501}
-temp	closure color	$tmp269	%read{505,505} %write{503,503}
-const	string	$const53	"NPRtextureCoords"		%read{503,503} %write{2147483647,-1}
-temp	color	$tmp270	%read{505,505} %write{504,504}
-temp	closure color	$tmp271	%read{506,506} %write{505,505}
-temp	closure color	$tmp272	%read{509,509} %write{507,507}
-const	string	$const54	"NPRcurvature"		%read{507,507} %write{2147483647,-1}
-temp	color	$tmp273	%read{509,509} %write{508,508}
-temp	closure color	$tmp274	%read{510,510} %write{509,509}
+temp	normal	$tmp242	%read{471,471} %write{470,470} %derivs
+temp	normal	$tmp243	%read{472,472} %write{471,471} %derivs
+temp	normal	$tmp244	%read{473,473} %write{472,472} %derivs
+temp	vector	$tmp245	%read{475,475} %write{474,474}
+temp	closure color	$tmp246	%read{477,477} %write{476,476}
+const	string	$const43	"NPRlineOutAlpha"		%read{476,476} %write{2147483647,-1}
+const	string	$const44	"debug"		%read{476,522} %write{2147483647,-1}
+temp	closure color	$tmp248	%read{478,478} %write{477,477}
+temp	closure color	$tmp249	%read{480,480} %write{479,479}
+const	string	$const45	"NPRoutline"		%read{479,479} %write{2147483647,-1}
+temp	closure color	$tmp251	%read{481,481} %write{480,480}
+temp	closure color	$tmp252	%read{484,484} %write{482,482}
+const	string	$const46	"NPRsections"		%read{482,482} %write{2147483647,-1}
+temp	color	$tmp253	%read{484,484} %write{483,483}
+temp	closure color	$tmp254	%read{485,485} %write{484,484}
+temp	closure color	$tmp255	%read{488,488} %write{486,486}
+const	string	$const47	"NPRlineNZ"		%read{486,486} %write{2147483647,-1}
+temp	color	$tmp256	%read{488,488} %write{487,487}
+temp	closure color	$tmp257	%read{489,489} %write{488,488}
+temp	closure color	$tmp258	%read{492,492} %write{490,490}
+const	string	$const48	"NPRalbedo"		%read{490,490} %write{2147483647,-1}
+temp	color	$tmp259	%read{492,492} %write{491,491}
+temp	closure color	$tmp260	%read{493,493} %write{492,492}
+temp	closure color	$tmp261	%read{496,496} %write{494,494}
+const	string	$const49	"NPRlineAlbedo"		%read{494,494} %write{2147483647,-1}
+temp	color	$tmp262	%read{496,496} %write{495,495}
+temp	closure color	$tmp263	%read{497,497} %write{496,496}
+temp	closure color	$tmp264	%read{500,500} %write{498,498}
+const	string	$const50	"NPRmask"		%read{498,498} %write{2147483647,-1}
+temp	color	$tmp265	%read{500,500} %write{499,499}
+temp	closure color	$tmp266	%read{501,501} %write{500,500}
+temp	closure color	$tmp267	%read{504,504} %write{502,502}
+const	string	$const51	"NPRlineWidth"		%read{502,502} %write{2147483647,-1}
+temp	color	$tmp268	%read{504,504} %write{503,503}
+temp	closure color	$tmp269	%read{505,505} %write{504,504}
+temp	closure color	$tmp270	%read{508,508} %write{506,506}
+const	string	$const52	"NPRPtriplanar"		%read{506,506} %write{2147483647,-1}
+temp	color	$tmp271	%read{508,508} %write{507,507}
+temp	closure color	$tmp272	%read{509,509} %write{508,508}
+temp	closure color	$tmp273	%read{512,512} %write{510,510}
+const	string	$const53	"NPRNtriplanar"		%read{510,510} %write{2147483647,-1}
+temp	color	$tmp274	%read{512,512} %write{511,511}
+temp	closure color	$tmp275	%read{513,513} %write{512,512}
+temp	closure color	$tmp276	%read{516,516} %write{514,514}
+const	string	$const54	"NPRtextureCoords"		%read{514,514} %write{2147483647,-1}
+temp	color	$tmp277	%read{516,516} %write{515,515}
+temp	closure color	$tmp278	%read{517,517} %write{516,516}
+temp	closure color	$tmp279	%read{520,520} %write{518,518}
+const	string	$const55	"NPRcurvature"		%read{518,518} %write{2147483647,-1}
+temp	color	$tmp280	%read{520,520} %write{519,519}
+temp	closure color	$tmp281	%read{521,521} %write{520,520}
+temp	closure color	$tmp282	%read{524,524} %write{522,522}
+const	string	$const56	"NPRdistort"		%read{522,522} %write{2147483647,-1}
+temp	color	$tmp283	%read{524,524} %write{523,523}
+temp	closure color	$tmp284	%read{525,525} %write{524,524}
 code ___main___
-# PxrStylizedControl.osl:456
+# PxrStylizedControl.osl:517
 #     getattribute("builtin", "id", id);
-	getattribute	$tmp1 $const1 $const2 id 	%filename{"PxrStylizedControl.osl"} %line{456} %argrw{"wrrw"}
-# PxrStylizedControl.osl:457
+	getattribute	$tmp1 $const1 $const2 id 	%filename{"PxrStylizedControl.osl"} %line{517} %argrw{"wrrw"}
+# PxrStylizedControl.osl:518
 #     color sections = color(rxcellnoise(id));
-	assign		$tmp3 id 	%line{457} %argrw{"wr"}
+	assign		$tmp3 id 	%line{518} %argrw{"wr"}
 	functioncall	$const3 255 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:968
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:968
 #     noise_parameters np = {1, 3, INPUT1W(seed), point(0), NONPERIODIC};
-	assign		___540_np.domain $const4 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h"} %line{968} %argrw{"wr"}
+	assign		___540_np.domain $const4 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h"} %line{968} %argrw{"wr"}
 	assign		___540_np.range $const5 	%argrw{"wr"}
 	fmod		$tmp4 $tmp3 $const6 	%argrw{"wrr"}
 	aassign		___540_np.input $const7 $tmp4 	%argrw{"wrr"}
@@ -421,23 +439,23 @@ code ___main___
 	assign		___540_np.result $const9 	%argrw{"wr"}
 	assign		___540_np.periodic $const7 	%argrw{"wr"}
 	assign		___540_np.period $const10 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:969
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:969
 #     rx_cell_noise(np);
 	functioncall	$const11 251 	%line{969} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:68
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:68
 #     float rxcellrandtable[4096] = {
 	assign		___475_rxcellrandtable $const12 	%line{68} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:582
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:582
 #     int rxcellpermute[4096] = {
 	assign		___475_rxcellpermute $const13 	%line{582} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:904
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:904
 #     int k = 0;
 	assign		___475_k $const7 	%line{904} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:905
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:905
 #     if (np.domain == 1)
 	eq		$tmp5 ___540_np.domain $const4 	%line{905} %argrw{"wrr"}
 	if		$tmp5 47 251 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:907
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:907
 #         SETUP_CELL_DOMAIN(0, int00);
 	aref		$tmp6 ___540_np.input $const7 	%line{907} %argrw{"wrr"}
 	add		___475_v0 $tmp6 $const14 	%argrw{"wrr"}
@@ -452,34 +470,34 @@ code ___main___
 	if		$tmp10 31 32 	%argrw{"r"}
 	assign		___475_int00 $const7 	%argrw{"wr"}
 	assign		___475_int00 ___475_v0 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:908
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:908
 #         for (i = np.range; i > 0; i--, int00 += 7)
 	for		$tmp12 34 36 44 47 	%line{908} %argrw{"r"}
 	assign		___475_i ___540_np.range 	%argrw{"wr"}
 	gt		$tmp11 ___475_i $const7 	%argrw{"wrr"}
 	neq		$tmp12 $tmp11 $const7 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:910
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:910
 #             v0 = rxcellrandtable[CELLPERMUTE(int00)];
 	shl		$tmp13 $const4 $const18 	%line{910} %argrw{"wrr"}
 	sub		$tmp14 $tmp13 $const4 	%argrw{"wrr"}
 	bitand		$tmp15 ___475_int00 $tmp14 	%argrw{"wrr"}
 	aref		$tmp16 ___475_rxcellpermute $tmp15 	%argrw{"wrr"}
 	aref		___475_v0 ___475_rxcellrandtable $tmp16 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:911
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:911
 #             np.result[k++] = v0;
 	assign		$tmp17 ___475_k 	%line{911} %argrw{"wr"}
 	add		___475_k ___475_k $const4 	%argrw{"wrr"}
 	compassign	___540_np.result $tmp17 ___475_v0 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:908
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:908
 #         for (i = np.range; i > 0; i--, int00 += 7)
 	assign		$tmp18 ___475_i 	%line{908} %argrw{"wr"}
 	sub		___475_i ___475_i $const4 	%argrw{"wrr"}
 	add		___475_int00 ___475_int00 $const19 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:914
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:914
 #     else if (np.domain == 2)
 	eq		$tmp19 ___540_np.domain $const8 	%line{914} %argrw{"wrr"}
 	if		$tmp19 96 251 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:916
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:916
 #         SETUP_CELL_DOMAIN(0, int00);
 	aref		$tmp20 ___540_np.input $const7 	%line{916} %argrw{"wrr"}
 	add		___475_v0 $tmp20 $const14 	%argrw{"wrr"}
@@ -494,7 +512,7 @@ code ___main___
 	if		$tmp24 61 62 	%argrw{"r"}
 	assign		___475_int00 $const7 	%argrw{"wr"}
 	assign		___475_int00 ___475_v0 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:917
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:917
 #         SETUP_CELL_DOMAIN(1, int01);
 	aref		$tmp25 ___540_np.input $const4 	%line{917} %argrw{"wrr"}
 	add		___475_v0 $tmp25 $const14 	%argrw{"wrr"}
@@ -509,19 +527,19 @@ code ___main___
 	if		$tmp29 74 75 	%argrw{"r"}
 	assign		___475_int01 $const7 	%argrw{"wr"}
 	assign		___475_int01 ___475_v0 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:918
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:918
 #         for (i = np.range; i > 0; i--, int00 += 7, int01 += 7)
 	for		$tmp31 77 79 92 96 	%line{918} %argrw{"r"}
 	assign		___475_i ___540_np.range 	%argrw{"wr"}
 	gt		$tmp30 ___475_i $const7 	%argrw{"wrr"}
 	neq		$tmp31 $tmp30 $const7 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:920
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:920
 #             iy = CELLPERMUTE(int01);
 	shl		$tmp32 $const4 $const18 	%line{920} %argrw{"wrr"}
 	sub		$tmp33 $tmp32 $const4 	%argrw{"wrr"}
 	bitand		$tmp34 ___475_int01 $tmp33 	%argrw{"wrr"}
 	aref		___475_iy ___475_rxcellpermute $tmp34 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:921
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:921
 #             np.result[k++] = rxcellrandtable[CELLPERMUTE(iy + int00)];
 	add		$tmp35 ___475_iy ___475_int00 	%line{921} %argrw{"wrr"}
 	shl		$tmp36 $const4 $const18 	%argrw{"wrr"}
@@ -532,17 +550,17 @@ code ___main___
 	assign		$tmp41 ___475_k 	%argrw{"wr"}
 	add		___475_k ___475_k $const4 	%argrw{"wrr"}
 	compassign	___540_np.result $tmp41 $tmp40 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:918
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:918
 #         for (i = np.range; i > 0; i--, int00 += 7, int01 += 7)
 	assign		$tmp42 ___475_i 	%line{918} %argrw{"wr"}
 	sub		___475_i ___475_i $const4 	%argrw{"wrr"}
 	add		___475_int00 ___475_int00 $const19 	%argrw{"wrr"}
 	add		___475_int01 ___475_int01 $const19 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:924
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:924
 #     else if (np.domain == 3)
 	eq		$tmp43 ___540_np.domain $const5 	%line{924} %argrw{"wrr"}
 	if		$tmp43 164 251 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:926
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:926
 #         SETUP_CELL_DOMAIN(0, int00);
 	aref		$tmp44 ___540_np.input $const7 	%line{926} %argrw{"wrr"}
 	add		___475_v0 $tmp44 $const14 	%argrw{"wrr"}
@@ -557,7 +575,7 @@ code ___main___
 	if		$tmp48 110 111 	%argrw{"r"}
 	assign		___475_int00 $const7 	%argrw{"wr"}
 	assign		___475_int00 ___475_v0 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:927
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:927
 #         SETUP_CELL_DOMAIN(1, int01);
 	aref		$tmp49 ___540_np.input $const4 	%line{927} %argrw{"wrr"}
 	add		___475_v0 $tmp49 $const14 	%argrw{"wrr"}
@@ -572,7 +590,7 @@ code ___main___
 	if		$tmp53 123 124 	%argrw{"r"}
 	assign		___475_int01 $const7 	%argrw{"wr"}
 	assign		___475_int01 ___475_v0 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:928
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:928
 #         SETUP_CELL_DOMAIN(2, int02);
 	aref		$tmp54 ___540_np.input $const8 	%line{928} %argrw{"wrr"}
 	add		___475_v0 $tmp54 $const14 	%argrw{"wrr"}
@@ -587,26 +605,26 @@ code ___main___
 	if		$tmp58 136 137 	%argrw{"r"}
 	assign		___475_int02 $const7 	%argrw{"wr"}
 	assign		___475_int02 ___475_v0 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:929
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:929
 #         for (i = np.range; i > 0; i--, int00 += 7, int01 += 7, int02 += 3)
 	for		$tmp60 139 141 159 164 	%line{929} %argrw{"r"}
 	assign		___475_i ___540_np.range 	%argrw{"wr"}
 	gt		$tmp59 ___475_i $const7 	%argrw{"wrr"}
 	neq		$tmp60 $tmp59 $const7 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:931
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:931
 #             iz = CELLPERMUTE(int02);
 	shl		$tmp61 $const4 $const18 	%line{931} %argrw{"wrr"}
 	sub		$tmp62 $tmp61 $const4 	%argrw{"wrr"}
 	bitand		$tmp63 ___475_int02 $tmp62 	%argrw{"wrr"}
 	aref		___475_iz ___475_rxcellpermute $tmp63 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:932
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:932
 #             iy = CELLPERMUTE(int01 + iz);
 	add		$tmp64 ___475_int01 ___475_iz 	%line{932} %argrw{"wrr"}
 	shl		$tmp65 $const4 $const18 	%argrw{"wrr"}
 	sub		$tmp66 $tmp65 $const4 	%argrw{"wrr"}
 	bitand		$tmp67 $tmp64 $tmp66 	%argrw{"wrr"}
 	aref		___475_iy ___475_rxcellpermute $tmp67 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:933
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:933
 #             np.result[k++] = rxcellrandtable[CELLPERMUTE(int00 + iy)];
 	add		$tmp68 ___475_int00 ___475_iy 	%line{933} %argrw{"wrr"}
 	shl		$tmp69 $const4 $const18 	%argrw{"wrr"}
@@ -617,18 +635,18 @@ code ___main___
 	assign		$tmp74 ___475_k 	%argrw{"wr"}
 	add		___475_k ___475_k $const4 	%argrw{"wrr"}
 	compassign	___540_np.result $tmp74 $tmp73 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:929
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:929
 #         for (i = np.range; i > 0; i--, int00 += 7, int01 += 7, int02 += 3)
 	assign		$tmp75 ___475_i 	%line{929} %argrw{"wr"}
 	sub		___475_i ___475_i $const4 	%argrw{"wrr"}
 	add		___475_int00 ___475_int00 $const19 	%argrw{"wrr"}
 	add		___475_int01 ___475_int01 $const19 	%argrw{"wrr"}
 	add		___475_int02 ___475_int02 $const5 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:936
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:936
 #     else if (np.domain == 4)
 	eq		$tmp76 ___540_np.domain $const20 	%line{936} %argrw{"wrr"}
 	if		$tmp76 251 251 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:938
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:938
 #         SETUP_CELL_DOMAIN(0, int00);
 	aref		$tmp77 ___540_np.input $const7 	%line{938} %argrw{"wrr"}
 	add		___475_v0 $tmp77 $const14 	%argrw{"wrr"}
@@ -643,7 +661,7 @@ code ___main___
 	if		$tmp81 178 179 	%argrw{"r"}
 	assign		___475_int00 $const7 	%argrw{"wr"}
 	assign		___475_int00 ___475_v0 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:939
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:939
 #         SETUP_CELL_DOMAIN(1, int01);
 	aref		$tmp82 ___540_np.input $const4 	%line{939} %argrw{"wrr"}
 	add		___475_v0 $tmp82 $const14 	%argrw{"wrr"}
@@ -658,7 +676,7 @@ code ___main___
 	if		$tmp86 191 192 	%argrw{"r"}
 	assign		___475_int01 $const7 	%argrw{"wr"}
 	assign		___475_int01 ___475_v0 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:940
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:940
 #         SETUP_CELL_DOMAIN(2, int02);
 	aref		$tmp87 ___540_np.input $const8 	%line{940} %argrw{"wrr"}
 	add		___475_v0 $tmp87 $const14 	%argrw{"wrr"}
@@ -673,7 +691,7 @@ code ___main___
 	if		$tmp91 204 205 	%argrw{"r"}
 	assign		___475_int02 $const7 	%argrw{"wr"}
 	assign		___475_int02 ___475_v0 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:941
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:941
 #         SETUP_CELL_DOMAIN(3, int03);
 	aref		$tmp92 ___540_np.input $const5 	%line{941} %argrw{"wrr"}
 	add		___475_v0 $tmp92 $const14 	%argrw{"wrr"}
@@ -688,13 +706,13 @@ code ___main___
 	if		$tmp96 217 218 	%argrw{"r"}
 	assign		___475_int03 $const7 	%argrw{"wr"}
 	assign		___475_int03 ___475_v0 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:942
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:942
 #         for (i = np.range; i > 0; i--, int00 += 7, int01 += 7, int02 += 3, int03 += 15)
 	for		$tmp98 220 222 245 251 	%line{942} %argrw{"r"}
 	assign		___475_i ___540_np.range 	%argrw{"wr"}
 	gt		$tmp97 ___475_i $const7 	%argrw{"wrr"}
 	neq		$tmp98 $tmp97 $const7 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:944
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:944
 #             iz = CELLPERMUTE(int02 + CELLPERMUTE(int03));
 	shl		$tmp99 $const4 $const18 	%line{944} %argrw{"wrr"}
 	sub		$tmp100 $tmp99 $const4 	%argrw{"wrr"}
@@ -705,14 +723,14 @@ code ___main___
 	sub		$tmp105 $tmp104 $const4 	%argrw{"wrr"}
 	bitand		$tmp106 $tmp103 $tmp105 	%argrw{"wrr"}
 	aref		___475_iz ___475_rxcellpermute $tmp106 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:945
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:945
 #             iy = CELLPERMUTE(int01 + iz);
 	add		$tmp107 ___475_int01 ___475_iz 	%line{945} %argrw{"wrr"}
 	shl		$tmp108 $const4 $const18 	%argrw{"wrr"}
 	sub		$tmp109 $tmp108 $const4 	%argrw{"wrr"}
 	bitand		$tmp110 $tmp107 $tmp109 	%argrw{"wrr"}
 	aref		___475_iy ___475_rxcellpermute $tmp110 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:946
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:946
 #             np.result[k++] = rxcellrandtable[CELLPERMUTE(int00 + iy)];
 	add		$tmp111 ___475_int00 ___475_iy 	%line{946} %argrw{"wrr"}
 	shl		$tmp112 $const4 $const18 	%argrw{"wrr"}
@@ -723,7 +741,7 @@ code ___main___
 	assign		$tmp117 ___475_k 	%argrw{"wr"}
 	add		___475_k ___475_k $const4 	%argrw{"wrr"}
 	compassign	___540_np.result $tmp117 $tmp116 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:942
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:942
 #         for (i = np.range; i > 0; i--, int00 += 7, int01 += 7, int02 += 3, int03 += 15)
 	assign		$tmp118 ___475_i 	%line{942} %argrw{"wr"}
 	sub		___475_i ___475_i $const4 	%argrw{"wrr"}
@@ -731,21 +749,21 @@ code ___main___
 	add		___475_int01 ___475_int01 $const19 	%argrw{"wrr"}
 	add		___475_int02 ___475_int02 $const5 	%argrw{"wrr"}
 	add		___475_int03 ___475_int03 $const21 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:970
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:970
 #     return point(np.result[0], np.result[1], np.result[2]);
 	compref		$tmp119 ___540_np.result $const7 	%line{970} %argrw{"wrr"}
 	compref		$tmp120 ___540_np.result $const4 	%argrw{"wrr"}
 	compref		$tmp121 ___540_np.result $const8 	%argrw{"wrr"}
 	point		$tmp2 $tmp119 $tmp120 $tmp121 	%argrw{"wrrr"}
-# PxrStylizedControl.osl:457
+# PxrStylizedControl.osl:518
 #     color sections = color(rxcellnoise(id));
-	assign		sections $tmp2 	%filename{"PxrStylizedControl.osl"} %line{457} %argrw{"wr"}
-# PxrStylizedControl.osl:460
+	assign		sections $tmp2 	%filename{"PxrStylizedControl.osl"} %line{518} %argrw{"wr"}
+# PxrStylizedControl.osl:521
 #     color HSV = transformc("rgb", "hsv", lineAlbedo);
-	transformc	HSV $const22 $const23 lineAlbedo 	%line{460} %argrw{"wrrr"}
-# PxrStylizedControl.osl:461
+	transformc	HSV $const22 $const23 lineAlbedo 	%line{521} %argrw{"wrrr"}
+# PxrStylizedControl.osl:522
 #     color RGB = color("hsv", HSV[0]+lineAlbedoHSV[0], HSV[1]+lineAlbedoHSV[1], HSV[2]*lineAlbedoHSV[2]);
-	compref		$tmp122 HSV $const7 	%line{461} %argrw{"wrr"}
+	compref		$tmp122 HSV $const7 	%line{522} %argrw{"wrr"}
 	compref		$tmp123 lineAlbedoHSV $const7 	%argrw{"wrr"}
 	add		$tmp124 $tmp122 $tmp123 	%argrw{"wrr"}
 	compref		$tmp125 HSV $const4 	%argrw{"wrr"}
@@ -755,159 +773,159 @@ code ___main___
 	compref		$tmp129 lineAlbedoHSV $const8 	%argrw{"wrr"}
 	mul		$tmp130 $tmp128 $tmp129 	%argrw{"wrr"}
 	color		RGB $const23 $tmp124 $tmp127 $tmp130 	%argrw{"wrrrr"}
-# PxrStylizedControl.osl:464
+# PxrStylizedControl.osl:525
 #     if (sectionsSpreadScale > 1.0)
-	gt		$tmp131 sectionsSpreadScale $const24 	%line{464} %argrw{"wrr"}
+	gt		$tmp131 sectionsSpreadScale $const24 	%line{525} %argrw{"wrr"}
 	if		$tmp131 326 326 	%argrw{"r"}
-# PxrStylizedControl.osl:467
+# PxrStylizedControl.osl:528
 #         sections[0] -= 0.5;
-	compref		$tmp132 sections $const7 	%line{467} %argrw{"wrr"}
+	compref		$tmp132 sections $const7 	%line{528} %argrw{"wrr"}
 	sub		$tmp133 $tmp132 $const25 	%argrw{"wrr"}
 	compassign	sections $const7 $tmp133 	%argrw{"wrr"}
-# PxrStylizedControl.osl:468
+# PxrStylizedControl.osl:529
 #         sections[1] -= 0.5;
-	compref		$tmp134 sections $const4 	%line{468} %argrw{"wrr"}
+	compref		$tmp134 sections $const4 	%line{529} %argrw{"wrr"}
 	sub		$tmp135 $tmp134 $const25 	%argrw{"wrr"}
 	compassign	sections $const4 $tmp135 	%argrw{"wrr"}
-# PxrStylizedControl.osl:469
+# PxrStylizedControl.osl:530
 #         sections[2] -= 0.5;
-	compref		$tmp136 sections $const8 	%line{469} %argrw{"wrr"}
+	compref		$tmp136 sections $const8 	%line{530} %argrw{"wrr"}
 	sub		$tmp137 $tmp136 $const25 	%argrw{"wrr"}
 	compassign	sections $const8 $tmp137 	%argrw{"wrr"}
-# PxrStylizedControl.osl:471
+# PxrStylizedControl.osl:532
 #         sections[0] *= 2;
-	compref		$tmp138 sections $const7 	%line{471} %argrw{"wrr"}
+	compref		$tmp138 sections $const7 	%line{532} %argrw{"wrr"}
 	mul		$tmp139 $tmp138 $const26 	%argrw{"wrr"}
 	compassign	sections $const7 $tmp139 	%argrw{"wrr"}
-# PxrStylizedControl.osl:472
+# PxrStylizedControl.osl:533
 #         sections[1] *= 2;
-	compref		$tmp140 sections $const4 	%line{472} %argrw{"wrr"}
+	compref		$tmp140 sections $const4 	%line{533} %argrw{"wrr"}
 	mul		$tmp141 $tmp140 $const26 	%argrw{"wrr"}
 	compassign	sections $const4 $tmp141 	%argrw{"wrr"}
-# PxrStylizedControl.osl:473
+# PxrStylizedControl.osl:534
 #         sections[2] *= 2;
-	compref		$tmp142 sections $const8 	%line{473} %argrw{"wrr"}
+	compref		$tmp142 sections $const8 	%line{534} %argrw{"wrr"}
 	mul		$tmp143 $tmp142 $const26 	%argrw{"wrr"}
 	compassign	sections $const8 $tmp143 	%argrw{"wrr"}
-# PxrStylizedControl.osl:475
+# PxrStylizedControl.osl:536
 #         sections[0] = abs(sections[0]);
-	compref		$tmp145 sections $const7 	%line{475} %argrw{"wrr"}
+	compref		$tmp145 sections $const7 	%line{536} %argrw{"wrr"}
 	abs		$tmp144 $tmp145 	%argrw{"wr"}
 	compassign	sections $const7 $tmp144 	%argrw{"wrr"}
-# PxrStylizedControl.osl:476
+# PxrStylizedControl.osl:537
 #         sections[1] = abs(sections[1]);
-	compref		$tmp147 sections $const4 	%line{476} %argrw{"wrr"}
+	compref		$tmp147 sections $const4 	%line{537} %argrw{"wrr"}
 	abs		$tmp146 $tmp147 	%argrw{"wr"}
 	compassign	sections $const4 $tmp146 	%argrw{"wrr"}
-# PxrStylizedControl.osl:477
+# PxrStylizedControl.osl:538
 #         sections[2] = abs(sections[2]);
-	compref		$tmp149 sections $const8 	%line{477} %argrw{"wrr"}
+	compref		$tmp149 sections $const8 	%line{538} %argrw{"wrr"}
 	abs		$tmp148 $tmp149 	%argrw{"wr"}
 	compassign	sections $const8 $tmp148 	%argrw{"wrr"}
-# PxrStylizedControl.osl:480
+# PxrStylizedControl.osl:541
 #         sections[0] *= float(sectionsSpreadScale);
-	compref		$tmp150 sections $const7 	%line{480} %argrw{"wrr"}
+	compref		$tmp150 sections $const7 	%line{541} %argrw{"wrr"}
 	assign		$tmp151 sectionsSpreadScale 	%argrw{"wr"}
 	mul		$tmp152 $tmp150 $tmp151 	%argrw{"wrr"}
 	compassign	sections $const7 $tmp152 	%argrw{"wrr"}
-# PxrStylizedControl.osl:481
+# PxrStylizedControl.osl:542
 #         sections[1] *= float(sectionsSpreadScale);
-	compref		$tmp153 sections $const4 	%line{481} %argrw{"wrr"}
+	compref		$tmp153 sections $const4 	%line{542} %argrw{"wrr"}
 	assign		$tmp154 sectionsSpreadScale 	%argrw{"wr"}
 	mul		$tmp155 $tmp153 $tmp154 	%argrw{"wrr"}
 	compassign	sections $const4 $tmp155 	%argrw{"wrr"}
-# PxrStylizedControl.osl:482
+# PxrStylizedControl.osl:543
 #         sections[2] *= float(sectionsSpreadScale);
-	compref		$tmp156 sections $const8 	%line{482} %argrw{"wrr"}
+	compref		$tmp156 sections $const8 	%line{543} %argrw{"wrr"}
 	assign		$tmp157 sectionsSpreadScale 	%argrw{"wr"}
 	mul		$tmp158 $tmp156 $tmp157 	%argrw{"wrr"}
 	compassign	sections $const8 $tmp158 	%argrw{"wrr"}
-# PxrStylizedControl.osl:485
+# PxrStylizedControl.osl:546
 #         sections = hsvCC(sections, vector(sectionsSpreadScale, 1.0, 1.0));
-	vector		$tmp159 sectionsSpreadScale $const24 $const24 	%line{485} %argrw{"wrrr"}
+	vector		$tmp159 sectionsSpreadScale $const24 $const24 	%line{546} %argrw{"wrrr"}
 	functioncall	$const27 326 	%argrw{"r"}
-# PxrStylizedControl.osl:76
-#     color color2HSV = transformc("rgb", "hsv", inputColor); // transform to HSV
-	transformc	___543_color2HSV $const22 $const23 sections 	%line{76} %argrw{"wrrr"}
-# PxrStylizedControl.osl:77
-#     color HSV_tint2HSV = transformc("rgb", "hsv", HSV_tint);
-	transformc	___543_HSV_tint2HSV $const22 $const23 $tmp159 	%line{77} %argrw{"wrrr"}
 # PxrStylizedControl.osl:78
+#     color color2HSV = transformc("rgb", "hsv", inputColor); // transform to HSV
+	transformc	___543_color2HSV $const22 $const23 sections 	%line{78} %argrw{"wrrr"}
+# PxrStylizedControl.osl:79
+#     color HSV_tint2HSV = transformc("rgb", "hsv", HSV_tint);
+	transformc	___543_HSV_tint2HSV $const22 $const23 $tmp159 	%line{79} %argrw{"wrrr"}
+# PxrStylizedControl.osl:80
 #     color colorFinal = color("hsv", modOne(color2HSV[0] + HSV_tint2HSV[0]),
-	compref		$tmp161 ___543_color2HSV $const7 	%line{78} %argrw{"wrr"}
+	compref		$tmp161 ___543_color2HSV $const7 	%line{80} %argrw{"wrr"}
 	compref		$tmp162 ___543_HSV_tint2HSV $const7 	%argrw{"wrr"}
 	add		$tmp163 $tmp161 $tmp162 	%argrw{"wrr"}
 	functioncall	$const28 318 	%argrw{"r"}
-# PxrStylizedControl.osl:70
+# PxrStylizedControl.osl:72
 #   return val-floor(val);
-	floor		$tmp164 $tmp163 	%line{70} %argrw{"wr"}
+	floor		$tmp164 $tmp163 	%line{72} %argrw{"wr"}
 	sub		$tmp160 $tmp163 $tmp164 	%argrw{"wrr"}
-# PxrStylizedControl.osl:79
+# PxrStylizedControl.osl:81
 #                                 color2HSV[1] * HSV_tint2HSV[1],
-	compref		$tmp165 ___543_color2HSV $const4 	%line{79} %argrw{"wrr"}
+	compref		$tmp165 ___543_color2HSV $const4 	%line{81} %argrw{"wrr"}
 	compref		$tmp166 ___543_HSV_tint2HSV $const4 	%argrw{"wrr"}
 	mul		$tmp167 $tmp165 $tmp166 	%argrw{"wrr"}
-# PxrStylizedControl.osl:80
+# PxrStylizedControl.osl:82
 #                                 color2HSV[2] * HSV_tint2HSV[2]);
-	compref		$tmp168 ___543_color2HSV $const8 	%line{80} %argrw{"wrr"}
+	compref		$tmp168 ___543_color2HSV $const8 	%line{82} %argrw{"wrr"}
 	compref		$tmp169 ___543_HSV_tint2HSV $const8 	%argrw{"wrr"}
 	mul		$tmp170 $tmp168 $tmp169 	%argrw{"wrr"}
-# PxrStylizedControl.osl:78
+# PxrStylizedControl.osl:80
 #     color colorFinal = color("hsv", modOne(color2HSV[0] + HSV_tint2HSV[0]),
-	color		___543_colorFinal $const23 $tmp160 $tmp167 $tmp170 	%line{78} %argrw{"wrrrr"}
-# PxrStylizedControl.osl:81
+	color		___543_colorFinal $const23 $tmp160 $tmp167 $tmp170 	%line{80} %argrw{"wrrrr"}
+# PxrStylizedControl.osl:83
 #     return colorFinal;
-	assign		sections ___543_colorFinal 	%line{81} %argrw{"wr"}
-# PxrStylizedControl.osl:488
+	assign		sections ___543_colorFinal 	%line{83} %argrw{"wr"}
+# PxrStylizedControl.osl:549
 #     if (sectionsQuantize > 1)
-	gt		$tmp171 sectionsQuantize $const4 	%line{488} %argrw{"wrr"}
+	gt		$tmp171 sectionsQuantize $const4 	%line{549} %argrw{"wrr"}
 	if		$tmp171 351 351 	%argrw{"r"}
-# PxrStylizedControl.osl:490
+# PxrStylizedControl.osl:551
 #         sections = quantizeColor(sections, sectionsQuantize);
-	functioncall	$const29 351 	%line{490} %argrw{"r"}
-# PxrStylizedControl.osl:118
+	functioncall	$const29 351 	%line{551} %argrw{"r"}
+# PxrStylizedControl.osl:120
 #     outputColor[0] = floor(inputColor[0] * numSteps)/numSteps;
-	compref		$tmp173 sections $const7 	%line{118} %argrw{"wrr"}
+	compref		$tmp173 sections $const7 	%line{120} %argrw{"wrr"}
 	assign		$tmp175 sectionsQuantize 	%argrw{"wr"}
 	mul		$tmp174 $tmp173 $tmp175 	%argrw{"wrr"}
 	floor		$tmp172 $tmp174 	%argrw{"wr"}
 	assign		$tmp177 sectionsQuantize 	%argrw{"wr"}
 	div		$tmp176 $tmp172 $tmp177 	%argrw{"wrr"}
 	compassign	___545_outputColor $const7 $tmp176 	%argrw{"wrr"}
-# PxrStylizedControl.osl:119
+# PxrStylizedControl.osl:121
 #     outputColor[1] = floor(inputColor[1] * numSteps)/numSteps;
-	compref		$tmp179 sections $const4 	%line{119} %argrw{"wrr"}
+	compref		$tmp179 sections $const4 	%line{121} %argrw{"wrr"}
 	assign		$tmp181 sectionsQuantize 	%argrw{"wr"}
 	mul		$tmp180 $tmp179 $tmp181 	%argrw{"wrr"}
 	floor		$tmp178 $tmp180 	%argrw{"wr"}
 	assign		$tmp183 sectionsQuantize 	%argrw{"wr"}
 	div		$tmp182 $tmp178 $tmp183 	%argrw{"wrr"}
 	compassign	___545_outputColor $const4 $tmp182 	%argrw{"wrr"}
-# PxrStylizedControl.osl:120
+# PxrStylizedControl.osl:122
 #     outputColor[2] = floor(inputColor[2] * numSteps)/numSteps;
-	compref		$tmp185 sections $const8 	%line{120} %argrw{"wrr"}
+	compref		$tmp185 sections $const8 	%line{122} %argrw{"wrr"}
 	assign		$tmp187 sectionsQuantize 	%argrw{"wr"}
 	mul		$tmp186 $tmp185 $tmp187 	%argrw{"wrr"}
 	floor		$tmp184 $tmp186 	%argrw{"wr"}
 	assign		$tmp189 sectionsQuantize 	%argrw{"wr"}
 	div		$tmp188 $tmp184 $tmp189 	%argrw{"wrr"}
 	compassign	___545_outputColor $const8 $tmp188 	%argrw{"wrr"}
-# PxrStylizedControl.osl:122
+# PxrStylizedControl.osl:124
 #     return outputColor;
-	assign		sections ___545_outputColor 	%line{122} %argrw{"wr"}
-# PxrStylizedControl.osl:493
+	assign		sections ___545_outputColor 	%line{124} %argrw{"wr"}
+# PxrStylizedControl.osl:554
 #     if (sectionsAdd > 0.0)
-	gt		$tmp190 sectionsAdd $const15 	%line{493} %argrw{"wrr"}
+	gt		$tmp190 sectionsAdd $const15 	%line{554} %argrw{"wrr"}
 	if		$tmp190 354 354 	%argrw{"r"}
-# PxrStylizedControl.osl:495
+# PxrStylizedControl.osl:556
 #         sections += sectionsAdd;
-	add		sections sections sectionsAdd 	%line{495} %argrw{"wrr"}
-# PxrStylizedControl.osl:498
+	add		sections sections sectionsAdd 	%line{556} %argrw{"wrr"}
+# PxrStylizedControl.osl:559
 #     color lineAlbedoFinal = lineAlbedo;
-	assign		lineAlbedoFinal lineAlbedo 	%line{498} %argrw{"wr"}
-# PxrStylizedControl.osl:500
+	assign		lineAlbedoFinal lineAlbedo 	%line{559} %argrw{"wr"}
+# PxrStylizedControl.osl:561
 #     if (lineAlbedoHSV[0]!=0 || lineAlbedoHSV[1]!=0 || lineAlbedoHSV[2]!=1)
-	compref		$tmp191 lineAlbedoHSV $const7 	%line{500} %argrw{"wrr"}
+	compref		$tmp191 lineAlbedoHSV $const7 	%line{561} %argrw{"wrr"}
 	neq		$tmp192 $tmp191 $const7 	%argrw{"wrr"}
 	neq		$tmp193 $tmp192 $const7 	%argrw{"wrr"}
 	if		$tmp193 359 363 	%argrw{"r"}
@@ -922,295 +940,322 @@ code ___main___
 	neq		$tmp200 $tmp199 $const7 	%argrw{"wrr"}
 	assign		$tmp197 $tmp200 	%argrw{"wr"}
 	if		$tmp197 387 387 	%argrw{"r"}
-# PxrStylizedControl.osl:502
+# PxrStylizedControl.osl:563
 #         lineAlbedoFinal = hsvCC(lineAlbedo, lineAlbedoHSV);
-	functioncall	$const27 387 	%line{502} %argrw{"r"}
-# PxrStylizedControl.osl:76
-#     color color2HSV = transformc("rgb", "hsv", inputColor); // transform to HSV
-	transformc	___543_color2HSV $const22 $const23 lineAlbedo 	%line{76} %argrw{"wrrr"}
-# PxrStylizedControl.osl:77
-#     color HSV_tint2HSV = transformc("rgb", "hsv", HSV_tint);
-	transformc	___543_HSV_tint2HSV $const22 $const23 lineAlbedoHSV 	%line{77} %argrw{"wrrr"}
+	functioncall	$const27 387 	%line{563} %argrw{"r"}
 # PxrStylizedControl.osl:78
+#     color color2HSV = transformc("rgb", "hsv", inputColor); // transform to HSV
+	transformc	___543_color2HSV $const22 $const23 lineAlbedo 	%line{78} %argrw{"wrrr"}
+# PxrStylizedControl.osl:79
+#     color HSV_tint2HSV = transformc("rgb", "hsv", HSV_tint);
+	transformc	___543_HSV_tint2HSV $const22 $const23 lineAlbedoHSV 	%line{79} %argrw{"wrrr"}
+# PxrStylizedControl.osl:80
 #     color colorFinal = color("hsv", modOne(color2HSV[0] + HSV_tint2HSV[0]),
-	compref		$tmp202 ___543_color2HSV $const7 	%line{78} %argrw{"wrr"}
+	compref		$tmp202 ___543_color2HSV $const7 	%line{80} %argrw{"wrr"}
 	compref		$tmp203 ___543_HSV_tint2HSV $const7 	%argrw{"wrr"}
 	add		$tmp204 $tmp202 $tmp203 	%argrw{"wrr"}
 	functioncall	$const28 379 	%argrw{"r"}
-# PxrStylizedControl.osl:70
+# PxrStylizedControl.osl:72
 #   return val-floor(val);
-	floor		$tmp205 $tmp204 	%line{70} %argrw{"wr"}
+	floor		$tmp205 $tmp204 	%line{72} %argrw{"wr"}
 	sub		$tmp201 $tmp204 $tmp205 	%argrw{"wrr"}
-# PxrStylizedControl.osl:79
+# PxrStylizedControl.osl:81
 #                                 color2HSV[1] * HSV_tint2HSV[1],
-	compref		$tmp206 ___543_color2HSV $const4 	%line{79} %argrw{"wrr"}
+	compref		$tmp206 ___543_color2HSV $const4 	%line{81} %argrw{"wrr"}
 	compref		$tmp207 ___543_HSV_tint2HSV $const4 	%argrw{"wrr"}
 	mul		$tmp208 $tmp206 $tmp207 	%argrw{"wrr"}
-# PxrStylizedControl.osl:80
+# PxrStylizedControl.osl:82
 #                                 color2HSV[2] * HSV_tint2HSV[2]);
-	compref		$tmp209 ___543_color2HSV $const8 	%line{80} %argrw{"wrr"}
+	compref		$tmp209 ___543_color2HSV $const8 	%line{82} %argrw{"wrr"}
 	compref		$tmp210 ___543_HSV_tint2HSV $const8 	%argrw{"wrr"}
 	mul		$tmp211 $tmp209 $tmp210 	%argrw{"wrr"}
-# PxrStylizedControl.osl:78
+# PxrStylizedControl.osl:80
 #     color colorFinal = color("hsv", modOne(color2HSV[0] + HSV_tint2HSV[0]),
-	color		___543_colorFinal $const23 $tmp201 $tmp208 $tmp211 	%line{78} %argrw{"wrrrr"}
-# PxrStylizedControl.osl:81
+	color		___543_colorFinal $const23 $tmp201 $tmp208 $tmp211 	%line{80} %argrw{"wrrrr"}
+# PxrStylizedControl.osl:83
 #     return colorFinal;
-	assign		lineAlbedoFinal ___543_colorFinal 	%line{81} %argrw{"wr"}
-# PxrStylizedControl.osl:507
+	assign		lineAlbedoFinal ___543_colorFinal 	%line{83} %argrw{"wr"}
+# PxrStylizedControl.osl:568
 #     sections = hsvCC(sections, sectionsHSV);
-	functioncall	$const27 404 	%line{507} %argrw{"r"}
-# PxrStylizedControl.osl:76
-#     color color2HSV = transformc("rgb", "hsv", inputColor); // transform to HSV
-	transformc	___543_color2HSV $const22 $const23 sections 	%line{76} %argrw{"wrrr"}
-# PxrStylizedControl.osl:77
-#     color HSV_tint2HSV = transformc("rgb", "hsv", HSV_tint);
-	transformc	___543_HSV_tint2HSV $const22 $const23 sectionsHSV 	%line{77} %argrw{"wrrr"}
+	functioncall	$const27 404 	%line{568} %argrw{"r"}
 # PxrStylizedControl.osl:78
+#     color color2HSV = transformc("rgb", "hsv", inputColor); // transform to HSV
+	transformc	___543_color2HSV $const22 $const23 sections 	%line{78} %argrw{"wrrr"}
+# PxrStylizedControl.osl:79
+#     color HSV_tint2HSV = transformc("rgb", "hsv", HSV_tint);
+	transformc	___543_HSV_tint2HSV $const22 $const23 sectionsHSV 	%line{79} %argrw{"wrrr"}
+# PxrStylizedControl.osl:80
 #     color colorFinal = color("hsv", modOne(color2HSV[0] + HSV_tint2HSV[0]),
-	compref		$tmp213 ___543_color2HSV $const7 	%line{78} %argrw{"wrr"}
+	compref		$tmp213 ___543_color2HSV $const7 	%line{80} %argrw{"wrr"}
 	compref		$tmp214 ___543_HSV_tint2HSV $const7 	%argrw{"wrr"}
 	add		$tmp215 $tmp213 $tmp214 	%argrw{"wrr"}
 	functioncall	$const28 396 	%argrw{"r"}
-# PxrStylizedControl.osl:70
+# PxrStylizedControl.osl:72
 #   return val-floor(val);
-	floor		$tmp216 $tmp215 	%line{70} %argrw{"wr"}
+	floor		$tmp216 $tmp215 	%line{72} %argrw{"wr"}
 	sub		$tmp212 $tmp215 $tmp216 	%argrw{"wrr"}
-# PxrStylizedControl.osl:79
+# PxrStylizedControl.osl:81
 #                                 color2HSV[1] * HSV_tint2HSV[1],
-	compref		$tmp217 ___543_color2HSV $const4 	%line{79} %argrw{"wrr"}
+	compref		$tmp217 ___543_color2HSV $const4 	%line{81} %argrw{"wrr"}
 	compref		$tmp218 ___543_HSV_tint2HSV $const4 	%argrw{"wrr"}
 	mul		$tmp219 $tmp217 $tmp218 	%argrw{"wrr"}
-# PxrStylizedControl.osl:80
+# PxrStylizedControl.osl:82
 #                                 color2HSV[2] * HSV_tint2HSV[2]);
-	compref		$tmp220 ___543_color2HSV $const8 	%line{80} %argrw{"wrr"}
+	compref		$tmp220 ___543_color2HSV $const8 	%line{82} %argrw{"wrr"}
 	compref		$tmp221 ___543_HSV_tint2HSV $const8 	%argrw{"wrr"}
 	mul		$tmp222 $tmp220 $tmp221 	%argrw{"wrr"}
-# PxrStylizedControl.osl:78
+# PxrStylizedControl.osl:80
 #     color colorFinal = color("hsv", modOne(color2HSV[0] + HSV_tint2HSV[0]),
-	color		___543_colorFinal $const23 $tmp212 $tmp219 $tmp222 	%line{78} %argrw{"wrrrr"}
-# PxrStylizedControl.osl:81
+	color		___543_colorFinal $const23 $tmp212 $tmp219 $tmp222 	%line{80} %argrw{"wrrrr"}
+# PxrStylizedControl.osl:83
 #     return colorFinal;
-	assign		sections ___543_colorFinal 	%line{81} %argrw{"wr"}
-# PxrStylizedControl.osl:510
+	assign		sections ___543_colorFinal 	%line{83} %argrw{"wr"}
+# PxrStylizedControl.osl:571
 #     resultRGB = inputRGB;
-	assign		resultRGB inputRGB 	%line{510} %argrw{"wr"}
-# PxrStylizedControl.osl:512
+	assign		resultRGB inputRGB 	%line{571} %argrw{"wr"}
+# PxrStylizedControl.osl:573
 #     point cameraP = transform("world", "camera", P);
-	transform	cameraP $const30 $const31 P 	%line{512} %argrw{"wrrr"}
-# PxrStylizedControl.osl:515
+	transform	cameraP $const30 $const31 P 	%line{573} %argrw{"wrrr"}
+# PxrStylizedControl.osl:576
 #     float cameraDepth = length(cameraP);
-	length		cameraDepth cameraP 	%line{515} %argrw{"wr"}
-# PxrStylizedControl.osl:517
+	length		cameraDepth cameraP 	%line{576} %argrw{"wr"}
+# PxrStylizedControl.osl:578
 #     if (cameraDepthType==1)
-	eq		$tmp223 cameraDepthType $const4 	%line{517} %argrw{"wrr"}
+	eq		$tmp223 cameraDepthType $const4 	%line{578} %argrw{"wrr"}
 	if		$tmp223 411 415 	%argrw{"r"}
-# PxrStylizedControl.osl:520
+# PxrStylizedControl.osl:581
 #         cameraDepth = abs(cameraP[2]);
-	compref		$tmp224 cameraP $const8 	%line{520} %argrw{"wrr"}
+	compref		$tmp224 cameraP $const8 	%line{581} %argrw{"wrr"}
 	abs		cameraDepth $tmp224 	%argrw{"wr"}
-# PxrStylizedControl.osl:523
+# PxrStylizedControl.osl:584
 #     if (cameraDepthType==2)
-	eq		$tmp225 cameraDepthType $const8 	%line{523} %argrw{"wrr"}
+	eq		$tmp225 cameraDepthType $const8 	%line{584} %argrw{"wrr"}
 	if		$tmp225 415 415 	%argrw{"r"}
-# PxrStylizedControl.osl:526
+# PxrStylizedControl.osl:587
 #         point cameraI = transform("world", "camera", I);
-	transformv	___551_cameraI $const30 $const31 I 	%line{526} %argrw{"wrrr"}
-# PxrStylizedControl.osl:527
+	transformv	___551_cameraI $const30 $const31 I 	%line{587} %argrw{"wrrr"}
+# PxrStylizedControl.osl:588
 #         cameraDepth = cameraI[2]; // Z component
-	compref		cameraDepth ___551_cameraI $const8 	%line{527} %argrw{"wrr"}
-# PxrStylizedControl.osl:530
+	compref		cameraDepth ___551_cameraI $const8 	%line{588} %argrw{"wrr"}
+# PxrStylizedControl.osl:591
 #     cameraDepth *= cameraDepth_scale;
-	mul		cameraDepth cameraDepth cameraDepth_scale 	%line{530} %argrw{"wrr"}
-# PxrStylizedControl.osl:537
+	mul		cameraDepth cameraDepth cameraDepth_scale 	%line{591} %argrw{"wrr"}
+# PxrStylizedControl.osl:598
 #     color lineNZ = color(N[0], N[1], cameraDepth);
-	compref		$tmp226 N $const7 	%line{537} %argrw{"wrr"}
+	compref		$tmp226 N $const7 	%line{598} %argrw{"wrr"}
 	compref		$tmp227 N $const4 	%argrw{"wrr"}
 	color		lineNZ $tmp226 $tmp227 cameraDepth 	%argrw{"wrrr"}
-# PxrStylizedControl.osl:538
+# PxrStylizedControl.osl:599
 #     color outline = color(1,1,1);
-	assign		outline $const32 	%line{538} %argrw{"wr"}
-# PxrStylizedControl.osl:540
+	assign		outline $const32 	%line{599} %argrw{"wr"}
+# PxrStylizedControl.osl:601
 #     float finalLineThickness = lineThickness; // assign to user input param
-	assign		finalLineThickness lineThickness 	%line{540} %argrw{"wr"}
-# PxrStylizedControl.osl:547
+	assign		finalLineThickness lineThickness 	%line{601} %argrw{"wr"}
+# PxrStylizedControl.osl:608
 #     if (lineThickness_remap_switch) // only do remap if switch is on
-	if		lineThickness_remap_switch 423 423 	%line{547} %argrw{"r"}
-# PxrStylizedControl.osl:548
+	if		lineThickness_remap_switch 423 423 	%line{608} %argrw{"r"}
+# PxrStylizedControl.osl:609
 #         finalLineThickness = mix(lineThickness_remap_min, lineThickness_remap_max, lineThickness);
-	mix		finalLineThickness lineThickness_remap_min lineThickness_remap_max lineThickness 	%line{548} %argrw{"wrrr"}
-# PxrStylizedControl.osl:550
+	mix		finalLineThickness lineThickness_remap_min lineThickness_remap_max lineThickness 	%line{609} %argrw{"wrrr"}
+# PxrStylizedControl.osl:611
 #     if (sectionsMapSwitch)
-	if		sectionsMapSwitch 429 429 	%line{550} %argrw{"r"}
-# PxrStylizedControl.osl:552
+	if		sectionsMapSwitch 429 429 	%line{611} %argrw{"r"}
+# PxrStylizedControl.osl:613
 #         if (sectionsMapBlackMaskSwitch)
-	if		sectionsMapBlackMaskSwitch 428 429 	%line{552} %argrw{"r"}
-# PxrStylizedControl.osl:555
+	if		sectionsMapBlackMaskSwitch 428 429 	%line{613} %argrw{"r"}
+# PxrStylizedControl.osl:616
 #             if (sectionsMap != color(0))
-	neq		$tmp229 sectionsMap $const33 	%line{555} %argrw{"wrr"}
+	neq		$tmp229 sectionsMap $const33 	%line{616} %argrw{"wrr"}
 	if		$tmp229 428 428 	%argrw{"r"}
-# PxrStylizedControl.osl:556
+# PxrStylizedControl.osl:617
 #                 sections = sectionsMap;
-	assign		sections sectionsMap 	%line{556} %argrw{"wr"}
-# PxrStylizedControl.osl:559
+	assign		sections sectionsMap 	%line{617} %argrw{"wr"}
+# PxrStylizedControl.osl:620
 #             sections = sectionsMap;
-	assign		sections sectionsMap 	%line{559} %argrw{"wr"}
-# PxrStylizedControl.osl:564
+	assign		sections sectionsMap 	%line{620} %argrw{"wr"}
+# PxrStylizedControl.osl:625
 #     point Ptransform = transform("common", "object", P);
-	transform	Ptransform $const34 $const35 P 	%line{564} %argrw{"wrrr"}
-# PxrStylizedControl.osl:565
+	transform	Ptransform $const34 $const35 P 	%line{625} %argrw{"wrrr"}
+# PxrStylizedControl.osl:626
 #     point finalPtriplanar = Ptransform;
-	assign		finalPtriplanar Ptransform 	%line{565} %argrw{"wr"}
-# PxrStylizedControl.osl:568
+	assign		finalPtriplanar Ptransform 	%line{626} %argrw{"wr"}
+# PxrStylizedControl.osl:629
 #     if (triplanarP==1) // user chooses __Pref in dropdown
-	eq		$tmp230 triplanarP $const4 	%line{568} %argrw{"wrr"}
+	eq		$tmp230 triplanarP $const4 	%line{629} %argrw{"wrr"}
 	if		$tmp230 443 443 	%argrw{"r"}
-# PxrStylizedControl.osl:570
+# PxrStylizedControl.osl:631
 #         int success = 0;
-	assign		___554_success $const7 	%line{570} %argrw{"wr"}
-# PxrStylizedControl.osl:571
+	assign		___554_success $const7 	%line{631} %argrw{"wr"}
+# PxrStylizedControl.osl:632
 #         point Pin = P;
-	assign		___554_Pin P 	%line{571} %argrw{"wr"}
-# PxrStylizedControl.osl:572
+	assign		___554_Pin P 	%line{632} %argrw{"wr"}
+# PxrStylizedControl.osl:633
 #         success = getattribute("primvar", "__Pref", Pin);
-	getattribute	___554_success $const36 $const37 ___554_Pin 	%line{572} %argrw{"wrrw"}
-# PxrStylizedControl.osl:573
+	getattribute	___554_success $const36 $const37 ___554_Pin 	%line{633} %argrw{"wrrw"}
+# PxrStylizedControl.osl:634
 #         if (success != 1)
-	neq		$tmp231 ___554_success $const4 	%line{573} %argrw{"wrr"}
+	neq		$tmp231 ___554_success $const4 	%line{634} %argrw{"wrr"}
 	if		$tmp231 439 443 	%argrw{"r"}
-# PxrStylizedControl.osl:574
+# PxrStylizedControl.osl:635
 #             printf("__Pref LOOKUP FAIL");
-	printf		$const38 	%line{574} %argrw{"r"}
-# PxrStylizedControl.osl:577
+	printf		$const38 	%line{635} %argrw{"r"}
+# PxrStylizedControl.osl:638
 #             printf("__Pref LOOKUP SUCCESS");
-	printf		$const39 	%line{577} %argrw{"r"}
-# PxrStylizedControl.osl:578
+	printf		$const39 	%line{638} %argrw{"r"}
+# PxrStylizedControl.osl:639
 #             Pin = transform("common", "object", Pin);
-	transform	___554_Pin $const34 $const35 ___554_Pin 	%line{578} %argrw{"wrrr"}
-# PxrStylizedControl.osl:579
+	transform	___554_Pin $const34 $const35 ___554_Pin 	%line{639} %argrw{"wrrr"}
+# PxrStylizedControl.osl:640
 #             Pin = transform("world", "common", Pin);
-	transform	___554_Pin $const30 $const34 ___554_Pin 	%line{579} %argrw{"wrrr"}
-# PxrStylizedControl.osl:580
+	transform	___554_Pin $const30 $const34 ___554_Pin 	%line{640} %argrw{"wrrr"}
+# PxrStylizedControl.osl:641
 #             finalPtriplanar = Pin; // assign to AOV
-	assign		finalPtriplanar ___554_Pin 	%line{580} %argrw{"wr"}
-# PxrStylizedControl.osl:585
+	assign		finalPtriplanar ___554_Pin 	%line{641} %argrw{"wr"}
+# PxrStylizedControl.osl:646
 #     if (triplanarP==2)
-	eq		$tmp232 triplanarP $const8 	%line{585} %argrw{"wrr"}
+	eq		$tmp232 triplanarP $const8 	%line{646} %argrw{"wrr"}
 	if		$tmp232 446 446 	%argrw{"r"}
-# PxrStylizedControl.osl:586
+# PxrStylizedControl.osl:647
 #         finalPtriplanar = inputPtriplanar;
-	assign		finalPtriplanar inputPtriplanar 	%line{586} %argrw{"wr"}
-# PxrStylizedControl.osl:589
+	assign		finalPtriplanar inputPtriplanar 	%line{647} %argrw{"wr"}
+# PxrStylizedControl.osl:650
 #     finalPtriplanar[0] *= triplanarScaleX;
-	compref		$tmp233 finalPtriplanar $const7 	%line{589} %argrw{"wrr"}
+	compref		$tmp233 finalPtriplanar $const7 	%line{650} %argrw{"wrr"}
 	mul		$tmp234 $tmp233 triplanarScaleX 	%argrw{"wrr"}
 	compassign	finalPtriplanar $const7 $tmp234 	%argrw{"wrr"}
-# PxrStylizedControl.osl:590
+# PxrStylizedControl.osl:651
 #     finalPtriplanar[1] *= triplanarScaleY;
-	compref		$tmp235 finalPtriplanar $const4 	%line{590} %argrw{"wrr"}
+	compref		$tmp235 finalPtriplanar $const4 	%line{651} %argrw{"wrr"}
 	mul		$tmp236 $tmp235 triplanarScaleY 	%argrw{"wrr"}
 	compassign	finalPtriplanar $const4 $tmp236 	%argrw{"wrr"}
-# PxrStylizedControl.osl:591
+# PxrStylizedControl.osl:652
 #     finalPtriplanar[2] *= triplanarScaleZ;
-	compref		$tmp237 finalPtriplanar $const8 	%line{591} %argrw{"wrr"}
+	compref		$tmp237 finalPtriplanar $const8 	%line{652} %argrw{"wrr"}
 	mul		$tmp238 $tmp237 triplanarScaleZ 	%argrw{"wrr"}
 	compassign	finalPtriplanar $const8 $tmp238 	%argrw{"wrr"}
-# PxrStylizedControl.osl:594
+# PxrStylizedControl.osl:655
 #     normal finalNtriplanar = transform("common", "object", N);
-	transformn	finalNtriplanar $const34 $const35 N 	%line{594} %argrw{"wrrr"}
-# PxrStylizedControl.osl:597
+	transformn	finalNtriplanar $const34 $const35 N 	%line{655} %argrw{"wrrr"}
+# PxrStylizedControl.osl:658
 #     if (triplanarN==1) // user chooses __Nref in dropdown
-	eq		$tmp239 triplanarN $const4 	%line{597} %argrw{"wrr"}
+	eq		$tmp239 triplanarN $const4 	%line{658} %argrw{"wrr"}
 	if		$tmp239 465 465 	%argrw{"r"}
-# PxrStylizedControl.osl:599
+# PxrStylizedControl.osl:660
 #         normal Nin = N;
-	assign		___556_Nin N 	%line{599} %argrw{"wr"}
-# PxrStylizedControl.osl:600
+	assign		___556_Nin N 	%line{660} %argrw{"wr"}
+# PxrStylizedControl.osl:661
 #         int success__Nref = getattribute("primvar", "__Nref", Nin);
-	getattribute	___556_success__Nref $const36 $const40 ___556_Nin 	%line{600} %argrw{"wrrw"}
-# PxrStylizedControl.osl:601
+	getattribute	___556_success__Nref $const36 $const40 ___556_Nin 	%line{661} %argrw{"wrrw"}
+# PxrStylizedControl.osl:662
 #         if (success__Nref != 1)
-	neq		$tmp240 ___556_success__Nref $const4 	%line{601} %argrw{"wrr"}
+	neq		$tmp240 ___556_success__Nref $const4 	%line{662} %argrw{"wrr"}
 	if		$tmp240 463 465 	%argrw{"r"}
-# PxrStylizedControl.osl:602
+# PxrStylizedControl.osl:663
 #             printf("__Nref LOOKUP FAIL");
-	printf		$const41 	%line{602} %argrw{"r"}
-# PxrStylizedControl.osl:605
+	printf		$const41 	%line{663} %argrw{"r"}
+# PxrStylizedControl.osl:666
 #             printf("__Nref LOOKUP SUCCESS");
-	printf		$const42 	%line{605} %argrw{"r"}
-# PxrStylizedControl.osl:606
+	printf		$const42 	%line{666} %argrw{"r"}
+# PxrStylizedControl.osl:667
 #             finalNtriplanar = Nin; // assign to AOV
-	assign		finalNtriplanar ___556_Nin 	%line{606} %argrw{"wr"}
-# PxrStylizedControl.osl:611
+	assign		finalNtriplanar ___556_Nin 	%line{667} %argrw{"wr"}
+# PxrStylizedControl.osl:672
 #     if (triplanarN==2)
-	eq		$tmp241 triplanarN $const8 	%line{611} %argrw{"wrr"}
+	eq		$tmp241 triplanarN $const8 	%line{672} %argrw{"wrr"}
 	if		$tmp241 468 468 	%argrw{"r"}
-# PxrStylizedControl.osl:612
+# PxrStylizedControl.osl:673
 #         finalNtriplanar = inputNtriplanar;
-	assign		finalNtriplanar inputNtriplanar 	%line{612} %argrw{"wr"}
-# PxrStylizedControl.osl:616
+	assign		finalNtriplanar inputNtriplanar 	%line{673} %argrw{"wr"}
+# PxrStylizedControl.osl:678
+#     normal Nbump = N;
+	assign		Nbump N 	%line{678} %argrw{"wr"}
+# PxrStylizedControl.osl:679
+#     if (distortBumpSwitch)
+	if		distortBumpSwitch 476 476 	%line{679} %argrw{"r"}
+# PxrStylizedControl.osl:681
+#         point Pbump = P + normalize(N)*distortU*distortScale;
+	normalize	$tmp242 N 	%line{681} %argrw{"wr"}
+	mul		$tmp243 $tmp242 distortU 	%argrw{"wrr"}
+	mul		$tmp244 $tmp243 distortScale 	%argrw{"wrr"}
+	add		___558_Pbump P $tmp244 	%argrw{"wrr"}
+# PxrStylizedControl.osl:682
+#         Nbump = normalize(calculatenormal(Pbump));
+	calculatenormal	$tmp245 ___558_Pbump 	%line{682} %argrw{"wr"} %argderivs{1}
+	normalize	Nbump $tmp245 	%argrw{"wr"}
+# PxrStylizedControl.osl:687
+#     Ci += color(0,0,0)*debug("NPRlineOutAlpha"); // initialize with black, try other color to test ReadRegion from daisy-chained Display Filters
+	closure		$tmp246 $const44 $const43 	%line{687} %argrw{"wrr"}
+	mul		$tmp248 $tmp246 $const33 	%argrw{"wrr"}
+	add		Ci Ci $tmp248 	%argrw{"wrr"}
+# PxrStylizedControl.osl:688
 #     Ci += color(1,1,1)*debug("NPRoutline");
-	closure		$tmp242 $const44 $const43 	%line{616} %argrw{"wrr"}
-	mul		$tmp244 $tmp242 $const32 	%argrw{"wrr"}
-	add		Ci Ci $tmp244 	%argrw{"wrr"}
-# PxrStylizedControl.osl:617
+	closure		$tmp249 $const44 $const45 	%line{688} %argrw{"wrr"}
+	mul		$tmp251 $tmp249 $const32 	%argrw{"wrr"}
+	add		Ci Ci $tmp251 	%argrw{"wrr"}
+# PxrStylizedControl.osl:689
 #     Ci += color(sections)*debug("NPRsections");
-	closure		$tmp245 $const44 $const45 	%line{617} %argrw{"wrr"}
-	assign		$tmp246 sections 	%argrw{"wr"}
-	mul		$tmp247 $tmp245 $tmp246 	%argrw{"wrr"}
-	add		Ci Ci $tmp247 	%argrw{"wrr"}
-# PxrStylizedControl.osl:618
+	closure		$tmp252 $const44 $const46 	%line{689} %argrw{"wrr"}
+	assign		$tmp253 sections 	%argrw{"wr"}
+	mul		$tmp254 $tmp252 $tmp253 	%argrw{"wrr"}
+	add		Ci Ci $tmp254 	%argrw{"wrr"}
+# PxrStylizedControl.osl:690
 #     Ci += color(lineNZ)*debug("NPRlineNZ");
-	closure		$tmp248 $const44 $const46 	%line{618} %argrw{"wrr"}
-	assign		$tmp249 lineNZ 	%argrw{"wr"}
-	mul		$tmp250 $tmp248 $tmp249 	%argrw{"wrr"}
-	add		Ci Ci $tmp250 	%argrw{"wrr"}
-# PxrStylizedControl.osl:619
+	closure		$tmp255 $const44 $const47 	%line{690} %argrw{"wrr"}
+	assign		$tmp256 lineNZ 	%argrw{"wr"}
+	mul		$tmp257 $tmp255 $tmp256 	%argrw{"wrr"}
+	add		Ci Ci $tmp257 	%argrw{"wrr"}
+# PxrStylizedControl.osl:691
 #     Ci += color(inputRGB)*debug("NPRalbedo");
-	closure		$tmp251 $const44 $const47 	%line{619} %argrw{"wrr"}
-	assign		$tmp252 inputRGB 	%argrw{"wr"}
-	mul		$tmp253 $tmp251 $tmp252 	%argrw{"wrr"}
-	add		Ci Ci $tmp253 	%argrw{"wrr"}
-# PxrStylizedControl.osl:620
+	closure		$tmp258 $const44 $const48 	%line{691} %argrw{"wrr"}
+	assign		$tmp259 inputRGB 	%argrw{"wr"}
+	mul		$tmp260 $tmp258 $tmp259 	%argrw{"wrr"}
+	add		Ci Ci $tmp260 	%argrw{"wrr"}
+# PxrStylizedControl.osl:692
 #     Ci += color(lineAlbedoFinal)*debug("NPRlineAlbedo");
-	closure		$tmp254 $const44 $const48 	%line{620} %argrw{"wrr"}
-	assign		$tmp255 lineAlbedoFinal 	%argrw{"wr"}
-	mul		$tmp256 $tmp254 $tmp255 	%argrw{"wrr"}
-	add		Ci Ci $tmp256 	%argrw{"wrr"}
-# PxrStylizedControl.osl:621
-#     Ci += color(lineMask, hatchingMask, 0)*debug("NPRlineMask"); // RED = lineMask, GREEN = hatchingMask
-	closure		$tmp257 $const44 $const49 	%line{621} %argrw{"wrr"}
-	color		$tmp258 lineMask hatchingMask $const15 	%argrw{"wrrr"}
-	mul		$tmp259 $tmp257 $tmp258 	%argrw{"wrr"}
-	add		Ci Ci $tmp259 	%argrw{"wrr"}
-# PxrStylizedControl.osl:622
+	closure		$tmp261 $const44 $const49 	%line{692} %argrw{"wrr"}
+	assign		$tmp262 lineAlbedoFinal 	%argrw{"wr"}
+	mul		$tmp263 $tmp261 $tmp262 	%argrw{"wrr"}
+	add		Ci Ci $tmp263 	%argrw{"wrr"}
+# PxrStylizedControl.osl:693
+#     Ci += color(lineMask, hatchingMask, Toon_Mask)*debug("NPRmask"); // RED = lineMask, GREEN = hatchingMask, BLUE = Toon_Mask
+	closure		$tmp264 $const44 $const50 	%line{693} %argrw{"wrr"}
+	color		$tmp265 lineMask hatchingMask Toon_Mask 	%argrw{"wrrr"}
+	mul		$tmp266 $tmp264 $tmp265 	%argrw{"wrr"}
+	add		Ci Ci $tmp266 	%argrw{"wrr"}
+# PxrStylizedControl.osl:694
 #     Ci += color(finalLineThickness)*debug("NPRlineWidth");
-	closure		$tmp260 $const44 $const50 	%line{622} %argrw{"wrr"}
-	assign		$tmp261 finalLineThickness 	%argrw{"wr"}
-	mul		$tmp262 $tmp260 $tmp261 	%argrw{"wrr"}
-	add		Ci Ci $tmp262 	%argrw{"wrr"}
-# PxrStylizedControl.osl:623
+	closure		$tmp267 $const44 $const51 	%line{694} %argrw{"wrr"}
+	assign		$tmp268 finalLineThickness 	%argrw{"wr"}
+	mul		$tmp269 $tmp267 $tmp268 	%argrw{"wrr"}
+	add		Ci Ci $tmp269 	%argrw{"wrr"}
+# PxrStylizedControl.osl:695
 #     Ci += color(finalPtriplanar)*debug("NPRPtriplanar");
-	closure		$tmp263 $const44 $const51 	%line{623} %argrw{"wrr"}
-	assign		$tmp264 finalPtriplanar 	%argrw{"wr"}
-	mul		$tmp265 $tmp263 $tmp264 	%argrw{"wrr"}
-	add		Ci Ci $tmp265 	%argrw{"wrr"}
-# PxrStylizedControl.osl:624
+	closure		$tmp270 $const44 $const52 	%line{695} %argrw{"wrr"}
+	assign		$tmp271 finalPtriplanar 	%argrw{"wr"}
+	mul		$tmp272 $tmp270 $tmp271 	%argrw{"wrr"}
+	add		Ci Ci $tmp272 	%argrw{"wrr"}
+# PxrStylizedControl.osl:696
 #     Ci += color(finalNtriplanar)*debug("NPRNtriplanar");
-	closure		$tmp266 $const44 $const52 	%line{624} %argrw{"wrr"}
-	assign		$tmp267 finalNtriplanar 	%argrw{"wr"}
-	mul		$tmp268 $tmp266 $tmp267 	%argrw{"wrr"}
-	add		Ci Ci $tmp268 	%argrw{"wrr"}
-# PxrStylizedControl.osl:625
+	closure		$tmp273 $const44 $const53 	%line{696} %argrw{"wrr"}
+	assign		$tmp274 finalNtriplanar 	%argrw{"wr"}
+	mul		$tmp275 $tmp273 $tmp274 	%argrw{"wrr"}
+	add		Ci Ci $tmp275 	%argrw{"wrr"}
+# PxrStylizedControl.osl:697
 #     Ci += color(inputTextureCoords)*debug("NPRtextureCoords"); 
-	closure		$tmp269 $const44 $const53 	%line{625} %argrw{"wrr"}
-	assign		$tmp270 inputTextureCoords 	%argrw{"wr"}
-	mul		$tmp271 $tmp269 $tmp270 	%argrw{"wrr"}
-	add		Ci Ci $tmp271 	%argrw{"wrr"}
-# PxrStylizedControl.osl:626
-#     Ci += color(N)*debug("NPRcurvature"); // put global N in NPRcurvature, to be read by Lines shader for "curvature" line type
-	closure		$tmp272 $const44 $const54 	%line{626} %argrw{"wrr"}
-	assign		$tmp273 N 	%argrw{"wr"}
-	mul		$tmp274 $tmp272 $tmp273 	%argrw{"wrr"}
-	add		Ci Ci $tmp274 	%argrw{"wrr"}
+	closure		$tmp276 $const44 $const54 	%line{697} %argrw{"wrr"}
+	assign		$tmp277 inputTextureCoords 	%argrw{"wr"}
+	mul		$tmp278 $tmp276 $tmp277 	%argrw{"wrr"}
+	add		Ci Ci $tmp278 	%argrw{"wrr"}
+# PxrStylizedControl.osl:698
+#     Ci += color(Nbump)*debug("NPRcurvature"); // put global N in NPRcurvature, to be read by Lines shader for "curvature" line type
+	closure		$tmp279 $const44 $const55 	%line{698} %argrw{"wrr"}
+	assign		$tmp280 Nbump 	%argrw{"wr"}
+	mul		$tmp281 $tmp279 $tmp280 	%argrw{"wrr"}
+	add		Ci Ci $tmp281 	%argrw{"wrr"}
+# PxrStylizedControl.osl:699
+#     Ci += color(distortU, distortV, 1)*debug("NPRdistort");
+	closure		$tmp282 $const44 $const56 	%line{699} %argrw{"wrr"}
+	color		$tmp283 distortU distortV $const24 	%argrw{"wrrr"}
+	mul		$tmp284 $tmp282 $tmp283 	%argrw{"wrr"}
+	add		Ci Ci $tmp284 	%argrw{"wrr"}
 	end

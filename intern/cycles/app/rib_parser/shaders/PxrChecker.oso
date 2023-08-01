@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
 # Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrChecker.osl/obj/PxrChecker.oso
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrChecker.osl/obj/PxrChecker.oso
 shader PxrChecker	%meta{int,rfm_nodeid,1053270} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/texture"} %meta{string,rfh_classification,"Pattern/Texture"} %meta{string,help,"An OSL pattern for making a checkerboard texture."} 
 param	color	colorA	1 1 1		%meta{string,label,"Color A"} %meta{string,widget,"color"} %meta{string,help,"First checker color"} %meta{int,connectable,1}  %read{72,73} %write{2147483647,-1}
 param	color	colorB	0 0 0		%meta{string,label,"Color B"} %meta{string,widget,"color"} %meta{string,help,"Second checker color"} %meta{int,connectable,1}  %read{72,73} %write{2147483647,-1}
@@ -88,55 +88,55 @@ code ___main___
 # PxrChecker.osl:86
 #         Manifold_Construct(P,N,inputManifoldRw);
 	functioncall	$const2 7 	%line{86} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:69
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:69
 #     m.Q = inP;
-	assign		inputManifoldRw.Q P 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{69} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:70
+	assign		inputManifoldRw.Q P 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{69} %argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:70
 #     m.QN = inN;
 	assign		inputManifoldRw.QN N 	%line{70} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:71
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:71
 #     m.Qradius = 0.0;
 	assign		inputManifoldRw.Qradius $const3 	%line{71} %argrw{"wr"}
 # PxrChecker.osl:87
 #         Manifold_Transform(inputManifoldRw,"object");
 	functioncall	$const5 21 	%filename{"PxrChecker.osl"} %line{87} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:91
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:91
 #     Manifold_Transform(ioManifold, "common", toSpace);
-	functioncall	$const5 21 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{91} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:78
+	functioncall	$const5 21 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{91} %argrw{"r"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:78
 #     ioManifold.Q = transform(fromSpace, toSpace, ioManifold.Q);
 	transform	inputManifoldRw.Q $const6 $const4 inputManifoldRw.Q 	%line{78} %argrw{"wrrr"}
 	assign		inputManifoldRw.Q inputManifoldRw.Q 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:79
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:79
 #     ioManifold.QN = normalize(transform(fromSpace, toSpace, ioManifold.QN));
 	transformn	$tmp3 $const6 $const4 inputManifoldRw.QN 	%line{79} %argrw{"wrrr"}
 	normalize	inputManifoldRw.QN $tmp3 	%argrw{"wr"}
 	assign		inputManifoldRw.QN inputManifoldRw.QN 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:81
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:81
 #     vector vec1 = vector(1.0);
 	assign		___392_vec1 $const7 	%line{81} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:82
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:82
 #     vec1 = transform(fromSpace, toSpace, vec1);
 	transformv	___392_vec1 $const6 $const4 ___392_vec1 	%line{82} %argrw{"wrrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:83
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:83
 #     float scale = length(vec1) / sqrt(3.0);
 	length		$tmp4 ___392_vec1 	%line{83} %argrw{"wr"}
 	sqrt		$tmp5 $const8 	%argrw{"wr"}
 	div		___392_scale $tmp4 $tmp5 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:84
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:84
 #     ioManifold.Qradius *= scale;
 	mul		inputManifoldRw.Qradius inputManifoldRw.Qradius ___392_scale 	%line{84} %argrw{"wrr"}
 	assign		inputManifoldRw.Qradius inputManifoldRw.Qradius 	%argrw{"wr"}
 # PxrChecker.osl:91
 #         Manifold_Copy(manifold,inputManifoldRw);
 	functioncall	$const9 25 	%filename{"PxrChecker.osl"} %line{91} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:53
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:53
 #     dest.Q = src.Q;
-	assign		inputManifoldRw.Q manifold.Q 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{53} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:54
+	assign		inputManifoldRw.Q manifold.Q 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{53} %argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:54
 #     dest.QN = src.QN;
 	assign		inputManifoldRw.QN manifold.QN 	%line{54} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:55
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:55
 #     dest.Qradius = src.Qradius;
 	assign		inputManifoldRw.Qradius manifold.Qradius 	%line{55} %argrw{"wr"}
 # PxrChecker.osl:96
@@ -180,9 +180,9 @@ code ___main___
 #         float mymod = mod(stOut[j], 1.0);
 	compref		$tmp12 stOut ___423_j 	%line{122} %argrw{"wrr"}
 	functioncall	$const16 48 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:154
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:154
 # float  mod (float  a, float  b) { return a - b*floor(a/b); }
-	div		$tmp14 $tmp12 $const15 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{154} %argrw{"wrr"}
+	div		$tmp14 $tmp12 $const15 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{154} %argrw{"wrr"}
 	floor		$tmp13 $tmp14 	%argrw{"wr"}
 	mul		$tmp15 $const15 $tmp13 	%argrw{"wrr"}
 	sub		___424_mymod $tmp12 $tmp15 	%argrw{"wrr"}

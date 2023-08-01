@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
 # Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrHSL.osl/obj/PxrHSL.oso
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrHSL.osl/obj/PxrHSL.oso
 shader PxrHSL	%meta{int,rfm_nodeid,1053429} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/color"} %meta{string,rfh_classification,"Pattern/Color"} %meta{string,help,"Adjust the hue, saturation and value of a given input color. Note the output is in RGB color space. "} 
 param	color	inputRGB	0 0 0		%meta{string,widget,"color"} %meta{string,help,"The color to have HSL adjustments applied to it."} %meta{string,label,"Input Color"}  %read{0,0} %write{2147483647,-1}
 param	int	hdrInput	0		%meta{string,widget,"checkBox"} %meta{string,help,"When enabled (set to 1) the output is not clamped."} %meta{string,label,"HDR Input"} %meta{int,connectable,0}  %read{1,38} %write{2147483647,-1}
@@ -111,9 +111,9 @@ code ___main___
 	compref		$tmp17 hsl $const4 	%line{131} %argrw{"wrr"}
 	mul		$tmp18 $tmp17 saturation 	%argrw{"wrr"}
 	functioncall	$const9 30 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp19 $tmp18 $const3 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp19 $tmp18 $const3 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
 	max		$tmp16 $tmp19 $const8 	%argrw{"wrr"}
 # PxrHSL.osl:131
 #     hsl[1] = clamp(hsl[1] * saturation, 0, 1);
@@ -123,9 +123,9 @@ code ___main___
 	compref		$tmp21 hsl $const5 	%line{132} %argrw{"wrr"}
 	mul		$tmp22 $tmp21 lum 	%argrw{"wrr"}
 	functioncall	$const9 36 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp23 $tmp22 $const3 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp23 $tmp22 $const3 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
 	max		$tmp20 $tmp23 $const8 	%argrw{"wrr"}
 # PxrHSL.osl:132
 #     hsl[2] = clamp(hsl[2] * lum, 0, 1);

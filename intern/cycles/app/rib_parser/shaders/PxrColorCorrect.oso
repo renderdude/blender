@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
 # Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrColorCorrect.osl/obj/PxrColorCorrect.oso
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrColorCorrect.osl/obj/PxrColorCorrect.oso
 shader PxrColorCorrect	%meta{int,rfm_nodeid,1200405} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/color"} %meta{string,rfh_classification,"Pattern/Color"} %meta{string,help,"PxrColorCorrect combines a number of classic remapping and color correction methods. "} 
 param	color	inputRGB	0 0 0		%meta{string,widget,"color"} %meta{string,help,"Plug an input color pattern here."} %meta{string,label,"Input Color"}  %read{0,195} %write{2147483647,-1}
 param	float	inputMask	1		%meta{string,widget,"default"} %meta{string,page,"Mask"} %meta{int,page_open,1} %meta{string,help,"A mask defining the color-corrected areas."} %meta{string,label,"Input Mask"} %meta{int,slider,1} %meta{float,slidermax,1} %meta{float,slidermin,0}  %read{3,4} %write{2147483647,-1}
@@ -334,9 +334,9 @@ code ___main___
 # PxrColorCorrect.osl:107
 #     float C = (clamp(contrast, -1.0, 1.0) * 0.5) + 0.5;
 	functioncall	$const12 101 	%line{107} %argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp50 $tmp43 $const2 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp50 $tmp43 $const2 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
 	max		$tmp49 $tmp50 $const11 	%argrw{"wrr"}
 # PxrColorCorrect.osl:107
 #     float C = (clamp(contrast, -1.0, 1.0) * 0.5) + 0.5;
@@ -413,9 +413,9 @@ code ___main___
 	compref		$tmp68 hsv $const6 	%argrw{"wrr"}
 	mul		$tmp69 $tmp67 $tmp68 	%argrw{"wrr"}
 	functioncall	$const12 140 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp70 $tmp69 $const2 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp70 $tmp69 $const2 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
 	max		$tmp66 $tmp70 $const3 	%argrw{"wrr"}
 # PxrColorCorrect.osl:141
 #     tmp[1] = clamp(tmp[1] * hsv[1], 0.0, 1.0);
@@ -426,9 +426,9 @@ code ___main___
 	compref		$tmp73 hsv $const9 	%argrw{"wrr"}
 	mul		$tmp74 $tmp72 $tmp73 	%argrw{"wrr"}
 	functioncall	$const12 147 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp75 $tmp74 $const2 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp75 $tmp74 $const2 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
 	max		$tmp71 $tmp75 $const3 	%argrw{"wrr"}
 # PxrColorCorrect.osl:142
 #     tmp[2] = clamp(tmp[2] * hsv[2], 0.0, 1.0);
@@ -520,9 +520,9 @@ code ___main___
 # PxrColorCorrect.osl:342
 #             resultRGB = clamp(resultRGB, clampMin, clampMax);
 	functioncall	$const12 195 	%line{342} %argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:160
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:160
 # vector clamp (vector x, vector minval, vector maxval) { return max(min(x,maxval),minval); }
-	min		$tmp97 resultRGB clampMax 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{160} %argrw{"wrr"}
+	min		$tmp97 resultRGB clampMax 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{160} %argrw{"wrr"}
 	max		resultRGB $tmp97 clampMin 	%argrw{"wrr"}
 # PxrColorCorrect.osl:347
 #         resultRGB = mix(inputRGB, resultRGB, maskValue);

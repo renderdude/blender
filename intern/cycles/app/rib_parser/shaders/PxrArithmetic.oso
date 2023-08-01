@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
 # Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrArithmetic.osl/obj/PxrArithmetic.oso
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrArithmetic.osl/obj/PxrArithmetic.oso
 shader PxrArithmetic	%meta{int,rfm_nodeid,1233488} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/utility"} %meta{string,rfh_classification,"Pattern/Utility"} 
 param	int	operation	1		%meta{string,label,"Operation"} %meta{string,widget,"mapper"} %meta{string,options,"No operation:0|Multiply:1|Divide:2|Multiply-Add:204|Add:4|Subtract:5|Power:3|Logarithm:6|Square Root:100|Inverse Square Root:101|Absolute:102|Exponent:103|Exponent 2:104|Minimum:7|Maximum:8|Less Than:9|Greater Than:10|Sign:105|Compare:200|Smooth Minimum:201|Smooth Maximum:202|Round:106|Floor:107|Ceil:108|Truncate:109|Fraction:110|Modulo:11|Wrap:203|Snap:12|Ping-Pong:13|Sine:111|Cosine:112|Tangent:113|ArcSine:114|ArcCosine:115|ArcTangent:116|Arctan 2:14|Hyperbolic Sine:117|Hyperbolic Cosine:118|Hyperbolic Tangent:119|To Radians:120|To Degrees:121"} %meta{int,connectable,0} %meta{string,help,"No operation: input1<br>Multiply: input1 * input2<br>Divide: input1 / input2<br>Multiply-Add: input1 * input2 + input3<br>Add: input1 + input2<br>Subtract: input1 - input2<br>Power: pow(input1, input2)<br>Logarithm: log(input1, input2)<br>Square Root: sqrt(input1)<br>Inverse Square Root: inversesqrt(input1)<br>Absolute: abs(input1)<br>Exponent: exp(input1)<br>Exponent 2: exp2(input1)<br>Minimum: min(input1, input2)<br>Maximum: max(input1, input2)<br>Less Than: 1 if input1 < input2 else 0<br>Greater Than: 1 if input1 > input2 else 0<br>Sign: 1 if input1 >= 0 else 0<br>Compare: input1 == input2 with tolerance input3<br>Smooth Minimum: min(input1, input2) with smoothed transition input3<br>Smooth Maximum: max(input1, input2) with smoothed transition input3<br>Round: round(input1)<br>Floor: floor(input1)<br>Ceil: ceil(input1)<br>Truncate: integer part of input1<br>Fraction: fractional part of input1<br>Modulo: fmod(input1, input2)<br>Wrap: wrap input1 to range input2 to input3<br>Snap: snap input1 to increment input2<br>Ping-Pong: wrap input1 and reverse every other cycle of size input2<br>Sine: sin(input1)<br>Cosine: cos(input1)<br>Tangent: tan(input1)<br>ArcSine: asin(input1)<br>ArcCosine: acos(input1)<br>ArcTangent: atan(input1)<br>ArcTan2: atan2(input1, input2)<br>Hyperbolic Sine: sinh(input1)<br>Hyperbolic Cosine: cosh(input1)<br>Hyperbolic Tangent: tanh(input1)<br>To Radians: convert input1 from degrees to radians<br>To Degrees: convert input1 from radians to degrees"}  %read{0,460} %write{2147483647,-1}
 param	color	input1	0 0 0		%meta{string,label,"Input 1"} %meta{int,color_enableFilmlookVis,0}  %read{2,465} %write{2147483647,-1} %derivs
@@ -454,9 +454,9 @@ code ___main___
 #         resultRGB = log(input1, input2[0]);
 	compref		$tmp9 input2 $const8 	%line{273} %argrw{"wrr"}
 	functioncall	$const9 26 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:116
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:116
 # color  log (color a,  float b) { return log(a)/log(b); }
-	log		$tmp10 input1 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{116} %argrw{"wr"}
+	log		$tmp10 input1 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{116} %argrw{"wr"}
 	log		$tmp11 $tmp9 	%argrw{"wr"}
 	div		resultRGB $tmp10 $tmp11 	%argrw{"wrr"}
 # PxrArithmetic.osl:275
@@ -566,15 +566,15 @@ code ___main___
 # PxrArithmetic.osl:321
 #         resultRGB = Color_Compare(input1, input2, input3);
 	functioncall	$const21 133 	%line{321} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:181
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:181
 #     return color(Math_Compare(a[0], b[0], eps[0]),
-	compref		$tmp42 input1 $const8 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{181} %argrw{"wrr"}
+	compref		$tmp42 input1 $const8 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{181} %argrw{"wrr"}
 	compref		$tmp43 input2 $const8 	%argrw{"wrr"}
 	compref		$tmp44 input3 $const8 	%argrw{"wrr"}
 	functioncall	$const22 98 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:586
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:586
 #     return ((a == b) || (abs(a - b) <= max(eps, 1.0e-6))) ? 1.0 : 0.0;
-	eq		$tmp45 $tmp42 $tmp43 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{586} %argrw{"wrr"}
+	eq		$tmp45 $tmp42 $tmp43 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{586} %argrw{"wrr"}
 	neq		$tmp46 $tmp45 $const8 	%argrw{"wrr"}
 	if		$tmp46 88 94 	%argrw{"r"}
 	sub		$tmp48 $tmp42 $tmp43 	%argrw{"wrr"}
@@ -587,15 +587,15 @@ code ___main___
 	assign		$tmp41 $const24 	%argrw{"wr"}
 	assign		$tmp41 $const25 	%argrw{"wr"}
 	return
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:182
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:182
 #                  Math_Compare(a[1], b[1], eps[1]),
-	compref		$tmp53 input1 $const1 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{182} %argrw{"wrr"}
+	compref		$tmp53 input1 $const1 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{182} %argrw{"wrr"}
 	compref		$tmp54 input2 $const1 	%argrw{"wrr"}
 	compref		$tmp55 input3 $const1 	%argrw{"wrr"}
 	functioncall	$const22 115 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:586
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:586
 #     return ((a == b) || (abs(a - b) <= max(eps, 1.0e-6))) ? 1.0 : 0.0;
-	eq		$tmp56 $tmp53 $tmp54 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{586} %argrw{"wrr"}
+	eq		$tmp56 $tmp53 $tmp54 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{586} %argrw{"wrr"}
 	neq		$tmp57 $tmp56 $const8 	%argrw{"wrr"}
 	if		$tmp57 105 111 	%argrw{"r"}
 	sub		$tmp59 $tmp53 $tmp54 	%argrw{"wrr"}
@@ -608,15 +608,15 @@ code ___main___
 	assign		$tmp52 $const24 	%argrw{"wr"}
 	assign		$tmp52 $const25 	%argrw{"wr"}
 	return
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:183
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:183
 #                  Math_Compare(a[2], b[2], eps[2]));
-	compref		$tmp64 input1 $const2 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{183} %argrw{"wrr"}
+	compref		$tmp64 input1 $const2 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{183} %argrw{"wrr"}
 	compref		$tmp65 input2 $const2 	%argrw{"wrr"}
 	compref		$tmp66 input3 $const2 	%argrw{"wrr"}
 	functioncall	$const22 132 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:586
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:586
 #     return ((a == b) || (abs(a - b) <= max(eps, 1.0e-6))) ? 1.0 : 0.0;
-	eq		$tmp67 $tmp64 $tmp65 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{586} %argrw{"wrr"}
+	eq		$tmp67 $tmp64 $tmp65 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{586} %argrw{"wrr"}
 	neq		$tmp68 $tmp67 $const8 	%argrw{"wrr"}
 	if		$tmp68 122 128 	%argrw{"r"}
 	sub		$tmp70 $tmp64 $tmp65 	%argrw{"wrr"}
@@ -629,9 +629,9 @@ code ___main___
 	assign		$tmp63 $const24 	%argrw{"wr"}
 	assign		$tmp63 $const25 	%argrw{"wr"}
 	return
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:181
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:181
 #     return color(Math_Compare(a[0], b[0], eps[0]),
-	color		resultRGB $tmp41 $tmp52 $tmp63 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{181} %argrw{"wrrr"}
+	color		resultRGB $tmp41 $tmp52 $tmp63 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{181} %argrw{"wrrr"}
 # PxrArithmetic.osl:323
 #     else if (operation == k_smooth_min)
 	eq		$tmp74 operation $const26 	%filename{"PxrArithmetic.osl"} %line{323} %argrw{"wrr"}
@@ -639,24 +639,24 @@ code ___main___
 # PxrArithmetic.osl:325
 #         resultRGB = Color_SmoothMin(input1, input2, input3);
 	functioncall	$const27 197 	%line{325} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:167
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:167
 #     return color(Math_SmoothMin(a[0], b[0], k[0]),
-	compref		$tmp76 input1 $const8 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{167} %argrw{"wrr"}
+	compref		$tmp76 input1 $const8 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{167} %argrw{"wrr"}
 	compref		$tmp77 input2 $const8 	%argrw{"wrr"}
 	compref		$tmp78 input3 $const8 	%argrw{"wrr"}
 	functioncall	$const28 156 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:576
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:576
 #     if (k != 0.0)
-	neq		$tmp79 $tmp78 $const25 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{576} %argrw{"wrr"}
+	neq		$tmp79 $tmp78 $const25 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{576} %argrw{"wrr"}
 	if		$tmp79 155 155 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:578
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:578
 #         float h = max(k - abs(a - b), 0.0) / k;
 	sub		$tmp82 $tmp76 $tmp77 	%line{578} %argrw{"wrr"}
 	abs		$tmp81 $tmp82 	%argrw{"wr"}
 	sub		$tmp83 $tmp78 $tmp81 	%argrw{"wrr"}
 	max		$tmp80 $tmp83 $const25 	%argrw{"wrr"}
 	div		___382_h $tmp80 $tmp78 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:579
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:579
 #         return min(a, b) - h * h * h * k * (1.0 / 6.0);
 	min		$tmp84 $tmp76 $tmp77 	%line{579} %argrw{"wrr"}
 	mul		$tmp85 ___382_h ___382_h 	%argrw{"wrr"}
@@ -666,27 +666,27 @@ code ___main___
 	mul		$tmp89 $tmp87 $tmp88 	%argrw{"wrr"}
 	sub		$tmp75 $tmp84 $tmp89 	%argrw{"wrr"}
 	return
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:581
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:581
 #     return min(a, b);
 	min		$tmp75 $tmp76 $tmp77 	%line{581} %argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:168
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:168
 #                  Math_SmoothMin(a[1], b[1], k[1]),
-	compref		$tmp91 input1 $const1 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{168} %argrw{"wrr"}
+	compref		$tmp91 input1 $const1 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{168} %argrw{"wrr"}
 	compref		$tmp92 input2 $const1 	%argrw{"wrr"}
 	compref		$tmp93 input3 $const1 	%argrw{"wrr"}
 	functioncall	$const28 176 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:576
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:576
 #     if (k != 0.0)
-	neq		$tmp94 $tmp93 $const25 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{576} %argrw{"wrr"}
+	neq		$tmp94 $tmp93 $const25 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{576} %argrw{"wrr"}
 	if		$tmp94 175 175 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:578
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:578
 #         float h = max(k - abs(a - b), 0.0) / k;
 	sub		$tmp97 $tmp91 $tmp92 	%line{578} %argrw{"wrr"}
 	abs		$tmp96 $tmp97 	%argrw{"wr"}
 	sub		$tmp98 $tmp93 $tmp96 	%argrw{"wrr"}
 	max		$tmp95 $tmp98 $const25 	%argrw{"wrr"}
 	div		___382_h $tmp95 $tmp93 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:579
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:579
 #         return min(a, b) - h * h * h * k * (1.0 / 6.0);
 	min		$tmp99 $tmp91 $tmp92 	%line{579} %argrw{"wrr"}
 	mul		$tmp100 ___382_h ___382_h 	%argrw{"wrr"}
@@ -696,27 +696,27 @@ code ___main___
 	mul		$tmp104 $tmp102 $tmp103 	%argrw{"wrr"}
 	sub		$tmp90 $tmp99 $tmp104 	%argrw{"wrr"}
 	return
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:581
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:581
 #     return min(a, b);
 	min		$tmp90 $tmp91 $tmp92 	%line{581} %argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:169
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:169
 #                  Math_SmoothMin(a[2], b[2], k[2]));
-	compref		$tmp106 input1 $const2 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{169} %argrw{"wrr"}
+	compref		$tmp106 input1 $const2 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{169} %argrw{"wrr"}
 	compref		$tmp107 input2 $const2 	%argrw{"wrr"}
 	compref		$tmp108 input3 $const2 	%argrw{"wrr"}
 	functioncall	$const28 196 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:576
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:576
 #     if (k != 0.0)
-	neq		$tmp109 $tmp108 $const25 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{576} %argrw{"wrr"}
+	neq		$tmp109 $tmp108 $const25 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{576} %argrw{"wrr"}
 	if		$tmp109 195 195 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:578
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:578
 #         float h = max(k - abs(a - b), 0.0) / k;
 	sub		$tmp112 $tmp106 $tmp107 	%line{578} %argrw{"wrr"}
 	abs		$tmp111 $tmp112 	%argrw{"wr"}
 	sub		$tmp113 $tmp108 $tmp111 	%argrw{"wrr"}
 	max		$tmp110 $tmp113 $const25 	%argrw{"wrr"}
 	div		___382_h $tmp110 $tmp108 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:579
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:579
 #         return min(a, b) - h * h * h * k * (1.0 / 6.0);
 	min		$tmp114 $tmp106 $tmp107 	%line{579} %argrw{"wrr"}
 	mul		$tmp115 ___382_h ___382_h 	%argrw{"wrr"}
@@ -726,12 +726,12 @@ code ___main___
 	mul		$tmp119 $tmp117 $tmp118 	%argrw{"wrr"}
 	sub		$tmp105 $tmp114 $tmp119 	%argrw{"wrr"}
 	return
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:581
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:581
 #     return min(a, b);
 	min		$tmp105 $tmp106 $tmp107 	%line{581} %argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:167
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:167
 #     return color(Math_SmoothMin(a[0], b[0], k[0]),
-	color		resultRGB $tmp75 $tmp90 $tmp105 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{167} %argrw{"wrrr"}
+	color		resultRGB $tmp75 $tmp90 $tmp105 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{167} %argrw{"wrrr"}
 # PxrArithmetic.osl:327
 #     else if (operation == k_smooth_max)
 	eq		$tmp120 operation $const30 	%filename{"PxrArithmetic.osl"} %line{327} %argrw{"wrr"}
@@ -739,26 +739,26 @@ code ___main___
 # PxrArithmetic.osl:329
 #         resultRGB = Color_SmoothMax(input1, input2, input3);
 	functioncall	$const31 270 	%line{329} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:174
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:174
 #     return color(-Math_SmoothMin(-a[0], -b[0], k[0]),
-	compref		$tmp122 input1 $const8 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{174} %argrw{"wrr"}
+	compref		$tmp122 input1 $const8 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{174} %argrw{"wrr"}
 	neg		$tmp123 $tmp122 	%argrw{"wr"}
 	compref		$tmp124 input2 $const8 	%argrw{"wrr"}
 	neg		$tmp125 $tmp124 	%argrw{"wr"}
 	compref		$tmp126 input3 $const8 	%argrw{"wrr"}
 	functioncall	$const28 222 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:576
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:576
 #     if (k != 0.0)
-	neq		$tmp127 $tmp126 $const25 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{576} %argrw{"wrr"}
+	neq		$tmp127 $tmp126 $const25 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{576} %argrw{"wrr"}
 	if		$tmp127 221 221 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:578
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:578
 #         float h = max(k - abs(a - b), 0.0) / k;
 	sub		$tmp130 $tmp123 $tmp125 	%line{578} %argrw{"wrr"}
 	abs		$tmp129 $tmp130 	%argrw{"wr"}
 	sub		$tmp131 $tmp126 $tmp129 	%argrw{"wrr"}
 	max		$tmp128 $tmp131 $const25 	%argrw{"wrr"}
 	div		___382_h $tmp128 $tmp126 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:579
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:579
 #         return min(a, b) - h * h * h * k * (1.0 / 6.0);
 	min		$tmp132 $tmp123 $tmp125 	%line{579} %argrw{"wrr"}
 	mul		$tmp133 ___382_h ___382_h 	%argrw{"wrr"}
@@ -768,13 +768,13 @@ code ___main___
 	mul		$tmp137 $tmp135 $tmp136 	%argrw{"wrr"}
 	sub		$tmp121 $tmp132 $tmp137 	%argrw{"wrr"}
 	return
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:581
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:581
 #     return min(a, b);
 	min		$tmp121 $tmp123 $tmp125 	%line{581} %argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:174
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:174
 #     return color(-Math_SmoothMin(-a[0], -b[0], k[0]),
-	neg		$tmp138 $tmp121 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{174} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:175
+	neg		$tmp138 $tmp121 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{174} %argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:175
 #                  -Math_SmoothMin(-a[1], -b[1], k[1]),
 	compref		$tmp140 input1 $const1 	%line{175} %argrw{"wrr"}
 	neg		$tmp141 $tmp140 	%argrw{"wr"}
@@ -782,18 +782,18 @@ code ___main___
 	neg		$tmp143 $tmp142 	%argrw{"wr"}
 	compref		$tmp144 input3 $const1 	%argrw{"wrr"}
 	functioncall	$const28 245 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:576
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:576
 #     if (k != 0.0)
-	neq		$tmp145 $tmp144 $const25 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{576} %argrw{"wrr"}
+	neq		$tmp145 $tmp144 $const25 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{576} %argrw{"wrr"}
 	if		$tmp145 244 244 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:578
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:578
 #         float h = max(k - abs(a - b), 0.0) / k;
 	sub		$tmp148 $tmp141 $tmp143 	%line{578} %argrw{"wrr"}
 	abs		$tmp147 $tmp148 	%argrw{"wr"}
 	sub		$tmp149 $tmp144 $tmp147 	%argrw{"wrr"}
 	max		$tmp146 $tmp149 $const25 	%argrw{"wrr"}
 	div		___382_h $tmp146 $tmp144 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:579
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:579
 #         return min(a, b) - h * h * h * k * (1.0 / 6.0);
 	min		$tmp150 $tmp141 $tmp143 	%line{579} %argrw{"wrr"}
 	mul		$tmp151 ___382_h ___382_h 	%argrw{"wrr"}
@@ -803,13 +803,13 @@ code ___main___
 	mul		$tmp155 $tmp153 $tmp154 	%argrw{"wrr"}
 	sub		$tmp139 $tmp150 $tmp155 	%argrw{"wrr"}
 	return
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:581
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:581
 #     return min(a, b);
 	min		$tmp139 $tmp141 $tmp143 	%line{581} %argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:175
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:175
 #                  -Math_SmoothMin(-a[1], -b[1], k[1]),
-	neg		$tmp156 $tmp139 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{175} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:176
+	neg		$tmp156 $tmp139 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{175} %argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:176
 #                  -Math_SmoothMin(-a[2], -b[2], k[2]));
 	compref		$tmp158 input1 $const2 	%line{176} %argrw{"wrr"}
 	neg		$tmp159 $tmp158 	%argrw{"wr"}
@@ -817,18 +817,18 @@ code ___main___
 	neg		$tmp161 $tmp160 	%argrw{"wr"}
 	compref		$tmp162 input3 $const2 	%argrw{"wrr"}
 	functioncall	$const28 268 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:576
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:576
 #     if (k != 0.0)
-	neq		$tmp163 $tmp162 $const25 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{576} %argrw{"wrr"}
+	neq		$tmp163 $tmp162 $const25 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{576} %argrw{"wrr"}
 	if		$tmp163 267 267 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:578
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:578
 #         float h = max(k - abs(a - b), 0.0) / k;
 	sub		$tmp166 $tmp159 $tmp161 	%line{578} %argrw{"wrr"}
 	abs		$tmp165 $tmp166 	%argrw{"wr"}
 	sub		$tmp167 $tmp162 $tmp165 	%argrw{"wrr"}
 	max		$tmp164 $tmp167 $const25 	%argrw{"wrr"}
 	div		___382_h $tmp164 $tmp162 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:579
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:579
 #         return min(a, b) - h * h * h * k * (1.0 / 6.0);
 	min		$tmp168 $tmp159 $tmp161 	%line{579} %argrw{"wrr"}
 	mul		$tmp169 ___382_h ___382_h 	%argrw{"wrr"}
@@ -838,13 +838,13 @@ code ___main___
 	mul		$tmp173 $tmp171 $tmp172 	%argrw{"wrr"}
 	sub		$tmp157 $tmp168 $tmp173 	%argrw{"wrr"}
 	return
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:581
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:581
 #     return min(a, b);
 	min		$tmp157 $tmp159 $tmp161 	%line{581} %argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:176
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:176
 #                  -Math_SmoothMin(-a[2], -b[2], k[2]));
-	neg		$tmp174 $tmp157 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{176} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:174
+	neg		$tmp174 $tmp157 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{176} %argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:174
 #     return color(-Math_SmoothMin(-a[0], -b[0], k[0]),
 	color		resultRGB $tmp138 $tmp156 $tmp174 	%line{174} %argrw{"wrrr"}
 # PxrArithmetic.osl:331
@@ -882,9 +882,9 @@ code ___main___
 # PxrArithmetic.osl:349
 #         resultRGB = Color_Fractional(input1);
 	functioncall	$const37 287 	%line{349} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:162
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:162
 #     return a - trunc(a);
-	trunc		$tmp180 input1 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{162} %argrw{"wr"}
+	trunc		$tmp180 input1 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{162} %argrw{"wr"}
 	sub		resultRGB input1 $tmp180 	%argrw{"wrr"}
 # PxrArithmetic.osl:351
 #     else if (operation == k_modulo)
@@ -900,16 +900,16 @@ code ___main___
 # PxrArithmetic.osl:357
 #         resultRGB = Color_Wrap(input1, input2, input3);
 	functioncall	$const40 336 	%line{357} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:189
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:189
 #     return color(Math_Wrap(a[0], b[0], c[0]),
-	compref		$tmp184 input1 $const8 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{189} %argrw{"wrr"}
+	compref		$tmp184 input1 $const8 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{189} %argrw{"wrr"}
 	compref		$tmp185 input2 $const8 	%argrw{"wrr"}
 	compref		$tmp186 input3 $const8 	%argrw{"wrr"}
 	functioncall	$const41 307 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:593
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:593
 #     float range = fmax - fmin;
-	sub		___384_range $tmp186 $tmp185 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{593} %argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:594
+	sub		___384_range $tmp186 $tmp185 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{593} %argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:594
 #     return (range != 0.0) ? a - (range * floor((a - fmin) / range)) : fmin;
 	neq		$tmp187 ___384_range $const25 	%line{594} %argrw{"wrr"}
 	if		$tmp187 305 306 	%argrw{"r"}
@@ -920,16 +920,16 @@ code ___main___
 	sub		$tmp183 $tmp184 $tmp191 	%argrw{"wrr"}
 	assign		$tmp183 $tmp185 	%argrw{"wr"}
 	return
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:190
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:190
 #                  Math_Wrap(a[1], b[1], c[1]),
-	compref		$tmp193 input1 $const1 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{190} %argrw{"wrr"}
+	compref		$tmp193 input1 $const1 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{190} %argrw{"wrr"}
 	compref		$tmp194 input2 $const1 	%argrw{"wrr"}
 	compref		$tmp195 input3 $const1 	%argrw{"wrr"}
 	functioncall	$const41 321 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:593
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:593
 #     float range = fmax - fmin;
-	sub		___384_range $tmp195 $tmp194 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{593} %argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:594
+	sub		___384_range $tmp195 $tmp194 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{593} %argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:594
 #     return (range != 0.0) ? a - (range * floor((a - fmin) / range)) : fmin;
 	neq		$tmp196 ___384_range $const25 	%line{594} %argrw{"wrr"}
 	if		$tmp196 319 320 	%argrw{"r"}
@@ -940,16 +940,16 @@ code ___main___
 	sub		$tmp192 $tmp193 $tmp200 	%argrw{"wrr"}
 	assign		$tmp192 $tmp194 	%argrw{"wr"}
 	return
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:191
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:191
 #                  Math_Wrap(a[2], b[2], c[2]));
-	compref		$tmp202 input1 $const2 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{191} %argrw{"wrr"}
+	compref		$tmp202 input1 $const2 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{191} %argrw{"wrr"}
 	compref		$tmp203 input2 $const2 	%argrw{"wrr"}
 	compref		$tmp204 input3 $const2 	%argrw{"wrr"}
 	functioncall	$const41 335 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:593
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:593
 #     float range = fmax - fmin;
-	sub		___384_range $tmp204 $tmp203 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{593} %argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:594
+	sub		___384_range $tmp204 $tmp203 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{593} %argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:594
 #     return (range != 0.0) ? a - (range * floor((a - fmin) / range)) : fmin;
 	neq		$tmp205 ___384_range $const25 	%line{594} %argrw{"wrr"}
 	if		$tmp205 333 334 	%argrw{"r"}
@@ -960,9 +960,9 @@ code ___main___
 	sub		$tmp201 $tmp202 $tmp209 	%argrw{"wrr"}
 	assign		$tmp201 $tmp203 	%argrw{"wr"}
 	return
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:189
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:189
 #     return color(Math_Wrap(a[0], b[0], c[0]),
-	color		resultRGB $tmp183 $tmp192 $tmp201 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{189} %argrw{"wrrr"}
+	color		resultRGB $tmp183 $tmp192 $tmp201 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{189} %argrw{"wrrr"}
 # PxrArithmetic.osl:359
 #     else if (operation == k_snap)
 	eq		$tmp210 operation $const42 	%filename{"PxrArithmetic.osl"} %line{359} %argrw{"wrr"}
@@ -970,57 +970,57 @@ code ___main___
 # PxrArithmetic.osl:361
 #         resultRGB = Color_Snap(input1, input2);
 	functioncall	$const43 370 	%line{361} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:196
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:196
 #     return color(Math_Snap(a[0], b[0]),
-	compref		$tmp212 input1 $const8 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{196} %argrw{"wrr"}
+	compref		$tmp212 input1 $const8 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{196} %argrw{"wrr"}
 	compref		$tmp213 input2 $const8 	%argrw{"wrr"}
 	functioncall	$const44 349 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:601
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:601
 #     if (b == 0.0) return 0.0;
-	eq		$tmp214 $tmp213 $const25 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{601} %argrw{"wrr"}
+	eq		$tmp214 $tmp213 $const25 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{601} %argrw{"wrr"}
 	if		$tmp214 346 346 	%argrw{"r"}
 	assign		$tmp211 $const25 	%argrw{"wr"}
 	return
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:602
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:602
 #     return floor(a / b) * b;
 	div		$tmp216 $tmp212 $tmp213 	%line{602} %argrw{"wrr"}
 	floor		$tmp215 $tmp216 	%argrw{"wr"}
 	mul		$tmp211 $tmp215 $tmp213 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:197
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:197
 #                  Math_Snap(a[1], b[1]),
-	compref		$tmp218 input1 $const1 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{197} %argrw{"wrr"}
+	compref		$tmp218 input1 $const1 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{197} %argrw{"wrr"}
 	compref		$tmp219 input2 $const1 	%argrw{"wrr"}
 	functioncall	$const44 359 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:601
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:601
 #     if (b == 0.0) return 0.0;
-	eq		$tmp220 $tmp219 $const25 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{601} %argrw{"wrr"}
+	eq		$tmp220 $tmp219 $const25 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{601} %argrw{"wrr"}
 	if		$tmp220 356 356 	%argrw{"r"}
 	assign		$tmp217 $const25 	%argrw{"wr"}
 	return
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:602
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:602
 #     return floor(a / b) * b;
 	div		$tmp222 $tmp218 $tmp219 	%line{602} %argrw{"wrr"}
 	floor		$tmp221 $tmp222 	%argrw{"wr"}
 	mul		$tmp217 $tmp221 $tmp219 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:198
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:198
 #                  Math_Snap(a[2], b[2]));
-	compref		$tmp224 input1 $const2 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{198} %argrw{"wrr"}
+	compref		$tmp224 input1 $const2 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{198} %argrw{"wrr"}
 	compref		$tmp225 input2 $const2 	%argrw{"wrr"}
 	functioncall	$const44 369 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:601
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:601
 #     if (b == 0.0) return 0.0;
-	eq		$tmp226 $tmp225 $const25 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{601} %argrw{"wrr"}
+	eq		$tmp226 $tmp225 $const25 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{601} %argrw{"wrr"}
 	if		$tmp226 366 366 	%argrw{"r"}
 	assign		$tmp223 $const25 	%argrw{"wr"}
 	return
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:602
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:602
 #     return floor(a / b) * b;
 	div		$tmp228 $tmp224 $tmp225 	%line{602} %argrw{"wrr"}
 	floor		$tmp227 $tmp228 	%argrw{"wr"}
 	mul		$tmp223 $tmp227 $tmp225 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:196
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:196
 #     return color(Math_Snap(a[0], b[0]),
-	color		resultRGB $tmp211 $tmp217 $tmp223 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{196} %argrw{"wrrr"}
+	color		resultRGB $tmp211 $tmp217 $tmp223 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{196} %argrw{"wrrr"}
 # PxrArithmetic.osl:363
 #     else if (operation == k_ping_pong)
 	eq		$tmp229 operation $const45 	%filename{"PxrArithmetic.osl"} %line{363} %argrw{"wrr"}
@@ -1028,90 +1028,90 @@ code ___main___
 # PxrArithmetic.osl:365
 #         resultRGB = Color_PingPong(input1, input2);
 	functioncall	$const46 425 	%line{365} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:203
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:203
 #     return color(Math_PingPong(a[0], b[0]),
-	compref		$tmp231 input1 $const8 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{203} %argrw{"wrr"}
+	compref		$tmp231 input1 $const8 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{203} %argrw{"wrr"}
 	compref		$tmp232 input2 $const8 	%argrw{"wrr"}
 	functioncall	$const47 390 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:609
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:609
 #     if (b == 0.0) return 0.0;
-	eq		$tmp233 $tmp232 $const25 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{609} %argrw{"wrr"}
+	eq		$tmp233 $tmp232 $const25 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{609} %argrw{"wrr"}
 	if		$tmp233 380 380 	%argrw{"r"}
 	assign		$tmp230 $const25 	%argrw{"wr"}
 	return
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:610
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:610
 #     return abs(Math_Fractional((a - b) / (b * 2.0)) * b * 2.0 - b);
 	sub		$tmp235 $tmp231 $tmp232 	%line{610} %argrw{"wrr"}
 	mul		$tmp236 $tmp232 $const48 	%argrw{"wrr"}
 	div		$tmp237 $tmp235 $tmp236 	%argrw{"wrr"}
 	functioncall	$const49 386 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:569
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:569
 #     return a - trunc(a);
 	trunc		$tmp238 $tmp237 	%line{569} %argrw{"wr"}
 	sub		$tmp234 $tmp237 $tmp238 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:610
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:610
 #     return abs(Math_Fractional((a - b) / (b * 2.0)) * b * 2.0 - b);
 	mul		$tmp239 $tmp234 $tmp232 	%line{610} %argrw{"wrr"}
 	mul		$tmp240 $tmp239 $const48 	%argrw{"wrr"}
 	sub		$tmp241 $tmp240 $tmp232 	%argrw{"wrr"}
 	abs		$tmp230 $tmp241 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:204
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:204
 #                  Math_PingPong(a[1], b[1]),
-	compref		$tmp243 input1 $const1 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{204} %argrw{"wrr"}
+	compref		$tmp243 input1 $const1 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{204} %argrw{"wrr"}
 	compref		$tmp244 input2 $const1 	%argrw{"wrr"}
 	functioncall	$const47 407 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:609
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:609
 #     if (b == 0.0) return 0.0;
-	eq		$tmp245 $tmp244 $const25 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{609} %argrw{"wrr"}
+	eq		$tmp245 $tmp244 $const25 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{609} %argrw{"wrr"}
 	if		$tmp245 397 397 	%argrw{"r"}
 	assign		$tmp242 $const25 	%argrw{"wr"}
 	return
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:610
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:610
 #     return abs(Math_Fractional((a - b) / (b * 2.0)) * b * 2.0 - b);
 	sub		$tmp247 $tmp243 $tmp244 	%line{610} %argrw{"wrr"}
 	mul		$tmp248 $tmp244 $const48 	%argrw{"wrr"}
 	div		$tmp249 $tmp247 $tmp248 	%argrw{"wrr"}
 	functioncall	$const49 403 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:569
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:569
 #     return a - trunc(a);
 	trunc		$tmp250 $tmp249 	%line{569} %argrw{"wr"}
 	sub		$tmp246 $tmp249 $tmp250 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:610
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:610
 #     return abs(Math_Fractional((a - b) / (b * 2.0)) * b * 2.0 - b);
 	mul		$tmp251 $tmp246 $tmp244 	%line{610} %argrw{"wrr"}
 	mul		$tmp252 $tmp251 $const48 	%argrw{"wrr"}
 	sub		$tmp253 $tmp252 $tmp244 	%argrw{"wrr"}
 	abs		$tmp242 $tmp253 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:205
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:205
 #                  Math_PingPong(a[2], b[2]));
-	compref		$tmp255 input1 $const2 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{205} %argrw{"wrr"}
+	compref		$tmp255 input1 $const2 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{205} %argrw{"wrr"}
 	compref		$tmp256 input2 $const2 	%argrw{"wrr"}
 	functioncall	$const47 424 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:609
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:609
 #     if (b == 0.0) return 0.0;
-	eq		$tmp257 $tmp256 $const25 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{609} %argrw{"wrr"}
+	eq		$tmp257 $tmp256 $const25 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{609} %argrw{"wrr"}
 	if		$tmp257 414 414 	%argrw{"r"}
 	assign		$tmp254 $const25 	%argrw{"wr"}
 	return
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:610
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:610
 #     return abs(Math_Fractional((a - b) / (b * 2.0)) * b * 2.0 - b);
 	sub		$tmp259 $tmp255 $tmp256 	%line{610} %argrw{"wrr"}
 	mul		$tmp260 $tmp256 $const48 	%argrw{"wrr"}
 	div		$tmp261 $tmp259 $tmp260 	%argrw{"wrr"}
 	functioncall	$const49 420 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:569
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:569
 #     return a - trunc(a);
 	trunc		$tmp262 $tmp261 	%line{569} %argrw{"wr"}
 	sub		$tmp258 $tmp261 $tmp262 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:610
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:610
 #     return abs(Math_Fractional((a - b) / (b * 2.0)) * b * 2.0 - b);
 	mul		$tmp263 $tmp258 $tmp256 	%line{610} %argrw{"wrr"}
 	mul		$tmp264 $tmp263 $const48 	%argrw{"wrr"}
 	sub		$tmp265 $tmp264 $tmp256 	%argrw{"wrr"}
 	abs		$tmp254 $tmp265 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:203
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:203
 #     return color(Math_PingPong(a[0], b[0]),
-	color		resultRGB $tmp230 $tmp242 $tmp254 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{203} %argrw{"wrrr"}
+	color		resultRGB $tmp230 $tmp242 $tmp254 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{203} %argrw{"wrrr"}
 # PxrArithmetic.osl:367
 #     else if (operation == k_sin)
 	eq		$tmp266 operation $const50 	%filename{"PxrArithmetic.osl"} %line{367} %argrw{"wrr"}
@@ -1189,9 +1189,9 @@ code ___main___
 # PxrArithmetic.osl:409
 #         resultRGB = radians(input1);
 	functioncall	$const61 460 	%line{409} %argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:87
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:87
 # color  radians (color x)  { return x*(M_PI/180.0); }
-	div		$tmp277 $const62 $const63 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{87} %argrw{"wrr"}
+	div		$tmp277 $const62 $const63 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{87} %argrw{"wrr"}
 	mul		resultRGB input1 $tmp277 	%argrw{"wrr"}
 # PxrArithmetic.osl:411
 #     else if (operation == k_to_degrees)
@@ -1200,9 +1200,9 @@ code ___main___
 # PxrArithmetic.osl:413
 #         resultRGB = degrees(input1);
 	functioncall	$const65 465 	%line{413} %argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:82
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:82
 # color  degrees (color x)  { return x*(180.0/M_PI); }
-	div		$tmp279 $const63 $const62 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{82} %argrw{"wrr"}
+	div		$tmp279 $const63 $const62 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{82} %argrw{"wrr"}
 	mul		resultRGB input1 $tmp279 	%argrw{"wrr"}
 # PxrArithmetic.osl:417
 #         resultRGB = input1;
@@ -1213,41 +1213,41 @@ code ___main___
 # PxrArithmetic.osl:421
 #         resultRGB = Color_filteredClamp(resultRGB, BLACK, WHITE, clampFilterWidth);
 	functioncall	$const68 529 	%line{421} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:210
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:210
 #     if (fwidth <= 0.0) return clamp(c, cmin, cmax);
-	le		$tmp282 clampFilterWidth $const25 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{210} %argrw{"wrr"}
+	le		$tmp282 clampFilterWidth $const25 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{210} %argrw{"wrr"}
 	if		$tmp282 474 474 	%argrw{"r"}
 	functioncall	$const69 473 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp283 resultRGB $const67 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	min		$tmp283 resultRGB $const67 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
 	max		resultRGB $tmp283 $const66 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:210
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:210
 #     if (fwidth <= 0.0) return clamp(c, cmin, cmax);
-	return	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{210}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:211
+	return	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{210}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:211
 #     return color(Math_FilteredClamp(c[0], cmin[0], cmax[0], fwidth),
 	compref		$tmp285 resultRGB $const8 	%line{211} %argrw{"wrr"}
 	compref		$tmp286 $const66 $const8 	%argrw{"wrr"}
 	compref		$tmp287 $const67 $const8 	%argrw{"wrr"}
 	functioncall	$const70 492 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:615
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:615
 #     if (fwidth <= 0.0) return clamp(x, fmin, fmax);
-	le		$tmp288 clampFilterWidth $const25 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{615} %argrw{"wrr"}
+	le		$tmp288 clampFilterWidth $const25 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{615} %argrw{"wrr"}
 	if		$tmp288 484 484 	%argrw{"r"}
 	functioncall	$const69 483 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp289 $tmp285 $tmp287 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp289 $tmp285 $tmp287 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
 	max		$tmp284 $tmp289 $tmp286 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:615
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:615
 #     if (fwidth <= 0.0) return clamp(x, fmin, fmax);
-	return	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{615}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:616
+	return	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{615}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:616
 #     float w = filterwidth(x) * fwidth;
 	filterwidth	$tmp290 $tmp285 	%line{616} %argrw{"wr"} %argderivs{1}
 	mul		___387_w $tmp290 clampFilterWidth 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:617
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:617
 #     return mix(fmin, mix(x, fmax, smoothstep(fmax - w, fmax, x)), smoothstep(fmin, fmin + w, x));
 	sub		$tmp293 $tmp287 ___387_w 	%line{617} %argrw{"wrr"}
 	smoothstep	$tmp292 $tmp293 $tmp287 $tmp285 	%argrw{"wrrr"}
@@ -1255,29 +1255,29 @@ code ___main___
 	add		$tmp295 $tmp286 ___387_w 	%argrw{"wrr"}
 	smoothstep	$tmp294 $tmp286 $tmp295 $tmp285 	%argrw{"wrrr"}
 	mix		$tmp284 $tmp286 $tmp291 $tmp294 	%argrw{"wrrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:212
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:212
 #                  Math_FilteredClamp(c[1], cmin[1], cmax[1], fwidth),
-	compref		$tmp297 resultRGB $const1 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{212} %argrw{"wrr"}
+	compref		$tmp297 resultRGB $const1 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{212} %argrw{"wrr"}
 	compref		$tmp298 $const66 $const1 	%argrw{"wrr"}
 	compref		$tmp299 $const67 $const1 	%argrw{"wrr"}
 	functioncall	$const70 510 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:615
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:615
 #     if (fwidth <= 0.0) return clamp(x, fmin, fmax);
-	le		$tmp300 clampFilterWidth $const25 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{615} %argrw{"wrr"}
+	le		$tmp300 clampFilterWidth $const25 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{615} %argrw{"wrr"}
 	if		$tmp300 502 502 	%argrw{"r"}
 	functioncall	$const69 501 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp301 $tmp297 $tmp299 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp301 $tmp297 $tmp299 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
 	max		$tmp296 $tmp301 $tmp298 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:615
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:615
 #     if (fwidth <= 0.0) return clamp(x, fmin, fmax);
-	return	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{615}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:616
+	return	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{615}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:616
 #     float w = filterwidth(x) * fwidth;
 	filterwidth	$tmp302 $tmp297 	%line{616} %argrw{"wr"} %argderivs{1}
 	mul		___387_w $tmp302 clampFilterWidth 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:617
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:617
 #     return mix(fmin, mix(x, fmax, smoothstep(fmax - w, fmax, x)), smoothstep(fmin, fmin + w, x));
 	sub		$tmp305 $tmp299 ___387_w 	%line{617} %argrw{"wrr"}
 	smoothstep	$tmp304 $tmp305 $tmp299 $tmp297 	%argrw{"wrrr"}
@@ -1285,29 +1285,29 @@ code ___main___
 	add		$tmp307 $tmp298 ___387_w 	%argrw{"wrr"}
 	smoothstep	$tmp306 $tmp298 $tmp307 $tmp297 	%argrw{"wrrr"}
 	mix		$tmp296 $tmp298 $tmp303 $tmp306 	%argrw{"wrrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:213
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:213
 #                  Math_FilteredClamp(c[2], cmin[2], cmax[2], fwidth));
-	compref		$tmp309 resultRGB $const2 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{213} %argrw{"wrr"}
+	compref		$tmp309 resultRGB $const2 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{213} %argrw{"wrr"}
 	compref		$tmp310 $const66 $const2 	%argrw{"wrr"}
 	compref		$tmp311 $const67 $const2 	%argrw{"wrr"}
 	functioncall	$const70 528 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:615
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:615
 #     if (fwidth <= 0.0) return clamp(x, fmin, fmax);
-	le		$tmp312 clampFilterWidth $const25 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{615} %argrw{"wrr"}
+	le		$tmp312 clampFilterWidth $const25 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{615} %argrw{"wrr"}
 	if		$tmp312 520 520 	%argrw{"r"}
 	functioncall	$const69 519 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp313 $tmp309 $tmp311 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp313 $tmp309 $tmp311 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
 	max		$tmp308 $tmp313 $tmp310 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:615
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:615
 #     if (fwidth <= 0.0) return clamp(x, fmin, fmax);
-	return	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{615}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:616
+	return	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{615}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:616
 #     float w = filterwidth(x) * fwidth;
 	filterwidth	$tmp314 $tmp309 	%line{616} %argrw{"wr"} %argderivs{1}
 	mul		___387_w $tmp314 clampFilterWidth 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Math.h:617
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:617
 #     return mix(fmin, mix(x, fmax, smoothstep(fmax - w, fmax, x)), smoothstep(fmin, fmin + w, x));
 	sub		$tmp317 $tmp311 ___387_w 	%line{617} %argrw{"wrr"}
 	smoothstep	$tmp316 $tmp317 $tmp311 $tmp309 	%argrw{"wrrr"}
@@ -1315,9 +1315,9 @@ code ___main___
 	add		$tmp319 $tmp310 ___387_w 	%argrw{"wrr"}
 	smoothstep	$tmp318 $tmp310 $tmp319 $tmp309 	%argrw{"wrrr"}
 	mix		$tmp308 $tmp310 $tmp315 $tmp318 	%argrw{"wrrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:211
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:211
 #     return color(Math_FilteredClamp(c[0], cmin[0], cmax[0], fwidth),
-	color		resultRGB $tmp284 $tmp296 $tmp308 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{211} %argrw{"wrrr"}
+	color		resultRGB $tmp284 $tmp296 $tmp308 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{211} %argrw{"wrrr"}
 # PxrArithmetic.osl:423
 #     resultR = resultRGB[0];
 	compref		resultR resultRGB $const8 	%filename{"PxrArithmetic.osl"} %line{423} %argrw{"wrr"}

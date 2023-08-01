@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
 # Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrWireframe.osl/obj/PxrWireframe.oso
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrWireframe.osl/obj/PxrWireframe.oso
 shader PxrWireframe	%meta{int,rfm_nodeid,1200435} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/geometry"} %meta{string,rfh_classification,"Pattern/Geometry"} 
 param	color	wireColor	0 0 0		%meta{string,label,"Wireframe Color"}  %read{19,19} %write{2147483647,-1}
 param	color	backColor	0.5 0.5 0.5		%meta{string,label,"Background Color"}  %read{19,19} %write{2147483647,-1}

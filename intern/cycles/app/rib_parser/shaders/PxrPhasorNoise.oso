@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
 # Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrPhasorNoise.osl/obj/PxrPhasorNoise.oso
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrPhasorNoise.osl/obj/PxrPhasorNoise.oso
 shader PxrPhasorNoise	%meta{int,rfm_nodeid,1233478} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/texture"} %meta{string,rfh_classification,"Pattern/Texture"} %meta{string,help,"Phasor wave noise generator"} %meta{string,category,"generator"} 
 param	struct Manifold	inputManifold			%meta{string,page,""} %meta{string,widget,"default"} %meta{string,readOnly,"True"}  %read{0,0} %write{2147483647,-1} %struct{"Manifold"} %structfields{Q,QN,Qradius} %structfieldtypes{"pnf"} %structnfields{3}
 param	point	inputManifold.Q	0 0 0		%meta{string,page,""} %meta{string,widget,"default"} %meta{string,readOnly,"True"}  %read{22,22} %write{2147483647,-1} %mystruct{inputManifold} %mystructfield{0} %derivs
@@ -82,7 +82,7 @@ local	vector	_dimensions	%read{41,497} %write{39,39} %derivs
 local	vector	_neighbors	%read{122,497} %write{41,41} %derivs
 local	vector	_kernelSize	%read{46,497} %write{43,46} %derivs
 local	float	_kernelSizeMin	%read{50,66} %write{47,55} %derivs
-local	int	___494_dim	%read{50,55} %write{49,55} %derivs
+local	int	___499_dim	%read{50,55} %write{49,55} %derivs
 local	float	bandwidth	%read{65,497} %write{56,66} %derivs
 local	point	Q0	%read{69,497} %write{68,69} %derivs
 local	vector	_alignAxis	%read{124,497} %write{72,93} %derivs
@@ -91,83 +91,83 @@ local	vector	_directionJitterSize	%read{100,497} %write{97,100} %derivs
 local	float[6]	filterWidth	%read{124,789} %write{115,789} %derivs
 local	float	filterWidthCount	%read{547,789} %write{112,112} %derivs
 local	vector[6]	phasorNoise	%read{124,789} %write{115,497} %derivs
-local	int	___505_i	%read{115,120} %write{114,120} %derivs
-local	float	___507_i	%read{124,497} %write{123,497} %derivs
-local	float	___509_j	%read{124,497} %write{124,497} %derivs
-local	float	___511_k	%read{124,497} %write{124,497} %derivs
-local	vector	___512_Qkernel0	%read{124,497} %write{124,497} %derivs
-local	vector	___512_dirKernel	%read{124,497} %write{124,497} %derivs
-local	float	___512_phiKernel	%read{124,497} %write{124,497} %derivs
-local	vector	___512_Qkernel	%read{124,497} %write{124,497} %derivs
-local	float	___513_impulse	%read{124,497} %write{124,497} %derivs
-local	vector	___514_Qseed	%read{124,497} %write{124,497} %derivs
-local	vector	___514_Qimpulse	%read{124,497} %write{124,497} %derivs
-local	vector	___514_x	%read{124,497} %write{124,497} %derivs
-local	float	___514_phiImpulse	%read{124,497} %write{124,497} %derivs
-local	vector	___514_dirImpulse	%read{124,497} %write{124,497} %derivs
-local	vector	___516_dirAlign	%read{124,497} %write{124,497} %derivs
-local	vector	___522_flowDir	%read{124,497} %write{124,497} %derivs
-local	float	___522_flowDot	%read{124,497} %write{124,497} %derivs
-local	float	___522_flotAngle	%read{124,497} %write{124,497} %derivs
-local	float	___522_flowAmount	%read{124,497} %write{124,497} %derivs
-local	vector	___522_flowAxis	%read{124,497} %write{124,497} %derivs
-local	vector	___523_Qnoise	%read{124,497} %write{124,497} %derivs
-local	float	___523_jitx	%read{124,497} %write{124,497} %derivs
-local	float	___523_jity	%read{124,497} %write{124,497} %derivs
-local	float	___523_jitz	%read{124,497} %write{124,497} %derivs
-local	vector	___523_jit	%read{124,497} %write{124,497} %derivs
-local	float	___514_a	%read{124,497} %write{124,497} %derivs
-local	float	___514_s	%read{124,497} %write{124,497} %derivs
-local	float	___514_c	%read{124,497} %write{124,497} %derivs
-local	float	___514_fOctScale	%read{124,497} %write{124,497} %derivs
-local	float	___514_fOctOffset	%read{124,497} %write{124,497} %derivs
-local	float	___514_fOctRotate	%read{124,497} %write{124,497} %derivs
-local	int	___526_fOct	%read{124,497} %write{124,497} %derivs
-local	float	___527_pOctScale	%read{124,497} %write{124,497} %derivs
-local	float	___527_pOctOffset	%read{124,497} %write{124,497} %derivs
-local	float	___527_pOctRotate	%read{124,497} %write{124,497} %derivs
-local	float	___527_pOctWeight	%read{124,497} %write{124,497} %derivs
-local	int	___528_pOct	%read{124,497} %write{124,497}
-local	float	___529_f	%read{124,497} %write{124,497} %derivs
-local	float	___529_r	%read{124,497} %write{124,497} %derivs
-local	vector	___529_dir	%read{124,497} %write{124,497} %derivs
-local	float	___529_phi	%read{124,497} %write{124,497} %derivs
-local	float	___531_phiAlign	%read{124,497} %write{124,497} %derivs
-local	float	___533_flattenDot	%read{124,497} %write{124,497} %derivs
-local	float	___533_flattenAngle	%read{124,497} %write{124,497} %derivs
-local	float	___533_flattenAmount	%read{124,497} %write{124,497} %derivs
-local	vector	___533_flattenAxis	%read{124,497} %write{124,497} %derivs
-local	float	___529_dotQNdir	%read{124,497} %write{124,497} %derivs
-local	float	___534_fFlattenDot	%read{124,497} %write{124,497} %derivs
-local	float	___534_fFlattenDivisor	%read{124,497} %write{124,497} %derivs
+local	int	___510_i	%read{115,120} %write{114,120} %derivs
+local	float	___512_i	%read{124,497} %write{123,497} %derivs
+local	float	___514_j	%read{124,497} %write{124,497} %derivs
+local	float	___516_k	%read{124,497} %write{124,497} %derivs
+local	vector	___517_Qkernel0	%read{124,497} %write{124,497} %derivs
+local	vector	___517_dirKernel	%read{124,497} %write{124,497} %derivs
+local	float	___517_phiKernel	%read{124,497} %write{124,497} %derivs
+local	vector	___517_Qkernel	%read{124,497} %write{124,497} %derivs
+local	float	___518_impulse	%read{124,497} %write{124,497} %derivs
+local	vector	___519_Qseed	%read{124,497} %write{124,497} %derivs
+local	vector	___519_Qimpulse	%read{124,497} %write{124,497} %derivs
+local	vector	___519_x	%read{124,497} %write{124,497} %derivs
+local	float	___519_phiImpulse	%read{124,497} %write{124,497} %derivs
+local	vector	___519_dirImpulse	%read{124,497} %write{124,497} %derivs
+local	vector	___521_dirAlign	%read{124,497} %write{124,497} %derivs
+local	vector	___527_flowDir	%read{124,497} %write{124,497} %derivs
+local	float	___527_flowDot	%read{124,497} %write{124,497} %derivs
+local	float	___527_flotAngle	%read{124,497} %write{124,497} %derivs
+local	float	___527_flowAmount	%read{124,497} %write{124,497} %derivs
+local	vector	___527_flowAxis	%read{124,497} %write{124,497} %derivs
+local	vector	___528_Qnoise	%read{124,497} %write{124,497} %derivs
+local	float	___528_jitx	%read{124,497} %write{124,497} %derivs
+local	float	___528_jity	%read{124,497} %write{124,497} %derivs
+local	float	___528_jitz	%read{124,497} %write{124,497} %derivs
+local	vector	___528_jit	%read{124,497} %write{124,497} %derivs
+local	float	___519_a	%read{124,497} %write{124,497} %derivs
+local	float	___519_s	%read{124,497} %write{124,497} %derivs
+local	float	___519_c	%read{124,497} %write{124,497} %derivs
+local	float	___519_fOctScale	%read{124,497} %write{124,497} %derivs
+local	float	___519_fOctOffset	%read{124,497} %write{124,497} %derivs
+local	float	___519_fOctRotate	%read{124,497} %write{124,497} %derivs
+local	int	___531_fOct	%read{124,497} %write{124,497} %derivs
+local	float	___532_pOctScale	%read{124,497} %write{124,497} %derivs
+local	float	___532_pOctOffset	%read{124,497} %write{124,497} %derivs
+local	float	___532_pOctRotate	%read{124,497} %write{124,497} %derivs
+local	float	___532_pOctWeight	%read{124,497} %write{124,497} %derivs
+local	int	___533_pOct	%read{124,497} %write{124,497}
+local	float	___534_f	%read{124,497} %write{124,497} %derivs
+local	float	___534_r	%read{124,497} %write{124,497} %derivs
+local	vector	___534_dir	%read{124,497} %write{124,497} %derivs
+local	float	___534_phi	%read{124,497} %write{124,497} %derivs
+local	float	___536_phiAlign	%read{124,497} %write{124,497} %derivs
+local	float	___538_flattenDot	%read{124,497} %write{124,497} %derivs
+local	float	___538_flattenAngle	%read{124,497} %write{124,497} %derivs
+local	float	___538_flattenAmount	%read{124,497} %write{124,497} %derivs
+local	vector	___538_flattenAxis	%read{124,497} %write{124,497} %derivs
+local	float	___534_dotQNdir	%read{124,497} %write{124,497} %derivs
+local	float	___539_fFlattenDot	%read{124,497} %write{124,497} %derivs
+local	float	___539_fFlattenDivisor	%read{124,497} %write{124,497} %derivs
 local	float	tmpVal	%read{547,789} %write{499,789} %derivs
 local	float	sum	%read{547,792} %write{500,789} %derivs
 local	float	average	%read{520,789} %write{507,543} %derivs
-local	float	___537_splineWidth	%read{520,543} %write{517,540} %derivs
-local	int	___538_i	%read{520,540} %write{519,540} %derivs
+local	float	___542_splineWidth	%read{520,543} %write{517,540} %derivs
+local	int	___543_i	%read{520,540} %write{519,540} %derivs
 local	float	fOctWeight	%read{547,789} %write{544,789} %derivs
-local	int	___540_fOct	%read{547,789} %write{546,789} %derivs
-local	float	___541_hOctScale	%read{547,789} %write{547,789} %derivs
-local	float	___541_hOctWeight	%read{547,789} %write{547,789} %derivs
-local	float	___541_hOctOffset	%read{547,789} %write{547,789} %derivs
-local	int	___542_hOct	%read{547,789} %write{547,789}
-local	float	___543_weight	%read{547,789} %write{547,789} %derivs
-local	vector	___543_pn	%read{547,789} %write{547,789} %derivs
-local	float	___543_phase	%read{547,789} %write{547,789} %derivs
-local	float	___543_phaseu	%read{547,789} %write{547,789} %derivs
-local	float	___543_filterwidth	%read{547,789} %write{547,789} %derivs
-local	float	___550_intensity	%read{547,789} %write{547,789} %derivs
-local	float	___550_samples	%read{547,789} %write{547,789} %derivs
-local	float	___551_intensity	%read{547,789} %write{547,789} %derivs
-local	float	___551_samples	%read{547,789} %write{547,789} %derivs
-local	float	___552_x	%read{547,789} %write{547,789} %derivs
-local	float[18]	___552_currentFloat	%read{547,789} %write{547,789} %derivs
-local	float[18]	___552_currentPositions	%read{547,789} %write{547,789} %derivs
-local	int	___553_i	%read{547,789} %write{547,789} %derivs
+local	int	___545_fOct	%read{547,789} %write{546,789} %derivs
+local	float	___546_hOctScale	%read{547,789} %write{547,789} %derivs
+local	float	___546_hOctWeight	%read{547,789} %write{547,789} %derivs
+local	float	___546_hOctOffset	%read{547,789} %write{547,789} %derivs
+local	int	___547_hOct	%read{547,789} %write{547,789}
+local	float	___548_weight	%read{547,789} %write{547,789} %derivs
+local	vector	___548_pn	%read{547,789} %write{547,789} %derivs
+local	float	___548_phase	%read{547,789} %write{547,789} %derivs
+local	float	___548_phaseu	%read{547,789} %write{547,789} %derivs
+local	float	___548_filterwidth	%read{547,789} %write{547,789} %derivs
+local	float	___555_intensity	%read{547,789} %write{547,789} %derivs
+local	float	___555_samples	%read{547,789} %write{547,789} %derivs
 local	float	___556_intensity	%read{547,789} %write{547,789} %derivs
-local	float	___558_tmp1	%read{547,789} %write{547,789} %derivs
-local	float	___558_tmp2	%read{547,789} %write{547,789} %derivs
-local	normal	___567_bumpN	%read{803,805} %write{801,801}
+local	float	___556_samples	%read{547,789} %write{547,789} %derivs
+local	float	___557_x	%read{547,789} %write{547,789} %derivs
+local	float[18]	___557_currentFloat	%read{547,789} %write{547,789} %derivs
+local	float[18]	___557_currentPositions	%read{547,789} %write{547,789} %derivs
+local	int	___558_i	%read{547,789} %write{547,789} %derivs
+local	float	___561_intensity	%read{547,789} %write{547,789} %derivs
+local	float	___563_tmp1	%read{547,789} %write{547,789} %derivs
+local	float	___563_tmp2	%read{547,789} %write{547,789} %derivs
+local	normal	___572_bumpN	%read{803,805} %write{801,801}
 temp	int	$tmp1	%read{1,1} %write{0,0}
 temp	int	$tmp2	%read{2,2} %write{1,1}
 const	int	$const1	0		%read{1,736} %write{2147483647,-1}
@@ -684,55 +684,55 @@ code ___main___
 	eq		$tmp2 $tmp1 $const1 	%argrw{"wrr"}
 	if		$tmp2 21 25 	%argrw{"r"}
 	functioncall	$const2 7 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:69
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:69
 #     m.Q = inP;
-	assign		inputManifoldRw.Q P 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{69} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:70
+	assign		inputManifoldRw.Q P 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{69} %argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:70
 #     m.QN = inN;
 	assign		inputManifoldRw.QN N 	%line{70} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:71
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:71
 #     m.Qradius = 0.0;
 	assign		inputManifoldRw.Qradius $const3 	%line{71} %argrw{"wr"}
 # PxrPhasorNoise.osl:646
 #     MANIFOLD_GET_STD_INPUT(inputManifoldRw);
 	functioncall	$const5 21 	%filename{"PxrPhasorNoise.osl"} %line{646} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:91
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:91
 #     Manifold_Transform(ioManifold, "common", toSpace);
-	functioncall	$const5 21 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{91} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:78
+	functioncall	$const5 21 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{91} %argrw{"r"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:78
 #     ioManifold.Q = transform(fromSpace, toSpace, ioManifold.Q);
 	transform	inputManifoldRw.Q $const6 $const4 inputManifoldRw.Q 	%line{78} %argrw{"wrrr"}
 	assign		inputManifoldRw.Q inputManifoldRw.Q 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:79
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:79
 #     ioManifold.QN = normalize(transform(fromSpace, toSpace, ioManifold.QN));
 	transformn	$tmp3 $const6 $const4 inputManifoldRw.QN 	%line{79} %argrw{"wrrr"}
 	normalize	inputManifoldRw.QN $tmp3 	%argrw{"wr"}
 	assign		inputManifoldRw.QN inputManifoldRw.QN 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:81
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:81
 #     vector vec1 = vector(1.0);
 	assign		___392_vec1 $const7 	%line{81} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:82
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:82
 #     vec1 = transform(fromSpace, toSpace, vec1);
 	transformv	___392_vec1 $const6 $const4 ___392_vec1 	%line{82} %argrw{"wrrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:83
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:83
 #     float scale = length(vec1) / sqrt(3.0);
 	length		$tmp4 ___392_vec1 	%line{83} %argrw{"wr"}
 	sqrt		$tmp5 $const8 	%argrw{"wr"}
 	div		___392_scale $tmp4 $tmp5 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:84
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:84
 #     ioManifold.Qradius *= scale;
 	mul		inputManifoldRw.Qradius inputManifoldRw.Qradius ___392_scale 	%line{84} %argrw{"wrr"}
 	assign		inputManifoldRw.Qradius inputManifoldRw.Qradius 	%argrw{"wr"}
 # PxrPhasorNoise.osl:646
 #     MANIFOLD_GET_STD_INPUT(inputManifoldRw);
 	functioncall	$const9 25 	%filename{"PxrPhasorNoise.osl"} %line{646} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:53
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:53
 #     dest.Q = src.Q;
-	assign		inputManifoldRw.Q inputManifold.Q 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{53} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:54
+	assign		inputManifoldRw.Q inputManifold.Q 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{53} %argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:54
 #     dest.QN = src.QN;
 	assign		inputManifoldRw.QN inputManifold.QN 	%line{54} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:55
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:55
 #     dest.Qradius = src.Qradius;
 	assign		inputManifoldRw.Qradius inputManifold.Qradius 	%line{55} %argrw{"wr"}
 # PxrPhasorNoise.osl:648
@@ -783,17 +783,17 @@ code ___main___
 # PxrPhasorNoise.osl:679
 #     for (int dim=1; dim<dimensions; dim++) {
 	for		$tmp18 50 52 54 56 	%line{679} %argrw{"r"}
-	assign		___494_dim $const10 	%argrw{"wr"}
-	lt		$tmp17 ___494_dim dimensions 	%argrw{"wrr"}
+	assign		___499_dim $const10 	%argrw{"wr"}
+	lt		$tmp17 ___499_dim dimensions 	%argrw{"wrr"}
 	neq		$tmp18 $tmp17 $const1 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:680
 #         _kernelSizeMin = min(_kernelSize[dim], _kernelSizeMin);
-	compref		$tmp19 _kernelSize ___494_dim 	%line{680} %argrw{"wrr"}
+	compref		$tmp19 _kernelSize ___499_dim 	%line{680} %argrw{"wrr"}
 	min		_kernelSizeMin $tmp19 _kernelSizeMin 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:679
 #     for (int dim=1; dim<dimensions; dim++) {
-	assign		$tmp20 ___494_dim 	%line{679} %argrw{"wr"}
-	add		___494_dim ___494_dim $const10 	%argrw{"wrr"}
+	assign		$tmp20 ___499_dim 	%line{679} %argrw{"wr"}
+	add		___499_dim ___499_dim $const10 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:685
 #     float bandwidth = 1.0;
 	assign		bandwidth $const12 	%line{685} %argrw{"wr"}
@@ -914,65 +914,65 @@ code ___main___
 # PxrPhasorNoise.osl:734
 #     for (int i=0; i<OCTAVES_MAX; i++) {
 	for		$tmp51 115 117 119 121 	%line{734} %argrw{"r"}
-	assign		___505_i $const1 	%argrw{"wr"}
-	lt		$tmp50 ___505_i $const23 	%argrw{"wrr"}
+	assign		___510_i $const1 	%argrw{"wr"}
+	lt		$tmp50 ___510_i $const23 	%argrw{"wrr"}
 	neq		$tmp51 $tmp50 $const1 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:735
 #         phasorNoise[i] = vector(0.0);
-	aassign		phasorNoise ___505_i $const25 	%line{735} %argrw{"wrr"}
+	aassign		phasorNoise ___510_i $const25 	%line{735} %argrw{"wrr"}
 # PxrPhasorNoise.osl:736
 #         filterWidth[i] = 0.0;
-	aassign		filterWidth ___505_i $const3 	%line{736} %argrw{"wrr"}
+	aassign		filterWidth ___510_i $const3 	%line{736} %argrw{"wrr"}
 # PxrPhasorNoise.osl:734
 #     for (int i=0; i<OCTAVES_MAX; i++) {
-	assign		$tmp53 ___505_i 	%line{734} %argrw{"wr"}
-	add		___505_i ___505_i $const10 	%argrw{"wrr"}
+	assign		$tmp53 ___510_i 	%line{734} %argrw{"wr"}
+	add		___510_i ___510_i $const10 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:744
 #     for (float i=-_neighbors[0]; i<=_neighbors[0]; i++) {
 	for		$tmp57 124 127 496 498 	%line{744} %argrw{"r"}
 	compref		$tmp54 _neighbors $const1 	%argrw{"wrr"}
-	neg		___507_i $tmp54 	%argrw{"wr"}
+	neg		___512_i $tmp54 	%argrw{"wr"}
 	compref		$tmp55 _neighbors $const1 	%argrw{"wrr"}
-	le		$tmp56 ___507_i $tmp55 	%argrw{"wrr"}
+	le		$tmp56 ___512_i $tmp55 	%argrw{"wrr"}
 	neq		$tmp57 $tmp56 $const1 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:745
 #         for (float j=-_neighbors[1]; j<=_neighbors[1]; j++) {
 	for		$tmp61 130 133 494 496 	%line{745} %argrw{"r"}
 	compref		$tmp58 _neighbors $const10 	%argrw{"wrr"}
-	neg		___509_j $tmp58 	%argrw{"wr"}
+	neg		___514_j $tmp58 	%argrw{"wr"}
 	compref		$tmp59 _neighbors $const10 	%argrw{"wrr"}
-	le		$tmp60 ___509_j $tmp59 	%argrw{"wrr"}
+	le		$tmp60 ___514_j $tmp59 	%argrw{"wrr"}
 	neq		$tmp61 $tmp60 $const1 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:746
 #             for (float k=-_neighbors[2]; k<=_neighbors[2]; k++) {
 	for		$tmp65 136 139 492 494 	%line{746} %argrw{"r"}
 	compref		$tmp62 _neighbors $const11 	%argrw{"wrr"}
-	neg		___511_k $tmp62 	%argrw{"wr"}
+	neg		___516_k $tmp62 	%argrw{"wr"}
 	compref		$tmp63 _neighbors $const11 	%argrw{"wrr"}
-	le		$tmp64 ___511_k $tmp63 	%argrw{"wrr"}
+	le		$tmp64 ___516_k $tmp63 	%argrw{"wrr"}
 	neq		$tmp65 $tmp64 $const1 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:749
 #                 vector Qkernel0 = Q0 + vector(i, j, k);
-	vector		$tmp66 ___507_i ___509_j ___511_k 	%line{749} %argrw{"wrrr"}
-	add		___512_Qkernel0 Q0 $tmp66 	%argrw{"wrr"}
+	vector		$tmp66 ___512_i ___514_j ___516_k 	%line{749} %argrw{"wrrr"}
+	add		___517_Qkernel0 Q0 $tmp66 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:752
 #                 vector dirKernel = _direction;
-	assign		___512_dirKernel _direction 	%line{752} %argrw{"wr"}
+	assign		___517_dirKernel _direction 	%line{752} %argrw{"wr"}
 # PxrPhasorNoise.osl:755
 #                 float phiKernel = cellnoise(Qkernel0);
-	cellnoise	___512_phiKernel ___512_Qkernel0 	%line{755} %argrw{"wr"}
+	cellnoise	___517_phiKernel ___517_Qkernel0 	%line{755} %argrw{"wr"}
 # PxrPhasorNoise.osl:758
 #                 vector Qkernel = Qkernel0;
-	assign		___512_Qkernel ___512_Qkernel0 	%line{758} %argrw{"wr"}
+	assign		___517_Qkernel ___517_Qkernel0 	%line{758} %argrw{"wr"}
 # PxrPhasorNoise.osl:760
 #                 for (float impulse=0.0; impulse<kernelImpulses; impulse++) {
 	for		$tmp68 146 148 490 492 	%line{760} %argrw{"r"}
-	assign		___513_impulse $const3 	%argrw{"wr"}
-	lt		$tmp67 ___513_impulse kernelImpulses 	%argrw{"wrr"}
+	assign		___518_impulse $const3 	%argrw{"wr"}
+	lt		$tmp67 ___518_impulse kernelImpulses 	%argrw{"wrr"}
 	neq		$tmp68 $tmp67 $const1 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:763
 #                     vector Qseed = Qkernel0 + cellnoise(vector(impulse))
-	assign		$tmp70 ___513_impulse 	%line{763} %argrw{"wr"}
+	assign		$tmp70 ___518_impulse 	%line{763} %argrw{"wr"}
 	cellnoise	$tmp69 $tmp70 	%argrw{"wr"}
 # PxrPhasorNoise.osl:764
 #                                   * vector(123.4567, 867.5309, 5551.212)
@@ -982,213 +982,213 @@ code ___main___
 	mul		$tmp73 $tmp72 _dimensions 	%line{765} %argrw{"wrr"}
 # PxrPhasorNoise.osl:763
 #                     vector Qseed = Qkernel0 + cellnoise(vector(impulse))
-	add		___514_Qseed ___512_Qkernel0 $tmp73 	%line{763} %argrw{"wrr"}
+	add		___519_Qseed ___517_Qkernel0 $tmp73 	%line{763} %argrw{"wrr"}
 # PxrPhasorNoise.osl:769
 #                     vector Qimpulse = (Qkernel0 + cellnoise(Qseed)) * _kernelSize * _dimensions;
-	cellnoise	$tmp74 ___514_Qseed 	%line{769} %argrw{"wr"}
-	add		$tmp75 ___512_Qkernel0 $tmp74 	%argrw{"wrr"}
+	cellnoise	$tmp74 ___519_Qseed 	%line{769} %argrw{"wr"}
+	add		$tmp75 ___517_Qkernel0 $tmp74 	%argrw{"wrr"}
 	mul		$tmp76 $tmp75 _kernelSize 	%argrw{"wrr"}
-	mul		___514_Qimpulse $tmp76 _dimensions 	%argrw{"wrr"}
+	mul		___519_Qimpulse $tmp76 _dimensions 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:772
 #                     if (impulse == 0.0) {
-	eq		$tmp77 ___513_impulse $const3 	%line{772} %argrw{"wrr"}
+	eq		$tmp77 ___518_impulse $const3 	%line{772} %argrw{"wrr"}
 	if		$tmp77 160 160 	%argrw{"r"}
 # PxrPhasorNoise.osl:773
 #                         Qkernel = Qimpulse;
-	assign		___512_Qkernel ___514_Qimpulse 	%line{773} %argrw{"wr"}
+	assign		___517_Qkernel ___519_Qimpulse 	%line{773} %argrw{"wr"}
 # PxrPhasorNoise.osl:777
 #                     vector x = Q - Qimpulse;
-	sub		___514_x Q ___514_Qimpulse 	%line{777} %argrw{"wrr"}
+	sub		___519_x Q ___519_Qimpulse 	%line{777} %argrw{"wrr"}
 # PxrPhasorNoise.osl:782
 #                     float phiImpulse = phiKernel + impulse / kernelImpulses;
 	assign		$tmp79 kernelImpulses 	%line{782} %argrw{"wr"}
-	div		$tmp78 ___513_impulse $tmp79 	%argrw{"wrr"}
-	add		___514_phiImpulse ___512_phiKernel $tmp78 	%argrw{"wrr"}
+	div		$tmp78 ___518_impulse $tmp79 	%argrw{"wrr"}
+	add		___519_phiImpulse ___517_phiKernel $tmp78 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:784
 #                     vector dirImpulse = dirKernel;
-	assign		___514_dirImpulse ___512_dirKernel 	%line{784} %argrw{"wr"}
+	assign		___519_dirImpulse ___517_dirKernel 	%line{784} %argrw{"wr"}
 # PxrPhasorNoise.osl:787
 #                     if (directionAlign > 0.0) {
 	gt		$tmp80 directionAlign $const3 	%line{787} %argrw{"wrr"}
 	if		$tmp80 185 185 	%argrw{"r"}
 # PxrPhasorNoise.osl:788
 #                         vector dirAlign = vector(0.0);
-	assign		___516_dirAlign $const25 	%line{788} %argrw{"wr"}
+	assign		___521_dirAlign $const25 	%line{788} %argrw{"wr"}
 # PxrPhasorNoise.osl:789
 #                         if (alignMode == ALIGNMODE_LINEARX) {
 	eq		$tmp81 alignMode $const1 	%line{789} %argrw{"wrr"}
 	if		$tmp81 171 183 	%argrw{"r"}
 # PxrPhasorNoise.osl:790
 #                             dirAlign = vector(1.0, 0.0, 0.0);
-	assign		___516_dirAlign $const14 	%line{790} %argrw{"wr"}
+	assign		___521_dirAlign $const14 	%line{790} %argrw{"wr"}
 # PxrPhasorNoise.osl:791
 #                         } else if (alignMode == ALIGNMODE_LINEARY) {
 	eq		$tmp82 alignMode $const10 	%line{791} %argrw{"wrr"}
 	if		$tmp82 174 183 	%argrw{"r"}
 # PxrPhasorNoise.osl:792
 #                             dirAlign = vector(0.0, 1.0, 0.0);
-	assign		___516_dirAlign $const15 	%line{792} %argrw{"wr"}
+	assign		___521_dirAlign $const15 	%line{792} %argrw{"wr"}
 # PxrPhasorNoise.osl:793
 #                         } else if (alignMode == ALIGNMODE_LINEARZ) {
 	eq		$tmp83 alignMode $const11 	%line{793} %argrw{"wrr"}
 	if		$tmp83 177 183 	%argrw{"r"}
 # PxrPhasorNoise.osl:794
 #                             dirAlign = vector(0.0, 0.0, 1.0);
-	assign		___516_dirAlign $const16 	%line{794} %argrw{"wr"}
+	assign		___521_dirAlign $const16 	%line{794} %argrw{"wr"}
 # PxrPhasorNoise.osl:795
 #                         } else if (alignMode == ALIGNMODE_KERNEL) {
 	eq		$tmp84 alignMode $const27 	%line{795} %argrw{"wrr"}
 	if		$tmp84 181 183 	%argrw{"r"}
 # PxrPhasorNoise.osl:796
 #                             dirAlign = normalize(Q - Qkernel);
-	sub		$tmp85 Q ___512_Qkernel 	%line{796} %argrw{"wrr"}
-	normalize	___516_dirAlign $tmp85 	%argrw{"wr"}
+	sub		$tmp85 Q ___517_Qkernel 	%line{796} %argrw{"wrr"}
+	normalize	___521_dirAlign $tmp85 	%argrw{"wr"}
 # PxrPhasorNoise.osl:798
 #                             dirAlign = normalize(Qimpulse * _alignAxis);
-	mul		$tmp86 ___514_Qimpulse _alignAxis 	%line{798} %argrw{"wrr"}
-	normalize	___516_dirAlign $tmp86 	%argrw{"wr"}
+	mul		$tmp86 ___519_Qimpulse _alignAxis 	%line{798} %argrw{"wrr"}
+	normalize	___521_dirAlign $tmp86 	%argrw{"wr"}
 # PxrPhasorNoise.osl:800
 #                         dirImpulse = normalize(mix(dirImpulse, dirAlign, directionAlign));
-	mix		$tmp87 ___514_dirImpulse ___516_dirAlign directionAlign 	%line{800} %argrw{"wrrr"}
-	normalize	___514_dirImpulse $tmp87 	%argrw{"wr"}
+	mix		$tmp87 ___519_dirImpulse ___521_dirAlign directionAlign 	%line{800} %argrw{"wrrr"}
+	normalize	___519_dirImpulse $tmp87 	%argrw{"wr"}
 # PxrPhasorNoise.osl:804
 #                     if (directionFlow > 0.0) {
 	gt		$tmp88 directionFlow $const3 	%line{804} %argrw{"wrr"}
 	if		$tmp88 249 249 	%argrw{"r"}
 # PxrPhasorNoise.osl:805
 #                         vector flowDir   = cross(cross(normalize(x), dirImpulse), dirImpulse);
-	normalize	$tmp90 ___514_x 	%line{805} %argrw{"wr"}
-	cross		$tmp89 $tmp90 ___514_dirImpulse 	%argrw{"wrr"}
-	cross		___522_flowDir $tmp89 ___514_dirImpulse 	%argrw{"wrr"}
+	normalize	$tmp90 ___519_x 	%line{805} %argrw{"wr"}
+	cross		$tmp89 $tmp90 ___519_dirImpulse 	%argrw{"wrr"}
+	cross		___527_flowDir $tmp89 ___519_dirImpulse 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:806
 #                         float flowDot    = dot(flowDir, dirImpulse);
-	dot		___522_flowDot ___522_flowDir ___514_dirImpulse 	%line{806} %argrw{"wrr"}
+	dot		___527_flowDot ___527_flowDir ___519_dirImpulse 	%line{806} %argrw{"wrr"}
 # PxrPhasorNoise.osl:807
 #                         float flotAngle  = acos(flowDot);
-	acos		___522_flotAngle ___522_flowDot 	%line{807} %argrw{"wr"}
+	acos		___527_flotAngle ___527_flowDot 	%line{807} %argrw{"wr"}
 # PxrPhasorNoise.osl:808
 #                         float flowAmount = directionFlow;
-	assign		___522_flowAmount directionFlow 	%line{808} %argrw{"wr"}
+	assign		___527_flowAmount directionFlow 	%line{808} %argrw{"wr"}
 # PxrPhasorNoise.osl:809
 #                         vector flowAxis  = normalize(cross(flowDir, dirImpulse));
-	cross		$tmp91 ___522_flowDir ___514_dirImpulse 	%line{809} %argrw{"wrr"}
-	normalize	___522_flowAxis $tmp91 	%argrw{"wr"}
+	cross		$tmp91 ___527_flowDir ___519_dirImpulse 	%line{809} %argrw{"wrr"}
+	normalize	___527_flowAxis $tmp91 	%argrw{"wr"}
 # PxrPhasorNoise.osl:810
 #                         dirImpulse = rotate(point(dirImpulse), flowAmount*flotAngle, point(0.0), point(flowAxis));
-	assign		$tmp92 ___514_dirImpulse 	%line{810} %argrw{"wr"}
-	mul		$tmp93 ___522_flowAmount ___522_flotAngle 	%argrw{"wrr"}
-	assign		$tmp95 ___522_flowAxis 	%argrw{"wr"}
+	assign		$tmp92 ___519_dirImpulse 	%line{810} %argrw{"wr"}
+	mul		$tmp93 ___527_flowAmount ___527_flotAngle 	%argrw{"wrr"}
+	assign		$tmp95 ___527_flowAxis 	%argrw{"wr"}
 	functioncall	$const29 249 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:292
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:292
 #     vector axis = normalize (b - a);
-	sub		$tmp96 $tmp95 $const28 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{292} %argrw{"wrr"}
+	sub		$tmp96 $tmp95 $const28 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{292} %argrw{"wrr"}
 	normalize	___252_axis $tmp96 	%argrw{"wr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:294
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:294
 #     sincos (angle, sinang, cosang);
 	sincos		$tmp93 ___252_sinang ___252_cosang 	%line{294} %argrw{"rww"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:295
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:295
 #     float cosang1 = 1.0 - cosang;
 	sub		___252_cosang1 $const12 ___252_cosang 	%line{295} %argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:296
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:296
 #     float x = axis[0], y = axis[1], z = axis[2];
 	compref		___252_x ___252_axis $const1 	%line{296} %argrw{"wrr"}
 	compref		___252_y ___252_axis $const10 	%argrw{"wrr"}
 	compref		___252_z ___252_axis $const11 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:297
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:297
 #     matrix M = matrix (x * x + (1.0 - x * x) * cosang,
 	mul		$tmp97 ___252_x ___252_x 	%line{297} %argrw{"wrr"}
 	mul		$tmp98 ___252_x ___252_x 	%argrw{"wrr"}
 	sub		$tmp99 $const12 $tmp98 	%argrw{"wrr"}
 	mul		$tmp100 $tmp99 ___252_cosang 	%argrw{"wrr"}
 	add		$tmp101 $tmp97 $tmp100 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:298
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:298
 #                        x * y * cosang1 + z * sinang,
 	mul		$tmp102 ___252_x ___252_y 	%line{298} %argrw{"wrr"}
 	mul		$tmp103 $tmp102 ___252_cosang1 	%argrw{"wrr"}
 	mul		$tmp104 ___252_z ___252_sinang 	%argrw{"wrr"}
 	add		$tmp105 $tmp103 $tmp104 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:299
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:299
 #                        x * z * cosang1 - y * sinang,
 	mul		$tmp106 ___252_x ___252_z 	%line{299} %argrw{"wrr"}
 	mul		$tmp107 $tmp106 ___252_cosang1 	%argrw{"wrr"}
 	mul		$tmp108 ___252_y ___252_sinang 	%argrw{"wrr"}
 	sub		$tmp109 $tmp107 $tmp108 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:301
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:301
 #                        x * y * cosang1 - z * sinang,
 	mul		$tmp110 ___252_x ___252_y 	%line{301} %argrw{"wrr"}
 	mul		$tmp111 $tmp110 ___252_cosang1 	%argrw{"wrr"}
 	mul		$tmp112 ___252_z ___252_sinang 	%argrw{"wrr"}
 	sub		$tmp113 $tmp111 $tmp112 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:302
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:302
 #                        y * y + (1.0 - y * y) * cosang,
 	mul		$tmp114 ___252_y ___252_y 	%line{302} %argrw{"wrr"}
 	mul		$tmp115 ___252_y ___252_y 	%argrw{"wrr"}
 	sub		$tmp116 $const12 $tmp115 	%argrw{"wrr"}
 	mul		$tmp117 $tmp116 ___252_cosang 	%argrw{"wrr"}
 	add		$tmp118 $tmp114 $tmp117 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:303
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:303
 #                        y * z * cosang1 + x * sinang,
 	mul		$tmp119 ___252_y ___252_z 	%line{303} %argrw{"wrr"}
 	mul		$tmp120 $tmp119 ___252_cosang1 	%argrw{"wrr"}
 	mul		$tmp121 ___252_x ___252_sinang 	%argrw{"wrr"}
 	add		$tmp122 $tmp120 $tmp121 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:305
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:305
 #                        x * z * cosang1 + y * sinang,
 	mul		$tmp123 ___252_x ___252_z 	%line{305} %argrw{"wrr"}
 	mul		$tmp124 $tmp123 ___252_cosang1 	%argrw{"wrr"}
 	mul		$tmp125 ___252_y ___252_sinang 	%argrw{"wrr"}
 	add		$tmp126 $tmp124 $tmp125 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:306
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:306
 #                        y * z * cosang1 - x * sinang,
 	mul		$tmp127 ___252_y ___252_z 	%line{306} %argrw{"wrr"}
 	mul		$tmp128 $tmp127 ___252_cosang1 	%argrw{"wrr"}
 	mul		$tmp129 ___252_x ___252_sinang 	%argrw{"wrr"}
 	sub		$tmp130 $tmp128 $tmp129 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:307
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:307
 #                        z * z + (1.0 - z * z) * cosang,
 	mul		$tmp131 ___252_z ___252_z 	%line{307} %argrw{"wrr"}
 	mul		$tmp132 ___252_z ___252_z 	%argrw{"wrr"}
 	sub		$tmp133 $const12 $tmp132 	%argrw{"wrr"}
 	mul		$tmp134 $tmp133 ___252_cosang 	%argrw{"wrr"}
 	add		$tmp135 $tmp131 $tmp134 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:297
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:297
 #     matrix M = matrix (x * x + (1.0 - x * x) * cosang,
 	matrix		___252_M $tmp101 $tmp105 $tmp109 $const3 $tmp113 $tmp118 $tmp122 $const3 $tmp126 $tmp130 $tmp135 $const3 $const3 $const3 $const3 $const12 	%line{297} %argrw{"wrrrrrrrrrrrrrrrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:310
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:310
 #     return transform (M, p-a) + a;
 	sub		$tmp137 $tmp92 $const28 	%line{310} %argrw{"wrr"}
 	transformv	$tmp136 ___252_M $tmp137 	%argrw{"wrr"}
-	add		___514_dirImpulse $tmp136 $const28 	%argrw{"wrr"}
+	add		___519_dirImpulse $tmp136 $const28 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:814
 #                     if (directionJitter > 0.0) {
 	gt		$tmp138 directionJitter $const3 	%filename{"PxrPhasorNoise.osl"} %line{814} %argrw{"wrr"}
 	if		$tmp138 263 263 	%argrw{"r"}
 # PxrPhasorNoise.osl:815
 #                         vector Qnoise = Qimpulse / _directionJitterSize;
-	div		___523_Qnoise ___514_Qimpulse _directionJitterSize 	%line{815} %argrw{"wrr"}
+	div		___528_Qnoise ___519_Qimpulse _directionJitterSize 	%line{815} %argrw{"wrr"}
 # PxrPhasorNoise.osl:818
 #                         float jitx = snoise(Qnoise + vector(123.4567, 867.5309, 5551.212));
-	add		$tmp140 ___523_Qnoise $const26 	%line{818} %argrw{"wrr"}
-	snoise		___523_jitx $tmp140 	%argrw{"wr"}
+	add		$tmp140 ___528_Qnoise $const26 	%line{818} %argrw{"wrr"}
+	snoise		___528_jitx $tmp140 	%argrw{"wr"}
 # PxrPhasorNoise.osl:819
 #                         float jity = snoise(Qnoise + vector(1234.567, 86.75309, 555.1212));
-	add		$tmp142 ___523_Qnoise $const30 	%line{819} %argrw{"wrr"}
-	snoise		___523_jity $tmp142 	%argrw{"wr"}
+	add		$tmp142 ___528_Qnoise $const30 	%line{819} %argrw{"wrr"}
+	snoise		___528_jity $tmp142 	%argrw{"wr"}
 # PxrPhasorNoise.osl:820
 #                         float jitz = snoise(Qnoise + vector(12345.67, 8675.309, 55.51212));
-	add		$tmp144 ___523_Qnoise $const31 	%line{820} %argrw{"wrr"}
-	snoise		___523_jitz $tmp144 	%argrw{"wr"}
+	add		$tmp144 ___528_Qnoise $const31 	%line{820} %argrw{"wrr"}
+	snoise		___528_jitz $tmp144 	%argrw{"wr"}
 # PxrPhasorNoise.osl:821
 #                         vector jit = vector(jitx, jity, jitz);
-	vector		___523_jit ___523_jitx ___523_jity ___523_jitz 	%line{821} %argrw{"wrrr"}
+	vector		___528_jit ___528_jitx ___528_jity ___528_jitz 	%line{821} %argrw{"wrrr"}
 # PxrPhasorNoise.osl:822
 #                         jit = normalize(jit * _dimensions);
-	mul		$tmp145 ___523_jit _dimensions 	%line{822} %argrw{"wrr"}
-	normalize	___523_jit $tmp145 	%argrw{"wr"}
+	mul		$tmp145 ___528_jit _dimensions 	%line{822} %argrw{"wrr"}
+	normalize	___528_jit $tmp145 	%argrw{"wr"}
 # PxrPhasorNoise.osl:823
 #                         dirImpulse = normalize(mix(dirImpulse, jit, directionJitter));
-	mix		$tmp146 ___514_dirImpulse ___523_jit directionJitter 	%line{823} %argrw{"wrrr"}
-	normalize	___514_dirImpulse $tmp146 	%argrw{"wr"}
+	mix		$tmp146 ___519_dirImpulse ___528_jit directionJitter 	%line{823} %argrw{"wrrr"}
+	normalize	___519_dirImpulse $tmp146 	%argrw{"wr"}
 # PxrPhasorNoise.osl:828
 #                     if (kernelError > 0.0) {
 	gt		$tmp147 kernelError $const3 	%line{828} %argrw{"wrr"}
@@ -1197,409 +1197,409 @@ code ___main___
 #                         a = exp(-M_PI * bandwidth * bandwidth * dot(x, x));
 	mul		$tmp148 $const32 bandwidth 	%line{829} %argrw{"wrr"}
 	mul		$tmp149 $tmp148 bandwidth 	%argrw{"wrr"}
-	dot		$tmp150 ___514_x ___514_x 	%argrw{"wrr"}
+	dot		$tmp150 ___519_x ___519_x 	%argrw{"wrr"}
 	mul		$tmp151 $tmp149 $tmp150 	%argrw{"wrr"}
-	exp		___514_a $tmp151 	%argrw{"wr"}
+	exp		___519_a $tmp151 	%argrw{"wr"}
 # PxrPhasorNoise.osl:831
 #                         a = cos(M_PI * clamp(bandwidth * length(x), 0.0, 1.0)) * 0.5 + 0.5;
-	length		$tmp154 ___514_x 	%line{831} %argrw{"wr"}
+	length		$tmp154 ___519_x 	%line{831} %argrw{"wr"}
 	mul		$tmp155 bandwidth $tmp154 	%argrw{"wrr"}
 	functioncall	$const33 275 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp156 $tmp155 $const12 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp156 $tmp155 $const12 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
 	max		$tmp153 $tmp156 $const3 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:831
 #                         a = cos(M_PI * clamp(bandwidth * length(x), 0.0, 1.0)) * 0.5 + 0.5;
 	mul		$tmp157 $const13 $tmp153 	%filename{"PxrPhasorNoise.osl"} %line{831} %argrw{"wrr"}
 	cos		$tmp152 $tmp157 	%argrw{"wr"}
 	mul		$tmp158 $tmp152 $const34 	%argrw{"wrr"}
-	add		___514_a $tmp158 $const34 	%argrw{"wrr"}
+	add		___519_a $tmp158 $const34 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:833
 #                     a = pow(a, kernelFalloff);
-	pow		___514_a ___514_a kernelFalloff 	%line{833} %argrw{"wrr"}
+	pow		___519_a ___519_a kernelFalloff 	%line{833} %argrw{"wrr"}
 # PxrPhasorNoise.osl:839
 #                     float fOctScale  = 1.0;
-	assign		___514_fOctScale $const12 	%line{839} %argrw{"wr"}
+	assign		___519_fOctScale $const12 	%line{839} %argrw{"wr"}
 # PxrPhasorNoise.osl:840
 #                     float fOctOffset = 0.0;
-	assign		___514_fOctOffset $const3 	%line{840} %argrw{"wr"}
+	assign		___519_fOctOffset $const3 	%line{840} %argrw{"wr"}
 # PxrPhasorNoise.osl:841
 #                     float fOctRotate = 0.0;
-	assign		___514_fOctRotate $const3 	%line{841} %argrw{"wr"}
+	assign		___519_fOctRotate $const3 	%line{841} %argrw{"wr"}
 # PxrPhasorNoise.osl:842
 #                     for (int fOct=0; fOct<fractalOctaves; fOct++) {
 	for		$tmp160 285 287 488 490 	%line{842} %argrw{"r"}
-	assign		___526_fOct $const1 	%argrw{"wr"}
-	lt		$tmp159 ___526_fOct fractalOctaves 	%argrw{"wrr"}
+	assign		___531_fOct $const1 	%argrw{"wr"}
+	lt		$tmp159 ___531_fOct fractalOctaves 	%argrw{"wrr"}
 	neq		$tmp160 $tmp159 $const1 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:843
 #                         float pOctScale  = 1.0;
-	assign		___527_pOctScale $const12 	%line{843} %argrw{"wr"}
+	assign		___532_pOctScale $const12 	%line{843} %argrw{"wr"}
 # PxrPhasorNoise.osl:844
 #                         float pOctOffset = 0.0;
-	assign		___527_pOctOffset $const3 	%line{844} %argrw{"wr"}
+	assign		___532_pOctOffset $const3 	%line{844} %argrw{"wr"}
 # PxrPhasorNoise.osl:845
 #                         float pOctRotate = 0.0;
-	assign		___527_pOctRotate $const3 	%line{845} %argrw{"wr"}
+	assign		___532_pOctRotate $const3 	%line{845} %argrw{"wr"}
 # PxrPhasorNoise.osl:846
 #                         float pOctWeight = 1.0;
-	assign		___527_pOctWeight $const12 	%line{846} %argrw{"wr"}
+	assign		___532_pOctWeight $const12 	%line{846} %argrw{"wr"}
 # PxrPhasorNoise.osl:847
 #                         for (int pOct=0; pOct<phasorOctaves; pOct++) {
 	for		$tmp162 293 295 483 485 	%line{847} %argrw{"r"}
-	assign		___528_pOct $const1 	%argrw{"wr"}
-	lt		$tmp161 ___528_pOct phasorOctaves 	%argrw{"wrr"}
+	assign		___533_pOct $const1 	%argrw{"wr"}
+	lt		$tmp161 ___533_pOct phasorOctaves 	%argrw{"wrr"}
 	neq		$tmp162 $tmp161 $const1 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:848
 #                             float f = frequency * fOctScale * pOctScale;
-	mul		$tmp163 frequency ___514_fOctScale 	%line{848} %argrw{"wrr"}
-	mul		___529_f $tmp163 ___527_pOctScale 	%argrw{"wrr"}
+	mul		$tmp163 frequency ___519_fOctScale 	%line{848} %argrw{"wrr"}
+	mul		___534_f $tmp163 ___532_pOctScale 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:849
 #                             float r = directionRotate + fOctRotate + pOctRotate;
-	add		$tmp164 directionRotate ___514_fOctRotate 	%line{849} %argrw{"wrr"}
-	add		___529_r $tmp164 ___527_pOctRotate 	%argrw{"wrr"}
+	add		$tmp164 directionRotate ___519_fOctRotate 	%line{849} %argrw{"wrr"}
+	add		___534_r $tmp164 ___532_pOctRotate 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:854
 #                             vector dir = dirImpulse;
-	assign		___529_dir ___514_dirImpulse 	%line{854} %argrw{"wr"}
+	assign		___534_dir ___519_dirImpulse 	%line{854} %argrw{"wr"}
 # PxrPhasorNoise.osl:857
 #                             if (r != 0.0) {
-	neq		$tmp165 ___529_r $const3 	%line{857} %argrw{"wrr"}
+	neq		$tmp165 ___534_r $const3 	%line{857} %argrw{"wrr"}
 	if		$tmp165 358 358 	%argrw{"r"}
 # PxrPhasorNoise.osl:858
 #                                 dir = rotate(point(dir), radians(r), point(0.0), point(QN));
-	assign		$tmp166 ___529_dir 	%line{858} %argrw{"wr"}
+	assign		$tmp166 ___534_dir 	%line{858} %argrw{"wr"}
 	functioncall	$const35 306 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:88
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:88
 # float  radians (float x)  { return x*(M_PI/180.0); }
-	div		$tmp168 $const13 $const36 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{88} %argrw{"wrr"}
-	mul		$tmp167 ___529_r $tmp168 	%argrw{"wrr"}
+	div		$tmp168 $const13 $const36 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{88} %argrw{"wrr"}
+	mul		$tmp167 ___534_r $tmp168 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:858
 #                                 dir = rotate(point(dir), radians(r), point(0.0), point(QN));
 	assign		$tmp170 QN 	%filename{"PxrPhasorNoise.osl"} %line{858} %argrw{"wr"}
 	functioncall	$const29 358 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:292
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:292
 #     vector axis = normalize (b - a);
-	sub		$tmp171 $tmp170 $const28 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{292} %argrw{"wrr"}
+	sub		$tmp171 $tmp170 $const28 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{292} %argrw{"wrr"}
 	normalize	___252_axis $tmp171 	%argrw{"wr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:294
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:294
 #     sincos (angle, sinang, cosang);
 	sincos		$tmp167 ___252_sinang ___252_cosang 	%line{294} %argrw{"rww"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:295
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:295
 #     float cosang1 = 1.0 - cosang;
 	sub		___252_cosang1 $const12 ___252_cosang 	%line{295} %argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:296
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:296
 #     float x = axis[0], y = axis[1], z = axis[2];
 	compref		___252_x ___252_axis $const1 	%line{296} %argrw{"wrr"}
 	compref		___252_y ___252_axis $const10 	%argrw{"wrr"}
 	compref		___252_z ___252_axis $const11 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:297
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:297
 #     matrix M = matrix (x * x + (1.0 - x * x) * cosang,
 	mul		$tmp172 ___252_x ___252_x 	%line{297} %argrw{"wrr"}
 	mul		$tmp173 ___252_x ___252_x 	%argrw{"wrr"}
 	sub		$tmp174 $const12 $tmp173 	%argrw{"wrr"}
 	mul		$tmp175 $tmp174 ___252_cosang 	%argrw{"wrr"}
 	add		$tmp176 $tmp172 $tmp175 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:298
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:298
 #                        x * y * cosang1 + z * sinang,
 	mul		$tmp177 ___252_x ___252_y 	%line{298} %argrw{"wrr"}
 	mul		$tmp178 $tmp177 ___252_cosang1 	%argrw{"wrr"}
 	mul		$tmp179 ___252_z ___252_sinang 	%argrw{"wrr"}
 	add		$tmp180 $tmp178 $tmp179 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:299
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:299
 #                        x * z * cosang1 - y * sinang,
 	mul		$tmp181 ___252_x ___252_z 	%line{299} %argrw{"wrr"}
 	mul		$tmp182 $tmp181 ___252_cosang1 	%argrw{"wrr"}
 	mul		$tmp183 ___252_y ___252_sinang 	%argrw{"wrr"}
 	sub		$tmp184 $tmp182 $tmp183 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:301
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:301
 #                        x * y * cosang1 - z * sinang,
 	mul		$tmp185 ___252_x ___252_y 	%line{301} %argrw{"wrr"}
 	mul		$tmp186 $tmp185 ___252_cosang1 	%argrw{"wrr"}
 	mul		$tmp187 ___252_z ___252_sinang 	%argrw{"wrr"}
 	sub		$tmp188 $tmp186 $tmp187 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:302
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:302
 #                        y * y + (1.0 - y * y) * cosang,
 	mul		$tmp189 ___252_y ___252_y 	%line{302} %argrw{"wrr"}
 	mul		$tmp190 ___252_y ___252_y 	%argrw{"wrr"}
 	sub		$tmp191 $const12 $tmp190 	%argrw{"wrr"}
 	mul		$tmp192 $tmp191 ___252_cosang 	%argrw{"wrr"}
 	add		$tmp193 $tmp189 $tmp192 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:303
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:303
 #                        y * z * cosang1 + x * sinang,
 	mul		$tmp194 ___252_y ___252_z 	%line{303} %argrw{"wrr"}
 	mul		$tmp195 $tmp194 ___252_cosang1 	%argrw{"wrr"}
 	mul		$tmp196 ___252_x ___252_sinang 	%argrw{"wrr"}
 	add		$tmp197 $tmp195 $tmp196 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:305
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:305
 #                        x * z * cosang1 + y * sinang,
 	mul		$tmp198 ___252_x ___252_z 	%line{305} %argrw{"wrr"}
 	mul		$tmp199 $tmp198 ___252_cosang1 	%argrw{"wrr"}
 	mul		$tmp200 ___252_y ___252_sinang 	%argrw{"wrr"}
 	add		$tmp201 $tmp199 $tmp200 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:306
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:306
 #                        y * z * cosang1 - x * sinang,
 	mul		$tmp202 ___252_y ___252_z 	%line{306} %argrw{"wrr"}
 	mul		$tmp203 $tmp202 ___252_cosang1 	%argrw{"wrr"}
 	mul		$tmp204 ___252_x ___252_sinang 	%argrw{"wrr"}
 	sub		$tmp205 $tmp203 $tmp204 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:307
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:307
 #                        z * z + (1.0 - z * z) * cosang,
 	mul		$tmp206 ___252_z ___252_z 	%line{307} %argrw{"wrr"}
 	mul		$tmp207 ___252_z ___252_z 	%argrw{"wrr"}
 	sub		$tmp208 $const12 $tmp207 	%argrw{"wrr"}
 	mul		$tmp209 $tmp208 ___252_cosang 	%argrw{"wrr"}
 	add		$tmp210 $tmp206 $tmp209 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:297
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:297
 #     matrix M = matrix (x * x + (1.0 - x * x) * cosang,
 	matrix		___252_M $tmp176 $tmp180 $tmp184 $const3 $tmp188 $tmp193 $tmp197 $const3 $tmp201 $tmp205 $tmp210 $const3 $const3 $const3 $const3 $const12 	%line{297} %argrw{"wrrrrrrrrrrrrrrrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:310
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:310
 #     return transform (M, p-a) + a;
 	sub		$tmp212 $tmp166 $const28 	%line{310} %argrw{"wrr"}
 	transformv	$tmp211 ___252_M $tmp212 	%argrw{"wrr"}
-	add		___529_dir $tmp211 $const28 	%argrw{"wrr"}
+	add		___534_dir $tmp211 $const28 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:861
 #                             float phi = phiImpulse + fOctOffset + pOctOffset;
-	add		$tmp213 ___514_phiImpulse ___514_fOctOffset 	%filename{"PxrPhasorNoise.osl"} %line{861} %argrw{"wrr"}
-	add		___529_phi $tmp213 ___527_pOctOffset 	%argrw{"wrr"}
+	add		$tmp213 ___519_phiImpulse ___519_fOctOffset 	%filename{"PxrPhasorNoise.osl"} %line{861} %argrw{"wrr"}
+	add		___534_phi $tmp213 ___532_pOctOffset 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:864
 #                             if (phaseAlign > 0.0) {
 	gt		$tmp214 phaseAlign $const3 	%line{864} %argrw{"wrr"}
 	if		$tmp214 382 382 	%argrw{"r"}
 # PxrPhasorNoise.osl:865
 #                                 float phiAlign = 0.0;
-	assign		___531_phiAlign $const3 	%line{865} %argrw{"wr"}
+	assign		___536_phiAlign $const3 	%line{865} %argrw{"wr"}
 # PxrPhasorNoise.osl:866
 #                                 if (alignMode != ALIGNMODE_KERNEL) {
 	neq		$tmp215 alignMode $const27 	%line{866} %argrw{"wrr"}
 	if		$tmp215 381 381 	%argrw{"r"}
 # PxrPhasorNoise.osl:867
 #                                     phiAlign = mod(f * dot(Qimpulse * _alignAxis, dir), 1.0);
-	mul		$tmp217 ___514_Qimpulse _alignAxis 	%line{867} %argrw{"wrr"}
-	dot		$tmp216 $tmp217 ___529_dir 	%argrw{"wrr"}
-	mul		$tmp218 ___529_f $tmp216 	%argrw{"wrr"}
+	mul		$tmp217 ___519_Qimpulse _alignAxis 	%line{867} %argrw{"wrr"}
+	dot		$tmp216 $tmp217 ___534_dir 	%argrw{"wrr"}
+	mul		$tmp218 ___534_f $tmp216 	%argrw{"wrr"}
 	functioncall	$const37 373 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:154
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:154
 # float  mod (float  a, float  b) { return a - b*floor(a/b); }
-	div		$tmp220 $tmp218 $const12 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{154} %argrw{"wrr"}
+	div		$tmp220 $tmp218 $const12 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{154} %argrw{"wrr"}
 	floor		$tmp219 $tmp220 	%argrw{"wr"}
 	mul		$tmp221 $const12 $tmp219 	%argrw{"wrr"}
-	sub		___531_phiAlign $tmp218 $tmp221 	%argrw{"wrr"}
+	sub		___536_phiAlign $tmp218 $tmp221 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:868
 #                                     if (phi - phiAlign > 0.5) phiAlign += 1.0;
-	sub		$tmp222 ___529_phi ___531_phiAlign 	%filename{"PxrPhasorNoise.osl"} %line{868} %argrw{"wrr"}
+	sub		$tmp222 ___534_phi ___536_phiAlign 	%filename{"PxrPhasorNoise.osl"} %line{868} %argrw{"wrr"}
 	gt		$tmp223 $tmp222 $const34 	%argrw{"wrr"}
 	if		$tmp223 377 377 	%argrw{"r"}
-	add		___531_phiAlign ___531_phiAlign $const12 	%argrw{"wrr"}
+	add		___536_phiAlign ___536_phiAlign $const12 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:869
 #                                     if (phiAlign - phi > 0.5) phiAlign -= 1.0;
-	sub		$tmp224 ___531_phiAlign ___529_phi 	%line{869} %argrw{"wrr"}
+	sub		$tmp224 ___536_phiAlign ___534_phi 	%line{869} %argrw{"wrr"}
 	gt		$tmp225 $tmp224 $const34 	%argrw{"wrr"}
 	if		$tmp225 381 381 	%argrw{"r"}
-	sub		___531_phiAlign ___531_phiAlign $const12 	%argrw{"wrr"}
+	sub		___536_phiAlign ___536_phiAlign $const12 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:871
 #                                 phi = mix(phi, phiAlign, phaseAlign);
-	mix		___529_phi ___529_phi ___531_phiAlign phaseAlign 	%line{871} %argrw{"wrrr"}
+	mix		___534_phi ___534_phi ___536_phiAlign phaseAlign 	%line{871} %argrw{"wrrr"}
 # PxrPhasorNoise.osl:875
 #                             if (directionFlatten > 0.0) {
 	gt		$tmp226 directionFlatten $const3 	%line{875} %argrw{"wrr"}
 	if		$tmp226 447 447 	%argrw{"r"}
 # PxrPhasorNoise.osl:876
 #                                 float flattenDot    = dot(QN, dir);
-	dot		___533_flattenDot QN ___529_dir 	%line{876} %argrw{"wrr"}
+	dot		___538_flattenDot QN ___534_dir 	%line{876} %argrw{"wrr"}
 # PxrPhasorNoise.osl:877
 #                                 float flattenAngle  = asin(flattenDot);
-	asin		___533_flattenAngle ___533_flattenDot 	%line{877} %argrw{"wr"}
+	asin		___538_flattenAngle ___538_flattenDot 	%line{877} %argrw{"wr"}
 # PxrPhasorNoise.osl:879
 #                                                     * pow(1.0 - abs(flattenDot), 1.0 - directionFlatten);
-	abs		$tmp228 ___533_flattenDot 	%line{879} %argrw{"wr"}
+	abs		$tmp228 ___538_flattenDot 	%line{879} %argrw{"wr"}
 	sub		$tmp229 $const12 $tmp228 	%argrw{"wrr"}
 	sub		$tmp230 $const12 directionFlatten 	%argrw{"wrr"}
 	pow		$tmp227 $tmp229 $tmp230 	%argrw{"wrr"}
-	mul		___533_flattenAmount directionFlatten $tmp227 	%argrw{"wrr"}
+	mul		___538_flattenAmount directionFlatten $tmp227 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:880
 #                                 vector flattenAxis  = normalize(cross(QN, dir));
-	cross		$tmp231 QN ___529_dir 	%line{880} %argrw{"wrr"}
-	normalize	___533_flattenAxis $tmp231 	%argrw{"wr"}
+	cross		$tmp231 QN ___534_dir 	%line{880} %argrw{"wrr"}
+	normalize	___538_flattenAxis $tmp231 	%argrw{"wr"}
 # PxrPhasorNoise.osl:881
 #                                 dir = rotate(point(dir), flattenAmount*flattenAngle, point(0.0), point(flattenAxis));
-	assign		$tmp232 ___529_dir 	%line{881} %argrw{"wr"}
-	mul		$tmp233 ___533_flattenAmount ___533_flattenAngle 	%argrw{"wrr"}
-	assign		$tmp235 ___533_flattenAxis 	%argrw{"wr"}
+	assign		$tmp232 ___534_dir 	%line{881} %argrw{"wr"}
+	mul		$tmp233 ___538_flattenAmount ___538_flattenAngle 	%argrw{"wrr"}
+	assign		$tmp235 ___538_flattenAxis 	%argrw{"wr"}
 	functioncall	$const29 447 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:292
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:292
 #     vector axis = normalize (b - a);
-	sub		$tmp236 $tmp235 $const28 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{292} %argrw{"wrr"}
+	sub		$tmp236 $tmp235 $const28 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{292} %argrw{"wrr"}
 	normalize	___252_axis $tmp236 	%argrw{"wr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:294
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:294
 #     sincos (angle, sinang, cosang);
 	sincos		$tmp233 ___252_sinang ___252_cosang 	%line{294} %argrw{"rww"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:295
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:295
 #     float cosang1 = 1.0 - cosang;
 	sub		___252_cosang1 $const12 ___252_cosang 	%line{295} %argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:296
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:296
 #     float x = axis[0], y = axis[1], z = axis[2];
 	compref		___252_x ___252_axis $const1 	%line{296} %argrw{"wrr"}
 	compref		___252_y ___252_axis $const10 	%argrw{"wrr"}
 	compref		___252_z ___252_axis $const11 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:297
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:297
 #     matrix M = matrix (x * x + (1.0 - x * x) * cosang,
 	mul		$tmp237 ___252_x ___252_x 	%line{297} %argrw{"wrr"}
 	mul		$tmp238 ___252_x ___252_x 	%argrw{"wrr"}
 	sub		$tmp239 $const12 $tmp238 	%argrw{"wrr"}
 	mul		$tmp240 $tmp239 ___252_cosang 	%argrw{"wrr"}
 	add		$tmp241 $tmp237 $tmp240 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:298
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:298
 #                        x * y * cosang1 + z * sinang,
 	mul		$tmp242 ___252_x ___252_y 	%line{298} %argrw{"wrr"}
 	mul		$tmp243 $tmp242 ___252_cosang1 	%argrw{"wrr"}
 	mul		$tmp244 ___252_z ___252_sinang 	%argrw{"wrr"}
 	add		$tmp245 $tmp243 $tmp244 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:299
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:299
 #                        x * z * cosang1 - y * sinang,
 	mul		$tmp246 ___252_x ___252_z 	%line{299} %argrw{"wrr"}
 	mul		$tmp247 $tmp246 ___252_cosang1 	%argrw{"wrr"}
 	mul		$tmp248 ___252_y ___252_sinang 	%argrw{"wrr"}
 	sub		$tmp249 $tmp247 $tmp248 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:301
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:301
 #                        x * y * cosang1 - z * sinang,
 	mul		$tmp250 ___252_x ___252_y 	%line{301} %argrw{"wrr"}
 	mul		$tmp251 $tmp250 ___252_cosang1 	%argrw{"wrr"}
 	mul		$tmp252 ___252_z ___252_sinang 	%argrw{"wrr"}
 	sub		$tmp253 $tmp251 $tmp252 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:302
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:302
 #                        y * y + (1.0 - y * y) * cosang,
 	mul		$tmp254 ___252_y ___252_y 	%line{302} %argrw{"wrr"}
 	mul		$tmp255 ___252_y ___252_y 	%argrw{"wrr"}
 	sub		$tmp256 $const12 $tmp255 	%argrw{"wrr"}
 	mul		$tmp257 $tmp256 ___252_cosang 	%argrw{"wrr"}
 	add		$tmp258 $tmp254 $tmp257 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:303
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:303
 #                        y * z * cosang1 + x * sinang,
 	mul		$tmp259 ___252_y ___252_z 	%line{303} %argrw{"wrr"}
 	mul		$tmp260 $tmp259 ___252_cosang1 	%argrw{"wrr"}
 	mul		$tmp261 ___252_x ___252_sinang 	%argrw{"wrr"}
 	add		$tmp262 $tmp260 $tmp261 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:305
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:305
 #                        x * z * cosang1 + y * sinang,
 	mul		$tmp263 ___252_x ___252_z 	%line{305} %argrw{"wrr"}
 	mul		$tmp264 $tmp263 ___252_cosang1 	%argrw{"wrr"}
 	mul		$tmp265 ___252_y ___252_sinang 	%argrw{"wrr"}
 	add		$tmp266 $tmp264 $tmp265 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:306
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:306
 #                        y * z * cosang1 - x * sinang,
 	mul		$tmp267 ___252_y ___252_z 	%line{306} %argrw{"wrr"}
 	mul		$tmp268 $tmp267 ___252_cosang1 	%argrw{"wrr"}
 	mul		$tmp269 ___252_x ___252_sinang 	%argrw{"wrr"}
 	sub		$tmp270 $tmp268 $tmp269 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:307
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:307
 #                        z * z + (1.0 - z * z) * cosang,
 	mul		$tmp271 ___252_z ___252_z 	%line{307} %argrw{"wrr"}
 	mul		$tmp272 ___252_z ___252_z 	%argrw{"wrr"}
 	sub		$tmp273 $const12 $tmp272 	%argrw{"wrr"}
 	mul		$tmp274 $tmp273 ___252_cosang 	%argrw{"wrr"}
 	add		$tmp275 $tmp271 $tmp274 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:297
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:297
 #     matrix M = matrix (x * x + (1.0 - x * x) * cosang,
 	matrix		___252_M $tmp241 $tmp245 $tmp249 $const3 $tmp253 $tmp258 $tmp262 $const3 $tmp266 $tmp270 $tmp275 $const3 $const3 $const3 $const3 $const12 	%line{297} %argrw{"wrrrrrrrrrrrrrrrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:310
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:310
 #     return transform (M, p-a) + a;
 	sub		$tmp277 $tmp232 $const28 	%line{310} %argrw{"wrr"}
 	transformv	$tmp276 ___252_M $tmp277 	%argrw{"wrr"}
-	add		___529_dir $tmp276 $const28 	%argrw{"wrr"}
+	add		___534_dir $tmp276 $const28 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:884
 #                             float dotQNdir = dot(dir, QN);
-	dot		___529_dotQNdir ___529_dir QN 	%filename{"PxrPhasorNoise.osl"} %line{884} %argrw{"wrr"}
+	dot		___534_dotQNdir ___534_dir QN 	%filename{"PxrPhasorNoise.osl"} %line{884} %argrw{"wrr"}
 # PxrPhasorNoise.osl:889
 #                             if (frequencyFlatten > 0.0) {
 	gt		$tmp278 frequencyFlatten $const3 	%line{889} %argrw{"wrr"}
 	if		$tmp278 457 457 	%argrw{"r"}
 # PxrPhasorNoise.osl:890
 #                                 float fFlattenDot = mix(0.0, dotQNdir, frequencyFlatten);
-	mix		___534_fFlattenDot $const3 ___529_dotQNdir frequencyFlatten 	%line{890} %argrw{"wrrr"}
+	mix		___539_fFlattenDot $const3 ___534_dotQNdir frequencyFlatten 	%line{890} %argrw{"wrrr"}
 # PxrPhasorNoise.osl:891
 #                                 float fFlattenDivisor = max(EPSILON, sqrt(1.0 - fFlattenDot * fFlattenDot));
-	mul		$tmp280 ___534_fFlattenDot ___534_fFlattenDot 	%line{891} %argrw{"wrr"}
+	mul		$tmp280 ___539_fFlattenDot ___539_fFlattenDot 	%line{891} %argrw{"wrr"}
 	sub		$tmp281 $const12 $tmp280 	%argrw{"wrr"}
 	sqrt		$tmp279 $tmp281 	%argrw{"wr"}
-	max		___534_fFlattenDivisor $const38 $tmp279 	%argrw{"wrr"}
+	max		___539_fFlattenDivisor $const38 $tmp279 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:892
 #                                 f = mix(f, f / fFlattenDivisor, frequencyFlatten);
-	div		$tmp282 ___529_f ___534_fFlattenDivisor 	%line{892} %argrw{"wrr"}
-	mix		___529_f ___529_f $tmp282 frequencyFlatten 	%argrw{"wrrr"}
+	div		$tmp282 ___534_f ___539_fFlattenDivisor 	%line{892} %argrw{"wrr"}
+	mix		___534_f ___534_f $tmp282 frequencyFlatten 	%argrw{"wrrr"}
 # PxrPhasorNoise.osl:895
 #                             sincos(M_2PI * (f * dot(x, dir) + phi + phaseOffset), s, c);
-	dot		$tmp283 ___514_x ___529_dir 	%line{895} %argrw{"wrr"}
-	mul		$tmp284 ___529_f $tmp283 	%argrw{"wrr"}
-	add		$tmp285 $tmp284 ___529_phi 	%argrw{"wrr"}
+	dot		$tmp283 ___519_x ___534_dir 	%line{895} %argrw{"wrr"}
+	mul		$tmp284 ___534_f $tmp283 	%argrw{"wrr"}
+	add		$tmp285 $tmp284 ___534_phi 	%argrw{"wrr"}
 	add		$tmp286 $tmp285 phaseOffset 	%argrw{"wrr"}
 	mul		$tmp287 $const39 $tmp286 	%argrw{"wrr"}
-	sincos		$tmp287 ___514_s ___514_c 	%argrw{"rww"}
+	sincos		$tmp287 ___519_s ___519_c 	%argrw{"rww"}
 # PxrPhasorNoise.osl:898
 #                             phasorNoise[fOct] += vector(c, s, 1.0) * vector(pOctWeight * a);
-	aref		$tmp288 phasorNoise ___526_fOct 	%line{898} %argrw{"wrr"}
-	vector		$tmp289 ___514_c ___514_s $const12 	%argrw{"wrrr"}
-	mul		$tmp291 ___527_pOctWeight ___514_a 	%argrw{"wrr"}
+	aref		$tmp288 phasorNoise ___531_fOct 	%line{898} %argrw{"wrr"}
+	vector		$tmp289 ___519_c ___519_s $const12 	%argrw{"wrrr"}
+	mul		$tmp291 ___532_pOctWeight ___519_a 	%argrw{"wrr"}
 	assign		$tmp290 $tmp291 	%argrw{"wr"}
 	mul		$tmp292 $tmp289 $tmp290 	%argrw{"wrr"}
 	add		$tmp293 $tmp288 $tmp292 	%argrw{"wrr"}
-	aassign		phasorNoise ___526_fOct $tmp293 	%argrw{"wrr"}
+	aassign		phasorNoise ___531_fOct $tmp293 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:907
 #                             filterWidth[fOct] += abs(f * sqrt(1.0 - dotQNdir*dotQNdir)) * Qradius;
-	aref		$tmp294 filterWidth ___526_fOct 	%line{907} %argrw{"wrr"}
-	mul		$tmp297 ___529_dotQNdir ___529_dotQNdir 	%argrw{"wrr"}
+	aref		$tmp294 filterWidth ___531_fOct 	%line{907} %argrw{"wrr"}
+	mul		$tmp297 ___534_dotQNdir ___534_dotQNdir 	%argrw{"wrr"}
 	sub		$tmp298 $const12 $tmp297 	%argrw{"wrr"}
 	sqrt		$tmp296 $tmp298 	%argrw{"wr"}
-	mul		$tmp299 ___529_f $tmp296 	%argrw{"wrr"}
+	mul		$tmp299 ___534_f $tmp296 	%argrw{"wrr"}
 	abs		$tmp295 $tmp299 	%argrw{"wr"}
 	mul		$tmp300 $tmp295 Qradius 	%argrw{"wrr"}
 	add		$tmp301 $tmp294 $tmp300 	%argrw{"wrr"}
-	aassign		filterWidth ___526_fOct $tmp301 	%argrw{"wrr"}
+	aassign		filterWidth ___531_fOct $tmp301 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:909
 #                             pOctScale  /= phasorOctaveScale;
-	div		___527_pOctScale ___527_pOctScale phasorOctaveScale 	%line{909} %argrw{"wrr"}
+	div		___532_pOctScale ___532_pOctScale phasorOctaveScale 	%line{909} %argrw{"wrr"}
 # PxrPhasorNoise.osl:910
 #                             pOctOffset += phasorOctaveOffset;
-	add		___527_pOctOffset ___527_pOctOffset phasorOctaveOffset 	%line{910} %argrw{"wrr"}
+	add		___532_pOctOffset ___532_pOctOffset phasorOctaveOffset 	%line{910} %argrw{"wrr"}
 # PxrPhasorNoise.osl:911
 #                             pOctRotate += phasorOctaveRotate;
-	add		___527_pOctRotate ___527_pOctRotate phasorOctaveRotate 	%line{911} %argrw{"wrr"}
+	add		___532_pOctRotate ___532_pOctRotate phasorOctaveRotate 	%line{911} %argrw{"wrr"}
 # PxrPhasorNoise.osl:912
 #                             pOctWeight *= phasorOctaveWeight;
-	mul		___527_pOctWeight ___527_pOctWeight phasorOctaveWeight 	%line{912} %argrw{"wrr"}
+	mul		___532_pOctWeight ___532_pOctWeight phasorOctaveWeight 	%line{912} %argrw{"wrr"}
 # PxrPhasorNoise.osl:847
 #                         for (int pOct=0; pOct<phasorOctaves; pOct++) {
-	assign		$tmp302 ___528_pOct 	%line{847} %argrw{"wr"}
-	add		___528_pOct ___528_pOct $const10 	%argrw{"wrr"}
+	assign		$tmp302 ___533_pOct 	%line{847} %argrw{"wr"}
+	add		___533_pOct ___533_pOct $const10 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:915
 #                         fOctScale  /= fractalOctaveScale;
-	div		___514_fOctScale ___514_fOctScale fractalOctaveScale 	%line{915} %argrw{"wrr"}
+	div		___519_fOctScale ___519_fOctScale fractalOctaveScale 	%line{915} %argrw{"wrr"}
 # PxrPhasorNoise.osl:916
 #                         fOctOffset += fractalOctaveOffset;
-	add		___514_fOctOffset ___514_fOctOffset fractalOctaveOffset 	%line{916} %argrw{"wrr"}
+	add		___519_fOctOffset ___519_fOctOffset fractalOctaveOffset 	%line{916} %argrw{"wrr"}
 # PxrPhasorNoise.osl:917
 #                         fOctRotate += fractalOctaveRotate;
-	add		___514_fOctRotate ___514_fOctRotate fractalOctaveRotate 	%line{917} %argrw{"wrr"}
+	add		___519_fOctRotate ___519_fOctRotate fractalOctaveRotate 	%line{917} %argrw{"wrr"}
 # PxrPhasorNoise.osl:842
 #                     for (int fOct=0; fOct<fractalOctaves; fOct++) {
-	assign		$tmp303 ___526_fOct 	%line{842} %argrw{"wr"}
-	add		___526_fOct ___526_fOct $const10 	%argrw{"wrr"}
+	assign		$tmp303 ___531_fOct 	%line{842} %argrw{"wr"}
+	add		___531_fOct ___531_fOct $const10 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:760
 #                 for (float impulse=0.0; impulse<kernelImpulses; impulse++) {
-	assign		$tmp304 ___513_impulse 	%line{760} %argrw{"wr"}
-	add		___513_impulse ___513_impulse $const12 	%argrw{"wrr"}
+	assign		$tmp304 ___518_impulse 	%line{760} %argrw{"wr"}
+	add		___518_impulse ___518_impulse $const12 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:746
 #             for (float k=-_neighbors[2]; k<=_neighbors[2]; k++) {
-	assign		$tmp305 ___511_k 	%line{746} %argrw{"wr"}
-	add		___511_k ___511_k $const12 	%argrw{"wrr"}
+	assign		$tmp305 ___516_k 	%line{746} %argrw{"wr"}
+	add		___516_k ___516_k $const12 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:745
 #         for (float j=-_neighbors[1]; j<=_neighbors[1]; j++) {
-	assign		$tmp306 ___509_j 	%line{745} %argrw{"wr"}
-	add		___509_j ___509_j $const12 	%argrw{"wrr"}
+	assign		$tmp306 ___514_j 	%line{745} %argrw{"wr"}
+	add		___514_j ___514_j $const12 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:744
 #     for (float i=-_neighbors[0]; i<=_neighbors[0]; i++) {
-	assign		$tmp307 ___507_i 	%line{744} %argrw{"wr"}
-	add		___507_i ___507_i $const12 	%argrw{"wrr"}
+	assign		$tmp307 ___512_i 	%line{744} %argrw{"wr"}
+	add		___512_i ___512_i $const12 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:926
 #     resultF      = 0.0;
 	assign		resultF $const3 	%line{926} %argrw{"wr"}
@@ -1645,25 +1645,25 @@ code ___main___
 	assign		average $const3 	%line{940} %argrw{"wr"}
 # PxrPhasorNoise.osl:941
 #         float splineWidth = 0.0;
-	assign		___537_splineWidth $const3 	%line{941} %argrw{"wr"}
+	assign		___542_splineWidth $const3 	%line{941} %argrw{"wr"}
 # PxrPhasorNoise.osl:944
 #         for (int i=0; i<shapingSpline-1; i++) {
 	for		$tmp315 520 523 539 541 	%line{944} %argrw{"r"}
-	assign		___538_i $const1 	%argrw{"wr"}
+	assign		___543_i $const1 	%argrw{"wr"}
 	sub		$tmp313 shapingSpline $const10 	%argrw{"wrr"}
-	lt		$tmp314 ___538_i $tmp313 	%argrw{"wrr"}
+	lt		$tmp314 ___543_i $tmp313 	%argrw{"wrr"}
 	neq		$tmp315 $tmp314 $const1 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:945
 #             average += (shapingSpline_Knots[i+1] - shapingSpline_Knots[i])
-	add		$tmp316 ___538_i $const10 	%line{945} %argrw{"wrr"}
+	add		$tmp316 ___543_i $const10 	%line{945} %argrw{"wrr"}
 	aref		$tmp317 shapingSpline_Knots $tmp316 	%argrw{"wrr"}
-	aref		$tmp318 shapingSpline_Knots ___538_i 	%argrw{"wrr"}
+	aref		$tmp318 shapingSpline_Knots ___543_i 	%argrw{"wrr"}
 	sub		$tmp319 $tmp317 $tmp318 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:946
 #                      * (shapingSpline_Floats[i+1] + shapingSpline_Floats[i])
-	add		$tmp320 ___538_i $const10 	%line{946} %argrw{"wrr"}
+	add		$tmp320 ___543_i $const10 	%line{946} %argrw{"wrr"}
 	aref		$tmp321 shapingSpline_Floats $tmp320 	%argrw{"wrr"}
-	aref		$tmp322 shapingSpline_Floats ___538_i 	%argrw{"wrr"}
+	aref		$tmp322 shapingSpline_Floats ___543_i 	%argrw{"wrr"}
 	add		$tmp323 $tmp321 $tmp322 	%argrw{"wrr"}
 	mul		$tmp324 $tmp319 $tmp323 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:947
@@ -1672,82 +1672,82 @@ code ___main___
 	add		average average $tmp325 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:948
 #             splineWidth += shapingSpline_Knots[i+1] - shapingSpline_Knots[i];
-	add		$tmp326 ___538_i $const10 	%line{948} %argrw{"wrr"}
+	add		$tmp326 ___543_i $const10 	%line{948} %argrw{"wrr"}
 	aref		$tmp327 shapingSpline_Knots $tmp326 	%argrw{"wrr"}
-	aref		$tmp328 shapingSpline_Knots ___538_i 	%argrw{"wrr"}
+	aref		$tmp328 shapingSpline_Knots ___543_i 	%argrw{"wrr"}
 	sub		$tmp329 $tmp327 $tmp328 	%argrw{"wrr"}
-	add		___537_splineWidth ___537_splineWidth $tmp329 	%argrw{"wrr"}
+	add		___542_splineWidth ___542_splineWidth $tmp329 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:944
 #         for (int i=0; i<shapingSpline-1; i++) {
-	assign		$tmp330 ___538_i 	%line{944} %argrw{"wr"}
-	add		___538_i ___538_i $const10 	%argrw{"wrr"}
+	assign		$tmp330 ___543_i 	%line{944} %argrw{"wr"}
+	add		___543_i ___543_i $const10 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:950
 #         if (splineWidth > 0.0) average /= splineWidth;
-	gt		$tmp331 ___537_splineWidth $const3 	%line{950} %argrw{"wrr"}
+	gt		$tmp331 ___542_splineWidth $const3 	%line{950} %argrw{"wrr"}
 	if		$tmp331 544 544 	%argrw{"r"}
-	div		average average ___537_splineWidth 	%argrw{"wrr"}
+	div		average average ___542_splineWidth 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:953
 #     float fOctWeight = 1.0;
 	assign		fOctWeight $const12 	%line{953} %argrw{"wr"}
 # PxrPhasorNoise.osl:954
 #     for (int fOct=0; fOct<fractalOctaves; fOct++) {
 	for		$tmp333 547 549 788 790 	%line{954} %argrw{"r"}
-	assign		___540_fOct $const1 	%argrw{"wr"}
-	lt		$tmp332 ___540_fOct fractalOctaves 	%argrw{"wrr"}
+	assign		___545_fOct $const1 	%argrw{"wr"}
+	lt		$tmp332 ___545_fOct fractalOctaves 	%argrw{"wrr"}
 	neq		$tmp333 $tmp332 $const1 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:956
 #         filterWidth[fOct] /= filterWidthCount;
-	aref		$tmp334 filterWidth ___540_fOct 	%line{956} %argrw{"wrr"}
+	aref		$tmp334 filterWidth ___545_fOct 	%line{956} %argrw{"wrr"}
 	div		$tmp335 $tmp334 filterWidthCount 	%argrw{"wrr"}
-	aassign		filterWidth ___540_fOct $tmp335 	%argrw{"wrr"}
+	aassign		filterWidth ___545_fOct $tmp335 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:958
 #         float hOctScale  = 1.0;
-	assign		___541_hOctScale $const12 	%line{958} %argrw{"wr"}
+	assign		___546_hOctScale $const12 	%line{958} %argrw{"wr"}
 # PxrPhasorNoise.osl:959
 #         float hOctWeight = 1.0;
-	assign		___541_hOctWeight $const12 	%line{959} %argrw{"wr"}
+	assign		___546_hOctWeight $const12 	%line{959} %argrw{"wr"}
 # PxrPhasorNoise.osl:960
 #         float hOctOffset = 0.0;
-	assign		___541_hOctOffset $const3 	%line{960} %argrw{"wr"}
+	assign		___546_hOctOffset $const3 	%line{960} %argrw{"wr"}
 # PxrPhasorNoise.osl:961
 #         for (int hOct=0; hOct<harmonicOctaves; hOct++) {
 	for		$tmp337 557 559 785 787 	%line{961} %argrw{"r"}
-	assign		___542_hOct $const1 	%argrw{"wr"}
-	lt		$tmp336 ___542_hOct harmonicOctaves 	%argrw{"wrr"}
+	assign		___547_hOct $const1 	%argrw{"wr"}
+	lt		$tmp336 ___547_hOct harmonicOctaves 	%argrw{"wrr"}
 	neq		$tmp337 $tmp336 $const1 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:962
 #             float  weight      = fOctWeight * hOctWeight;
-	mul		___543_weight fOctWeight ___541_hOctWeight 	%line{962} %argrw{"wrr"}
+	mul		___548_weight fOctWeight ___546_hOctWeight 	%line{962} %argrw{"wrr"}
 # PxrPhasorNoise.osl:963
 #             vector pn          = phasorNoise[fOct];
-	aref		___543_pn phasorNoise ___540_fOct 	%line{963} %argrw{"wrr"}
+	aref		___548_pn phasorNoise ___545_fOct 	%line{963} %argrw{"wrr"}
 # PxrPhasorNoise.osl:964
 #             float  phase       = atan2(pn[1], pn[0]) * hOctScale + hOctOffset * M_2PI;
-	compref		$tmp339 ___543_pn $const10 	%line{964} %argrw{"wrr"}
-	compref		$tmp340 ___543_pn $const1 	%argrw{"wrr"}
+	compref		$tmp339 ___548_pn $const10 	%line{964} %argrw{"wrr"}
+	compref		$tmp340 ___548_pn $const1 	%argrw{"wrr"}
 	atan2		$tmp338 $tmp339 $tmp340 	%argrw{"wrr"}
-	mul		$tmp341 $tmp338 ___541_hOctScale 	%argrw{"wrr"}
-	mul		$tmp342 ___541_hOctOffset $const39 	%argrw{"wrr"}
-	add		___543_phase $tmp341 $tmp342 	%argrw{"wrr"}
+	mul		$tmp341 $tmp338 ___546_hOctScale 	%argrw{"wrr"}
+	mul		$tmp342 ___546_hOctOffset $const39 	%argrw{"wrr"}
+	add		___548_phase $tmp341 $tmp342 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:965
 #             float  phaseu      = mod(phase / M_2PI + 0.5 * hOctScale, 1.0);
-	div		$tmp343 ___543_phase $const39 	%line{965} %argrw{"wrr"}
-	mul		$tmp344 $const34 ___541_hOctScale 	%argrw{"wrr"}
+	div		$tmp343 ___548_phase $const39 	%line{965} %argrw{"wrr"}
+	mul		$tmp344 $const34 ___546_hOctScale 	%argrw{"wrr"}
 	add		$tmp345 $tmp343 $tmp344 	%argrw{"wrr"}
 	functioncall	$const37 575 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:154
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:154
 # float  mod (float  a, float  b) { return a - b*floor(a/b); }
-	div		$tmp347 $tmp345 $const12 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{154} %argrw{"wrr"}
+	div		$tmp347 $tmp345 $const12 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{154} %argrw{"wrr"}
 	floor		$tmp346 $tmp347 	%argrw{"wr"}
 	mul		$tmp348 $const12 $tmp346 	%argrw{"wrr"}
-	sub		___543_phaseu $tmp345 $tmp348 	%argrw{"wrr"}
+	sub		___548_phaseu $tmp345 $tmp348 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:966
 #             float  filterwidth = filterWidth[fOct] * hOctScale;
-	aref		$tmp349 filterWidth ___540_fOct 	%filename{"PxrPhasorNoise.osl"} %line{966} %argrw{"wrr"}
-	mul		___543_filterwidth $tmp349 ___541_hOctScale 	%argrw{"wrr"}
+	aref		$tmp349 filterWidth ___545_fOct 	%filename{"PxrPhasorNoise.osl"} %line{966} %argrw{"wrr"}
+	mul		___548_filterwidth $tmp349 ___546_hOctScale 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:970
 #             if (filterwidth < 0.5) {
-	lt		$tmp350 ___543_filterwidth $const34 	%line{970} %argrw{"wrr"}
+	lt		$tmp350 ___548_filterwidth $const34 	%line{970} %argrw{"wrr"}
 	if		$tmp350 735 736 	%argrw{"r"}
 # PxrPhasorNoise.osl:972
 #                 if (shapingMode == SHAPINGMODE_SINE) {
@@ -1755,7 +1755,7 @@ code ___main___
 	if		$tmp351 584 654 	%argrw{"r"}
 # PxrPhasorNoise.osl:973
 #                     tmpVal = sin(phase) * 0.5 + 0.5;
-	sin		$tmp352 ___543_phase 	%line{973} %argrw{"wr"}
+	sin		$tmp352 ___548_phase 	%line{973} %argrw{"wr"}
 	mul		$tmp353 $tmp352 $const34 	%argrw{"wrr"}
 	add		tmpVal $tmp353 $const34 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:974
@@ -1764,7 +1764,7 @@ code ___main___
 	if		$tmp354 589 654 	%argrw{"r"}
 # PxrPhasorNoise.osl:975
 #                     tmpVal = cos(phase) * 0.5 + 0.5;
-	cos		$tmp355 ___543_phase 	%line{975} %argrw{"wr"}
+	cos		$tmp355 ___548_phase 	%line{975} %argrw{"wr"}
 	mul		$tmp356 $tmp355 $const34 	%argrw{"wrr"}
 	add		tmpVal $tmp356 $const34 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:976
@@ -1773,39 +1773,39 @@ code ___main___
 	if		$tmp357 592 654 	%argrw{"r"}
 # PxrPhasorNoise.osl:977
 #                     tmpVal = phaseu;
-	assign		tmpVal ___543_phaseu 	%line{977} %argrw{"wr"}
+	assign		tmpVal ___548_phaseu 	%line{977} %argrw{"wr"}
 # PxrPhasorNoise.osl:978
 #                 } else if (shapingMode == SHAPINGMODE_PULSE) {
 	eq		$tmp358 shapingMode $const17 	%line{978} %argrw{"wrr"}
 	if		$tmp358 595 654 	%argrw{"r"}
 # PxrPhasorNoise.osl:979
 #                     tmpVal = phaseu;
-	assign		tmpVal ___543_phaseu 	%line{979} %argrw{"wr"}
+	assign		tmpVal ___548_phaseu 	%line{979} %argrw{"wr"}
 # PxrPhasorNoise.osl:980
 #                 } else if (shapingMode == SHAPINGMODE_PULSECENTERED) {
 	eq		$tmp359 shapingMode $const19 	%line{980} %argrw{"wrr"}
 	if		$tmp359 598 654 	%argrw{"r"}
 # PxrPhasorNoise.osl:981
 #                     tmpVal = phaseu;
-	assign		tmpVal ___543_phaseu 	%line{981} %argrw{"wr"}
+	assign		tmpVal ___548_phaseu 	%line{981} %argrw{"wr"}
 # PxrPhasorNoise.osl:983
 #                 } else if (shapingMode == SHAPINGMODE_GABORSINE) {
 	eq		$tmp360 shapingMode $const21 	%line{983} %argrw{"wrr"}
 	if		$tmp360 612 654 	%argrw{"r"}
 # PxrPhasorNoise.osl:984
 #                     float intensity = length(vector(pn[0], pn[1], 0.0));
-	compref		$tmp362 ___543_pn $const1 	%line{984} %argrw{"wrr"}
-	compref		$tmp363 ___543_pn $const10 	%argrw{"wrr"}
+	compref		$tmp362 ___548_pn $const1 	%line{984} %argrw{"wrr"}
+	compref		$tmp363 ___548_pn $const10 	%argrw{"wrr"}
 	vector		$tmp361 $tmp362 $tmp363 $const3 	%argrw{"wrrr"}
-	length		___550_intensity $tmp361 	%argrw{"wr"}
+	length		___555_intensity $tmp361 	%argrw{"wr"}
 # PxrPhasorNoise.osl:985
 #                     float samples   = pn[2];
-	compref		___550_samples ___543_pn $const11 	%line{985} %argrw{"wrr"}
+	compref		___555_samples ___548_pn $const11 	%line{985} %argrw{"wrr"}
 # PxrPhasorNoise.osl:986
 #                     tmpVal = sin(phase) * intensity / sqrt(samples) * 0.5 * 0.5 + 0.5;
-	sin		$tmp364 ___543_phase 	%line{986} %argrw{"wr"}
-	mul		$tmp365 $tmp364 ___550_intensity 	%argrw{"wrr"}
-	sqrt		$tmp366 ___550_samples 	%argrw{"wr"}
+	sin		$tmp364 ___548_phase 	%line{986} %argrw{"wr"}
+	mul		$tmp365 $tmp364 ___555_intensity 	%argrw{"wrr"}
+	sqrt		$tmp366 ___555_samples 	%argrw{"wr"}
 	div		$tmp367 $tmp365 $tmp366 	%argrw{"wrr"}
 	mul		$tmp368 $tmp367 $const34 	%argrw{"wrr"}
 	mul		$tmp369 $tmp368 $const34 	%argrw{"wrr"}
@@ -1816,18 +1816,18 @@ code ___main___
 	if		$tmp370 626 654 	%argrw{"r"}
 # PxrPhasorNoise.osl:988
 #                     float intensity = length(vector(pn[0], pn[1], 0.0));
-	compref		$tmp372 ___543_pn $const1 	%line{988} %argrw{"wrr"}
-	compref		$tmp373 ___543_pn $const10 	%argrw{"wrr"}
+	compref		$tmp372 ___548_pn $const1 	%line{988} %argrw{"wrr"}
+	compref		$tmp373 ___548_pn $const10 	%argrw{"wrr"}
 	vector		$tmp371 $tmp372 $tmp373 $const3 	%argrw{"wrrr"}
-	length		___551_intensity $tmp371 	%argrw{"wr"}
+	length		___556_intensity $tmp371 	%argrw{"wr"}
 # PxrPhasorNoise.osl:989
 #                     float samples   = pn[2];
-	compref		___551_samples ___543_pn $const11 	%line{989} %argrw{"wrr"}
+	compref		___556_samples ___548_pn $const11 	%line{989} %argrw{"wrr"}
 # PxrPhasorNoise.osl:990
 #                     tmpVal = cos(phase) * intensity / sqrt(samples) * 0.5 * 0.5 + 0.5;
-	cos		$tmp374 ___543_phase 	%line{990} %argrw{"wr"}
-	mul		$tmp375 $tmp374 ___551_intensity 	%argrw{"wrr"}
-	sqrt		$tmp376 ___551_samples 	%argrw{"wr"}
+	cos		$tmp374 ___548_phase 	%line{990} %argrw{"wr"}
+	mul		$tmp375 $tmp374 ___556_intensity 	%argrw{"wrr"}
+	sqrt		$tmp376 ___556_samples 	%argrw{"wr"}
 	div		$tmp377 $tmp375 $tmp376 	%argrw{"wrr"}
 	mul		$tmp378 $tmp377 $const34 	%argrw{"wrr"}
 	mul		$tmp379 $tmp378 $const34 	%argrw{"wrr"}
@@ -1838,51 +1838,51 @@ code ___main___
 	if		$tmp380 653 654 	%argrw{"r"}
 # PxrPhasorNoise.osl:992
 #                     float x = phaseu;
-	assign		___552_x ___543_phaseu 	%line{992} %argrw{"wr"}
+	assign		___557_x ___548_phaseu 	%line{992} %argrw{"wr"}
 # PxrPhasorNoise.osl:996
 #                     currentPositions[0] = shapingSpline_Knots[0];
 	aref		$tmp381 shapingSpline_Knots $const1 	%line{996} %argrw{"wrr"}
-	aassign		___552_currentPositions $const1 $tmp381 	%argrw{"wrr"}
+	aassign		___557_currentPositions $const1 $tmp381 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:997
 #                     currentFloat[0] = shapingSpline_Floats[0];
 	aref		$tmp382 shapingSpline_Floats $const1 	%line{997} %argrw{"wrr"}
-	aassign		___552_currentFloat $const1 $tmp382 	%argrw{"wrr"}
+	aassign		___557_currentFloat $const1 $tmp382 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:998
 #                     for (int i=0; i<16; i++)
 	for		$tmp384 635 637 643 645 	%line{998} %argrw{"r"}
-	assign		___553_i $const1 	%argrw{"wr"}
-	lt		$tmp383 ___553_i $const40 	%argrw{"wrr"}
+	assign		___558_i $const1 	%argrw{"wr"}
+	lt		$tmp383 ___558_i $const40 	%argrw{"wrr"}
 	neq		$tmp384 $tmp383 $const1 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:1000
 #                         currentPositions[i+1] = shapingSpline_Knots[i];
-	aref		$tmp385 shapingSpline_Knots ___553_i 	%line{1000} %argrw{"wrr"}
-	add		$tmp386 ___553_i $const10 	%argrw{"wrr"}
-	aassign		___552_currentPositions $tmp386 $tmp385 	%argrw{"wrr"}
+	aref		$tmp385 shapingSpline_Knots ___558_i 	%line{1000} %argrw{"wrr"}
+	add		$tmp386 ___558_i $const10 	%argrw{"wrr"}
+	aassign		___557_currentPositions $tmp386 $tmp385 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:1001
 #                         currentFloat[i+1] = shapingSpline_Floats[i];
-	aref		$tmp387 shapingSpline_Floats ___553_i 	%line{1001} %argrw{"wrr"}
-	add		$tmp388 ___553_i $const10 	%argrw{"wrr"}
-	aassign		___552_currentFloat $tmp388 $tmp387 	%argrw{"wrr"}
+	aref		$tmp387 shapingSpline_Floats ___558_i 	%line{1001} %argrw{"wrr"}
+	add		$tmp388 ___558_i $const10 	%argrw{"wrr"}
+	aassign		___557_currentFloat $tmp388 $tmp387 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:998
 #                     for (int i=0; i<16; i++)
-	assign		$tmp389 ___553_i 	%line{998} %argrw{"wr"}
-	add		___553_i ___553_i $const10 	%argrw{"wrr"}
+	assign		$tmp389 ___558_i 	%line{998} %argrw{"wr"}
+	add		___558_i ___558_i $const10 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:1003
 #                     currentPositions[17] = shapingSpline_Knots[15];
 	aref		$tmp390 shapingSpline_Knots $const41 	%line{1003} %argrw{"wrr"}
-	aassign		___552_currentPositions $const42 $tmp390 	%argrw{"wrr"}
+	aassign		___557_currentPositions $const42 $tmp390 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:1004
 #                     currentFloat[17] = shapingSpline_Floats[15];
 	aref		$tmp391 shapingSpline_Floats $const41 	%line{1004} %argrw{"wrr"}
-	aassign		___552_currentFloat $const42 $tmp391 	%argrw{"wrr"}
+	aassign		___557_currentFloat $const42 $tmp391 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:1006
 #                     x = splineinverse(shapingSpline_Interpolation, x, shapingSpline + 2,
 	add		$tmp392 shapingSpline $const11 	%line{1006} %argrw{"wrr"}
-	splineinverse	___552_x shapingSpline_Interpolation ___552_x $tmp392 ___552_currentPositions 	%argrw{"wrrrr"}
+	splineinverse	___557_x shapingSpline_Interpolation ___557_x $tmp392 ___557_currentPositions 	%argrw{"wrrrr"}
 # PxrPhasorNoise.osl:1008
 #                     tmpVal = spline(shapingSpline_Interpolation, x, shapingSpline + 2,
 	add		$tmp393 shapingSpline $const11 	%line{1008} %argrw{"wrr"}
-	spline		tmpVal shapingSpline_Interpolation ___552_x $tmp393 ___552_currentFloat 	%argrw{"wrrrr"}
+	spline		tmpVal shapingSpline_Interpolation ___557_x $tmp393 ___557_currentFloat 	%argrw{"wrrrr"}
 # PxrPhasorNoise.osl:1011
 #                     tmpVal = 0.5;
 	assign		tmpVal $const34 	%line{1011} %argrw{"wr"}
@@ -1892,13 +1892,13 @@ code ___main___
 	if		$tmp394 664 664 	%argrw{"r"}
 # PxrPhasorNoise.osl:1017
 #                     float intensity = length(vector(pn[0], pn[1], 0.0));
-	compref		$tmp396 ___543_pn $const1 	%line{1017} %argrw{"wrr"}
-	compref		$tmp397 ___543_pn $const10 	%argrw{"wrr"}
+	compref		$tmp396 ___548_pn $const1 	%line{1017} %argrw{"wrr"}
+	compref		$tmp397 ___548_pn $const10 	%argrw{"wrr"}
 	vector		$tmp395 $tmp396 $tmp397 $const3 	%argrw{"wrrr"}
-	length		___556_intensity $tmp395 	%argrw{"wr"}
+	length		___561_intensity $tmp395 	%argrw{"wr"}
 # PxrPhasorNoise.osl:1018
 #                     tmpVal = mix(tmpVal, average, exp(-intensity / shapingSoften));
-	neg		$tmp399 ___556_intensity 	%line{1018} %argrw{"wr"}
+	neg		$tmp399 ___561_intensity 	%line{1018} %argrw{"wr"}
 	div		$tmp400 $tmp399 shapingSoften 	%argrw{"wrr"}
 	exp		$tmp398 $tmp400 	%argrw{"wr"}
 	mix		tmpVal tmpVal average $tmp398 	%argrw{"wrrr"}
@@ -1910,23 +1910,23 @@ code ___main___
 #                     tmpVal = aastep(1.0 - shapingPulseWidth, tmpVal);
 	sub		$tmp402 $const12 shapingPulseWidth 	%line{1022} %argrw{"wrr"}
 	functioncall	$const43 686 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:424
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:424
 #     return aastep (edge, s, filterwidth(edge), filterwidth(s));
-	filterwidth	$tmp403 $tmp402 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{424} %argrw{"wr"} %argderivs{1}
+	filterwidth	$tmp403 $tmp402 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{424} %argrw{"wr"} %argderivs{1}
 	filterwidth	$tmp404 tmpVal 	%argrw{"wr"} %argderivs{1}
 	functioncall	$const43 686 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:415
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:415
 #     float width = fabs(dedge) + fabs(ds);
 	fabs		$tmp405 $tmp403 	%line{415} %argrw{"wr"}
 	fabs		$tmp406 $tmp404 	%argrw{"wr"}
 	add		___280_width $tmp405 $tmp406 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:416
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:416
 #     float halfwidth = 0.5*width;
 	mul		___280_halfwidth $const34 ___280_width 	%line{416} %argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:417
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:417
 #     float e1 = edge-halfwidth;
 	sub		___280_e1 $tmp402 ___280_halfwidth 	%line{417} %argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:418
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:418
 #     return (s <= e1) ? 0.0 : ((s >= (edge+halfwidth)) ? 1.0 : (s-e1)/width);
 	le		$tmp407 tmpVal ___280_e1 	%line{418} %argrw{"wrr"}
 	if		$tmp407 679 685 	%argrw{"r"}
@@ -1947,77 +1947,77 @@ code ___main___
 	mul		$tmp412 shapingPulseWidth $const34 	%line{1024} %argrw{"wrr"}
 	sub		$tmp413 $const34 $tmp412 	%argrw{"wrr"}
 	functioncall	$const43 709 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:424
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:424
 #     return aastep (edge, s, filterwidth(edge), filterwidth(s));
-	filterwidth	$tmp414 $tmp413 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{424} %argrw{"wr"} %argderivs{1}
+	filterwidth	$tmp414 $tmp413 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{424} %argrw{"wr"} %argderivs{1}
 	filterwidth	$tmp415 tmpVal 	%argrw{"wr"} %argderivs{1}
 	functioncall	$const43 709 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:415
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:415
 #     float width = fabs(dedge) + fabs(ds);
 	fabs		$tmp416 $tmp414 	%line{415} %argrw{"wr"}
 	fabs		$tmp417 $tmp415 	%argrw{"wr"}
 	add		___280_width $tmp416 $tmp417 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:416
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:416
 #     float halfwidth = 0.5*width;
 	mul		___280_halfwidth $const34 ___280_width 	%line{416} %argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:417
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:417
 #     float e1 = edge-halfwidth;
 	sub		___280_e1 $tmp413 ___280_halfwidth 	%line{417} %argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:418
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:418
 #     return (s <= e1) ? 0.0 : ((s >= (edge+halfwidth)) ? 1.0 : (s-e1)/width);
 	le		$tmp418 tmpVal ___280_e1 	%line{418} %argrw{"wrr"}
 	if		$tmp418 702 708 	%argrw{"r"}
-	assign		___558_tmp1 $const3 	%argrw{"wr"}
+	assign		___563_tmp1 $const3 	%argrw{"wr"}
 	add		$tmp419 $tmp413 ___280_halfwidth 	%argrw{"wrr"}
 	ge		$tmp420 tmpVal $tmp419 	%argrw{"wrr"}
 	if		$tmp420 706 708 	%argrw{"r"}
-	assign		___558_tmp1 $const12 	%argrw{"wr"}
+	assign		___563_tmp1 $const12 	%argrw{"wr"}
 	sub		$tmp421 tmpVal ___280_e1 	%argrw{"wrr"}
-	div		___558_tmp1 $tmp421 ___280_width 	%argrw{"wrr"}
+	div		___563_tmp1 $tmp421 ___280_width 	%argrw{"wrr"}
 	return
 # PxrPhasorNoise.osl:1025
 #                     float tmp2 = aastep(0.5 + shapingPulseWidth * 0.5, tmpVal);
 	mul		$tmp422 shapingPulseWidth $const34 	%filename{"PxrPhasorNoise.osl"} %line{1025} %argrw{"wrr"}
 	add		$tmp423 $const34 $tmp422 	%argrw{"wrr"}
 	functioncall	$const43 730 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:424
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:424
 #     return aastep (edge, s, filterwidth(edge), filterwidth(s));
-	filterwidth	$tmp424 $tmp423 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{424} %argrw{"wr"} %argderivs{1}
+	filterwidth	$tmp424 $tmp423 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{424} %argrw{"wr"} %argderivs{1}
 	filterwidth	$tmp425 tmpVal 	%argrw{"wr"} %argderivs{1}
 	functioncall	$const43 730 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:415
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:415
 #     float width = fabs(dedge) + fabs(ds);
 	fabs		$tmp426 $tmp424 	%line{415} %argrw{"wr"}
 	fabs		$tmp427 $tmp425 	%argrw{"wr"}
 	add		___280_width $tmp426 $tmp427 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:416
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:416
 #     float halfwidth = 0.5*width;
 	mul		___280_halfwidth $const34 ___280_width 	%line{416} %argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:417
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:417
 #     float e1 = edge-halfwidth;
 	sub		___280_e1 $tmp423 ___280_halfwidth 	%line{417} %argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:418
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:418
 #     return (s <= e1) ? 0.0 : ((s >= (edge+halfwidth)) ? 1.0 : (s-e1)/width);
 	le		$tmp428 tmpVal ___280_e1 	%line{418} %argrw{"wrr"}
 	if		$tmp428 723 729 	%argrw{"r"}
-	assign		___558_tmp2 $const3 	%argrw{"wr"}
+	assign		___563_tmp2 $const3 	%argrw{"wr"}
 	add		$tmp429 $tmp423 ___280_halfwidth 	%argrw{"wrr"}
 	ge		$tmp430 tmpVal $tmp429 	%argrw{"wrr"}
 	if		$tmp430 727 729 	%argrw{"r"}
-	assign		___558_tmp2 $const12 	%argrw{"wr"}
+	assign		___563_tmp2 $const12 	%argrw{"wr"}
 	sub		$tmp431 tmpVal ___280_e1 	%argrw{"wrr"}
-	div		___558_tmp2 $tmp431 ___280_width 	%argrw{"wrr"}
+	div		___563_tmp2 $tmp431 ___280_width 	%argrw{"wrr"}
 	return
 # PxrPhasorNoise.osl:1026
 #                     tmpVal = tmp1 * (1.0 - tmp2);
-	sub		$tmp432 $const12 ___558_tmp2 	%filename{"PxrPhasorNoise.osl"} %line{1026} %argrw{"wrr"}
-	mul		tmpVal ___558_tmp1 $tmp432 	%argrw{"wrr"}
+	sub		$tmp432 $const12 ___563_tmp2 	%filename{"PxrPhasorNoise.osl"} %line{1026} %argrw{"wrr"}
+	mul		tmpVal ___563_tmp1 $tmp432 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:1029
 #                 tmpVal = StdNoise_FilterAttenuate(tmpVal, filterwidth, average);
 	functioncall	$const44 735 	%line{1029} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/StdNoise.h:55
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/StdNoise.h:55
 #     return (mix(x, k, smoothstep(0.125, 0.5, dx)));
-	smoothstep	$tmp433 $const45 $const34 ___543_filterwidth 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/StdNoise.h"} %line{55} %argrw{"wrrr"}
+	smoothstep	$tmp433 $const45 $const34 ___548_filterwidth 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/StdNoise.h"} %line{55} %argrw{"wrrr"}
 	mix		tmpVal tmpVal average $tmp433 	%argrw{"wrrr"}
 # PxrPhasorNoise.osl:1031
 #                 tmpVal = average;
@@ -2028,11 +2028,11 @@ code ___main___
 	if		$tmp434 741 782 	%argrw{"r"}
 # PxrPhasorNoise.osl:1036
 #                 resultF += tmpVal * weight;
-	mul		$tmp435 tmpVal ___543_weight 	%line{1036} %argrw{"wrr"}
+	mul		$tmp435 tmpVal ___548_weight 	%line{1036} %argrw{"wrr"}
 	add		resultF resultF $tmp435 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:1037
 #                 sum += weight;
-	add		sum sum ___543_weight 	%line{1037} %argrw{"wrr"}
+	add		sum sum ___548_weight 	%line{1037} %argrw{"wrr"}
 # PxrPhasorNoise.osl:1038
 #             } else if (fractalHarmonicMode == FRACTALHARMONICMODE_SCREEN) {
 	eq		$tmp436 fractalHarmonicMode $const10 	%line{1038} %argrw{"wrr"}
@@ -2040,7 +2040,7 @@ code ___main___
 # PxrPhasorNoise.osl:1039
 #                 resultF = 1.0 - (1.0 -resultF) * (1.0 - tmpVal * weight);
 	sub		$tmp437 $const12 resultF 	%line{1039} %argrw{"wrr"}
-	mul		$tmp438 tmpVal ___543_weight 	%argrw{"wrr"}
+	mul		$tmp438 tmpVal ___548_weight 	%argrw{"wrr"}
 	sub		$tmp439 $const12 $tmp438 	%argrw{"wrr"}
 	mul		$tmp440 $tmp437 $tmp439 	%argrw{"wrr"}
 	sub		resultF $const12 $tmp440 	%argrw{"wrr"}
@@ -2053,7 +2053,7 @@ code ___main___
 	if		$tmp441 753 782 	%argrw{"r"}
 # PxrPhasorNoise.osl:1042
 #                 resultF = mix(resultF, tmpVal, weight);
-	mix		resultF resultF tmpVal ___543_weight 	%line{1042} %argrw{"wrrr"}
+	mix		resultF resultF tmpVal ___548_weight 	%line{1042} %argrw{"wrrr"}
 # PxrPhasorNoise.osl:1043
 #                 sum = 1.0;
 	assign		sum $const12 	%line{1043} %argrw{"wr"}
@@ -2064,7 +2064,7 @@ code ___main___
 # PxrPhasorNoise.osl:1045
 #                 resultF = resultF * (1.0 - (1.0 - tmpVal) * weight);
 	sub		$tmp443 $const12 tmpVal 	%line{1045} %argrw{"wrr"}
-	mul		$tmp444 $tmp443 ___543_weight 	%argrw{"wrr"}
+	mul		$tmp444 $tmp443 ___548_weight 	%argrw{"wrr"}
 	sub		$tmp445 $const12 $tmp444 	%argrw{"wrr"}
 	mul		resultF resultF $tmp445 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:1046
@@ -2076,7 +2076,7 @@ code ___main___
 	if		$tmp446 765 782 	%argrw{"r"}
 # PxrPhasorNoise.osl:1049
 #                 resultF = max(resultF, (tmpVal * weight));
-	mul		$tmp447 tmpVal ___543_weight 	%line{1049} %argrw{"wrr"}
+	mul		$tmp447 tmpVal ___548_weight 	%line{1049} %argrw{"wrr"}
 	max		resultF resultF $tmp447 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:1050
 #                 sum = 1.0;
@@ -2088,7 +2088,7 @@ code ___main___
 # PxrPhasorNoise.osl:1053
 #                 resultF = resultF + (1.0 - resultF) * (tmpVal * weight);
 	sub		$tmp449 $const12 resultF 	%line{1053} %argrw{"wrr"}
-	mul		$tmp450 tmpVal ___543_weight 	%argrw{"wrr"}
+	mul		$tmp450 tmpVal ___548_weight 	%argrw{"wrr"}
 	mul		$tmp451 $tmp449 $tmp450 	%argrw{"wrr"}
 	add		resultF resultF $tmp451 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:1054
@@ -2105,31 +2105,31 @@ code ___main___
 	mul		$tmp455 tmpVal $const24 	%argrw{"wrr"}
 	sub		$tmp456 $tmp455 $const12 	%argrw{"wrr"}
 	mul		$tmp457 $tmp453 $tmp456 	%argrw{"wrr"}
-	mul		$tmp458 $tmp457 ___543_weight 	%argrw{"wrr"}
+	mul		$tmp458 $tmp457 ___548_weight 	%argrw{"wrr"}
 	add		resultF resultF $tmp458 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:1059
 #                 sum = 1.0;
 	assign		sum $const12 	%line{1059} %argrw{"wr"}
 # PxrPhasorNoise.osl:1062
 #             hOctScale  *= 2.0;
-	mul		___541_hOctScale ___541_hOctScale $const24 	%line{1062} %argrw{"wrr"}
+	mul		___546_hOctScale ___546_hOctScale $const24 	%line{1062} %argrw{"wrr"}
 # PxrPhasorNoise.osl:1063
 #             hOctWeight *= harmonicOctaveWeight;
-	mul		___541_hOctWeight ___541_hOctWeight harmonicOctaveWeight 	%line{1063} %argrw{"wrr"}
+	mul		___546_hOctWeight ___546_hOctWeight harmonicOctaveWeight 	%line{1063} %argrw{"wrr"}
 # PxrPhasorNoise.osl:1064
 #             hOctOffset += harmonicOctaveOffset;
-	add		___541_hOctOffset ___541_hOctOffset harmonicOctaveOffset 	%line{1064} %argrw{"wrr"}
+	add		___546_hOctOffset ___546_hOctOffset harmonicOctaveOffset 	%line{1064} %argrw{"wrr"}
 # PxrPhasorNoise.osl:961
 #         for (int hOct=0; hOct<harmonicOctaves; hOct++) {
-	assign		$tmp459 ___542_hOct 	%line{961} %argrw{"wr"}
-	add		___542_hOct ___542_hOct $const10 	%argrw{"wrr"}
+	assign		$tmp459 ___547_hOct 	%line{961} %argrw{"wr"}
+	add		___547_hOct ___547_hOct $const10 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:1067
 #         fOctWeight *= fractalOctaveWeight;
 	mul		fOctWeight fOctWeight fractalOctaveWeight 	%line{1067} %argrw{"wrr"}
 # PxrPhasorNoise.osl:954
 #     for (int fOct=0; fOct<fractalOctaves; fOct++) {
-	assign		$tmp460 ___540_fOct 	%line{954} %argrw{"wr"}
-	add		___540_fOct ___540_fOct $const10 	%argrw{"wrr"}
+	assign		$tmp460 ___545_fOct 	%line{954} %argrw{"wr"}
+	add		___545_fOct ___545_fOct $const10 	%argrw{"wrr"}
 # PxrPhasorNoise.osl:1070
 #     if (sum != 0.0) resultF /= sum;
 	neq		$tmp461 sum $const3 	%line{1070} %argrw{"wrr"}
@@ -2151,17 +2151,17 @@ code ___main___
 	mul		$tmp465 N $tmp464 	%argrw{"wrr"}
 	add		$tmp466 P $tmp465 	%argrw{"wrr"}
 	calculatenormal	$tmp463 $tmp466 	%argrw{"wr"} %argderivs{1}
-	normalize	___567_bumpN $tmp463 	%argrw{"wr"}
+	normalize	___572_bumpN $tmp463 	%argrw{"wr"}
 # PxrPhasorNoise.osl:1079
 #         resultNG = surfgradFromPerturbedNormal(bumpN, N);
 	functioncall	$const46 809 	%line{1079} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:100
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:100
 # 	float k = dot(Nn, bN);
-	dot		___477_k N ___567_bumpN 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Bump.h"} %line{100} %argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:101
+	dot		___477_k N ___572_bumpN 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h"} %line{100} %argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:101
 # 	return (k * Nn - bN) / max(1.0e-8, abs(k));
 	mul		$tmp467 ___477_k N 	%line{101} %argrw{"wrr"}
-	sub		$tmp468 $tmp467 ___567_bumpN 	%argrw{"wrr"}
+	sub		$tmp468 $tmp467 ___572_bumpN 	%argrw{"wrr"}
 	abs		$tmp470 ___477_k 	%argrw{"wr"}
 	max		$tmp469 $const47 $tmp470 	%argrw{"wrr"}
 	div		resultNG $tmp468 $tmp469 	%argrw{"wrr"}

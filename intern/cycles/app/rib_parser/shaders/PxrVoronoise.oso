@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
 # Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrVoronoise.osl/obj/PxrVoronoise.oso
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrVoronoise.osl/obj/PxrVoronoise.oso
 shader PxrVoronoise	%meta{int,rfm_nodeid,1053425} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/texture"} %meta{string,rfh_classification,"Pattern/Texture"} %meta{string,help,"A noise function based on Inigo Quilez function. The u and v parameters control the amount of jitter and the amount of noise. jitter=0,smoothness=0 produces a minimum distance non jittered grid of values. jitter=0,smoothness=1 gives a noise function. jitter=1,smoothness=0 produces a jittered, minimum distance Voronoi pattern. jitter=1,smoothness=1 produces a combination of jittered Voronoi and noise also called 'voronoise'. Note, this version adds fractal octaves and turbulence."} %meta{string,category,"generator"} 
 param	struct Manifold	manifold			%meta{string,page,""} %meta{string,widget,"default"} %meta{string,readOnly,"True"}  %read{0,31} %write{2147483647,-1} %struct{"Manifold"} %structfields{Q,QN,Qradius} %structfieldtypes{"pnf"} %structnfields{3}
 param	point	manifold.Q	0 0 0		%meta{string,page,""} %meta{string,widget,"default"} %meta{string,readOnly,"True"}  %read{25,25} %write{2147483647,-1} %mystruct{manifold} %mystructfield{0} %derivs
@@ -49,29 +49,29 @@ local	point	___629_np.result	%read{98,464} %write{98,464} %mystruct{___629_np} %
 local	int	___629_np.periodic	%read{2147483647,-1} %write{98,464} %mystruct{___629_np} %mystructfield{4}
 local	int[4]	___629_np.period	%read{2147483647,-1} %write{98,464} %mystruct{___629_np} %mystructfield{5}
 local	float	___662_k	%read{477,479} %write{476,476}
-local	point	___677_pfo	%read{98,464} %write{98,464} %derivs
-local	point	___677_p	%read{98,464} %write{98,464} %derivs
-local	point	___677_f	%read{98,464} %write{98,464} %derivs
-local	float	___677_vv	%read{98,464} %write{98,464} %derivs
-local	float	___677_ka	%read{98,464} %write{98,464} %derivs
-local	float	___677_va	%read{98,464} %write{98,464} %derivs
-local	float	___677_wt	%read{98,464} %write{98,464} %derivs
-local	float	___678_k	%read{98,464} %write{98,464} %derivs
-local	float	___680_j	%read{98,464} %write{98,464} %derivs
-local	float	___682_i	%read{98,464} %write{98,464} %derivs
-local	point	___683_g	%read{98,464} %write{98,464} %derivs
-local	point	___683_pPlusg	%read{98,464} %write{98,464} %derivs
-local	point	___683_prand	%read{98,464} %write{98,464} %derivs
-local	point	___683_o	%read{98,464} %write{98,464} %derivs
-local	point	___683_r	%read{98,464} %write{98,464} %derivs
-local	float	___683_d	%read{98,464} %write{98,464} %derivs
-local	float	___683_ww	%read{98,464} %write{98,464} %derivs
+local	point	___682_pfo	%read{98,464} %write{98,464} %derivs
+local	point	___682_p	%read{98,464} %write{98,464} %derivs
+local	point	___682_f	%read{98,464} %write{98,464} %derivs
+local	float	___682_vv	%read{98,464} %write{98,464} %derivs
+local	float	___682_ka	%read{98,464} %write{98,464} %derivs
+local	float	___682_va	%read{98,464} %write{98,464} %derivs
+local	float	___682_wt	%read{98,464} %write{98,464} %derivs
+local	float	___683_k	%read{98,464} %write{98,464} %derivs
+local	float	___685_j	%read{98,464} %write{98,464} %derivs
+local	float	___687_i	%read{98,464} %write{98,464} %derivs
+local	point	___688_g	%read{98,464} %write{98,464} %derivs
+local	point	___688_pPlusg	%read{98,464} %write{98,464} %derivs
+local	point	___688_prand	%read{98,464} %write{98,464} %derivs
+local	point	___688_o	%read{98,464} %write{98,464} %derivs
+local	point	___688_r	%read{98,464} %write{98,464} %derivs
+local	float	___688_d	%read{98,464} %write{98,464} %derivs
+local	float	___688_ww	%read{98,464} %write{98,464} %derivs
 local	point	inputManifoldRw.Q	%read{9,464} %write{4,464} %mystruct{inputManifoldRw} %mystructfield{0} %derivs
 local	normal	inputManifoldRw.QN	%read{11,48} %write{5,48} %mystruct{inputManifoldRw} %mystructfield{1}
 local	float	inputManifoldRw.Qradius	%read{19,464} %write{6,464} %mystruct{inputManifoldRw} %mystructfield{2} %derivs
-local	float	___684_Qradius	%read{23,23} %write{21,22} %derivs
-local	point	___686_k_Po	%read{39,39} %write{36,37} %derivs
-local	float	___687_width	%read{65,66} %write{62,65} %derivs
+local	float	___689_Qradius	%read{23,23} %write{21,22} %derivs
+local	point	___691_k_Po	%read{39,39} %write{36,37} %derivs
+local	float	___692_width	%read{65,66} %write{62,65} %derivs
 local	float	ga	%read{98,464} %write{73,464} %derivs
 local	float	norm	%read{98,465} %write{74,464} %derivs
 local	float	f	%read{98,465} %write{75,464} %derivs
@@ -82,7 +82,7 @@ local	float	average	%read{98,464} %write{91,92} %derivs
 local	float	w	%read{98,464} %write{93,464} %derivs
 local	float	iqn	%read{98,464} %write{94,464} %derivs
 local	int	oc	%read{98,464} %write{95,464}
-local	normal	___692_bumpN	%read{476,478} %write{474,474}
+local	normal	___697_bumpN	%read{476,478} %write{474,474}
 temp	int	$tmp1	%read{1,1} %write{0,0}
 temp	int	$tmp2	%read{2,2} %write{1,1}
 const	int	$const1	0		%read{1,460} %write{2147483647,-1}
@@ -348,64 +348,64 @@ code ___main___
 # PxrVoronoise.osl:258
 #         Manifold_Construct(P,N,inputManifoldRw);
 	functioncall	$const2 7 	%line{258} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:69
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:69
 #     m.Q = inP;
-	assign		inputManifoldRw.Q P 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{69} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:70
+	assign		inputManifoldRw.Q P 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{69} %argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:70
 #     m.QN = inN;
 	assign		inputManifoldRw.QN N 	%line{70} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:71
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:71
 #     m.Qradius = 0.0;
 	assign		inputManifoldRw.Qradius $const3 	%line{71} %argrw{"wr"}
 # PxrVoronoise.osl:259
 #         Manifold_Transform(inputManifoldRw,"object");
 	functioncall	$const5 21 	%filename{"PxrVoronoise.osl"} %line{259} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:91
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:91
 #     Manifold_Transform(ioManifold, "common", toSpace);
-	functioncall	$const5 21 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{91} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:78
+	functioncall	$const5 21 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{91} %argrw{"r"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:78
 #     ioManifold.Q = transform(fromSpace, toSpace, ioManifold.Q);
 	transform	inputManifoldRw.Q $const6 $const4 inputManifoldRw.Q 	%line{78} %argrw{"wrrr"}
 	assign		inputManifoldRw.Q inputManifoldRw.Q 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:79
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:79
 #     ioManifold.QN = normalize(transform(fromSpace, toSpace, ioManifold.QN));
 	transformn	$tmp3 $const6 $const4 inputManifoldRw.QN 	%line{79} %argrw{"wrrr"}
 	normalize	inputManifoldRw.QN $tmp3 	%argrw{"wr"}
 	assign		inputManifoldRw.QN inputManifoldRw.QN 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:81
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:81
 #     vector vec1 = vector(1.0);
 	assign		___392_vec1 $const7 	%line{81} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:82
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:82
 #     vec1 = transform(fromSpace, toSpace, vec1);
 	transformv	___392_vec1 $const6 $const4 ___392_vec1 	%line{82} %argrw{"wrrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:83
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:83
 #     float scale = length(vec1) / sqrt(3.0);
 	length		$tmp4 ___392_vec1 	%line{83} %argrw{"wr"}
 	sqrt		$tmp5 $const8 	%argrw{"wr"}
 	div		___392_scale $tmp4 $tmp5 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:84
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:84
 #     ioManifold.Qradius *= scale;
 	mul		inputManifoldRw.Qradius inputManifoldRw.Qradius ___392_scale 	%line{84} %argrw{"wrr"}
 	assign		inputManifoldRw.Qradius inputManifoldRw.Qradius 	%argrw{"wr"}
 # PxrVoronoise.osl:260
 #         float Qradius = 0.0;
-	assign		___684_Qradius $const3 	%filename{"PxrVoronoise.osl"} %line{260} %argrw{"wr"}
+	assign		___689_Qradius $const3 	%filename{"PxrVoronoise.osl"} %line{260} %argrw{"wr"}
 # PxrVoronoise.osl:261
 #         getattribute("builtin", "PRadius", Qradius);
-	getattribute	$tmp6 $const9 $const10 ___684_Qradius 	%line{261} %argrw{"wrrw"}
+	getattribute	$tmp6 $const9 $const10 ___689_Qradius 	%line{261} %argrw{"wrrw"}
 # PxrVoronoise.osl:262
 #         inputManifoldRw.Qradius = Qradius;
-	assign		inputManifoldRw.Qradius ___684_Qradius 	%line{262} %argrw{"wr"}
+	assign		inputManifoldRw.Qradius ___689_Qradius 	%line{262} %argrw{"wr"}
 # PxrVoronoise.osl:266
 #         Manifold_Copy(manifold,inputManifoldRw);
 	functioncall	$const11 28 	%line{266} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:53
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:53
 #     dest.Q = src.Q;
-	assign		inputManifoldRw.Q manifold.Q 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{53} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:54
+	assign		inputManifoldRw.Q manifold.Q 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{53} %argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:54
 #     dest.QN = src.QN;
 	assign		inputManifoldRw.QN manifold.QN 	%line{54} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:55
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:55
 #     dest.Qradius = src.Qradius;
 	assign		inputManifoldRw.Qradius manifold.Qradius 	%line{55} %argrw{"wr"}
 # PxrVoronoise.osl:271
@@ -420,49 +420,49 @@ code ___main___
 	if		$tmp8 56 56 	%argrw{"r"}
 # PxrVoronoise.osl:273
 #         point k_Po = 0;
-	assign		___686_k_Po $const1 	%line{273} %argrw{"wr"}
+	assign		___691_k_Po $const1 	%line{273} %argrw{"wr"}
 # PxrVoronoise.osl:275
 #         getattribute("primvar", "P", k_Po);
-	getattribute	$tmp12 $const13 $const14 ___686_k_Po 	%line{275} %argrw{"wrrw"}
+	getattribute	$tmp12 $const13 $const14 ___691_k_Po 	%line{275} %argrw{"wrrw"}
 # PxrVoronoise.osl:277
 #         Manifold_Construct(k_Po, N, inputManifoldRw);
 	functioncall	$const2 42 	%line{277} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:69
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:69
 #     m.Q = inP;
-	assign		inputManifoldRw.Q ___686_k_Po 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{69} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:70
+	assign		inputManifoldRw.Q ___691_k_Po 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{69} %argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:70
 #     m.QN = inN;
 	assign		inputManifoldRw.QN N 	%line{70} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:71
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:71
 #     m.Qradius = 0.0;
 	assign		inputManifoldRw.Qradius $const3 	%line{71} %argrw{"wr"}
 # PxrVoronoise.osl:278
 #         Manifold_Transform(inputManifoldRw, "object");
 	functioncall	$const5 56 	%filename{"PxrVoronoise.osl"} %line{278} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:91
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:91
 #     Manifold_Transform(ioManifold, "common", toSpace);
-	functioncall	$const5 56 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{91} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:78
+	functioncall	$const5 56 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{91} %argrw{"r"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:78
 #     ioManifold.Q = transform(fromSpace, toSpace, ioManifold.Q);
 	transform	inputManifoldRw.Q $const6 $const4 inputManifoldRw.Q 	%line{78} %argrw{"wrrr"}
 	assign		inputManifoldRw.Q inputManifoldRw.Q 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:79
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:79
 #     ioManifold.QN = normalize(transform(fromSpace, toSpace, ioManifold.QN));
 	transformn	$tmp13 $const6 $const4 inputManifoldRw.QN 	%line{79} %argrw{"wrrr"}
 	normalize	inputManifoldRw.QN $tmp13 	%argrw{"wr"}
 	assign		inputManifoldRw.QN inputManifoldRw.QN 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:81
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:81
 #     vector vec1 = vector(1.0);
 	assign		___392_vec1 $const7 	%line{81} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:82
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:82
 #     vec1 = transform(fromSpace, toSpace, vec1);
 	transformv	___392_vec1 $const6 $const4 ___392_vec1 	%line{82} %argrw{"wrrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:83
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:83
 #     float scale = length(vec1) / sqrt(3.0);
 	length		$tmp14 ___392_vec1 	%line{83} %argrw{"wr"}
 	sqrt		$tmp15 $const8 	%argrw{"wr"}
 	div		___392_scale $tmp14 $tmp15 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:84
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:84
 #     ioManifold.Qradius *= scale;
 	mul		inputManifoldRw.Qradius inputManifoldRw.Qradius ___392_scale 	%line{84} %argrw{"wrr"}
 	assign		inputManifoldRw.Qradius inputManifoldRw.Qradius 	%argrw{"wr"}
@@ -476,24 +476,24 @@ code ___main___
 	filterwidth	$tmp17 $tmp18 	%argrw{"wr"} %argderivs{1}
 	compref		$tmp20 P $const12 	%argrw{"wrr"}
 	filterwidth	$tmp19 $tmp20 	%argrw{"wr"} %argderivs{1}
-	max		___687_width $tmp17 $tmp19 	%argrw{"wrr"}
+	max		___692_width $tmp17 $tmp19 	%argrw{"wrr"}
 # PxrVoronoise.osl:285
 #         width = max(width, filterwidth(P.z));
 	compref		$tmp22 P $const15 	%line{285} %argrw{"wrr"}
 	filterwidth	$tmp21 $tmp22 	%argrw{"wr"} %argderivs{1}
-	max		___687_width ___687_width $tmp21 	%argrw{"wrr"}
+	max		___692_width ___692_width $tmp21 	%argrw{"wrr"}
 # PxrVoronoise.osl:286
 #         inputManifoldRw.Qradius = 0.5 * width;
-	mul		inputManifoldRw.Qradius $const16 ___687_width 	%line{286} %argrw{"wrr"}
+	mul		inputManifoldRw.Qradius $const16 ___692_width 	%line{286} %argrw{"wrr"}
 	assign		inputManifoldRw.Qradius inputManifoldRw.Qradius 	%argrw{"wr"}
 # PxrVoronoise.osl:289
 #     Manifold_MultFrequency(inputManifoldRw, frequency);
 	functioncall	$const17 73 	%line{289} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:97
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:97
 #     ioManifold.Q *= frequency;
-	mul		inputManifoldRw.Q inputManifoldRw.Q frequency 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{97} %argrw{"wrr"}
+	mul		inputManifoldRw.Q inputManifoldRw.Q frequency 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{97} %argrw{"wrr"}
 	assign		inputManifoldRw.Q inputManifoldRw.Q 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:98
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:98
 #     ioManifold.Qradius *= frequency;
 	mul		inputManifoldRw.Qradius inputManifoldRw.Qradius frequency 	%line{98} %argrw{"wrr"}
 	assign		inputManifoldRw.Qradius inputManifoldRw.Qradius 	%argrw{"wr"}
@@ -512,9 +512,9 @@ code ___main___
 # PxrVoronoise.osl:296
 #     float smooth = clamp(smoothness, 0.0, 1.0);
 	functioncall	$const19 80 	%line{296} %argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp23 smoothness $const18 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp23 smoothness $const18 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
 	max		smooth $tmp23 $const3 	%argrw{"wrr"}
 # PxrVoronoise.osl:297
 #     float contrastBlend = (betterContrast) ? smoothstep(0, 1, smooth) : 0;
@@ -571,102 +571,102 @@ code ___main___
 	add		$tmp33 $tmp32 $const16 	%argrw{"wrr"}
 	compref		$tmp34 inputManifoldRw.Q $const15 	%argrw{"wrr"}
 	add		$tmp35 $tmp34 $const16 	%argrw{"wrr"}
-	point		___677_pfo $tmp31 $tmp33 $tmp35 	%argrw{"wrrr"}
+	point		___682_pfo $tmp31 $tmp33 $tmp35 	%argrw{"wrrr"}
 # PxrVoronoise.osl:215
 #         point p = point(floor(pfo[0]), floor(pfo[1]), floor(pfo[2]));
-	compref		$tmp37 ___677_pfo $const1 	%line{215} %argrw{"wrr"}
+	compref		$tmp37 ___682_pfo $const1 	%line{215} %argrw{"wrr"}
 	floor		$tmp36 $tmp37 	%argrw{"wr"}
-	compref		$tmp39 ___677_pfo $const12 	%argrw{"wrr"}
+	compref		$tmp39 ___682_pfo $const12 	%argrw{"wrr"}
 	floor		$tmp38 $tmp39 	%argrw{"wr"}
-	compref		$tmp41 ___677_pfo $const15 	%argrw{"wrr"}
+	compref		$tmp41 ___682_pfo $const15 	%argrw{"wrr"}
 	floor		$tmp40 $tmp41 	%argrw{"wr"}
-	point		___677_p $tmp36 $tmp38 $tmp40 	%argrw{"wrrr"}
+	point		___682_p $tmp36 $tmp38 $tmp40 	%argrw{"wrrr"}
 # PxrVoronoise.osl:217
 #         point f = pfo - p;
-	sub		___677_f ___677_pfo ___677_p 	%line{217} %argrw{"wrr"}
+	sub		___682_f ___682_pfo ___682_p 	%line{217} %argrw{"wrr"}
 # PxrVoronoise.osl:219
 #         float vv = 1.0 - tt;
-	sub		___677_vv $const18 smooth 	%line{219} %argrw{"wrr"}
+	sub		___682_vv $const18 smooth 	%line{219} %argrw{"wrr"}
 # PxrVoronoise.osl:220
 #         vv = vv * vv;   // squared
-	mul		___677_vv ___677_vv ___677_vv 	%line{220} %argrw{"wrr"}
+	mul		___682_vv ___682_vv ___682_vv 	%line{220} %argrw{"wrr"}
 # PxrVoronoise.osl:221
 #         vv = vv * vv;   // ^ 4
-	mul		___677_vv ___677_vv ___677_vv 	%line{221} %argrw{"wrr"}
+	mul		___682_vv ___682_vv ___682_vv 	%line{221} %argrw{"wrr"}
 # PxrVoronoise.osl:223
 #         float ka = 1.0 + 63.0 * vv;
-	mul		$tmp42 $const23 ___677_vv 	%line{223} %argrw{"wrr"}
-	add		___677_ka $const18 $tmp42 	%argrw{"wrr"}
+	mul		$tmp42 $const23 ___682_vv 	%line{223} %argrw{"wrr"}
+	add		___682_ka $const18 $tmp42 	%argrw{"wrr"}
 # PxrVoronoise.osl:225
 #         float va = 0.0;
-	assign		___677_va $const3 	%line{225} %argrw{"wr"}
+	assign		___682_va $const3 	%line{225} %argrw{"wr"}
 # PxrVoronoise.osl:226
 #         float wt = 0.0;
-	assign		___677_wt $const3 	%line{226} %argrw{"wr"}
+	assign		___682_wt $const3 	%line{226} %argrw{"wr"}
 # PxrVoronoise.osl:227
 #         for (float k=-2.0; k<=1.0; k++ )
 	for		$tmp44 129 131 421 423 	%line{227} %argrw{"r"}
-	assign		___678_k $const24 	%argrw{"wr"}
-	le		$tmp43 ___678_k $const18 	%argrw{"wrr"}
+	assign		___683_k $const24 	%argrw{"wr"}
+	le		$tmp43 ___683_k $const18 	%argrw{"wrr"}
 	neq		$tmp44 $tmp43 $const1 	%argrw{"wrr"}
 # PxrVoronoise.osl:229
 #             for (float j=-2.0; j<=1.0; j++ )
 	for		$tmp46 133 135 419 421 	%line{229} %argrw{"r"}
-	assign		___680_j $const24 	%argrw{"wr"}
-	le		$tmp45 ___680_j $const18 	%argrw{"wrr"}
+	assign		___685_j $const24 	%argrw{"wr"}
+	le		$tmp45 ___685_j $const18 	%argrw{"wrr"}
 	neq		$tmp46 $tmp45 $const1 	%argrw{"wrr"}
 # PxrVoronoise.osl:231
 #                 for (float i=-2.0; i<=1.0; i++ )
 	for		$tmp48 137 139 417 419 	%line{231} %argrw{"r"}
-	assign		___682_i $const24 	%argrw{"wr"}
-	le		$tmp47 ___682_i $const18 	%argrw{"wrr"}
+	assign		___687_i $const24 	%argrw{"wr"}
+	le		$tmp47 ___687_i $const18 	%argrw{"wrr"}
 	neq		$tmp48 $tmp47 $const1 	%argrw{"wrr"}
 # PxrVoronoise.osl:233
 #                     point g = point(i, j, k);
-	point		___683_g ___682_i ___680_j ___678_k 	%line{233} %argrw{"wrrr"}
+	point		___688_g ___687_i ___685_j ___683_k 	%line{233} %argrw{"wrrr"}
 # PxrVoronoise.osl:234
 #                     point pPlusg = p + g;
-	add		___683_pPlusg ___677_p ___683_g 	%line{234} %argrw{"wrr"}
+	add		___688_pPlusg ___682_p ___688_g 	%line{234} %argrw{"wrr"}
 # PxrVoronoise.osl:235
 #                     point prand = matchCppPattern ?
 	if		matchCppPattern 400 401 	%line{235} %argrw{"r"}
 # PxrVoronoise.osl:236
 #                                     rxcellnoise(pPlusg) : noise("cell", pPlusg);
 	functioncall	$const25 400 	%line{236} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:954
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:954
 #     noise_parameters np = {3, 3, INPUT3W(seed), point(0), NONPERIODIC};
-	assign		___629_np.domain $const26 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h"} %line{954} %argrw{"wr"}
+	assign		___629_np.domain $const26 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h"} %line{954} %argrw{"wr"}
 	assign		___629_np.range $const26 	%argrw{"wr"}
-	compref		$tmp50 ___683_pPlusg $const1 	%argrw{"wrr"}
+	compref		$tmp50 ___688_pPlusg $const1 	%argrw{"wrr"}
 	fmod		$tmp49 $tmp50 $const27 	%argrw{"wrr"}
 	aassign		___629_np.input $const1 $tmp49 	%argrw{"wrr"}
-	compref		$tmp52 ___683_pPlusg $const12 	%argrw{"wrr"}
+	compref		$tmp52 ___688_pPlusg $const12 	%argrw{"wrr"}
 	fmod		$tmp51 $tmp52 $const27 	%argrw{"wrr"}
 	aassign		___629_np.input $const12 $tmp51 	%argrw{"wrr"}
-	compref		$tmp54 ___683_pPlusg $const15 	%argrw{"wrr"}
+	compref		$tmp54 ___688_pPlusg $const15 	%argrw{"wrr"}
 	fmod		$tmp53 $tmp54 $const27 	%argrw{"wrr"}
 	aassign		___629_np.input $const15 $tmp53 	%argrw{"wrr"}
 	aassign		___629_np.input $const26 $const1 	%argrw{"wrr"}
 	assign		___629_np.result $const28 	%argrw{"wr"}
 	assign		___629_np.periodic $const1 	%argrw{"wr"}
 	assign		___629_np.period $const29 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:955
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:955
 #     rx_cell_noise(np);
 	functioncall	$const30 396 	%line{955} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:68
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:68
 #     float rxcellrandtable[4096] = {
 	assign		___566_rxcellrandtable $const31 	%line{68} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:582
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:582
 #     int rxcellpermute[4096] = {
 	assign		___566_rxcellpermute $const32 	%line{582} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:904
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:904
 #     int k = 0;
 	assign		___566_k $const1 	%line{904} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:905
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:905
 #     if (np.domain == 1)
 	eq		$tmp55 ___629_np.domain $const12 	%line{905} %argrw{"wrr"}
 	if		$tmp55 192 396 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:907
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:907
 #         SETUP_CELL_DOMAIN(0, int00);
 	aref		$tmp56 ___629_np.input $const1 	%line{907} %argrw{"wrr"}
 	add		___566_v0 $tmp56 $const33 	%argrw{"wrr"}
@@ -681,34 +681,34 @@ code ___main___
 	if		$tmp60 176 177 	%argrw{"r"}
 	assign		___566_int00 $const1 	%argrw{"wr"}
 	assign		___566_int00 ___566_v0 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:908
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:908
 #         for (i = np.range; i > 0; i--, int00 += 7)
 	for		$tmp62 179 181 189 192 	%line{908} %argrw{"r"}
 	assign		___566_i ___629_np.range 	%argrw{"wr"}
 	gt		$tmp61 ___566_i $const1 	%argrw{"wrr"}
 	neq		$tmp62 $tmp61 $const1 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:910
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:910
 #             v0 = rxcellrandtable[CELLPERMUTE(int00)];
 	shl		$tmp63 $const12 $const36 	%line{910} %argrw{"wrr"}
 	sub		$tmp64 $tmp63 $const12 	%argrw{"wrr"}
 	bitand		$tmp65 ___566_int00 $tmp64 	%argrw{"wrr"}
 	aref		$tmp66 ___566_rxcellpermute $tmp65 	%argrw{"wrr"}
 	aref		___566_v0 ___566_rxcellrandtable $tmp66 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:911
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:911
 #             np.result[k++] = v0;
 	assign		$tmp67 ___566_k 	%line{911} %argrw{"wr"}
 	add		___566_k ___566_k $const12 	%argrw{"wrr"}
 	compassign	___629_np.result $tmp67 ___566_v0 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:908
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:908
 #         for (i = np.range; i > 0; i--, int00 += 7)
 	assign		$tmp68 ___566_i 	%line{908} %argrw{"wr"}
 	sub		___566_i ___566_i $const12 	%argrw{"wrr"}
 	add		___566_int00 ___566_int00 $const37 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:914
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:914
 #     else if (np.domain == 2)
 	eq		$tmp69 ___629_np.domain $const15 	%line{914} %argrw{"wrr"}
 	if		$tmp69 241 396 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:916
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:916
 #         SETUP_CELL_DOMAIN(0, int00);
 	aref		$tmp70 ___629_np.input $const1 	%line{916} %argrw{"wrr"}
 	add		___566_v0 $tmp70 $const33 	%argrw{"wrr"}
@@ -723,7 +723,7 @@ code ___main___
 	if		$tmp74 206 207 	%argrw{"r"}
 	assign		___566_int00 $const1 	%argrw{"wr"}
 	assign		___566_int00 ___566_v0 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:917
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:917
 #         SETUP_CELL_DOMAIN(1, int01);
 	aref		$tmp75 ___629_np.input $const12 	%line{917} %argrw{"wrr"}
 	add		___566_v0 $tmp75 $const33 	%argrw{"wrr"}
@@ -738,19 +738,19 @@ code ___main___
 	if		$tmp79 219 220 	%argrw{"r"}
 	assign		___566_int01 $const1 	%argrw{"wr"}
 	assign		___566_int01 ___566_v0 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:918
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:918
 #         for (i = np.range; i > 0; i--, int00 += 7, int01 += 7)
 	for		$tmp81 222 224 237 241 	%line{918} %argrw{"r"}
 	assign		___566_i ___629_np.range 	%argrw{"wr"}
 	gt		$tmp80 ___566_i $const1 	%argrw{"wrr"}
 	neq		$tmp81 $tmp80 $const1 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:920
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:920
 #             iy = CELLPERMUTE(int01);
 	shl		$tmp82 $const12 $const36 	%line{920} %argrw{"wrr"}
 	sub		$tmp83 $tmp82 $const12 	%argrw{"wrr"}
 	bitand		$tmp84 ___566_int01 $tmp83 	%argrw{"wrr"}
 	aref		___566_iy ___566_rxcellpermute $tmp84 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:921
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:921
 #             np.result[k++] = rxcellrandtable[CELLPERMUTE(iy + int00)];
 	add		$tmp85 ___566_iy ___566_int00 	%line{921} %argrw{"wrr"}
 	shl		$tmp86 $const12 $const36 	%argrw{"wrr"}
@@ -761,17 +761,17 @@ code ___main___
 	assign		$tmp91 ___566_k 	%argrw{"wr"}
 	add		___566_k ___566_k $const12 	%argrw{"wrr"}
 	compassign	___629_np.result $tmp91 $tmp90 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:918
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:918
 #         for (i = np.range; i > 0; i--, int00 += 7, int01 += 7)
 	assign		$tmp92 ___566_i 	%line{918} %argrw{"wr"}
 	sub		___566_i ___566_i $const12 	%argrw{"wrr"}
 	add		___566_int00 ___566_int00 $const37 	%argrw{"wrr"}
 	add		___566_int01 ___566_int01 $const37 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:924
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:924
 #     else if (np.domain == 3)
 	eq		$tmp93 ___629_np.domain $const26 	%line{924} %argrw{"wrr"}
 	if		$tmp93 309 396 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:926
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:926
 #         SETUP_CELL_DOMAIN(0, int00);
 	aref		$tmp94 ___629_np.input $const1 	%line{926} %argrw{"wrr"}
 	add		___566_v0 $tmp94 $const33 	%argrw{"wrr"}
@@ -786,7 +786,7 @@ code ___main___
 	if		$tmp98 255 256 	%argrw{"r"}
 	assign		___566_int00 $const1 	%argrw{"wr"}
 	assign		___566_int00 ___566_v0 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:927
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:927
 #         SETUP_CELL_DOMAIN(1, int01);
 	aref		$tmp99 ___629_np.input $const12 	%line{927} %argrw{"wrr"}
 	add		___566_v0 $tmp99 $const33 	%argrw{"wrr"}
@@ -801,7 +801,7 @@ code ___main___
 	if		$tmp103 268 269 	%argrw{"r"}
 	assign		___566_int01 $const1 	%argrw{"wr"}
 	assign		___566_int01 ___566_v0 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:928
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:928
 #         SETUP_CELL_DOMAIN(2, int02);
 	aref		$tmp104 ___629_np.input $const15 	%line{928} %argrw{"wrr"}
 	add		___566_v0 $tmp104 $const33 	%argrw{"wrr"}
@@ -816,26 +816,26 @@ code ___main___
 	if		$tmp108 281 282 	%argrw{"r"}
 	assign		___566_int02 $const1 	%argrw{"wr"}
 	assign		___566_int02 ___566_v0 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:929
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:929
 #         for (i = np.range; i > 0; i--, int00 += 7, int01 += 7, int02 += 3)
 	for		$tmp110 284 286 304 309 	%line{929} %argrw{"r"}
 	assign		___566_i ___629_np.range 	%argrw{"wr"}
 	gt		$tmp109 ___566_i $const1 	%argrw{"wrr"}
 	neq		$tmp110 $tmp109 $const1 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:931
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:931
 #             iz = CELLPERMUTE(int02);
 	shl		$tmp111 $const12 $const36 	%line{931} %argrw{"wrr"}
 	sub		$tmp112 $tmp111 $const12 	%argrw{"wrr"}
 	bitand		$tmp113 ___566_int02 $tmp112 	%argrw{"wrr"}
 	aref		___566_iz ___566_rxcellpermute $tmp113 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:932
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:932
 #             iy = CELLPERMUTE(int01 + iz);
 	add		$tmp114 ___566_int01 ___566_iz 	%line{932} %argrw{"wrr"}
 	shl		$tmp115 $const12 $const36 	%argrw{"wrr"}
 	sub		$tmp116 $tmp115 $const12 	%argrw{"wrr"}
 	bitand		$tmp117 $tmp114 $tmp116 	%argrw{"wrr"}
 	aref		___566_iy ___566_rxcellpermute $tmp117 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:933
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:933
 #             np.result[k++] = rxcellrandtable[CELLPERMUTE(int00 + iy)];
 	add		$tmp118 ___566_int00 ___566_iy 	%line{933} %argrw{"wrr"}
 	shl		$tmp119 $const12 $const36 	%argrw{"wrr"}
@@ -846,18 +846,18 @@ code ___main___
 	assign		$tmp124 ___566_k 	%argrw{"wr"}
 	add		___566_k ___566_k $const12 	%argrw{"wrr"}
 	compassign	___629_np.result $tmp124 $tmp123 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:929
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:929
 #         for (i = np.range; i > 0; i--, int00 += 7, int01 += 7, int02 += 3)
 	assign		$tmp125 ___566_i 	%line{929} %argrw{"wr"}
 	sub		___566_i ___566_i $const12 	%argrw{"wrr"}
 	add		___566_int00 ___566_int00 $const37 	%argrw{"wrr"}
 	add		___566_int01 ___566_int01 $const37 	%argrw{"wrr"}
 	add		___566_int02 ___566_int02 $const26 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:936
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:936
 #     else if (np.domain == 4)
 	eq		$tmp126 ___629_np.domain $const38 	%line{936} %argrw{"wrr"}
 	if		$tmp126 396 396 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:938
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:938
 #         SETUP_CELL_DOMAIN(0, int00);
 	aref		$tmp127 ___629_np.input $const1 	%line{938} %argrw{"wrr"}
 	add		___566_v0 $tmp127 $const33 	%argrw{"wrr"}
@@ -872,7 +872,7 @@ code ___main___
 	if		$tmp131 323 324 	%argrw{"r"}
 	assign		___566_int00 $const1 	%argrw{"wr"}
 	assign		___566_int00 ___566_v0 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:939
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:939
 #         SETUP_CELL_DOMAIN(1, int01);
 	aref		$tmp132 ___629_np.input $const12 	%line{939} %argrw{"wrr"}
 	add		___566_v0 $tmp132 $const33 	%argrw{"wrr"}
@@ -887,7 +887,7 @@ code ___main___
 	if		$tmp136 336 337 	%argrw{"r"}
 	assign		___566_int01 $const1 	%argrw{"wr"}
 	assign		___566_int01 ___566_v0 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:940
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:940
 #         SETUP_CELL_DOMAIN(2, int02);
 	aref		$tmp137 ___629_np.input $const15 	%line{940} %argrw{"wrr"}
 	add		___566_v0 $tmp137 $const33 	%argrw{"wrr"}
@@ -902,7 +902,7 @@ code ___main___
 	if		$tmp141 349 350 	%argrw{"r"}
 	assign		___566_int02 $const1 	%argrw{"wr"}
 	assign		___566_int02 ___566_v0 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:941
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:941
 #         SETUP_CELL_DOMAIN(3, int03);
 	aref		$tmp142 ___629_np.input $const26 	%line{941} %argrw{"wrr"}
 	add		___566_v0 $tmp142 $const33 	%argrw{"wrr"}
@@ -917,13 +917,13 @@ code ___main___
 	if		$tmp146 362 363 	%argrw{"r"}
 	assign		___566_int03 $const1 	%argrw{"wr"}
 	assign		___566_int03 ___566_v0 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:942
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:942
 #         for (i = np.range; i > 0; i--, int00 += 7, int01 += 7, int02 += 3, int03 += 15)
 	for		$tmp148 365 367 390 396 	%line{942} %argrw{"r"}
 	assign		___566_i ___629_np.range 	%argrw{"wr"}
 	gt		$tmp147 ___566_i $const1 	%argrw{"wrr"}
 	neq		$tmp148 $tmp147 $const1 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:944
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:944
 #             iz = CELLPERMUTE(int02 + CELLPERMUTE(int03));
 	shl		$tmp149 $const12 $const36 	%line{944} %argrw{"wrr"}
 	sub		$tmp150 $tmp149 $const12 	%argrw{"wrr"}
@@ -934,14 +934,14 @@ code ___main___
 	sub		$tmp155 $tmp154 $const12 	%argrw{"wrr"}
 	bitand		$tmp156 $tmp153 $tmp155 	%argrw{"wrr"}
 	aref		___566_iz ___566_rxcellpermute $tmp156 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:945
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:945
 #             iy = CELLPERMUTE(int01 + iz);
 	add		$tmp157 ___566_int01 ___566_iz 	%line{945} %argrw{"wrr"}
 	shl		$tmp158 $const12 $const36 	%argrw{"wrr"}
 	sub		$tmp159 $tmp158 $const12 	%argrw{"wrr"}
 	bitand		$tmp160 $tmp157 $tmp159 	%argrw{"wrr"}
 	aref		___566_iy ___566_rxcellpermute $tmp160 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:946
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:946
 #             np.result[k++] = rxcellrandtable[CELLPERMUTE(int00 + iy)];
 	add		$tmp161 ___566_int00 ___566_iy 	%line{946} %argrw{"wrr"}
 	shl		$tmp162 $const12 $const36 	%argrw{"wrr"}
@@ -952,7 +952,7 @@ code ___main___
 	assign		$tmp167 ___566_k 	%argrw{"wr"}
 	add		___566_k ___566_k $const12 	%argrw{"wrr"}
 	compassign	___629_np.result $tmp167 $tmp166 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:942
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:942
 #         for (i = np.range; i > 0; i--, int00 += 7, int01 += 7, int02 += 3, int03 += 15)
 	assign		$tmp168 ___566_i 	%line{942} %argrw{"wr"}
 	sub		___566_i ___566_i $const12 	%argrw{"wrr"}
@@ -960,62 +960,62 @@ code ___main___
 	add		___566_int01 ___566_int01 $const37 	%argrw{"wrr"}
 	add		___566_int02 ___566_int02 $const26 	%argrw{"wrr"}
 	add		___566_int03 ___566_int03 $const39 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:956
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanCellNoise.h:956
 #     return point(np.result[0], np.result[1], np.result[2]);
 	compref		$tmp169 ___629_np.result $const1 	%line{956} %argrw{"wrr"}
 	compref		$tmp170 ___629_np.result $const12 	%argrw{"wrr"}
 	compref		$tmp171 ___629_np.result $const15 	%argrw{"wrr"}
-	point		___683_prand $tmp169 $tmp170 $tmp171 	%argrw{"wrrr"}
+	point		___688_prand $tmp169 $tmp170 $tmp171 	%argrw{"wrrr"}
 # PxrVoronoise.osl:236
 #                                     rxcellnoise(pPlusg) : noise("cell", pPlusg);
-	noise		___683_prand $const40 ___683_pPlusg 	%filename{"PxrVoronoise.osl"} %line{236} %argrw{"wrr"}
+	noise		___688_prand $const40 ___688_pPlusg 	%filename{"PxrVoronoise.osl"} %line{236} %argrw{"wrr"}
 # PxrVoronoise.osl:237
 #                     point o = prand * point(ss, ss, ss);
 	point		$tmp172 jitter jitter jitter 	%line{237} %argrw{"wrrr"}
-	mul		___683_o ___683_prand $tmp172 	%argrw{"wrr"}
+	mul		___688_o ___688_prand $tmp172 	%argrw{"wrr"}
 # PxrVoronoise.osl:239
 #                     point r = g - f + o + 0.5;
-	sub		$tmp173 ___683_g ___677_f 	%line{239} %argrw{"wrr"}
-	add		$tmp174 $tmp173 ___683_o 	%argrw{"wrr"}
-	add		___683_r $tmp174 $const16 	%argrw{"wrr"}
+	sub		$tmp173 ___688_g ___682_f 	%line{239} %argrw{"wrr"}
+	add		$tmp174 $tmp173 ___688_o 	%argrw{"wrr"}
+	add		___688_r $tmp174 $const16 	%argrw{"wrr"}
 # PxrVoronoise.osl:240
 #                     float d = smoothstep(0.0, 1.414, length(r));
-	length		$tmp175 ___683_r 	%line{240} %argrw{"wr"}
-	smoothstep	___683_d $const3 $const41 $tmp175 	%argrw{"wrrr"}
+	length		$tmp175 ___688_r 	%line{240} %argrw{"wr"}
+	smoothstep	___688_d $const3 $const41 $tmp175 	%argrw{"wrrr"}
 # PxrVoronoise.osl:242
 #                     float ww = pow(clamp(1.0 - d, 0.0, 1.0), ka);
-	sub		$tmp177 $const18 ___683_d 	%line{242} %argrw{"wrr"}
+	sub		$tmp177 $const18 ___688_d 	%line{242} %argrw{"wrr"}
 	functioncall	$const19 412 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp178 $tmp177 $const18 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp178 $tmp177 $const18 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
 	max		$tmp176 $tmp178 $const3 	%argrw{"wrr"}
 # PxrVoronoise.osl:242
 #                     float ww = pow(clamp(1.0 - d, 0.0, 1.0), ka);
-	pow		___683_ww $tmp176 ___677_ka 	%filename{"PxrVoronoise.osl"} %line{242} %argrw{"wrr"}
+	pow		___688_ww $tmp176 ___682_ka 	%filename{"PxrVoronoise.osl"} %line{242} %argrw{"wrr"}
 # PxrVoronoise.osl:243
 #                     va += (prand[0] * ww);
-	compref		$tmp179 ___683_prand $const1 	%line{243} %argrw{"wrr"}
-	mul		$tmp180 $tmp179 ___683_ww 	%argrw{"wrr"}
-	add		___677_va ___677_va $tmp180 	%argrw{"wrr"}
+	compref		$tmp179 ___688_prand $const1 	%line{243} %argrw{"wrr"}
+	mul		$tmp180 $tmp179 ___688_ww 	%argrw{"wrr"}
+	add		___682_va ___682_va $tmp180 	%argrw{"wrr"}
 # PxrVoronoise.osl:244
 #                     wt += ww;
-	add		___677_wt ___677_wt ___683_ww 	%line{244} %argrw{"wrr"}
+	add		___682_wt ___682_wt ___688_ww 	%line{244} %argrw{"wrr"}
 # PxrVoronoise.osl:231
 #                 for (float i=-2.0; i<=1.0; i++ )
-	assign		$tmp181 ___682_i 	%line{231} %argrw{"wr"}
-	add		___682_i ___682_i $const18 	%argrw{"wrr"}
+	assign		$tmp181 ___687_i 	%line{231} %argrw{"wr"}
+	add		___687_i ___687_i $const18 	%argrw{"wrr"}
 # PxrVoronoise.osl:229
 #             for (float j=-2.0; j<=1.0; j++ )
-	assign		$tmp182 ___680_j 	%line{229} %argrw{"wr"}
-	add		___680_j ___680_j $const18 	%argrw{"wrr"}
+	assign		$tmp182 ___685_j 	%line{229} %argrw{"wr"}
+	add		___685_j ___685_j $const18 	%argrw{"wrr"}
 # PxrVoronoise.osl:227
 #         for (float k=-2.0; k<=1.0; k++ )
-	assign		$tmp183 ___678_k 	%line{227} %argrw{"wr"}
-	add		___678_k ___678_k $const18 	%argrw{"wrr"}
+	assign		$tmp183 ___683_k 	%line{227} %argrw{"wr"}
+	add		___683_k ___683_k $const18 	%argrw{"wrr"}
 # PxrVoronoise.osl:249
 #         if (wt == 0.0)
-	eq		$tmp184 ___677_wt $const3 	%line{249} %argrw{"wrr"}
+	eq		$tmp184 ___682_wt $const3 	%line{249} %argrw{"wrr"}
 	if		$tmp184 427 429 	%argrw{"r"}
 # PxrVoronoise.osl:250
 #             return 0.00001; // Avoid NaNs
@@ -1023,7 +1023,7 @@ code ___main___
 	return
 # PxrVoronoise.osl:252
 #             return (va / wt);
-	div		iqn ___677_va ___677_wt 	%line{252} %argrw{"wrr"}
+	div		iqn ___682_va ___682_wt 	%line{252} %argrw{"wrr"}
 	return
 # PxrVoronoise.osl:315
 #             if (turbulent)
@@ -1074,9 +1074,9 @@ code ___main___
 #                 : clamp(smooth + smoothnessOffset, 0.0, 1.0);
 	add		$tmp191 smooth smoothnessOffset 	%line{331} %argrw{"wrr"}
 	functioncall	$const19 454 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp192 $tmp191 $const18 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp192 $tmp191 $const18 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
 	max		smooth $tmp192 $const3 	%argrw{"wrr"}
 # PxrVoronoise.osl:332
 #             if (betterContrast) contrastBlend = smoothstep(0.0, 1.0, smooth);
@@ -1114,17 +1114,17 @@ code ___main___
 	mul		$tmp200 N $tmp199 	%argrw{"wrr"}
 	add		$tmp201 P $tmp200 	%argrw{"wrr"}
 	calculatenormal	$tmp198 $tmp201 	%argrw{"wr"} %argderivs{1}
-	normalize	___692_bumpN $tmp198 	%argrw{"wr"}
+	normalize	___697_bumpN $tmp198 	%argrw{"wr"}
 # PxrVoronoise.osl:344
 #         resultNG = surfgradFromPerturbedNormal(bumpN, N);
 	functioncall	$const47 482 	%line{344} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:100
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:100
 # 	float k = dot(Nn, bN);
-	dot		___662_k N ___692_bumpN 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Bump.h"} %line{100} %argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:101
+	dot		___662_k N ___697_bumpN 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h"} %line{100} %argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:101
 # 	return (k * Nn - bN) / max(1.0e-8, abs(k));
 	mul		$tmp202 ___662_k N 	%line{101} %argrw{"wrr"}
-	sub		$tmp203 $tmp202 ___692_bumpN 	%argrw{"wrr"}
+	sub		$tmp203 $tmp202 ___697_bumpN 	%argrw{"wrr"}
 	abs		$tmp205 ___662_k 	%argrw{"wr"}
 	max		$tmp204 $const48 $tmp205 	%argrw{"wrr"}
 	div		resultNG $tmp203 $tmp204 	%argrw{"wrr"}

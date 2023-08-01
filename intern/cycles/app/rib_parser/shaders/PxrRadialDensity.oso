@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
 # Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrRadialDensity.osl/obj/PxrRadialDensity.oso
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrRadialDensity.osl/obj/PxrRadialDensity.oso
 shader PxrRadialDensity	%meta{int,rfm_nodeid,1233477} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/volume"} %meta{string,rfh_classification,"Pattern/Volume"} %meta{string,help,"Creates a radial density gradient to shape volume areas."} 
 param	float	radius	1		%meta{float,min,0} %meta{float,slidermax,100} %meta{string,help,"The radius of the gradient."}  %read{8,8} %write{2147483647,-1}
 param	float	density	1		%meta{float,min,0} %meta{float,slidermax,1} %meta{string,help,"Maximum density of the gradient."}  %read{25,25} %write{2147483647,-1}
@@ -44,9 +44,9 @@ code ___main___
 # PxrRadialDensity.osl:86
 # 	point pShaded = transform(space, P);
 	functioncall	$const3 6 	%line{86} %argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:285
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:285
 # point  transform (string to, point p)  { return transform("common",to,p); }
-	transform	pShaded $const4 space P 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{285} %argrw{"wrrr"}
+	transform	pShaded $const4 space P 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{285} %argrw{"wrrr"}
 # PxrRadialDensity.osl:87
 # 	point pCenter = point(0, 0, 0);
 	assign		pCenter $const5 	%filename{"PxrRadialDensity.osl"} %line{87} %argrw{"wr"}
@@ -61,26 +61,26 @@ code ___main___
 # PxrRadialDensity.osl:91
 #         normDist = linearstep(start, stop, normDist);
 	functioncall	$const7 22 	%line{91} %argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:361
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:361
 #     if (edge0 != edge1) {
-	neq		$tmp4 start stop 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{361} %argrw{"wrr"}
+	neq		$tmp4 start stop 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{361} %argrw{"wrr"}
 	if		$tmp4 20 21 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:362
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:362
 #         float xclamped = clamp (x, edge0, edge1);
 	functioncall	$const8 17 	%line{362} %argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
 	min		$tmp5 normDist stop 	%line{163} %argrw{"wrr"}
 	max		___270_xclamped $tmp5 start 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:363
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:363
 #         result = (xclamped - edge0) / (edge1 - edge0);
 	sub		$tmp6 ___270_xclamped start 	%line{363} %argrw{"wrr"}
 	sub		$tmp7 stop start 	%argrw{"wrr"}
 	div		___269_result $tmp6 $tmp7 	%argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:365
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:365
 #         result = step (edge0, x);
 	step		___269_result start normDist 	%line{365} %argrw{"wrr"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:367
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:367
 #     return result;
 	assign		normDist ___269_result 	%line{367} %argrw{"wr"}
 # PxrRadialDensity.osl:92

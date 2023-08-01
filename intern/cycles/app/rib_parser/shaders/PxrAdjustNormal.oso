@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
 # Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrAdjustNormal.osl/obj/PxrAdjustNormal.oso
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrAdjustNormal.osl/obj/PxrAdjustNormal.oso
 shader PxrAdjustNormal	%meta{int,rfm_nodeid,1200406} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/bump"} %meta{string,rfh_classification,"Pattern/Bump"} %meta{string,help,"Utility to adjust the normals."} 
 param	normal	inputNormal	0 0 0		%meta{string,widget,"default"} %meta{string,help,"Connect your normal pattern to adjust.<br><br>inputNormal (normal)"} %meta{string,label,"Input Normal"} %meta{string,readOnly,"True"}  %read{2,2} %write{2147483647,-1}
 param	float	adjustAmount	1		%meta{string,widget,"default"} %meta{string,help,"Amount to adjust the normals.<br><br>adjustAmount (float)"} %meta{string,label,"Adjust Amount"} %meta{float,max,1} %meta{float,min,0}  %read{4,13} %write{2147483647,-1}
@@ -37,40 +37,40 @@ code ___main___
 # PxrAdjustNormal.osl:83
 #     RixAdjustNormal(adjustAmount, Vn, Ng, bumpN);
 	functioncall	$const1 18 	%line{83} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:198
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:198
 #     if (amount == 0) return;
-	eq		$tmp2 adjustAmount $const2 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Bump.h"} %line{198} %argrw{"wrr"}
+	eq		$tmp2 adjustAmount $const2 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h"} %line{198} %argrw{"wrr"}
 	if		$tmp2 7 7 	%argrw{"r"}
 	return
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:200
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:200
 #     if (dot(Vn, Ngn) >= 0)
 	dot		$tmp3 Vn Ng 	%line{200} %argrw{"wrr"}
 	ge		$tmp4 $tmp3 $const2 	%argrw{"wrr"}
 	if		$tmp4 18 18 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:202
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:202
 #         float VdotN = dot(Vn, Nn);
 	dot		___367_VdotN Vn bumpN 	%line{202} %argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:203
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:203
 #         if (VdotN <= 0)
 	le		$tmp5 ___367_VdotN $const2 	%line{203} %argrw{"wrr"}
 	if		$tmp5 18 18 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:207
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:207
 #             Nn -= amount * 1.01 * VdotN * Vn;
 	mul		$tmp6 adjustAmount $const3 	%line{207} %argrw{"wrr"}
 	mul		$tmp7 $tmp6 ___367_VdotN 	%argrw{"wrr"}
 	mul		$tmp8 $tmp7 Vn 	%argrw{"wrr"}
 	sub		bumpN bumpN $tmp8 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:208
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:208
 #             Nn = normalize(Nn);
 	normalize	bumpN bumpN 	%line{208} %argrw{"wr"}
 # PxrAdjustNormal.osl:84
 #     RixBlendWithNormal(surfaceNormalMix, N, bumpN);
 	functioncall	$const4 23 	%filename{"PxrAdjustNormal.osl"} %line{84} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:215
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:215
 #     if (surfaceNormalMix > 0)
-	gt		$tmp9 surfaceNormalMix $const2 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Bump.h"} %line{215} %argrw{"wrr"}
+	gt		$tmp9 surfaceNormalMix $const2 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h"} %line{215} %argrw{"wrr"}
 	if		$tmp9 23 23 	%argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:216
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:216
 #         bumpN = normalize(mix(bumpN, Nn, surfaceNormalMix));
 	mix		$tmp10 bumpN N surfaceNormalMix 	%line{216} %argrw{"wrrr"}
 	normalize	bumpN $tmp10 	%argrw{"wr"}

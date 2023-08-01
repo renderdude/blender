@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
 # Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrBlend.osl/obj/PxrBlend.oso
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrBlend.osl/obj/PxrBlend.oso
 shader PxrBlend	%meta{int,rfm_nodeid,1053411} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/color"} %meta{string,rfh_classification,"Pattern/Color"} 
 param	int	operation	19		%meta{string,widget,"mapper"} %meta{string,options,"Color:0|Color Burn:1|Color Dodge:2|Darken:3|Darker Color:4|Difference:5|Dissolve:6|Divide:7|Exclusion:8|Hard Light:9|Hard Mix:10|Hue:11|Lighten:12|Lighter Color:13|Linear Burn:14|Linear Dodge:15|Linear Light:16|Luminosity:17|Multiply:18|Normal:19|Overlay:20|Pin Light:21|Saturation:22|Screen:23|Soft Light:24|Subtract:25|Vivid Light:26 "} %meta{string,help,"operation (int)"} %meta{int,connectable,0} %meta{string,label,"Operation"}  %read{10,1123} %write{2147483647,-1}
 param	color	topRGB	0 0 0		%meta{string,widget,"color"} %meta{string,help,"topRGB (color)"} %meta{string,label,"Top Color"}  %read{3,3} %write{2147483647,-1}
@@ -945,9 +945,9 @@ code ___main___
 	assign		$tmp21 $const12 	%argrw{"wr"}
 	assign		$tmp22 $const13 	%argrw{"wr"}
 	functioncall	$const14 40 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp23 $tmp20 $tmp22 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	min		$tmp23 $tmp20 $tmp22 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
 	max		___336_result $tmp23 $tmp21 	%argrw{"wrr"}
 # PxrColorBlend.h:150
 #     return pxrClipColor(result);
@@ -996,9 +996,9 @@ code ___main___
 	assign		$tmp45 $const12 	%argrw{"wr"}
 	assign		$tmp46 $const13 	%argrw{"wr"}
 	functioncall	$const14 73 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp47 $tmp44 $tmp46 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	min		$tmp47 $tmp44 $tmp46 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
 	max		___333_result $tmp47 $tmp45 	%argrw{"wrr"}
 # PxrColorBlend.h:138
 #     if (x > 1)
@@ -1015,9 +1015,9 @@ code ___main___
 	assign		$tmp55 $const12 	%argrw{"wr"}
 	assign		$tmp56 $const13 	%argrw{"wr"}
 	functioncall	$const14 86 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp57 $tmp54 $tmp56 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	min		$tmp57 $tmp54 $tmp56 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
 	max		___333_result $tmp57 $tmp55 	%argrw{"wrr"}
 # PxrColorBlend.h:142
 #     return result;
@@ -1581,9 +1581,9 @@ code ___main___
 	assign		$tmp315 $const12 	%argrw{"wr"}
 	assign		$tmp316 $const13 	%argrw{"wr"}
 	functioncall	$const14 484 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp317 $tmp314 $tmp316 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	min		$tmp317 $tmp314 $tmp316 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
 	max		___336_result $tmp317 $tmp315 	%argrw{"wrr"}
 # PxrColorBlend.h:150
 #     return pxrClipColor(result);
@@ -1632,9 +1632,9 @@ code ___main___
 	assign		$tmp339 $const12 	%argrw{"wr"}
 	assign		$tmp340 $const13 	%argrw{"wr"}
 	functioncall	$const14 517 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp341 $tmp338 $tmp340 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	min		$tmp341 $tmp338 $tmp340 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
 	max		___333_result $tmp341 $tmp339 	%argrw{"wrr"}
 # PxrColorBlend.h:138
 #     if (x > 1)
@@ -1651,9 +1651,9 @@ code ___main___
 	assign		$tmp349 $const12 	%argrw{"wr"}
 	assign		$tmp350 $const13 	%argrw{"wr"}
 	functioncall	$const14 530 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp351 $tmp348 $tmp350 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	min		$tmp351 $tmp348 $tmp350 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
 	max		___333_result $tmp351 $tmp349 	%argrw{"wrr"}
 # PxrColorBlend.h:142
 #     return result;
@@ -1809,9 +1809,9 @@ code ___main___
 	assign		$tmp411 $const12 	%argrw{"wr"}
 	assign		$tmp412 $const13 	%argrw{"wr"}
 	functioncall	$const14 628 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp413 $tmp410 $tmp412 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	min		$tmp413 $tmp410 $tmp412 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
 	max		___336_result $tmp413 $tmp411 	%argrw{"wrr"}
 # PxrColorBlend.h:150
 #     return pxrClipColor(result);
@@ -1860,9 +1860,9 @@ code ___main___
 	assign		$tmp435 $const12 	%argrw{"wr"}
 	assign		$tmp436 $const13 	%argrw{"wr"}
 	functioncall	$const14 661 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp437 $tmp434 $tmp436 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	min		$tmp437 $tmp434 $tmp436 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
 	max		___333_result $tmp437 $tmp435 	%argrw{"wrr"}
 # PxrColorBlend.h:138
 #     if (x > 1)
@@ -1879,9 +1879,9 @@ code ___main___
 	assign		$tmp445 $const12 	%argrw{"wr"}
 	assign		$tmp446 $const13 	%argrw{"wr"}
 	functioncall	$const14 674 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp447 $tmp444 $tmp446 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	min		$tmp447 $tmp444 $tmp446 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
 	max		___333_result $tmp447 $tmp445 	%argrw{"wrr"}
 # PxrColorBlend.h:142
 #     return result;
@@ -2290,9 +2290,9 @@ code ___main___
 	assign		$tmp639 $const12 	%argrw{"wr"}
 	assign		$tmp640 $const13 	%argrw{"wr"}
 	functioncall	$const14 963 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp641 $tmp638 $tmp640 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	min		$tmp641 $tmp638 $tmp640 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
 	max		___336_result $tmp641 $tmp639 	%argrw{"wrr"}
 # PxrColorBlend.h:150
 #     return pxrClipColor(result);
@@ -2341,9 +2341,9 @@ code ___main___
 	assign		$tmp663 $const12 	%argrw{"wr"}
 	assign		$tmp664 $const13 	%argrw{"wr"}
 	functioncall	$const14 996 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp665 $tmp662 $tmp664 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	min		$tmp665 $tmp662 $tmp664 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
 	max		___333_result $tmp665 $tmp663 	%argrw{"wrr"}
 # PxrColorBlend.h:138
 #     if (x > 1)
@@ -2360,9 +2360,9 @@ code ___main___
 	assign		$tmp673 $const12 	%argrw{"wr"}
 	assign		$tmp674 $const13 	%argrw{"wr"}
 	functioncall	$const14 1009 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp675 $tmp672 $tmp674 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	min		$tmp675 $tmp672 $tmp674 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
 	max		___333_result $tmp675 $tmp673 	%argrw{"wrr"}
 # PxrColorBlend.h:142
 #     return result;
@@ -2569,9 +2569,9 @@ code ___main___
 	assign		$tmp761 $const12 	%argrw{"wr"}
 	assign		$tmp762 $const13 	%argrw{"wr"}
 	functioncall	$const14 1144 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp763 resultRGB $tmp762 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	min		$tmp763 resultRGB $tmp762 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
 	max		resultRGB $tmp763 $tmp761 	%argrw{"wrr"}
 # PxrBlend.osl:134
 #     resultR = resultRGB[0];

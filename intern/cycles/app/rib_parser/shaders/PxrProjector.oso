@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
 # Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrProjector.osl/obj/PxrProjector.oso
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrProjector.osl/obj/PxrProjector.oso
 shader PxrProjector	%meta{int,rfm_nodeid,1053426} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/manifold"} %meta{string,rfh_classification,"Pattern/Manifold"} %meta{string,help,"Computes mapping coordinates for Camera, Spherical, Cylindrical and Planar projections."} 
 param	int	projection	0		%meta{string,widget,"mapper"} %meta{string,help,"projection (int)"} %meta{string,options,"Camera:0|Spherical:1|Cylindrical:2|Planar:3"} %meta{int,connectable,0} %meta{string,label,"Projection"}  %read{54,401} %write{2147483647,-1}
 param	string	coordsys	""		%meta{string,widget,"string"} %meta{string,houdiniui,"oplist"} %meta{string,help,"Name of coordinate system transform.<br>Standard coordinate systems : \"object\", \"world\", \"screen\", \"NDC\".<br><br>coordsys (string)"} %meta{int,connectable,0} %meta{string,label,"Coordinate System"}  %read{20,34} %write{2147483647,-1} %derivs
@@ -538,42 +538,42 @@ code ___main___
 # PxrProjector.osl:794
 #     Manifold_Construct(Pin, Nin, inputManifoldRw);
 	functioncall	$const12 18 	%line{794} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:69
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:69
 #     m.Q = inP;
-	assign		inputManifoldRw.Q Pin 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{69} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:70
+	assign		inputManifoldRw.Q Pin 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{69} %argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:70
 #     m.QN = inN;
 	assign		inputManifoldRw.QN Nin 	%line{70} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:71
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:71
 #     m.Qradius = 0.0;
 	assign		inputManifoldRw.Qradius $const13 	%line{71} %argrw{"wr"}
 # PxrProjector.osl:795
 #     Manifold_Transform(inputManifoldRw, coordsys);
 	functioncall	$const14 32 	%filename{"PxrProjector.osl"} %line{795} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:91
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:91
 #     Manifold_Transform(ioManifold, "common", toSpace);
-	functioncall	$const14 32 	%filename{"/data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{91} %argrw{"r"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:78
+	functioncall	$const14 32 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{91} %argrw{"r"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:78
 #     ioManifold.Q = transform(fromSpace, toSpace, ioManifold.Q);
 	transform	inputManifoldRw.Q $const15 coordsys inputManifoldRw.Q 	%line{78} %argrw{"wrrr"}
 	assign		inputManifoldRw.Q inputManifoldRw.Q 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:79
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:79
 #     ioManifold.QN = normalize(transform(fromSpace, toSpace, ioManifold.QN));
 	transformn	$tmp10 $const15 coordsys inputManifoldRw.QN 	%line{79} %argrw{"wrrr"}
 	normalize	inputManifoldRw.QN $tmp10 	%argrw{"wr"}
 	assign		inputManifoldRw.QN inputManifoldRw.QN 	%argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:81
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:81
 #     vector vec1 = vector(1.0);
 	assign		___392_vec1 $const16 	%line{81} %argrw{"wr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:82
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:82
 #     vec1 = transform(fromSpace, toSpace, vec1);
 	transformv	___392_vec1 $const15 coordsys ___392_vec1 	%line{82} %argrw{"wrrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:83
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:83
 #     float scale = length(vec1) / sqrt(3.0);
 	length		$tmp11 ___392_vec1 	%line{83} %argrw{"wr"}
 	sqrt		$tmp12 $const17 	%argrw{"wr"}
 	div		___392_scale $tmp11 $tmp12 	%argrw{"wrr"}
-# /data/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:84
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:84
 #     ioManifold.Qradius *= scale;
 	mul		inputManifoldRw.Qradius inputManifoldRw.Qradius ___392_scale 	%line{84} %argrw{"wrr"}
 	assign		inputManifoldRw.Qradius inputManifoldRw.Qradius 	%argrw{"wr"}
@@ -869,9 +869,9 @@ code ___main___
 #     Q[0] = clamp(Q[0], -0.9999e4, 0.9999e4);
 	compref		$tmp85 result.Q $const20 	%line{114} %argrw{"wrr"}
 	functioncall	$const31 196 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp86 $tmp85 $const30 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp86 $tmp85 $const30 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
 	max		$tmp84 $tmp86 $const29 	%argrw{"wrr"}
 # PxrProjector.osl:114
 #     Q[0] = clamp(Q[0], -0.9999e4, 0.9999e4);
@@ -880,9 +880,9 @@ code ___main___
 #     Q[1] = clamp(Q[1], -0.9999e4, 0.9999e4);
 	compref		$tmp88 result.Q $const1 	%line{115} %argrw{"wrr"}
 	functioncall	$const31 201 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp89 $tmp88 $const30 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp89 $tmp88 $const30 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
 	max		$tmp87 $tmp89 $const29 	%argrw{"wrr"}
 # PxrProjector.osl:115
 #     Q[1] = clamp(Q[1], -0.9999e4, 0.9999e4);
@@ -1120,9 +1120,9 @@ code ___main___
 #     Q[0] = clamp(Q[0], -0.9999e4, 0.9999e4);
 	compref		$tmp167 result.Q $const20 	%line{114} %argrw{"wrr"}
 	functioncall	$const31 335 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp168 $tmp167 $const30 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp168 $tmp167 $const30 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
 	max		$tmp166 $tmp168 $const29 	%argrw{"wrr"}
 # PxrProjector.osl:114
 #     Q[0] = clamp(Q[0], -0.9999e4, 0.9999e4);
@@ -1131,9 +1131,9 @@ code ___main___
 #     Q[1] = clamp(Q[1], -0.9999e4, 0.9999e4);
 	compref		$tmp170 result.Q $const1 	%line{115} %argrw{"wrr"}
 	functioncall	$const31 340 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp171 $tmp170 $const30 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp171 $tmp170 $const30 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
 	max		$tmp169 $tmp171 $const29 	%argrw{"wrr"}
 # PxrProjector.osl:115
 #     Q[1] = clamp(Q[1], -0.9999e4, 0.9999e4);
@@ -1232,9 +1232,9 @@ code ___main___
 #     Q[0] = clamp(Q[0], -0.9999e4, 0.9999e4);
 	compref		$tmp199 result.Q $const20 	%line{114} %argrw{"wrr"}
 	functioncall	$const31 393 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp200 $tmp199 $const30 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp200 $tmp199 $const30 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
 	max		$tmp198 $tmp200 $const29 	%argrw{"wrr"}
 # PxrProjector.osl:114
 #     Q[0] = clamp(Q[0], -0.9999e4, 0.9999e4);
@@ -1243,9 +1243,9 @@ code ___main___
 #     Q[1] = clamp(Q[1], -0.9999e4, 0.9999e4);
 	compref		$tmp202 result.Q $const1 	%line{115} %argrw{"wrr"}
 	functioncall	$const31 398 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp203 $tmp202 $const30 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp203 $tmp202 $const30 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
 	max		$tmp201 $tmp203 $const29 	%argrw{"wrr"}
 # PxrProjector.osl:115
 #     Q[1] = clamp(Q[1], -0.9999e4, 0.9999e4);
@@ -1341,9 +1341,9 @@ code ___main___
 #     Q[0] = clamp(Q[0], -0.9999e4, 0.9999e4);
 	compref		$tmp231 result.Q $const20 	%line{114} %argrw{"wrr"}
 	functioncall	$const31 450 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp232 $tmp231 $const30 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp232 $tmp231 $const30 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
 	max		$tmp230 $tmp232 $const29 	%argrw{"wrr"}
 # PxrProjector.osl:114
 #     Q[0] = clamp(Q[0], -0.9999e4, 0.9999e4);
@@ -1352,9 +1352,9 @@ code ___main___
 #     Q[1] = clamp(Q[1], -0.9999e4, 0.9999e4);
 	compref		$tmp234 result.Q $const1 	%line{115} %argrw{"wrr"}
 	functioncall	$const31 455 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp235 $tmp234 $const30 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp235 $tmp234 $const30 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
 	max		$tmp233 $tmp235 $const29 	%argrw{"wrr"}
 # PxrProjector.osl:115
 #     Q[1] = clamp(Q[1], -0.9999e4, 0.9999e4);
@@ -1582,9 +1582,9 @@ code ___main___
 # PxrProjector.osl:845
 #         sincos(radians(angle), sn, cs);
 	functioncall	$const40 601 	%line{845} %argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:88
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:88
 # float  radians (float x)  { return x*(M_PI/180.0); }
-	div		$tmp326 $const35 $const41 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{88} %argrw{"wrr"}
+	div		$tmp326 $const35 $const41 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{88} %argrw{"wrr"}
 	mul		$tmp325 angle $tmp326 	%argrw{"wrr"}
 # PxrProjector.osl:845
 #         sincos(radians(angle), sn, cs);

@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
 # Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include -I/data/build/ratbuild/rmanshare/RIS/include -I/data/build/ratbuild/rmanshare/RIS/include/common -I/data/build/ratbuild/rmanshare/RIS/pattern/osl -I/data/build/ratbuild/rmanshare/RIS/include/osl -o /data/build/ratbuild/rmanshare/_built/osxMojave_x86-64_clang10_external_release/osl/PxrRemap.osl/obj/PxrRemap.oso
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrRemap.osl/obj/PxrRemap.oso
 shader PxrRemap	%meta{int,rfm_nodeid,1053394} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/color"} %meta{string,rfh_classification,"Pattern/Color"} 
 param	color	inputRGB	0 0 0		%meta{string,widget,"color"} %meta{string,help,"The input color to remap."} %meta{string,label,"Input Color"}  %read{6,14} %write{2147483647,-1}
 param	float	inputMin	0		%meta{string,widget,"default"} %meta{string,page,"Input Range"} %meta{int,page_open,1} %meta{string,label,"Input Min"} %meta{float,slidermax,1} %meta{float,slidermin,-1}  %read{0,15} %write{2147483647,-1}
@@ -119,9 +119,9 @@ code ___main___
 #         if (clampInput) resultRGB = clamp(resultRGB, color(0), color(1));
 	if		clampInput 22 22 	%line{178} %argrw{"r"}
 	functioncall	$const6 22 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp13 resultRGB $const5 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	min		$tmp13 resultRGB $const5 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
 	max		resultRGB $tmp13 $const4 	%argrw{"wrr"}
 # PxrRemap.osl:182
 #     resultRGB = colorBias(resultRGB, bias);
@@ -138,9 +138,9 @@ code ___main___
 # PxrRemap.osl:40
 #     result = clamp(result, color(0), color(1));
 	functioncall	$const6 33 	%line{40} %argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp24 ___325_result $const5 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	min		$tmp24 ___325_result $const5 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
 	max		___325_result $tmp24 $const4 	%argrw{"wrr"}
 # PxrRemap.osl:41
 #     return result;
@@ -151,9 +151,9 @@ code ___main___
 # PxrRemap.osl:47
 #     gain = clamp(gg, color(0.0001), color(0.9999));
 	functioncall	$const6 38 	%line{47} %argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp27 gain $const12 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	min		$tmp27 gain $const12 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
 	max		___326_gain $tmp27 $const8 	%argrw{"wrr"}
 # PxrRemap.osl:50
 #     for (int ch = 0; ch < 3; ++ch)
@@ -210,9 +210,9 @@ code ___main___
 # PxrRemap.osl:63
 #     result = clamp(result, color(0), color(1));
 	functioncall	$const6 79 	%line{63} %argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp62 ___326_result $const5 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	min		$tmp62 ___326_result $const5 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
 	max		___326_result $tmp62 $const4 	%argrw{"wrr"}
 # PxrRemap.osl:64
 #     return result;
@@ -226,9 +226,9 @@ code ___main___
 #     if (clampOutput) resultRGB = clamp(resultRGB, color(0), color(1));
 	if		clampOutput 87 87 	%line{187} %argrw{"r"}
 	functioncall	$const6 87 	%argrw{"r"}
-# /data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp67 resultRGB $const5 	%filename{"/data/build/ratbuild/rman/_built/osxMojave_x86-64_clang10_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	min		$tmp67 resultRGB $const5 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
 	max		resultRGB $tmp67 $const4 	%argrw{"wrr"}
 # PxrRemap.osl:189
 #     resultR = resultRGB[0];
