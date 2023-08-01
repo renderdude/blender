@@ -32,6 +32,7 @@
 #include "BKE_fcurve.h"
 #include "BKE_global.h"
 #include "BKE_gpencil_legacy.h"
+#include "BKE_grease_pencil.hh"
 #include "BKE_layer.h"
 #include "BKE_lib_id.h"
 #include "BKE_mask.h"
@@ -591,6 +592,12 @@ static void anim_channels_select_set(bAnimContext *ac,
             ale->adt->flag &= ~ADT_UI_ACTIVE;
           }
         }
+        break;
+      }
+      case ANIMTYPE_GREASE_PENCIL_LAYER: {
+        using namespace blender::bke::greasepencil;
+        Layer *layer = static_cast<Layer *>(ale->data);
+        ACHANNEL_SET_FLAG(&(layer->base), sel, GP_LAYER_TREE_NODE_SELECT);
         break;
       }
       case ANIMTYPE_GPLAYER: {
@@ -3219,7 +3226,7 @@ static int animchannels_rename_invoke(bContext *C, wmOperator * /*op*/, const wm
 static void ANIM_OT_channels_rename(wmOperatorType *ot)
 {
   /* identifiers */
-  ot->name = "Rename Channels";
+  ot->name = "Rename Channel";
   ot->idname = "ANIM_OT_channels_rename";
   ot->description = "Rename animation channel under mouse";
 
@@ -3726,7 +3733,7 @@ static int mouse_anim_channels(bContext *C,
   }
 
   /* action to take depends on what channel we've got */
-  /* WARNING: must keep this in sync with the equivalent function in nla_channels.c */
+  /* WARNING: must keep this in sync with the equivalent function in `nla_channels.cc`. */
   switch (ale->type) {
     case ANIMTYPE_SCENE:
       notifierFlags |= click_select_channel_scene(ale, selectmode);

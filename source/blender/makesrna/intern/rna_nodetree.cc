@@ -4343,8 +4343,8 @@ void rna_ShaderNodePointDensity_density_cache(bNode *self, Depsgraph *depsgraph)
 
 void rna_ShaderNodePointDensity_density_calc(bNode *self,
                                              Depsgraph *depsgraph,
-                                             int *length,
-                                             float **values)
+                                             float **values,
+                                             int *values_num)
 {
   NodeShaderTexPointDensity *shader_point_density = static_cast<NodeShaderTexPointDensity *>(
       self->storage);
@@ -4352,16 +4352,16 @@ void rna_ShaderNodePointDensity_density_calc(bNode *self,
   const int resolution = shader_point_density->cached_resolution;
 
   if (depsgraph == nullptr) {
-    *length = 0;
+    *values_num = 0;
     return;
   }
 
   /* TODO(sergey): Will likely overflow, but how to pass size_t via RNA? */
-  *length = 4 * resolution * resolution * resolution;
+  *values_num = 4 * resolution * resolution * resolution;
 
   if (*values == nullptr) {
     *values = static_cast<float *>(
-        MEM_mallocN(sizeof(float) * (*length), "point density dynamic array"));
+        MEM_mallocN(sizeof(float) * (*values_num), "point density dynamic array"));
   }
 
   /* Single-threaded sampling of the voxel domain. */
@@ -4519,7 +4519,7 @@ static const EnumPropertyItem node_sheen_items[] = {
      0,
      "Microfiber",
      "Microflake-based model of multiple scattering between normal-oriented fibers"},
-    {0, NULL, 0, NULL, NULL},
+    {0, nullptr, 0, nullptr, nullptr},
 };
 
 static const EnumPropertyItem node_toon_items[] = {
@@ -6000,7 +6000,7 @@ static void def_sheen(StructRNA *srna)
   PropertyRNA *prop;
 
   prop = RNA_def_property(srna, "distribution", PROP_ENUM, PROP_NONE);
-  RNA_def_property_enum_sdna(prop, NULL, "custom1");
+  RNA_def_property_enum_sdna(prop, nullptr, "custom1");
   RNA_def_property_enum_items(prop, node_sheen_items);
   RNA_def_property_ui_text(prop, "Distribution", "Sheen shading model");
   RNA_def_property_update(prop, NC_NODE | NA_EDITED, "rna_Node_update");
@@ -7896,8 +7896,12 @@ static void def_cmp_tonemap(StructRNA *srna)
   PropertyRNA *prop;
 
   static const EnumPropertyItem type_items[] = {
-      {1, "RD_PHOTORECEPTOR", 0, "R/D Photoreceptor", ""},
-      {0, "RH_SIMPLE", 0, "Rh Simple", ""},
+      {1,
+       "RD_PHOTORECEPTOR",
+       0,
+       "R/D Photoreceptor",
+       "More advanced algorithm based on eye physiology, by Reinhard and Devlin"},
+      {0, "RH_SIMPLE", 0, "Rh Simple", "Simpler photographic algorithm by Reinhard"},
       {0, nullptr, 0, nullptr, nullptr},
   };
 
@@ -8784,7 +8788,7 @@ static void def_cmp_keying(StructRNA *srna)
   prop = RNA_def_property(srna, "dilate_distance", PROP_INT, PROP_NONE);
   RNA_def_property_int_sdna(prop, nullptr, "dilate_distance");
   RNA_def_property_range(prop, -100, 100);
-  RNA_def_property_ui_text(prop, "Dilate/Erode", "Matte dilate/erode side");
+  RNA_def_property_ui_text(prop, "Dilate/Erode", "Distance to grow/shrink the matte");
   RNA_def_property_update(prop, NC_NODE | NA_EDITED, "rna_Node_update");
 
   prop = RNA_def_property(srna, "edge_kernel_radius", PROP_INT, PROP_NONE);

@@ -3505,7 +3505,7 @@ void CustomData_swap_corners(CustomData *data, const int index, const int *corne
   }
 }
 
-void CustomData_swap(CustomData *data, const int index_a, const int index_b)
+void CustomData_swap(CustomData *data, const int index_a, const int index_b, const int totelem)
 {
   char buff_static[256];
 
@@ -3514,17 +3514,17 @@ void CustomData_swap(CustomData *data, const int index_a, const int index_b)
   }
 
   for (int i = 0; i < data->totlayer; i++) {
-    const LayerTypeInfo *typeInfo = layerType_getInfo(eCustomDataType(data->layers[i].type));
+    CustomDataLayer &layer = data->layers[i];
+    ensure_layer_data_is_mutable(layer, totelem);
+    const LayerTypeInfo *typeInfo = layerType_getInfo(eCustomDataType(layer.type));
     const size_t size = typeInfo->size;
     const size_t offset_a = size * index_a;
     const size_t offset_b = size * index_b;
 
     void *buff = size <= sizeof(buff_static) ? buff_static : MEM_mallocN(size, __func__);
-    memcpy(buff, POINTER_OFFSET(data->layers[i].data, offset_a), size);
-    memcpy(POINTER_OFFSET(data->layers[i].data, offset_a),
-           POINTER_OFFSET(data->layers[i].data, offset_b),
-           size);
-    memcpy(POINTER_OFFSET(data->layers[i].data, offset_b), buff, size);
+    memcpy(buff, POINTER_OFFSET(layer.data, offset_a), size);
+    memcpy(POINTER_OFFSET(layer.data, offset_a), POINTER_OFFSET(layer.data, offset_b), size);
+    memcpy(POINTER_OFFSET(layer.data, offset_b), buff, size);
 
     if (buff != buff_static) {
       MEM_freeN(buff);
@@ -5213,14 +5213,14 @@ static void blend_read_mdisps(BlendDataReader *reader,
         /* this calculation is only correct for loop mdisps;
          * if loading pre-BMesh face mdisps this will be
          * overwritten with the correct value in
-         * bm_corners_to_loops() */
+         * #bm_corners_to_loops() */
         float gridsize = sqrtf(mdisps[i].totdisp);
         mdisps[i].level = int(logf(gridsize - 1.0f) / float(M_LN2)) + 1;
       }
 
       if (BLO_read_requires_endian_switch(reader) && (mdisps[i].disps)) {
-        /* DNA_struct_switch_endian doesn't do endian swap for (*disps)[] */
-        /* this does swap for data written at write_mdisps() - readfile.c */
+        /* #DNA_struct_switch_endian doesn't do endian swap for `(*disps)[]` */
+        /* this does swap for data written at #write_mdisps() - `readfile.cc`. */
         BLI_endian_switch_float_array(*mdisps[i].disps, mdisps[i].totdisp * 3);
       }
       if (!external && !mdisps[i].disps) {

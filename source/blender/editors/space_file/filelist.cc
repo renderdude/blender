@@ -80,9 +80,9 @@
 
 #include "atomic_ops.h"
 
-#include "file_indexer.h"
-#include "file_intern.h"
-#include "filelist.h"
+#include "file_indexer.hh"
+#include "file_intern.hh"
+#include "filelist.hh"
 
 using namespace blender;
 
@@ -1959,6 +1959,11 @@ void filelist_freelib(FileList *filelist)
 BlendHandle *filelist_lib(FileList *filelist)
 {
   return filelist->libfiledata;
+}
+
+int filelist_files_num_entries(FileList *filelist)
+{
+  return filelist->filelist.entries_num;
 }
 
 static const char *fileentry_uiname(const char *root, FileListInternEntry *entry, char *buff)

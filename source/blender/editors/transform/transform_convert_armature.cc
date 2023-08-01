@@ -1582,7 +1582,7 @@ static short apply_targetless_ik(Object *ob)
     data = has_targetless_ik(pchan);
     if (data && (data->flag & CONSTRAINT_IK_AUTO)) {
 
-      /* fill the array with the bones of the chain (armature.c does same, keep it synced) */
+      /* Fill the array with the bones of the chain (`armature.cc` does same, keep it synced). */
       segcount = 0;
 
       /* exclude tip from chain? */
@@ -1786,14 +1786,14 @@ static void special_aftertrans_update__pose(bContext *C, TransInfo *t)
 
 TransConvertTypeInfo TransConvertType_EditArmature = {
     /*flags*/ (T_EDIT | T_POINTS),
-    /*createTransData*/ createTransArmatureVerts,
-    /*recalcData*/ recalcData_edit_armature,
+    /*create_trans_data*/ createTransArmatureVerts,
+    /*recalc_data*/ recalcData_edit_armature,
     /*special_aftertrans_update*/ nullptr,
 };
 
 TransConvertTypeInfo TransConvertType_Pose = {
     /*flags*/ 0,
-    /*createTransData*/ createTransPose,
-    /*recalcData*/ recalcData_pose,
+    /*create_trans_data*/ createTransPose,
+    /*recalc_data*/ recalcData_pose,
     /*special_aftertrans_update*/ special_aftertrans_update__pose,
 };

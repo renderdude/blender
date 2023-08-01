@@ -62,6 +62,8 @@
  * and being able to set it to zero is handy. */
 /* #define USE_NUM_NO_ZERO */
 
+using namespace blender;
+
 bool transdata_check_local_islands(TransInfo *t, short around)
 {
   if (t->options & (CTX_CURSOR | CTX_TEXTURE_SPACE)) {
@@ -1419,7 +1421,7 @@ bool calculateTransformCenter(bContext *C, int centerMode, float cent3d[3], floa
   /* avoid doing connectivity lookups (when V3D_AROUND_LOCAL_ORIGINS is set) */
   t->around = V3D_AROUND_CENTER_BOUNDS;
 
-  createTransData(C, t); /* make TransData structs from selection */
+  create_trans_data(C, t); /* make TransData structs from selection */
 
   t->around = centerMode; /* override user-defined mode. */
 
@@ -1911,7 +1913,7 @@ bool initTransform(bContext *C, TransInfo *t, wmOperator *op, const wmEvent *eve
         SPACE_TYPE_ANY, RGN_TYPE_ANY, transform_draw_cursor_poll, transform_draw_cursor_draw, t);
   }
 
-  createTransData(C, t); /* Make #TransData structs from selection. */
+  create_trans_data(C, t); /* Make #TransData structs from selection. */
 
   if (t->data_len_all == 0) {
     postTrans(C, t);
@@ -2021,12 +2023,12 @@ bool initTransform(bContext *C, TransInfo *t, wmOperator *op, const wmEvent *eve
       }
     }
 
-    int mval[2];
+    float2 mval;
     if (t->flag & T_EVENT_DRAG_START) {
-      WM_event_drag_start_mval(event, t->region, mval);
+      WM_event_drag_start_mval_fl(event, t->region, mval);
     }
     else {
-      copy_v2_v2_int(mval, event->mval);
+      mval = float2(event->mval);
     }
     initMouseInput(t, &t->mouse, t->center2d, mval, use_accurate);
   }
@@ -2059,7 +2061,7 @@ bool initTransform(bContext *C, TransInfo *t, wmOperator *op, const wmEvent *eve
    * values. */
   if (t->flag & T_MODAL) {
     /* Setup the mouse input with initial values. */
-    applyMouseInput(t, &t->mouse, t->mouse.imval, t->values);
+    applyMouseInput(t, &t->mouse, int2(t->mouse.imval), t->values);
   }
 
   if ((prop = RNA_struct_find_property(op->ptr, "preserve_clnor"))) {
@@ -2109,7 +2111,7 @@ void transformApply(bContext *C, TransInfo *t)
   if (t->redraw == TREDRAW_HARD) {
     selectConstraint(t);
     if (t->mode_info) {
-      t->mode_info->transform_fn(t, t->mval); /* calls recalcData() */
+      t->mode_info->transform_fn(t, t->mval); /* calls recalc_data() */
     }
   }
 
@@ -2137,7 +2139,7 @@ int transformEnd(bContext *C, TransInfo *t)
     /* handle restoring objects */
     if (t->state == TRANS_CANCEL) {
       exit_code = OPERATOR_CANCELLED;
-      restoreTransObjects(t); /* calls recalcData() */
+      restoreTransObjects(t); /* calls recalc_data() */
     }
     else {
       if (t->flag & T_CLNOR_REBUILD) {

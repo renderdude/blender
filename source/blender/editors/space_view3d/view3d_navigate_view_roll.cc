@@ -192,7 +192,7 @@ static int viewroll_exec(bContext *C, wmOperator *op)
 
   if (vod->depsgraph == nullptr) {
     vod->depsgraph = CTX_data_ensure_evaluated_depsgraph(C);
-    vod->init_navigation(C, nullptr, &ViewOpsType_roll, false);
+    vod->init_navigation(C, nullptr, &ViewOpsType_roll);
   }
 
   int type = RNA_enum_get(op->ptr, "type");
@@ -303,7 +303,7 @@ void VIEW3D_OT_view_roll(wmOperatorType *ot)
 const ViewOpsType ViewOpsType_roll = {
     /*flag*/ (VIEWOPS_FLAG_ORBIT_SELECT),
     /*idname*/ "VIEW3D_OT_view_roll",
+    /*poll_fn*/ nullptr,
     /*init_fn*/ nullptr,
     /*apply_fn*/ nullptr,
-    /*cancel_fn*/ nullptr,
 };

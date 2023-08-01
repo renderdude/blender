@@ -27,6 +27,8 @@
 #define RESET_TRANSFORMATION
 #define REMOVE_GIZMO
 
+using namespace blender;
+
 /* -------------------------------------------------------------------- */
 /** \name Transform Element
  * \{ */
@@ -79,7 +81,7 @@ static void snapsource_confirm(TransInfo *t)
   SnapSouceCustomData *customdata = static_cast<SnapSouceCustomData *>(t->custom.mode.data);
   t->tsnap.mode = customdata->snap_mode_confirm;
 
-  int mval[2];
+  float2 mval;
 #ifndef RESET_TRANSFORMATION
   if (true) {
     if (t->transform_matrix) {
@@ -97,12 +99,12 @@ static void snapsource_confirm(TransInfo *t)
       sub_v3_v3(t->tsnap.snap_source, t->vec);
     }
 
-    projectIntView(t, t->tsnap.snap_source, mval);
+    projectFloatView(t, t->tsnap.snap_source, mval);
   }
   else
 #endif
   {
-    copy_v2_v2_int(mval, t->mval);
+    mval = float2(t->mval);
   }
 
   snapsource_end(t);
@@ -212,7 +214,7 @@ void transform_mode_snap_source_init(TransInfo *t, wmOperator * /*op*/)
 
 #ifdef RESET_TRANSFORMATION
   /* Temporarily disable snapping.
-   * We don't want #SCE_SNAP_PROJECT to affect `recalcData` for example. */
+   * We don't want #SCE_SNAP_PROJECT to affect `recalc_data` for example. */
   t->tsnap.flag &= ~SCE_SNAP;
 
   restoreTransObjects(t);
@@ -221,7 +223,7 @@ void transform_mode_snap_source_init(TransInfo *t, wmOperator * /*op*/)
   transform_snap_flag_from_modifiers_set(t);
 
   /* Reset initial values to restore gizmo position. */
-  applyMouseInput(t, &t->mouse, t->mouse.imval, t->values_final);
+  applyMouseInput(t, &t->mouse, int2(t->mouse.imval), t->values_final);
 #endif
 
 #ifdef REMOVE_GIZMO

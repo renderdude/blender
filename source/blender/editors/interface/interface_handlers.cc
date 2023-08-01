@@ -8003,12 +8003,16 @@ static int ui_do_button(bContext *C, uiBlock *block, uiBut *but, const wmEvent *
         (event->modifier & (KM_SHIFT | KM_CTRL | KM_ALT | KM_OSKEY)) == 0 &&
         (event->val == KM_PRESS))
     {
+      ARegion *region = CTX_wm_region(C);
       /* For some button types that are typically representing entire sets of data, right-clicking
        * to spawn the context menu should also activate the item. This makes it clear which item
        * will be operated on.
        * Apply the button immediately, so context menu polls get the right active item. */
-      if (ELEM(but->type, UI_BTYPE_VIEW_ITEM)) {
-        ui_apply_but(C, but->block, but, but->active, true);
+      uiBut *clicked_view_item_but = but->type == UI_BTYPE_VIEW_ITEM ?
+                                         but :
+                                         ui_view_item_find_mouse_over(region, event->xy);
+      if (clicked_view_item_but) {
+        UI_but_execute(C, region, clicked_view_item_but);
       }
 
       /* RMB has two options now */
@@ -9657,7 +9661,7 @@ static int ui_handle_list_event(bContext *C, const wmEvent *event, ARegion *regi
     }
 
     /* If type still is mouse-pan, we call it handled, since delta-y accumulate. */
-    /* also see wm_event_system.c do_wheel_ui hack */
+    /* also see `wm_event_system.cc` do_wheel_ui hack. */
     if (type == MOUSEPAN) {
       retval = WM_UI_HANDLER_BREAK;
     }

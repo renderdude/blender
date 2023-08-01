@@ -88,7 +88,7 @@ static int UNUSED_FUNCTION(ED_operator_uvmap_mesh)(bContext *C)
   if (ob && ob->type == OB_MESH) {
     Mesh *me = static_cast<Mesh *>(ob->data);
 
-    if (CustomData_get_layer(&me->ldata, CD_PROP_FLOAT2) != nullptr) {
+    if (CustomData_get_layer(&me->loop_data, CD_PROP_FLOAT2) != nullptr) {
       return 1;
     }
   }
@@ -2051,7 +2051,7 @@ static void UV_OT_mark_seam(wmOperatorType *ot)
 
 void ED_operatortypes_uvedit()
 {
-  /* uvedit_select.c */
+  /* `uvedit_select.cc` */
   WM_operatortype_append(UV_OT_select_all);
   WM_operatortype_append(UV_OT_select);
   WM_operatortype_append(UV_OT_select_loop);

@@ -14,6 +14,10 @@
 #  include <windows.h>
 #endif
 
+#ifdef __linux__
+#  include <unistd.h>
+#endif
+
 #if defined(WITH_TBB_MALLOC) && defined(_MSC_VER) && defined(NDEBUG)
 #  pragma comment(lib, "tbbmalloc_proxy.lib")
 #  pragma comment(linker, "/include:__TBB_malloc_proxy")
@@ -25,6 +29,7 @@
 
 #include "DNA_genfile.h"
 
+#include "BLI_path_util.h"
 #include "BLI_string.h"
 #include "BLI_system.h"
 #include "BLI_task.h"
@@ -205,7 +210,7 @@ static void callback_clg_fatal(void *fp)
 
 #ifdef WITH_PYTHON_MODULE
 
-/* Called in `bpy_interface.c` when building as a Python module. */
+/* Called in `bpy_interface.cc` when building as a Python module. */
 int main_python_enter(int argc, const char **argv);
 void main_python_exit(void);
 
@@ -329,6 +334,19 @@ int main(int argc,
 #  endif /* USE_WIN32_UNICODE_ARGS */
 #endif   /* WIN32 */
 
+/* Here we check for Windows ARM64 or WSL, and override the Mesa reported OpenGL version */
+#if defined(WIN32) || defined(__linux__)
+#  if defined(WIN32)
+  if (strncmp(BLI_getenv("PROCESSOR_IDENTIFIER"), "ARM", 3) == 0)
+#  else /* Must be linux, so check if we're in WSL */
+  if (access("/proc/sys/fs/binfmt_misc/WSLInterop", F_OK) == 0)
+#  endif
+  {
+    BLI_setenv_if_new("MESA_GLSL_VERSION_OVERRIDE", "430");
+    BLI_setenv_if_new("MESA_GL_VERSION_OVERRIDE", "4.3");
+  }
+#endif
+
   /* NOTE: Special exception for guarded allocator type switch:
    *       we need to perform switch from lock-free to fully
    *       guarded allocator before any allocation happened.
@@ -425,7 +443,7 @@ int main(int argc,
 
   DNA_sdna_current_init();
 
-  BKE_blender_globals_init(); /* blender.c */
+  BKE_blender_globals_init(); /* `blender.cc` */
 
   BKE_cpp_types_init();
   BKE_idtype_init();

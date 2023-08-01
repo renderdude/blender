@@ -83,7 +83,7 @@ float bc_get_float_value(const COLLADAFW::FloatOrDoubleArray &array, uint index)
 
 int bc_test_parent_loop(Object *par, Object *ob)
 {
-  /* Copied from /editors/object/object_relations.c */
+  /* Copied from `editors/object/object_relations.cc`. */
 
   /* test if 'ob' is a parent somewhere in par's parents */
 
@@ -183,7 +183,7 @@ void bc_update_scene(BlenderContext &blender_context, float ctime)
   Scene *scene = blender_context.get_scene();
   Depsgraph *depsgraph = blender_context.get_depsgraph();
 
-  /* See remark in physics_fluid.c lines 395...) */
+  /* See remark in `physics_fluid.cc` lines 395...) */
   // BKE_scene_update_for_newframe(ev_context, bmain, scene, scene->lay);
   BKE_scene_frame_set(scene, ctime);
   ED_update_for_newframe(bmain, depsgraph);
@@ -322,7 +322,7 @@ bool bc_is_root_bone(Bone *aBone, bool deform_bones_only)
 int bc_get_active_UVLayer(Object *ob)
 {
   Mesh *me = (Mesh *)ob->data;
-  return CustomData_get_active_layer_index(&me->ldata, CD_PROP_FLOAT2);
+  return CustomData_get_active_layer_index(&me->loop_data, CD_PROP_FLOAT2);
 }
 
 std::string bc_url_encode(std::string data)
@@ -685,7 +685,7 @@ void bc_set_IDPropertyMatrix(EditBone *ebone, const char *key, float mat[4][4])
  */
 static void bc_set_IDProperty(EditBone *ebone, const char *key, float value)
 {
-  if (ebone->prop == NULL) {
+  if (ebone->prop == nullptr) {
     IDPropertyTemplate val = {0};
     ebone->prop = IDP_New(IDP_GROUP, &val, "RNA_EditBone ID properties");
   }
@@ -1076,9 +1076,9 @@ void bc_copy_m4d_v44(double (&r)[4][4], std::vector<std::vector<double>> &a)
  */
 static std::string bc_get_active_uvlayer_name(Mesh *me)
 {
-  int num_layers = CustomData_number_of_layers(&me->ldata, CD_PROP_FLOAT2);
+  int num_layers = CustomData_number_of_layers(&me->loop_data, CD_PROP_FLOAT2);
   if (num_layers) {
-    const char *layer_name = bc_CustomData_get_active_layer_name(&me->ldata, CD_PROP_FLOAT2);
+    const char *layer_name = bc_CustomData_get_active_layer_name(&me->loop_data, CD_PROP_FLOAT2);
     if (layer_name) {
       return std::string(layer_name);
     }
@@ -1101,9 +1101,9 @@ static std::string bc_get_active_uvlayer_name(Object *ob)
  */
 static std::string bc_get_uvlayer_name(Mesh *me, int layer)
 {
-  int num_layers = CustomData_number_of_layers(&me->ldata, CD_PROP_FLOAT2);
+  int num_layers = CustomData_number_of_layers(&me->loop_data, CD_PROP_FLOAT2);
   if (num_layers && layer < num_layers) {
-    const char *layer_name = bc_CustomData_get_layer_name(&me->ldata, CD_PROP_FLOAT2, layer);
+    const char *layer_name = bc_CustomData_get_layer_name(&me->loop_data, CD_PROP_FLOAT2, layer);
     if (layer_name) {
       return std::string(layer_name);
     }

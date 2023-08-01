@@ -424,7 +424,7 @@ static int transform_modal(bContext *C, wmOperator *op, const wmEvent *event)
   if (t->vod && (exit_code & OPERATOR_PASS_THROUGH)) {
     RegionView3D *rv3d = static_cast<RegionView3D *>(t->region->regiondata);
     const bool is_navigating = (rv3d->rflag & RV3D_NAVIGATING) != 0;
-    if (ED_view3d_navigation_do(C, t->vod, event)) {
+    if (ED_view3d_navigation_do(C, t->vod, event, t->center_global)) {
       if (!is_navigating) {
         /* Navigation has started. */
 
@@ -803,7 +803,7 @@ void Transform_Properties(wmOperatorType *ot, int flags)
 
   if (flags & P_VIEW3D_ALT_NAVIGATION) {
     prop = RNA_def_boolean(
-        ot->srna, "alt_navigation", 0, "Transform Navigation with Alt", nullptr);
+        ot->srna, "alt_navigation", false, "Transform Navigation with Alt", nullptr);
     RNA_def_property_flag(prop, PROP_HIDDEN);
   }
 
@@ -1026,7 +1026,7 @@ static void TRANSFORM_OT_shear(wmOperatorType *ot)
 {
   /* identifiers */
   ot->name = "Shear";
-  ot->description = "Shear selected items along the horizontal screen axis";
+  ot->description = "Shear selected items along the given axis";
   ot->idname = OP_SHEAR;
   ot->flag = OPTYPE_REGISTER | OPTYPE_UNDO | OPTYPE_BLOCKING;
 
