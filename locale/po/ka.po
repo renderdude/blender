@@ -1,9 +1,9 @@
 
 msgid ""
 msgstr ""
-"Project-Id-Version: Blender 4.0.0 Alpha (b'4f56261f768e')\n"
+"Project-Id-Version: Blender 4.0.0 Alpha (b'769fe076683a')\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-07-24 15:42:18\n"
+"POT-Creation-Date: 2023-08-14 09:28:55\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Tamar Mebonia <tammebonia@gmail.com>, 2023\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1131,6 +1131,18 @@ msgstr "იარლიყები"
 
 msgid "Custom tags (name tokens) for the asset, used for filtering and general asset management"
 msgstr "მორგებული იარლიყები (სახელის ჟეტონი) აქტივისთვის, გამოიყენება გასაფილტრად და ზოგადად აქტივების მენეჯმენტისთვის"
+
+
+msgid "ID Name"
+msgstr "ID სახელი"
+
+
+msgid "Options"
+msgstr "ვარიანტები"
+
+
+msgid "Space Type"
+msgstr "სივრცის ტიპი"
 
 
 msgid "Asset Tag"
@@ -5806,44 +5818,8 @@ msgid "sRGB display space with Filmic view transform"
 msgstr "sRGB ამსახველი სივრცე ფილმური ხედის ტრანსფორმირებით"
 
 
-msgid "Rec. 709 (Full Range), Blender native linear space"
-msgstr "Rec. 709 (სრული დიაპაზონი), ბლენდერის მკვიდრი წრფივი სივრცე"
-
-
-msgid "Linear ACES"
-msgstr "წრფივი ACES"
-
-
-msgid "ACES2065-1 linear space"
-msgstr "ACES2065-1 წრფივი სივრცე"
-
-
-msgid "Linear ACEScg"
-msgstr "წრფივი ACEScg"
-
-
-msgid "ACEScg linear space"
-msgstr "ACEScg წრფივი სივრცე"
-
-
 msgid "Non-Color"
 msgstr "არა-ფერული"
-
-
-msgid "Color space used for images which contain non-color data (e.g. normal maps)"
-msgstr "ფერის სივრცე გამოყენებული იმ გამოსახულებებისათვის, რომლებიც შეიცავენ არა-ფერის მონაცემებს (მაგ.: ნორმალების რუკებს)"
-
-
-msgid "Raw"
-msgstr "უფორმატო"
-
-
-msgid "sRGB display space"
-msgstr "sRGB ამსახველი სივრცე"
-
-
-msgid "XYZ"
-msgstr "XYZ"
 
 
 msgid "Do not perform any color transform on load, treat colors as in scene linear space already"
@@ -16255,10 +16231,6 @@ msgid "Storage of an operator being executed, or registered after execution"
 msgstr "გაშვებული, ან გაშვების შემდეგ რეგისტრირებული ოპერატორის საცავი"
 
 
-msgid "Options"
-msgstr "ვარიანტები"
-
-
 msgid "Options for this operator type"
 msgstr "ვარიანტები ამ ოპერატორის ტიპისთვის"
 
@@ -16347,8 +16319,8 @@ msgid "Temporary"
 msgstr "დროებითი"
 
 
-msgid "UI"
-msgstr "UI"
+msgid "Sidebar"
+msgstr "გვერდითა ზოლი"
 
 
 msgid "Tools"
@@ -16381,10 +16353,6 @@ msgstr "ხელსაწყოს სათაური"
 
 msgid "XR"
 msgstr "XR"
-
-
-msgid "Space Type"
-msgstr "სივრცის ტიპი"
 
 
 msgid "The space where the panel is going to be used in"
@@ -23761,10 +23729,6 @@ msgid "Angular diameter of the Sun as seen from the Earth"
 msgstr "მზის კუთხოვანი დიამეტრი, დანახული დედამიწიდან"
 
 
-msgid "Sunlight strength in watts per meter squared (W/m^2)"
-msgstr "მზის სინათლის სიძლიერე ვატებში ყოველ კვადრატულ მეტრზე (ვტ/მ^2)"
-
-
 msgid "Cascade Count"
 msgstr "კასკადების რიცხვი"
 
@@ -24289,16 +24253,8 @@ msgid "Loops"
 msgstr "მარყუჟები"
 
 
-msgid "Loops of the mesh (polygon corners)"
-msgstr "მეშის მარყუჟები (მრავალკუთხედის კუთხეები)"
-
-
 msgid "Polygon Normals"
 msgstr "მრავალკუთხედის ნორმალები"
-
-
-msgid "The normal direction of each polygon, defined by the winding order and position of its vertices"
-msgstr "თითოეული მრავალკუთხედის ნორმალის მიმართულება, მისი წვეროების წრიული თანმიმდევრობისა და პოზიციების მიხედვით"
 
 
 msgid "Polygons"
@@ -24677,10 +24633,6 @@ msgid "Index of the active output"
 msgstr "აქტიური გამომაცლის ინდექსი"
 
 
-msgid "ID Name"
-msgstr "ID სახელი"
-
-
 msgid "Label"
 msgstr "იარლიყი"
 
@@ -24867,6 +24819,26 @@ msgstr "გეომეტრიის კვანძური ხე"
 
 msgid "Node tree consisting of linked nodes used for geometries"
 msgstr "კვანძური ხე, რომელიც შედგება გეომეტრიებისთვის გამოყენებული ურთიერთდაკავშირებული კვანძებისგან"
+
+
+msgid "Edit"
+msgstr "რედაქტირება"
+
+
+msgid "Sculpt"
+msgstr "ძერწვა"
+
+
+msgid "Tool"
+msgstr "ხელსაწყო"
+
+
+msgid "Mesh"
+msgstr "მეში"
+
+
+msgid "Point Cloud"
+msgstr "წერტილების ღრუბელი"
 
 
 msgid "Shader Node Tree"
@@ -26886,10 +26858,6 @@ msgid "Relative amount of virtual parents"
 msgstr "ვირტუალური მშობლების შეფარდებითი რაოდენობა"
 
 
-msgid "Point Cloud"
-msgstr "წერტილების ღრუბელი"
-
-
 msgid "Point cloud data-block"
 msgstr "წერტილოვანი ღრუბლის მონაცემთა ბლოკი"
 
@@ -27152,14 +27120,6 @@ msgstr "სეკვენსერის ფერის სივრცის 
 
 msgid "Settings of color space sequencer is working in"
 msgstr "იმ ფერის სივრცის პარამეტრები, რომელშიც სეკვენსერი მუშაობს"
-
-
-msgid "Only Keyframes from Selected Channels"
-msgstr "საკვანძო ფაზები მხოლოდ მონიშნული არხებიდან"
-
-
-msgid "Consider keyframes for active object and/or its selected bones only (in timeline and when jumping between keyframes)"
-msgstr "განიხილე საკვანძო ფაზები მხოლოდ აქტიური ობიექტისთვის და/ან მისი მონიშნული ძვლისთვის (დროის ზოლში და საკვანძო ფაზებს შორის გადახტომისას)"
 
 
 msgid "Show Subframe"
@@ -28174,10 +28134,6 @@ msgstr "RNA მისამართი"
 
 msgid "ID Library Override Property Operation"
 msgstr "ოპერაცია ID ბიბლიოთეკის უკუგდების მახასიათებელზე"
-
-
-msgid "Optional flags (NOT USED)"
-msgstr "არჩევითი დროშები (არ გამოიყენება)"
 
 
 msgid "Mandatory"
@@ -31045,10 +31001,6 @@ msgid "NLA Context Menu"
 msgstr "NLA კონტექსტური მენიუ"
 
 
-msgid "Edit"
-msgstr "რედაქტირება"
-
-
 msgid "Converter"
 msgstr "დამაკონვერტირებელი"
 
@@ -31099,10 +31051,6 @@ msgstr "წერა"
 
 msgid "Instances"
 msgstr "ინსტანციები"
-
-
-msgid "Mesh"
-msgstr "მეში"
 
 
 msgid "Node"
@@ -31480,10 +31428,6 @@ msgstr "პროპორციული რედაქტირების �
 
 msgid "Random Mask"
 msgstr "შემთხვევითი ნიღაბი"
-
-
-msgid "Sculpt"
-msgstr "ძერწვა"
 
 
 msgid "Automasking"
@@ -33313,10 +33257,6 @@ msgid "Return brush to defaults based on current tool"
 msgstr "დააბრუნე ფუნჯს ნაგულისმები იერსახე მიმდინარე ხელსაწყოზე დაყრდნობით"
 
 
-msgid "Tool"
-msgstr "ხელსაწყო"
-
-
 msgid "Translation"
 msgstr "თარგმანი"
 
@@ -33822,15 +33762,6 @@ msgstr "საწყისი კადრი საექსპორტოდ"
 
 
 msgctxt "Operator"
-msgid "Export PLY"
-msgstr "PLY-ის ექსპორტირება"
-
-
-msgid "Export as a Stanford PLY with normals, vertex colors and texture coordinates"
-msgstr "Stanford PLY-ის ექსპორტი ნორმალებით, წვეროების ფერებითა და ტექსტურების კოორდინატებით"
-
-
-msgctxt "Operator"
 msgid "Export STL"
 msgstr "STL-ის ექსპორტირება"
 
@@ -33903,19 +33834,6 @@ msgstr "ობიექტის პარამეტრები"
 
 msgid "Animation settings"
 msgstr "ანიმაციის პარამეტრები"
-
-
-msgctxt "Operator"
-msgid "Export OBJ"
-msgstr "დააექსპორტირე OBJ"
-
-
-msgid "Save a Wavefront OBJ File"
-msgstr "Wavefront OBJ ფაილის შენახვა"
-
-
-msgid "Material Groups"
-msgstr "მასალის ჯგუფები"
 
 
 msgctxt "Operator"
@@ -34792,19 +34710,6 @@ msgstr "გამჭვირვალობისთვის გამოი�
 
 
 msgctxt "Operator"
-msgid "Import PLY"
-msgstr "დააიმპორტირე PLY"
-
-
-msgid "Load a PLY geometry file"
-msgstr "ჩატვირთე PLY გეომეტრიული ფაილი"
-
-
-msgid "File path used for importing the PLY file"
-msgstr "ფაილის მისამართი PLY ფაილის დასაიმპორტირებლად"
-
-
-msgctxt "Operator"
 msgid "Import STL"
 msgstr "დააიმპორტირე STL"
 
@@ -34829,15 +34734,6 @@ msgstr "დააიმპორტირე glTF 2.0"
 
 msgid "Load a glTF 2.0 file"
 msgstr "ჩატვირთე glTF 2.0 ფაილი"
-
-
-msgctxt "Operator"
-msgid "Import OBJ"
-msgstr "დააიმპორტირე OBJ"
-
-
-msgid "Load a Wavefront OBJ File"
-msgstr "ჩატვირთე Wavefront OBJ ფაილი"
 
 
 msgctxt "Operator"
@@ -38345,10 +38241,6 @@ msgid "Shear"
 msgstr "წანაცვლება"
 
 
-msgid "Shear selected items along the horizontal screen axis"
-msgstr "წაანაცვლე მონიშნული ელემენტები ეკრანის ჰორიზონტალური ღერძის გასწვრივ"
-
-
 msgctxt "Operator"
 msgid "Shrink/Fatten"
 msgstr "შეკუმშვა/გაბერვა"
@@ -39167,6 +39059,16 @@ msgstr "გახსენი მისამართი ფაილები�
 
 
 msgctxt "Operator"
+msgid "Export PLY"
+msgstr "PLY-ის ექსპორტირება"
+
+
+msgctxt "Operator"
+msgid "Import PLY"
+msgstr "დააიმპორტირე PLY"
+
+
+msgctxt "Operator"
 msgid "Batch-Clear Previews"
 msgstr "წინასწარი ხედების ერთობლივი გასუფთავება"
 
@@ -39750,8 +39652,24 @@ msgid "UV Sculpting"
 msgstr "UV-ის ძერწვა"
 
 
+msgid "Refraction"
+msgstr "გარდატეხა"
+
+
+msgid "Denoising"
+msgstr "განხმაურება"
+
+
 msgid "View Object Types"
 msgstr "მაჩვენე ობიექტების ტიპები"
+
+
+msgid "Film"
+msgstr "ფილმი"
+
+
+msgid "Passes"
+msgstr "გადავლები"
 
 
 msgid "Bendy Bones"
@@ -39790,10 +39708,6 @@ msgid "Post Processing"
 msgstr "თანამდევი დამუშავება"
 
 
-msgid "Film"
-msgstr "ფილმი"
-
-
 msgid "Pixel Filter"
 msgstr "პიქსელური ფილტრი"
 
@@ -39816,10 +39730,6 @@ msgstr "ასხლეტვების მაქს. რაოდენობ
 
 msgid "Shutter Curve"
 msgstr "ჩამკეტის მრუდი"
-
-
-msgid "Passes"
-msgstr "გადავლები"
 
 
 msgid "Performance"
@@ -40042,10 +39952,6 @@ msgid "Slot"
 msgstr "სლოტი"
 
 
-msgid "Node Panels"
-msgstr "კვანძის პანელები"
-
-
 msgid "Simulation State"
 msgstr "სიმულაციის მდგომარეობა"
 
@@ -40124,16 +40030,16 @@ msgid "Shadows"
 msgstr "ჩრდილები"
 
 
-msgid "Screen Space Reflections"
-msgstr "ეკრანის სივრცისეული არეკლვები"
-
-
 msgid "Volumetrics"
 msgstr "მოცულობითები"
 
 
 msgid "Volumetric Lighting"
 msgstr "მოცულობითი განათება"
+
+
+msgid "Screen Space Reflections"
+msgstr "ეკრანის სივრცისეული არეკლვები"
 
 
 msgid "Volumetric Shadows"
@@ -41023,6 +40929,10 @@ msgid "Temperature"
 msgstr "ტემპერატურა"
 
 
+msgid "XYZ"
+msgstr "XYZ"
+
+
 msgid "Lens focal length (mm)"
 msgstr "ლინზის ფოკუსური მანძილი (მმ)"
 
@@ -41322,6 +41232,10 @@ msgstr "სეკვენსერის ლენტები"
 
 msgid "Pixel Size"
 msgstr "პიქსელური ზომა"
+
+
+msgid "Resolution Scale"
+msgstr "გარჩევადობის მასშტაბი"
 
 
 msgid "Display the object as wire edges"
@@ -41866,10 +41780,6 @@ msgstr "ბოლო ოპერაციის პარამეტრებ�
 
 msgid "Toolbar"
 msgstr "ხელსაწყოთა ზოლი"
-
-
-msgid "Sidebar"
-msgstr "გვერდითა ზოლი"
 
 
 msgctxt "MovieClip"
@@ -43319,10 +43229,6 @@ msgid "Surfaces"
 msgstr "ზედაპირები"
 
 
-msgid "Denoising"
-msgstr "განხმაურება"
-
-
 msgid "Denoising Data"
 msgstr "განხმაურების მონაცემები"
 
@@ -43993,10 +43899,6 @@ msgid "Light Clamping"
 msgstr "სინათლის აღკვეთა"
 
 
-msgid "Refraction"
-msgstr "გარდატეხა"
-
-
 msgid "Cascade Size"
 msgstr "კასკადის ზომა"
 
@@ -44353,6 +44255,10 @@ msgstr "აქტიური ხელსაწყოები"
 msgctxt "Operator"
 msgid "Grouped"
 msgstr "დაჯგუფებული"
+
+
+msgid "Raw"
+msgstr "უფორმატო"
 
 
 msgctxt "Operator"
@@ -44812,10 +44718,6 @@ msgstr "პარამეტრების ავტომატური შ�
 msgctxt "Operator"
 msgid "Revert to Saved Preferences"
 msgstr "დაბრუნე შენახულ პარამეტრებზე"
-
-
-msgid "Resolution Scale"
-msgstr "გარჩევადობის მასშტაბი"
 
 
 msgid "Splash Screen"
@@ -47012,6 +46914,10 @@ msgid "Object Groups"
 msgstr "ობიექტების ჯგუფები"
 
 
+msgid "Material Groups"
+msgstr "მასალის ჯგუფები"
+
+
 msgid "Mesh Data"
 msgstr "მეშის მონაცემები"
 
@@ -48917,50 +48823,6 @@ msgid "4:3 in 16:9"
 msgstr "4:3 16:9-ში"
 
 
-msgid "apple"
-msgstr "ვაშლი"
-
-
-msgid "chicken"
-msgstr "ქათამი"
-
-
-msgid "cream"
-msgstr "კრემი"
-
-
-msgid "ketchup"
-msgstr "კეჩუპი"
-
-
-msgid "marble"
-msgstr "მარმარილო"
-
-
-msgid "potato"
-msgstr "კარტოფილი"
-
-
-msgid "skim milk"
-msgstr "უცხიმო რძე"
-
-
-msgid "skin1"
-msgstr "კანი1"
-
-
-msgid "skin2"
-msgstr "კანი2"
-
-
-msgid "whole milk"
-msgstr "რძე"
-
-
-msgid "internal"
-msgstr "შიდა"
-
-
 msgid "Blurry Footage"
 msgstr "გადღაბნილი ვიდეომასალა"
 
@@ -49097,24 +48959,12 @@ msgid "File > Import > Scalable Vector Graphics (.svg)"
 msgstr "ფაილი > იმპორტი > Scalable Vector Graphics (.svg)"
 
 
-msgid "Stanford PLY format"
-msgstr "Stanford PLY ფორმატი"
-
-
-msgid "File > Import/Export"
-msgstr "ფაილი > იმპორტი/ექსპორტი"
-
-
 msgid "UV Layout"
 msgstr "UV განლაგება"
 
 
 msgid "UV Editor > UV > Export UV Layout"
 msgstr "UV რედაქტორი > UV > UV განლაგების ექსპორტი"
-
-
-msgid "Wavefront OBJ format (legacy)"
-msgstr "Wavefront OBJ ფორმატი (ძველებური)"
 
 
 msgid "glTF 2.0 format"

@@ -10,9 +10,9 @@
 
 #include "BLI_math_vector_types.hh"
 
-#include "ED_numinput.h"
-#include "ED_transform.h"
-#include "ED_view3d.h"
+#include "ED_numinput.hh"
+#include "ED_transform.hh"
+#include "ED_view3d.hh"
 
 #include "DNA_listBase.h"
 #include "DNA_object_enums.h"
@@ -252,7 +252,7 @@ enum {
   TFM_MODAL_ADD_SNAP = 16,
   TFM_MODAL_REMOVE_SNAP = 17,
 
-  /* 18 and 19 used by number-input, defined in `ED_numinput.h`. */
+  /* 18 and 19 used by number-input, defined in `ED_numinput.hh`. */
   // NUM_MODAL_INCREMENT_UP = 18,
   // NUM_MODAL_INCREMENT_DOWN = 19,
 
@@ -394,11 +394,6 @@ struct TransCustomData {
   void *data;
   void (*free_cb)(TransInfo *, TransDataContainer *tc, TransCustomData *custom_data);
   unsigned int use_free : 1;
-};
-
-struct TransCenterData {
-  float global[3];
-  unsigned int is_set : 1;
 };
 
 /**
@@ -651,7 +646,7 @@ struct TransInfo {
   /** assign from the operator, or can be NULL. */
   ReportList *reports;
   /** current mouse position. */
-  int mval[2];
+  blender::float2 mval;
   /** use for 3d view. */
   float zfac;
   void *draw_handle_view;
@@ -749,7 +744,7 @@ void initMouseInput(TransInfo *t,
                     const blender::float2 &mval,
                     bool precision);
 void initMouseInputMode(TransInfo *t, MouseInput *mi, MouseInputMode mode);
-void applyMouseInput(TransInfo *t, MouseInput *mi, const blender::int2 &mval, float output[3]);
+void applyMouseInput(TransInfo *t, MouseInput *mi, const blender::float2 &mval, float output[3]);
 void transform_input_update(TransInfo *t, const float fac);
 void transform_input_virtual_mval_reset(TransInfo *t);
 void transform_input_reset(TransInfo *t, const blender::float2 &mval);

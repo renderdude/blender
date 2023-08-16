@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -18,7 +18,7 @@
 
 #include "../system/FreestyleConfig.h"
 
-#include "BLI_math.h"
+#include "BLI_math_base.h"
 
 #ifdef WITH_CXX_GUARDEDALLOC
 #  include "MEM_guardedalloc.h"
@@ -1240,7 +1240,8 @@ class WShape {
     Vec3f v;
     for (vector<WVertex *>::iterator wv = _VertexList.begin(), wvend = _VertexList.end();
          wv != wvend;
-         wv++) {
+         wv++)
+    {
       for (uint i = 0; i < 3; i++) {
         v = (*wv)->GetVertex();
         if (v[i] < _min[i]) {

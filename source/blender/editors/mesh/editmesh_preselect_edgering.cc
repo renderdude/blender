@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -10,7 +10,6 @@
 
 #include "DNA_userdef_types.h"
 
-#include "BLI_math.h"
 #include "BLI_stack.h"
 
 #include "BKE_editmesh.h"
@@ -19,9 +18,9 @@
 #include "GPU_matrix.h"
 #include "GPU_state.h"
 
-#include "ED_mesh.h"
+#include "ED_mesh.hh"
 
-#include "UI_resources.h"
+#include "UI_resources.hh"
 
 /* -------------------------------------------------------------------- */
 /** \name Mesh Edge Ring Pre-Select

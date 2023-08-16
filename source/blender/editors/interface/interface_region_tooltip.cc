@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2008 Blender Foundation
+/* SPDX-FileCopyrightText: 2008 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -27,22 +27,23 @@
 #include "DNA_userdef_types.h"
 
 #include "BLI_listbase.h"
-#include "BLI_math.h"
+#include "BLI_math_color.h"
+#include "BLI_math_vector.h"
 #include "BLI_rect.h"
 #include "BLI_string.h"
 #include "BLI_utildefines.h"
 
 #include "BKE_context.h"
-#include "BKE_paint.h"
+#include "BKE_paint.hh"
 #include "BKE_screen.h"
 
-#include "WM_api.h"
-#include "WM_types.h"
+#include "WM_api.hh"
+#include "WM_types.hh"
 
-#include "RNA_access.h"
-#include "RNA_path.h"
+#include "RNA_access.hh"
+#include "RNA_path.hh"
 
-#include "UI_interface.h"
+#include "UI_interface.hh"
 
 #include "BLF_api.h"
 #include "BLT_translation.h"
@@ -51,7 +52,7 @@
 #  include "BPY_extern_run.h"
 #endif
 
-#include "ED_screen.h"
+#include "ED_screen.hh"
 
 #include "interface_intern.hh"
 #include "interface_regions_intern.hh"
@@ -1051,20 +1052,19 @@ static uiTooltipData *ui_tooltip_data_from_gizmo(bContext *C, wmGizmo *gz)
                                 nullptr;
       if (gzop != nullptr) {
         /* Description */
-        char *info = WM_operatortype_description_or_name(C, gzop->type, &gzop->ptr);
+        std::string info = WM_operatortype_description_or_name(C, gzop->type, &gzop->ptr);
 
-        if (info != nullptr) {
-          char *text = info;
+        if (!info.empty()) {
+          const char *text = info.c_str();
 
           if (gzop_actions[i].prefix != nullptr) {
-            text = BLI_sprintfN("%s: %s", gzop_actions[i].prefix, info);
-            MEM_freeN(info);
+            text = BLI_sprintfN("%s: %s", gzop_actions[i].prefix, info.c_str());
           }
 
           if (text != nullptr) {
             uiTooltipField *field = text_field_add(
                 data, uiTooltipFormat::Style::Header, uiTooltipFormat::ColorID::Value, true);
-            field->text = text;
+            field->text = BLI_strdup(text);
           }
         }
 

@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: Blender Foundation
+/* SPDX-FileCopyrightText: Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -43,7 +43,9 @@
 
 #include "BLI_ghash.h"
 #include "BLI_listbase.h"
-#include "BLI_math.h"
+#include "BLI_math_geom.h"
+#include "BLI_math_matrix.h"
+#include "BLI_math_vector.h"
 #include "BLI_threads.h"
 #include "BLI_utildefines.h"
 
@@ -2275,7 +2277,8 @@ static void softbody_calc_forces(
   /* check conditions for various options */
   do_deflector = query_external_colliders(depsgraph, sb->collision_group);
 #if 0
-  do_selfcollision=((ob->softflag & OB_SB_EDGES) && (sb->bspring)&& (ob->softflag & OB_SB_SELF));
+  do_selfcollision = ((ob->softflag & OB_SB_EDGES) && (sb->bspring) &&
+                      (ob->softflag & OB_SB_SELF));
 #endif
   do_springcollision = do_deflector && (ob->softflag & OB_SB_EDGES) &&
                        (ob->softflag & OB_SB_EDGECOLL);
@@ -3139,7 +3142,8 @@ SoftBody *sbNew(void)
 
   sb->inspring = 0.5f;
   sb->infrict = 0.5f;
-  /* TODO: backward file compat should copy `inspring` to `inpush` while reading old files. */
+  /* TODO: backward file compatibility should copy `inspring` to `inpush` while reading old files.
+   */
   sb->inpush = 0.5f;
 
   sb->colball = 0.49f;
@@ -3152,7 +3156,8 @@ SoftBody *sbNew(void)
 
   sb->choke = 3;
   sb_new_scratch(sb);
-  /* TODO: backward file compat should set `sb->shearstiff = 1.0f` while reading old files. */
+  /* TODO: backward file compatibility should set `sb->shearstiff = 1.0f` while reading old files.
+   */
   sb->shearstiff = 1.0f;
   sb->solverflags |= SBSO_OLDERR;
 

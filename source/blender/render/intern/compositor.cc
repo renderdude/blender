@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -320,7 +320,7 @@ class Context : public realtime_compositor::Context {
 
     Image *image = BKE_image_ensure_viewer(G.main, IMA_TYPE_COMPOSITE, "Viewer Node");
 
-    ImageUser image_user = {0};
+    ImageUser image_user = {nullptr};
     image_user.multi_index = BKE_scene_multiview_view_id_get(input_data_.render_data,
                                                              input_data_.view_name.c_str());
 
@@ -431,6 +431,34 @@ class RealtimeCompositor {
 
 }  // namespace blender::render
 
+void Render::compositor_execute(const Scene &scene,
+                                const RenderData &render_data,
+                                const bNodeTree &node_tree,
+                                const bool use_file_output,
+                                const char *view_name)
+{
+  std::unique_lock lock(gpu_compositor_mutex);
+
+  blender::render::ContextInputData input_data(
+      scene, render_data, node_tree, use_file_output, view_name);
+
+  if (gpu_compositor == nullptr) {
+    gpu_compositor = new blender::render::RealtimeCompositor(*this, input_data);
+  }
+
+  gpu_compositor->execute(input_data);
+}
+
+void Render::compositor_free()
+{
+  std::unique_lock lock(gpu_compositor_mutex);
+
+  if (gpu_compositor != nullptr) {
+    delete gpu_compositor;
+    gpu_compositor = nullptr;
+  }
+}
+
 void RE_compositor_execute(Render &render,
                            const Scene &scene,
                            const RenderData &render_data,
@@ -438,26 +466,10 @@ void RE_compositor_execute(Render &render,
                            const bool use_file_output,
                            const char *view_name)
 {
-  BLI_mutex_lock(&render.gpu_compositor_mutex);
-
-  blender::render::ContextInputData input_data(
-      scene, render_data, node_tree, use_file_output, view_name);
-
-  if (render.gpu_compositor == nullptr) {
-    render.gpu_compositor = new blender::render::RealtimeCompositor(render, input_data);
-  }
-
-  render.gpu_compositor->execute(input_data);
-
-  BLI_mutex_unlock(&render.gpu_compositor_mutex);
+  render.compositor_execute(scene, render_data, node_tree, use_file_output, view_name);
 }
 
 void RE_compositor_free(Render &render)
 {
-  BLI_mutex_lock(&render.gpu_compositor_mutex);
-  if (render.gpu_compositor) {
-    delete render.gpu_compositor;
-    render.gpu_compositor = nullptr;
-  }
-  BLI_mutex_unlock(&render.gpu_compositor_mutex);
+  render.compositor_free();
 }

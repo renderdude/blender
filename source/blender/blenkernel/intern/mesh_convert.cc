@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -23,7 +23,6 @@
 #include "BLI_edgehash.h"
 #include "BLI_index_range.hh"
 #include "BLI_listbase.h"
-#include "BLI_math.h"
 #include "BLI_span.hh"
 #include "BLI_string.h"
 #include "BLI_utildefines.h"
@@ -44,8 +43,8 @@
 #include "BKE_material.h"
 #include "BKE_mball.h"
 #include "BKE_mesh.hh"
-#include "BKE_mesh_runtime.h"
-#include "BKE_mesh_wrapper.h"
+#include "BKE_mesh_runtime.hh"
+#include "BKE_mesh_wrapper.hh"
 #include "BKE_modifier.h"
 /* these 2 are only used by conversion functions */
 #include "BKE_curve.h"
@@ -575,7 +574,7 @@ void BKE_pointcloud_to_mesh(Main *bmain, Depsgraph *depsgraph, Scene * /*scene*/
 
   Mesh *mesh = BKE_mesh_add(bmain, ob->id.name + 2);
 
-  if (const PointCloud *points = geometry.get_pointcloud_for_read()) {
+  if (const PointCloud *points = geometry.get_pointcloud()) {
     mesh->totvert = points->totpoint;
     CustomData_merge(&points->pdata, &mesh->vert_data, CD_MASK_PROP_ALL, points->totpoint);
   }
@@ -689,7 +688,7 @@ static void curve_to_mesh_eval_ensure(Object &object)
 static const Curves *get_evaluated_curves_from_object(const Object *object)
 {
   if (blender::bke::GeometrySet *geometry_set_eval = object->runtime.geometry_set_eval) {
-    return geometry_set_eval->get_curves_for_read();
+    return geometry_set_eval->get_curves();
   }
   return nullptr;
 }

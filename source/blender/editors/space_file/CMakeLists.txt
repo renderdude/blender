@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023 Blender Foundation
+# SPDX-FileCopyrightText: 2023 Blender Authors
 #
 # SPDX-License-Identifier: GPL-2.0-or-later
 
@@ -35,7 +35,8 @@ set(SRC
   filelist.cc
   filesel.cc
   folder_history.cc
-  fsmenu.c
+  fsmenu.cc
+  fsmenu_system.cc
   space_file.cc
 
   file_indexer.hh

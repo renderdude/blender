@@ -15,9 +15,9 @@
 #include "BLI_vector.hh"
 
 #include "DNA_listBase.h"
-#include "RNA_types.h"
-#include "UI_interface.h"
-#include "UI_resources.h"
+#include "RNA_types.hh"
+#include "UI_interface.hh"
+#include "UI_resources.hh"
 
 struct AnimationEvalContext;
 struct ARegion;
@@ -82,7 +82,7 @@ enum {
    * active button can be polled on non-active buttons to (e.g. for disabling). */
   UI_BUT_ACTIVE_OVERRIDE = (1 << 7),
 
-  /* WARNING: rest of #uiBut.flag in UI_interface.h */
+  /* WARNING: rest of #uiBut.flag in UI_interface.hh */
 };
 
 /** #uiBut.pie_dir */
@@ -369,12 +369,12 @@ struct uiButColorBand : public uiBut {
 
 /** Derived struct for #UI_BTYPE_CURVEPROFILE. */
 struct uiButCurveProfile : public uiBut {
-  struct CurveProfile *edit_profile = nullptr;
+  CurveProfile *edit_profile = nullptr;
 };
 
 /** Derived struct for #UI_BTYPE_CURVE. */
 struct uiButCurveMapping : public uiBut {
-  struct CurveMapping *edit_cumap = nullptr;
+  CurveMapping *edit_cumap = nullptr;
   eButGradientType gradient_type = UI_GRAD_SV;
 };
 
@@ -397,7 +397,7 @@ struct uiButExtraOpIcon {
 };
 
 struct ColorPicker {
-  struct ColorPicker *next, *prev;
+  ColorPicker *next, *prev;
 
   /** Color in HSV or HSL, in color picking color space. Used for HSV cube,
    * circle and slider widgets. The color picking space is perceptually
@@ -467,9 +467,9 @@ struct uiButtonGroup {
 };
 
 struct uiBlockDynamicListener {
-  struct uiBlockDynamicListener *next, *prev;
+  uiBlockDynamicListener *next, *prev;
 
-  void (*listener_func)(const struct wmRegionListenerParams *params);
+  void (*listener_func)(const wmRegionListenerParams *params);
 };
 
 struct uiBlock {
@@ -855,7 +855,7 @@ struct uiPopupBlockHandle {
 
 /* `interface_region_tooltip.cc` */
 
-/* exposed as public API in UI_interface.h */
+/* exposed as public API in UI_interface.hh */
 
 /* `interface_region_color_picker.cc` */
 
@@ -1191,13 +1191,18 @@ void ui_draw_preview_item(const uiFontStyle *fstyle,
 /**
  * Version of #ui_draw_preview_item() that does not draw the menu background and item text based on
  * state. It just draws the preview and text directly.
+ *
+ * \param draw_as_icon: Instead of stretching the preview/icon to the available width/height, draw
+ *                      it at the standard icon size. Mono-icons will draw with \a text_col or the
+ *                      corresponding theme override for this type of icon.
  */
 void ui_draw_preview_item_stateless(const uiFontStyle *fstyle,
                                     rcti *rect,
                                     const char *name,
                                     int iconid,
                                     const uchar text_col[4],
-                                    eFontStyle_Align text_align);
+                                    eFontStyle_Align text_align,
+                                    bool draw_as_icon = false);
 
 #define UI_TEXT_MARGIN_X 0.4f
 #define UI_POPUP_MARGIN (UI_SCALE_FAC * 12)
@@ -1342,9 +1347,9 @@ uiBut *ui_list_find_mouse_over(const ARegion *region,
 uiBut *ui_list_find_from_row(const ARegion *region, const uiBut *row_but) ATTR_WARN_UNUSED_RESULT;
 uiBut *ui_list_row_find_mouse_over(const ARegion *region, const int xy[2])
     ATTR_NONNULL(1, 2) ATTR_WARN_UNUSED_RESULT;
-uiBut *ui_list_row_find_from_index(const ARegion *region,
-                                   int index,
-                                   uiBut *listbox) ATTR_WARN_UNUSED_RESULT;
+uiBut *ui_list_row_find_index(const ARegion *region,
+                              int index,
+                              uiBut *listbox) ATTR_WARN_UNUSED_RESULT;
 uiBut *ui_view_item_find_mouse_over(const ARegion *region, const int xy[2]) ATTR_NONNULL(1, 2);
 uiBut *ui_view_item_find_active(const ARegion *region);
 

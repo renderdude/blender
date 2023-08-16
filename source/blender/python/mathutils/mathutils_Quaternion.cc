@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -10,7 +10,9 @@
 
 #include "mathutils.h"
 
-#include "BLI_math.h"
+#include "BLI_math_matrix.h"
+#include "BLI_math_rotation.h"
+#include "BLI_math_vector.h"
 #include "BLI_utildefines.h"
 
 #include "../generic/py_capi_utils.h"
@@ -1551,22 +1553,22 @@ static PyGetSetDef Quaternion_getseters[] = {
      (getter)Quaternion_axis_get,
      (setter)Quaternion_axis_set,
      Quaternion_axis_doc,
-     (void *)0},
+     POINTER_FROM_INT(0)},
     {"x",
      (getter)Quaternion_axis_get,
      (setter)Quaternion_axis_set,
      Quaternion_axis_doc,
-     (void *)1},
+     POINTER_FROM_INT(1)},
     {"y",
      (getter)Quaternion_axis_get,
      (setter)Quaternion_axis_set,
      Quaternion_axis_doc,
-     (void *)2},
+     POINTER_FROM_INT(2)},
     {"z",
      (getter)Quaternion_axis_get,
      (setter)Quaternion_axis_set,
      Quaternion_axis_doc,
-     (void *)3},
+     POINTER_FROM_INT(3)},
     {"magnitude",
      (getter)Quaternion_magnitude_get,
      (setter) nullptr,

@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -11,7 +11,7 @@
 #include "mathutils.h"
 #include "mathutils_interpolate.h"
 
-#include "BLI_math.h"
+#include "BLI_math_geom.h"
 #include "BLI_utildefines.h"
 
 #ifndef MATH_STANDALONE /* define when building outside blender */

@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2009 Blender Foundation
+/* SPDX-FileCopyrightText: 2009 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -15,7 +15,7 @@
 #include "DNA_userdef_types.h"
 
 #include "BLI_listbase.h"
-#include "BLI_math.h"
+#include "BLI_math_color.h"
 #include "BLI_rect.h"
 #include "BLI_string.h"
 #include "BLI_string_utf8.h"
@@ -23,15 +23,15 @@
 
 #include "BKE_context.h"
 
-#include "RNA_access.h"
+#include "RNA_access.hh"
 
 #include "BLF_api.h"
 
 #include "ED_node.hh"
 
-#include "UI_interface.h"
-#include "UI_interface_icons.h"
-#include "UI_view2d.h"
+#include "UI_interface.hh"
+#include "UI_interface_icons.hh"
+#include "UI_view2d.hh"
 
 #include "interface_intern.hh"
 
@@ -44,7 +44,7 @@
 #include "GPU_state.h"
 
 #ifdef WITH_INPUT_IME
-#  include "WM_types.h"
+#  include "WM_types.hh"
 #endif
 
 /* -------------------------------------------------------------------- */
@@ -1344,6 +1344,32 @@ static void widget_draw_preview(BIFIconID icon, float alpha, const rcti *rect)
   }
 }
 
+static void widget_draw_icon_centered(const BIFIconID icon,
+                                      const float aspect,
+                                      const float alpha,
+                                      const rcti *rect,
+                                      const uchar mono_color[4])
+{
+  if (icon == ICON_NONE) {
+    return;
+  }
+
+  const float size = ICON_DEFAULT_HEIGHT / (aspect * UI_INV_SCALE_FAC);
+
+  if (size > 0) {
+    const int x = BLI_rcti_cent_x(rect) - size / 2;
+    const int y = BLI_rcti_cent_y(rect) - size / 2;
+
+    const bTheme *btheme = UI_GetTheme();
+    const float desaturate = 1.0 - btheme->tui.icon_saturation;
+    uchar color[4] = {mono_color[0], mono_color[1], mono_color[2], mono_color[3]};
+    const bool has_theme = UI_icon_get_theme_color(int(icon), color);
+
+    UI_icon_draw_ex(
+        x, y, icon, aspect * UI_INV_SCALE_FAC, alpha, desaturate, color, has_theme, nullptr);
+  }
+}
+
 static int ui_but_draw_menu_icon(const uiBut *but)
 {
   return (but->flag & UI_BUT_ICON_SUBMENU) && (but->emboss == UI_EMBOSS_PULLDOWN);
@@ -2287,7 +2313,7 @@ static void widget_draw_text_icon(const uiFontStyle *fstyle,
 
   /* Big previews with optional text label below */
   if (but->flag & UI_BUT_ICON_PREVIEW && ui_block_is_menu(but->block)) {
-    const BIFIconID icon = BIFIconID(ui_but_icon(but));
+    const BIFIconID icon = ui_but_icon(but);
     int icon_size = BLI_rcti_size_y(rect);
     int text_size = 0;
 
@@ -2324,7 +2350,7 @@ static void widget_draw_text_icon(const uiFontStyle *fstyle,
     }
 #endif
 
-    const BIFIconID icon = BIFIconID(ui_but_icon(but));
+    const BIFIconID icon = ui_but_icon(but);
     const int icon_size_init = is_tool ? ICON_DEFAULT_HEIGHT_TOOLBAR : ICON_DEFAULT_HEIGHT;
     const float icon_size = icon_size_init / (but->block->aspect * UI_INV_SCALE_FAC);
     const float icon_padding = 2 * UI_SCALE_FAC;
@@ -4202,8 +4228,17 @@ static void widget_preview_tile(uiBut *but,
     widget_list_itembut(wcol, rect, state, roundboxalign, zoom);
   }
 
-  ui_draw_preview_item_stateless(
-      &UI_style_get()->widget, rect, but->drawstr, but->icon, wcol->text, UI_STYLE_TEXT_CENTER);
+  /* When the button is not tagged as having a preview icon, do regular icon drawing with the
+   * standard icon size. */
+  const bool draw_as_icon = !(but->flag & UI_BUT_ICON_PREVIEW);
+
+  ui_draw_preview_item_stateless(&UI_style_get()->widget,
+                                 rect,
+                                 but->drawstr,
+                                 but->icon,
+                                 wcol->text,
+                                 UI_STYLE_TEXT_CENTER,
+                                 draw_as_icon);
 }
 
 static void widget_optionbut(uiWidgetColors *wcol,
@@ -4617,6 +4652,8 @@ static uiWidgetType *widget_type(uiWidgetTypeEnum type)
       wt.draw = nullptr;
       /* Drawn via the `custom` callback. */
       wt.text = nullptr;
+      /* Drawing indicates state well enough. No need to change colors further. */
+      wt.state = widget_state_nothing;
       wt.custom = widget_preview_tile;
       wt.wcol_theme = &btheme->tui.wcol_list_item;
       break;
@@ -5570,18 +5607,36 @@ void ui_draw_preview_item_stateless(const uiFontStyle *fstyle,
                                     const char *name,
                                     int iconid,
                                     const uchar text_col[4],
-                                    eFontStyle_Align text_align)
+                                    eFontStyle_Align text_align,
+                                    bool draw_as_icon)
 {
   rcti trect = *rect;
   const float text_size = UI_UNIT_Y;
   const bool has_text = name && name[0];
+
+  float alpha = 1.0f;
+
+  {
+    /* Special handling: Previews often want to show a loading icon while the preview is being
+     * loaded. Draw this with reduced opacity. */
+    const bool is_loading_icon = iconid == ICON_TEMP;
+    if (is_loading_icon) {
+      alpha *= 0.5f;
+      draw_as_icon = true;
+    }
+  }
 
   if (has_text) {
     /* draw icon in rect above the space reserved for the label */
     rect->ymin += text_size;
   }
   GPU_blend(GPU_BLEND_ALPHA);
-  widget_draw_preview(BIFIconID(iconid), 1.0f, rect);
+  if (draw_as_icon) {
+    widget_draw_icon_centered(iconid, 1.0f, alpha, rect, text_col);
+  }
+  else {
+    widget_draw_preview(iconid, alpha, rect);
+  }
   GPU_blend(GPU_BLEND_NONE);
 
   if (!has_text) {

@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2014 Blender Foundation
+/* SPDX-FileCopyrightText: 2014 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -17,6 +17,8 @@
 #include "BLI_blenlib.h"
 #include "BLI_ghash.h"
 #include "BLI_lasso_2d.h"
+#include "BLI_math_color.h"
+#include "BLI_math_matrix.h"
 #include "BLI_math_vector.h"
 #include "BLI_rand.h"
 #include "BLI_utildefines.h"
@@ -35,20 +37,20 @@
 #include "BKE_material.h"
 #include "BKE_report.h"
 
-#include "UI_interface.h"
-#include "UI_resources.h"
+#include "UI_interface.hh"
+#include "UI_resources.hh"
 
-#include "WM_api.h"
-#include "WM_types.h"
+#include "WM_api.hh"
+#include "WM_types.hh"
 
-#include "RNA_access.h"
-#include "RNA_define.h"
+#include "RNA_access.hh"
+#include "RNA_define.hh"
 
-#include "UI_view2d.h"
+#include "UI_view2d.hh"
 
-#include "ED_gpencil_legacy.h"
-#include "ED_select_utils.h"
-#include "ED_view3d.h"
+#include "ED_gpencil_legacy.hh"
+#include "ED_select_utils.hh"
+#include "ED_view3d.hh"
 
 #include "DEG_depsgraph.h"
 #include "DEG_depsgraph_query.h"
@@ -765,7 +767,6 @@ static bool gpencil_select_same_layer(bContext *C)
   bool changed = false;
   CTX_DATA_BEGIN (C, bGPDlayer *, gpl, editable_gpencil_layers) {
     bGPDframe *gpf = BKE_gpencil_layer_frame_get(gpl, scene->r.cfra, GP_GETFRAME_USE_PREV);
-    bGPDstroke *gps;
     bool found = false;
 
     if (gpf == nullptr) {
@@ -773,7 +774,7 @@ static bool gpencil_select_same_layer(bContext *C)
     }
 
     /* Search for a selected stroke */
-    for (gps = static_cast<bGPDstroke *>(gpf->strokes.first); gps; gps = gps->next) {
+    LISTBASE_FOREACH (bGPDstroke *, gps, &gpf->strokes) {
       if (ED_gpencil_stroke_can_use(C, gps)) {
         if (gps->flag & GP_STROKE_SELECT) {
           found = true;
@@ -785,7 +786,7 @@ static bool gpencil_select_same_layer(bContext *C)
     /* Select all if found */
     if (found) {
       if (is_curve_edit) {
-        for (gps = static_cast<bGPDstroke *>(gpf->strokes.first); gps; gps = gps->next) {
+        LISTBASE_FOREACH (bGPDstroke *, gps, &gpf->strokes) {
           if (gps->editcurve != nullptr && ED_gpencil_stroke_can_use(C, gps)) {
             bGPDcurve *gpc = gps->editcurve;
             for (int i = 0; i < gpc->tot_curve_points; i++) {
@@ -802,7 +803,7 @@ static bool gpencil_select_same_layer(bContext *C)
         }
       }
       else {
-        for (gps = static_cast<bGPDstroke *>(gpf->strokes.first); gps; gps = gps->next) {
+        LISTBASE_FOREACH (bGPDstroke *, gps, &gpf->strokes) {
           if (ED_gpencil_stroke_can_use(C, gps)) {
             bGPDspoint *pt;
             int i;

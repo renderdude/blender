@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 #pragma once
@@ -89,8 +89,8 @@ enum {
   ID_REMAP_FORCE_USER_REFCOUNT = 1 << 17,
   /**
    * Do NOT handle user count for IDs (used in some cases when dealing with IDs from different
-   * BMains, if usercount will be recomputed anyway afterwards, like e.g. in memfile reading during
-   * undo step decoding).
+   * BMains, if user-count will be recomputed anyway afterwards, like e.g.
+   * in memfile reading during undo step decoding).
    */
   ID_REMAP_SKIP_USER_REFCOUNT = 1 << 18,
   /**

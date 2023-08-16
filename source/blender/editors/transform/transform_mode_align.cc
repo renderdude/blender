@@ -8,11 +8,12 @@
 
 #include <cstdlib>
 
-#include "BLI_math.h"
-
 #include "BKE_context.h"
 
-#include "ED_screen.h"
+#include "ED_screen.hh"
+
+#include "BLI_math_matrix.h"
+#include "BLI_math_vector.h"
 
 #include "BLT_translation.h"
 
@@ -25,7 +26,7 @@
 /** \name Transform (Align)
  * \{ */
 
-static void applyAlign(TransInfo *t, const int[2] /*mval*/)
+static void applyAlign(TransInfo *t)
 {
   float center[3];
   int i;

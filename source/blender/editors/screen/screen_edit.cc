@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2008 Blender Foundation
+/* SPDX-FileCopyrightText: 2008 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -31,17 +31,17 @@
 #include "BKE_sound.h"
 #include "BKE_workspace.h"
 
-#include "WM_api.h"
-#include "WM_types.h"
+#include "WM_api.hh"
+#include "WM_types.hh"
 
-#include "ED_clip.h"
-#include "ED_node.h"
-#include "ED_screen.h"
-#include "ED_screen_types.h"
+#include "ED_clip.hh"
+#include "ED_node.hh"
+#include "ED_screen.hh"
+#include "ED_screen_types.hh"
 
-#include "UI_interface.h"
+#include "UI_interface.hh"
 
-#include "WM_message.h"
+#include "WM_message.hh"
 #include "WM_toolsystem.h"
 
 #include "DEG_depsgraph_query.h"
@@ -728,7 +728,7 @@ static bool region_poll(const bContext *C,
     return true;
   }
 
-  RegionPollParams params = {0};
+  RegionPollParams params = {nullptr};
   params.screen = screen;
   params.area = area;
   params.region = region;
@@ -895,7 +895,10 @@ static void screen_cursor_set(wmWindow *win, const int xy[2])
   ScrArea *area = nullptr;
 
   LISTBASE_FOREACH (ScrArea *, area_iter, &screen->areabase) {
-    if ((az = ED_area_actionzone_find_xy(area_iter, xy))) {
+    az = ED_area_actionzone_find_xy(area_iter, xy);
+    /* Scrollers use default cursor and their zones extend outside of their
+     * areas. Ignore here so we can always detect screen edges - #110085. */
+    if (az && az->type != AZONE_REGION_SCROLL) {
       area = area_iter;
       break;
     }
@@ -976,7 +979,7 @@ void ED_screen_set_active_region(bContext *C, wmWindow *win, const int xy[2])
 
       LISTBASE_FOREACH (ARegion *, region, &area_iter->regionbase) {
         /* Call old area's deactivate if assigned. */
-        if (region == region_prev && area_iter->type->deactivate) {
+        if (region == region_prev && area_iter->type && area_iter->type->deactivate) {
           area_iter->type->deactivate(area_iter);
         }
 
@@ -1500,7 +1503,9 @@ static bScreen *screen_state_to_nonnormal(bContext *C,
                RGN_TYPE_FOOTER,
                RGN_TYPE_TOOLS,
                RGN_TYPE_NAV_BAR,
-               RGN_TYPE_EXECUTE))
+               RGN_TYPE_EXECUTE,
+               RGN_TYPE_ASSET_SHELF,
+               RGN_TYPE_ASSET_SHELF_HEADER))
       {
         region->flag |= RGN_FLAG_HIDDEN;
       }

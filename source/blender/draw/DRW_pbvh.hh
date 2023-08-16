@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2022 Blender Foundation
+/* SPDX-FileCopyrightText: 2022 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -61,7 +61,6 @@ struct PBVH_GPU_Args {
   blender::Span<int> grid_indices;
   CCGKey ccg_key;
   CCGElem **grids;
-  void **gridfaces;
   BLI_bitmap **grid_hidden;
 
   blender::Span<int> prim_indices;

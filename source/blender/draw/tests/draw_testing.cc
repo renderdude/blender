@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: Apache-2.0 */
 
@@ -23,6 +23,14 @@ void DrawOpenGLTest::SetUp()
 void DrawMetalTest::SetUp()
 {
   GPUMetalTest::SetUp();
+  DRW_draw_state_init_gtests(GPU_SHADER_CFG_DEFAULT);
+}
+#endif
+
+#ifdef WITH_VULKAN_BACKEND
+void DrawVulkanTest::SetUp()
+{
+  GPUVulkanTest::SetUp();
   DRW_draw_state_init_gtests(GPU_SHADER_CFG_DEFAULT);
 }
 #endif

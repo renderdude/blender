@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -29,7 +29,7 @@
 #include "BLI_threads.h"
 #include "BLI_utildefines.h"
 
-#include "RNA_types.h"
+#include "RNA_types.hh"
 
 #include "bpy.h"
 #include "bpy_capi_utils.h"
@@ -257,6 +257,11 @@ static PyObject *CCL_initPython()
 }
 #endif
 
+#ifdef WITH_HYDRA
+/* defined in render_hydra module */
+PyObject *BPyInit_hydra();
+#endif
+
 static _inittab bpy_internal_modules[] = {
     {"mathutils", PyInit_mathutils},
 #if 0
@@ -286,6 +291,9 @@ static _inittab bpy_internal_modules[] = {
 #endif
     {"gpu", BPyInit_gpu},
     {"idprop", BPyInit_idprop},
+#ifdef WITH_HYDRA
+    {"_bpy_hydra", BPyInit_hydra},
+#endif
     {nullptr, nullptr},
 };
 

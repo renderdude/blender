@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -9,8 +9,8 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "RNA_define.h"
-#include "RNA_enum_types.h"
+#include "RNA_define.hh"
+#include "RNA_enum_types.hh"
 
 #include "rna_internal.h"
 
@@ -20,14 +20,15 @@
 #include "DNA_object_types.h"
 #include "DNA_scene_types.h"
 
-#include "BLI_math.h"
+#include "BLI_math_rotation.h"
+#include "BLI_math_vector.h"
 #include "BLI_string_utf8_symbols.h"
 
 #include "BLT_translation.h"
 
-#include "UI_resources.h"
+#include "UI_resources.hh"
 
-#include "WM_types.h"
+#include "WM_types.hh"
 
 /* Bone and Group Color Sets */
 const EnumPropertyItem rna_enum_color_sets_items[] = {
@@ -77,12 +78,12 @@ const EnumPropertyItem rna_enum_color_sets_items[] = {
 #  include "DEG_depsgraph.h"
 #  include "DEG_depsgraph_build.h"
 
-#  include "ED_armature.h"
-#  include "ED_object.h"
+#  include "ED_armature.hh"
+#  include "ED_object.hh"
 
-#  include "WM_api.h"
+#  include "WM_api.hh"
 
-#  include "RNA_access.h"
+#  include "RNA_access.hh"
 
 static void rna_Pose_update(Main * /*bmain*/, Scene * /*scene*/, PointerRNA *ptr)
 {
@@ -818,7 +819,8 @@ static void rna_PoseChannel_matrix_basis_get(PointerRNA *ptr, float *values)
 static void rna_PoseChannel_matrix_basis_set(PointerRNA *ptr, const float *values)
 {
   bPoseChannel *pchan = (bPoseChannel *)ptr->data;
-  BKE_pchan_apply_mat4(pchan, (float(*)[4])values, false); /* no compat for predictable result */
+  /* No compatibility for predictable result. */
+  BKE_pchan_apply_mat4(pchan, (const float(*)[4])values, false);
 }
 
 static void rna_PoseChannel_matrix_set(PointerRNA *ptr, const float *values)
@@ -827,9 +829,10 @@ static void rna_PoseChannel_matrix_set(PointerRNA *ptr, const float *values)
   Object *ob = (Object *)ptr->owner_id;
   float tmat[4][4];
 
-  BKE_armature_mat_pose_to_bone_ex(nullptr, ob, pchan, (float(*)[4])values, tmat);
+  BKE_armature_mat_pose_to_bone_ex(nullptr, ob, pchan, (const float(*)[4])values, tmat);
 
-  BKE_pchan_apply_mat4(pchan, tmat, false); /* no compat for predictable result */
+  /* No compatibility for predictable result. */
+  BKE_pchan_apply_mat4(pchan, tmat, false);
 }
 
 static bPoseChannel *rna_PoseChannel_ensure_own_pchan(Object *ob,

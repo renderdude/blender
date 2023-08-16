@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -23,7 +23,9 @@
 
 #include "BLI_alloca.h"
 #include "BLI_listbase.h"
-#include "BLI_math.h"
+#include "BLI_math_geom.h"
+#include "BLI_math_rotation.h"
+#include "BLI_math_vector.h"
 #include "BLI_utildefines.h"
 #include "BLI_utildefines_stack.h"
 
@@ -155,15 +157,13 @@ static bool bm_edgeloop_check_overlap_all(BMesh *bm,
                                           BMEdgeLoopStore *el_store_b)
 {
   bool has_overlap = true;
-  LinkData *node;
-
   ListBase *lb_a = BM_edgeloop_verts_get(el_store_a);
   ListBase *lb_b = BM_edgeloop_verts_get(el_store_b);
 
   bm_edgeloop_vert_tag(el_store_a, false);
   bm_edgeloop_vert_tag(el_store_b, true);
 
-  for (node = static_cast<LinkData *>(lb_a->first); node; node = node->next) {
+  LISTBASE_FOREACH (LinkData *, node, lb_a) {
     if (bm_vert_is_tag_edge_connect(bm, static_cast<BMVert *>(node->data)) == false) {
       has_overlap = false;
       goto finally;
@@ -173,7 +173,7 @@ static bool bm_edgeloop_check_overlap_all(BMesh *bm,
   bm_edgeloop_vert_tag(el_store_a, true);
   bm_edgeloop_vert_tag(el_store_b, false);
 
-  for (node = static_cast<LinkData *>(lb_b->first); node; node = node->next) {
+  LISTBASE_FOREACH (LinkData *, node, lb_b) {
     if (bm_vert_is_tag_edge_connect(bm, static_cast<BMVert *>(node->data)) == false) {
       has_overlap = false;
       goto finally;
@@ -994,7 +994,6 @@ static void bm_edgering_pair_subdiv(BMesh *bm,
   STACK_DECLARE(edges_ring_arr);
   STACK_DECLARE(faces_ring_arr);
   BMEdgeLoopStore *el_store_ring;
-  LinkData *node;
   BMEdge *e;
   BMFace *f;
 
@@ -1004,7 +1003,7 @@ static void bm_edgering_pair_subdiv(BMesh *bm,
   bm_edgeloop_vert_tag(el_store_a, false);
   bm_edgeloop_vert_tag(el_store_b, true);
 
-  for (node = static_cast<LinkData *>(lb_a->first); node; node = node->next) {
+  LISTBASE_FOREACH (LinkData *, node, lb_a) {
     BMIter eiter;
 
     BM_ITER_ELEM (e, &eiter, (BMVert *)node->data, BM_EDGES_OF_VERT) {

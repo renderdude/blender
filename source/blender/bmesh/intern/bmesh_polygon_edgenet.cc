@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -16,7 +16,9 @@
 #include "BLI_array.h"
 #include "BLI_kdopbvh.h"
 #include "BLI_linklist_stack.h"
-#include "BLI_math.h"
+#include "BLI_math_geom.h"
+#include "BLI_math_matrix.h"
+#include "BLI_math_vector.h"
 #include "BLI_memarena.h"
 #include "BLI_sort_utils.h"
 #include "BLI_utildefines_stack.h"
@@ -925,7 +927,7 @@ static BMEdge *test_edges_isect_2d_ray(const EdgeGroup_FindConnection_Args *args
   hit.index = -1;
   hit.dist = BVH_RAYCAST_DIST_MAX;
 
-  Edges_VertRay_BVHTreeTest user_data = {0};
+  Edges_VertRay_BVHTreeTest user_data = {nullptr};
   user_data.edge_arr = args->edge_arr;
   user_data.v_origin = v_origin;
   user_data.vert_range = args->vert_range;

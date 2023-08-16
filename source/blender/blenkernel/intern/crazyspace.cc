@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2005 Blender Foundation
+/* SPDX-FileCopyrightText: 2005 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -16,6 +16,8 @@
 
 #include "BLI_bitmap.h"
 #include "BLI_linklist.h"
+#include "BLI_math_matrix.h"
+#include "BLI_math_rotation.h"
 #include "BLI_utildefines.h"
 
 #include "BKE_DerivedMesh.h"
@@ -27,9 +29,9 @@
 #include "BKE_grease_pencil.hh"
 #include "BKE_lib_id.h"
 #include "BKE_mesh.hh"
-#include "BKE_mesh_wrapper.h"
+#include "BKE_mesh_wrapper.hh"
 #include "BKE_modifier.h"
-#include "BKE_multires.h"
+#include "BKE_multires.hh"
 #include "BKE_report.h"
 
 #include "DEG_depsgraph_query.h"
@@ -626,7 +628,7 @@ GeometryDeformation get_evaluated_curves_deformation(const Object *ob_eval, cons
 
   /* If available, use deformation information generated during evaluation. */
   const GeometryComponentEditData *edit_component_eval =
-      geometry_eval->get_component_for_read<GeometryComponentEditData>();
+      geometry_eval->get_component<GeometryComponentEditData>();
   bool uses_extra_positions = false;
   if (edit_component_eval != nullptr) {
     const CurvesEditHints *edit_hints = edit_component_eval->curves_edit_hints_.get();
@@ -645,10 +647,9 @@ GeometryDeformation get_evaluated_curves_deformation(const Object *ob_eval, cons
 
   /* Use the positions of the evaluated curves directly, if the number of points matches. */
   if (!uses_extra_positions) {
-    const CurveComponent *curves_component_eval =
-        geometry_eval->get_component_for_read<CurveComponent>();
+    const CurveComponent *curves_component_eval = geometry_eval->get_component<CurveComponent>();
     if (curves_component_eval != nullptr) {
-      const Curves *curves_id_eval = curves_component_eval->get_for_read();
+      const Curves *curves_id_eval = curves_component_eval->get();
       if (curves_id_eval != nullptr) {
         const CurvesGeometry &curves_eval = curves_id_eval->geometry.wrap();
         if (curves_eval.points_num() == points_num) {

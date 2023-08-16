@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2008 Blender Foundation
+/* SPDX-FileCopyrightText: 2008 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -14,6 +14,9 @@
 
 #include "BLI_sys_types.h" /* int64_t */
 
+#include "BLI_math_geom.h"
+#include "BLI_math_matrix.h"
+#include "BLI_math_rotation.h"
 #include "BLI_math_vector.h"
 
 #include "BKE_camera.h"
@@ -21,7 +24,7 @@
 
 #include "GPU_matrix.h"
 
-#include "ED_view3d.h" /* own include */
+#include "ED_view3d.hh" /* own include */
 
 #define BL_ZERO_CLIP 0.001
 

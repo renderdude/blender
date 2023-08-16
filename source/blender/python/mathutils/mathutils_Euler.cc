@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -12,7 +12,9 @@
 
 #include "../generic/py_capi_utils.h"
 #include "../generic/python_utildefines.h"
-#include "BLI_math.h"
+#include "BLI_math_matrix.h"
+#include "BLI_math_rotation.h"
+#include "BLI_math_vector.h"
 #include "BLI_utildefines.h"
 
 #ifndef MATH_STANDALONE
@@ -719,10 +721,10 @@ static int Euler_order_set(EulerObject *self, PyObject *value, void * /*closure*
  * \{ */
 
 static PyGetSetDef Euler_getseters[] = {
-    {"x", (getter)Euler_axis_get, (setter)Euler_axis_set, Euler_axis_doc, (void *)0},
-    {"y", (getter)Euler_axis_get, (setter)Euler_axis_set, Euler_axis_doc, (void *)1},
-    {"z", (getter)Euler_axis_get, (setter)Euler_axis_set, Euler_axis_doc, (void *)2},
-    {"order", (getter)Euler_order_get, (setter)Euler_order_set, Euler_order_doc, (void *)nullptr},
+    {"x", (getter)Euler_axis_get, (setter)Euler_axis_set, Euler_axis_doc, POINTER_FROM_INT(0)},
+    {"y", (getter)Euler_axis_get, (setter)Euler_axis_set, Euler_axis_doc, POINTER_FROM_INT(1)},
+    {"z", (getter)Euler_axis_get, (setter)Euler_axis_set, Euler_axis_doc, POINTER_FROM_INT(2)},
+    {"order", (getter)Euler_order_get, (setter)Euler_order_set, Euler_order_doc, nullptr},
 
     {"is_wrapped",
      (getter)BaseMathObject_is_wrapped_get,

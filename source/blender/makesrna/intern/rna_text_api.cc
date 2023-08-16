@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -11,16 +11,16 @@
 
 #include "BLI_utildefines.h"
 
-#include "ED_text.h"
+#include "ED_text.hh"
 
-#include "RNA_define.h"
+#include "RNA_define.hh"
 
 #include "rna_internal.h" /* own include */
 
 #ifdef RNA_RUNTIME
 
-#  include "WM_api.h"
-#  include "WM_types.h"
+#  include "WM_api.hh"
+#  include "WM_types.hh"
 
 static void rna_Text_clear(Text *text)
 {

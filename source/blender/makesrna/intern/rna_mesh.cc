@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -16,6 +16,7 @@
 #include "DNA_object_types.h"
 
 #include "BLI_math_base.h"
+#include "BLI_math_geom.h"
 #include "BLI_math_rotation.h"
 #include "BLI_string_utf8.h"
 #include "BLI_utildefines.h"
@@ -23,14 +24,14 @@
 #include "BKE_attribute.h"
 #include "BKE_editmesh.h"
 
-#include "RNA_access.h"
-#include "RNA_define.h"
-#include "RNA_enum_types.h"
-#include "RNA_types.h"
+#include "RNA_access.hh"
+#include "RNA_define.hh"
+#include "RNA_enum_types.hh"
+#include "RNA_types.hh"
 
 #include "rna_internal.h"
 
-#include "WM_types.h"
+#include "WM_types.hh"
 
 const EnumPropertyItem rna_enum_mesh_delimit_mode_items[] = {
     {BMO_DELIM_NORMAL, "NORMAL", 0, "Normal", "Delimit by face directions"},
@@ -56,14 +57,14 @@ static const EnumPropertyItem rna_enum_mesh_remesh_mode_items[] = {
 #  include "BKE_customdata.h"
 #  include "BKE_main.h"
 #  include "BKE_mesh.hh"
-#  include "BKE_mesh_runtime.h"
+#  include "BKE_mesh_runtime.hh"
 #  include "BKE_report.h"
 
 #  include "DEG_depsgraph.h"
 
-#  include "ED_mesh.h" /* XXX Bad level call */
+#  include "ED_mesh.hh" /* XXX Bad level call */
 
-#  include "WM_api.h"
+#  include "WM_api.hh"
 
 #  include "rna_mesh_utils.hh"
 
@@ -671,13 +672,10 @@ static float rna_MeshPolygon_area_get(PointerRNA *ptr)
 
 static void rna_MeshPolygon_flip(ID *id, MIntProperty *poly_offset_p)
 {
+  using namespace blender;
   Mesh *me = (Mesh *)id;
-  const int poly_start = *((const int *)poly_offset_p);
-  const int poly_size = *(((const int *)poly_offset_p) + 1) - poly_start;
-  int *corner_verts = me->corner_verts_for_write().data();
-  int *corner_edges = me->corner_edges_for_write().data();
-  BKE_mesh_face_flip(
-      poly_start, poly_size, corner_verts, corner_edges, &me->loop_data, me->totloop);
+  const int index = reinterpret_cast<int *>(poly_offset_p) - me->faces().data();
+  bke::mesh_flip_faces(*me, IndexMask(IndexRange(index, 1)));
   BKE_mesh_tessface_clear(me);
   BKE_mesh_runtime_clear_geometry(me);
 }

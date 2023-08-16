@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -16,8 +16,8 @@
 #include "BLI_alloca.h"
 #include "BLI_utildefines.h"
 
-#include "WM_api.h"
-#include "WM_types.h"
+#include "WM_api.hh"
+#include "WM_types.hh"
 
 #include "bpy_capi_utils.h"
 #include "bpy_rna_gizmo.h"
@@ -25,10 +25,10 @@
 #include "../generic/py_capi_utils.h"
 #include "../generic/python_utildefines.h"
 
-#include "RNA_access.h"
-#include "RNA_enum_types.h"
+#include "RNA_access.hh"
+#include "RNA_enum_types.hh"
 #include "RNA_prototypes.h"
-#include "RNA_types.h"
+#include "RNA_types.hh"
 
 #include "bpy_rna.h"
 
@@ -355,7 +355,7 @@ static PyObject *bpy_gizmo_target_set_handler(PyObject * /*self*/, PyObject *arg
       "O"  /* `range` */
       ":target_set_handler",
       _keywords,
-      0,
+      nullptr,
   };
 
   BPyGizmoHandlerUserData *data;
@@ -454,7 +454,7 @@ static PyObject *bpy_gizmo_target_get_value(PyObject * /*self*/, PyObject *args,
       "O&" /* `target` */
       ":target_get_value",
       _keywords,
-      0,
+      nullptr,
   };
 
   int array_len;
@@ -525,7 +525,7 @@ static PyObject *bpy_gizmo_target_set_value(PyObject * /*self*/, PyObject *args,
       "O"  /* `value` */
       ":target_set_value",
       _keywords,
-      0,
+      nullptr,
   };
 
   wmGizmo *gz;
@@ -607,7 +607,7 @@ static PyObject *bpy_gizmo_target_get_range(PyObject * /*self*/, PyObject *args,
       "O&" /* `target` */
       ":target_get_range",
       _keywords,
-      0,
+      nullptr,
   };
 
   wmGizmo *gz;

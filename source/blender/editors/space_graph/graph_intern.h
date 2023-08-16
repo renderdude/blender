@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2008 Blender Foundation
+/* SPDX-FileCopyrightText: 2008 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -119,6 +119,8 @@ void GRAPH_OT_clean(struct wmOperatorType *ot);
 void GRAPH_OT_blend_to_neighbor(struct wmOperatorType *ot);
 void GRAPH_OT_breakdown(struct wmOperatorType *ot);
 void GRAPH_OT_ease(struct wmOperatorType *ot);
+void GRAPH_OT_blend_offset(struct wmOperatorType *ot);
+void GRAPH_OT_blend_to_ease(struct wmOperatorType *ot);
 void GRAPH_OT_decimate(struct wmOperatorType *ot);
 void GRAPH_OT_blend_to_default(struct wmOperatorType *ot);
 void GRAPH_OT_butterworth_smooth(struct wmOperatorType *ot);
@@ -143,7 +145,7 @@ void GRAPH_OT_equalize_handles(struct wmOperatorType *ot);
 void GRAPH_OT_mirror(struct wmOperatorType *ot);
 
 /* defines for snap keyframes
- * NOTE: keep in sync with eEditKeyframes_Snap (in ED_keyframes_edit.h)
+ * NOTE: keep in sync with eEditKeyframes_Snap (in ED_keyframes_edit.hh)
  */
 enum eGraphKeys_Snap_Mode {
   GRAPHKEYS_SNAP_CFRA = 1,
@@ -155,7 +157,7 @@ enum eGraphKeys_Snap_Mode {
 };
 
 /* Defines for equalize keyframe handles.
- * NOTE: Keep in sync with eEditKeyframes_Equalize (in ED_keyframes_edit.h).
+ * NOTE: Keep in sync with eEditKeyframes_Equalize (in ED_keyframes_edit.hh).
  */
 enum eGraphKeys_Equalize_Mode {
   GRAPHKEYS_EQUALIZE_LEFT = 1,
@@ -164,7 +166,7 @@ enum eGraphKeys_Equalize_Mode {
 };
 
 /* defines for mirror keyframes
- * NOTE: keep in sync with eEditKeyframes_Mirror (in ED_keyframes_edit.h)
+ * NOTE: keep in sync with eEditKeyframes_Mirror (in ED_keyframes_edit.hh)
  */
 enum eGraphKeys_Mirror_Mode {
   GRAPHKEYS_MIRROR_CFRA = 1,

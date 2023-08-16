@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -61,7 +61,7 @@ GreasePencil *GreasePencilComponent::release()
   return grease_pencil;
 }
 
-const GreasePencil *GreasePencilComponent::get_for_read() const
+const GreasePencil *GreasePencilComponent::get() const
 {
   return grease_pencil_;
 }

@@ -12,18 +12,19 @@
 
 #include "BLI_bitmap.h"
 #include "BLI_linklist_stack.h"
-#include "BLI_math.h"
+#include "BLI_math_matrix.h"
+#include "BLI_math_vector.h"
 
 #include "BKE_context.h"
 #include "BKE_customdata.h"
 #include "BKE_editmesh.h"
-#include "BKE_mesh_mapping.h"
+#include "BKE_mesh_mapping.hh"
 
-#include "ED_image.h"
-#include "ED_mesh.h"
-#include "ED_uvedit.h"
+#include "ED_image.hh"
+#include "ED_mesh.hh"
+#include "ED_uvedit.hh"
 
-#include "WM_api.h" /* for WM_event_add_notifier to deal with stabilization nodes */
+#include "WM_api.hh" /* for WM_event_add_notifier to deal with stabilization nodes */
 
 #include "transform.hh"
 #include "transform_convert.hh"

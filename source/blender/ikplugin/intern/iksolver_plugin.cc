@@ -10,7 +10,9 @@
 
 #include "BIK_api.h"
 #include "BLI_blenlib.h"
-#include "BLI_math.h"
+#include "BLI_math_matrix.h"
+#include "BLI_math_rotation.h"
+#include "BLI_math_vector.h"
 #include "BLI_utildefines.h"
 
 #include "BKE_armature.h"
@@ -278,7 +280,6 @@ static void execute_posetree(Depsgraph *depsgraph, Scene *scene, Object *ob, Pos
   bPoseChannel *pchan;
   IK_Segment *seg, *parent, **iktree, *iktarget;
   IK_Solver *solver;
-  PoseTarget *target;
   bKinematicConstraint *data, *poleangledata = nullptr;
   Bone *bone;
 
@@ -409,7 +410,7 @@ static void execute_posetree(Depsgraph *depsgraph, Scene *scene, Object *ob, Pos
   mul_m4_m4m4(imat, ob->object_to_world, rootmat);
   invert_m4_m4(goalinv, imat);
 
-  for (target = static_cast<PoseTarget *>(tree->targets.first); target; target = target->next) {
+  LISTBASE_FOREACH (PoseTarget *, target, &tree->targets) {
     float polepos[3];
     int poleconstrain = 0;
 
@@ -577,9 +578,7 @@ void iksolver_initialize_tree(Depsgraph * /*depsgraph*/,
                               Object *ob,
                               float /*ctime*/)
 {
-  bPoseChannel *pchan;
-
-  for (pchan = static_cast<bPoseChannel *>(ob->pose->chanbase.first); pchan; pchan = pchan->next) {
+  LISTBASE_FOREACH (bPoseChannel *, pchan, &ob->pose->chanbase) {
     if (pchan->constflag & PCHAN_HAS_IK) { /* flag is set on editing constraints */
       initialize_posetree(ob, pchan);      /* will attach it to root! */
     }

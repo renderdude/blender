@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2008 Blender Foundation
+/* SPDX-FileCopyrightText: 2008 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -24,12 +24,16 @@ struct Scene;
 struct ScrArea;
 struct View3D;
 struct bContext;
+struct Object;
+struct PointerRNA;
 struct rcti;
 struct wmEvent;
 struct wmKeyConfig;
 struct wmKeyMap;
 struct wmOperator;
 struct wmOperatorType;
+struct wmTimer;
+struct wmWindow;
 struct wmWindowManager;
 
 enum eV3D_OpPropFlag {
@@ -139,7 +143,7 @@ struct ViewOpsData {
     float mousevec[3];
 
     /** Used for roll */
-    struct Dial *dial;
+    Dial *dial;
   } init;
 
   /** Previous state (previous modal event handled). */
@@ -304,7 +308,7 @@ extern const ViewOpsType ViewOpsType_rotate;
  * Each of the struct members may be NULL to signify they aren't to be adjusted.
  */
 struct V3D_SmoothParams {
-  struct Object *camera_old, *camera;
+  Object *camera_old, *camera;
   const float *ofs, *quat, *dist, *lens;
 
   /** Alternate rotation center, when set `ofs` must be NULL. */

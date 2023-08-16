@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -11,7 +11,6 @@
 #include "BKE_curves.hh"
 #include "BKE_grease_pencil.hh"
 
-#include "BLI_math.h"
 #include "BLI_math_matrix.hh"
 
 #include "BLT_translation.h"
@@ -19,7 +18,7 @@
 #include "DNA_material_types.h"
 #include "DNA_scene_types.h"
 
-#include "ED_grease_pencil.h"
+#include "ED_grease_pencil.hh"
 
 namespace blender::ed::greasepencil {
 

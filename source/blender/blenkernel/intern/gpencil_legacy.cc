@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2008 Blender Foundation
+/* SPDX-FileCopyrightText: 2008 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -17,6 +17,7 @@
 #include "MEM_guardedalloc.h"
 
 #include "BLI_blenlib.h"
+#include "BLI_math_matrix.h"
 #include "BLI_math_vector.h"
 #include "BLI_string_utils.h"
 
@@ -48,7 +49,7 @@
 #include "BKE_lib_query.h"
 #include "BKE_main.h"
 #include "BKE_material.h"
-#include "BKE_paint.h"
+#include "BKE_paint.hh"
 
 #include "BLI_math_color.h"
 
@@ -149,10 +150,6 @@ static void greasepencil_blend_write(BlendWriter *writer, ID *id, const void *id
   BLO_write_id_struct(writer, bGPdata, id_address, &gpd->id);
   BKE_id_blend_write(writer, &gpd->id);
 
-  if (gpd->adt) {
-    BKE_animdata_blend_write(writer, gpd->adt);
-  }
-
   BKE_defbase_blend_write(writer, &gpd->vertex_group_names);
 
   BLO_write_pointer_array(writer, gpd->totcol, gpd->mat);
@@ -188,10 +185,6 @@ void BKE_gpencil_blend_read_data(BlendDataReader *reader, bGPdata *gpd)
   if (gpd == nullptr) {
     return;
   }
-
-  /* Relink anim-data. */
-  BLO_read_data_address(reader, &gpd->adt);
-  BKE_animdata_blend_read_data(reader, gpd->adt);
 
   /* Ensure full object-mode for linked grease pencil. */
   if (ID_IS_LINKED(gpd)) {
@@ -1220,12 +1213,10 @@ bool BKE_gpencil_layer_is_editable(const bGPDlayer *gpl)
 
 bGPDframe *BKE_gpencil_layer_frame_find(bGPDlayer *gpl, int cframe)
 {
-  bGPDframe *gpf;
-
   /* Search in reverse order, since this is often used for playback/adding,
    * where it's less likely that we're interested in the earlier frames
    */
-  for (gpf = static_cast<bGPDframe *>(gpl->frames.last); gpf; gpf = gpf->prev) {
+  LISTBASE_FOREACH_BACKWARD (bGPDframe *, gpf, &gpl->frames) {
     if (gpf->framenum == cframe) {
       return gpf;
     }
@@ -1583,15 +1574,13 @@ bGPDlayer *BKE_gpencil_layer_active_get(bGPdata *gpd)
 
 bGPDlayer *BKE_gpencil_layer_get_by_name(bGPdata *gpd, const char *name, int first_if_not_found)
 {
-  bGPDlayer *gpl;
-
   /* error checking */
   if (ELEM(nullptr, gpd, gpd->layers.first)) {
     return nullptr;
   }
 
   /* loop over layers until found (assume only one active) */
-  for (gpl = static_cast<bGPDlayer *>(gpd->layers.first); gpl; gpl = gpl->next) {
+  LISTBASE_FOREACH (bGPDlayer *, gpl, &gpd->layers) {
     if (STREQ(name, gpl->info)) {
       return gpl;
     }
@@ -2024,7 +2013,7 @@ bool BKE_gpencil_merge_materials_table_get(Object *ob,
   GHash *mat_used = BLI_ghash_int_new(__func__);
 
   short *totcol = BKE_object_material_len_p(ob);
-  if (totcol == 0) {
+  if (totcol == nullptr) {
     return changed;
   }
 
@@ -2143,7 +2132,7 @@ bool BKE_gpencil_merge_materials(Object *ob,
   bGPdata *gpd = static_cast<bGPdata *>(ob->data);
 
   short *totcol = BKE_object_material_len_p(ob);
-  if (totcol == 0) {
+  if (totcol == nullptr) {
     *r_removed = 0;
     return false;
   }

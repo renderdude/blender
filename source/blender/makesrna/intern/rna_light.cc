@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -14,8 +14,8 @@
 
 #include "BLT_translation.h"
 
-#include "RNA_define.h"
-#include "RNA_enum_types.h"
+#include "RNA_define.hh"
+#include "RNA_enum_types.hh"
 #include "rna_internal.h"
 
 #include "DNA_light_types.h"
@@ -32,9 +32,9 @@
 
 #  include "DEG_depsgraph.h"
 
-#  include "ED_node.h"
-#  include "WM_api.h"
-#  include "WM_types.h"
+#  include "ED_node.hh"
+#  include "WM_api.hh"
+#  include "WM_types.hh"
 
 static StructRNA *rna_Light_refine(PointerRNA *ptr)
 {

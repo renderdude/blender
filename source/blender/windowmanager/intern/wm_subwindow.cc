@@ -8,7 +8,8 @@
  * OpenGL utilities for setting up 2D viewport for window and regions.
  */
 
-#include "BLI_math.h"
+#include "BLI_math_geom.h"
+#include "BLI_math_vector.h"
 #include "BLI_rect.h"
 
 #include "DNA_screen_types.h"
@@ -17,7 +18,7 @@
 #include "GPU_matrix.h"
 #include "GPU_viewport.h"
 
-#include "WM_api.h"
+#include "WM_api.hh"
 
 void wmViewport(const rcti *winrct)
 {

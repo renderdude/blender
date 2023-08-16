@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2009 Blender Foundation
+/* SPDX-FileCopyrightText: 2009 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -10,7 +10,7 @@
 
 #include "DNA_vec_types.h"
 
-#include "ED_numinput.h"
+#include "ED_numinput.hh"
 
 #define DEPTH_INVALID 1.0f
 

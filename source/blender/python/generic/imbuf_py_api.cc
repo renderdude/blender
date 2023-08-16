@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -100,7 +100,7 @@ static PyObject *py_imbuf_resize(Py_ImBuf *self, PyObject *args, PyObject *kw)
       "O&"   /* `method` */
       ":resize",
       _keywords,
-      0,
+      nullptr,
   };
   if (!_PyArg_ParseTupleAndKeywordsFast(
           args, kw, &_parser, &size[0], &size[1], PyC_ParseStringEnum, &method))
@@ -145,7 +145,7 @@ static PyObject *py_imbuf_crop(Py_ImBuf *self, PyObject *args, PyObject *kw)
       "(II)" /* `max` */
       ":crop",
       _keywords,
-      0,
+      nullptr,
   };
   if (!_PyArg_ParseTupleAndKeywordsFast(
           args, kw, &_parser, &crop.xmin, &crop.ymin, &crop.xmax, &crop.ymax))
@@ -445,7 +445,7 @@ static PyObject *M_imbuf_new(PyObject * /*self*/, PyObject *args, PyObject *kw)
       "(ii)" /* `size` */
       ":new",
       _keywords,
-      0,
+      nullptr,
   };
   if (!_PyArg_ParseTupleAndKeywordsFast(args, kw, &_parser, &size[0], &size[1])) {
     return nullptr;
@@ -467,30 +467,8 @@ static PyObject *M_imbuf_new(PyObject * /*self*/, PyObject *args, PyObject *kw)
   return Py_ImBuf_CreatePyObject(ibuf);
 }
 
-PyDoc_STRVAR(M_imbuf_load_doc,
-             ".. function:: load(filepath)\n"
-             "\n"
-             "   Load an image from a file.\n"
-             "\n"
-             "   :arg filepath: the filepath of the image.\n"
-             "   :type filepath: string\n"
-             "   :return: the newly loaded image.\n"
-             "   :rtype: :class:`ImBuf`\n");
-static PyObject *M_imbuf_load(PyObject * /*self*/, PyObject *args, PyObject *kw)
+static PyObject *imbuf_load_impl(const char *filepath)
 {
-  const char *filepath;
-
-  static const char *_keywords[] = {"filepath", nullptr};
-  static _PyArg_Parser _parser = {
-      "s" /* `filepath` */
-      ":load",
-      _keywords,
-      0,
-  };
-  if (!_PyArg_ParseTupleAndKeywordsFast(args, kw, &_parser, &filepath)) {
-    return nullptr;
-  }
-
   const int file = BLI_open(filepath, O_BINARY | O_RDONLY, 0);
   if (file == -1) {
     PyErr_Format(PyExc_IOError, "load: %s, failed to open file '%s'", strerror(errno), filepath);
@@ -512,6 +490,48 @@ static PyObject *M_imbuf_load(PyObject * /*self*/, PyObject *args, PyObject *kw)
   return Py_ImBuf_CreatePyObject(ibuf);
 }
 
+PyDoc_STRVAR(M_imbuf_load_doc,
+             ".. function:: load(filepath)\n"
+             "\n"
+             "   Load an image from a file.\n"
+             "\n"
+             "   :arg filepath: the filepath of the image.\n"
+             "   :type filepath: string or bytes\n"
+             "   :return: the newly loaded image.\n"
+             "   :rtype: :class:`ImBuf`\n");
+static PyObject *M_imbuf_load(PyObject * /*self*/, PyObject *args, PyObject *kw)
+{
+  PyC_UnicodeAsBytesAndSize_Data filepath_data = {nullptr};
+
+  static const char *_keywords[] = {"filepath", nullptr};
+  static _PyArg_Parser _parser = {
+      "O&" /* `filepath` */
+      ":load",
+      _keywords,
+      nullptr,
+  };
+  if (!_PyArg_ParseTupleAndKeywordsFast(
+          args, kw, &_parser, PyC_ParseUnicodeAsBytesAndSize, &filepath_data))
+  {
+    return nullptr;
+  }
+
+  PyObject *result = imbuf_load_impl(filepath_data.value);
+  Py_XDECREF(filepath_data.value_coerce);
+  return result;
+}
+
+static PyObject *imbuf_write_impl(ImBuf *ibuf, const char *filepath)
+{
+  const bool ok = IMB_saveiff(ibuf, filepath, IB_rect);
+  if (ok == false) {
+    PyErr_Format(
+        PyExc_IOError, "write: Unable to write image file (%s) '%s'", strerror(errno), filepath);
+    return nullptr;
+  }
+  Py_RETURN_NONE;
+}
+
 PyDoc_STRVAR(
     M_imbuf_write_doc,
     ".. function:: write(image, filepath=image.filepath)\n"
@@ -521,37 +541,40 @@ PyDoc_STRVAR(
     "   :arg image: the image to write.\n"
     "   :type image: :class:`ImBuf`\n"
     "   :arg filepath: Optional filepath of the image (fallback to the images file path).\n"
-    "   :type filepath: string\n");
+    "   :type filepath: string, bytes or NoneType\n");
 static PyObject *M_imbuf_write(PyObject * /*self*/, PyObject *args, PyObject *kw)
 {
   Py_ImBuf *py_imb;
-  const char *filepath = nullptr;
+  PyC_UnicodeAsBytesAndSize_Data filepath_data = {nullptr};
 
   static const char *_keywords[] = {"image", "filepath", nullptr};
   static _PyArg_Parser _parser = {
       "O!" /* `image` */
       "|$" /* Optional keyword only arguments. */
-      "s"  /* `filepath` */
+      "O&" /* `filepath` */
       ":write",
       _keywords,
-      0,
+      nullptr,
   };
-  if (!_PyArg_ParseTupleAndKeywordsFast(args, kw, &_parser, &Py_ImBuf_Type, &py_imb, &filepath)) {
+  if (!_PyArg_ParseTupleAndKeywordsFast(args,
+                                        kw,
+                                        &_parser,
+                                        &Py_ImBuf_Type,
+                                        &py_imb,
+                                        PyC_ParseUnicodeAsBytesAndSize_OrNone,
+                                        &filepath_data))
+  {
     return nullptr;
   }
 
+  const char *filepath = filepath_data.value;
   if (filepath == nullptr) {
+    /* Argument omitted, use images path. */
     filepath = py_imb->ibuf->filepath;
   }
-
-  const bool ok = IMB_saveiff(py_imb->ibuf, filepath, IB_rect);
-  if (ok == false) {
-    PyErr_Format(
-        PyExc_IOError, "write: Unable to write image file (%s) '%s'", strerror(errno), filepath);
-    return nullptr;
-  }
-
-  Py_RETURN_NONE;
+  PyObject *result = imbuf_write_impl(py_imb->ibuf, filepath);
+  Py_XDECREF(filepath_data.value_coerce);
+  return result;
 }
 
 /** \} */

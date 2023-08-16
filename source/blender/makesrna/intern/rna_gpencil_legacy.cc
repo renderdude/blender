@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -7,8 +7,6 @@
  */
 
 #include <cstdlib>
-
-#include "BLI_math.h"
 
 #include "DNA_brush_types.h"
 #include "DNA_curve_types.h"
@@ -19,17 +17,20 @@
 
 #include "MEM_guardedalloc.h"
 
+#include "BLI_math_matrix.h"
+#include "BLI_math_rotation.h"
+#include "BLI_math_vector.h"
 #include "BLI_utildefines.h"
 
 #include "BLT_translation.h"
 
-#include "RNA_access.h"
-#include "RNA_define.h"
-#include "RNA_enum_types.h"
+#include "RNA_access.hh"
+#include "RNA_define.hh"
+#include "RNA_enum_types.hh"
 
 #include "rna_internal.h"
 
-#include "WM_types.h"
+#include "WM_types.hh"
 
 /* parent type */
 static const EnumPropertyItem parent_type_items[] = {
@@ -152,7 +153,7 @@ static const EnumPropertyItem rna_enum_gpencil_caps_modes_items[] = {
 #  include "BLI_listbase.h"
 #  include "BLI_string_utils.h"
 
-#  include "WM_api.h"
+#  include "WM_api.hh"
 
 #  include "BKE_action.h"
 #  include "BKE_animsys.h"
@@ -171,7 +172,8 @@ static void rna_GPencil_update(Main * /*bmain*/, Scene * /*scene*/, PointerRNA *
 #  if 0
   /* In case a property on a layer changed, tag it with a light update. */
   if (ptr->type == &RNA_GPencilLayer) {
-    BKE_gpencil_tag_light_update((bGPdata *)(ptr->owner_id), (bGPDlayer *)(ptr->data), nullptr, nullptr);
+    BKE_gpencil_tag_light_update(
+        (bGPdata *)(ptr->owner_id), (bGPDlayer *)(ptr->data), nullptr, nullptr);
   }
 #  endif
   DEG_id_tag_update(ptr->owner_id, ID_RECALC_GEOMETRY);

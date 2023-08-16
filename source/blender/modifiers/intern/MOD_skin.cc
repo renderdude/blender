@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -45,8 +45,8 @@
 #include "BLI_array_utils.hh"
 #include "BLI_bitmap.h"
 #include "BLI_heap_simple.h"
-#include "BLI_math.h"
 #include "BLI_math_geom.h"
+#include "BLI_math_matrix.h"
 #include "BLI_stack.h"
 #include "BLI_vector.hh"
 
@@ -63,17 +63,17 @@
 #include "BKE_deform.h"
 #include "BKE_lib_id.h"
 #include "BKE_mesh.hh"
-#include "BKE_mesh_mapping.h"
+#include "BKE_mesh_mapping.hh"
 #include "BKE_modifier.h"
 #include "BKE_screen.h"
 
-#include "UI_interface.h"
-#include "UI_resources.h"
+#include "UI_interface.hh"
+#include "UI_resources.hh"
 
-#include "RNA_access.h"
+#include "RNA_access.hh"
 #include "RNA_prototypes.h"
 
-#include "WM_types.h" /* For skin mark clear operator UI. */
+#include "WM_types.hh" /* For skin mark clear operator UI. */
 
 #include "MOD_modifiertypes.hh"
 #include "MOD_ui_common.hh"

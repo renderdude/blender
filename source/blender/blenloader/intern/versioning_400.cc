@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -25,19 +25,22 @@
 
 #include "BLI_assert.h"
 #include "BLI_listbase.h"
-#include "BLI_math.h"
+#include "BLI_math_vector.h"
 #include "BLI_set.hh"
 #include "BLI_string_ref.hh"
 
 #include "BKE_grease_pencil.hh"
 #include "BKE_idprop.hh"
 #include "BKE_main.h"
-#include "BKE_mesh_legacy_convert.h"
+#include "BKE_mesh_legacy_convert.hh"
 #include "BKE_node.hh"
 #include "BKE_node_runtime.hh"
 #include "BKE_scene.h"
 #include "BKE_tracking.h"
 
+#include "BLT_translation.h"
+
+#include "BLO_read_write.h"
 #include "BLO_readfile.h"
 
 #include "readfile.h"
@@ -46,7 +49,19 @@
 
 // static CLG_LogRef LOG = {"blo.readfile.doversion"};
 
-void do_versions_after_linking_400(FileData * /*fd*/, Main *bmain)
+static void version_composite_nodetree_null_id(bNodeTree *ntree, Scene *scene)
+{
+  for (bNode *node : ntree->all_nodes()) {
+    if (node->id == nullptr &&
+        ((node->type == CMP_NODE_R_LAYERS) ||
+         (node->type == CMP_NODE_CRYPTOMATTE && node->custom1 == CMP_CRYPTOMATTE_SRC_RENDER)))
+    {
+      node->id = &scene->id;
+    }
+  }
+}
+
+void do_versions_after_linking_400(FileData *fd, Main *bmain)
 {
   if (!MAIN_VERSION_FILE_ATLEAST(bmain, 400, 9)) {
     /* Fix area light scaling. */
@@ -54,6 +69,45 @@ void do_versions_after_linking_400(FileData * /*fd*/, Main *bmain)
       light->energy = light->energy_deprecated;
       if (light->type == LA_AREA) {
         light->energy *= M_PI_4;
+      }
+    }
+
+    /* XXX This was added several years ago in 'lib_link` code of Scene... Should be safe enough
+     * here. */
+    LISTBASE_FOREACH (Scene *, scene, &bmain->scenes) {
+      if (scene->nodetree) {
+        version_composite_nodetree_null_id(scene->nodetree, scene);
+      }
+    }
+
+    /* Object proxies have been deprecated sine 3.x era, so their update & sanity check can now
+     * happen in do_versions code. */
+    LISTBASE_FOREACH (Object *, ob, &bmain->objects) {
+      if (ob->proxy) {
+        /* Paranoia check, actually a proxy_from pointer should never be written... */
+        if (!ID_IS_LINKED(ob->proxy)) {
+          ob->proxy->proxy_from = nullptr;
+          ob->proxy = nullptr;
+
+          if (ob->id.lib) {
+            BLO_reportf_wrap(fd->reports,
+                             RPT_INFO,
+                             TIP_("Proxy lost from object %s lib %s\n"),
+                             ob->id.name + 2,
+                             ob->id.lib->filepath);
+          }
+          else {
+            BLO_reportf_wrap(fd->reports,
+                             RPT_INFO,
+                             TIP_("Proxy lost from object %s lib <NONE>\n"),
+                             ob->id.name + 2);
+          }
+          fd->reports->count.missing_obproxies++;
+        }
+        else {
+          /* This triggers object_update to always use a copy. */
+          ob->proxy->proxy_from = ob;
+        }
       }
     }
   }
@@ -445,6 +499,8 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
         lightprobe->grid_normal_bias = 0.3f;
         lightprobe->grid_view_bias = 0.0f;
         lightprobe->grid_facing_bias = 0.5f;
+        lightprobe->grid_dilation_threshold = 0.5f;
+        lightprobe->grid_dilation_radius = 1.0f;
       }
     }
 
@@ -458,6 +514,13 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
     if (!DNA_struct_elem_find(fd->filesdna, "World", "int", "probe_resolution")) {
       LISTBASE_FOREACH (World *, world, &bmain->worlds) {
         world->probe_resolution = LIGHT_PROBE_RESOLUTION_1024;
+      }
+    }
+
+    if (!DNA_struct_elem_find(fd->filesdna, "LightProbe", "float", "grid_surface_bias")) {
+      LISTBASE_FOREACH (LightProbe *, lightprobe, &bmain->lightprobes) {
+        lightprobe->grid_surface_bias = 0.05f;
+        lightprobe->grid_escape_bias = 0.1f;
       }
     }
 
@@ -521,6 +584,72 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
     }
   }
 
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 400, 14)) {
+    if (!DNA_struct_elem_find(fd->filesdna, "SceneEEVEE", "RaytraceEEVEE", "reflection_options")) {
+      LISTBASE_FOREACH (Scene *, scene, &bmain->scenes) {
+        scene->eevee.reflection_options.flag = RAYTRACE_EEVEE_USE_DENOISE;
+        scene->eevee.reflection_options.denoise_stages = RAYTRACE_EEVEE_DENOISE_SPATIAL |
+                                                         RAYTRACE_EEVEE_DENOISE_TEMPORAL |
+                                                         RAYTRACE_EEVEE_DENOISE_BILATERAL;
+        scene->eevee.reflection_options.screen_trace_quality = 0.25f;
+        scene->eevee.reflection_options.screen_trace_thickness = 0.2f;
+        scene->eevee.reflection_options.sample_clamp = 10.0f;
+        scene->eevee.reflection_options.resolution_scale = 2;
+
+        scene->eevee.refraction_options = scene->eevee.reflection_options;
+
+        scene->eevee.ray_split_settings = 0;
+        scene->eevee.ray_tracing_method = RAYTRACE_EEVEE_METHOD_SCREEN;
+      }
+    }
+
+    if (!DNA_struct_find(fd->filesdna, "RegionAssetShelf")) {
+      LISTBASE_FOREACH (bScreen *, screen, &bmain->screens) {
+        LISTBASE_FOREACH (ScrArea *, area, &screen->areabase) {
+          LISTBASE_FOREACH (SpaceLink *, sl, &area->spacedata) {
+            if (sl->spacetype != SPACE_VIEW3D) {
+              continue;
+            }
+
+            ListBase *regionbase = (sl == area->spacedata.first) ? &area->regionbase :
+                                                                   &sl->regionbase;
+
+            if (ARegion *new_shelf_region = do_versions_add_region_if_not_found(
+                    regionbase,
+                    RGN_TYPE_ASSET_SHELF,
+                    "asset shelf for view3d (versioning)",
+                    RGN_TYPE_TOOL_HEADER))
+            {
+              new_shelf_region->alignment = RGN_ALIGN_BOTTOM;
+            }
+            if (ARegion *new_shelf_header = do_versions_add_region_if_not_found(
+                    regionbase,
+                    RGN_TYPE_ASSET_SHELF_HEADER,
+                    "asset shelf header for view3d (versioning)",
+                    RGN_TYPE_ASSET_SHELF))
+            {
+              new_shelf_header->alignment = RGN_ALIGN_BOTTOM | RGN_SPLIT_PREV;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 400, 16)) {
+    /* Set Normalize property of Noise Texture node to true. */
+    FOREACH_NODETREE_BEGIN (bmain, ntree, id) {
+      if (ntree->type != NTREE_CUSTOM) {
+        LISTBASE_FOREACH (bNode *, node, &ntree->nodes) {
+          if (node->type == SH_NODE_TEX_NOISE) {
+            ((NodeTexNoise *)node->storage)->normalize = true;
+          }
+        }
+      }
+    }
+    FOREACH_NODETREE_END;
+  }
+
   /**
    * Versioning code until next subversion bump goes here.
    *
@@ -533,5 +662,19 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
    */
   {
     /* Keep this block, even when empty. */
+
+    if (!DNA_struct_elem_find(fd->filesdna, "LightProbe", "float", "grid_flag")) {
+      LISTBASE_FOREACH (LightProbe *, lightprobe, &bmain->lightprobes) {
+        /* Keep old behavior of baking the whole lighting. */
+        lightprobe->grid_flag = LIGHTPROBE_GRID_CAPTURE_WORLD | LIGHTPROBE_GRID_CAPTURE_INDIRECT |
+                                LIGHTPROBE_GRID_CAPTURE_EMISSION;
+      }
+    }
+
+    if (!DNA_struct_elem_find(fd->filesdna, "SceneEEVEE", "int", "gi_irradiance_pool_size")) {
+      LISTBASE_FOREACH (Scene *, scene, &bmain->scenes) {
+        scene->eevee.gi_irradiance_pool_size = 16;
+      }
+    }
   }
 }

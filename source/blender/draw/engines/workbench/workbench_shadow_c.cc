@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2020 Blender Foundation
+/* SPDX-FileCopyrightText: 2020 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -18,8 +18,6 @@
 #include "DRW_render.h"
 
 #include "BKE_object.h"
-
-#include "BLI_math.h"
 
 #include "workbench_engine.h"
 #include "workbench_private.h"

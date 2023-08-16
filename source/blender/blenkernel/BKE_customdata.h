@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2006 Blender Foundation
+/* SPDX-FileCopyrightText: 2006 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -428,11 +428,6 @@ void CustomData_bmesh_interp(struct CustomData *data,
  * \param corner_indices: A mapping 'new_index -> old_index' of sub-item data.
  */
 void CustomData_swap_corners(struct CustomData *data, int index, const int *corner_indices);
-
-/**
- * Swap two items of given custom data, in all available layers.
- */
-void CustomData_swap(struct CustomData *data, int index_a, int index_b, const int totelem);
 
 /**
  * Retrieve a pointer to an element of the active layer of the given \a type, chosen by the

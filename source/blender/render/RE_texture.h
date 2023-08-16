@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2006 Blender Foundation
+/* SPDX-FileCopyrightText: 2006 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 /** \file
@@ -137,7 +137,7 @@ int multitex_nodes(struct Tex *tex,
                    struct TexResult *texres,
                    short thread,
                    short which_output,
-                   struct MTex *mtex,
+                   const struct MTex *mtex,
                    struct ImagePool *pool);
 
 #ifdef __cplusplus

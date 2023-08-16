@@ -18,7 +18,7 @@
 #include "MEM_guardedalloc.h"
 
 #include "BLI_blenlib.h"
-#include "BLI_math.h"
+#include "BLI_math_vector.h"
 #include "BLI_utildefines.h"
 
 #include "BLT_translation.h"
@@ -43,14 +43,14 @@
 
 #include "BLI_sys_types.h" /* for intptr_t support */
 
-#include "ED_mesh.h"
-#include "ED_object.h"
+#include "ED_mesh.hh"
+#include "ED_object.hh"
 
-#include "RNA_access.h"
-#include "RNA_define.h"
+#include "RNA_access.hh"
+#include "RNA_define.hh"
 
-#include "WM_api.h"
-#include "WM_types.h"
+#include "WM_api.hh"
+#include "WM_types.hh"
 
 #include "object_intern.h"
 
@@ -339,18 +339,16 @@ static bool shape_key_remove_poll_property(const bContext * /*C*/,
   return true;
 }
 
-static char *shape_key_remove_get_description(bContext * /*C*/,
-                                              wmOperatorType * /*ot*/,
-                                              PointerRNA *ptr)
+static std::string shape_key_remove_get_description(bContext * /*C*/,
+                                                    wmOperatorType * /*ot*/,
+                                                    PointerRNA *ptr)
 {
   const bool do_apply_mix = RNA_boolean_get(ptr, "apply_mix");
-
   if (do_apply_mix) {
-    return BLI_strdup(
-        TIP_("Apply current visible shape to the object data, and delete all shape keys"));
+    return TIP_("Apply current visible shape to the object data, and delete all shape keys");
   }
 
-  return nullptr;
+  return "";
 }
 
 void OBJECT_OT_shape_key_remove(wmOperatorType *ot)
@@ -394,7 +392,7 @@ static int shape_key_clear_exec(bContext *C, wmOperator * /*op*/)
     return OPERATOR_CANCELLED;
   }
 
-  for (kb = static_cast<KeyBlock *>(key->block.first); kb; kb = kb->next) {
+  LISTBASE_FOREACH (KeyBlock *, kb, &key->block) {
     kb->curval = 0.0f;
   }
 
@@ -431,7 +429,7 @@ static int shape_key_retime_exec(bContext *C, wmOperator * /*op*/)
     return OPERATOR_CANCELLED;
   }
 
-  for (kb = static_cast<KeyBlock *>(key->block.first); kb; kb = kb->next) {
+  LISTBASE_FOREACH (KeyBlock *, kb, &key->block) {
     kb->pos = cfra;
     cfra += 0.1f;
   }

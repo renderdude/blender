@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -25,7 +25,7 @@
 #include "BLF_api.h"
 
 #include "BLI_listbase.h"
-#include "BLI_math.h"
+#include "BLI_math_geom.h"
 #include "BLI_string.h"
 #include "BLI_string_utf8.h"
 #include "BLI_timecode.h"
@@ -46,20 +46,20 @@
 #include "BKE_main.h"
 #include "BKE_mesh.hh"
 #include "BKE_object.h"
-#include "BKE_paint.h"
+#include "BKE_paint.hh"
 #include "BKE_particle.h"
 #include "BKE_pbvh_api.hh"
 #include "BKE_scene.h"
-#include "BKE_subdiv_ccg.h"
-#include "BKE_subdiv_modifier.h"
+#include "BKE_subdiv_ccg.hh"
+#include "BKE_subdiv_modifier.hh"
 
 #include "DEG_depsgraph_query.h"
 
-#include "ED_info.h"
+#include "ED_info.hh"
 
-#include "WM_api.h"
+#include "WM_api.hh"
 
-#include "UI_resources.h"
+#include "UI_resources.hh"
 
 #include "GPU_capabilities.h"
 

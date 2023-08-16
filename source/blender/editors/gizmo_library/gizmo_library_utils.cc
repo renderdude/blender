@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2015 Blender Foundation
+/* SPDX-FileCopyrightText: 2015 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -10,8 +10,6 @@
  * \brief This file contains functions for common behaviors of gizmos.
  */
 
-#include "BLI_math.h"
-
 #include "DNA_screen_types.h"
 #include "DNA_view3d_types.h"
 
@@ -19,13 +17,17 @@
 #include "BKE_global.h"
 #include "BKE_main.h"
 
-#include "RNA_access.h"
+#include "BLI_math_geom.h"
+#include "BLI_math_matrix.h"
+#include "BLI_math_vector.h"
 
-#include "WM_api.h"
-#include "WM_types.h"
+#include "RNA_access.hh"
 
-#include "ED_screen.h"
-#include "ED_view3d.h"
+#include "WM_api.hh"
+#include "WM_types.hh"
+
+#include "ED_screen.hh"
+#include "ED_view3d.hh"
 
 #include "CLG_log.h"
 

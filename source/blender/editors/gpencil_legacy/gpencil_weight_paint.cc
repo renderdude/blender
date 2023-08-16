@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2015 Blender Foundation
+/* SPDX-FileCopyrightText: 2015 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -13,7 +13,8 @@
 #include "BLI_ghash.h"
 #include "BLI_kdtree.h"
 #include "BLI_listbase.h"
-#include "BLI_math.h"
+#include "BLI_math_matrix.h"
+#include "BLI_math_vector.h"
 
 #include "BLT_translation.h"
 
@@ -23,7 +24,7 @@
 #include "DNA_gpencil_modifier_types.h"
 
 #include "BKE_action.h"
-#include "BKE_brush.h"
+#include "BKE_brush.hh"
 #include "BKE_colortools.h"
 #include "BKE_context.h"
 #include "BKE_deform.h"
@@ -34,18 +35,18 @@
 #include "BKE_report.h"
 #include "DNA_meshdata_types.h"
 
-#include "WM_api.h"
-#include "WM_types.h"
+#include "WM_api.hh"
+#include "WM_types.hh"
 
-#include "RNA_access.h"
-#include "RNA_define.h"
+#include "RNA_access.hh"
+#include "RNA_define.hh"
 #include "RNA_prototypes.h"
 
-#include "UI_view2d.h"
+#include "UI_view2d.hh"
 
-#include "ED_gpencil_legacy.h"
-#include "ED_screen.h"
-#include "ED_view3d.h"
+#include "ED_gpencil_legacy.hh"
+#include "ED_screen.hh"
+#include "ED_view3d.hh"
 
 #include "DEG_depsgraph.h"
 #include "DEG_depsgraph_query.h"
@@ -299,7 +300,7 @@ static bool *gpencil_vgroup_bone_deformed_map_get(Object *ob, const int defbase_
 
   /* Add all vertex group names to a hash table. */
   gh = BLI_ghash_str_new_ex(__func__, defbase_tot);
-  for (dg = static_cast<bDeformGroup *>(defbase->first); dg; dg = dg->next) {
+  LISTBASE_FOREACH (bDeformGroup *, dg, defbase) {
     BLI_ghash_insert(gh, dg->name, nullptr);
   }
   BLI_assert(BLI_ghash_len(gh) == defbase_tot);
@@ -314,9 +315,8 @@ static bool *gpencil_vgroup_bone_deformed_map_get(Object *ob, const int defbase_
 
     if (amd->object && amd->object->pose) {
       bPose *pose = amd->object->pose;
-      bPoseChannel *chan;
 
-      for (chan = static_cast<bPoseChannel *>(pose->chanbase.first); chan; chan = chan->next) {
+      LISTBASE_FOREACH (bPoseChannel *, chan, &pose->chanbase) {
         void **val_p;
         if (chan->bone->flag & BONE_NO_DEFORM) {
           continue;

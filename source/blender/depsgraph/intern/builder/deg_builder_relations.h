@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2013 Blender Foundation
+/* SPDX-FileCopyrightText: 2013 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -15,7 +15,7 @@
 
 #include "DNA_ID.h"
 
-#include "RNA_path.h"
+#include "RNA_path.hh"
 
 #include "BLI_string.h"
 #include "BLI_utildefines.h"

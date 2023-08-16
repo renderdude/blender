@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -109,6 +109,8 @@ typedef enum {
   BKE_CB_EVT_COMPOSITE_CANCEL,
   BKE_CB_EVT_ANIMATION_PLAYBACK_PRE,
   BKE_CB_EVT_ANIMATION_PLAYBACK_POST,
+  BKE_CB_EVT_EXTENSION_REPOS_UPDATE_PRE,
+  BKE_CB_EVT_EXTENSION_REPOS_UPDATE_POST,
   BKE_CB_EVT_TOT,
 } eCbEvent;
 

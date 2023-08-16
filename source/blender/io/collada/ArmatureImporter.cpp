@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2010-2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2010-2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -17,8 +17,9 @@
 #include "BKE_armature.h"
 #include "BKE_object.h"
 #include "BLI_listbase.h"
+#include "BLI_math_matrix.h"
 #include "BLI_string.h"
-#include "ED_armature.h"
+#include "ED_armature.hh"
 
 #include "ANIM_bone_collections.h"
 
@@ -226,7 +227,7 @@ void ArmatureImporter::fix_leaf_bone_hierarchy(bArmature *armature,
     fix_leaf_bone(armature, ebone, be, fix_orientation);
   }
 
-  for (Bone *child = (Bone *)bone->childbase.first; child; child = child->next) {
+  LISTBASE_FOREACH (Bone *, child, &bone->childbase) {
     fix_leaf_bone_hierarchy(armature, child, fix_orientation);
   }
 }
@@ -272,7 +273,7 @@ void ArmatureImporter::fix_parent_connect(bArmature *armature, Bone *bone)
     copy_v3_v3(bone->parent->tail, bone->head);
   }
 
-  for (Bone *child = (Bone *)bone->childbase.first; child; child = child->next) {
+  LISTBASE_FOREACH (Bone *, child, &bone->childbase) {
     fix_parent_connect(armature, child);
   }
 }
@@ -338,7 +339,7 @@ void ArmatureImporter::connect_bone_chains(bArmature *armature,
         }
       }
     }
-    for (Bone *ch = (Bone *)parentbone->childbase.first; ch; ch = ch->next) {
+    LISTBASE_FOREACH (Bone *, ch, &parentbone->childbase) {
       ArmatureImporter::connect_bone_chains(armature, ch, UNLIMITED_CHAIN_MAX);
     }
   }
@@ -351,7 +352,7 @@ void ArmatureImporter::connect_bone_chains(bArmature *armature,
     if (pbe) {
       pbe->set_leaf_bone(true);
     }
-    for (Bone *ch = (Bone *)parentbone->childbase.first; ch; ch = ch->next) {
+    LISTBASE_FOREACH (Bone *, ch, &parentbone->childbase) {
       ArmatureImporter::connect_bone_chains(armature, ch, UNLIMITED_CHAIN_MAX);
     }
   }

@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -53,7 +53,7 @@ TEST(greasepencil, add_empty_drawings)
   EXPECT_EQ(grease_pencil.drawings().size(), 3);
 }
 
-TEST(greasepencil, remove_drawing)
+TEST(greasepencil, remove_drawings)
 {
   GreasePencilIDTestContext ctx;
   GreasePencil &grease_pencil = *static_cast<GreasePencil *>(BKE_id_new(ctx.bmain, ID_GP, "GP"));
@@ -61,7 +61,7 @@ TEST(greasepencil, remove_drawing)
 
   GreasePencilDrawing *drawing = reinterpret_cast<GreasePencilDrawing *>(
       grease_pencil.drawings(1));
-  drawing->geometry.wrap().resize(0, 10);
+  drawing->wrap().strokes_for_write().resize(0, 10);
 
   Layer &layer1 = grease_pencil.root_group().add_layer("Layer1");
   Layer &layer2 = grease_pencil.root_group().add_layer("Layer2");
@@ -71,8 +71,10 @@ TEST(greasepencil, remove_drawing)
   layer1.add_frame(20, 2);
 
   layer2.add_frame(0, 1);
+  drawing->wrap().add_user();
 
-  grease_pencil.remove_drawing(1);
+  grease_pencil.remove_frames(layer1, {10});
+  grease_pencil.remove_frames(layer2, {0});
   EXPECT_EQ(grease_pencil.drawings().size(), 2);
 
   static int expected_frames_size[] = {2, 0};
@@ -130,7 +132,7 @@ TEST(greasepencil, layer_tree_pre_order_iteration)
   Span<const TreeNode *> children = ex.root.nodes();
   for (const int i : children.index_range()) {
     const TreeNode &child = *children[i];
-    EXPECT_STREQ(child.name, ex.names[i].data());
+    EXPECT_STREQ(child.name().data(), ex.names[i].data());
   }
 }
 
@@ -173,7 +175,7 @@ struct GreasePencilLayerFramesExample {
    * Scene Frame:  |0|1|2|3|4|5|6|7|8|9|0|1|2|3|4|5|6|...
    * Drawing:      [#0       ][#1      ]   [#2     ]
    */
-  const int sorted_keys[5] = {0, 5, 10, 12, 16};
+  const FramesMapKey sorted_keys[5] = {0, 5, 10, 12, 16};
   GreasePencilFrame sorted_values[5] = {{0}, {1}, {-1}, {2}, {-1}};
   Layer layer;
 
@@ -230,7 +232,7 @@ TEST(greasepencil, add_frame_duration_check_duration)
 {
   GreasePencilLayerFramesExample ex;
   EXPECT_TRUE(ex.layer.add_frame(17, 3, 10));
-  Span<int> sorted_keys = ex.layer.sorted_keys();
+  Span<FramesMapKey> sorted_keys = ex.layer.sorted_keys();
   EXPECT_EQ(sorted_keys.size(), 7);
   EXPECT_EQ(sorted_keys[6] - sorted_keys[5], 10);
 }
@@ -247,7 +249,7 @@ TEST(greasepencil, add_frame_duration_override_null_frames)
   EXPECT_EQ(layer.drawing_index_at(0), 1);
   EXPECT_EQ(layer.drawing_index_at(1), 3);
   EXPECT_EQ(layer.drawing_index_at(11), -1);
-  Span<int> sorted_keys = layer.sorted_keys();
+  Span<FramesMapKey> sorted_keys = layer.sorted_keys();
   EXPECT_EQ(sorted_keys.size(), 3);
   EXPECT_EQ(sorted_keys[0], 0);
   EXPECT_EQ(sorted_keys[1], 1);

@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2009 Blender Foundation
+/* SPDX-FileCopyrightText: 2009 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -29,8 +29,8 @@
 #include "DNA_vec_types.h"
 
 #include "BLI_listbase.h"
-#include "BLI_math.h"
 #include "BLI_math_color_blend.h"
+#include "BLI_math_matrix.h"
 #include "BLI_path_util.h"
 #include "BLI_rect.h"
 #include "BLI_string.h"
@@ -1643,7 +1643,7 @@ void blf_ensure_size(FontBLF *font)
     return;
   }
 
-  FTC_ScalerRec scaler = {0};
+  FTC_ScalerRec scaler = {nullptr};
   scaler.face_id = font;
   scaler.width = 0;
   scaler.height = round_fl_to_uint(font->size * 64.0f);
@@ -1672,7 +1672,7 @@ bool blf_font_size(FontBLF *font, float size)
 
   if (font->size != size) {
     if (font->flags & BLF_CACHED) {
-      FTC_ScalerRec scaler = {0};
+      FTC_ScalerRec scaler = {nullptr};
       scaler.face_id = font;
       scaler.width = 0;
       scaler.height = ft_size;

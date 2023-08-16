@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -104,7 +104,7 @@ class Drawing : public ::GreasePencilDrawing {
 
   /**
    * Add a user for this drawing. When a drawing has multiple users, both users are allowed to
-   * modifify this drawings data.
+   * modify this drawings data.
    */
   void add_user() const;
   /**
@@ -122,6 +122,67 @@ class Drawing : public ::GreasePencilDrawing {
 class LayerGroup;
 class Layer;
 
+/* Defines the common functions used by #TreeNode, #Layer, and #LayerGroup.
+ * Note: Because we cannot mix C-style and C++ inheritance (all of these three classes wrap a
+ * C-struct that already uses "inheritance"), we define and implement these methods on all these
+ * classes individually. This just means that we can call `layer->name()` directly instead of
+ * having to write `layer->as_node().name()`. For #Layer and #LayerGroup the calls are just
+ * forwarded to #TreeNode. */
+#define TREENODE_COMMON_METHODS \
+  StringRefNull name() const; \
+  void set_name(StringRefNull new_name); \
+  bool is_visible() const; \
+  void set_visible(bool visible); \
+  bool is_locked() const; \
+  void set_locked(bool locked); \
+  bool is_editable() const; \
+  bool is_selected() const; \
+  void set_selected(bool selected); \
+  bool use_onion_skinning() const;
+
+/* Implements the forwarding of the methods defined by #TREENODE_COMMON_METHODS. */
+#define TREENODE_COMMON_METHODS_FORWARD_IMPL(class_name) \
+  inline StringRefNull class_name::name() const \
+  { \
+    return this->as_node().name(); \
+  } \
+  inline void class_name::set_name(StringRefNull new_name) \
+  { \
+    return this->as_node().set_name(new_name); \
+  } \
+  inline bool class_name::is_visible() const \
+  { \
+    return this->as_node().is_visible(); \
+  } \
+  inline void class_name::set_visible(const bool visible) \
+  { \
+    this->as_node().set_visible(visible); \
+  } \
+  inline bool class_name::is_locked() const \
+  { \
+    return this->as_node().is_locked(); \
+  } \
+  inline void class_name::set_locked(const bool locked) \
+  { \
+    this->as_node().set_locked(locked); \
+  } \
+  inline bool class_name::is_editable() const \
+  { \
+    return this->as_node().is_editable(); \
+  } \
+  inline bool class_name::is_selected() const \
+  { \
+    return this->as_node().is_selected(); \
+  } \
+  inline void class_name::set_selected(const bool selected) \
+  { \
+    this->as_node().set_selected(selected); \
+  } \
+  inline bool class_name::use_onion_skinning() const \
+  { \
+    return this->as_node().use_onion_skinning(); \
+  }
+
 /**
  * A TreeNode represents one node in the layer tree.
  * It can either be a layer or a group. The node has zero children if it is a layer or zero or
@@ -135,50 +196,34 @@ class TreeNode : public ::GreasePencilLayerTreeNode {
   TreeNode(const TreeNode &other);
 
  public:
+  /* Define the common functions for #TreeNode. */
+  TREENODE_COMMON_METHODS;
   /**
-   * \returns true if this node is a LayerGroup.
+   * \returns true if this node is a #LayerGroup.
    */
-  bool is_group() const
-  {
-    return this->type == GP_LAYER_TREE_GROUP;
-  }
+  bool is_group() const;
+  /**
+   * \returns true if this node is a #Layer.
+   */
+  bool is_layer() const;
 
   /**
-   * \returns true if this node is a Layer.
+   * \returns this node as a #Layer.
    */
-  bool is_layer() const
-  {
-    return this->type == GP_LAYER_TREE_LEAF;
-  }
-
-  /**
-   * \returns this tree node as a LayerGroup.
-   * \note This results in undefined behavior if the node is not a LayerGroup.
-   */
-  const LayerGroup &as_group() const;
-
-  /**
-   * \returns this tree node as a Layer.
-   * \note This results in undefined behavior if the node is not a Layer.
-   */
+  Layer &as_layer();
   const Layer &as_layer() const;
 
   /**
-   * \returns this tree node as a mutable LayerGroup.
-   * \note This results in undefined behavior if the node is not a LayerGroup.
+   * \returns this node as a #LayerGroup.
    */
-  LayerGroup &as_group_for_write();
-
-  /**
-   * \returns this tree node as a mutable Layer.
-   * \note This results in undefined behavior if the node is not a Layer.
-   */
-  Layer &as_layer_for_write();
+  LayerGroup &as_group();
+  const LayerGroup &as_group() const;
 
   /**
    * \returns the parent layer group or nullptr for the root group.
    */
   LayerGroup *parent_group() const;
+  TreeNode *parent_node() const;
 };
 
 /**
@@ -191,6 +236,30 @@ class LayerMask : public ::GreasePencilLayerMask {
   LayerMask(const LayerMask &other);
   ~LayerMask();
 };
+
+/**
+ * Structure used to transform frames in a grease pencil layer.
+ */
+struct LayerTransformData {
+  enum FrameTransformationStatus { TRANS_CLEAR, TRANS_INIT, TRANS_RUNNING };
+
+  /* Map of frame keys describing the transformation of the frames. Keys of the map are the source
+   * frame indices, and the values of the map are the destination frame indices. */
+  Map<int, int> frames_destination;
+
+  /* Copy of the layer frames map. This allows to display the transformation while running, without
+   * removing any drawing. */
+  Map<int, GreasePencilFrame> frames_copy;
+  /* Map containing the duration (in frames) for each frame in the layer that has a fixed duration,
+   * i.e. each frame that is not an implicit hold. */
+  Map<int, int> frames_duration;
+
+  FrameTransformationStatus status{TRANS_CLEAR};
+};
+
+/* The key of a GreasePencilFrame in the frames map is the starting scene frame number (int) of
+ * that frame. */
+using FramesMapKey = int;
 
 class LayerRuntime {
  public:
@@ -219,16 +288,19 @@ class LayerRuntime {
    * referenced drawings are discarded. If the frame is longer than the number of referenced
    * drawings, then the last referenced drawing is held for the rest of the duration.
    */
-  Map<int, GreasePencilFrame> frames_;
+  Map<FramesMapKey, GreasePencilFrame> frames_;
   /**
    * Caches a sorted vector of the keys of `frames_`.
    */
-  mutable SharedCache<Vector<int>> sorted_keys_cache_;
+  mutable SharedCache<Vector<FramesMapKey>> sorted_keys_cache_;
   /**
    * A vector of LayerMask. This layer will be masked by the layers referenced in the masks.
    * A layer can have zero or more layer masks.
    */
   Vector<LayerMask> masks_;
+
+  /* Runtime data used for frame transformations.*/
+  LayerTransformData trans_data_;
 };
 
 /**
@@ -242,17 +314,9 @@ class Layer : public ::GreasePencilLayer {
   Layer(const Layer &other);
   ~Layer();
 
-  /**
-   * \returns the layer name.
-   */
-  StringRefNull name() const;
-  void set_name(StringRefNull new_name);
-
-  /**
-   * \returns the parent layer group.
-   */
-  LayerGroup &parent_group() const;
-
+ public:
+  /* Define the common functions for #TreeNode. */
+  TREENODE_COMMON_METHODS;
   /**
    * \returns the layer as a `TreeNode`.
    */
@@ -260,47 +324,47 @@ class Layer : public ::GreasePencilLayer {
   TreeNode &as_node();
 
   /**
+   * \returns the parent #LayerGroup of this layer.
+   */
+  LayerGroup &parent_group() const;
+
+  /**
    * \returns the frames mapping.
    */
-  const Map<int, GreasePencilFrame> &frames() const;
-  Map<int, GreasePencilFrame> &frames_for_write();
+  const Map<FramesMapKey, GreasePencilFrame> &frames() const;
+  Map<FramesMapKey, GreasePencilFrame> &frames_for_write();
 
-  bool is_visible() const;
-  bool is_locked() const;
-  bool is_editable() const;
   bool is_empty() const;
-  bool is_selected() const;
 
   /**
    * Adds a new frame into the layer frames map.
-   * Fails if there already exists a frame at \a frame_number that is not a null-frame.
-   * Null-frame at \a frame_number and subsequent null-frames are removed.
+   * Fails if there already exists a frame at \a key that is not a null-frame.
+   * Null-frame at \a key and subsequent null-frames are removed.
    *
    * If \a duration is 0, the frame is marked as an implicit hold (see `GP_FRAME_IMPLICIT_HOLD`).
-   * Otherwise adds an additional null-frame at \a frame_number + \a duration, if necessary, to
+   * Otherwise adds an additional null-frame at \a key + \a duration, if necessary, to
    * indicate the end of the added frame.
    *
    * \returns a pointer to the added frame on success, otherwise nullptr.
    */
-  GreasePencilFrame *add_frame(int frame_number, int drawing_index, int duration = 0);
+  GreasePencilFrame *add_frame(FramesMapKey key, int drawing_index, int duration = 0);
   /**
-   * Removes a frame with \a start_frame_number from the frames map.
+   * Removes a frame with \a key from the frames map.
    *
-   * Fails if the map does not contain a frame with \a frame_number or in the specific case where
+   * Fails if the map does not contain a frame with \a key or in the specific case where
    * the previous frame has a fixed duration (is not marked as an implicit hold) and the frame to
    * remove is a null frame.
    *
    * Will remove null frames after the frame to remove.
-   * \param start_frame_number: the first frame number of the frame to be removed.
    * \return true on success.
    */
-  bool remove_frame(int start_frame_number);
+  bool remove_frame(FramesMapKey key);
 
   /**
-   * Returns the sorted (start) frame numbers of the frames of this layer.
+   * Returns the sorted keys (start frame numbers) of the frames of this layer.
    * \note This will cache the keys lazily.
    */
-  Span<int> sorted_keys() const;
+  Span<FramesMapKey> sorted_keys() const;
 
   /**
    * \returns the index of the active drawing at frame \a frame_number or -1 if there is no
@@ -308,10 +372,21 @@ class Layer : public ::GreasePencilLayer {
   int drawing_index_at(const int frame_number) const;
 
   /**
+   * \returns the key of the active frame at \a frame_number or -1 if there is no frame.
+   */
+  FramesMapKey frame_key_at(int frame_number) const;
+
+  /**
    * \returns a pointer to the active frame at \a frame_number or nullptr if there is no frame.
    */
   const GreasePencilFrame *frame_at(const int frame_number) const;
   GreasePencilFrame *frame_at(const int frame_number);
+
+  /**
+   * \returns the frame duration of the active frame at \a frame_number or -1 if there is no active
+   * frame or the active frame is the last frame.
+   */
+  int get_frame_duration_at(const int frame_number) const;
 
   void tag_frames_map_changed();
 
@@ -326,7 +401,7 @@ class Layer : public ::GreasePencilLayer {
 
  private:
   GreasePencilFrame *add_frame_internal(int frame_number, int drawing_index);
-  int frame_index_at(int frame_number) const;
+
   /**
    * Removes null frames starting from \a begin until \a end (excluded) or until a non-null frame
    * is reached. \param begin, end: Iterators into the `sorted_keys` span. \returns an iterator to
@@ -367,12 +442,8 @@ class LayerGroup : public ::GreasePencilLayerTreeGroup {
   ~LayerGroup();
 
  public:
-  StringRefNull name() const;
-  void set_name(StringRefNull new_name);
-
-  bool is_visible() const;
-  bool is_locked() const;
-
+  /* Define the common functions for #TreeNode. */
+  TREENODE_COMMON_METHODS;
   /**
    * \returns the group as a `TreeNode`.
    */
@@ -465,6 +536,69 @@ class LayerGroup : public ::GreasePencilLayerTreeGroup {
   void tag_nodes_cache_dirty() const;
 };
 
+inline void Drawing::add_user() const
+{
+  this->runtime->user_count.fetch_add(1, std::memory_order_relaxed);
+}
+inline void Drawing::remove_user() const
+{
+  this->runtime->user_count.fetch_sub(1, std::memory_order_relaxed);
+}
+inline bool Drawing::is_instanced() const
+{
+  return this->runtime->user_count.load(std::memory_order_relaxed) > 1;
+}
+inline bool Drawing::has_users() const
+{
+  return this->runtime->user_count.load(std::memory_order_relaxed) > 0;
+}
+
+inline bool TreeNode::is_group() const
+{
+  return this->type == GP_LAYER_TREE_GROUP;
+}
+inline bool TreeNode::is_layer() const
+{
+  return this->type == GP_LAYER_TREE_LEAF;
+}
+inline bool TreeNode::is_visible() const
+{
+  return ((this->flag & GP_LAYER_TREE_NODE_HIDE) == 0) &&
+         (!this->parent_group() || this->parent_group()->as_node().is_visible());
+}
+inline void TreeNode::set_visible(const bool visible)
+{
+  SET_FLAG_FROM_TEST(this->flag, !visible, GP_LAYER_TREE_NODE_HIDE);
+}
+inline bool TreeNode::is_locked() const
+{
+  return ((this->flag & GP_LAYER_TREE_NODE_LOCKED) != 0) ||
+         (!this->parent_group() || this->parent_group()->as_node().is_locked());
+}
+inline void TreeNode::set_locked(const bool locked)
+{
+  SET_FLAG_FROM_TEST(this->flag, locked, GP_LAYER_TREE_NODE_LOCKED);
+}
+inline bool TreeNode::is_editable() const
+{
+  return this->is_visible() && !this->is_locked();
+}
+inline bool TreeNode::is_selected() const
+{
+  return (this->flag & GP_LAYER_TREE_NODE_SELECT) != 0;
+}
+inline void TreeNode::set_selected(const bool selected)
+{
+  SET_FLAG_FROM_TEST(this->flag, selected, GP_LAYER_TREE_NODE_SELECT);
+}
+inline bool TreeNode::use_onion_skinning() const
+{
+  return ((this->flag & GP_LAYER_TREE_NODE_USE_ONION_SKINNING) != 0);
+}
+inline StringRefNull TreeNode::name() const
+{
+  return this->name_ptr;
+}
 inline const TreeNode &LayerGroup::as_node() const
 {
   return *reinterpret_cast<const TreeNode *>(this);
@@ -483,20 +617,17 @@ inline TreeNode &Layer::as_node()
   return *reinterpret_cast<TreeNode *>(this);
 }
 
-inline StringRefNull Layer::name() const
+TREENODE_COMMON_METHODS_FORWARD_IMPL(Layer);
+inline bool Layer::is_empty() const
 {
-  return this->base.name;
+  return (this->frames().size() == 0);
 }
-
 inline LayerGroup &Layer::parent_group() const
 {
-  return this->base.parent->wrap();
+  return *this->as_node().parent_group();
 }
 
-inline StringRefNull LayerGroup::name() const
-{
-  return this->base.name;
-}
+TREENODE_COMMON_METHODS_FORWARD_IMPL(LayerGroup);
 
 namespace convert {
 
@@ -515,6 +646,8 @@ class GreasePencilRuntime {
    */
   void *batch_cache = nullptr;
   bke::greasepencil::StrokeCache stroke_cache;
+  /* The frame on which the object was evaluated (only valid for evaluated object). */
+  int eval_frame;
 
  public:
   GreasePencilRuntime() {}
@@ -528,26 +661,6 @@ class GreasePencilRuntime {
 };
 
 }  // namespace blender::bke
-
-inline void blender::bke::greasepencil::Drawing::add_user() const
-{
-  this->runtime->user_count.fetch_add(1, std::memory_order_relaxed);
-}
-
-inline void blender::bke::greasepencil::Drawing::remove_user() const
-{
-  this->runtime->user_count.fetch_sub(1, std::memory_order_relaxed);
-}
-
-inline bool blender::bke::greasepencil::Drawing::is_instanced() const
-{
-  return this->runtime->user_count.load(std::memory_order_relaxed) > 1;
-}
-
-inline bool blender::bke::greasepencil::Drawing::has_users() const
-{
-  return this->runtime->user_count.load(std::memory_order_relaxed) > 0;
-}
 
 inline blender::bke::greasepencil::Drawing &GreasePencilDrawing::wrap()
 {
@@ -632,9 +745,7 @@ void *BKE_grease_pencil_add(Main *bmain, const char *name);
 GreasePencil *BKE_grease_pencil_new_nomain();
 GreasePencil *BKE_grease_pencil_copy_for_eval(const GreasePencil *grease_pencil_src);
 BoundBox *BKE_grease_pencil_boundbox_get(Object *ob);
-void BKE_grease_pencil_data_update(struct Depsgraph *depsgraph,
-                                   struct Scene *scene,
-                                   struct Object *object);
+void BKE_grease_pencil_data_update(Depsgraph *depsgraph, Scene *scene, Object *object);
 
 int BKE_grease_pencil_object_material_index_get_by_name(Object *ob, const char *name);
 Material *BKE_grease_pencil_object_material_new(Main *bmain,

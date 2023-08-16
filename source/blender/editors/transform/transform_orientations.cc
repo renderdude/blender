@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -23,7 +23,10 @@
 #include "DNA_view3d_types.h"
 
 #include "BLI_listbase.h"
-#include "BLI_math.h"
+#include "BLI_math_geom.h"
+#include "BLI_math_matrix.h"
+#include "BLI_math_rotation.h"
+#include "BLI_math_vector.h"
 #include "BLI_string.h"
 #include "BLI_string_utils.h"
 #include "BLI_utildefines.h"
@@ -39,7 +42,7 @@
 
 #include "BLT_translation.h"
 
-#include "ED_armature.h"
+#include "ED_armature.hh"
 
 #include "ANIM_bone_collections.h"
 
@@ -84,7 +87,7 @@ static void uniqueOrientationName(ListBase *lb, char *name)
                     CTX_DATA_(BLT_I18NCONTEXT_ID_SCENE, "Space"),
                     '.',
                     name,
-                    sizeof(((TransformOrientation *)nullptr)->name));
+                    sizeof(TransformOrientation::name));
 }
 
 static TransformOrientation *createViewSpace(bContext *C,
@@ -240,7 +243,7 @@ static bool test_rotmode_euler(short rotmode)
   return ELEM(rotmode, ROT_MODE_AXISANGLE, ROT_MODE_QUAT) ? false : true;
 }
 
-/* could move into BLI_math however this is only useful for display/editing purposes */
+/* could move into BLI_math_rotation.h however this is only useful for display/editing purposes */
 static void axis_angle_to_gimbal_axis(float gmat[3][3], const float axis[3], const float angle)
 {
   /* X/Y are arbitrary axes, most importantly Z is the axis of rotation. */
@@ -545,11 +548,10 @@ static int armature_bone_transflags_update_recursive(bArmature *arm,
                                                      ListBase *lb,
                                                      const bool do_it)
 {
-  Bone *bone;
   bool do_next;
   int total = 0;
 
-  for (bone = static_cast<Bone *>(lb->first); bone; bone = bone->next) {
+  LISTBASE_FOREACH (Bone *, bone, lb) {
     bone->flag &= ~BONE_TRANSFORM;
     do_next = do_it;
     if (do_it) {
@@ -830,9 +832,8 @@ static uint bm_mesh_elems_select_get_n__internal(
 
   if (!BLI_listbase_is_empty(&bm->selected)) {
     /* quick check */
-    BMEditSelection *ese;
     i = 0;
-    for (ese = static_cast<BMEditSelection *>(bm->selected.last); ese; ese = ese->prev) {
+    LISTBASE_FOREACH_BACKWARD (BMEditSelection *, ese, &bm->selected) {
       /* shouldn't need this check */
       if (BM_elem_flag_test(ese->ele, BM_ELEM_SELECT)) {
 
@@ -1266,7 +1267,7 @@ int getTransformOrientation_ex(const Scene *scene,
         ok = true;
       }
       else {
-        for (ml = static_cast<MetaElem *>(mb->editelems->first); ml; ml = ml->next) {
+        LISTBASE_FOREACH (MetaElem *, ml, mb->editelems) {
           if (ml->flag & SELECT) {
             quat_to_mat3(tmat, ml->quat);
             add_v3_v3(normal, tmat[2]);
@@ -1303,7 +1304,7 @@ int getTransformOrientation_ex(const Scene *scene,
         zero_v3(fallback_normal);
         zero_v3(fallback_plane);
 
-        for (ebone = static_cast<EditBone *>(arm->edbo->first); ebone; ebone = ebone->next) {
+        LISTBASE_FOREACH (EditBone *, ebone, arm->edbo) {
           if (ANIM_bonecoll_is_visible_editbone(arm, ebone)) {
             if (ebone->flag & BONE_SELECTED) {
               ED_armature_ebone_to_mat3(ebone, tmat);
@@ -1370,8 +1371,7 @@ int getTransformOrientation_ex(const Scene *scene,
       transformed_len = armature_bone_transflags_update_recursive(arm, &arm->bonebase, true);
       if (transformed_len) {
         /* use channels to get stats */
-        for (pchan = static_cast<bPoseChannel *>(ob->pose->chanbase.first); pchan;
-             pchan = pchan->next) {
+        LISTBASE_FOREACH (bPoseChannel *, pchan, &ob->pose->chanbase) {
           if (pchan->bone && pchan->bone->flag & BONE_TRANSFORM) {
             add_v3_v3(normal, pchan->pose_mat[2]);
             add_v3_v3(plane, pchan->pose_mat[1]);

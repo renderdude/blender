@@ -17,7 +17,8 @@
 #include "DNA_object_types.h"
 
 #include "BLI_edgehash.h"
-#include "BLI_math.h"
+#include "BLI_math_geom.h"
+#include "BLI_math_matrix.h"
 #include "BLI_math_vector_types.hh"
 #include "BLI_memarena.h"
 #include "BLI_polyfill_2d.h"
@@ -29,8 +30,8 @@
 #include "BKE_customdata.h"
 #include "BKE_global.h"
 #include "BKE_mesh.hh"
-#include "BKE_mesh_legacy_convert.h"
-#include "BKE_multires.h"
+#include "BKE_mesh_legacy_convert.hh"
+#include "BKE_multires.hh"
 
 using blender::MutableSpan;
 using blender::Span;

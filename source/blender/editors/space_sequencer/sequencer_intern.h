@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2008 Blender Foundation
+/* SPDX-FileCopyrightText: 2008 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -9,7 +9,7 @@
 #pragma once
 
 #include "DNA_sequence_types.h"
-#include "RNA_access.h"
+#include "RNA_access.hh"
 
 #ifdef __cplusplus
 extern "C" {

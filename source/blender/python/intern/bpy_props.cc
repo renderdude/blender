@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -15,7 +15,7 @@
 
 #include <Python.h>
 
-#include "RNA_types.h"
+#include "RNA_types.hh"
 
 #include "BLI_listbase.h"
 #include "BLI_utildefines.h"
@@ -26,9 +26,9 @@
 
 #include "BKE_idprop.h"
 
-#include "RNA_access.h"
-#include "RNA_define.h" /* for defining our own rna */
-#include "RNA_enum_types.h"
+#include "RNA_access.hh"
+#include "RNA_define.hh" /* for defining our own rna */
+#include "RNA_enum_types.hh"
 #include "RNA_prototypes.h"
 
 #include "MEM_guardedalloc.h"
@@ -150,8 +150,7 @@ struct BPyPropStore {
   } py_data;
 };
 
-#define BPY_PROP_STORE_PY_DATA_SIZE \
-  (sizeof(((BPyPropStore *)nullptr)->py_data) / sizeof(PyObject *))
+#define BPY_PROP_STORE_PY_DATA_SIZE (sizeof(BPyPropStore::py_data) / sizeof(PyObject *))
 
 #define ASSIGN_PYOBJECT_INCREF(a, b) \
   { \
@@ -1610,7 +1609,7 @@ static bool bpy_prop_string_visit_fn_call(PyObject *py_func,
         "s" /* `info` */
         ":search",
         _keywords,
-        0,
+        nullptr,
     };
     if (!_PyArg_ParseTupleAndKeywordsFast(item, nullptr, &_parser, &text, &info)) {
       PyC_Err_PrintWithFunc(py_func);
@@ -2268,10 +2267,8 @@ static void bpy_prop_callback_assign_update(PropertyRNA *prop, PyObject *update_
   if (update_fn && update_fn != Py_None) {
     BPyPropStore *prop_store = bpy_prop_py_data_ensure(prop);
 
-    RNA_def_property_update_runtime(prop, reinterpret_cast<const void *>(bpy_prop_update_fn));
+    RNA_def_property_update_runtime_with_context_and_property(prop, bpy_prop_update_fn);
     ASSIGN_PYOBJECT_INCREF(prop_store->py_data.update_fn, update_fn);
-
-    RNA_def_property_flag(prop, PROP_CONTEXT_PROPERTY_UPDATE);
   }
 }
 
@@ -2855,7 +2852,7 @@ static PyObject *BPy_BoolProperty(PyObject *self, PyObject *args, PyObject *kw)
       "O"  /* `set` */
       ":BoolProperty",
       _keywords,
-      0,
+      nullptr,
   };
   if (!_PyArg_ParseTupleAndKeywordsFast(args,
                                         kw,
@@ -3015,7 +3012,7 @@ static PyObject *BPy_BoolVectorProperty(PyObject *self, PyObject *args, PyObject
       "O"  /* `set` */
       ":BoolVectorProperty",
       _keywords,
-      0,
+      nullptr,
   };
   if (!_PyArg_ParseTupleAndKeywordsFast(args,
                                         kw,
@@ -3209,7 +3206,7 @@ static PyObject *BPy_IntProperty(PyObject *self, PyObject *args, PyObject *kw)
       "O"  /* `set` */
       ":IntProperty",
       _keywords,
-      0,
+      nullptr,
   };
   if (!_PyArg_ParseTupleAndKeywordsFast(args,
                                         kw,
@@ -3380,7 +3377,7 @@ static PyObject *BPy_IntVectorProperty(PyObject *self, PyObject *args, PyObject 
       "O"  /* `set` */
       ":IntVectorProperty",
       _keywords,
-      0,
+      nullptr,
   };
   if (!_PyArg_ParseTupleAndKeywordsFast(args,
                                         kw,
@@ -3578,7 +3575,7 @@ static PyObject *BPy_FloatProperty(PyObject *self, PyObject *args, PyObject *kw)
       "O"  /* `set` */
       ":FloatProperty",
       _keywords,
-      0,
+      nullptr,
   };
   if (!_PyArg_ParseTupleAndKeywordsFast(args,
                                         kw,
@@ -3763,7 +3760,7 @@ static PyObject *BPy_FloatVectorProperty(PyObject *self, PyObject *args, PyObjec
       "O"  /* `set` */
       ":FloatVectorProperty",
       _keywords,
-      0,
+      nullptr,
   };
   if (!_PyArg_ParseTupleAndKeywordsFast(args,
                                         kw,
@@ -3968,7 +3965,7 @@ static PyObject *BPy_StringProperty(PyObject *self, PyObject *args, PyObject *kw
       "O&" /* `search_options` */
       ":StringProperty",
       _keywords,
-      0,
+      nullptr,
   };
   if (!_PyArg_ParseTupleAndKeywordsFast(args,
                                         kw,
@@ -4170,7 +4167,7 @@ static PyObject *BPy_EnumProperty(PyObject *self, PyObject *args, PyObject *kw)
       "O"  /* `set` */
       ":EnumProperty",
       _keywords,
-      0,
+      nullptr,
   };
   if (!_PyArg_ParseTupleAndKeywordsFast(args,
                                         kw,
@@ -4396,7 +4393,7 @@ PyObject *BPy_PointerProperty(PyObject *self, PyObject *args, PyObject *kw)
       "O"  /* `update` */
       ":PointerProperty",
       _keywords,
-      0,
+      nullptr,
   };
   if (!_PyArg_ParseTupleAndKeywordsFast(args,
                                         kw,
@@ -4536,7 +4533,7 @@ PyObject *BPy_CollectionProperty(PyObject *self, PyObject *args, PyObject *kw)
       "O&" /* `tags` */
       ":CollectionProperty",
       _keywords,
-      0,
+      nullptr,
   };
   if (!_PyArg_ParseTupleAndKeywordsFast(args,
                                         kw,
@@ -4646,7 +4643,7 @@ static PyObject *BPy_RemoveProperty(PyObject *self, PyObject *args, PyObject *kw
       "s" /* `attr` */
       ":RemoveProperty",
       _keywords,
-      0,
+      nullptr,
   };
   if (!_PyArg_ParseTupleAndKeywordsFast(args, kw, &_parser, &id)) {
     return nullptr;

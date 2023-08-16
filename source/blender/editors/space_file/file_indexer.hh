@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -7,7 +7,7 @@
  */
 #pragma once
 
-#include "ED_file_indexer.h"
+#include "ED_file_indexer.hh"
 
 /**
  * Default indexer to use when listing files. The implementation is a no-operation indexing. When

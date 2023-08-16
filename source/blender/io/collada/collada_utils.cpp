@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2010-2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2010-2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -29,7 +29,7 @@
 
 #include "BLI_linklist.h"
 #include "BLI_listbase.h"
-#include "BLI_math.h"
+#include "BLI_math_matrix.h"
 
 #include "BKE_action.h"
 #include "BKE_armature.h"
@@ -42,18 +42,18 @@
 #include "BKE_lib_id.h"
 #include "BKE_material.h"
 #include "BKE_mesh.hh"
-#include "BKE_mesh_legacy_convert.h"
-#include "BKE_mesh_runtime.h"
+#include "BKE_mesh_legacy_convert.hh"
+#include "BKE_mesh_runtime.hh"
 #include "BKE_node.hh"
 #include "BKE_object.h"
 #include "BKE_scene.h"
 
-#include "ED_node.h"
-#include "ED_object.h"
-#include "ED_screen.h"
+#include "ED_node.hh"
+#include "ED_object.hh"
+#include "ED_screen.hh"
 
-#include "WM_api.h" /* XXX hrm, see if we can do without this */
-#include "WM_types.h"
+#include "WM_api.hh" /* XXX hrm, see if we can do without this */
+#include "WM_types.hh"
 
 #include "bmesh.h"
 #include "bmesh_tools.h"
@@ -253,8 +253,7 @@ Object *bc_get_assigned_armature(Object *ob)
     ob_arm = ob->parent;
   }
   else {
-    ModifierData *mod;
-    for (mod = (ModifierData *)ob->modifiers.first; mod; mod = mod->next) {
+    LISTBASE_FOREACH (ModifierData *, mod, &ob->modifiers) {
       if (mod->type == eModifierType_Armature) {
         ob_arm = ((ArmatureModifierData *)mod)->object;
       }
@@ -425,7 +424,7 @@ void bc_triangulate_mesh(Mesh *me)
 
 bool bc_is_leaf_bone(Bone *bone)
 {
-  for (Bone *child = (Bone *)bone->childbase.first; child; child = child->next) {
+  LISTBASE_FOREACH (Bone *, child, &bone->childbase) {
     if (child->flag & BONE_CONNECTED) {
       return false;
     }
@@ -435,9 +434,7 @@ bool bc_is_leaf_bone(Bone *bone)
 
 EditBone *bc_get_edit_bone(bArmature *armature, char *name)
 {
-  EditBone *eBone;
-
-  for (eBone = (EditBone *)armature->edbo->first; eBone; eBone = eBone->next) {
+  LISTBASE_FOREACH (EditBone *, eBone, armature->edbo) {
     if (STREQ(name, eBone->name)) {
       return eBone;
     }
@@ -765,7 +762,6 @@ static bool has_custom_props(Bone *bone, bool enabled, std::string key)
 
 void bc_enable_fcurves(bAction *act, char *bone_name)
 {
-  FCurve *fcu;
   char prefix[200];
 
   if (bone_name) {
@@ -774,7 +770,7 @@ void bc_enable_fcurves(bAction *act, char *bone_name)
     SNPRINTF(prefix, "pose.bones[\"%s\"]", bone_name_esc);
   }
 
-  for (fcu = (FCurve *)act->curves.first; fcu; fcu = fcu->next) {
+  LISTBASE_FOREACH (FCurve *, fcu, &act->curves) {
     if (bone_name) {
       if (STREQLEN(fcu->rna_path, prefix, strlen(prefix))) {
         fcu->flag &= ~FCURVE_DISABLED;
@@ -1309,7 +1305,7 @@ bNode *bc_get_master_shader(Material *ma)
 {
   bNodeTree *nodetree = ma->nodetree;
   if (nodetree) {
-    for (bNode *node = (bNode *)nodetree->nodes.first; node; node = node->next) {
+    LISTBASE_FOREACH (bNode *, node, &nodetree->nodes) {
       if (node->typeinfo->type == SH_NODE_BSDF_PRINCIPLED) {
         return node;
       }

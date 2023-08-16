@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -11,8 +11,10 @@
 #include "draw_attributes.hh"
 #include "draw_pbvh.h"
 
-#include "BKE_paint.h"
+#include "BKE_mesh_types.hh"
+#include "BKE_paint.hh"
 #include "BKE_pbvh_api.hh"
+
 #include "DRW_pbvh.hh"
 
 namespace blender::draw {

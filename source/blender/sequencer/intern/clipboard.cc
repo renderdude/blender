@@ -1,5 +1,5 @@
 /* SPDX-FileCopyrightText: 2001-2002 NaN Holding BV. All rights reserved.
- * SPDX-FileCopyrightText: 2003-2009 Blender Foundation
+ * SPDX-FileCopyrightText: 2003-2009 Blender Authors
  * SPDX-FileCopyrightText: 2005-2006 Peter Schlaile <peter [at] schlaile [dot] de>
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
@@ -155,24 +155,21 @@ static void sequence_clipboard_pointers(Main *bmain,
 /* recursive versions of functions above */
 void seq_clipboard_pointers_free(ListBase *seqbase)
 {
-  Sequence *seq;
-  for (seq = static_cast<Sequence *>(seqbase->first); seq; seq = seq->next) {
+  LISTBASE_FOREACH (Sequence *, seq, seqbase) {
     sequence_clipboard_pointers(nullptr, seq, seqclipboard_ptr_free);
     seq_clipboard_pointers_free(&seq->seqbase);
   }
 }
 void SEQ_clipboard_pointers_store(Main *bmain, ListBase *seqbase)
 {
-  Sequence *seq;
-  for (seq = static_cast<Sequence *>(seqbase->first); seq; seq = seq->next) {
+  LISTBASE_FOREACH (Sequence *, seq, seqbase) {
     sequence_clipboard_pointers(bmain, seq, seqclipboard_ptr_store);
     SEQ_clipboard_pointers_store(bmain, &seq->seqbase);
   }
 }
 void SEQ_clipboard_pointers_restore(ListBase *seqbase, Main *bmain)
 {
-  Sequence *seq;
-  for (seq = static_cast<Sequence *>(seqbase->first); seq; seq = seq->next) {
+  LISTBASE_FOREACH (Sequence *, seq, seqbase) {
     sequence_clipboard_pointers(bmain, seq, seqclipboard_ptr_restore);
     SEQ_clipboard_pointers_restore(&seq->seqbase, bmain);
   }

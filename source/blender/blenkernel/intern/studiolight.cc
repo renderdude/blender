@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2006-2007 Blender Foundation
+/* SPDX-FileCopyrightText: 2006-2007 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -16,8 +16,9 @@
 #include "BLI_fileops_types.h"
 #include "BLI_linklist.h"
 #include "BLI_listbase.h"
-#include "BLI_math.h"
 #include "BLI_math_color.h"
+#include "BLI_math_matrix.h"
+#include "BLI_math_vector.h"
 #include "BLI_path_util.h"
 #include "BLI_string.h"
 #include "BLI_string_utils.h"
@@ -31,6 +32,8 @@
 #include "GPU_texture.h"
 
 #include "MEM_guardedalloc.h"
+
+#include <string.h>
 
 /* Statics */
 static ListBase studiolights;
@@ -1472,8 +1475,7 @@ void BKE_studiolight_init()
 
 void BKE_studiolight_free()
 {
-  StudioLight *sl;
-  while ((sl = static_cast<StudioLight *>(BLI_pophead(&studiolights)))) {
+  while (StudioLight *sl = static_cast<StudioLight *>(BLI_pophead(&studiolights))) {
     studiolight_free(sl);
   }
 }
@@ -1636,7 +1638,7 @@ StudioLight *BKE_studiolight_create(const char *filepath,
 
 StudioLight *BKE_studiolight_studio_edit_get()
 {
-  static StudioLight sl = {0};
+  static StudioLight sl = {nullptr};
   sl.flag = STUDIOLIGHT_TYPE_STUDIO | STUDIOLIGHT_SPECULAR_HIGHLIGHT_PASS;
 
   memcpy(sl.light, U.light_param, sizeof(*sl.light) * 4);

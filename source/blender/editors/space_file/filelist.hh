@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2007 Blender Foundation
+/* SPDX-FileCopyrightText: 2007 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -69,11 +69,12 @@ void filelist_filter(FileList *filelist);
  */
 void filelist_setlibrary(FileList *filelist, const AssetLibraryReference *asset_library_ref);
 
-void filelist_init_icons(void);
-void filelist_free_icons(void);
+void filelist_init_icons();
+void filelist_free_icons();
 void filelist_file_get_full_path(const FileList *filelist,
                                  const FileDirEntry *file,
                                  char r_filepath[/*FILE_MAX_LIBEXTRA*/]);
+bool filelist_file_is_preview_pending(const FileList *filelist, const FileDirEntry *file);
 ImBuf *filelist_getimage(FileList *filelist, int index);
 ImBuf *filelist_file_getimage(const FileDirEntry *file);
 ImBuf *filelist_geticon_image_ex(const FileDirEntry *file);

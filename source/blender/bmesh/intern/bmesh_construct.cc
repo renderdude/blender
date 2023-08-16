@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2007 Blender Foundation
+/* SPDX-FileCopyrightText: 2007 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -11,7 +11,7 @@
 #include "MEM_guardedalloc.h"
 
 #include "BLI_alloca.h"
-#include "BLI_math.h"
+#include "BLI_math_vector.h"
 #include "BLI_sort_utils.h"
 
 #include "BKE_customdata.h"
@@ -607,7 +607,6 @@ BMesh *BM_mesh_copy(BMesh *bm_old)
   BMEdge *e, *e_new, **etable = nullptr;
   BMFace *f, *f_new, **ftable = nullptr;
   BMElem **eletable;
-  BMEditSelection *ese;
   BMIter iter;
   int i;
   const BMAllocTemplate allocsize = BMALLOC_TEMPLATE_FROM_BM(bm_old);
@@ -683,7 +682,7 @@ BMesh *BM_mesh_copy(BMesh *bm_old)
   BLI_assert(i == bm_old->totface);
 
   /* copy over edit selection history */
-  for (ese = static_cast<BMEditSelection *>(bm_old->selected.first); ese; ese = ese->next) {
+  LISTBASE_FOREACH (BMEditSelection *, ese, &bm_old->selected) {
     BMElem *ele = nullptr;
 
     switch (ese->htype) {

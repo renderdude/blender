@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: Blender Foundation
+/* SPDX-FileCopyrightText: Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -18,7 +18,9 @@
 #  include "DNA_scene_types.h"
 #  include "DNA_texture_types.h"
 
-#  include "BLI_math.h"
+#  include "BLI_math_geom.h"
+#  include "BLI_math_matrix.h"
+#  include "BLI_math_vector.h"
 #  include "BLI_utildefines.h"
 
 #  include "BKE_cloth.h"
@@ -1723,7 +1725,8 @@ BLI_INLINE bool spring_length(Implicit_Data *data,
 #  if 0
     if (length > L) {
       if ((clmd->sim_parms->flags & CSIMSETT_FLAG_TEARING_ENABLED) &&
-          (((length - L) * 100.0f / L) > clmd->sim_parms->maxspringlen)) {
+          (((length - L) * 100.0f / L) > clmd->sim_parms->maxspringlen))
+      {
         /* cut spring! */
         s->flags |= CSPRING_FLAG_DEACTIVATE;
         return false;

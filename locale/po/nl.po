@@ -1,9 +1,9 @@
 
 msgid ""
 msgstr ""
-"Project-Id-Version: Blender 4.0.0 Alpha (b'4f56261f768e')\n"
+"Project-Id-Version: Blender 4.0.0 Alpha (b'769fe076683a')\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-07-24 15:42:18\n"
+"POT-Creation-Date: 2023-08-14 09:28:55\n"
 "PO-Revision-Date: 2021-12-05 20:05+0100\n"
 "Language: nl\n"
 "MIME-Version: 1.0\n"
@@ -276,6 +276,10 @@ msgstr "Auteur"
 
 msgid "Description"
 msgstr "Beschrijving"
+
+
+msgid "Options"
+msgstr "Opties"
 
 
 msgid "Data Type"
@@ -1670,10 +1674,6 @@ msgid "Select Background"
 msgstr "Selecteer Achtergrond"
 
 
-msgid "Options"
-msgstr "Opties"
-
-
 msgid "Window"
 msgstr "Scherm"
 
@@ -2239,6 +2239,18 @@ msgid "Undefined"
 msgstr "Niet Gedefinieerd"
 
 
+msgid "Edit"
+msgstr "Bewerken"
+
+
+msgid "Sculpt"
+msgstr "Beeldhouwen"
+
+
+msgid "Tool"
+msgstr "Gereedschap"
+
+
 msgid "Active Material"
 msgstr "Actieve Materiaal"
 
@@ -2700,10 +2712,6 @@ msgid "Add"
 msgstr "Toevoegen"
 
 
-msgid "Edit"
-msgstr "Bewerken"
-
-
 msgid "Converter"
 msgstr "Converteerder"
 
@@ -2807,10 +2815,6 @@ msgstr "Star Lichaam"
 
 msgid "Clear Transform"
 msgstr "Maak Transformatie Leeg"
-
-
-msgid "Sculpt"
-msgstr "Beeldhouwen"
 
 
 msgid "Local View"
@@ -3314,11 +3318,6 @@ msgstr "Verplaats Kanalen"
 
 
 msgctxt "Operator"
-msgid "Rename Channels"
-msgstr "Hernoem Kanalen"
-
-
-msgctxt "Operator"
 msgid "Disable Channel Setting"
 msgstr "Zet Kanaal Instellingen Uit"
 
@@ -3512,10 +3511,6 @@ msgstr "Rond"
 msgctxt "Operator"
 msgid "Reset Brush"
 msgstr "Reset Kwast"
-
-
-msgid "Tool"
-msgstr "Gereedschap"
 
 
 msgctxt "Operator"
@@ -3818,17 +3813,12 @@ msgstr "Exporteer BVH"
 
 
 msgctxt "Operator"
-msgid "Export PLY"
-msgstr "Exporteer PLY"
+msgid "Export STL"
+msgstr "Exporteer STL"
 
 
 msgid "Apply Modifiers"
 msgstr "Pas Aanpassers Toe"
-
-
-msgctxt "Operator"
-msgid "Export STL"
-msgstr "Exporteer STL"
 
 
 msgctxt "Operator"
@@ -3862,15 +3852,6 @@ msgstr "Algemeen"
 
 msgid "Animation settings"
 msgstr "Animatie-instellingen"
-
-
-msgctxt "Operator"
-msgid "Export OBJ"
-msgstr "Exporteer OBJ"
-
-
-msgid "Apply modifiers"
-msgstr "Pas aanpassers toe"
 
 
 msgctxt "Operator"
@@ -4371,11 +4352,6 @@ msgstr "Importeer Afbeeldingen als Vlakken"
 
 
 msgctxt "Operator"
-msgid "Import PLY"
-msgstr "Importeer PLY"
-
-
-msgctxt "Operator"
 msgid "Import STL"
 msgstr "Importeer STL"
 
@@ -4391,11 +4367,6 @@ msgstr "Importeer Animatie"
 
 msgid "Import FBX animation"
 msgstr "Importeer FBX Animatie"
-
-
-msgctxt "Operator"
-msgid "Import OBJ"
-msgstr "Importeer OBJ"
 
 
 msgctxt "Operator"
@@ -6195,6 +6166,16 @@ msgid "Open a Blender file"
 msgstr "Open een Blender Bestand"
 
 
+msgctxt "Operator"
+msgid "Export PLY"
+msgstr "Exporteer PLY"
+
+
+msgctxt "Operator"
+msgid "Import PLY"
+msgstr "Importeer PLY"
+
+
 msgid "All Types"
 msgstr "Alle Types"
 
@@ -6746,8 +6727,8 @@ msgid "Old mapping value in frames"
 msgstr "Oude mapping waarde in frames"
 
 
-msgid "Resolution %"
-msgstr "Resolutie %"
+msgid "Resolution Scale"
+msgstr "Resolutie Schaal"
 
 
 msgid "Percentage scale for render resolution"
@@ -8193,10 +8174,6 @@ msgstr "Geen actief item"
 msgctxt "Operator"
 msgid "Revert to Saved Preferences"
 msgstr "Ga terug naar Opgeslagen Instellingen"
-
-
-msgid "Resolution Scale"
-msgstr "Resolutie Schaal"
 
 
 msgid "New Data"

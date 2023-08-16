@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -21,9 +21,9 @@
  * - object_id: index of object to bake (to use with the pixel_array)
  * - pixel_array: list of primitive ids and barycentric coordinates to
  *   `bake(Python object, see bake_pixel)`.
- * - pixels_num: size of pixel_array, number of pixels to bake (int)
- * - depth: depth of pixels to return (int, assuming always 4 now)
- * - result: array to be populated by the engine (float array, PyLong_AsVoidPtr)
+ * - pixels_num: size of pixel_array, number of pixels to bake `int`.
+ * - depth: depth of pixels to return (`int`, assuming always 4 now).
+ * - result: array to be populated by the engine (`float` array, #PyLong_AsVoidPtr).
  *
  * \note Normals are expected to be in World Space and in the +X, +Y, +Z orientation.
  *
@@ -53,10 +53,12 @@
 
 #include "MEM_guardedalloc.h"
 
-#include "BLI_math.h"
-
 #include "DNA_mesh_types.h"
 #include "DNA_meshdata_types.h"
+
+#include "BLI_math_geom.h"
+#include "BLI_math_matrix.h"
+#include "BLI_math_vector.h"
 
 #include "BKE_attribute.hh"
 #include "BKE_bvhutils.h"
@@ -64,8 +66,8 @@
 #include "BKE_image.h"
 #include "BKE_lib_id.h"
 #include "BKE_mesh.hh"
-#include "BKE_mesh_runtime.h"
-#include "BKE_mesh_tangent.h"
+#include "BKE_mesh_runtime.hh"
+#include "BKE_mesh_tangent.hh"
 #include "BKE_node.hh"
 
 #include "IMB_imbuf.h"

@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -18,19 +18,19 @@
 
 #include "BKE_layer.h"
 
-#include "BLI_math.h"
+#include "BLI_math_base.h"
 #include "BLI_string_utf8_symbols.h"
 
 #include "BLT_translation.h"
 
-#include "RNA_define.h"
-#include "RNA_enum_types.h"
+#include "RNA_define.hh"
+#include "RNA_enum_types.hh"
 
 #include "rna_internal.h"
 
 #include "IMB_imbuf.h"
 
-#include "WM_types.h"
+#include "WM_types.hh"
 
 static const EnumPropertyItem prop_direction_items[] = {
     {0, "ADD", ICON_ADD, "Add", "Add effect of brush"},
@@ -450,16 +450,16 @@ static EnumPropertyItem rna_enum_gpencil_brush_vertex_icons_items[] = {
 
 #  include "MEM_guardedalloc.h"
 
-#  include "RNA_access.h"
+#  include "RNA_access.hh"
 
-#  include "BKE_brush.h"
+#  include "BKE_brush.hh"
 #  include "BKE_colorband.h"
 #  include "BKE_gpencil_legacy.h"
 #  include "BKE_icons.h"
 #  include "BKE_material.h"
-#  include "BKE_paint.h"
+#  include "BKE_paint.hh"
 
-#  include "WM_api.h"
+#  include "WM_api.hh"
 
 static bool rna_BrushCapabilitiesSculpt_has_accumulate_get(PointerRNA *ptr)
 {
@@ -759,7 +759,7 @@ static void rna_Brush_reset_icon(Brush *br)
     return;
   }
 
-  if (id->icon_id >= BIFICONID_LAST) {
+  if (id->icon_id >= BIFICONID_LAST_STATIC) {
     BKE_icon_id_delete(id);
     BKE_previewimg_id_free(id);
   }

@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 #pragma once
@@ -29,7 +29,7 @@ extern "C" {
 
 /* Blender file format version. */
 #define BLENDER_FILE_VERSION BLENDER_VERSION
-#define BLENDER_FILE_SUBVERSION 13
+#define BLENDER_FILE_SUBVERSION 16
 
 /* Minimum Blender version that supports reading file written with the current
  * version. Older Blender versions will test this and cancel loading the file, showing a warning to
@@ -56,7 +56,7 @@ bool BKE_blender_version_is_alpha(void);
  * `file_version` is used.
  */
 void BKE_blender_version_blendfile_string_from_values(char *str_buff,
-                                                      const size_t str_buff_len,
+                                                      const size_t str_buff_maxncpy,
                                                       const short file_version,
                                                       const short file_subversion);
 

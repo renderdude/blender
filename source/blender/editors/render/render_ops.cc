@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2009 Blender Foundation
+/* SPDX-FileCopyrightText: 2009 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -10,9 +10,9 @@
 
 #include "BLI_utildefines.h"
 
-#include "ED_render.h"
+#include "ED_render.hh"
 
-#include "WM_api.h"
+#include "WM_api.hh"
 
 #include "render_intern.hh" /* own include */
 

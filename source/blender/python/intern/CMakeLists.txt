@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2006 Blender Foundation
+# SPDX-FileCopyrightText: 2006 Blender Authors
 #
 # SPDX-License-Identifier: GPL-2.0-or-later
 
@@ -362,6 +362,13 @@ endif()
 
 if(WITH_HARU)
   add_definitions(-DWITH_HARU)
+endif()
+
+if(WITH_HYDRA)
+  list(APPEND LIB
+    bf_render_hydra
+  )
+  add_definitions(-DWITH_HYDRA)
 endif()
 
 blender_add_lib(bf_python "${SRC}" "${INC}" "${INC_SYS}" "${LIB}")

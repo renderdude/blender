@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -19,6 +19,8 @@ extern "C" {
 }
 
 #include "BLI_strict_flags.h"
+
+#include <string.h>
 
 struct Knot {
   Knot *next, *prev;

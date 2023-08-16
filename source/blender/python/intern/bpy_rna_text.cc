@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -16,7 +16,7 @@
 
 #include "MEM_guardedalloc.h"
 
-#include "WM_api.h"
+#include "WM_api.hh"
 
 #include "BKE_text.h"
 
@@ -70,7 +70,7 @@ static PyObject *bpy_rna_region_as_string(PyObject *self, PyObject *args, PyObje
       "((ii)(ii))" /* `range` */
       ":region_as_string",
       _keywords,
-      0,
+      nullptr,
   };
   if (!_PyArg_ParseTupleAndKeywordsFast(
           args, kwds, &_parser, &region.curl, &region.curc, &region.sell, &region.selc))
@@ -138,7 +138,7 @@ static PyObject *bpy_rna_region_from_string(PyObject *self, PyObject *args, PyOb
       "((ii)(ii))" /* `range` */
       ":region_from_string",
       _keywords,
-      0,
+      nullptr,
   };
   if (!_PyArg_ParseTupleAndKeywordsFast(args,
                                         kwds,

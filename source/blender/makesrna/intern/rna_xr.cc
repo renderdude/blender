@@ -1,12 +1,10 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
 /** \file
  * \ingroup RNA
  */
-
-#include "BLI_math.h"
 
 #include "BLT_translation.h"
 
@@ -15,19 +13,21 @@
 #include "DNA_windowmanager_types.h"
 #include "DNA_xr_types.h"
 
-#include "RNA_access.h"
-#include "RNA_define.h"
-#include "RNA_enum_types.h"
+#include "RNA_access.hh"
+#include "RNA_define.hh"
+#include "RNA_enum_types.hh"
 
-#include "WM_types.h"
+#include "WM_types.hh"
 
 #include "rna_internal.h"
 
 #ifdef RNA_RUNTIME
 
 #  include "BLI_listbase.h"
+#  include "BLI_math_rotation.h"
+#  include "BLI_math_vector.h"
 
-#  include "WM_api.h"
+#  include "WM_api.hh"
 
 /* -------------------------------------------------------------------- */
 
@@ -355,7 +355,7 @@ static void rna_XrActionMapItem_op_name_get(PointerRNA *ptr, char *value)
     if (ami->op_properties_ptr) {
       wmOperatorType *ot = WM_operatortype_find(ami->op, 1);
       if (ot) {
-        strcpy(value, WM_operatortype_name(ot, ami->op_properties_ptr));
+        strcpy(value, WM_operatortype_name(ot, ami->op_properties_ptr).c_str());
         return;
       }
     }
@@ -376,7 +376,7 @@ static int rna_XrActionMapItem_op_name_length(PointerRNA *ptr)
     if (ami->op_properties_ptr) {
       wmOperatorType *ot = WM_operatortype_find(ami->op, 1);
       if (ot) {
-        return strlen(WM_operatortype_name(ot, ami->op_properties_ptr));
+        return strlen(WM_operatortype_name(ot, ami->op_properties_ptr).c_str());
       }
     }
     return strlen(ami->op);
@@ -706,8 +706,8 @@ static int rna_XrSessionSettings_icon_from_show_object_viewport_get(PointerRNA *
   return rna_object_type_visibility_icon_get_common(
       xr->session_settings.object_type_exclude_viewport,
 #    if 0
-    /* For the future when selection in VR is reliably supported. */
-    &xr->session_settings.object_type_exclude_select
+      /* For the future when selection in VR is reliably supported. */
+      &xr->session_settings.object_type_exclude_select
 #    else
       nullptr
 #    endif

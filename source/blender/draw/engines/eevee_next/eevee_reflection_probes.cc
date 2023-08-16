@@ -1,9 +1,13 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
-#include "eevee_reflection_probes.hh"
+#include "BLI_bit_vector.hh"
+
 #include "eevee_instance.hh"
+#include "eevee_reflection_probes.hh"
+
+#include <iostream>
 
 namespace blender::eevee {
 
@@ -395,6 +399,7 @@ void ReflectionProbeModule::do_world_update_set(bool value)
   ReflectionProbe &world_probe = probes_.lookup(world_object_key_);
   world_probe.do_render = value;
   world_probe.do_world_irradiance_update = value;
+  instance_.irradiance_cache.do_update_world_ = true;
 }
 
 void ReflectionProbeModule::do_world_update_irradiance_set(bool value)

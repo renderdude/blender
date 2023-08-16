@@ -12,7 +12,7 @@
 #include "MEM_guardedalloc.h"
 
 #include "BLI_listbase.h"
-#include "BLI_math.h"
+#include "BLI_math_vector.h"
 
 #include "BKE_curve.h"
 #include "BKE_fcurve.h"
@@ -21,8 +21,8 @@
 #include "DEG_depsgraph.h"
 #include "DEG_depsgraph_build.h"
 
-#include "ED_curve.h"
-#include "ED_view3d.h"
+#include "ED_curve.hh"
+#include "ED_view3d.hh"
 
 #include "curve_intern.h"
 

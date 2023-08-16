@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2017 Blender Foundation
+/* SPDX-FileCopyrightText: 2017 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -8,9 +8,9 @@
  * Custom select code for picking small regions (not efficient for large regions).
  * `gpu_select_pick_*` API.
  */
-#include <float.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cfloat>
+#include <cstdlib>
+#include <cstring>
 
 #include "GPU_debug.h"
 #include "GPU_framebuffer.h"

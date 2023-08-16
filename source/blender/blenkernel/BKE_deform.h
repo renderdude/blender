@@ -26,6 +26,7 @@ struct MDeformVert;
 struct Object;
 struct bDeformGroup;
 
+bool BKE_id_supports_vertex_groups(const struct ID *id);
 bool BKE_object_supports_vertex_groups(const struct Object *ob);
 const struct ListBase *BKE_object_defgroup_list(const struct Object *ob);
 struct ListBase *BKE_object_defgroup_list_mutable(struct Object *ob);
@@ -89,6 +90,7 @@ int *BKE_object_defgroup_flip_map_single(const struct Object *ob,
 int BKE_object_defgroup_flip_index(const struct Object *ob, int index, bool use_default);
 int BKE_object_defgroup_name_index(const struct Object *ob, const char *name);
 void BKE_object_defgroup_unique_name(struct bDeformGroup *dg, struct Object *ob);
+bool BKE_defgroup_unique_name_check(void *arg, const char *name);
 
 struct MDeformWeight *BKE_defvert_find_index(const struct MDeformVert *dv, int defgroup);
 /**

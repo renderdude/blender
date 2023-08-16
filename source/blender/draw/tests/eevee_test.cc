@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: Apache-2.0 */
 
@@ -10,7 +10,7 @@
 #include "BKE_node.hh"
 #include "BKE_object.h"
 #include "DEG_depsgraph.h"
-#include "RNA_define.h"
+#include "RNA_define.hh"
 
 #include "GPU_batch.h"
 #include "draw_shader.h"

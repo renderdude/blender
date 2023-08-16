@@ -8,16 +8,16 @@
 
 #include <cstdlib>
 
-#include "BLI_math.h"
+#include "BLI_math_vector.h"
 #include "BLI_string.h"
 #include "BLI_task.h"
 
 #include "BKE_context.h"
 #include "BKE_unit.h"
 
-#include "ED_screen.h"
+#include "ED_screen.hh"
 
-#include "UI_interface.h"
+#include "UI_interface.hh"
 
 #include "BLT_translation.h"
 
@@ -136,12 +136,12 @@ static void apply_value_impl(TransInfo *t, const char *value_name)
   ED_area_status_text(t->area, str);
 }
 
-static void applyCrease(TransInfo *t, const int[2] /*mval*/)
+static void applyCrease(TransInfo *t)
 {
   apply_value_impl(t, TIP_("Crease"));
 }
 
-static void applyBevelWeight(TransInfo *t, const int[2] /*mval*/)
+static void applyBevelWeight(TransInfo *t)
 {
   apply_value_impl(t, TIP_("Bevel Weight"));
 }

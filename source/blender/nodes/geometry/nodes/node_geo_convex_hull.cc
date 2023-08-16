@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -138,7 +138,7 @@ static Mesh *compute_hull(const GeometrySet &geometry_set)
 
   Span<float3> positions_span;
 
-  if (const Mesh *mesh = geometry_set.get_mesh_for_read()) {
+  if (const Mesh *mesh = geometry_set.get_mesh()) {
     count++;
     if (const VArray positions = *mesh->attributes().lookup<float3>("position")) {
       if (positions.is_span()) {
@@ -149,7 +149,7 @@ static Mesh *compute_hull(const GeometrySet &geometry_set)
     }
   }
 
-  if (const PointCloud *points = geometry_set.get_pointcloud_for_read()) {
+  if (const PointCloud *points = geometry_set.get_pointcloud()) {
     count++;
     if (const VArray positions = *points->attributes().lookup<float3>("position")) {
       if (positions.is_span()) {
@@ -160,7 +160,7 @@ static Mesh *compute_hull(const GeometrySet &geometry_set)
     }
   }
 
-  if (const Curves *curves_id = geometry_set.get_curves_for_read()) {
+  if (const Curves *curves_id = geometry_set.get_curves()) {
     count++;
     span_count++;
     const bke::CurvesGeometry &curves = curves_id->geometry.wrap();
@@ -175,34 +175,34 @@ static Mesh *compute_hull(const GeometrySet &geometry_set)
   /* If there is only one positions virtual array and it is already contiguous, avoid copying
    * all of the positions and instead pass the span directly to the convex hull function. */
   if (span_count == 1 && count == 1) {
-    return hull_from_bullet(geometry_set.get_mesh_for_read(), positions_span);
+    return hull_from_bullet(geometry_set.get_mesh(), positions_span);
   }
 
   Array<float3> positions(total_num);
   int offset = 0;
 
-  if (const Mesh *mesh = geometry_set.get_mesh_for_read()) {
+  if (const Mesh *mesh = geometry_set.get_mesh()) {
     if (const VArray varray = *mesh->attributes().lookup<float3>("position")) {
       varray.materialize(positions.as_mutable_span().slice(offset, varray.size()));
       offset += varray.size();
     }
   }
 
-  if (const PointCloud *points = geometry_set.get_pointcloud_for_read()) {
+  if (const PointCloud *points = geometry_set.get_pointcloud()) {
     if (const VArray varray = *points->attributes().lookup<float3>("position")) {
       varray.materialize(positions.as_mutable_span().slice(offset, varray.size()));
       offset += varray.size();
     }
   }
 
-  if (const Curves *curves_id = geometry_set.get_curves_for_read()) {
+  if (const Curves *curves_id = geometry_set.get_curves()) {
     const bke::CurvesGeometry &curves = curves_id->geometry.wrap();
     Span<float3> array = curves.evaluated_positions();
     positions.as_mutable_span().slice(offset, array.size()).copy_from(array);
     offset += array.size();
   }
 
-  return hull_from_bullet(geometry_set.get_mesh_for_read(), positions);
+  return hull_from_bullet(geometry_set.get_mesh(), positions);
 }
 
 #endif /* WITH_BULLET */
@@ -227,16 +227,15 @@ static void node_geo_exec(GeoNodeExecParams params)
 #endif /* WITH_BULLET */
 }
 
-}  // namespace blender::nodes::node_geo_convex_hull_cc
-
-void register_node_type_geo_convex_hull()
+static void node_register()
 {
-  namespace file_ns = blender::nodes::node_geo_convex_hull_cc;
-
   static bNodeType ntype;
 
   geo_node_type_base(&ntype, GEO_NODE_CONVEX_HULL, "Convex Hull", NODE_CLASS_GEOMETRY);
-  ntype.declare = file_ns::node_declare;
-  ntype.geometry_node_execute = file_ns::node_geo_exec;
+  ntype.declare = node_declare;
+  ntype.geometry_node_execute = node_geo_exec;
   nodeRegisterType(&ntype);
 }
+NOD_REGISTER_NODE(node_register)
+
+}  // namespace blender::nodes::node_geo_convex_hull_cc

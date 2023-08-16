@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2009 Blender Foundation, Joshua Leung.
+/* SPDX-FileCopyrightText: 2009 Blender Authors, Joshua Leung.
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -32,7 +32,7 @@
 
 #include "BLI_blenlib.h"
 #include "BLI_dlrbTree.h"
-#include "BLI_math.h"
+#include "BLI_math_rotation.h"
 
 #include "BLT_translation.h"
 
@@ -53,26 +53,26 @@
 #include "BKE_screen.h"
 #include "BKE_unit.h"
 
-#include "RNA_access.h"
-#include "RNA_define.h"
-#include "RNA_path.h"
+#include "RNA_access.hh"
+#include "RNA_define.hh"
+#include "RNA_path.hh"
 #include "RNA_prototypes.h"
 
-#include "WM_api.h"
-#include "WM_types.h"
+#include "WM_api.hh"
+#include "WM_types.hh"
 
-#include "UI_interface.h"
-#include "UI_resources.h"
+#include "UI_interface.hh"
+#include "UI_resources.hh"
 
-#include "ED_armature.h"
-#include "ED_keyframes_edit.h"
-#include "ED_keyframes_keylist.h"
-#include "ED_keyframing.h"
-#include "ED_markers.h"
-#include "ED_numinput.h"
-#include "ED_screen.h"
-#include "ED_space_api.h"
-#include "ED_util.h"
+#include "ED_armature.hh"
+#include "ED_keyframes_edit.hh"
+#include "ED_keyframes_keylist.hh"
+#include "ED_keyframing.hh"
+#include "ED_markers.hh"
+#include "ED_numinput.hh"
+#include "ED_screen.hh"
+#include "ED_space_api.hh"
+#include "ED_util.hh"
 
 #include "GPU_immediate.h"
 #include "GPU_immediate_util.h"
@@ -477,7 +477,6 @@ static void pose_slide_apply_props(tPoseSlideOp *pso,
                                    const char prop_prefix[])
 {
   PointerRNA ptr = {nullptr};
-  LinkData *ld;
   int len = strlen(pfl->pchan_path);
 
   /* Setup pointer RNA for resolving paths. */
@@ -488,7 +487,7 @@ static void pose_slide_apply_props(tPoseSlideOp *pso,
    * - bbone properties are similar, but they always start with a prefix "bbone_*",
    *   so a similar method should work here for those too
    */
-  for (ld = static_cast<LinkData *>(pfl->fcurves.first); ld; ld = ld->next) {
+  LISTBASE_FOREACH (LinkData *, ld, &pfl->fcurves) {
     FCurve *fcu = (FCurve *)ld->data;
     const char *bPtr, *pPtr;
 
@@ -760,10 +759,8 @@ static void pose_slide_rest_pose_apply_other_rot(tPoseSlideOp *pso, float vec[4]
  */
 static void pose_slide_rest_pose_apply(bContext *C, tPoseSlideOp *pso)
 {
-  tPChanFCurveLink *pfl;
-
   /* For each link, handle each set of transforms. */
-  for (pfl = static_cast<tPChanFCurveLink *>(pso->pfLinks.first); pfl; pfl = pfl->next) {
+  LISTBASE_FOREACH (tPChanFCurveLink *, pfl, &pso->pfLinks) {
     /* Valid transforms for each #bPoseChannel should have been noted already.
      * - Sliding the pose should be a straightforward exercise for location+rotation,
      *   but rotations get more complicated since we may want to use quaternion blending
@@ -819,8 +816,6 @@ static void pose_slide_rest_pose_apply(bContext *C, tPoseSlideOp *pso)
  */
 static void pose_slide_apply(bContext *C, tPoseSlideOp *pso)
 {
-  tPChanFCurveLink *pfl;
-
   /* Sanitize the frame ranges. */
   if (pso->prev_frame == pso->next_frame) {
     /* Move out one step either side. */
@@ -843,7 +838,7 @@ static void pose_slide_apply(bContext *C, tPoseSlideOp *pso)
   }
 
   /* For each link, handle each set of transforms. */
-  for (pfl = static_cast<tPChanFCurveLink *>(pso->pfLinks.first); pfl; pfl = pfl->next) {
+  LISTBASE_FOREACH (tPChanFCurveLink *, pfl, &pso->pfLinks) {
     /* Valid transforms for each #bPoseChannel should have been noted already
      * - sliding the pose should be a straightforward exercise for location+rotation,
      *   but rotations get more complicated since we may want to use quaternion blending
@@ -1013,7 +1008,6 @@ static void pose_slide_draw_status(bContext *C, tPoseSlideOp *pso)
  */
 static int pose_slide_invoke_common(bContext *C, wmOperator *op, const wmEvent *event)
 {
-  tPChanFCurveLink *pfl;
   wmWindow *win = CTX_wm_window(C);
 
   tPoseSlideOp *pso = static_cast<tPoseSlideOp *>(op->customdata);
@@ -1021,11 +1015,9 @@ static int pose_slide_invoke_common(bContext *C, wmOperator *op, const wmEvent *
   ED_slider_init(pso->slider, event);
 
   /* For each link, add all its keyframes to the search tree. */
-  for (pfl = static_cast<tPChanFCurveLink *>(pso->pfLinks.first); pfl; pfl = pfl->next) {
-    LinkData *ld;
-
+  LISTBASE_FOREACH (tPChanFCurveLink *, pfl, &pso->pfLinks) {
     /* Do this for each F-Curve. */
-    for (ld = static_cast<LinkData *>(pfl->fcurves.first); ld; ld = ld->next) {
+    LISTBASE_FOREACH (LinkData *, ld, &pfl->fcurves) {
       FCurve *fcu = (FCurve *)ld->data;
       fcurve_to_keylist(pfl->ob->adt, fcu, pso->keylist, 0);
     }

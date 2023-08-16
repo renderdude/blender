@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2020 Blender Foundation
+/* SPDX-FileCopyrightText: 2020 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -14,7 +14,7 @@
 #include "BLI_sys_types.h"
 #include "BLI_virtual_array.hh"
 
-#include "BKE_multires.h"
+#include "BKE_multires.hh"
 
 struct Depsgraph;
 struct GridPaintMask;

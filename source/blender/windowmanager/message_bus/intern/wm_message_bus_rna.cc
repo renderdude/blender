@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -17,12 +17,12 @@
 #include "BLI_listbase.h"
 #include "BLI_utildefines.h"
 
-#include "WM_message.h"
-#include "WM_types.h"
-#include "message_bus/intern/wm_message_bus_intern.h"
+#include "WM_message.hh"
+#include "WM_types.hh"
+#include "message_bus/intern/wm_message_bus_intern.hh"
 
-#include "RNA_access.h"
-#include "RNA_path.h"
+#include "RNA_access.hh"
+#include "RNA_path.hh"
 
 /* -------------------------------------------------------------------- */
 /** \name Internal Utilities

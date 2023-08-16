@@ -16,7 +16,8 @@
 
 #include "BLI_blenlib.h"
 #include "BLI_kdtree.h"
-#include "BLI_math.h"
+#include "BLI_math_rotation.h"
+#include "BLI_math_vector.h"
 #include "BLI_rand.h"
 #include "BLI_utildefines.h"
 
@@ -30,7 +31,7 @@
 
 #include "BKE_modifier.h"
 
-#include "RNA_enum_types.h"
+#include "RNA_enum_types.hh"
 
 static float len_squared_v3v3_with_normal_bias(const float co_search[3],
                                                const float co_test[3],
@@ -74,7 +75,7 @@ static bool rule_goal_avoid(BoidRule *rule, BoidBrainData *bbd, BoidValues *val,
   BoidParticle *bpa = pa->boid;
   EffectedPoint epoint;
   ListBase *effectors = bbd->sim->psys->effectors;
-  EffectorCache *cur, *eff = nullptr;
+  EffectorCache *eff = nullptr;
   EffectorCache temp_eff;
   EffectorData efd, cur_efd;
   float mul = (rule->type == eBoidRuleType_Avoid ? 1.0 : -1.0);
@@ -88,7 +89,7 @@ static bool rule_goal_avoid(BoidRule *rule, BoidBrainData *bbd, BoidValues *val,
 
   /* first find out goal/predator with highest priority */
   if (effectors) {
-    for (cur = static_cast<EffectorCache *>(effectors->first); cur; cur = cur->next) {
+    LISTBASE_FOREACH (EffectorCache *, cur, effectors) {
       Object *eob = cur->ob;
       PartDeflect *pd = cur->pd;
 
@@ -211,9 +212,7 @@ static bool rule_avoid_collision(BoidRule *rule,
   const int raycast_flag = BVH_RAYCAST_DEFAULT & ~BVH_RAYCAST_WATERTIGHT;
   BoidRuleAvoidCollision *acbr = (BoidRuleAvoidCollision *)rule;
   KDTreeNearest_3d *ptn = nullptr;
-  ParticleTarget *pt;
   BoidParticle *bpa = pa->boid;
-  ColliderCache *coll;
   float vec[3] = {0.0f, 0.0f, 0.0f}, loc[3] = {0.0f, 0.0f, 0.0f};
   float co1[3], vel1[3], co2[3], vel2[3];
   float len, t, inp, t_min = 2.0f;
@@ -237,8 +236,7 @@ static bool rule_avoid_collision(BoidRule *rule,
     hit.dist = col.original_ray_length = normalize_v3(ray_dir);
 
     /* find out closest deflector object */
-    for (coll = static_cast<ColliderCache *>(bbd->sim->colliders->first); coll; coll = coll->next)
-    {
+    LISTBASE_FOREACH (ColliderCache *, coll, bbd->sim->colliders) {
       /* don't check with current ground object */
       if (coll->ob == bpa->ground) {
         continue;
@@ -335,7 +333,7 @@ static bool rule_avoid_collision(BoidRule *rule,
   MEM_SAFE_FREE(ptn);
 
   /* check boids in other systems */
-  for (pt = static_cast<ParticleTarget *>(bbd->sim->psys->targets.first); pt; pt = pt->next) {
+  LISTBASE_FOREACH (ParticleTarget *, pt, &bbd->sim->psys->targets) {
     ParticleSystem *epsys = psys_get_target_system(bbd->sim->ob, pt);
 
     if (epsys) {
@@ -404,7 +402,6 @@ static bool rule_separate(BoidRule * /*rule*/,
                           ParticleData *pa)
 {
   KDTreeNearest_3d *ptn = nullptr;
-  ParticleTarget *pt;
   float len = 2.0f * val->personal_space * pa->size + 1.0f;
   float vec[3] = {0.0f, 0.0f, 0.0f};
   int neighbors = BLI_kdtree_3d_range_search(
@@ -422,7 +419,7 @@ static bool rule_separate(BoidRule * /*rule*/,
   MEM_SAFE_FREE(ptn);
 
   /* check other boid systems */
-  for (pt = static_cast<ParticleTarget *>(bbd->sim->psys->targets.first); pt; pt = pt->next) {
+  LISTBASE_FOREACH (ParticleTarget *, pt, &bbd->sim->psys->targets) {
     ParticleSystem *epsys = psys_get_target_system(bbd->sim->ob, pt);
 
     if (epsys) {
@@ -679,7 +676,6 @@ static bool rule_fight(BoidRule *rule, BoidBrainData *bbd, BoidValues *val, Part
 {
   BoidRuleFight *fbr = (BoidRuleFight *)rule;
   KDTreeNearest_3d *ptn = nullptr;
-  ParticleTarget *pt;
   ParticleData *epars;
   ParticleData *enemy_pa = nullptr;
   BoidParticle *bpa;
@@ -704,7 +700,7 @@ static bool rule_fight(BoidRule *rule, BoidBrainData *bbd, BoidValues *val, Part
   MEM_SAFE_FREE(ptn);
 
   /* add other friendlies and calculate enemy strength and find closest enemy */
-  for (pt = static_cast<ParticleTarget *>(bbd->sim->psys->targets.first); pt; pt = pt->next) {
+  LISTBASE_FOREACH (ParticleTarget *, pt, &bbd->sim->psys->targets) {
     ParticleSystem *epsys = psys_get_target_system(bbd->sim->ob, pt);
     if (epsys) {
       epars = epsys->particles;
@@ -853,7 +849,6 @@ static Object *boid_find_ground(BoidBrainData *bbd,
 
   const float zvec[3] = {0.0f, 0.0f, 2000.0f};
   ParticleCollision col;
-  ColliderCache *coll;
   BVHTreeRayHit hit;
   float radius = 0.0f, t, ray_dir[3];
 
@@ -872,7 +867,7 @@ static Object *boid_find_ground(BoidBrainData *bbd,
   hit.dist = col.original_ray_length = normalize_v3(ray_dir);
   col.pce.inside = 0;
 
-  for (coll = static_cast<ColliderCache *>(bbd->sim->colliders->first); coll; coll = coll->next) {
+  LISTBASE_FOREACH (ColliderCache *, coll, bbd->sim->colliders) {
     col.current = coll->ob;
     col.md = coll->collmd;
     col.fac1 = col.fac2 = 0.0f;
@@ -905,7 +900,7 @@ static Object *boid_find_ground(BoidBrainData *bbd,
   hit.index = -1;
   hit.dist = col.original_ray_length = normalize_v3(ray_dir);
 
-  for (coll = static_cast<ColliderCache *>(bbd->sim->colliders->first); coll; coll = coll->next) {
+  LISTBASE_FOREACH (ColliderCache *, coll, bbd->sim->colliders) {
     col.current = coll->ob;
     col.md = coll->collmd;
 
@@ -956,10 +951,8 @@ static bool boid_rule_applies(ParticleData *pa, BoidSettings * /*boids*/, BoidRu
 }
 void boids_precalc_rules(ParticleSettings *part, float cfra)
 {
-  BoidState *state = static_cast<BoidState *>(part->boids->states.first);
-  BoidRule *rule;
-  for (; state; state = state->next) {
-    for (rule = static_cast<BoidRule *>(state->rules.first); rule; rule = rule->next) {
+  LISTBASE_FOREACH (BoidState *, state, &part->boids->states) {
+    LISTBASE_FOREACH (BoidRule *, rule, &state->rules) {
       if (rule->type == eBoidRuleType_FollowLeader) {
         BoidRuleFollowLeader *flbr = (BoidRuleFollowLeader *)rule;
 
@@ -1093,7 +1086,7 @@ void boid_brain(BoidBrainData *bbd, int p, ParticleData *pa)
   /* go through rules */
   switch (state->ruleset_type) {
     case eBoidRulesetType_Fuzzy: {
-      for (rule = static_cast<BoidRule *>(state->rules.first); rule; rule = rule->next) {
+      LISTBASE_FOREACH (BoidRule *, rule, &state->rules) {
         if (apply_boid_rule(bbd, rule, &val, pa, state->rule_fuzziness)) {
           break; /* only first nonzero rule that comes through fuzzy rule is applied */
         }
@@ -1112,7 +1105,7 @@ void boid_brain(BoidBrainData *bbd, int p, ParticleData *pa)
     case eBoidRulesetType_Average: {
       float wanted_co[3] = {0.0f, 0.0f, 0.0f}, wanted_speed = 0.0f;
       int n = 0;
-      for (rule = static_cast<BoidRule *>(state->rules.first); rule; rule = rule->next) {
+      LISTBASE_FOREACH (BoidRule *, rule, &state->rules) {
         if (apply_boid_rule(bbd, rule, &val, pa, -1.0f)) {
           add_v3_v3(wanted_co, bbd->wanted_co);
           wanted_speed += bbd->wanted_speed;

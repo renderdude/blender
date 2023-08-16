@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2016 Blender Foundation
+/* SPDX-FileCopyrightText: 2016 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -8,7 +8,7 @@
  * \name Gizmo API
  * \brief API for external use of wmGizmo types.
  *
- * Only included in WM_api.h
+ * Only included in WM_api.hh
  */
 
 #pragma once

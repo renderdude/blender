@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -18,7 +18,9 @@
 #include "BLI_alloca.h"
 #include "BLI_heap.h"
 #include "BLI_linklist.h"
-#include "BLI_math.h"
+#include "BLI_math_geom.h"
+#include "BLI_math_matrix.h"
+#include "BLI_math_vector.h"
 #include "BLI_memarena.h"
 #include "BLI_polyfill_2d.h"
 #include "BLI_polyfill_2d_beautify.h"
@@ -289,7 +291,7 @@ static int bm_vert_tri_find_unique_edge(BMVert *verts[3])
 {
 /* find the most 'unique' loop, (greatest difference to others) */
 #if 1
-  /* optimized version that avoids sqrt */
+  /* Optimized version that avoids `sqrt`. */
   float difs[3];
   for (int i_prev = 1, i_curr = 2, i_next = 0; i_next < 3; i_prev = i_curr, i_curr = i_next++) {
     const float *co = verts[i_curr]->co;

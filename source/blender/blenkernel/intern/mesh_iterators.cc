@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -15,10 +15,10 @@
 #include "BKE_editmesh.h"
 #include "BKE_editmesh_cache.hh"
 #include "BKE_mesh.hh"
-#include "BKE_mesh_iterators.h"
+#include "BKE_mesh_iterators.hh"
 
 #include "BLI_bitmap.h"
-#include "BLI_math.h"
+#include "BLI_math_vector.h"
 
 #include "MEM_guardedalloc.h"
 

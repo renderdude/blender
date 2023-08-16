@@ -1,8 +1,8 @@
-/* SPDX-FileCopyrightText: 2021 Blender Foundation
+/* SPDX-FileCopyrightText: 2021 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
-#include "BKE_subdiv_modifier.h"
+#include "BKE_subdiv_modifier.hh"
 
 #include "MEM_guardedalloc.h"
 
@@ -14,7 +14,7 @@
 
 #include "BKE_mesh.hh"
 #include "BKE_modifier.h"
-#include "BKE_subdiv.h"
+#include "BKE_subdiv.hh"
 
 #include "GPU_capabilities.h"
 #include "GPU_context.h"

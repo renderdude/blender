@@ -22,7 +22,10 @@
 #include "DNA_scene_types.h"
 
 #include "BLI_listbase.h"
-#include "BLI_math.h"
+#include "BLI_math_geom.h"
+#include "BLI_math_matrix.h"
+#include "BLI_math_rotation.h"
+#include "BLI_math_vector.h"
 #include "BLI_memarena.h"
 #include "BLI_string_utils.h"
 #include "BLI_utildefines.h"
@@ -1488,10 +1491,7 @@ Mesh *BKE_mball_polygonize(Depsgraph *depsgraph, Scene *scene, Object *ob)
   for (int i = 0; i < mesh->totvert; i++) {
     normalize_v3(process.no[i]);
   }
-  memcpy(BKE_mesh_vert_normals_for_write(mesh),
-         process.no.data(),
-         sizeof(float[3]) * size_t(mesh->totvert));
-  BKE_mesh_vert_normals_clear_dirty(mesh);
+  blender::bke::mesh_vert_normals_assign(*mesh, std::move(process.no));
 
   BKE_mesh_calc_edges(mesh, false, false);
 

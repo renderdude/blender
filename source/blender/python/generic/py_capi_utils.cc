@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -857,41 +857,34 @@ static void pyc_exception_buffer_handle_system_exit(PyObject *error_type,
 /* returns the exception string as a new PyUnicode object, depends on external traceback module */
 #  if 0
 
-
 /* this version uses traceback module but somehow fails on UI errors */
-
 
 PyObject *PyC_ExceptionBuffer()
 {
-PyObject *traceback_mod = nullptr;
-PyObject *format_tb_func = nullptr;
-PyObject *ret = nullptr;
+  PyObject *traceback_mod = nullptr;
+  PyObject *format_tb_func = nullptr;
+  PyObject *ret = nullptr;
 
+  if (!(traceback_mod = PyImport_ImportModule("traceback"))) {
+    goto error_cleanup;
+  }
+  else if (!(format_tb_func = PyObject_GetAttrString(traceback_mod, "format_exc"))) {
+    goto error_cleanup;
+  }
 
-if (!(traceback_mod = PyImport_ImportModule("traceback"))) {
-goto error_cleanup;
-}
-else if (!(format_tb_func = PyObject_GetAttrString(traceback_mod, "format_exc"))) {
-goto error_cleanup;
-}
+  ret = PyObject_CallObject(format_tb_func, nullptr);
 
-
-ret = PyObject_CallObject(format_tb_func, nullptr);
-
-
-if (ret == Py_None) {
-Py_DECREF(ret);
-ret = nullptr;
-}
-
+  if (ret == Py_None) {
+    Py_DECREF(ret);
+    ret = nullptr;
+  }
 
 error_cleanup:
-/* could not import the module so print the error and close */
-Py_XDECREF(traceback_mod);
-Py_XDECREF(format_tb_func);
+  /* could not import the module so print the error and close */
+  Py_XDECREF(traceback_mod);
+  Py_XDECREF(format_tb_func);
 
-
-return ret;
+  return ret;
 }
 #  else /* verbose, non-threadsafe version */
 PyObject *PyC_ExceptionBuffer()
@@ -1092,6 +1085,36 @@ PyObject *PyC_UnicodeFromBytes(const char *str)
   return PyC_UnicodeFromBytesAndSize(str, strlen(str));
 }
 
+int PyC_ParseUnicodeAsBytesAndSize(PyObject *o, void *p)
+{
+  PyC_UnicodeAsBytesAndSize_Data *data = static_cast<PyC_UnicodeAsBytesAndSize_Data *>(p);
+  if (UNLIKELY(o == nullptr)) {
+    /* Signal to cleanup. */
+    Py_CLEAR(data->value_coerce);
+    return 1;
+  }
+  /* The value must be cleared. */
+  BLI_assert(!(data->value_coerce || data->value || data->value_len));
+  data->value = PyC_UnicodeAsBytesAndSize(o, &data->value_len, &data->value_coerce);
+  if (data->value == nullptr) {
+    /* Leave the error as-is. */
+    return 0;
+  }
+  /* Needed to #Py_DECREF `data->value_coerce` on future failure. */
+  return data->value_coerce ? Py_CLEANUP_SUPPORTED : 1;
+}
+
+int PyC_ParseUnicodeAsBytesAndSize_OrNone(PyObject *o, void *p)
+{
+  if (o == Py_None) {
+    PyC_UnicodeAsBytesAndSize_Data *data = static_cast<PyC_UnicodeAsBytesAndSize_Data *>(p);
+    BLI_assert(!(data->value_coerce || data->value || data->value_len));
+    UNUSED_VARS_NDEBUG(data);
+    return 1;
+  }
+  return PyC_ParseUnicodeAsBytesAndSize(o, p);
+}
+
 /** \} */
 
 /* -------------------------------------------------------------------- */
@@ -1120,7 +1143,7 @@ bool PyC_NameSpace_ImportArray(PyObject *py_dict, const char *imports[])
 {
   for (int i = 0; imports[i]; i++) {
     PyObject *name = PyUnicode_FromString(imports[i]);
-    PyObject *mod = PyImport_ImportModuleLevelObject(name, nullptr, nullptr, 0, 0);
+    PyObject *mod = PyImport_ImportModuleLevelObject(name, nullptr, nullptr, nullptr, 0);
     bool ok = false;
     if (mod) {
       PyDict_SetItem(py_dict, name, mod);

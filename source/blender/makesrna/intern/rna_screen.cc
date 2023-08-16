@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -9,8 +9,8 @@
 #include <cstddef>
 #include <cstdlib>
 
-#include "RNA_define.h"
-#include "RNA_enum_types.h"
+#include "RNA_define.hh"
+#include "RNA_enum_types.hh"
 
 #include "rna_internal.h"
 
@@ -18,7 +18,7 @@
 #include "DNA_screen_types.h"
 #include "DNA_workspace_types.h"
 
-#include "ED_info.h"
+#include "ED_info.hh"
 
 const EnumPropertyItem rna_enum_region_type_items[] = {
     {RGN_TYPE_WINDOW, "WINDOW", 0, "Window", ""},
@@ -28,6 +28,8 @@ const EnumPropertyItem rna_enum_region_type_items[] = {
     {RGN_TYPE_UI, "UI", 0, "Sidebar", ""},
     {RGN_TYPE_TOOLS, "TOOLS", 0, "Tools", ""},
     {RGN_TYPE_TOOL_PROPS, "TOOL_PROPS", 0, "Tool Properties", ""},
+    {RGN_TYPE_ASSET_SHELF, "ASSET_SHELF", 0, "Asset Shelf", ""},
+    {RGN_TYPE_ASSET_SHELF_HEADER, "ASSET_SHELF_HEADER", 0, "Asset Shelf Header", ""},
     {RGN_TYPE_PREVIEW, "PREVIEW", 0, "Preview", ""},
     {RGN_TYPE_HUD, "HUD", 0, "Floating Region", ""},
     {RGN_TYPE_NAV_BAR, "NAVIGATION_BAR", 0, "Navigation Bar", ""},
@@ -38,14 +40,14 @@ const EnumPropertyItem rna_enum_region_type_items[] = {
     {0, nullptr, 0, nullptr, nullptr},
 };
 
-#include "ED_screen.h"
+#include "ED_screen.hh"
 
-#include "WM_api.h"
-#include "WM_types.h"
+#include "WM_api.hh"
+#include "WM_types.hh"
 
 #ifdef RNA_RUNTIME
 
-#  include "RNA_access.h"
+#  include "RNA_access.hh"
 
 #  include "BKE_global.h"
 #  include "BKE_screen.h"
@@ -53,7 +55,7 @@ const EnumPropertyItem rna_enum_region_type_items[] = {
 
 #  include "DEG_depsgraph.h"
 
-#  include "UI_view2d.h"
+#  include "UI_view2d.hh"
 
 #  ifdef WITH_PYTHON
 #    include "BPY_extern.h"

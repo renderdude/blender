@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2006 Blender Foundation
+/* SPDX-FileCopyrightText: 2006 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -8,8 +8,8 @@
  * Manages materials, lights and textures.
  */
 
-#include <math.h>
-#include <string.h>
+#include <cmath>
+#include <cstring>
 
 #include "MEM_guardedalloc.h"
 
@@ -18,7 +18,7 @@
 #include "DNA_world_types.h"
 
 #include "BLI_listbase.h"
-#include "BLI_math.h"
+#include "BLI_math_vector.h"
 #include "BLI_string.h"
 #include "BLI_utildefines.h"
 
@@ -948,9 +948,9 @@ void GPU_material_compile(GPUMaterial *mat)
     GPUShader *sh = GPU_pass_shader_get(mat->pass);
     if (sh != nullptr) {
 
-      /** Perform async Render Pipeline State Object (PSO) compilation.
+      /** Perform asynchronous Render Pipeline State Object (PSO) compilation.
        *
-       * Warm PSO cache within async compilation thread using default material as source.
+       * Warm PSO cache within asynchronous compilation thread using default material as source.
        * GPU_shader_warm_cache(..) performs the API-specific PSO compilation using the assigned
        * parent shader's cached PSO descriptors as an input.
        *
@@ -1040,9 +1040,9 @@ void GPU_material_optimize(GPUMaterial *mat)
   if (success) {
     GPUShader *sh = GPU_pass_shader_get(mat->optimized_pass);
     if (sh != nullptr) {
-      /** Perform async Render Pipeline State Object (PSO) compilation.
+      /** Perform asynchronous Render Pipeline State Object (PSO) compilation.
        *
-       * Warm PSO cache within async compilation thread for optimized materials.
+       * Warm PSO cache within asynchronous compilation thread for optimized materials.
        * This setup assigns the original unoptimized shader as a "parent" shader
        * for the optimized version. This then allows the associated GPU backend to
        * compile PSOs within this asynchronous pass, using the identical PSO descriptors of the

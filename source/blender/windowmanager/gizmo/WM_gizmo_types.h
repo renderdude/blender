@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2016 Blender Foundation
+/* SPDX-FileCopyrightText: 2016 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -8,7 +8,7 @@
  * \name Gizmo Types
  * \brief Gizmo defines for external use.
  *
- * Only included in WM_types.h and lower level files.
+ * Only included in WM_types.hh and lower level files.
  */
 
 #pragma once

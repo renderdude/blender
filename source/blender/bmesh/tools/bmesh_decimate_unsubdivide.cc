@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -9,8 +9,6 @@
  */
 
 #include "MEM_guardedalloc.h"
-
-#include "BLI_math.h"
 
 #include "bmesh.h"
 #include "bmesh_decimate.h" /* own include */

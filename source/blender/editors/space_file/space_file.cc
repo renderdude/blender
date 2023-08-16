@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2008 Blender Foundation
+/* SPDX-FileCopyrightText: 2008 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -23,25 +23,25 @@
 #include "BKE_report.h"
 #include "BKE_screen.h"
 
-#include "RNA_access.h"
-#include "RNA_define.h"
-#include "RNA_enum_types.h"
+#include "RNA_access.hh"
+#include "RNA_define.hh"
+#include "RNA_enum_types.hh"
 
-#include "WM_api.h"
-#include "WM_message.h"
-#include "WM_types.h"
+#include "WM_api.hh"
+#include "WM_message.hh"
+#include "WM_types.hh"
 
-#include "ED_asset.h"
+#include "ED_asset.hh"
 #include "ED_asset_indexer.h"
-#include "ED_fileselect.h"
-#include "ED_screen.h"
-#include "ED_space_api.h"
+#include "ED_fileselect.hh"
+#include "ED_screen.hh"
+#include "ED_space_api.hh"
 
 #include "IMB_imbuf_types.h"
 #include "IMB_thumbs.h"
 
-#include "UI_resources.h"
-#include "UI_view2d.h"
+#include "UI_resources.hh"
+#include "UI_view2d.hh"
 
 #include "BLO_read_write.h"
 

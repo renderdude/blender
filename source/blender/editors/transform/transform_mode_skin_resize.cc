@@ -8,15 +8,16 @@
 
 #include <cstdlib>
 
-#include "BLI_math.h"
+#include "BLI_math_matrix.h"
+#include "BLI_math_vector.h"
 #include "BLI_task.h"
 
 #include "BKE_context.h"
 #include "BKE_unit.h"
 
-#include "ED_screen.h"
+#include "ED_screen.hh"
 
-#include "UI_interface.h"
+#include "UI_interface.hh"
 
 #include "transform.hh"
 #include "transform_constraints.hh"
@@ -81,7 +82,7 @@ static void transdata_elem_skin_resize_fn(void *__restrict iter_data_v,
 /** \name Transform (Skin)
  * \{ */
 
-static void applySkinResize(TransInfo *t, const int[2] /*mval*/)
+static void applySkinResize(TransInfo *t)
 {
   float mat_final[3][3];
   int i;

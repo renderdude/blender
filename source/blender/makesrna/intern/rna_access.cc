@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -23,7 +23,6 @@
 #include "BLI_blenlib.h"
 #include "BLI_dynstr.h"
 #include "BLI_ghash.h"
-#include "BLI_math.h"
 #include "BLI_threads.h"
 #include "BLI_utildefines.h"
 
@@ -37,7 +36,7 @@
 #include "BKE_global.h"
 #include "BKE_idprop.h"
 #include "BKE_idtype.h"
-#include "BKE_lib_override.h"
+#include "BKE_lib_override.hh"
 #include "BKE_main.h"
 #include "BKE_node.hh"
 #include "BKE_report.h"
@@ -45,17 +44,17 @@
 #include "DEG_depsgraph.h"
 #include "DEG_depsgraph_build.h"
 
-#include "RNA_access.h"
-#include "RNA_define.h"
-#include "RNA_enum_types.h"
-#include "RNA_path.h"
+#include "RNA_access.hh"
+#include "RNA_define.hh"
+#include "RNA_enum_types.hh"
+#include "RNA_path.hh"
 
-#include "WM_api.h"
-#include "WM_message.h"
+#include "WM_api.hh"
+#include "WM_message.hh"
 
 /* flush updates */
 #include "DNA_object_types.h"
-#include "WM_types.h"
+#include "WM_types.hh"
 
 #include "rna_access_internal.h"
 #include "rna_internal.h"
@@ -67,7 +66,6 @@ const PointerRNA PointerRNA_NULL = {nullptr};
 void RNA_init()
 {
   StructRNA *srna;
-  PropertyRNA *prop;
 
   BLENDER_RNA.structs_map = BLI_ghash_str_new_ex(__func__, 2048);
   BLENDER_RNA.structs_len = 0;
@@ -78,8 +76,7 @@ void RNA_init()
     if (!srna->cont.prophash) {
       srna->cont.prophash = BLI_ghash_str_new("RNA_init gh");
 
-      for (prop = static_cast<PropertyRNA *>(srna->cont.properties.first); prop; prop = prop->next)
-      {
+      LISTBASE_FOREACH (PropertyRNA *, prop, &srna->cont.properties) {
         if (!(prop->flag_internal & PROP_INTERN_BUILTIN)) {
           BLI_ghash_insert(srna->cont.prophash, (void *)prop->identifier, prop);
         }
@@ -1854,9 +1851,7 @@ bool RNA_property_enum_name_gettexted(
 
   if (result) {
     if (!(prop->flag & PROP_ENUM_NO_TRANSLATE)) {
-      if (BLT_translate_iface()) {
-        *name = BLT_pgettext(prop->translation_context, *name);
-      }
+      *name = BLT_translate_do_iface(prop->translation_context, *name);
     }
   }
 
@@ -1897,9 +1892,7 @@ bool RNA_property_enum_item_from_value_gettexted(
   const bool result = RNA_property_enum_item_from_value(C, ptr, prop, value, r_item);
 
   if (result && !(prop->flag & PROP_ENUM_NO_TRANSLATE)) {
-    if (BLT_translate_iface()) {
-      r_item->name = BLT_pgettext(prop->translation_context, r_item->name);
-    }
+    r_item->name = BLT_translate_do_iface(prop->translation_context, r_item->name);
   }
 
   return result;
@@ -5993,7 +5986,6 @@ ParameterList *RNA_parameter_list_create(ParameterList *parms,
                                          PointerRNA * /*ptr*/,
                                          FunctionRNA *func)
 {
-  PropertyRNA *parm;
   PointerRNA null_ptr = PointerRNA_NULL;
   void *data;
   int alloc_size = 0, size;
@@ -6002,7 +5994,7 @@ ParameterList *RNA_parameter_list_create(ParameterList *parms,
   parms->ret_count = 0;
 
   /* allocate data */
-  for (parm = static_cast<PropertyRNA *>(func->cont.properties.first); parm; parm = parm->next) {
+  LISTBASE_FOREACH (PropertyRNA *, parm, &func->cont.properties) {
     alloc_size += rna_parameter_size_pad(rna_parameter_size(parm));
 
     if (parm->flag_parameter & PARM_OUTPUT) {
@@ -6020,7 +6012,7 @@ ParameterList *RNA_parameter_list_create(ParameterList *parms,
   /* set default values */
   data = parms->data;
 
-  for (parm = static_cast<PropertyRNA *>(func->cont.properties.first); parm; parm = parm->next) {
+  LISTBASE_FOREACH (PropertyRNA *, parm, &func->cont.properties) {
     size = rna_parameter_size(parm);
 
     /* set length to 0, these need to be set later, see bpy_array.c's py_to_array */
@@ -6543,7 +6535,6 @@ static int rna_function_parameter_parse(PointerRNA *ptr,
     case PROP_COLLECTION: {
       StructRNA *ptype;
       ListBase *lb, *clb;
-      Link *link;
       CollectionPointerLink *clink;
 
       if (ftype != 'C') {
@@ -6572,7 +6563,7 @@ static int rna_function_parameter_parse(PointerRNA *ptr,
         return -1;
       }
 
-      for (link = static_cast<Link *>(lb->first); link; link = link->next) {
+      LISTBASE_FOREACH (Link *, link, lb) {
         clink = MEM_cnew<CollectionPointerLink>(__func__);
         RNA_pointer_create(nullptr, srna, link, &clink->ptr);
         BLI_addtail(clb, clink);

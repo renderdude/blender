@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -7,8 +7,8 @@
 #include "BKE_mesh_sample.hh"
 #include "BKE_type_conversions.hh"
 
-#include "UI_interface.h"
-#include "UI_resources.h"
+#include "UI_interface.hh"
+#include "UI_resources.hh"
 
 #include "GEO_reverse_uv_sampler.hh"
 
@@ -170,7 +170,7 @@ class ReverseUVSampleFunction : public mf::MultiFunction {
  private:
   void evaluate_source()
   {
-    const Mesh &mesh = *source_.get_mesh_for_read();
+    const Mesh &mesh = *source_.get_mesh();
     source_context_.emplace(bke::MeshFieldContext{mesh, ATTR_DOMAIN_CORNER});
     source_evaluator_ = std::make_unique<FieldEvaluator>(*source_context_, mesh.totloop);
     source_evaluator_->add(src_uv_map_field_);
@@ -238,7 +238,7 @@ static void node_geo_exec(GeoNodeExecParams params)
 {
   GeometrySet geometry = params.extract_input<GeometrySet>("Mesh");
   const eCustomDataType data_type = eCustomDataType(params.node().custom1);
-  const Mesh *mesh = geometry.get_mesh_for_read();
+  const Mesh *mesh = geometry.get_mesh();
   if (mesh == nullptr) {
     params.set_default_remaining_outputs();
     return;
@@ -270,20 +270,19 @@ static void node_geo_exec(GeoNodeExecParams params)
   output_attribute_field(params, GField(sample_op, 0));
 }
 
-}  // namespace blender::nodes::node_geo_sample_uv_surface_cc
-
-void register_node_type_geo_sample_uv_surface()
+static void node_register()
 {
-  namespace file_ns = blender::nodes::node_geo_sample_uv_surface_cc;
-
   static bNodeType ntype;
 
   geo_node_type_base(&ntype, GEO_NODE_SAMPLE_UV_SURFACE, "Sample UV Surface", NODE_CLASS_GEOMETRY);
-  ntype.initfunc = file_ns::node_init;
-  ntype.updatefunc = file_ns::node_update;
-  ntype.declare = file_ns::node_declare;
-  ntype.geometry_node_execute = file_ns::node_geo_exec;
-  ntype.draw_buttons = file_ns::node_layout;
-  ntype.gather_link_search_ops = file_ns::node_gather_link_searches;
+  ntype.initfunc = node_init;
+  ntype.updatefunc = node_update;
+  ntype.declare = node_declare;
+  ntype.geometry_node_execute = node_geo_exec;
+  ntype.draw_buttons = node_layout;
+  ntype.gather_link_search_ops = node_gather_link_searches;
   nodeRegisterType(&ntype);
 }
+NOD_REGISTER_NODE(node_register)
+
+}  // namespace blender::nodes::node_geo_sample_uv_surface_cc

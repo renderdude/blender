@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -23,9 +23,9 @@
 #include "BKE_global.h"
 #include "BKE_idtype.h"
 
-#include "RNA_access.h"
+#include "RNA_access.hh"
 #include "RNA_prototypes.h"
-#include "RNA_types.h"
+#include "RNA_types.hh"
 
 #include "bpy_rna_driver.h" /* For #pyrna_driver_get_variable_value. */
 
@@ -770,8 +770,8 @@ float BPY_driver_exec(PathResolvedRNA *anim_rna,
 #endif /* USE_BYTECODE_WHITELIST */
 
 #if 0 /* slow, with this can avoid all Py_CompileString above. */
-/* execute expression to get a value */
-retval = PyRun_String(expr, Py_eval_input, bpy_pydriver_Dict, driver_vars);
+  /* execute expression to get a value */
+  retval = PyRun_String(expr, Py_eval_input, bpy_pydriver_Dict, driver_vars);
 #else
   /* Evaluate the compiled expression. */
   if (expr_code) {

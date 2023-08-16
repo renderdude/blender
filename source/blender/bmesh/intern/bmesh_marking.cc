@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -20,7 +20,7 @@
 #include "DNA_scene_types.h"
 
 #include "BLI_listbase.h"
-#include "BLI_math.h"
+#include "BLI_math_vector.h"
 #include "BLI_task.h"
 
 #include "bmesh.h"
@@ -1139,16 +1139,13 @@ bool BM_select_history_active_get(BMesh *bm, BMEditSelection *ese)
 
 GHash *BM_select_history_map_create(BMesh *bm)
 {
-  BMEditSelection *ese;
-  GHash *map;
-
   if (BLI_listbase_is_empty(&bm->selected)) {
     return nullptr;
   }
 
-  map = BLI_ghash_ptr_new(__func__);
+  GHash *map = BLI_ghash_ptr_new(__func__);
 
-  for (ese = static_cast<BMEditSelection *>(bm->selected.first); ese; ese = ese->next) {
+  LISTBASE_FOREACH (BMEditSelection *, ese, &bm->selected) {
     BLI_ghash_insert(map, ese->ele, ese);
   }
 

@@ -14,7 +14,7 @@
 #include <cstring>
 
 #include "BLI_blenlib.h"
-#include "BLI_math.h"
+#include "BLI_math_color.h"
 #include "BLI_utildefines.h"
 
 /* Types --------------------------------------------------------------- */
@@ -40,12 +40,12 @@
 #include "GPU_matrix.h"
 #include "GPU_state.h"
 
-#include "UI_interface.h"
-#include "UI_resources.h"
-#include "UI_view2d.h"
+#include "UI_interface.hh"
+#include "UI_resources.hh"
+#include "UI_view2d.hh"
 
-#include "ED_anim_api.h"
-#include "ED_keyframes_draw.h"
+#include "ED_anim_api.hh"
+#include "ED_keyframes_draw.hh"
 
 #include "MOD_nodes.hh"
 
@@ -295,18 +295,33 @@ static void draw_backdrops(bAnimContext *ac, ListBase &anim_data, View2D *v2d, u
     else if (ac->datatype == ANIMCONT_GPENCIL) {
       uchar *color;
       uchar gpl_col[4];
-      if (ale->type == ANIMTYPE_SUMMARY) {
-        color = col_summary;
-      }
-      else if ((show_group_colors) && (ale->type == ANIMTYPE_GPLAYER)) {
-        bGPDlayer *gpl = (bGPDlayer *)ale->data;
-        rgb_float_to_uchar(gpl_col, gpl->color);
-        gpl_col[3] = col1[3];
+      switch (ale->type) {
+        case ANIMTYPE_SUMMARY:
+          color = col_summary;
+          break;
 
-        color = sel ? col1 : gpl_col;
-      }
-      else {
-        color = sel ? col1 : col2;
+        case ANIMTYPE_GPLAYER: {
+          if (show_group_colors) {
+            bGPDlayer *gpl = (bGPDlayer *)ale->data;
+            rgb_float_to_uchar(gpl_col, gpl->color);
+            gpl_col[3] = col1[3];
+
+            color = sel ? col1 : gpl_col;
+          }
+          else {
+            color = sel ? col1 : col2;
+          }
+          break;
+        }
+
+        case ANIMTYPE_GREASE_PENCIL_DATABLOCK:
+          color = col2b;
+          color[3] = sel ? col1[3] : col2b[3];
+          break;
+
+        default:
+          color = sel ? col1 : col2;
+          break;
       }
 
       /* Color overlay on frames between the start/end frames. */
@@ -431,13 +446,21 @@ static void draw_keyframes(bAnimContext *ac,
                             scale_factor,
                             action_flag);
         break;
-      case ALE_GREASE_PENCIL_CELS:
+      case ALE_GREASE_PENCIL_CEL:
         draw_grease_pencil_cels_channel(draw_list,
                                         ads,
-                                        static_cast<GreasePencilLayer *>(ale->data),
+                                        static_cast<const GreasePencilLayer *>(ale->data),
                                         ycenter,
                                         scale_factor,
                                         action_flag);
+        break;
+      case ALE_GREASE_PENCIL_DATA:
+        draw_grease_pencil_datablock_channel(draw_list,
+                                             ads,
+                                             static_cast<const GreasePencil *>(ale->data),
+                                             ycenter,
+                                             scale_factor,
+                                             action_flag);
         break;
       case ALE_GPFRAME:
         draw_gpl_channel(draw_list,

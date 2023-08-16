@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -10,8 +10,8 @@
 #include "BKE_mesh.hh"
 #include "BKE_mesh_sample.hh"
 
-#include "UI_interface.h"
-#include "UI_resources.h"
+#include "UI_interface.hh"
+#include "UI_resources.hh"
 
 #include "NOD_socket_search_link.hh"
 
@@ -143,7 +143,7 @@ class SampleNearestSurfaceFunction : public mf::MultiFunction {
     MutableSpan<int> triangle_index = params.uninitialized_single_output<int>(1, "Triangle Index");
     MutableSpan<float3> sample_position = params.uninitialized_single_output<float3>(
         2, "Sample Position");
-    const Mesh &mesh = *source_.get_mesh_for_read();
+    const Mesh &mesh = *source_.get_mesh();
     get_closest_mesh_looptris(mesh, positions, mask, triangle_index, {}, sample_position);
   }
 
@@ -212,7 +212,7 @@ static void node_geo_exec(GeoNodeExecParams params)
 {
   GeometrySet geometry = params.extract_input<GeometrySet>("Mesh");
   const eCustomDataType data_type = eCustomDataType(params.node().custom1);
-  const Mesh *mesh = geometry.get_mesh_for_read();
+  const Mesh *mesh = geometry.get_mesh();
   if (mesh == nullptr) {
     params.set_default_remaining_outputs();
     return;
@@ -245,22 +245,21 @@ static void node_geo_exec(GeoNodeExecParams params)
   output_attribute_field(params, GField(sample_op));
 }
 
-}  // namespace blender::nodes::node_geo_sample_nearest_surface_cc
-
-void register_node_type_geo_sample_nearest_surface()
+static void node_register()
 {
-  namespace file_ns = blender::nodes::node_geo_sample_nearest_surface_cc;
-
   static bNodeType ntype;
 
   geo_node_type_base(
       &ntype, GEO_NODE_SAMPLE_NEAREST_SURFACE, "Sample Nearest Surface", NODE_CLASS_GEOMETRY);
-  ntype.initfunc = file_ns::node_init;
-  ntype.updatefunc = file_ns::node_update;
-  ntype.declare = file_ns::node_declare;
+  ntype.initfunc = node_init;
+  ntype.updatefunc = node_update;
+  ntype.declare = node_declare;
   blender::bke::node_type_size_preset(&ntype, blender::bke::eNodeSizePreset::MIDDLE);
-  ntype.geometry_node_execute = file_ns::node_geo_exec;
-  ntype.draw_buttons = file_ns::node_layout;
-  ntype.gather_link_search_ops = file_ns::node_gather_link_searches;
+  ntype.geometry_node_execute = node_geo_exec;
+  ntype.draw_buttons = node_layout;
+  ntype.gather_link_search_ops = node_gather_link_searches;
   nodeRegisterType(&ntype);
 }
+NOD_REGISTER_NODE(node_register)
+
+}  // namespace blender::nodes::node_geo_sample_nearest_surface_cc

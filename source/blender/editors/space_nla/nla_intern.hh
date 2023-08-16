@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2009 Blender Foundation, Joshua Leung. All rights reserved.
+/* SPDX-FileCopyrightText: 2009 Blender Authors, Joshua Leung. All rights reserved.
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -149,5 +149,5 @@ bool nlaedit_is_tweakmode_on(bAnimContext *ac);
 
 /* --- */
 
-void nla_operatortypes(void);
+void nla_operatortypes();
 void nla_keymap(wmKeyConfig *keyconf);

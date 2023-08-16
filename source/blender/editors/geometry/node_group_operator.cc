@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -7,12 +7,12 @@
  */
 
 #include "ED_curves.hh"
-#include "ED_object.h"
-#include "ED_screen.h"
-#include "ED_select_utils.h"
-#include "ED_view3d.h"
+#include "ED_object.hh"
+#include "ED_screen.hh"
+#include "ED_select_utils.hh"
+#include "ED_view3d.hh"
 
-#include "WM_api.h"
+#include "WM_api.hh"
 
 #include "BKE_asset.h"
 #include "BKE_attribute_math.hh"
@@ -25,7 +25,7 @@
 #include "BKE_lib_id.h"
 #include "BKE_material.h"
 #include "BKE_mesh.hh"
-#include "BKE_mesh_wrapper.h"
+#include "BKE_mesh_wrapper.hh"
 #include "BKE_node_runtime.hh"
 #include "BKE_object.h"
 #include "BKE_pointcloud.h"
@@ -38,16 +38,16 @@
 #include "DEG_depsgraph.h"
 #include "DEG_depsgraph_query.h"
 
-#include "RNA_access.h"
-#include "RNA_define.h"
-#include "RNA_enum_types.h"
+#include "RNA_access.hh"
+#include "RNA_define.hh"
+#include "RNA_enum_types.hh"
 
-#include "UI_interface.h"
-#include "UI_resources.h"
+#include "UI_interface.hh"
+#include "UI_resources.hh"
 
-#include "ED_asset.h"
-#include "ED_geometry.h"
-#include "ED_mesh.h"
+#include "ED_asset.hh"
+#include "ED_geometry.hh"
+#include "ED_mesh.hh"
 
 #include "BLT_translation.h"
 
@@ -206,12 +206,12 @@ static bke::GeometrySet get_original_geometry_eval_copy(Object &object)
   switch (object.type) {
     case OB_CURVES: {
       Curves *curves = BKE_curves_copy_for_eval(static_cast<const Curves *>(object.data));
-      return bke::GeometrySet::create_with_curves(curves);
+      return bke::GeometrySet::from_curves(curves);
     }
     case OB_POINTCLOUD: {
       PointCloud *points = BKE_pointcloud_copy_for_eval(
           static_cast<const PointCloud *>(object.data));
-      return bke::GeometrySet::create_with_pointcloud(points);
+      return bke::GeometrySet::from_pointcloud(points);
     }
     case OB_MESH: {
       const Mesh *mesh = static_cast<const Mesh *>(object.data);
@@ -220,16 +220,19 @@ static bke::GeometrySet get_original_geometry_eval_copy(Object &object)
         BKE_mesh_wrapper_ensure_mdata(mesh_copy);
         Mesh *final_copy = BKE_mesh_copy_for_eval(mesh_copy);
         BKE_id_free(nullptr, mesh_copy);
-        return bke::GeometrySet::create_with_mesh(final_copy);
+        return bke::GeometrySet::from_mesh(final_copy);
       }
-      return bke::GeometrySet::create_with_mesh(BKE_mesh_copy_for_eval(mesh));
+      return bke::GeometrySet::from_mesh(BKE_mesh_copy_for_eval(mesh));
     }
     default:
       return {};
   }
 }
 
-static void store_result_geometry(Main &bmain, Object &object, bke::GeometrySet geometry)
+static void store_result_geometry(Main &bmain,
+                                  Scene &scene,
+                                  Object &object,
+                                  bke::GeometrySet geometry)
 {
   switch (object.type) {
     case OB_CURVES: {
@@ -270,7 +273,7 @@ static void store_result_geometry(Main &bmain, Object &object, bke::GeometrySet 
       if (!new_mesh) {
         BKE_mesh_clear_geometry(&mesh);
         if (object.mode == OB_MODE_EDIT) {
-          EDBM_mesh_make(&object, SCE_SELECT_VERTEX, true);
+          EDBM_mesh_make(&object, scene.toolsettings->selectmode, true);
         }
         break;
       }
@@ -281,7 +284,7 @@ static void store_result_geometry(Main &bmain, Object &object, bke::GeometrySet 
       BKE_object_material_from_eval_data(&bmain, &object, &new_mesh->id);
       BKE_mesh_nomain_to_mesh(new_mesh, &mesh, &object);
       if (object.mode == OB_MODE_EDIT) {
-        EDBM_mesh_make(&object, SCE_SELECT_VERTEX, true);
+        EDBM_mesh_make(&object, scene.toolsettings->selectmode, true);
         BKE_editmesh_looptri_and_normals_calc(mesh.edit_mesh);
       }
       break;
@@ -329,6 +332,7 @@ static int run_node_group_exec(bContext *C, wmOperator *op)
     nodes::GeoNodesOperatorData operator_eval_data{};
     operator_eval_data.depsgraph = depsgraph;
     operator_eval_data.self_object = object;
+    operator_eval_data.scene = scene;
 
     bke::GeometrySet geometry_orig = get_original_geometry_eval_copy(*object);
 
@@ -342,7 +346,7 @@ static int run_node_group_exec(bContext *C, wmOperator *op)
           user_data.log_socket_values = false;
         });
 
-    store_result_geometry(*bmain, *object, std::move(new_geometry));
+    store_result_geometry(*bmain, *scene, *object, std::move(new_geometry));
 
     DEG_id_tag_update(static_cast<ID *>(object->data), ID_RECALC_GEOMETRY);
     WM_event_add_notifier(C, NC_GEOM | ND_DATA, object->data);
@@ -360,23 +364,150 @@ static int run_node_group_invoke(bContext *C, wmOperator *op, const wmEvent * /*
     return OPERATOR_CANCELLED;
   }
 
-  nodes::update_input_properties_from_node_tree(*node_tree, op->properties, *op->properties);
+  nodes::update_input_properties_from_node_tree(*node_tree, op->properties, true, *op->properties);
   nodes::update_output_properties_from_node_tree(*node_tree, op->properties, *op->properties);
 
   return run_node_group_exec(C, op);
 }
 
-static char *run_node_group_get_description(bContext *C, wmOperatorType * /*ot*/, PointerRNA *ptr)
+static std::string run_node_group_get_description(bContext *C,
+                                                  wmOperatorType * /*ot*/,
+                                                  PointerRNA *ptr)
 {
   const asset_system::AssetRepresentation *asset = get_asset(*C, *ptr, nullptr);
   if (!asset) {
-    return nullptr;
+    return "";
   }
-  const char *description = asset->get_metadata().description;
-  if (!description) {
-    return nullptr;
+  if (!asset->get_metadata().description) {
+    return "";
   }
-  return BLI_strdup(description);
+  return asset->get_metadata().description;
+}
+
+static void add_attribute_search_or_value_buttons(uiLayout *layout,
+                                                  PointerRNA *md_ptr,
+                                                  const bNodeSocket &socket)
+{
+  char socket_id_esc[sizeof(socket.identifier) * 2];
+  BLI_str_escape(socket_id_esc, socket.identifier, sizeof(socket_id_esc));
+  const std::string rna_path = "[\"" + std::string(socket_id_esc) + "\"]";
+  const std::string rna_path_use_attribute = "[\"" + std::string(socket_id_esc) +
+                                             nodes::input_use_attribute_suffix() + "\"]";
+  const std::string rna_path_attribute_name = "[\"" + std::string(socket_id_esc) +
+                                              nodes::input_attribute_name_suffix() + "\"]";
+
+  /* We're handling this manually in this case. */
+  uiLayoutSetPropDecorate(layout, false);
+
+  uiLayout *split = uiLayoutSplit(layout, 0.4f, false);
+  uiLayout *name_row = uiLayoutRow(split, false);
+  uiLayoutSetAlignment(name_row, UI_LAYOUT_ALIGN_RIGHT);
+
+  const bool use_attribute = RNA_boolean_get(md_ptr, rna_path_use_attribute.c_str());
+  if (socket.type == SOCK_BOOLEAN && !use_attribute) {
+    uiItemL(name_row, "", ICON_NONE);
+  }
+  else {
+    uiItemL(name_row, socket.name, ICON_NONE);
+  }
+
+  uiLayout *prop_row = uiLayoutRow(split, true);
+  if (socket.type == SOCK_BOOLEAN) {
+    uiLayoutSetPropSep(prop_row, false);
+    uiLayoutSetAlignment(prop_row, UI_LAYOUT_ALIGN_EXPAND);
+  }
+
+  if (use_attribute) {
+    /* TODO: Add attribute search. */
+    uiItemR(prop_row, md_ptr, rna_path_attribute_name.c_str(), UI_ITEM_NONE, "", ICON_NONE);
+  }
+  else {
+    const char *name = socket.type == SOCK_BOOLEAN ? socket.name : "";
+    uiItemR(prop_row, md_ptr, rna_path.c_str(), UI_ITEM_NONE, name, ICON_NONE);
+  }
+
+  uiItemR(
+      prop_row, md_ptr, rna_path_use_attribute.c_str(), UI_ITEM_R_ICON_ONLY, "", ICON_SPREADSHEET);
+}
+
+static void draw_property_for_socket(const bNodeTree &node_tree,
+                                     uiLayout *layout,
+                                     IDProperty *op_properties,
+                                     PointerRNA *bmain_ptr,
+                                     PointerRNA *op_ptr,
+                                     const bNodeSocket &socket,
+                                     const int socket_index)
+{
+  /* The property should be created in #MOD_nodes_update_interface with the correct type. */
+  IDProperty *property = IDP_GetPropertyFromGroup(op_properties, socket.identifier);
+
+  /* IDProperties can be removed with python, so there could be a situation where
+   * there isn't a property for a socket or it doesn't have the correct type. */
+  if (property == nullptr || !nodes::id_property_type_matches_socket(socket, *property)) {
+    return;
+  }
+
+  char socket_id_esc[sizeof(socket.identifier) * 2];
+  BLI_str_escape(socket_id_esc, socket.identifier, sizeof(socket_id_esc));
+
+  char rna_path[sizeof(socket_id_esc) + 4];
+  SNPRINTF(rna_path, "[\"%s\"]", socket_id_esc);
+
+  uiLayout *row = uiLayoutRow(layout, true);
+  uiLayoutSetPropDecorate(row, true);
+
+  /* Use #uiItemPointerR to draw pointer properties because #uiItemR would not have enough
+   * information about what type of ID to select for editing the values. This is because
+   * pointer IDProperties contain no information about their type. */
+  switch (socket.type) {
+    case SOCK_OBJECT:
+      uiItemPointerR(row, op_ptr, rna_path, bmain_ptr, "objects", socket.name, ICON_OBJECT_DATA);
+      break;
+    case SOCK_COLLECTION:
+      uiItemPointerR(
+          row, op_ptr, rna_path, bmain_ptr, "collections", socket.name, ICON_OUTLINER_COLLECTION);
+      break;
+    case SOCK_MATERIAL:
+      uiItemPointerR(row, op_ptr, rna_path, bmain_ptr, "materials", socket.name, ICON_MATERIAL);
+      break;
+    case SOCK_TEXTURE:
+      uiItemPointerR(row, op_ptr, rna_path, bmain_ptr, "textures", socket.name, ICON_TEXTURE);
+      break;
+    case SOCK_IMAGE:
+      uiItemPointerR(row, op_ptr, rna_path, bmain_ptr, "images", socket.name, ICON_IMAGE);
+      break;
+    default:
+      if (nodes::input_has_attribute_toggle(node_tree, socket_index)) {
+        add_attribute_search_or_value_buttons(row, op_ptr, socket);
+      }
+      else {
+        uiItemR(row, op_ptr, rna_path, UI_ITEM_NONE, socket.name, ICON_NONE);
+      }
+  }
+  if (!nodes::input_has_attribute_toggle(node_tree, socket_index)) {
+    uiItemL(row, "", ICON_BLANK1);
+  }
+}
+
+static void run_node_group_ui(bContext *C, wmOperator *op)
+{
+  uiLayout *layout = op->layout;
+  uiLayoutSetPropSep(layout, true);
+  uiLayoutSetPropDecorate(layout, false);
+  Main *bmain = CTX_data_main(C);
+  PointerRNA bmain_ptr;
+  RNA_main_pointer_create(bmain, &bmain_ptr);
+
+  const bNodeTree *node_tree = get_node_group(*C, *op->ptr, nullptr);
+  if (!node_tree) {
+    return;
+  }
+
+  int input_index;
+  LISTBASE_FOREACH_INDEX (bNodeSocket *, io_socket, &node_tree->inputs, input_index) {
+    draw_property_for_socket(
+        *node_tree, layout, op->properties, &bmain_ptr, op->ptr, *io_socket, input_index);
+  }
 }
 
 void GEOMETRY_OT_execute_node_group(wmOperatorType *ot)
@@ -389,6 +520,7 @@ void GEOMETRY_OT_execute_node_group(wmOperatorType *ot)
   ot->invoke = run_node_group_invoke;
   ot->exec = run_node_group_exec;
   ot->get_description = run_node_group_get_description;
+  ot->ui = run_node_group_ui;
 
   ot->flag = OPTYPE_REGISTER | OPTYPE_UNDO;
 
@@ -419,22 +551,67 @@ static bool asset_menu_poll(const bContext *C, MenuType * /*mt*/)
   return CTX_wm_view3d(C);
 }
 
-static asset::AssetItemTree &get_static_item_tree()
+static GeometryNodeAssetTraitFlag asset_flag_for_context(const eContextObjectMode ctx_mode)
 {
-  static asset::AssetItemTree tree;
-  return tree;
+  switch (ctx_mode) {
+    case CTX_MODE_EDIT_MESH:
+      return (GEO_NODE_ASSET_TOOL | GEO_NODE_ASSET_EDIT | GEO_NODE_ASSET_MESH);
+    case CTX_MODE_EDIT_CURVES:
+      return (GEO_NODE_ASSET_TOOL | GEO_NODE_ASSET_EDIT | GEO_NODE_ASSET_CURVE);
+    case CTX_MODE_EDIT_POINT_CLOUD:
+      return (GEO_NODE_ASSET_TOOL | GEO_NODE_ASSET_EDIT | GEO_NODE_ASSET_POINT_CLOUD);
+    case CTX_MODE_SCULPT:
+      return (GEO_NODE_ASSET_TOOL | GEO_NODE_ASSET_SCULPT | GEO_NODE_ASSET_MESH);
+    case CTX_MODE_SCULPT_CURVES:
+      return (GEO_NODE_ASSET_TOOL | GEO_NODE_ASSET_SCULPT | GEO_NODE_ASSET_CURVE);
+    default:
+      BLI_assert_unreachable();
+      return GeometryNodeAssetTraitFlag(0);
+  }
+}
+
+static asset::AssetItemTree *get_static_item_tree(const bContext &C)
+{
+  switch (eContextObjectMode(CTX_data_mode_enum(&C))) {
+    case CTX_MODE_EDIT_MESH: {
+      static asset::AssetItemTree tree;
+      return &tree;
+    }
+    case CTX_MODE_EDIT_CURVES: {
+      static asset::AssetItemTree tree;
+      return &tree;
+    }
+    case CTX_MODE_EDIT_POINT_CLOUD: {
+      static asset::AssetItemTree tree;
+      return &tree;
+    }
+    case CTX_MODE_SCULPT: {
+      static asset::AssetItemTree tree;
+      return &tree;
+    }
+    case CTX_MODE_SCULPT_CURVES: {
+      static asset::AssetItemTree tree;
+      return &tree;
+    }
+    default:
+      return nullptr;
+  }
 }
 
 static asset::AssetItemTree build_catalog_tree(const bContext &C)
 {
+  const eContextObjectMode ctx_mode = eContextObjectMode(CTX_data_mode_enum(&C));
   AssetFilterSettings type_filter{};
   type_filter.id_types = FILTER_ID_NT;
-  AssetTag operator_tag;
-  STRNCPY(operator_tag.name, "Operator");
-  BLI_addtail(&type_filter.tags, &operator_tag);
+  const GeometryNodeAssetTraitFlag flag = asset_flag_for_context(ctx_mode);
   auto meta_data_filter = [&](const AssetMetaData &meta_data) {
     const IDProperty *tree_type = BKE_asset_metadata_idprop_find(&meta_data, "type");
     if (tree_type == nullptr || IDP_Int(tree_type) != NTREE_GEOMETRY) {
+      return false;
+    }
+    const IDProperty *traits_flag = BKE_asset_metadata_idprop_find(
+        &meta_data, "geometry_node_asset_traits_flag");
+    if (traits_flag == nullptr || (IDP_Int(traits_flag) & flag) != flag) {
       return false;
     }
     return true;
@@ -453,6 +630,7 @@ static Set<std::string> get_builtin_menus(const ObjectType object_type, const eO
   Set<std::string> menus;
   switch (object_type) {
     case OB_CURVES:
+    case OB_POINTCLOUD:
       menus.add_new("View");
       menus.add_new("Select");
       menus.add_new("Curves");
@@ -495,14 +673,17 @@ static Set<std::string> get_builtin_menus(const ObjectType object_type, const eO
 static void node_add_catalog_assets_draw(const bContext *C, Menu *menu)
 {
   bScreen &screen = *CTX_wm_screen(C);
-  asset::AssetItemTree &tree = get_static_item_tree();
+  asset::AssetItemTree *tree = get_static_item_tree(*C);
+  if (!tree) {
+    return;
+  }
   const PointerRNA menu_path_ptr = CTX_data_pointer_get(C, "asset_catalog_path");
   if (RNA_pointer_is_null(&menu_path_ptr)) {
     return;
   }
   const auto &menu_path = *static_cast<const asset_system::AssetCatalogPath *>(menu_path_ptr.data);
-  const Span<asset_system::AssetRepresentation *> assets = tree.assets_per_path.lookup(menu_path);
-  asset_system::AssetCatalogTreeItem *catalog_item = tree.catalogs.find_item(menu_path);
+  const Span<asset_system::AssetRepresentation *> assets = tree->assets_per_path.lookup(menu_path);
+  asset_system::AssetCatalogTreeItem *catalog_item = tree->catalogs.find_item(menu_path);
   BLI_assert(catalog_item != nullptr);
 
   if (assets.is_empty() && !catalog_item->has_children()) {
@@ -523,7 +704,7 @@ static void node_add_catalog_assets_draw(const bContext *C, Menu *menu)
                     ICON_NONE,
                     nullptr,
                     WM_OP_INVOKE_DEFAULT,
-                    eUI_Item_Flag(0),
+                    UI_ITEM_NONE,
                     &props_ptr);
     RNA_enum_set(&props_ptr, "asset_library_type", weak_ref->asset_library_type);
     RNA_string_set(&props_ptr, "asset_library_identifier", weak_ref->asset_library_identifier);
@@ -566,8 +747,11 @@ void ui_template_node_operator_asset_menu_items(uiLayout &layout,
                                                 const StringRef catalog_path)
 {
   bScreen &screen = *CTX_wm_screen(&C);
-  asset::AssetItemTree &tree = get_static_item_tree();
-  const asset_system::AssetCatalogTreeItem *item = tree.catalogs.find_root_item(catalog_path);
+  asset::AssetItemTree *tree = get_static_item_tree(C);
+  if (!tree) {
+    return;
+  }
+  const asset_system::AssetCatalogTreeItem *item = tree->catalogs.find_root_item(catalog_path);
   if (!item) {
     return;
   }
@@ -593,9 +777,12 @@ void ui_template_node_operator_asset_root_items(uiLayout &layout, bContext &C)
   if (!active_object) {
     return;
   }
-  asset::AssetItemTree &tree = get_static_item_tree();
-  tree = build_catalog_tree(C);
-  if (tree.catalogs.is_empty()) {
+  asset::AssetItemTree *tree = get_static_item_tree(C);
+  if (!tree) {
+    return;
+  }
+  *tree = build_catalog_tree(C);
+  if (tree->catalogs.is_empty()) {
     return;
   }
 
@@ -608,7 +795,7 @@ void ui_template_node_operator_asset_root_items(uiLayout &layout, bContext &C)
   const Set<std::string> builtin_menus = get_builtin_menus(ObjectType(active_object->type),
                                                            eObjectMode(active_object->mode));
 
-  tree.catalogs.foreach_root_item([&](asset_system::AssetCatalogTreeItem &item) {
+  tree->catalogs.foreach_root_item([&](asset_system::AssetCatalogTreeItem &item) {
     if (builtin_menus.contains(item.get_name())) {
       return;
     }

@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2004-2008 Blender Foundation
+/* SPDX-FileCopyrightText: 2004-2008 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -25,17 +25,17 @@
 
 #include "DEG_depsgraph.h"
 
-#include "RNA_access.h"
+#include "RNA_access.hh"
 #include "RNA_prototypes.h"
 
-#include "WM_api.h"
-#include "WM_types.h"
+#include "WM_api.hh"
+#include "WM_types.hh"
 
-#include "ED_mesh.h"
-#include "ED_undo.h"
+#include "ED_mesh.hh"
+#include "ED_undo.hh"
 
-#include "UI_interface.h"
-#include "UI_resources.h"
+#include "UI_interface.hh"
+#include "UI_resources.hh"
 
 #include "view3d_intern.h"
 

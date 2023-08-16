@@ -1244,8 +1244,9 @@ void GHOST_SystemX11::processEvent(XEvent *xe)
       const XFocusChangeEvent &xfe = xe->xfocus;
 
       /* TODO: make sure this is the correct place for activate/deactivate */
-      // printf("X: focus %s for window %d\n",
-      //        xfe.type == FocusIn ? "in" : "out", (int) xfe.window);
+#if 0
+      printf("X: focus %s for window %d\n", xfe.type == FocusIn ? "in" : "out", int(xfe.window));
+#endif
 
       /* May have to look at the type of event and filter some out. */
 
@@ -1339,8 +1340,10 @@ void GHOST_SystemX11::processEvent(XEvent *xe)
                                         window->GetTabletData());
       }
 
-      // printf("X: %s window %d\n",
-      //        xce.type == EnterNotify ? "entering" : "leaving", (int) xce.window);
+#if 0
+      printf(
+          "X: %s window %d\n", xce.type == EnterNotify ? "entering" : "leaving", int(xce.window));
+#endif
 
       if (xce.type == EnterNotify) {
         m_windowManager->setActiveWindow(window);
@@ -1482,7 +1485,7 @@ void GHOST_SystemX11::processEvent(XEvent *xe)
             window->GetTabletData().Pressure = axis_value / float(xtablet.PressureLevels);
           }
 
-          /* NOTE(@broken): the (short) cast and the & 0xffff is bizarre and unexplained anywhere,
+          /* NOTE(@broken): the `short` cast and the & 0xffff is bizarre and unexplained anywhere,
            * but I got garbage data without it. Found it in the `xidump.c` source.
            *
            * NOTE(@mont29): The '& 0xffff' just truncates the value to its two lowest bytes,
@@ -1690,6 +1693,8 @@ GHOST_TCapabilityFlag GHOST_SystemX11::getCapabilities() const
 {
   return GHOST_TCapabilityFlag(GHOST_CAPABILITY_FLAG_ALL &
                                ~(
+                                   /* No support yet for desktop sampling. */
+                                   GHOST_kCapabilityDesktopSample |
                                    /* No support yet for image copy/paste. */
                                    GHOST_kCapabilityClipboardImages));
 }
@@ -2426,6 +2431,8 @@ GHOST_TSuccess GHOST_SystemX11::showMessageBox(const char *title,
   XSelectInput(m_display, window, ExposureMask | ButtonPressMask | ButtonReleaseMask);
   XMapWindow(m_display, window);
 
+  const bool has_link = link && strlen(link);
+
   while (true) {
     XNextEvent(m_display, &e);
     if (e.type == Expose) {
@@ -2439,7 +2446,7 @@ GHOST_TSuccess GHOST_SystemX11::showMessageBox(const char *title,
                     int(strlen(text_splitted[i])));
       }
       dialog_data.drawButton(m_display, window, buttonBorderGC, buttonGC, 1, continue_label);
-      if (strlen(link)) {
+      if (has_link) {
         dialog_data.drawButton(m_display, window, buttonBorderGC, buttonGC, 2, help_label);
       }
     }
@@ -2448,7 +2455,7 @@ GHOST_TSuccess GHOST_SystemX11::showMessageBox(const char *title,
         break;
       }
       if (dialog_data.isInsideButton(e, 2)) {
-        if (strlen(link)) {
+        if (has_link) {
           string cmd = "xdg-open \"" + string(link) + "\"";
           if (system(cmd.c_str()) != 0) {
             GHOST_PRINTF("GHOST_SystemX11::showMessageBox: Unable to run system command [%s]",

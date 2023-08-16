@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -24,15 +24,15 @@
 #include "BKE_image.h"
 #include "BKE_scene.h"
 
-#include "RNA_define.h"
-#include "RNA_enum_types.h"
+#include "RNA_define.hh"
+#include "RNA_enum_types.hh"
 
 #include "rna_internal.h"
 
 #include "RE_engine.h"
 #include "RE_pipeline.h"
 
-#include "ED_render.h"
+#include "ED_render.hh"
 
 /* Deprecated, only provided for API compatibility. */
 const EnumPropertyItem rna_enum_render_pass_type_items[] = {
@@ -84,7 +84,7 @@ const EnumPropertyItem rna_enum_bake_pass_type_items[] = {
 
 #  include "MEM_guardedalloc.h"
 
-#  include "RNA_access.h"
+#  include "RNA_access.hh"
 
 #  include "BKE_appdir.h"
 #  include "BKE_context.h"
@@ -1010,6 +1010,14 @@ static void rna_def_render_engine(BlenderRNA *brna)
   RNA_define_verify_sdna(true);
 }
 
+static void rna_def_hydra_render_engine(BlenderRNA *brna)
+{
+  /* This is implemented in Python. */
+  StructRNA *srna = RNA_def_struct(brna, "HydraRenderEngine", "RenderEngine");
+  RNA_def_struct_sdna(srna, "RenderEngine");
+  RNA_def_struct_ui_text(srna, "Hydra Render Engine", "Base class from USD Hydra based renderers");
+}
+
 static void rna_def_render_result(BlenderRNA *brna)
 {
   StructRNA *srna;
@@ -1238,6 +1246,7 @@ static void rna_def_render_pass(BlenderRNA *brna)
 void RNA_def_render(BlenderRNA *brna)
 {
   rna_def_render_engine(brna);
+  rna_def_hydra_render_engine(brna);
   rna_def_render_result(brna);
   rna_def_render_view(brna);
   rna_def_render_layer(brna);

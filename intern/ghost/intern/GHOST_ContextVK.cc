@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2022-2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2022-2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -219,6 +219,7 @@ class GHOST_DeviceVK {
     device_features.dualSrcBlend = VK_TRUE;
     device_features.logicOp = VK_TRUE;
     device_features.imageCubeArray = VK_TRUE;
+    device_features.multiViewport = VK_TRUE;
 #endif
 
     VkDeviceCreateInfo device_create_info = {};
@@ -247,8 +248,8 @@ class GHOST_DeviceVK {
 
     generic_queue_family = 0;
     for (const auto &queue_family : queue_families) {
-      /* Every vulkan implementation by spec must have one queue family that support both graphics
-       * and compute pipelines. We select this one; compute only queue family hints at async
+      /* Every VULKAN implementation by spec must have one queue family that support both graphics
+       * and compute pipelines. We select this one; compute only queue family hints at asynchronous
        * compute implementations. */
       if ((queue_family.queueFlags & VK_QUEUE_GRAPHICS_BIT) &&
           (queue_family.queueFlags & VK_QUEUE_COMPUTE_BIT))

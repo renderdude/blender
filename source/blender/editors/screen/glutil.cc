@@ -12,12 +12,11 @@
 #include "DNA_userdef_types.h"
 #include "DNA_vec_types.h"
 
-#include "BLI_math.h"
 #include "BLI_utildefines.h"
 
 #include "BKE_context.h"
 
-#include "BIF_glutil.h"
+#include "BIF_glutil.hh"
 
 #include "IMB_colormanagement.h"
 #include "IMB_imbuf_types.h"
@@ -31,7 +30,7 @@
 #  include "GPU_state.h"
 #endif
 
-#include "UI_interface.h"
+#include "UI_interface.hh"
 
 /* ******************************************** */
 
@@ -445,7 +444,7 @@ void ED_draw_imbuf_clipping(ImBuf *ibuf,
   if (force_fallback == false) {
     int ok;
 
-    IMMDrawPixelsTexState state = {0};
+    IMMDrawPixelsTexState state = {nullptr};
     /* We want GLSL state to be fully handled by OCIO. */
     state.do_shader_unbind = false;
     immDrawPixelsTexSetupAttributes(&state);

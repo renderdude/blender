@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -8,7 +8,7 @@
 
 #include "MEM_guardedalloc.h"
 
-#include "BLI_math.h"
+#include "BLI_math_matrix.h"
 
 #include "BKE_editmesh.h"
 
@@ -18,8 +18,8 @@
 
 #include "DNA_object_types.h"
 
-#include "ED_mesh.h"
-#include "ED_view3d.h"
+#include "ED_mesh.hh"
+#include "ED_view3d.hh"
 
 /* -------------------------------------------------------------------- */
 /** \name Mesh Element Pre-Select

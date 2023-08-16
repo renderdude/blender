@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -14,11 +14,11 @@
 
 #include "BKE_context.h"
 
-#include "BLI_math.h"
+#include "BLI_math_vector.h"
 #include "BLI_utildefines.h"
 
-#include "WM_api.h"
-#include "WM_types.h"
+#include "WM_api.hh"
+#include "WM_types.hh"
 
 #include "transform.hh"
 #include "transform_mode.hh"
@@ -412,7 +412,7 @@ void setInputPostFct(MouseInput *mi, void (*post)(TransInfo *t, float values[3])
   mi->post = post;
 }
 
-void applyMouseInput(TransInfo *t, MouseInput *mi, const int2 &mval, float output[3])
+void applyMouseInput(TransInfo *t, MouseInput *mi, const float2 &mval, float output[3])
 {
   double mval_db[2];
 

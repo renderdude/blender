@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -26,17 +26,16 @@
 #include "BKE_idprop.h"
 #include "BKE_screen.h"
 
-#include "ED_asset.h"
-#include "ED_keyframing.h"
-#include "ED_screen.h"
+#include "ED_asset.hh"
+#include "ED_keyframing.hh"
+#include "ED_screen.hh"
 
-#include "UI_interface.h"
 #include "UI_interface.hh"
 
 #include "interface_intern.hh"
 
-#include "RNA_access.h"
-#include "RNA_path.h"
+#include "RNA_access.hh"
+#include "RNA_path.hh"
 #include "RNA_prototypes.h"
 
 #ifdef WITH_PYTHON
@@ -44,8 +43,8 @@
 #  include "BPY_extern_run.h"
 #endif
 
-#include "WM_api.h"
-#include "WM_types.h"
+#include "WM_api.hh"
+#include "WM_types.hh"
 
 /* This hack is needed because we don't have a good way to
  * re-reference keymap items once added: #42944 */
@@ -424,7 +423,7 @@ static void ui_but_user_menu_add(bContext *C, uiBut *but, bUserMenu *um)
   }
   else if ((ot = UI_but_operatortype_get_from_enum_menu(but, &prop))) {
     ED_screen_user_menu_item_add_operator(&um->items,
-                                          WM_operatortype_name(ot, nullptr),
+                                          WM_operatortype_name(ot, nullptr).c_str(),
                                           ot,
                                           nullptr,
                                           RNA_property_identifier(prop),

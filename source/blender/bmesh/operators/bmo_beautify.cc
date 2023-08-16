@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -8,8 +8,6 @@
  * Beautify the mesh by rotating edges between triangles
  * to more attractive positions until no more rotations can be made.
  */
-
-#include "BLI_math.h"
 
 #include "MEM_guardedalloc.h"
 

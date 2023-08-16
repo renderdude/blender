@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2023 Blender Foundation
+/* SPDX-FileCopyrightText: 2023 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -48,7 +48,7 @@ static PyObject *bpy_app_icons_new_triangles(PyObject * /*self*/, PyObject *args
       "S"    /* `colors` */
       ":new_triangles",
       _keywords,
-      0,
+      nullptr,
   };
   if (!_PyArg_ParseTupleAndKeywordsFast(
           args, kw, &_parser, &coords_range[0], &coords_range[1], &py_coords, &py_colors))
@@ -92,28 +92,31 @@ PyDoc_STRVAR(bpy_app_icons_new_triangles_from_file_doc,
              "   Create a new icon from triangle geometry.\n"
              "\n"
              "   :arg filepath: File path.\n"
-             "   :type filepath: string.\n"
+             "   :type filepath: string or bytes.\n"
              "   :return: Unique icon value (pass to interface ``icon_value`` argument).\n"
              "   :rtype: int\n");
 static PyObject *bpy_app_icons_new_triangles_from_file(PyObject * /*self*/,
                                                        PyObject *args,
                                                        PyObject *kw)
 {
-  /* bytes */
-  char *filepath;
+  PyC_UnicodeAsBytesAndSize_Data filepath_data = {nullptr};
 
   static const char *_keywords[] = {"filepath", nullptr};
   static _PyArg_Parser _parser = {
-      "s" /* `filepath` */
+      "O&" /* `filepath` */
       ":new_triangles_from_file",
       _keywords,
-      0,
+      nullptr,
   };
-  if (!_PyArg_ParseTupleAndKeywordsFast(args, kw, &_parser, &filepath)) {
+  if (!_PyArg_ParseTupleAndKeywordsFast(
+          args, kw, &_parser, PyC_ParseUnicodeAsBytesAndSize, &filepath_data))
+  {
     return nullptr;
   }
 
-  Icon_Geom *geom = BKE_icon_geom_from_file(filepath);
+  Icon_Geom *geom = BKE_icon_geom_from_file(filepath_data.value);
+  Py_XDECREF(filepath_data.value_coerce);
+
   if (geom == nullptr) {
     PyErr_SetString(PyExc_ValueError, "Unable to load from file");
     return nullptr;
@@ -134,7 +137,7 @@ static PyObject *bpy_app_icons_release(PyObject * /*self*/, PyObject *args, PyOb
       "i" /* `icon_id` */
       ":release",
       _keywords,
-      0,
+      nullptr,
   };
   if (!_PyArg_ParseTupleAndKeywordsFast(args, kw, &_parser, &icon_id)) {
     return nullptr;

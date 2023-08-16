@@ -8,7 +8,8 @@
 
 #include <cstdlib>
 
-#include "BLI_math.h"
+#include "BLI_math_matrix.h"
+#include "BLI_math_vector.h"
 #include "BLI_string.h"
 #include "BLI_task.h"
 
@@ -17,9 +18,9 @@
 #include "BKE_context.h"
 #include "BKE_unit.h"
 
-#include "ED_screen.h"
+#include "ED_screen.hh"
 
-#include "UI_interface.h"
+#include "UI_interface.hh"
 
 #include "BLT_translation.h"
 
@@ -170,7 +171,7 @@ static void transdata_elem_to_sphere_fn(void *__restrict iter_data_v,
 /** \name Transform (ToSphere)
  * \{ */
 
-static void applyToSphere(TransInfo *t, const int[2] /*mval*/)
+static void applyToSphere(TransInfo *t)
 {
   const bool is_local_center = transdata_check_local_center(t, t->around);
   const bool is_data_space = (t->options & CTX_POSE_BONE) != 0;

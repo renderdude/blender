@@ -1,4 +1,4 @@
-/* SPDX-FileCopyrightText: 2017 Blender Foundation
+/* SPDX-FileCopyrightText: 2017 Blender Authors
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
@@ -9,8 +9,8 @@
 #include "DRW_engine.h"
 #include "DRW_render.h"
 
-#include "ED_gpencil_legacy.h"
-#include "ED_view3d.h"
+#include "ED_gpencil_legacy.hh"
+#include "ED_view3d.hh"
 
 #include "DNA_gpencil_legacy_types.h"
 #include "DNA_view3d_types.h"
@@ -21,11 +21,12 @@
 
 #include "BLI_hash.h"
 #include "BLI_link_utils.h"
+#include "BLI_math_color.h"
 #include "BLI_memblock.h"
 
 #include "gpencil_engine.h"
 
-#include "draw_cache_impl.h"
+#include "draw_cache_impl.hh"
 
 #include "DEG_depsgraph.h"
 
