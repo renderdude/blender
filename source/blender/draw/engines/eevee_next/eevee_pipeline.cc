@@ -149,17 +149,14 @@ void WorldVolumePipeline::render(View &view)
 void ShadowPipeline::sync()
 {
   surface_ps_.init();
-  /* TODO(fclem): Add state for rendering to empty framebuffer without depth test.
-   * For now this is only here for avoiding the rasterizer discard state. */
   surface_ps_.state_set(DRW_STATE_WRITE_DEPTH | DRW_STATE_DEPTH_LESS);
   surface_ps_.bind_texture(RBUFS_UTILITY_TEX_SLOT, inst_.pipelines.utility_tx);
-  surface_ps_.bind_texture(SHADOW_RENDER_MAP_SLOT, &inst_.shadows.render_map_tx_);
-  surface_ps_.bind_image(SHADOW_ATLAS_SLOT, &inst_.shadows.atlas_tx_);
+  surface_ps_.bind_image(SHADOW_ATLAS_IMG_SLOT, inst_.shadows.atlas_tx_);
   surface_ps_.bind_ubo(CAMERA_BUF_SLOT, inst_.camera.ubo_get());
+  surface_ps_.bind_ssbo(SHADOW_RENDER_MAP_BUF_SLOT, &inst_.shadows.render_map_buf_);
+  surface_ps_.bind_ssbo(SHADOW_VIEWPORT_INDEX_BUF_SLOT, &inst_.shadows.viewport_index_buf_);
   surface_ps_.bind_ssbo(SHADOW_PAGE_INFO_SLOT, &inst_.shadows.pages_infos_data_);
   inst_.sampling.bind_resources(&surface_ps_);
-
-  surface_ps_.framebuffer_set(&inst_.shadows.render_fb_);
 }
 
 PassMain::Sub *ShadowPipeline::surface_material_add(GPUMaterial *gpumat)
@@ -226,7 +223,6 @@ void ForwardPipeline::sync()
       opaque_ps_.bind_image(RBUFS_CRYPTOMATTE_SLOT, &inst_.render_buffers.cryptomatte_tx);
       /* Textures. */
       opaque_ps_.bind_texture(RBUFS_UTILITY_TEX_SLOT, inst_.pipelines.utility_tx);
-      opaque_ps_.bind_texture(SSS_TRANSMITTANCE_TEX_SLOT, inst_.subsurface.transmittance_tx_get());
 
       /* Uniform Buffer. */
       opaque_ps_.bind_ubo(CAMERA_BUF_SLOT, inst_.camera.ubo_get());
@@ -257,7 +253,6 @@ void ForwardPipeline::sync()
 
     /* Textures. */
     sub.bind_texture(RBUFS_UTILITY_TEX_SLOT, inst_.pipelines.utility_tx);
-    sub.bind_texture(SSS_TRANSMITTANCE_TEX_SLOT, inst_.subsurface.transmittance_tx_get());
     /* Uniform Buffer. */
     sub.bind_ubo(CAMERA_BUF_SLOT, inst_.camera.ubo_get());
 
@@ -460,8 +455,6 @@ void DeferredLayer::end_sync()
     eval_light_ps_.bind_image(RBUFS_COLOR_SLOT, &inst_.render_buffers.rp_color_tx);
     eval_light_ps_.bind_image(RBUFS_VALUE_SLOT, &inst_.render_buffers.rp_value_tx);
     eval_light_ps_.bind_texture(RBUFS_UTILITY_TEX_SLOT, inst_.pipelines.utility_tx);
-    eval_light_ps_.bind_texture(SSS_TRANSMITTANCE_TEX_SLOT,
-                                inst_.subsurface.transmittance_tx_get());
     eval_light_ps_.bind_ubo(RBUFS_BUF_SLOT, &inst_.render_buffers.data);
 
     inst_.lights.bind_resources(&eval_light_ps_);
@@ -735,8 +728,6 @@ void DeferredProbeLayer::end_sync()
     eval_light_ps_.bind_image(RBUFS_COLOR_SLOT, &inst_.render_buffers.rp_color_tx);
     eval_light_ps_.bind_image(RBUFS_VALUE_SLOT, &inst_.render_buffers.rp_value_tx);
     eval_light_ps_.bind_texture(RBUFS_UTILITY_TEX_SLOT, inst_.pipelines.utility_tx);
-    eval_light_ps_.bind_texture(SSS_TRANSMITTANCE_TEX_SLOT,
-                                inst_.subsurface.transmittance_tx_get());
     eval_light_ps_.bind_ubo(RBUFS_BUF_SLOT, &inst_.render_buffers.data);
 
     inst_.lights.bind_resources(&eval_light_ps_);

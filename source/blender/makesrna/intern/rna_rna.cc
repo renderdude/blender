@@ -26,13 +26,13 @@
 
 /* Reuse for dynamic types. */
 
-const EnumPropertyItem DummyRNA_NULL_items[] = {
+const EnumPropertyItem rna_enum_dummy_NULL_items[] = {
     {0, nullptr, 0, nullptr, nullptr},
 };
 
 /* Reuse for dynamic types with default value. */
 
-const EnumPropertyItem DummyRNA_DEFAULT_items[] = {
+const EnumPropertyItem rna_enum_dummy_DEFAULT_items[] = {
     {0, "DEFAULT", 0, "Default", ""},
     {0, nullptr, 0, nullptr, nullptr},
 };
@@ -993,7 +993,7 @@ static const EnumPropertyItem *rna_EnumProperty_default_itemf(bContext *C,
 
   /* incompatible default attributes */
   if ((prop_parent->flag & PROP_ENUM_FLAG) != (prop->flag & PROP_ENUM_FLAG)) {
-    return DummyRNA_NULL_items;
+    return rna_enum_dummy_NULL_items;
   }
 
   if ((eprop->item_fn == nullptr) || (eprop->item_fn == rna_EnumProperty_default_itemf) ||
@@ -3161,7 +3161,7 @@ static void rna_def_property(BlenderRNA *brna)
   prop = RNA_def_property(srna, "is_enum_flag", PROP_BOOLEAN, PROP_NONE);
   RNA_def_property_clear_flag(prop, PROP_EDITABLE);
   RNA_def_property_boolean_funcs(prop, "rna_Property_is_enum_flag_get", nullptr);
-  RNA_def_property_ui_text(prop, "Enum Flag", "True when multiple enums ");
+  RNA_def_property_ui_text(prop, "Enum Flag", "True when multiple enums");
 
   prop = RNA_def_property(srna, "is_library_editable", PROP_BOOLEAN, PROP_NONE);
   RNA_def_property_clear_flag(prop, PROP_EDITABLE);

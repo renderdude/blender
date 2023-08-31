@@ -66,6 +66,7 @@
 #include "../generic/idprop_py_ui_api.h"
 #include "../generic/py_capi_rna.h"
 #include "../generic/py_capi_utils.h"
+#include "../generic/python_compat.h"
 #include "../generic/python_utildefines.h"
 
 #define USE_PEDANTIC_WRITE
@@ -1333,9 +1334,9 @@ static PyObject *pyrna_enum_to_py(PointerRNA *ptr, PropertyRNA *prop, int val)
       RNA_property_enum_items_ex(nullptr, ptr, prop, true, &enum_item, nullptr, &free_dummy);
       BLI_assert(!free_dummy);
 
-      /* Do not print warning in case of DummyRNA_NULL_items,
+      /* Do not print warning in case of #rna_enum_dummy_NULL_items,
        * this one will never match any value... */
-      if (enum_item != DummyRNA_NULL_items) {
+      if (enum_item != rna_enum_dummy_NULL_items) {
         const char *ptr_name = RNA_struct_name_get_alloc(ptr, nullptr, 0, nullptr);
 
         /* Prefer not to fail silently in case of API errors, maybe disable it later. */
@@ -3632,6 +3633,7 @@ static PyObject *pyrna_struct_is_property_set(BPy_StructRNA *self, PyObject *arg
 
   static const char *_keywords[] = {"", "ghost", nullptr};
   static _PyArg_Parser _parser = {
+      PY_ARG_PARSER_HEAD_COMPAT()
       "s"  /* `name` (positional). */
       "|$" /* Optional keyword only arguments. */
       "O&" /* `ghost` */
@@ -4017,7 +4019,7 @@ static PyObject *pyrna_struct_type_recast(BPy_StructRNA *self)
 static PyObject *pyrna_struct_bl_rna_find_subclass_recursive(PyObject *cls, const char *id)
 {
   PyObject *ret_test = nullptr;
-  PyObject *subclasses = ((PyTypeObject *)cls)->tp_subclasses;
+  PyObject *subclasses = (PyObject *)((PyTypeObject *)cls)->tp_subclasses;
   if (subclasses) {
     /* Unfortunately we can't use the dict key because Python class names
      * don't match the bl_idname used internally. */

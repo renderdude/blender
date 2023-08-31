@@ -18,6 +18,7 @@
 #include "BKE_appdir.h"
 #include "BKE_context.h"
 #include "BKE_global.h"
+#include "BKE_lib_query.h"
 #include "BKE_lib_remap.h"
 #include "BKE_main.h"
 #include "BKE_report.h"
@@ -43,7 +44,7 @@
 #include "UI_resources.hh"
 #include "UI_view2d.hh"
 
-#include "BLO_read_write.h"
+#include "BLO_read_write.hh"
 
 #include "GPU_framebuffer.h"
 #include "file_indexer.hh"
@@ -843,6 +844,20 @@ static void file_id_remap(ScrArea *area, SpaceLink *sl, const IDRemapper * /*map
   file_reset_filelist_showing_main_data(area, sfile);
 }
 
+static void file_foreach_id(SpaceLink *space_link, LibraryForeachIDData *data)
+{
+  SpaceFile *sfile = reinterpret_cast<SpaceFile *>(space_link);
+  const int data_flags = BKE_lib_query_foreachid_process_flags_get(data);
+  const bool is_readonly = (data_flags & IDWALK_READONLY) != 0;
+
+  /* TODO: investigate whether differences between this code and the one in #file_id_remap are
+   * meaningful and make sense or not. */
+  if (!is_readonly) {
+    sfile->op = nullptr;
+    sfile->tags = FILE_TAG_REBUILD_MAIN_FILES;
+  }
+}
+
 static void file_space_blend_read_data(BlendDataReader *reader, SpaceLink *sl)
 {
   SpaceFile *sfile = (SpaceFile *)sl;
@@ -868,11 +883,12 @@ static void file_space_blend_read_data(BlendDataReader *reader, SpaceLink *sl)
   }
 }
 
-static void file_space_blend_read_lib(BlendLibReader * /*reader*/,
-                                      ID * /*parent_id*/,
-                                      SpaceLink *sl)
+static void file_space_blend_read_after_liblink(BlendLibReader * /*reader*/,
+                                                ID * /*parent_id*/,
+                                                SpaceLink *sl)
 {
-  SpaceFile *sfile = (SpaceFile *)sl;
+  SpaceFile *sfile = reinterpret_cast<SpaceFile *>(sl);
+
   sfile->tags |= FILE_TAG_REBUILD_MAIN_FILES;
 }
 
@@ -912,8 +928,9 @@ void ED_spacetype_file()
   st->space_subtype_set = file_space_subtype_set;
   st->context = file_context;
   st->id_remap = file_id_remap;
+  st->foreach_id = file_foreach_id;
   st->blend_read_data = file_space_blend_read_data;
-  st->blend_read_lib = file_space_blend_read_lib;
+  st->blend_read_after_liblink = file_space_blend_read_after_liblink;
   st->blend_write = file_space_blend_write;
 
   /* regions: main window */

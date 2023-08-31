@@ -1,3 +1,6 @@
+/* SPDX-FileCopyrightText: 2022-2023 Blender Authors
+ *
+ * SPDX-License-Identifier: GPL-2.0-or-later */
 
 #pragma BLENDER_REQUIRE(common_hair_lib.glsl) /* TODO rename to curve. */
 #pragma BLENDER_REQUIRE(common_math_lib.glsl)
@@ -11,7 +14,7 @@ void main()
 {
   DRW_VIEW_FROM_RESOURCE_ID;
 #ifdef MAT_SHADOW
-  shadow_interp.view_id = drw_view_id;
+  shadow_viewport_layer_set(int(drw_view_id), int(viewport_index_buf[drw_view_id]));
 #endif
 
   init_interface();
@@ -29,7 +32,7 @@ void main()
                               interp.curves_time_width);
 
   interp.N = cross(interp.curves_tangent, interp.curves_binormal);
-  interp.curves_strand_id = hair_get_strand_id();
+  interp_flat.curves_strand_id = hair_get_strand_id();
   interp.barycentric_coords = hair_get_barycentric();
 #ifdef MAT_VELOCITY
   /* Due to the screen space nature of the vertex positioning, we compute only the motion of curve

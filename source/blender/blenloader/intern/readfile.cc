@@ -76,6 +76,7 @@
 #include "BKE_lib_remap.h"
 #include "BKE_main.h" /* for Main */
 #include "BKE_main_idmap.h"
+#include "BKE_main_namemap.h"
 #include "BKE_material.h"
 #include "BKE_mesh.hh"
 #include "BKE_modifier.h"
@@ -92,11 +93,11 @@
 
 #include "DEG_depsgraph.h"
 
-#include "BLO_blend_defs.h"
-#include "BLO_blend_validate.h"
-#include "BLO_read_write.h"
+#include "BLO_blend_defs.hh"
+#include "BLO_blend_validate.hh"
+#include "BLO_read_write.hh"
 #include "BLO_readfile.h"
-#include "BLO_undofile.h"
+#include "BLO_undofile.hh"
 
 #include "SEQ_clipboard.h"
 #include "SEQ_iterator.h"
@@ -104,7 +105,7 @@
 #include "SEQ_sequencer.h"
 #include "SEQ_utils.h"
 
-#include "readfile.h"
+#include "readfile.hh"
 
 /* Make preferences read-only. */
 #define U (*((const UserDef *)&U))
@@ -593,11 +594,6 @@ struct BlendDataReader {
 };
 
 struct BlendLibReader {
-  FileData *fd;
-  Main *main;
-};
-
-struct BlendExpander {
   FileData *fd;
   Main *main;
 };
@@ -1885,52 +1881,63 @@ static void link_glob_list(FileData *fd, ListBase *lb) /* for glob data */
 /** \name Read ID
  * \{ */
 
-static void lib_link_id(BlendLibReader *reader, ID *id);
+static void after_liblink_id_process(BlendLibReader *reader, ID *id);
 
-static void lib_link_id_embedded_id(BlendLibReader *reader, ID *id)
+static void after_liblink_id_embedded_id_process(BlendLibReader *reader, ID *id)
 {
 
   /* Handle 'private IDs'. */
   bNodeTree *nodetree = ntreeFromID(id);
   if (nodetree != nullptr) {
-    lib_link_id(reader, &nodetree->id);
-    blender::bke::ntreeBlendReadLib(reader, nodetree);
+    after_liblink_id_process(reader, &nodetree->id);
+
+    if (nodetree->owner_id == nullptr) {
+      CLOG_WARN(&LOG,
+                "NULL owner_id pointer for embedded NodeTree of %s, should never happen",
+                id->name);
+      nodetree->owner_id = id;
+    }
+    else if (nodetree->owner_id != id) {
+      CLOG_WARN(&LOG,
+                "Inconsistent owner_id pointer for embedded NodeTree of %s, should never happen",
+                id->name);
+      nodetree->owner_id = id;
+    }
   }
 
   if (GS(id->name) == ID_SCE) {
     Scene *scene = (Scene *)id;
     if (scene->master_collection != nullptr) {
-      lib_link_id(reader, &scene->master_collection->id);
-      BKE_collection_blend_read_lib(reader, scene->master_collection);
+      after_liblink_id_process(reader, &scene->master_collection->id);
+
+      if (scene->master_collection->runtime.owner_id == nullptr) {
+        CLOG_WARN(&LOG,
+                  "NULL owner_id pointer for embedded Scene Collection of %s, should never happen",
+                  id->name);
+        scene->master_collection->runtime.owner_id = id;
+      }
+      else if (scene->master_collection->runtime.owner_id != id) {
+        CLOG_WARN(&LOG,
+                  "Inconsistent owner_id pointer for embedded Scene Collection of %s, should "
+                  "never happen",
+                  id->name);
+        scene->master_collection->runtime.owner_id = id;
+      }
     }
   }
 }
 
-static void lib_link_id(BlendLibReader *reader, ID *id)
+static void after_liblink_id_process(BlendLibReader *reader, ID *id)
 {
   /* NOTE: WM IDProperties are never written to file, hence they should always be nullptr here. */
   BLI_assert((GS(id->name) != ID_WM) || id->properties == nullptr);
-  IDP_BlendReadLib(reader, id, id->properties);
 
-  AnimData *adt = BKE_animdata_from_id(id);
-  if (adt != nullptr) {
-    BKE_animdata_blend_read_lib(reader, id, adt);
+  after_liblink_id_embedded_id_process(reader, id);
+
+  const IDTypeInfo *id_type = BKE_idtype_get_info_from_id(id);
+  if (id_type->blend_read_after_liblink != nullptr) {
+    id_type->blend_read_after_liblink(reader, id);
   }
-
-  if (id->override_library) {
-    BLO_read_id_address(reader, id, &id->override_library->reference);
-    BLO_read_id_address(reader, id, &id->override_library->storage);
-    BLO_read_id_address(reader, id, &id->override_library->hierarchy_root);
-
-    LISTBASE_FOREACH (IDOverrideLibraryProperty *, op, &id->override_library->properties) {
-      LISTBASE_FOREACH (IDOverrideLibraryPropertyOperation *, opop, &op->operations) {
-        BLO_read_id_address(reader, id, &opop->subitem_reference_id);
-        BLO_read_id_address(reader, id, &opop->subitem_local_id);
-      }
-    }
-  }
-
-  lib_link_id_embedded_id(reader, id);
 }
 
 static void direct_link_id_override_property_operation_cb(BlendDataReader *reader, void *data)
@@ -2061,6 +2068,10 @@ static void direct_link_id_common(
   }
 
   id->lib = current_library;
+  if (id->lib) {
+    /* Always fully clear fake user flag for linked data. */
+    id->flag &= ~LIB_FAKEUSER;
+  }
   id->us = ID_FAKE_USERS(id);
   id->icon_id = 0;
   id->newid = nullptr; /* Needed because .blend may have been saved with crap value here... */
@@ -2291,8 +2302,6 @@ static void direct_link_library(FileData *fd, Library *lib, Main *main)
 
   id_us_ensure_real(&lib->id);
 }
-
-static void lib_link_library(BlendLibReader * /*reader*/, Library * /*lib*/) {}
 
 /* Always call this once you have loaded new library data to set the relative paths correctly
  * in relation to the blend file. */
@@ -3259,6 +3268,34 @@ static void do_versions_after_linking(FileData *fd, Main *main)
 /** \name Read Library Data Block (all)
  * \{ */
 
+static int lib_link_cb(LibraryIDLinkCallbackData *cb_data)
+{
+  /* Embedded IDs are not known by lib_link code, so they would be remapped to `nullptr`. But there
+   * is no need to process them anyway, as they are already handled during the 'read_data' phase.
+   *
+   * NOTE: Some external non-owning pointers to embedded IDs (like the node-tree pointers of the
+   * Node editor) will not be detected as embedded ones though at 'lib_link' stage (because their
+   * source data cannot be accessed). This is handled on a case-by-case basis in 'after_lib_link'
+   * validation code. */
+  if (cb_data->cb_flag & (IDWALK_CB_EMBEDDED | IDWALK_CB_EMBEDDED_NOT_OWNING)) {
+    return IDWALK_RET_NOP;
+  }
+
+  /* Explicitly requested to be ignored during readfile processing. Means the read_data code
+   * already handled this pointer. Typically, the 'owner_id' pointer of an embedded ID. */
+  if (cb_data->cb_flag & IDWALK_CB_READFILE_IGNORE) {
+    return IDWALK_RET_NOP;
+  }
+
+  BlendLibReader *reader = static_cast<BlendLibReader *>(cb_data->user_data);
+  ID **id_ptr = cb_data->id_pointer;
+  ID *owner_id = cb_data->owner_id;
+
+  *id_ptr = BLO_read_get_new_id_address(reader, owner_id, ID_IS_LINKED(owner_id), *id_ptr);
+
+  return IDWALK_RET_NOP;
+}
+
 static void lib_link_all(FileData *fd, Main *bmain)
 {
   BlendLibReader reader = {fd, bmain};
@@ -3288,15 +3325,13 @@ static void lib_link_all(FileData *fd, Main *bmain)
     }
 
     if ((id->tag & LIB_TAG_NEED_LINK) != 0) {
-      lib_link_id(&reader, id);
+      /* Not all original pointer values can be considered as valid.
+       * Handling of DNA deprecated data should never be needed in undo case. */
+      const int flag = IDWALK_NO_ORIG_POINTERS_ACCESS | IDWALK_INCLUDE_UI |
+                       ((fd->flags & FD_FLAGS_IS_MEMFILE) ? 0 : IDWALK_DO_DEPRECATED_POINTERS);
+      BKE_library_foreach_ID_link(nullptr, id, lib_link_cb, &reader, flag);
 
-      if (id_type->blend_read_lib != nullptr) {
-        id_type->blend_read_lib(&reader, id);
-      }
-
-      if (GS(id->name) == ID_LI) {
-        lib_link_library(&reader, (Library *)id); /* Only init users. */
-      }
+      after_liblink_id_process(&reader, id);
 
       id->tag &= ~LIB_TAG_NEED_LINK;
     }
@@ -3331,17 +3366,25 @@ static void lib_link_all(FileData *fd, Main *bmain)
  * Those operations cannot perform properly in a split bmain case, since some data from other
  * bmain's (aka libraries) may not have been processed yet.
  */
-static void after_liblink_merged_bmain_process(Main *bmain)
+static void after_liblink_merged_bmain_process(Main *bmain, BlendFileReadReport *reports)
 {
   /* We only expect a merged Main here, not a split one. */
   BLI_assert((bmain->prev == nullptr) && (bmain->next == nullptr));
+
+  if (!BKE_main_namemap_validate_and_fix(bmain)) {
+    BKE_report(
+        reports ? reports->reports : nullptr,
+        RPT_ERROR,
+        "Critical blendfile corruption: Conflicts and/or otherwise invalid data-blocks names "
+        "(see console for details)");
+  }
 
   /* Check for possible cycles in scenes' 'set' background property. */
   lib_link_scenes_check_set(bmain);
 
   /* We could integrate that to mesh/curve/lattice lib_link, but this is really cheap process,
    * so simpler to just use it directly in this single call. */
-  BLO_main_validate_shapekeys(bmain, nullptr);
+  BLO_main_validate_shapekeys(bmain, reports ? reports->reports : nullptr);
 
   /* We have to rebuild that runtime information *after* all data-blocks have been properly linked.
    */
@@ -3669,7 +3712,7 @@ BlendFileData *blo_read_file_internal(FileData *fd, const char *filepath)
     blo_join_main(&mainlist);
 
     lib_link_all(fd, bfd->main);
-    after_liblink_merged_bmain_process(bfd->main);
+    after_liblink_merged_bmain_process(bfd->main, fd->reports);
 
     if (is_undo) {
       /* Ensure ID usages of reused 'no undo' IDs remain valid. */
@@ -3929,6 +3972,11 @@ static ID *library_id_is_yet_read(FileData *fd, Main *mainvar, BHead *bhead)
 /** \name Library Linking (expand pointers)
  * \{ */
 
+struct BlendExpander {
+  FileData *fd;
+  Main *main;
+};
+
 static void expand_doit_library(void *fdhandle, Main *mainvar, void *old)
 {
   FileData *fd = static_cast<FileData *>(fdhandle);
@@ -4054,53 +4102,39 @@ static void expand_doit_library(void *fdhandle, Main *mainvar, void *old)
 
 static BLOExpandDoitCallback expand_doit;
 
-static void expand_id(BlendExpander *expander, ID *id);
-
-static void expand_id_embedded_id(BlendExpander *expander, ID *id)
-{
-  /* Handle 'private IDs'. */
-  bNodeTree *nodetree = ntreeFromID(id);
-  if (nodetree != nullptr) {
-    expand_id(expander, &nodetree->id);
-    blender::bke::ntreeBlendReadExpand(expander, nodetree);
-  }
-
-  if (GS(id->name) == ID_SCE) {
-    Scene *scene = (Scene *)id;
-    if (scene->master_collection != nullptr) {
-      expand_id(expander, &scene->master_collection->id);
-      BKE_collection_blend_read_expand(expander, scene->master_collection);
-    }
-  }
-}
-
-static void expand_id(BlendExpander *expander, ID *id)
-{
-  IDP_BlendReadExpand(expander, id->properties);
-
-  if (id->override_library) {
-    BLO_expand(expander, id->override_library->reference);
-    BLO_expand(expander, id->override_library->storage);
-
-    LISTBASE_FOREACH (IDOverrideLibraryProperty *, op, &id->override_library->properties) {
-      LISTBASE_FOREACH (IDOverrideLibraryPropertyOperation *, opop, &op->operations) {
-        BLO_expand(expander, opop->subitem_reference_id);
-        BLO_expand(expander, opop->subitem_local_id);
-      }
-    }
-  }
-
-  AnimData *adt = BKE_animdata_from_id(id);
-  if (adt != nullptr) {
-    BKE_animdata_blend_read_expand(expander, adt);
-  }
-
-  expand_id_embedded_id(expander, id);
-}
-
 void BLO_main_expander(BLOExpandDoitCallback expand_doit_func)
 {
   expand_doit = expand_doit_func;
+}
+
+static int expand_cb(LibraryIDLinkCallbackData *cb_data)
+{
+  /* Embedded IDs are not known by lib_link code, so they would be remapped to `nullptr`. But there
+   * is no need to process them anyway, as they are already handled during the 'read_data' phase.
+   */
+  if (cb_data->cb_flag & (IDWALK_CB_EMBEDDED | IDWALK_CB_EMBEDDED_NOT_OWNING)) {
+    return IDWALK_RET_NOP;
+  }
+
+  /* Explicitly requested to be ignored during readfile processing. Means the read_data code
+   * already handled this pointer. Typically, the 'owner_id' pointer of an embedded ID. */
+  if (cb_data->cb_flag & IDWALK_CB_READFILE_IGNORE) {
+    return IDWALK_RET_NOP;
+  }
+
+  /* Expand process can be re-entrant or have other complex interactions that will not work well
+   * with loop-back pointers. Further more, processing such data should not be needed here anyway.
+   */
+  if (cb_data->cb_flag & (IDWALK_CB_LOOPBACK)) {
+    return IDWALK_RET_NOP;
+  }
+
+  BlendExpander *expander = static_cast<BlendExpander *>(cb_data->user_data);
+  ID *id = *(cb_data->id_pointer);
+
+  expand_doit(expander->fd, expander->main, id);
+
+  return IDWALK_RET_NOP;
 }
 
 void BLO_expand_main(void *fdhandle, Main *mainvar)
@@ -4117,12 +4151,16 @@ void BLO_expand_main(void *fdhandle, Main *mainvar)
         continue;
       }
 
-      expand_id(&expander, id_iter);
-
-      const IDTypeInfo *id_type = BKE_idtype_get_info_from_id(id_iter);
-      if (id_type->blend_read_expand != nullptr) {
-        id_type->blend_read_expand(&expander, id_iter);
-      }
+      /* Original (current) ID pointer can be considered as valid, but _not_ its own pointers to
+       * other IDs - the already loaded ones will be valid, but the yet-to-be-read ones will not.
+       * Expanding should _not_ require processing of UI ID pointers.
+       * Expanding should never modify ID pointers themselves.
+       * Handling of DNA deprecated data should never be needed in undo case. */
+      const int flag = IDWALK_READONLY | IDWALK_NO_ORIG_POINTERS_ACCESS |
+                       ((!fd || (fd->flags & FD_FLAGS_IS_MEMFILE)) ?
+                            0 :
+                            IDWALK_DO_DEPRECATED_POINTERS);
+      BKE_library_foreach_ID_link(nullptr, id_iter, expand_cb, &expander, flag);
 
       do_it = true;
       id_iter->tag &= ~LIB_TAG_NEED_EXPAND;
@@ -4340,7 +4378,7 @@ static void library_link_end(Main *mainl, FileData **fd, const int flag)
   }
 
   lib_link_all(*fd, mainvar);
-  after_liblink_merged_bmain_process(mainvar);
+  after_liblink_merged_bmain_process(mainvar, (*fd)->reports);
 
   /* Some versioning code does expect some proper userrefcounting, e.g. in conversion from
    * groups to collections... We could optimize out that first call when we are reading a
@@ -4973,11 +5011,6 @@ Main *BLO_read_lib_get_main(BlendLibReader *reader)
 BlendFileReadReport *BLO_read_lib_reports(BlendLibReader *reader)
 {
   return reader->fd->reports;
-}
-
-void BLO_expand_id(BlendExpander *expander, ID *id)
-{
-  expand_doit(expander->fd, expander->main, id);
 }
 
 /** \} */

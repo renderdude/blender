@@ -314,6 +314,10 @@ static void draw_backdrops(bAnimContext *ac, ListBase &anim_data, View2D *v2d, u
           break;
         }
 
+        case ANIMTYPE_GREASE_PENCIL_LAYER_GROUP:
+          color = sel ? col1a : col2a;
+          break;
+
         case ANIMTYPE_GREASE_PENCIL_DATABLOCK:
           color = col2b;
           color[3] = sel ? col1[3] : col2b[3];
@@ -453,6 +457,15 @@ static void draw_keyframes(bAnimContext *ac,
                                         ycenter,
                                         scale_factor,
                                         action_flag);
+        break;
+      case ALE_GREASE_PENCIL_GROUP:
+        draw_grease_pencil_layer_group_channel(
+            draw_list,
+            ads,
+            static_cast<const GreasePencilLayerTreeGroup *>(ale->data),
+            ycenter,
+            scale_factor,
+            action_flag);
         break;
       case ALE_GREASE_PENCIL_DATA:
         draw_grease_pencil_datablock_channel(draw_list,
@@ -735,19 +748,30 @@ static void timeline_cache_draw_single(PTCacheID *pid, float y_offset, float hei
 }
 
 static void timeline_cache_draw_simulation_nodes(
-    const Scene &scene,
     const blender::bke::sim::ModifierSimulationCache &cache,
     const float y_offset,
     const float height,
     const uint pos_id)
 {
+  std::lock_guard lock{cache.mutex};
+  if (cache.cache_by_zone_id.is_empty()) {
+    return;
+  }
+  /* Draw the state if one of the simulation zones. This is fine for now, because there is no ui
+   * that allows caching zones independently. */
+  const blender::bke::sim::SimulationZoneCache &zone_cache =
+      **cache.cache_by_zone_id.values().begin();
+  if (zone_cache.frame_caches.is_empty()) {
+    return;
+  }
+
   GPU_matrix_push();
   GPU_matrix_translate_2f(0.0, float(V2D_SCROLL_HANDLE_HEIGHT) + y_offset);
   GPU_matrix_scale_2f(1.0, height);
 
   float color[4];
   UI_GetThemeColor4fv(TH_SIMULATED_FRAMES, color);
-  switch (cache.cache_state) {
+  switch (zone_cache.cache_state) {
     case blender::bke::sim::CacheState::Invalid: {
       color[3] = 0.4f;
       break;
@@ -764,16 +788,13 @@ static void timeline_cache_draw_simulation_nodes(
 
   immUniformColor4fv(color);
 
-  const int start_frame = scene.r.sfra;
-  const int end_frame = scene.r.efra;
-  const int frames_num = end_frame - start_frame + 1;
-  const blender::IndexRange frames_range(start_frame, frames_num);
+  immBeginAtMost(GPU_PRIM_TRIS, zone_cache.frame_caches.size() * 6);
 
-  immBeginAtMost(GPU_PRIM_TRIS, frames_num * 6);
-  for (const int frame : frames_range) {
-    if (cache.has_state_at_frame(frame)) {
-      immRectf_fast(pos_id, frame - 0.5f, 0, frame + 0.5f, 1.0f);
-    }
+  for (const std::unique_ptr<blender::bke::sim::SimulationZoneFrameCache> &frame_cache :
+       zone_cache.frame_caches.as_span())
+  {
+    const int frame = frame_cache->frame.frame();
+    immRectf_fast(pos_id, frame - 0.5f, 0, frame + 0.5f, 1.0f);
   }
   immEnd();
 
@@ -827,7 +848,7 @@ void timeline_draw_cache(const SpaceAction *saction, const Object *ob, const Sce
         continue;
       }
       timeline_cache_draw_simulation_nodes(
-          *scene, *nmd->runtime->simulation_cache, y_offset, cache_draw_height, pos_id);
+          *nmd->runtime->simulation_cache, y_offset, cache_draw_height, pos_id);
       y_offset += cache_draw_height;
     }
   }

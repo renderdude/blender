@@ -1,3 +1,6 @@
+/* SPDX-FileCopyrightText: 2023 Blender Authors
+ *
+ * SPDX-License-Identifier: GPL-2.0-or-later */
 
 /**
  * The resources expected to be defined are:
@@ -86,7 +89,7 @@ vec3 lightprobe_irradiance_grid_bias_sample_coord(IrradianceGridData grid_data,
 
     /* Biases. See McGuire's presentation. */
     positional_weight += 0.001;
-    geometry_weight = square_f(geometry_weight) + 0.2 + grid_data.facing_bias;
+    geometry_weight = square(geometry_weight) + 0.2 + grid_data.facing_bias;
 
     trilinear_weights[i] = saturate(positional_weight * geometry_weight * validity_weight);
     total_weight += trilinear_weights[i];
@@ -181,7 +184,7 @@ void lightprobe_eval(ClosureDiffuse diffuse,
                      inout vec3 out_specular)
 {
   /* NOTE: Use the diffuse normal for biasing the probe sampling location since it is smoother than
-   * geometric normal. Could also try to use interp.N. */
+   * geometric normal. Could also try to use `interp.N`. */
   SphericalHarmonicL1 irradiance = lightprobe_irradiance_sample(
       irradiance_atlas_tx, P, V, diffuse.N, true);
 

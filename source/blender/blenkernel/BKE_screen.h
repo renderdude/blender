@@ -105,6 +105,13 @@ typedef struct SpaceType {
   /* Used when we want to replace an ID by another (or NULL). */
   void (*id_remap)(struct ScrArea *area, struct SpaceLink *sl, const struct IDRemapper *mappings);
 
+  /**
+   * foreach_id callback to process all ID pointers of the editor. Used indirectly by lib_query's
+   * #BKE_library_foreach_ID_link when #IDWALK_INCLUDE_UI bit-flag is set (through WM's foreach_id
+   * usage of #BKE_screen_foreach_id_screen_area).
+   */
+  void (*foreach_id)(struct SpaceLink *space_link, struct LibraryForeachIDData *data);
+
   int (*space_subtype_get)(struct ScrArea *area);
   void (*space_subtype_set)(struct ScrArea *area, int value);
   void (*space_subtype_item_extend)(struct bContext *C, EnumPropertyItem **item, int *totitem);
@@ -117,9 +124,9 @@ typedef struct SpaceType {
   /**
    * Update pointers to other id data blocks.
    */
-  void (*blend_read_lib)(struct BlendLibReader *reader,
-                         struct ID *parent_id,
-                         struct SpaceLink *space_link);
+  void (*blend_read_after_liblink)(struct BlendLibReader *reader,
+                                   struct ID *parent_id,
+                                   struct SpaceLink *space_link);
 
   /**
    * Write all structs that should be saved in a .blend file.
@@ -457,7 +464,6 @@ typedef struct AssetShelfType {
 /* Space-types. */
 
 struct SpaceType *BKE_spacetype_from_id(int spaceid);
-struct ARegionType *BKE_regiontype_from_id_or_first(const struct SpaceType *st, int regionid);
 struct ARegionType *BKE_regiontype_from_id(const struct SpaceType *st, int regionid);
 const struct ListBase *BKE_spacetypes_list(void);
 void BKE_spacetype_register(struct SpaceType *st);
@@ -622,9 +628,15 @@ bool BKE_screen_area_map_blend_read_data(struct BlendDataReader *reader,
  * For the saved 2.50 files without `regiondata`.
  */
 void BKE_screen_view3d_do_versions_250(struct View3D *v3d, ListBase *regions);
-void BKE_screen_area_blend_read_lib(struct BlendLibReader *reader,
-                                    struct ID *parent_id,
-                                    struct ScrArea *area);
+
+/**
+ * Called after lib linking process is done, to perform some validation on the read data, or some
+ * complex specific reading process that requires the data to be fully read and ID pointers to be
+ * valid.
+ */
+void BKE_screen_area_blend_read_after_liblink(struct BlendLibReader *reader,
+                                              struct ID *parent_id,
+                                              struct ScrArea *area);
 /**
  * Cannot use #IDTypeInfo callback yet, because of the return value.
  */

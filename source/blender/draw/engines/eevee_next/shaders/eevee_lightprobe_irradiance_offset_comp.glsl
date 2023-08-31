@@ -1,6 +1,9 @@
+/* SPDX-FileCopyrightText: 2023 Blender Authors
+ *
+ * SPDX-License-Identifier: GPL-2.0-or-later */
 
 /**
- * For every irradiance probe sample, check if close to a surounding surfel and try to offset the
+ * For every irradiance probe sample, check if close to a surrounding surfel and try to offset the
  * irradiance sample position. This is similar to the surfel ray but we do not actually transport
  * the light.
  *
@@ -13,8 +16,8 @@
 int find_closest_surfel(ivec3 grid_coord, vec3 P)
 {
   int surfel_first = imageLoad(cluster_list_img, grid_coord).r;
-  float search_radius_sqr = square_f(capture_info_buf.max_virtual_offset +
-                                     capture_info_buf.min_distance_to_surface);
+  float search_radius_sqr = square(capture_info_buf.max_virtual_offset +
+                                   capture_info_buf.min_distance_to_surface);
 
   int closest_surfel = -1;
   float closest_distance_sqr = 1e10;

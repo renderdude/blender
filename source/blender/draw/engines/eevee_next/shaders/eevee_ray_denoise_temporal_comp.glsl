@@ -1,11 +1,14 @@
+/* SPDX-FileCopyrightText: 2023 Blender Authors
+ *
+ * SPDX-License-Identifier: GPL-2.0-or-later */
 
 /**
  * Temporal Reprojection and accumulation of denoised raytraced radiance.
  *
  * Dispatched at fullres using a tile list.
  *
- * Input: Spatialy denoised radiance, Variance, Hit depth
- * Ouput: Stabilized Radiance, Stabilized Variance
+ * Input: Spatially denoised radiance, Variance, Hit depth
+ * Output: Stabilized Radiance, Stabilized Variance
  *
  * Following "Stochastic All The Things: Raytracing in Hybrid Real-Time Rendering"
  * by Tomasz Stachowiak
@@ -60,14 +63,14 @@ LocalStatistics local_statistics_get(ivec2 texel, vec3 center_radiance)
       /* Use YCoCg for clamping and accumulation to avoid color shift artifacts. */
       vec3 radiance_YCoCg = colorspace_YCoCg_from_scene_linear(radiance.rgb);
       result.mean += radiance_YCoCg;
-      result.moment += square_f(radiance_YCoCg);
+      result.moment += square(radiance_YCoCg);
       weight_accum += 1.0;
     }
   }
   float inv_weight = safe_rcp(weight_accum);
   result.mean *= inv_weight;
   result.moment *= inv_weight;
-  result.variance = abs(result.moment - square_f(result.mean));
+  result.variance = abs(result.moment - square(result.mean));
   result.deviation = max(vec3(1e-4), sqrt(result.variance));
   result.clamp_min = result.mean - result.deviation;
   result.clamp_max = result.mean + result.deviation;
@@ -194,7 +197,7 @@ void main()
   history_radiance.rgb = colorspace_scene_linear_from_YCoCg(history_radiance.rgb);
   /* Blend history with new radiance. */
   float mix_fac = (history_radiance.w > 1e-3) ? 0.97 : 0.0;
-  /* Reduce blend factor to improve low rougness reflections. Use variance instead for speed. */
+  /* Reduce blend factor to improve low roughness reflections. Use variance instead for speed. */
   mix_fac *= mix(0.75, 1.0, saturate(in_variance * 20.0));
   vec3 out_radiance = mix(safe_color(in_radiance), safe_color(history_radiance.rgb), mix_fac);
   /* This is feedback next frame as radiance_history_tx. */

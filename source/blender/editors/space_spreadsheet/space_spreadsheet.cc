@@ -25,7 +25,7 @@
 #include "UI_resources.hh"
 #include "UI_view2d.hh"
 
-#include "BLO_read_write.h"
+#include "BLO_read_write.hh"
 
 #include "DEG_depsgraph_query.h"
 
@@ -161,6 +161,12 @@ static void spreadsheet_id_remap(ScrArea * /*area*/, SpaceLink *slink, const IDR
 {
   SpaceSpreadsheet *sspreadsheet = (SpaceSpreadsheet *)slink;
   BKE_viewer_path_id_remap(&sspreadsheet->viewer_path, mappings);
+}
+
+static void spreadsheet_foreach_id(SpaceLink *space_link, LibraryForeachIDData *data)
+{
+  SpaceSpreadsheet *sspreadsheet = reinterpret_cast<SpaceSpreadsheet *>(space_link);
+  BKE_viewer_path_foreach_id(data, &sspreadsheet->viewer_path);
 }
 
 static void spreadsheet_main_region_init(wmWindowManager *wm, ARegion *region)
@@ -677,12 +683,6 @@ static void spreadsheet_blend_read_data(BlendDataReader *reader, SpaceLink *sl)
   BKE_viewer_path_blend_read_data(reader, &sspreadsheet->viewer_path);
 }
 
-static void spreadsheet_blend_read_lib(BlendLibReader *reader, ID *parent_id, SpaceLink *sl)
-{
-  SpaceSpreadsheet *sspreadsheet = (SpaceSpreadsheet *)sl;
-  BKE_viewer_path_blend_read_lib(reader, parent_id, &sspreadsheet->viewer_path);
-}
-
 static void spreadsheet_blend_write(BlendWriter *writer, SpaceLink *sl)
 {
   BLO_write_struct(writer, SpaceSpreadsheet, sl);
@@ -721,8 +721,9 @@ void ED_spacetype_spreadsheet()
   st->operatortypes = spreadsheet_operatortypes;
   st->keymap = spreadsheet_keymap;
   st->id_remap = spreadsheet_id_remap;
+  st->foreach_id = spreadsheet_foreach_id;
   st->blend_read_data = spreadsheet_blend_read_data;
-  st->blend_read_lib = spreadsheet_blend_read_lib;
+  st->blend_read_after_liblink = nullptr;
   st->blend_write = spreadsheet_blend_write;
 
   /* regions: main window */

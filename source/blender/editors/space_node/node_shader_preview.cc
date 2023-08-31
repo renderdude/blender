@@ -376,7 +376,8 @@ static void connect_nested_node_to_node(const Span<bNodeTreePath *> treepath,
       output_node->flag |= NODE_DO_OUTPUT;
     }
 
-    ntreeAddSocketInterface(nested_nt, SOCK_OUT, nested_socket_iter->idname, route_name);
+    nested_nt->tree_interface.add_socket(
+        route_name, "", nested_socket_iter->idname, NODE_INTERFACE_SOCKET_OUTPUT, nullptr);
     BKE_ntree_update_main_tree(G.pr_main, nested_nt, nullptr);
     bNodeSocket *out_socket = blender::bke::node_find_enabled_input_socket(*output_node,
                                                                            route_name);
@@ -454,8 +455,8 @@ static void connect_nodes_to_aovs(const Span<bNodeTreePath *> treepath,
     bNodeSocket *socket_preview = nodesocket.second;
 
     bNode *aov_node = nodeAddStaticNode(nullptr, main_nt, SH_NODE_OUTPUT_AOV);
-    strcpy(reinterpret_cast<NodeShaderOutputAOV *>(aov_node->storage)->name,
-           nodesocket.first->name);
+    STRNCPY(reinterpret_cast<NodeShaderOutputAOV *>(aov_node->storage)->name,
+            nodesocket.first->name);
     if (socket_preview == nullptr) {
       continue;
     }
@@ -600,11 +601,11 @@ static void preview_render(ShaderNodesPreviewJob &job_data)
   for (NodeSocketPair nodesocket_iter : job_data.shader_nodes) {
     ViewLayer *vl = BKE_view_layer_add(
         scene, nodesocket_iter.first->name, AOV_layer, VIEWLAYER_ADD_COPY);
-    strcpy(vl->name, nodesocket_iter.first->name);
+    STRNCPY(vl->name, nodesocket_iter.first->name);
   }
   for (NodeSocketPair nodesocket_iter : job_data.AOV_nodes) {
     ViewLayerAOV *aov = BKE_view_layer_add_aov(AOV_layer);
-    strcpy(aov->name, nodesocket_iter.first->name);
+    STRNCPY(aov->name, nodesocket_iter.first->name);
   }
   scene->r.xsch = job_data.tree_previews->preview_size;
   scene->r.ysch = job_data.tree_previews->preview_size;

@@ -23,6 +23,7 @@
 
 #include "BKE_context.h"
 #include "BKE_lib_id.h"
+#include "BKE_lib_query.h"
 #include "BKE_lib_remap.h"
 #include "BKE_movieclip.h"
 #include "BKE_screen.h"
@@ -49,7 +50,7 @@
 #include "UI_resources.hh"
 #include "UI_view2d.hh"
 
-#include "BLO_read_write.h"
+#include "BLO_read_write.hh"
 
 #include "RNA_access.hh"
 
@@ -1162,6 +1163,20 @@ static void clip_id_remap(ScrArea * /*area*/, SpaceLink *slink, const IDRemapper
   BKE_id_remapper_apply(mappings, (ID **)&sclip->mask_info.mask, ID_REMAP_APPLY_ENSURE_REAL);
 }
 
+static void clip_foreach_id(SpaceLink *space_link, LibraryForeachIDData *data)
+{
+  SpaceClip *sclip = reinterpret_cast<SpaceClip *>(space_link);
+  const int data_flags = BKE_lib_query_foreachid_process_flags_get(data);
+  const bool is_readonly = (data_flags & IDWALK_READONLY) != 0;
+
+  BKE_LIB_FOREACHID_PROCESS_IDSUPER(data, sclip->clip, IDWALK_CB_USER_ONE);
+  BKE_LIB_FOREACHID_PROCESS_IDSUPER(data, sclip->mask_info.mask, IDWALK_CB_USER_ONE);
+
+  if (!is_readonly) {
+    sclip->scopes.ok = 0;
+  }
+}
+
 static void clip_space_blend_read_data(BlendDataReader * /*reader*/, SpaceLink *sl)
 {
   SpaceClip *sclip = (SpaceClip *)sl;
@@ -1169,13 +1184,6 @@ static void clip_space_blend_read_data(BlendDataReader * /*reader*/, SpaceLink *
   sclip->scopes.track_search = nullptr;
   sclip->scopes.track_preview = nullptr;
   sclip->scopes.ok = 0;
-}
-
-static void clip_space_blend_read_lib(BlendLibReader *reader, ID *parent_id, SpaceLink *sl)
-{
-  SpaceClip *sclip = (SpaceClip *)sl;
-  BLO_read_id_address(reader, parent_id, &sclip->clip);
-  BLO_read_id_address(reader, parent_id, &sclip->mask_info.mask);
 }
 
 static void clip_space_blend_write(BlendWriter *writer, SpaceLink *sl)
@@ -1209,8 +1217,9 @@ void ED_spacetype_clip()
   st->dropboxes = clip_dropboxes;
   st->refresh = clip_refresh;
   st->id_remap = clip_id_remap;
+  st->foreach_id = clip_foreach_id;
   st->blend_read_data = clip_space_blend_read_data;
-  st->blend_read_lib = clip_space_blend_read_lib;
+  st->blend_read_after_liblink = nullptr;
   st->blend_write = clip_space_blend_write;
 
   /* regions: main window */

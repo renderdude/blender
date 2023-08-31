@@ -701,7 +701,7 @@ static const EnumPropertyItem *outliner_id_itemf(bContext *C,
                                                  bool *r_free)
 {
   if (C == nullptr) {
-    return DummyRNA_NULL_items;
+    return rna_enum_dummy_NULL_items;
   }
 
   EnumPropertyItem item_tmp = {0}, *item = nullptr;
@@ -745,13 +745,14 @@ void OUTLINER_OT_id_remap(wmOperatorType *ot)
    */
   RNA_def_property_flag(prop, PROP_HIDDEN);
 
-  prop = RNA_def_enum(ot->srna, "old_id", DummyRNA_NULL_items, 0, "Old ID", "Old ID to replace");
+  prop = RNA_def_enum(
+      ot->srna, "old_id", rna_enum_dummy_NULL_items, 0, "Old ID", "Old ID to replace");
   RNA_def_property_enum_funcs_runtime(prop, nullptr, nullptr, outliner_id_itemf);
   RNA_def_property_flag(prop, (PropertyFlag)(PROP_ENUM_NO_TRANSLATE | PROP_HIDDEN));
 
   ot->prop = RNA_def_enum(ot->srna,
                           "new_id",
-                          DummyRNA_NULL_items,
+                          rna_enum_dummy_NULL_items,
                           0,
                           "New ID",
                           "New ID to remap all selected IDs' users to");
@@ -1655,7 +1656,7 @@ static void tree_element_to_path(TreeElement *te,
     /* get data */
     TreeElement *tem = (TreeElement *)ld->data;
     TreeElementRNACommon *tem_rna = tree_element_cast<TreeElementRNACommon>(tem);
-    PointerRNA ptr = tem_rna->getPointerRNA();
+    PointerRNA ptr = tem_rna->get_pointer_rna();
 
     /* check if we're looking for first ID, or appending to path */
     if (*id) {
@@ -1664,7 +1665,7 @@ static void tree_element_to_path(TreeElement *te,
        *   then free old path + swap them.
        */
       if (TreeElementRNAProperty *tem_rna_prop = tree_element_cast<TreeElementRNAProperty>(tem)) {
-        PropertyRNA *prop = tem_rna_prop->getPropertyRNA();
+        PropertyRNA *prop = tem_rna_prop->get_property_rna();
 
         if (RNA_property_type(prop) == PROP_POINTER) {
           /* for pointer we just append property name */
@@ -1674,7 +1675,7 @@ static void tree_element_to_path(TreeElement *te,
           char buf[128], *name;
 
           TreeElement *temnext = (TreeElement *)(ld->next->data);
-          PointerRNA nextptr = tree_element_cast<TreeElementRNACommon>(temnext)->getPointerRNA();
+          PointerRNA nextptr = tree_element_cast<TreeElementRNACommon>(temnext)->get_pointer_rna();
           name = RNA_struct_name_get_alloc(&nextptr, buf, sizeof(buf), nullptr);
 
           if (name) {
@@ -1732,7 +1733,7 @@ static void tree_element_to_path(TreeElement *te,
   /* step 3: if we've got an ID, add the current item to the path */
   if (*id) {
     /* add the active property to the path */
-    PropertyRNA *prop = tree_element_cast<TreeElementRNACommon>(te)->getPropertyRNA();
+    PropertyRNA *prop = tree_element_cast<TreeElementRNACommon>(te)->get_property_rna();
 
     /* array checks */
     if (tselem->type == TSE_RNA_ARRAY_ELEM) {
@@ -1793,8 +1794,8 @@ static void do_outliner_drivers_editop(SpaceOutliner *space_outliner,
     short groupmode = KSP_GROUP_KSNAME;
 
     TreeElementRNACommon *te_rna = tree_element_cast<TreeElementRNACommon>(te);
-    PointerRNA ptr = te_rna ? te_rna->getPointerRNA() : PointerRNA_NULL;
-    PropertyRNA *prop = te_rna ? te_rna->getPropertyRNA() : nullptr;
+    PointerRNA ptr = te_rna ? te_rna->get_pointer_rna() : PointerRNA_NULL;
+    PropertyRNA *prop = te_rna ? te_rna->get_property_rna() : nullptr;
 
     /* check if RNA-property described by this selected element is an animatable prop */
     if (prop && RNA_property_animateable(&ptr, prop)) {
@@ -1986,9 +1987,10 @@ static void do_outliner_keyingset_editop(SpaceOutliner *space_outliner,
 
     /* check if RNA-property described by this selected element is an animatable prop */
     const TreeElementRNACommon *te_rna = tree_element_cast<TreeElementRNACommon>(te);
-    PointerRNA ptr = te_rna->getPointerRNA();
-    if (te_rna && te_rna->getPropertyRNA() &&
-        RNA_property_animateable(&ptr, te_rna->getPropertyRNA())) {
+    PointerRNA ptr = te_rna->get_pointer_rna();
+    if (te_rna && te_rna->get_property_rna() &&
+        RNA_property_animateable(&ptr, te_rna->get_property_rna()))
+    {
       /* get id + path + index info from the selected element */
       tree_element_to_path(te, tselem, &id, &path, &array_index, &flag, &groupmode);
     }

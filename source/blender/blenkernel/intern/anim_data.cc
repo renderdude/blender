@@ -41,7 +41,7 @@
 
 #include "DEG_depsgraph.h"
 
-#include "BLO_read_write.h"
+#include "BLO_read_write.hh"
 
 #include "RNA_access.hh"
 #include "RNA_path.hh"
@@ -1498,36 +1498,4 @@ void BKE_animdata_blend_read_data(BlendDataReader *reader, ID *id)
    *       state, but it's going to be too hard to enforce this single case. */
   BLO_read_data_address(reader, &adt->act_track);
   BLO_read_data_address(reader, &adt->actstrip);
-}
-
-void BKE_animdata_blend_read_lib(BlendLibReader *reader, ID *id, AnimData *adt)
-{
-  if (adt == nullptr) {
-    return;
-  }
-
-  /* link action data */
-  BLO_read_id_address(reader, id, &adt->action);
-  BLO_read_id_address(reader, id, &adt->tmpact);
-
-  /* link drivers */
-  BKE_fcurve_blend_read_lib(reader, id, &adt->drivers);
-
-  /* overrides don't have lib-link for now, so no need to do anything */
-
-  /* link NLA-data */
-  BKE_nla_blend_read_lib(reader, id, &adt->nla_tracks);
-}
-
-void BKE_animdata_blend_read_expand(BlendExpander *expander, AnimData *adt)
-{
-  /* own action */
-  BLO_expand(expander, adt->action);
-  BLO_expand(expander, adt->tmpact);
-
-  /* drivers - assume that these F-Curves have driver data to be in this list... */
-  BKE_fcurve_blend_read_expand(expander, &adt->drivers);
-
-  /* NLA data - referenced actions. */
-  BKE_nla_blend_read_expand(expander, &adt->nla_tracks);
 }

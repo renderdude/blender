@@ -21,6 +21,7 @@
 
 #include "BKE_context.h"
 #include "BKE_fcurve.h"
+#include "BKE_lib_query.h"
 #include "BKE_lib_remap.h"
 #include "BKE_screen.h"
 
@@ -46,7 +47,7 @@
 #include "UI_resources.hh"
 #include "UI_view2d.hh"
 
-#include "BLO_read_write.h"
+#include "BLO_read_write.hh"
 
 #include "graph_intern.h" /* own include */
 
@@ -814,6 +815,27 @@ static void graph_id_remap(ScrArea * /*area*/, SpaceLink *slink, const IDRemappe
   BKE_id_remapper_apply(mappings, (ID **)&sgraph->ads->source, ID_REMAP_APPLY_DEFAULT);
 }
 
+static void graph_foreach_id(SpaceLink *space_link, LibraryForeachIDData *data)
+{
+  SpaceGraph *sgraph = reinterpret_cast<SpaceGraph *>(space_link);
+  const int data_flags = BKE_lib_query_foreachid_process_flags_get(data);
+  const bool is_readonly = (data_flags & IDWALK_READONLY) != 0;
+
+  /* NOTE: Could be deduplicated with the #bDopeSheet handling of #SpaceAction and #SpaceNla. */
+  if (sgraph->ads == nullptr) {
+    return;
+  }
+
+  BKE_LIB_FOREACHID_PROCESS_ID(data, sgraph->ads->source, IDWALK_CB_NOP);
+  BKE_LIB_FOREACHID_PROCESS_IDSUPER(data, sgraph->ads->filter_grp, IDWALK_CB_NOP);
+
+  if (!is_readonly) {
+    /* Force recalc of list of channels (i.e. including calculating F-Curve colors) to
+     * prevent the "black curves" problem post-undo. */
+    sgraph->runtime.flag |= SIPO_RUNTIME_FLAG_NEED_CHAN_SYNC_COLOR;
+  }
+}
+
 static int graph_space_subtype_get(ScrArea *area)
 {
   SpaceGraph *sgraph = static_cast<SpaceGraph *>(area->spacedata.first);
@@ -839,17 +861,6 @@ static void graph_space_blend_read_data(BlendDataReader *reader, SpaceLink *sl)
 
   BLO_read_data_address(reader, &sipo->ads);
   memset(&sipo->runtime, 0x0, sizeof(sipo->runtime));
-}
-
-static void graph_space_blend_read_lib(BlendLibReader *reader, ID *parent_id, SpaceLink *sl)
-{
-  SpaceGraph *sipo = (SpaceGraph *)sl;
-  bDopeSheet *ads = sipo->ads;
-
-  if (ads) {
-    BLO_read_id_address(reader, parent_id, &ads->source);
-    BLO_read_id_address(reader, parent_id, &ads->filter_grp);
-  }
 }
 
 static void graph_space_blend_write(BlendWriter *writer, SpaceLink *sl)
@@ -886,11 +897,12 @@ void ED_spacetype_ipo()
   st->listener = graph_listener;
   st->refresh = graph_refresh;
   st->id_remap = graph_id_remap;
+  st->foreach_id = graph_foreach_id;
   st->space_subtype_item_extend = graph_space_subtype_item_extend;
   st->space_subtype_get = graph_space_subtype_get;
   st->space_subtype_set = graph_space_subtype_set;
   st->blend_read_data = graph_space_blend_read_data;
-  st->blend_read_lib = graph_space_blend_read_lib;
+  st->blend_read_after_liblink = nullptr;
   st->blend_write = graph_space_blend_write;
 
   /* regions: main window */

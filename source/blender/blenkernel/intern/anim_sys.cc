@@ -57,7 +57,7 @@
 #include "RNA_path.hh"
 #include "RNA_prototypes.h"
 
-#include "BLO_read_write.h"
+#include "BLO_read_write.hh"
 
 #include "nla_private.h"
 
@@ -317,24 +317,6 @@ void BKE_keyingsets_blend_read_data(BlendDataReader *reader, ListBase *list)
     LISTBASE_FOREACH (KS_Path *, ksp, &ks->paths) {
       /* rna path */
       BLO_read_data_address(reader, &ksp->rna_path);
-    }
-  }
-}
-
-void BKE_keyingsets_blend_read_lib(BlendLibReader *reader, ID *id, ListBase *list)
-{
-  LISTBASE_FOREACH (KeyingSet *, ks, list) {
-    LISTBASE_FOREACH (KS_Path *, ksp, &ks->paths) {
-      BLO_read_id_address(reader, id, &ksp->id);
-    }
-  }
-}
-
-void BKE_keyingsets_blend_read_expand(BlendExpander *expander, ListBase *list)
-{
-  LISTBASE_FOREACH (KeyingSet *, ks, list) {
-    LISTBASE_FOREACH (KS_Path *, ksp, &ks->paths) {
-      BLO_expand(expander, ksp->id);
     }
   }
 }

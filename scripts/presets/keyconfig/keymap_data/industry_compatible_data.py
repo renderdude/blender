@@ -857,6 +857,7 @@ def km_markers(params):
         ("marker.delete", {"type": 'BACK_SPACE', "value": 'PRESS'}, None),
         ("marker.delete", {"type": 'DEL', "value": 'PRESS'}, {"properties": [("confirm", False)]}),
         op_panel("TOPBAR_PT_name_marker", {"type": 'RET', "value": 'PRESS'}, [("keep_open", False)]),
+        op_panel("TOPBAR_PT_name_marker", {"type": 'LEFTMOUSE', "value": 'DOUBLE_CLICK'}, [("keep_open", False)]),
         ("marker.move", {"type": 'W', "value": 'PRESS'}, None),
     ])
 
@@ -4296,7 +4297,16 @@ def km_3d_view_tool_edit_gpencil_select(params):
     )
 
 
+def km_sequencer_editor_tool_generic_select(params):
+    return (
+        "Sequencer Tool: Tweak",
+        {"space_type": 'SEQUENCE_EDITOR', "region_type": 'WINDOW'},
+        {"items": []}
+    )
+
 # NOTE: duplicated from `blender_default.py`.
+
+
 def _template_node_select(*, type, value, select_passthrough):
     items = [
         ("node.select", {"type": type, "value": value},
@@ -4483,6 +4493,7 @@ def generate_keymaps_impl(params=None):
         km_3d_view_tool_select(params),
         km_image_editor_tool_uv_select(params),
         km_3d_view_tool_edit_gpencil_select(params),
+        km_sequencer_editor_tool_generic_select(params),
         km_3d_view_tool_interactive_add(params),
     ]
 

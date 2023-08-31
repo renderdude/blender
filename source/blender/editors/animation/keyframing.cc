@@ -221,17 +221,8 @@ FCurve *ED_action_fcurve_ensure(Main *bmain,
 
         /* sync bone group colors if applicable */
         if (ptr && (ptr->type == &RNA_PoseBone)) {
-          Object *ob = (Object *)ptr->owner_id;
           bPoseChannel *pchan = static_cast<bPoseChannel *>(ptr->data);
-          bPose *pose = ob->pose;
-          bActionGroup *grp;
-
-          /* find bone group (if present), and use the color from that */
-          grp = (bActionGroup *)BLI_findlink(&pose->agroups, (pchan->agrp_index - 1));
-          if (grp) {
-            agrp->customCol = grp->customCol;
-            action_group_colors_sync(agrp, grp);
-          }
+          action_group_colors_set_from_posebone(agrp, pchan);
         }
       }
 
@@ -2066,7 +2057,7 @@ void ANIM_OT_keyframe_insert(wmOperatorType *ot)
 
   /* keyingset to use (dynamic enum) */
   prop = RNA_def_enum(
-      ot->srna, "type", DummyRNA_DEFAULT_items, 0, "Keying Set", "The Keying Set to use");
+      ot->srna, "type", rna_enum_dummy_DEFAULT_items, 0, "Keying Set", "The Keying Set to use");
   RNA_def_enum_funcs(prop, ANIM_keying_sets_enum_itemf);
   RNA_def_property_flag(prop, PROP_HIDDEN);
   ot->prop = prop;
@@ -2180,7 +2171,7 @@ void ANIM_OT_keyframe_insert_menu(wmOperatorType *ot)
 
   /* keyingset to use (dynamic enum) */
   prop = RNA_def_enum(
-      ot->srna, "type", DummyRNA_DEFAULT_items, 0, "Keying Set", "The Keying Set to use");
+      ot->srna, "type", rna_enum_dummy_DEFAULT_items, 0, "Keying Set", "The Keying Set to use");
   RNA_def_enum_funcs(prop, ANIM_keying_sets_enum_itemf);
   RNA_def_property_flag(prop, PROP_HIDDEN);
   ot->prop = prop;
@@ -2265,7 +2256,7 @@ void ANIM_OT_keyframe_delete(wmOperatorType *ot)
 
   /* keyingset to use (dynamic enum) */
   prop = RNA_def_enum(
-      ot->srna, "type", DummyRNA_DEFAULT_items, 0, "Keying Set", "The Keying Set to use");
+      ot->srna, "type", rna_enum_dummy_DEFAULT_items, 0, "Keying Set", "The Keying Set to use");
   RNA_def_enum_funcs(prop, ANIM_keying_sets_enum_itemf);
   RNA_def_property_flag(prop, PROP_HIDDEN);
   ot->prop = prop;

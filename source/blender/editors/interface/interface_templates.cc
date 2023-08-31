@@ -2986,6 +2986,8 @@ static void constraint_ops_extra_draw(bContext *C, uiLayout *layout, void *con_v
 
   uiLayoutSetUnitsX(layout, 4.0f);
 
+  UI_block_flag_enable(uiLayoutGetBlock(layout), UI_BLOCK_IS_FLIP);
+
   /* Apply. */
   uiItemO(layout,
           CTX_IFACE_(BLT_I18NCONTEXT_OPERATOR_DEFAULT, "Apply"),
@@ -6469,7 +6471,7 @@ void uiTemplateReportsBanner(uiLayout *layout, bContext *C)
                       0,
                       UI_UNIT_X,
                       UI_UNIT_Y,
-                      TIP_("Click to see the remaining reports in text block: 'Recent Reports'"));
+                      TIP_("Click to open the info editor"));
   UI_GetThemeColorType4ubv(UI_text_colorid_from_report_type(report->type), SPACE_INFO, but->col);
   but->col[3] = 255; /* This theme color is RBG only, so have to set alpha here. */
 
