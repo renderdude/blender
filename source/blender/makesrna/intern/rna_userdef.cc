@@ -1657,11 +1657,6 @@ static void rna_def_userdef_theme_ui(BlenderRNA *brna)
   RNA_def_property_ui_text(prop, "List Item Colors", "");
   RNA_def_property_update(prop, 0, "rna_userdef_theme_update");
 
-  prop = RNA_def_property(srna, "wcol_view_item", PROP_POINTER, PROP_NONE);
-  RNA_def_property_flag(prop, PROP_NEVER_NULL);
-  RNA_def_property_ui_text(prop, "Data-View Item Colors", "");
-  RNA_def_property_update(prop, 0, "rna_userdef_theme_update");
-
   prop = RNA_def_property(srna, "wcol_state", PROP_POINTER, PROP_NONE);
   RNA_def_property_flag(prop, PROP_NEVER_NULL);
   RNA_def_property_ui_text(prop, "State Colors", "");
@@ -4980,13 +4975,6 @@ static void rna_def_userdef_view(BlenderRNA *brna)
   RNA_def_property_boolean_sdna(prop, nullptr, "uiflag", USER_PLAINMENUS);
   RNA_def_property_ui_text(prop, "Toolbox Column Layout", "Use a column layout for toolbox");
 
-  prop = RNA_def_property(srna, "use_directional_menus", PROP_BOOLEAN, PROP_NONE);
-  RNA_def_property_boolean_negative_sdna(prop, nullptr, "uiflag", USER_MENUFIXEDORDER);
-  RNA_def_property_ui_text(prop,
-                           "Contents Follow Opening Direction",
-                           "Otherwise menus, etc will always be top to bottom, left to right, "
-                           "no matter opening direction");
-
   static const EnumPropertyItem header_align_items[] = {
       {0, "NONE", 0, "Keep Existing", "Keep existing header alignment"},
       {USER_HEADER_FROM_PREF, "TOP", 0, "Top", "Top aligned on load"},
@@ -6990,6 +6978,9 @@ static void rna_def_userdef_experimental(BlenderRNA *brna)
   prop = RNA_def_property(srna, "use_grease_pencil_version3", PROP_BOOLEAN, PROP_NONE);
   RNA_def_property_boolean_sdna(prop, nullptr, "use_grease_pencil_version3", 1);
   RNA_def_property_ui_text(prop, "Grease Pencil 3.0", "Enable the new grease pencil 3.0 codebase");
+  /* The key-map depends on this setting, it needs to be reloaded. */
+  RNA_def_property_flag(prop, PROP_CONTEXT_UPDATE);
+  RNA_def_property_update(prop, 0, "rna_userdef_keyconfig_reload_update");
 
   prop = RNA_def_property(srna, "use_viewport_debug", PROP_BOOLEAN, PROP_NONE);
   RNA_def_property_boolean_sdna(prop, nullptr, "use_viewport_debug", 1);

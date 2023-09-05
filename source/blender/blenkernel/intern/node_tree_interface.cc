@@ -408,6 +408,23 @@ static void item_copy(bNodeTreeInterfaceItem &dst,
   }
 }
 
+static void item_set_unique_identifier(const int uid, bNodeTreeInterfaceItem &item)
+{
+  switch (item.item_type) {
+    case NODE_INTERFACE_SOCKET: {
+      bNodeTreeInterfaceSocket &socket = reinterpret_cast<bNodeTreeInterfaceSocket &>(item);
+      MEM_SAFE_FREE(socket.identifier);
+      socket.identifier = BLI_sprintfN("Socket_%d", uid);
+      break;
+    }
+    case NODE_INTERFACE_PANEL: {
+      bNodeTreeInterfacePanel &panel = reinterpret_cast<bNodeTreeInterfacePanel &>(item);
+      panel.identifier = uid;
+      break;
+    }
+  }
+}
+
 static void item_free(bNodeTreeInterfaceItem &item, const bool do_id_user)
 {
   switch (item.item_type) {
@@ -991,8 +1008,6 @@ void bNodeTreeInterfacePanel::copy_from(
   /* Copy buffers. */
   for (const int i : items_src.index_range()) {
     const bNodeTreeInterfaceItem *item_src = items_src[i];
-    BLI_assert(item_src->item_type != NODE_INTERFACE_PANEL ||
-               (flag & NODE_INTERFACE_PANEL_ALLOW_CHILD_PANELS));
     items_array[i] = static_cast<bNodeTreeInterfaceItem *>(MEM_dupallocN(item_src));
     item_types::item_copy(*items_array[i], *item_src, flag);
   }
@@ -1174,6 +1189,7 @@ bNodeTreeInterfaceItem *bNodeTreeInterface::add_item_copy(const bNodeTreeInterfa
 
   bNodeTreeInterfaceItem *citem = static_cast<bNodeTreeInterfaceItem *>(MEM_dupallocN(&item));
   item_types::item_copy(*citem, item, 0);
+  item_types::item_set_unique_identifier(next_uid++, *citem);
   parent->add_item(*citem);
 
   return citem;
@@ -1198,6 +1214,7 @@ bNodeTreeInterfaceItem *bNodeTreeInterface::insert_item_copy(const bNodeTreeInte
 
   bNodeTreeInterfaceItem *citem = static_cast<bNodeTreeInterfaceItem *>(MEM_dupallocN(&item));
   item_types::item_copy(*citem, item, 0);
+  item_types::item_set_unique_identifier(next_uid++, *citem);
   parent->insert_item(*citem, position);
 
   return citem;
@@ -1205,7 +1222,7 @@ bNodeTreeInterfaceItem *bNodeTreeInterface::insert_item_copy(const bNodeTreeInte
 
 bool bNodeTreeInterface::remove_item(bNodeTreeInterfaceItem &item, bool move_content_to_parent)
 {
-  bNodeTreeInterfacePanel *parent = this->find_item_parent(item);
+  bNodeTreeInterfacePanel *parent = this->find_item_parent(item, true);
   if (parent == nullptr) {
     return false;
   }
@@ -1230,7 +1247,7 @@ void bNodeTreeInterface::clear_items()
 
 bool bNodeTreeInterface::move_item(bNodeTreeInterfaceItem &item, const int new_position)
 {
-  bNodeTreeInterfacePanel *parent = this->find_item_parent(item);
+  bNodeTreeInterfacePanel *parent = this->find_item_parent(item, true);
   if (parent == nullptr) {
     return false;
   }
@@ -1241,11 +1258,11 @@ bool bNodeTreeInterface::move_item_to_parent(bNodeTreeInterfaceItem &item,
                                              bNodeTreeInterfacePanel *new_parent,
                                              int new_position)
 {
-  bNodeTreeInterfacePanel *parent = this->find_item_parent(item);
+  bNodeTreeInterfacePanel *parent = this->find_item_parent(item, true);
   if (parent == nullptr) {
     return false;
   }
-  if (item.item_type == NODE_INTERFACE_PANEL &&
+  if (item.item_type == NODE_INTERFACE_PANEL && new_parent &&
       !(new_parent->flag & NODE_INTERFACE_PANEL_ALLOW_CHILD_PANELS))
   {
     /* Parent does not allow adding child panels. */

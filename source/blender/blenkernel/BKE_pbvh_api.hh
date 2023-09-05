@@ -210,7 +210,7 @@ void BKE_pbvh_build_grids(PBVH *pbvh,
                           CCGElem **grids,
                           int totgrid,
                           CCGKey *key,
-                          void **gridfaces,
+                          blender::Span<int> grid_to_face_map,
                           DMFlagMat *flagmats,
                           unsigned int **grid_hidden,
                           Mesh *me,
@@ -445,7 +445,7 @@ void BKE_pbvh_redraw_BB(PBVH *pbvh, float bb_min[3], float bb_max[3]);
 void BKE_pbvh_get_grid_updates(PBVH *pbvh, bool clear, void ***r_gridfaces, int *r_totface);
 void BKE_pbvh_grids_update(PBVH *pbvh,
                            CCGElem **grids,
-                           void **gridfaces,
+                           blender::Span<int> grid_to_face_map,
                            DMFlagMat *flagmats,
                            unsigned int **grid_hidden,
                            CCGKey *key);
@@ -462,7 +462,6 @@ void BKE_pbvh_face_sets_color_set(PBVH *pbvh, int seed, int color_default);
 
 /* Vertex Deformer. */
 
-float (*BKE_pbvh_vert_coords_alloc(PBVH *pbvh))[3];
 void BKE_pbvh_vert_coords_apply(PBVH *pbvh, const float (*vertCos)[3], int totvert);
 bool BKE_pbvh_is_deformed(PBVH *pbvh);
 

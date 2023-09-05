@@ -1561,6 +1561,15 @@ static bool rna_Node_is_registered_node_type(StructRNA *type)
   return (RNA_struct_blender_type_get(type) != nullptr);
 }
 
+static bool rna_Node_is_builtin(bNodeType *nt)
+{
+  BLI_assert(nt);
+
+  /* `nt->rna_ext.data` is the python object. If it's nullptr then it's a
+   * builtin node. */
+  return nt->rna_ext.data == nullptr;
+}
+
 static void rna_Node_is_registered_node_type_runtime(bContext * /*C*/,
                                                      ReportList * /*reports*/,
                                                      PointerRNA *ptr,
@@ -1574,9 +1583,7 @@ static bool rna_Node_unregister(Main * /*bmain*/, StructRNA *type)
 {
   bNodeType *nt = static_cast<bNodeType *>(RNA_struct_blender_type_get(type));
 
-  /* `nt->rna_ext.data` is the python object. If it's nullptr then it's an
-   * internally registered node, thus can't unregister. */
-  if (!nt || !nt->rna_ext.data) {
+  if (!nt || rna_Node_is_builtin(nt)) {
     return false;
   }
 
@@ -1638,6 +1645,17 @@ static bNodeType *rna_Node_register_base(Main *bmain,
   /* check if we have registered this node type before, and remove it */
   nt = nodeTypeFind(dummy_nt.idname);
   if (nt) {
+    /* If it's an internal node, we cannot proceed. */
+    if (rna_Node_is_builtin(nt)) {
+      BKE_reportf(reports,
+                  RPT_ERROR,
+                  "%s '%s', bl_idname '%s' is a builtin node",
+                  error_prefix,
+                  identifier,
+                  dummy_nt.idname);
+      return nullptr;
+    }
+
     /* NOTE: unlike most types `nt->rna_ext.srna` doesn't need to be checked for nullptr. */
     if (!rna_Node_unregister(bmain, nt->rna_ext.srna)) {
       BKE_reportf(reports,
@@ -1765,6 +1783,15 @@ static bool rna_GeometryNodeTree_is_tool_get(PointerRNA *ptr)
 static void rna_GeometryNodeTree_is_tool_set(PointerRNA *ptr, bool value)
 {
   geometry_node_asset_trait_flag_set(ptr, GEO_NODE_ASSET_TOOL, value);
+}
+
+static bool rna_GeometryNodeTree_is_modifier_get(PointerRNA *ptr)
+{
+  return geometry_node_asset_trait_flag_get(ptr, GEO_NODE_ASSET_MODIFIER);
+}
+static void rna_GeometryNodeTree_is_modifier_set(PointerRNA *ptr, bool value)
+{
+  geometry_node_asset_trait_flag_set(ptr, GEO_NODE_ASSET_MODIFIER, value);
 }
 
 static bool rna_GeometryNodeTree_is_mode_edit_get(PointerRNA *ptr)
@@ -4799,6 +4826,7 @@ static void def_sh_tex_image(StructRNA *srna)
   RNA_def_property_enum_items(prop, prop_projection_items);
   RNA_def_property_ui_text(
       prop, "Projection", "Method to project 2D image on object with a 3D texture vector");
+  RNA_def_property_translation_context(prop, BLT_I18NCONTEXT_ID_IMAGE);
   RNA_def_property_update(prop, 0, "rna_Node_update");
 
   prop = RNA_def_property(srna, "interpolation", PROP_ENUM, PROP_NONE);
@@ -5966,6 +5994,7 @@ static void def_cmp_blur(StructRNA *srna)
   RNA_def_property_enum_sdna(prop, nullptr, "filtertype");
   RNA_def_property_enum_items(prop, filter_type_items);
   RNA_def_property_ui_text(prop, "Filter Type", "");
+  RNA_def_property_translation_context(prop, BLT_I18NCONTEXT_ID_NODETREE);
   RNA_def_property_update(prop, NC_NODE | NA_EDITED, "rna_Node_update");
 
   prop = RNA_def_property(srna, "use_bokeh", PROP_BOOLEAN, PROP_NONE);
@@ -10286,6 +10315,14 @@ static void rna_def_geometry_nodetree(BlenderRNA *brna)
   RNA_def_property_ui_text(prop, "Tool", "The node group is used as a tool");
   RNA_def_property_boolean_funcs(
       prop, "rna_GeometryNodeTree_is_tool_get", "rna_GeometryNodeTree_is_tool_set");
+  RNA_def_property_update(prop, NC_NODE | ND_DISPLAY, "rna_NodeTree_update");
+
+  prop = RNA_def_property(srna, "is_modifier", PROP_BOOLEAN, PROP_NONE);
+  RNA_def_property_boolean_sdna(prop, nullptr, "flag", GEO_NODE_ASSET_MODIFIER);
+  RNA_def_property_clear_flag(prop, PROP_ANIMATABLE);
+  RNA_def_property_ui_text(prop, "Modifier", "The node group is used as a geometry modifier");
+  RNA_def_property_boolean_funcs(
+      prop, "rna_GeometryNodeTree_is_modifier_get", "rna_GeometryNodeTree_is_modifier_set");
   RNA_def_property_update(prop, NC_NODE | ND_DISPLAY, "rna_NodeTree_update");
 
   prop = RNA_def_property(srna, "is_mode_edit", PROP_BOOLEAN, PROP_NONE);

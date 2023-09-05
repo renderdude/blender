@@ -57,7 +57,6 @@
 #include "BKE_context.h"
 #include "BKE_cryptomatte.h"
 #include "BKE_global.h"
-#include "BKE_icons.h"
 #include "BKE_idprop.h"
 #include "BKE_idprop.hh"
 #include "BKE_idtype.h"
@@ -71,6 +70,7 @@
 #include "BKE_node_tree_interface.hh"
 #include "BKE_node_tree_update.h"
 #include "BKE_node_tree_zones.hh"
+#include "BKE_preview_image.hh"
 #include "BKE_type_conversions.hh"
 
 #include "RNA_access.hh"
@@ -490,8 +490,8 @@ static bNodeSocket *make_socket(bNodeTree *ntree,
 
   sock->limit = (in_out == SOCK_IN ? 1 : 0xFFF);
 
-  BLI_strncpy(sock->identifier, identifier.data(), sizeof(sock->identifier));
-  BLI_strncpy(sock->name, name.data(), sizeof(sock->name));
+  STRNCPY(sock->identifier, identifier.data());
+  STRNCPY(sock->name, name.data());
   sock->storage = nullptr;
   sock->flag |= SOCK_COLLAPSED;
 
@@ -519,7 +519,7 @@ static void construct_interface_as_legacy_sockets(bNodeTree *ntree)
     }
 
     if (socket.description) {
-      BLI_strncpy(iosock->description, socket.description, sizeof(iosock->description));
+      STRNCPY(iosock->description, socket.description);
     }
     node_socket_copy_default_value_data(
         eNodeSocketDatatype(iosock->typeinfo->type), iosock->default_value, socket.socket_data);
@@ -531,11 +531,7 @@ static void construct_interface_as_legacy_sockets(bNodeTree *ntree)
     SET_FLAG_FROM_TEST(
         iosock->flag, socket.flag & NODE_INTERFACE_SOCKET_HIDE_IN_MODIFIER, SOCK_HIDE_IN_MODIFIER);
     iosock->attribute_domain = socket.attribute_domain;
-    if (socket.default_attribute_name) {
-      BLI_strncpy(iosock->default_attribute_name,
-                  socket.default_attribute_name,
-                  sizeof(iosock->default_attribute_name));
-    }
+    iosock->default_attribute_name = BLI_strdup_null(socket.default_attribute_name);
     return iosock;
   };
 
@@ -1362,14 +1358,16 @@ void ntreeSetTypes(const bContext *C, bNodeTree *ntree)
   blender::bke::ntree_set_typeinfo(ntree, ntreeTypeFind(ntree->idname));
 
   for (bNode *node : ntree->all_nodes()) {
-    blender::bke::node_set_typeinfo(C, ntree, node, nodeTypeFind(node->idname));
-
+    /* Set socket typeinfo first because node initialization may rely on socket typeinfo for
+     * generating declarations. */
     LISTBASE_FOREACH (bNodeSocket *, sock, &node->inputs) {
       blender::bke::node_socket_set_typeinfo(ntree, sock, nodeSocketTypeFind(sock->idname));
     }
     LISTBASE_FOREACH (bNodeSocket *, sock, &node->outputs) {
       blender::bke::node_socket_set_typeinfo(ntree, sock, nodeSocketTypeFind(sock->idname));
     }
+
+    blender::bke::node_set_typeinfo(C, ntree, node, nodeTypeFind(node->idname));
   }
 }
 

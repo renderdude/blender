@@ -83,7 +83,7 @@ typedef struct SpaceType {
   /* called when the mouse moves out of the area */
   void (*deactivate)(struct ScrArea *area);
 
-  /* refresh context, called after filereads, ED_area_tag_refresh() */
+  /** Refresh context, called after file-reads, #ED_area_tag_refresh(). */
   void (*refresh)(const struct bContext *C, struct ScrArea *area);
 
   /* after a spacedata copy, an init should result in exact same situation */
@@ -413,6 +413,12 @@ typedef struct MenuType {
   /* draw entirely, view changes should be handled here */
   void (*draw)(const struct bContext *C, struct Menu *menu);
   void (*listener)(const wmRegionListenerParams *params);
+
+  /**
+   * True if the menu depends on data retrieved via #CTX_data_pointer_get. If it is context
+   * dependent, menu search has to scan it in different contexts.
+   */
+  bool context_dependent;
 
   /* RNA integration */
   ExtensionRNA rna_ext;

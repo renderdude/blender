@@ -794,13 +794,20 @@ class SEQUENCER_MT_add_effect(Menu):
         layout.operator_context = 'INVOKE_REGION_WIN'
 
         col = layout.column()
-        col.operator("sequencer.effect_strip_add", text="Add").type = 'ADD'
-        col.operator("sequencer.effect_strip_add", text="Subtract").type = 'SUBTRACT'
-        col.operator("sequencer.effect_strip_add", text="Multiply").type = 'MULTIPLY'
-        col.operator("sequencer.effect_strip_add", text="Over Drop").type = 'OVER_DROP'
-        col.operator("sequencer.effect_strip_add", text="Alpha Over").type = 'ALPHA_OVER'
-        col.operator("sequencer.effect_strip_add", text="Alpha Under").type = 'ALPHA_UNDER'
-        col.operator("sequencer.effect_strip_add", text="Color Mix").type = 'COLORMIX'
+        col.operator("sequencer.effect_strip_add", text="Add",
+                     text_ctxt=i18n_contexts.id_sequence).type = 'ADD'
+        col.operator("sequencer.effect_strip_add", text="Subtract",
+                     text_ctxt=i18n_contexts.id_sequence).type = 'SUBTRACT'
+        col.operator("sequencer.effect_strip_add", text="Multiply",
+                     text_ctxt=i18n_contexts.id_sequence).type = 'MULTIPLY'
+        col.operator("sequencer.effect_strip_add", text="Over Drop",
+                     text_ctxt=i18n_contexts.id_sequence).type = 'OVER_DROP'
+        col.operator("sequencer.effect_strip_add", text="Alpha Over",
+                     text_ctxt=i18n_contexts.id_sequence).type = 'ALPHA_OVER'
+        col.operator("sequencer.effect_strip_add", text="Alpha Under",
+                     text_ctxt=i18n_contexts.id_sequence).type = 'ALPHA_UNDER'
+        col.operator("sequencer.effect_strip_add", text="Color Mix",
+                     text_ctxt=i18n_contexts.id_sequence).type = 'COLORMIX'
         col.enabled = selected_sequences_len(context) >= 2
 
         layout.separator()
@@ -1886,12 +1893,6 @@ class SEQUENCER_PT_time(SequencerButtonsPanel, Panel):
         split.label(text="Channel")
         split.prop(strip, "channel", text="")
 
-        if strip.type == 'SOUND':
-            split = layout.split(factor=0.5 + max_factor)
-            split.alignment = 'RIGHT'
-            split.label(text="Speed Factor")
-            split.prop(strip, "speed_factor", text="")
-
         sub = layout.column(align=True)
         split = sub.split(factor=0.5 + max_factor, align=True)
         split.alignment = 'RIGHT'
@@ -2587,27 +2588,33 @@ class SEQUENCER_PT_modifiers(SequencerButtonsPanel, Panel):
                         eq_row = box.row()
                         # eq_graphs = eq_row.operator_menu_enum("sequencer.strip_modifier_equalizer_redefine", "graphs")
                         # eq_graphs.name = mod.name
-                        flow = box.grid_flow(row_major=True, columns=0, even_columns=True, even_rows=False, align=False)
-                        for i in range(len(mod.graphics)):
-                            soundEq = mod.graphics[i]
+                        flow = box.grid_flow(
+                            row_major=True,
+                            columns=0,
+                            even_columns=True,
+                            even_rows=False,
+                            align=False,
+                        )
+                        for sound_eq in mod.graphics:
                             col = flow.column()
                             box = col.box()
                             split = box.split(factor=0.4)
-                            split.label(text="{:.2f}".format(soundEq.curve_mapping.clip_min_x))
+                            split.label(text="%.2f" % sound_eq.curve_mapping.clip_min_x)
                             split.label(text="Hz")
                             split.alignment = "RIGHT"
-                            split.label(text="{:.2f}".format(soundEq.curve_mapping.clip_max_x))
+                            split.label(text="%.2f" % sound_eq.curve_mapping.clip_max_x)
                             box.template_curve_mapping(
-                                soundEq,
+                                sound_eq,
                                 "curve_mapping",
                                 type='NONE',
                                 levels=False,
                                 brush=True,
                                 use_negative_slope=True,
-                                show_tone=False)
+                                show_tone=False,
+                            )
                             second_row = col.row()
                             second_row.label(text="dB")
-                            second_row.alignment = "CENTER"
+                            second_row.alignment = 'CENTER'
 
 
 class SEQUENCER_PT_annotation(AnnotationDataPanel, SequencerButtonsPanel_Output, Panel):
