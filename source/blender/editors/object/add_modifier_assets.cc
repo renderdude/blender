@@ -219,6 +219,9 @@ static int modifier_add_asset_exec(bContext *C, wmOperator *op)
   id_us_plus(&node_group->id);
   MOD_nodes_update_interface(object, nmd);
 
+  /* By default, don't show the data-block selector since it's not usually necessary for assets. */
+  nmd->flag |= NODES_MODIFIER_HIDE_DATABLOCK_SELECTOR;
+
   STRNCPY(nmd->modifier.name, DATA_(node_group->id.name + 2));
 
   WM_event_add_notifier(C, NC_OBJECT | ND_MODIFIER, object);
@@ -262,7 +265,7 @@ static MenuType modifier_add_catalog_assets_menu_type()
   STRNCPY(type.idname, "OBJECT_MT_add_modifier_catalog_assets");
   type.draw = catalog_assets_draw;
   type.listener = asset::asset_reading_region_listen_fn;
-  type.context_dependent = true;
+  type.flag = MenuTypeFlag::ContextDependent;
   return type;
 }
 
@@ -272,7 +275,7 @@ static MenuType modifier_add_root_catalogs_menu_type()
   STRNCPY(type.idname, "OBJECT_MT_modifier_add_root_catalogs");
   type.draw = root_catalogs_draw;
   type.listener = asset::asset_reading_region_listen_fn;
-  type.context_dependent = true;
+  type.flag = MenuTypeFlag::ContextDependent;
   return type;
 }
 

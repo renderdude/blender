@@ -105,8 +105,8 @@ typedef struct ReportList {
 #
 #
 typedef struct ReportTimerInfo {
-  float col[4];
   float widthfac;
+  float flash_progress;
 } ReportTimerInfo;
 
 //#ifdef WITH_XR_OPENXR
@@ -206,6 +206,8 @@ typedef struct wmWindowManager {
   wmXrData xr;
   //#endif
 } wmWindowManager;
+
+#define WM_KEYCONFIG_ARRAY_P(wm) &(wm)->defaultconf, &(wm)->addonconf, &(wm)->userconf
 
 /** #wmWindowManager.init_flag */
 enum {

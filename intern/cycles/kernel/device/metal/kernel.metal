@@ -53,7 +53,7 @@ TReturn metalrt_local_hit(constant KernelParamsMetal &launch_params_metal,
 
   if ((object != payload.local_object) || context.intersection_skip_self_local(payload.self, prim))
   {
-    /* Only intersect with matching object and skip self-intersecton. */
+    /* Only intersect with matching object and skip self-intersection. */
     result.accept = false;
     result.continue_search = true;
     return result;
@@ -132,10 +132,10 @@ __anyhit__cycles_metalrt_local_hit_tri_prim(
     float2 barycentrics [[barycentric_coord]],
     float ray_tmax [[distance]])
 {
-  // instance_id, aka the user_id has been removed. If we take this function we optimized the
-  // SSS for starting traversal from a primitive acceleration structure instead of the root of the
-  // global AS. this means we will always be intersecting the correct object no need for the userid
-  // to check
+  /* instance_id, aka the user_id has been removed. If we take this function we optimized the
+   * SSS for starting traversal from a primitive acceleration structure instead of the root of the
+   * global AS. this means we will always be intersecting the correct object no need for the
+   * user-id to check */
   return metalrt_local_hit<TriangleIntersectionResult, METALRT_HIT_TRIANGLE>(
       launch_params_metal, payload, payload.local_object, primitive_id, barycentrics, ray_tmax);
 }
@@ -217,6 +217,13 @@ bool metalrt_shadow_all_hit(constant KernelParamsMetal &launch_params_metal,
     /* continue search */
     return true;
   }
+
+#    ifdef __SHADOW_LINKING__
+  if (context.intersection_skip_shadow_link(nullptr, payload.self, object)) {
+    /* continue search */
+    return true;
+  }
+#    endif
 
 #    ifndef __TRANSPARENT_SHADOWS__
   /* No transparent shadows support compiled in, make opaque. */
@@ -372,6 +379,14 @@ inline TReturnType metalrt_visibility_test(
 
   /* Shadow ray early termination. */
   if (visibility & PATH_RAY_SHADOW_OPAQUE) {
+#  ifdef __SHADOW_LINKING__
+    if (context.intersection_skip_shadow_link(nullptr, payload.self, object)) {
+      result.accept = false;
+      result.continue_search = true;
+      return result;
+    }
+#  endif
+
     if (context.intersection_skip_self_shadow(payload.self, object, prim)) {
       result.accept = false;
       result.continue_search = true;
