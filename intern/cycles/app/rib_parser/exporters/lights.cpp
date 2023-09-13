@@ -6,12 +6,29 @@
 
 CCL_NAMESPACE_BEGIN
 
+
 Light *initialize(Scene *scene,
                   Light_Scene_Entity &light_inst,
                   Instance_Definition_Scene_Entity *inst_def);
 void populate_shader_graph(Light_Scene_Entity &light_inst,
                            Light *light,
                            bool initializing = false);
+
+Transform convert_transform(const ProjectionTransform &matrix)
+{
+  return make_transform(-matrix.x[0],
+                        -matrix.x[1],
+                        -matrix.x[2],
+                        matrix.x[3],
+                        -matrix.y[0],
+                        -matrix.y[1],
+                        -matrix.y[2],
+                        matrix.y[3],
+                        -matrix.z[0],
+                        -matrix.z[1],
+                        -matrix.z[2],
+                        matrix.z[3]);
+}
 
 void export_lights(Scene *scene,
                    vector<Instance_Scene_Entity> &inst_v,
@@ -21,7 +38,7 @@ void export_lights(Scene *scene,
     for (auto &inst : inst_v) {
       const float metersPerUnit = 1.;
       ProjectionTransform xform_obj = *inst.render_from_instance * *light_inst.render_from_light;
-      Transform xform = transform_scale(make_float3(metersPerUnit)) * projection_to_transform(xform_obj);
+      Transform xform = transform_scale(make_float3(metersPerUnit)) * convert_transform(xform_obj);
       vector<Transform> motion = {xform};
       vector<DecomposedTransform> decomp(motion.size());
       transform_motion_decompose(decomp.data(), motion.data(), motion.size());
@@ -29,14 +46,6 @@ void export_lights(Scene *scene,
       Light *light = initialize(scene, light_inst, inst_def);
 
       light->set_tfm(xform);
-
-      light->set_co(transform_get_column(&xform, 3));
-      light->set_dir(normalize(transform_get_column(&xform, 2)));
-
-      if (light_inst.light_type == "PxrDiskLight" || light_inst.light_type == "PxrRectLight") {
-        light->set_axisu(transform_get_column(&xform, 0));
-        light->set_axisv(transform_get_column(&xform, 1));
-      }
 
       float3 strength = make_float3(1.0f, 1.0f, 1.0f);
 
