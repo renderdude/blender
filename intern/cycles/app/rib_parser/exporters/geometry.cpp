@@ -16,6 +16,7 @@
 #include <opensubdiv/vtr/types.h>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "app/rib_parser/util/mikktspace/mikktspace.hh"
 
@@ -634,6 +635,9 @@ void RIBCyclesMesh::populate_topology()
   const bool smooth = _shape.parameters.get_one_bool("smooth", false);
   const bool subdivision = _geom->get_subdivision_type() != Mesh::SUBDIVISION_NONE;
 
+  // Initialize lookup table from polygon face to material shader index
+  std::vector<int> faceShaders(_shape.parameters.get_one_int("nfaces", 0), 0);
+
   int shader = 0;
   const vector<int> vertIndx = _shape.parameters.get_int_array("vertices");
   const vector<int> vertCounts = _shape.parameters.get_int_array("nvertices");
@@ -654,7 +658,7 @@ void RIBCyclesMesh::populate_topology()
 
     PxOsdSubdivTags subdivTags = GetSubdivTags(sceneDelegate);
     _topology.SetSubdivTags(subdivTags);
-
+  */
     size_t numNgons = 0;
     size_t numCorners = 0;
     for (int vertCount : vertCounts) {
@@ -662,7 +666,7 @@ void RIBCyclesMesh::populate_topology()
       numCorners += vertCount;
     }
 
-    _geom->reserve_subd_faces(_topology.GetNumFaces(), numNgons, numCorners);
+    _geom->reserve_subd_faces(_shape.parameters.get_one_int("nfaces", 0), numNgons, numCorners);
 
     // TODO: Handle hole indices
     size_t faceIndex = 0;
@@ -674,6 +678,7 @@ void RIBCyclesMesh::populate_topology()
       indexOffset += vertCount;
     }
 
+    /*
     const VtIntArray creaseLengths = subdivTags.GetCreaseLengths();
     if (!creaseLengths.empty()) {
       size_t numCreases = 0;
@@ -712,11 +717,17 @@ void RIBCyclesMesh::populate_topology()
         _geom->add_vertex_crease(cornerIndices[i], cornerWeights[i]);
       }
     }
+  */
+
+    const float metersPerUnit = 1.;
+
+    const Transform tfm = transform_scale(make_float3(metersPerUnit)) *
+                          projection_to_transform((*_inst_v[0].render_from_instance) *
+                                                  (*_shape.render_from_object));
 
     _geom->set_subd_dicing_rate(1.0f);
-    _geom->set_subd_max_level(_topology.GetRefineLevel());
-    _geom->set_subd_objecttoworld(_instances[0]->get_tfm());
-    */
+    _geom->set_subd_max_level(0);
+    _geom->set_subd_objecttoworld(tfm);
   }
 }
 

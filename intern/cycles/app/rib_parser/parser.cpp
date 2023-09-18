@@ -619,7 +619,8 @@ static Parsed_Parameter_Vector parse_parameters(
             error_callback(t, "expected Boolean value");
         }
 
-        if (!param->has_strings()) param->payload = vector<std::string>();
+        if (!param->has_strings())
+          param->payload = vector<std::string>();
         param->add_string(dequote_string(t));
       }
       else if (t.token[0] == 't' && t.token == "true") {
@@ -637,7 +638,8 @@ static Parsed_Parameter_Vector parse_parameters(
             break;
         }
 
-        if (!param->has_bools()) param->payload = vector<uint8_t>();
+        if (!param->has_bools())
+          param->payload = vector<uint8_t>();
         param->add_bool(true);
       }
       else if (t.token[0] == 'f' && t.token == "false") {
@@ -655,7 +657,8 @@ static Parsed_Parameter_Vector parse_parameters(
             break;
         }
 
-        if (!param->has_bools()) param->payload = vector<uint8_t>();
+        if (!param->has_bools())
+          param->payload = vector<uint8_t>();
         param->add_bool(false);
       }
       else {
@@ -1219,6 +1222,46 @@ void parse(Ri *target, std::unique_ptr<Tokenizer> t)
       case 'H':
         if (tok->token == "Hider") {
         }
+        else if (tok->token == "HierarchicalSubdivisionMesh") {
+          std::string_view scheme = dequote_string(*nextToken(TokenRequired));
+          std::vector<int> n_vertices;
+          parse_array_of_int(n_vertices);
+
+          std::vector<int> vertices;
+          parse_array_of_int(vertices);
+
+          std::vector<string> tags;
+          parse_array_of_string(tags);
+
+          std::vector<int> nargs;
+          parse_array_of_int(nargs);
+
+          std::vector<int> intargs;
+          parse_array_of_int(intargs);
+
+          std::vector<float> floatargs;
+          parse_array_of_real(floatargs);
+
+          std::vector<std::string> stringargs;
+          parse_array_of_string(stringargs);
+
+          Parsed_Parameter_Vector params = parse_parameters(
+              nextToken, unget, [&](const Token &t, const char *msg) {
+                std::string token = to_string_from_view(t.token);
+                std::string str = msg;
+                parse_error(str.c_str(), &t.loc);
+              });
+          target->HierarchicalSubdivisionMesh(to_string_from_view(scheme),
+                                              n_vertices,
+                                              vertices,
+                                              tags,
+                                              nargs,
+                                              intargs,
+                                              floatargs,
+                                              stringargs,
+                                              std::move(params),
+                                              tok->loc);
+        }
         else if (tok->token == "Hyperboloid") {
         }
         else
@@ -1636,8 +1679,8 @@ void parse_files(Ri *target, std::vector<std::string> filenames)
   // use duration cast method
   std::chrono::duration<float, std::milli> dt = stop - start;
 
-  std::cout << "Time taken by parsing: " << dt.count()/1000.0 << " seconds" << std::endl;
-  //exit(1);
+  std::cout << "Time taken by parsing: " << dt.count() / 1000.0 << " seconds" << std::endl;
+  // exit(1);
 }
 
 void parse_string(Ri *target, std::string str)

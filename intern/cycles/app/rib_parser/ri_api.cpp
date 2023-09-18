@@ -258,9 +258,7 @@ void Ri::add_instance_uses(p_std::span<Instance_Scene_Entity> in)
   std::move(std::begin(in), std::end(in), std::back_inserter(instances));
 }
 
-Ri::~Ri()
-{
-}
+Ri::~Ri() {}
 
 // RI API Default Implementation
 void Ri::ArchiveBegin(const std::string &name, Parsed_Parameter_Vector params, File_Loc loc)
@@ -554,10 +552,11 @@ void Ri::Cone(
 
 void Ri::CropWindow(float xmin, float xmax, float ymin, float ymax, File_Loc loc)
 {
-  if (xmin >= 0. && xmin <= 1. && xmin < xmax && xmin >= _crop_window[0] &&
-      xmax >= 0. && xmax <= 1. && xmin < xmax && xmax <= _crop_window[1] &&
-      ymin >= 0. && ymin <= 1. && ymin < ymax && ymin >= _crop_window[2] &&
-      ymax >= 0. && ymax <= 1. && ymin < ymax && ymax <= _crop_window[3]) {
+  if (xmin >= 0. && xmin <= 1. && xmin < xmax && xmin >= _crop_window[0] && xmax >= 0. &&
+      xmax <= 1. && xmin < xmax && xmax <= _crop_window[1] && ymin >= 0. && ymin <= 1. &&
+      ymin < ymax && ymin >= _crop_window[2] && ymax >= 0. && ymax <= 1. && ymin < ymax &&
+      ymax <= _crop_window[3])
+  {
     _crop_window[0] = xmin;
     _crop_window[1] = xmax;
     _crop_window[2] = ymin;
@@ -825,6 +824,63 @@ void Ri::Hider(const std::string &name, Parsed_Parameter_Vector params, File_Loc
   std::cout << "Hider is unimplemented" << std::endl;
 }
 
+void Ri::HierarchicalSubdivisionMesh(const std::string &scheme,
+                                     std::vector<int> n_vertices,
+                                     std::vector<int> vertices,
+                                     std::vector<std::string> tags,
+                                     std::vector<int> nargs,
+                                     std::vector<int> intargs,
+                                     std::vector<float> floatargs,
+                                     std::vector<std::string> stringargs,
+                                     Parsed_Parameter_Vector params,
+                                     File_Loc loc)
+{
+  Parsed_Parameter *param = new Parsed_Parameter(Parameter_Type::String, "scheme", loc);
+  param->add_string(scheme);
+  params.push_back(param);
+
+  param = new Parsed_Parameter(Parameter_Type::Integer, "vertices", loc);
+  for (int i = 0; i < vertices.size(); ++i)
+    param->add_int(vertices[i]);
+  params.push_back(param);
+
+  param = new Parsed_Parameter(Parameter_Type::Integer, "nvertices", loc);
+  for (int i = 0; i < n_vertices.size(); ++i) {
+    param->add_int(n_vertices[i]);
+  }
+  params.push_back(param);
+
+  param = new Parsed_Parameter(Parameter_Type::Integer, "nfaces", loc);
+  param->add_int(n_vertices.size());
+  params.push_back(param);
+
+  param = new Parsed_Parameter(Parameter_Type::String, "tags", loc);
+  for (int i = 0; i < tags.size(); ++i)
+    param->add_string(tags[i]);
+  params.push_back(param);
+
+  param = new Parsed_Parameter(Parameter_Type::Integer, "nargs", loc);
+  for (int i = 0; i < nargs.size(); ++i)
+    param->add_int(nargs[i]);
+  params.push_back(param);
+
+  param = new Parsed_Parameter(Parameter_Type::Integer, "intargs", loc);
+  for (int i = 0; i < intargs.size(); ++i)
+    param->add_int(intargs[i]);
+  params.push_back(param);
+
+  param = new Parsed_Parameter(Parameter_Type::Real, "floatargs", loc);
+  for (int i = 0; i < floatargs.size(); ++i)
+    param->add_float(floatargs[i]);
+  params.push_back(param);
+
+  param = new Parsed_Parameter(Parameter_Type::Real, "stringargs", loc);
+  for (int i = 0; i < stringargs.size(); ++i)
+    param->add_string(stringargs[i]);
+  params.push_back(param);
+
+  Shape("subdivision_mesh", params, loc);
+}
 void Ri::Hyperboloid(
     Point3f point1, Point3f point2, float thetamax, Parsed_Parameter_Vector params, File_Loc loc)
 {
@@ -1327,8 +1383,10 @@ void Ri::PointsPolygons(std::vector<int> n_vertices,
   // Fix attributes whose storage class couldn't be determined at parsing
   // time
   for (auto &p : params) {
-    if ((p->type == Parameter_Type::Point3 || p->type == Parameter_Type::Normal || p->type == Parameter_Type::Color) &&
-        p->storage == Container_Type::Constant && p->floats().size() > 3) {
+    if ((p->type == Parameter_Type::Point3 || p->type == Parameter_Type::Normal ||
+         p->type == Parameter_Type::Color) &&
+        p->storage == Container_Type::Constant && p->floats().size() > 3)
+    {
       int num_vals = p->floats().size() / 3;
       if (num_vals == n_vertices.size())
         p->storage = Container_Type::Uniform;
@@ -1974,10 +2032,12 @@ void Ri::add_default_search_paths(std::string filepath)
   Parsed_Parameter *param;
 
   param = new Parsed_Parameter(Parameter_Type::String, "shader_default", File_Loc());
-    std::cout << param->has_bools() << " " << param->has_floats() << " " << param->has_ints() << " " << param->has_strings() << " " << param->payload.index() << std::endl;
-    param->payload = vector<std::string>();
+  std::cout << param->has_bools() << " " << param->has_floats() << " " << param->has_ints() << " "
+            << param->has_strings() << " " << param->payload.index() << std::endl;
+  param->payload = vector<std::string>();
   param->add_string(filepath);
-    std::cout << param->has_bools() << " " << param->has_floats() << " " << param->has_ints() << " " << param->has_strings() << " " << param->payload.index() << std::endl;
+  std::cout << param->has_bools() << " " << param->has_floats() << " " << param->has_ints() << " "
+            << param->has_strings() << " " << param->payload.index() << std::endl;
 
   params.push_back(param);
 

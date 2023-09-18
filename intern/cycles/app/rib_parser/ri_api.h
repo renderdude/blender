@@ -31,18 +31,16 @@ std::vector<std::string> split_string(std::string_view str, char ch);
 // Parser Definition
 class Ri {
  public:
-  Ri(Session *session) : session(session)
-  {
-  }
+  Ri(Session *session) : session(session) {}
   ~Ri();
   // Ri Interface
 
-  void adjust_buffer_parameters(BufferParams* buffer);
+  void adjust_buffer_parameters(BufferParams *buffer);
   void export_to_cycles();
-  void export_options(Scene_Entity& filter,
-                      Scene_Entity& film,
-                      Camera_Scene_Entity& camera,
-                      Scene_Entity& sampler);
+  void export_options(Scene_Entity &filter,
+                      Scene_Entity &film,
+                      Camera_Scene_Entity &camera,
+                      Scene_Entity &sampler);
   void add_light(Light_Scene_Entity light);
   int add_area_light(Scene_Entity light);
   void add_shapes(p_std::span<Shape_Scene_Entity> shape);
@@ -127,6 +125,16 @@ class Ri {
   void GeometricApproximation(const std::string &type, float value, File_Loc loc);
   void Geometry(const std::string &type, Parsed_Parameter_Vector params, File_Loc loc);
   void Hider(const std::string &name, Parsed_Parameter_Vector params, File_Loc loc);
+  void HierarchicalSubdivisionMesh(const std::string &scheme,
+                                   std::vector<int> n_vertices,
+                                   std::vector<int> vertices,
+                                   std::vector<std::string> tags,
+                                   std::vector<int> nargs,
+                                   std::vector<int> intargs,
+                                   std::vector<float> floatargs,
+                                   std::vector<std::string> stringargs,
+                                   Parsed_Parameter_Vector params,
+                                   File_Loc loc);
   void Hyperboloid(Point3f point1,
                    Point3f point2,
                    float thetamax,
@@ -282,7 +290,7 @@ class Ri {
                        std::vector<std::string> tags,
                        std::vector<int> nargs,
                        std::vector<int> intargs,
-                       std::vector<float> floatargs,                       
+                       std::vector<float> floatargs,
                        Parsed_Parameter_Vector params,
                        File_Loc loc);
   void Surface(const std::string &name, Parsed_Parameter_Vector params, File_Loc loc);
@@ -367,9 +375,7 @@ class Ri {
   Active_Instance_Definition *active_instance_definition = nullptr;
 
   struct RIB_State {
-    RIB_State()
-    {
-    }
+    RIB_State() {}
 
     using Option_Item = std::unordered_map<std::string, Parsed_Parameter *>;
     std::unordered_map<std::string, Option_Item> options;
@@ -426,7 +432,7 @@ class Ri {
   std::string _camera_name = "";
 
   std::string _display_name;
-  Parsed_Parameter_Vector* _cylinder_light_material = nullptr;
+  Parsed_Parameter_Vector *_cylinder_light_material = nullptr;
   std::vector<float> _crop_window = {0., 1., 0., 1.};
 };
 
