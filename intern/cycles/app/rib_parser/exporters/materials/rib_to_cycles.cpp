@@ -1,6 +1,7 @@
 
 #include "app/rib_parser/exporters/materials/rib_to_cycles.h"
 #include "app/rib_parser/parsed_parameter.h"
+#include "util/color.h"
 
 CCL_NAMESPACE_BEGIN
 
@@ -396,6 +397,106 @@ void PxrSurfacetoPrincipled::update_parameters(Parameter_Dictionary const &param
           }
         }
       }
+    }
+  }
+}
+
+void PxrDisneytoPrincipled::update_parameters(Parameter_Dictionary const &parameters,
+                                              vector<Parsed_Parameter const *> &connections)
+{
+  // Exactly the same as the base except we create a map of the parameters for
+  // later retrieval
+  for (const auto param : parameters.get_parameter_vector()) {
+    // Check if the parameter is a connection, and defer processing
+    // if it is
+    _parameters[param->name] = param;
+    if (param->storage == Container_Type::Reference)
+      connections.push_back(param);
+    else {
+      // See if the parameter name is in Pixar terms, and needs to be converted
+      const std::string input_name = parameter_name(param->name);
+
+      // Find the input to write the parameter value to
+      const SocketType *input = find_socket(input_name, _nodes.back());
+
+      if (!input) {
+        VLOG_WARNING << "Could not find parameter '" << param->name.c_str() << "' on node '"
+                     << _nodes.back()->name.c_str() << "'\n";
+        continue;
+      }
+
+      set_node_value(_nodes.back(), *input, param);
+    }
+  }
+
+  // Now handle the funny one-offs that require remapping
+  Parsed_Parameter updated_param;
+  Parsed_Parameter *param;
+  const SocketType *input;
+
+  updated_param.payload = vector<float>();
+  if ((param = _parameters["emitColor"])) {
+    if (param->storage != Container_Type::Reference) {
+      updated_param.type = Parameter_Type::Real;
+      float3 hsv = rgb_to_hsv(make_float3(param->floats()[0], param->floats()[1], param->floats()[2]));
+      updated_param.add_float(hsv[2]);
+      input = find_socket("emission_strength", _nodes.back());
+      set_node_value(_nodes.back(), *input, &updated_param);
+    }
+  }
+}
+
+void PxrDisneyBsdftoPrincipled::update_parameters(Parameter_Dictionary const &parameters,
+                                              vector<Parsed_Parameter const *> &connections)
+{
+  // Exactly the same as the base except we create a map of the parameters for
+  // later retrieval
+  for (const auto param : parameters.get_parameter_vector()) {
+    // Check if the parameter is a connection, and defer processing
+    // if it is
+    _parameters[param->name] = param;
+    if (param->storage == Container_Type::Reference)
+      connections.push_back(param);
+    else {
+      // See if the parameter name is in Pixar terms, and needs to be converted
+      const std::string input_name = parameter_name(param->name);
+
+      // Find the input to write the parameter value to
+      const SocketType *input = find_socket(input_name, _nodes.back());
+
+      if (!input) {
+        VLOG_WARNING << "Could not find parameter '" << param->name.c_str() << "' on node '"
+                     << _nodes.back()->name.c_str() << "'\n";
+        continue;
+      }
+
+      set_node_value(_nodes.back(), *input, param);
+    }
+  }
+
+  // Now handle the funny one-offs that require remapping
+  Parsed_Parameter updated_param;
+  Parsed_Parameter *param;
+  const SocketType *input;
+
+  updated_param.payload = vector<float>();
+  if ((param = _parameters["emitColor"])) {
+    if (param->storage != Container_Type::Reference) {
+      updated_param.type = Parameter_Type::Real;
+      float3 hsv = rgb_to_hsv(make_float3(param->floats()[0], param->floats()[1], param->floats()[2]));
+      updated_param.add_float(hsv[2]);
+      input = find_socket("emission_strength", _nodes.back());
+      set_node_value(_nodes.back(), *input, &updated_param);
+    }
+  }
+  if ((param = _parameters["diffTrans"])) {
+    if (param->storage != Container_Type::Reference) {
+      updated_param.floats().clear();
+      updated_param.type = Parameter_Type::Real;
+      // RenderMan diffTrans is in the range [0,2] so rescale back to [0,1]
+      updated_param.add_float(param->floats()[0]/2.0f);
+      input = find_socket("transmission", _nodes.back());
+      set_node_value(_nodes.back(), *input, &updated_param);
     }
   }
 }

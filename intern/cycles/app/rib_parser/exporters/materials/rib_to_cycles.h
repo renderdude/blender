@@ -141,6 +141,28 @@ class PxrSurfacetoPrincipled : public RIBtoCyclesMapping {
   std::unordered_map<std::string, Parsed_Parameter *> _parameters;
 };
 
+class PxrDisneytoPrincipled : public RIBtoCyclesMapping {
+ public:
+  using RIBtoCyclesMapping::RIBtoCyclesMapping;
+
+  void update_parameters(Parameter_Dictionary const &params,
+                         vector<Parsed_Parameter const *> &connections);
+
+ private:
+  std::unordered_map<std::string, Parsed_Parameter *> _parameters;
+};
+
+class PxrDisneyBsdftoPrincipled : public RIBtoCyclesMapping {
+ public:
+  using RIBtoCyclesMapping::RIBtoCyclesMapping;
+
+  void update_parameters(Parameter_Dictionary const &params,
+                         vector<Parsed_Parameter const *> &connections);
+
+ private:
+  std::unordered_map<std::string, Parsed_Parameter *> _parameters;
+};
+
 CCL_NAMESPACE_END
 
 #endif  // RIB_TO_CYCLES_H

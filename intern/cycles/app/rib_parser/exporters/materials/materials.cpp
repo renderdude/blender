@@ -77,6 +77,58 @@ class RIBtoCycles {
       }};
 #endif
 
+  const PxrDisneytoPrincipled PxrDisney = {
+      {"principled_bsdf"},
+      {
+          { "baseColor", ustring("base_color")},
+          { "subsurfaceColor", ustring("subsurface_color")},
+          { "metallic", ustring("metallic")},
+          { "subsurface", ustring("subsurface")},
+          //{ "", ustring("subsurface_radius")},
+          //{ "", ustring("subsurface_ior")},
+          //{ "", ustring("subsurface_anisotropy")},
+          { "specular", ustring("specular")},
+          { "roughness", ustring("roughness")},
+          { "", ustring("specular_tint")},
+          { "anisotropic", ustring("anisotropic")},
+          { "sheen", ustring("sheen")},
+          //{ "", ustring("sheen_roughness")},
+          { "sheenTint", ustring("sheen_tint")},
+          { "clearcoat", ustring("clearcoat")},
+          //{ "", ustring("clearcoat_roughness")},
+          //{ "", ustring("ior")},
+          //{ "", ustring("transmission")},
+          //{ "", ustring("anisotropic_rotation")},
+          { "emitColor", ustring("emission")},
+          //{ "", ustring("emission_strength")},
+      }};
+
+  const PxrDisneyBsdftoPrincipled PxrDisneyBsdf = {
+      {"principled_bsdf"},
+      {
+          { "baseColor", ustring("base_color")},
+          { "subsurfaceColor", ustring("subsurface_color")},
+          { "metallic", ustring("metallic")},
+          { "subsurface", ustring("subsurface")},
+          //{ "", ustring("subsurface_radius")},
+          //{ "", ustring("subsurface_ior")},
+          //{ "", ustring("subsurface_anisotropy")},
+          { "specular", ustring("specular")},
+          { "roughness", ustring("roughness")},
+          { "specularTint", ustring("specular_tint")},
+          { "anisotropic", ustring("anisotropic")},
+          { "sheen", ustring("sheen")},
+          //{ "", ustring("sheen_roughness")},
+          { "sheenTint", ustring("sheen_tint")},
+          { "clearcoat", ustring("clearcoat")},
+          //{ "", ustring("clearcoat_roughness")},
+          { "ior", ustring("ior")},
+          { "diffTrans", ustring("transmission")},
+          //{ "", ustring("anisotropic_rotation")},
+          { "emitColor", ustring("emission")},
+          //{ "", ustring("emission_strength")},
+      }};
+
   const PxrNormalMaptoCycles PxrMultiNodeNormalMap = {
       // Nodes
       {"image_texture", "normal_map"},
@@ -129,6 +181,12 @@ class RIBtoCycles {
 
     if (nodeType == "PxrSurface") {
       result = new PxrSurfacetoPrincipled(PxrSurface);
+    }
+    else if (nodeType == "PxrDisney") {
+      result = new PxrDisneytoPrincipled(PxrDisney);
+    }
+    else if (nodeType == "PxrDisneyBsdf") {
+      result = new PxrDisneyBsdftoPrincipled(PxrDisneyBsdf);
     }
     else if (nodeType == "PxrBlack") {
       result = new RIBtoCyclesMapping(PxrBlack);
@@ -428,6 +486,7 @@ void RIBCyclesMaterials::add_default_renderman_inputs(Shader *shader)
   ShaderNode *sep_xyz = NULL;
   ShaderNode *sep_uv = NULL;
   bool found_geom = false, found_texco = false;
+  bool connected_geom = false, connected_texco = false;
 
   auto graph = shader->graph;
   // First check if ShaderGraph::simplify added a geometry or texture coordinate node
@@ -489,6 +548,7 @@ void RIBCyclesMaterials::add_default_renderman_inputs(Shader *shader)
             if (!sep_uv) {
               sep_uv = graph->create_node<SeparateXYZNode>();
               graph->connect(texco->output("UV"), sep_uv->input("Vector"));
+              connected_texco = true;
             }
 
             graph->connect(sep_uv->output("X"), input);
@@ -497,6 +557,7 @@ void RIBCyclesMaterials::add_default_renderman_inputs(Shader *shader)
             if (!sep_uv) {
               sep_uv = graph->create_node<SeparateXYZNode>();
               graph->connect(texco->output("UV"), sep_uv->input("Vector"));
+              connected_texco = true;
             }
 
             graph->connect(sep_uv->output("Y"), input);
@@ -504,6 +565,7 @@ void RIBCyclesMaterials::add_default_renderman_inputs(Shader *shader)
           else if (has_st) {
             if (!input->name().compare("st") || !input->name().compare("ST")) {
               graph->connect(texco->output("UV"), input);
+              connected_texco = true;
             }
           }
           else if (has_u && has_v) {
@@ -511,6 +573,7 @@ void RIBCyclesMaterials::add_default_renderman_inputs(Shader *shader)
               if (!sep_uv) {
                 sep_uv = graph->create_node<SeparateXYZNode>();
                 graph->connect(texco->output("UV"), sep_uv->input("Vector"));
+                connected_texco = true;
               }
 
               graph->connect(sep_uv->output("X"), input);
@@ -520,6 +583,7 @@ void RIBCyclesMaterials::add_default_renderman_inputs(Shader *shader)
             if (!sep_uv) {
               sep_uv = graph->create_node<SeparateXYZNode>();
               graph->connect(texco->output("UV"), sep_uv->input("Vector"));
+              connected_texco = true;
             }
 
             graph->connect(sep_uv->output("Y"), input);
@@ -530,6 +594,7 @@ void RIBCyclesMaterials::add_default_renderman_inputs(Shader *shader)
             if (!sep_xyz) {
               sep_xyz = graph->create_node<SeparateXYZNode>();
               graph->connect(geom->output("Position"), sep_xyz->input("Vector"));
+              connected_geom = true;
             }
 
             graph->connect(sep_xyz->output("X"), input);
@@ -538,6 +603,7 @@ void RIBCyclesMaterials::add_default_renderman_inputs(Shader *shader)
             if (!sep_xyz) {
               sep_xyz = graph->create_node<SeparateXYZNode>();
               graph->connect(geom->output("Position"), sep_xyz->input("Vector"));
+              connected_geom = true;
             }
 
             graph->connect(sep_xyz->output("Y"), input);
@@ -546,6 +612,7 @@ void RIBCyclesMaterials::add_default_renderman_inputs(Shader *shader)
             if (!sep_xyz) {
               sep_xyz = graph->create_node<SeparateXYZNode>();
               graph->connect(geom->output("Position"), sep_xyz->input("Vector"));
+              connected_geom = true;
             }
 
             graph->connect(sep_xyz->output("Z"), input);
@@ -555,9 +622,9 @@ void RIBCyclesMaterials::add_default_renderman_inputs(Shader *shader)
     }
   }
 
-  if (!found_geom)
+  if (!found_geom && connected_geom)
     graph->add(geom);
-  if (!found_texco)
+  if (!found_texco && connected_texco)
     graph->add(texco);
   if (sep_uv)
     graph->add(sep_uv);
