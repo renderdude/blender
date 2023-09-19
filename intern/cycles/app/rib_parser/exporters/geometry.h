@@ -23,9 +23,7 @@ class RIBCyclesMesh {
   {
   }
 
-  ~RIBCyclesMesh()
-  {
-  }
+  ~RIBCyclesMesh() = default;
 
   void export_geometry();
 

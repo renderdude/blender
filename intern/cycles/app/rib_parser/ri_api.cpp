@@ -33,6 +33,7 @@ namespace bfs = boost::filesystem;
 #include "util/projection.h"
 #include "util/transform.h"
 
+#include "exporters/curves.h"
 #include "exporters/geometry.h"
 #include "exporters/lights.h"
 #include "exporters/materials/materials.h"
@@ -123,13 +124,21 @@ void Ri::export_to_cycles()
   RIBCyclesMaterials materials(session->scene, osl_shader_group);
   materials.export_materials();
   for (auto &inst : instance_uses) {
-    auto inst_def = instance_definitions[inst.first];
-    if (inst_def->lights.size() > 0)
+    auto *inst_def = instance_definitions[inst.first];
+    if (!inst_def->lights.empty()) {
       export_lights(session->scene, inst.second, inst_def);
-    else if (inst_def->shapes.size() > 0) {
-      RIBCyclesMesh mesh(session->scene, inst.second, inst_def);
-      mesh.export_geometry();
-      scene_bounds.grow(mesh.bounds());
+    }
+    else if (!inst_def->shapes.empty()) {
+      if (inst_def->shapes[0].name == "curve") {
+        RIBCyclesCurves curve(session->scene, inst.second, inst_def);
+        curve.export_curves();
+        scene_bounds.grow(curve.bounds());
+      }
+      else {
+        RIBCyclesMesh mesh(session->scene, inst.second, inst_def);
+        mesh.export_geometry();
+        scene_bounds.grow(mesh.bounds());
+      }
     }
   }
 }
@@ -573,7 +582,23 @@ void Ri::Curves(const std::string &type,
                 Parsed_Parameter_Vector params,
                 File_Loc loc)
 {
-  std::cout << "Curves is unimplemented" << std::endl;
+  VERIFY_WORLD("Shape");
+
+  Parsed_Parameter *param = new Parsed_Parameter(Parameter_Type::Integer, "nvertices", loc);
+  for (int nv : nvertices) {
+    param->add_int(nv);
+  }
+  params.push_back(param);
+
+  param = new Parsed_Parameter(Parameter_Type::String, "wrap", loc);
+  param->add_string(wrap);
+  params.push_back(param);
+
+  param = new Parsed_Parameter(Parameter_Type::String, "type", loc);
+  param->add_string(type);
+  params.push_back(param);
+
+  Shape("curve", params, loc);
 }
 
 void Ri::Cylinder(float radius,
