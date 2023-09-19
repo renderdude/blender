@@ -414,9 +414,9 @@ namespace viewer_linking {
  * \{ */
 
 /* Depending on the node tree type, different socket types are supported by viewer nodes. */
-static bool socket_can_be_viewed(const bNodeSocket &socket)
+static bool socket_can_be_viewed(const bNode &node, const bNodeSocket &socket)
 {
-  if (!socket.is_visible()) {
+  if (!node.is_socket_icon_drawn(socket)) {
     return false;
   }
   if (STREQ(socket.idname, "NodeSocketVirtual")) {
@@ -530,7 +530,7 @@ static bNodeSocket *determine_socket_to_view(bNode &node_to_view)
   int last_linked_data_socket_index = -1;
   bool has_linked_geometry_socket = false;
   for (bNodeSocket *socket : node_to_view.output_sockets()) {
-    if (!socket_can_be_viewed(*socket)) {
+    if (!socket_can_be_viewed(node_to_view, *socket)) {
       continue;
     }
     for (bNodeLink *link : socket->directly_linked_links()) {
@@ -554,7 +554,7 @@ static bNodeSocket *determine_socket_to_view(bNode &node_to_view)
   if (last_linked_data_socket_index == -1 && !has_linked_geometry_socket) {
     /* Return the first socket that can be viewed. */
     for (bNodeSocket *socket : node_to_view.output_sockets()) {
-      if (socket_can_be_viewed(*socket)) {
+      if (socket_can_be_viewed(node_to_view, *socket)) {
         return socket;
       }
     }
@@ -566,7 +566,7 @@ static bNodeSocket *determine_socket_to_view(bNode &node_to_view)
   for (const int offset : IndexRange(1, tot_outputs)) {
     const int index = (last_linked_data_socket_index + offset) % tot_outputs;
     bNodeSocket &output_socket = node_to_view.output_socket(index);
-    if (!socket_can_be_viewed(output_socket)) {
+    if (!socket_can_be_viewed(node_to_view, output_socket)) {
       continue;
     }
     if (has_linked_geometry_socket && output_socket.type == SOCK_GEOMETRY) {

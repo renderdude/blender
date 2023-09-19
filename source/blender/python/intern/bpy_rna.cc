@@ -1665,11 +1665,11 @@ static int pyrna_py_to_prop(
             }
           }
           else {
-            PyC_Err_Format_Prefix(PyExc_TypeError,
-                                  "%.200s %.200s.%.200s doesn't support None from string types",
-                                  error_prefix,
-                                  RNA_struct_identifier(ptr->type),
-                                  RNA_property_identifier(prop));
+            PyErr_Format(PyExc_TypeError,
+                         "%.200s %.200s.%.200s doesn't support None from string types",
+                         error_prefix,
+                         RNA_struct_identifier(ptr->type),
+                         RNA_property_identifier(prop));
             return -1;
           }
         }
@@ -4513,14 +4513,19 @@ static PyObject *pyrna_struct_meta_idprop_getattro(PyObject *cls, PyObject *attr
  * this is faking internal behavior in a way that's too tricky to maintain well. */
 #  if 0
   if ((ret == nullptr) /* || BPy_PropDeferred_CheckTypeExact(ret) */) {
+    PyErr_Clear(); /* Clear error from tp_getattro. */
     StructRNA *srna = srna_from_self(cls, "StructRNA.__getattr__");
     if (srna) {
       PropertyRNA *prop = RNA_struct_type_find_property_no_base(srna, PyUnicode_AsUTF8(attr));
       if (prop) {
-        PyErr_Clear(); /* Clear error from tp_getattro. */
         PointerRNA tptr = RNA_pointer_create(nullptr, &RNA_Property, prop);
         ret = pyrna_struct_CreatePyObject(&tptr);
       }
+    }
+    if (ret == nullptr) {
+      PyErr_Format(PyExc_AttributeError,
+                   "StructRNA.__getattr__: attribute \"%.200s\" not found",
+                   PyUnicode_AsUTF8(attr));
     }
   }
 #  endif
@@ -4724,28 +4729,20 @@ static PyObject *pyrna_prop_collection_getattro(BPy_PropertyRNA *self, PyObject 
   {
     /* Could just do this except for 1 awkward case.
      * `PyObject_GenericGetAttr((PyObject *)self, pyname);`
-     * so as to support `bpy.data.library.load()` */
+     * so as to support `bpy.data.libraries.load()` */
 
-    PyObject *ret = PyObject_GenericGetAttr((PyObject *)self, pyname);
+    PyObject *ret = _PyObject_GenericGetAttrWithDict((PyObject *)self, pyname, nullptr, 1);
 
-    if (ret == nullptr && name[0] != '_') { /* Avoid inheriting `__call__` and similar. */
+    /* Check the '_' prefix to avoid inheriting `__call__` and similar. */
+    if ((ret == nullptr) && (name[0] != '_')) {
       /* Since this is least common case, handle it last. */
       PointerRNA r_ptr;
       if (RNA_property_collection_type_get(&self->ptr, self->prop, &r_ptr)) {
-        PyObject *cls;
-
-        PyObject *error_type, *error_value, *error_traceback;
-        PyErr_Fetch(&error_type, &error_value, &error_traceback);
-
-        cls = pyrna_struct_Subtype(&r_ptr);
-        ret = PyObject_GenericGetAttr(cls, pyname);
+        PyObject *cls = pyrna_struct_Subtype(&r_ptr);
+        ret = _PyObject_GenericGetAttrWithDict(cls, pyname, nullptr, 1);
         Py_DECREF(cls);
 
-        /* Restore the original error. */
-        if (ret == nullptr) {
-          PyErr_Restore(error_type, error_value, error_traceback);
-        }
-        else {
+        if (ret != nullptr) {
           if (Py_TYPE(ret) == &PyMethodDescr_Type) {
             PyMethodDef *m = ((PyMethodDescrObject *)ret)->d_method;
             /* TODO: #METH_CLASS */
@@ -4759,6 +4756,11 @@ static PyObject *pyrna_prop_collection_getattro(BPy_PropertyRNA *self, PyObject 
           }
         }
       }
+    }
+
+    if (ret == nullptr) {
+      PyErr_Format(
+          PyExc_AttributeError, "bpy_prop_collection: attribute \"%.200s\" not found", name);
     }
 
     return ret;
@@ -7952,7 +7954,6 @@ int pyrna_struct_as_ptr_or_null_parse(PyObject *o, void *p)
 
 StructRNA *srna_from_self(PyObject *self, const char *error_prefix)
 {
-
   if (self == nullptr) {
     return nullptr;
   }
@@ -7964,19 +7965,8 @@ StructRNA *srna_from_self(PyObject *self, const char *error_prefix)
   }
 
   /* These cases above not errors, they just mean the type was not compatible
-   * After this any errors will be raised in the script */
-
-  PyObject *error_type, *error_value, *error_traceback;
-  StructRNA *srna;
-
-  PyErr_Fetch(&error_type, &error_value, &error_traceback);
-  srna = pyrna_struct_as_srna(self, false, error_prefix);
-
-  if (!PyErr_Occurred()) {
-    PyErr_Restore(error_type, error_value, error_traceback);
-  }
-
-  return srna;
+   * After this any errors will be raised in the script. */
+  return pyrna_struct_as_srna(self, false, error_prefix);
 }
 
 static int deferred_register_prop(StructRNA *srna, PyObject *key, PyObject *item)
@@ -8757,7 +8747,19 @@ static int bpy_class_call(bContext *C, PointerRNA *ptr, FunctionRNA *func, Param
       reports = CTX_wm_reports(C);
     }
 
-    BPy_errors_to_report(reports);
+    /* Typically null reports are sent to the output,
+     * in this case however PyErr_Print is responsible for that,
+     * so only run this if reports are non-null. */
+    if (reports) {
+      /* Create a temporary report list so none of the reports are printed (only stored).
+       * Only do this when reports is non-null because the error is printed to the `stderr`
+       * #PyErr_Print below. */
+      ReportList reports_temp = {0};
+      BKE_reports_init(&reports_temp, reports->flag | RPT_PRINT_HANDLED_BY_OWNER);
+      reports_temp.storelevel = reports->storelevel;
+      BPy_errors_to_report(&reports_temp);
+      BLI_movelisttolist(&reports->list, &reports_temp.list);
+    }
 
     /* Also print in the console for Python. */
     PyErr_Print();

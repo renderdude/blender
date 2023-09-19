@@ -1027,7 +1027,7 @@ class WM_OT_url_open(Operator):
 
     @staticmethod
     def _add_utm_param_to_url(url, utm_source):
-        import urllib
+        import urllib.parse
 
         # Make sure we have a scheme otherwise we can't parse the url.
         if not url.startswith(("http://", "https://")):
@@ -3445,9 +3445,6 @@ class WM_MT_region_toggle_pie(Menu):
 
         # Use to access the labels.
         enum_items = bpy.types.Region.bl_rna.properties["type"].enum_items_static_ui
-
-        # Remove empty items.
-        items[:] = [item for item in items if item != []]
 
         for region_type_list in (items + items_overflow):
             if not region_type_list:

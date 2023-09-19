@@ -1888,7 +1888,7 @@ static void edittranslation_find_po_file(const char *root,
     return;
   }
 
-  /* Now try without the second ISO code part (`_ES` in `es_ES`). */
+  /* Now try without the second ISO code part (`_BR` in `pt_BR`). */
   {
     const char *tc = nullptr;
     size_t szt = 0;
@@ -2383,13 +2383,16 @@ static void UI_OT_list_start_filter(wmOperatorType *ot)
 
 static bool ui_view_focused_poll(bContext *C)
 {
+  const wmWindow *win = CTX_wm_window(C);
+  if (!(win && win->eventstate)) {
+    return false;
+  }
+
   const ARegion *region = CTX_wm_region(C);
   if (!region) {
     return false;
   }
-  const wmWindow *win = CTX_wm_window(C);
   const uiViewHandle *view = UI_region_view_find_at(region, win->eventstate->xy, 0);
-
   return view != nullptr;
 }
 
@@ -2426,6 +2429,9 @@ static void UI_OT_view_start_filter(wmOperatorType *ot)
 static bool ui_view_drop_poll(bContext *C)
 {
   const wmWindow *win = CTX_wm_window(C);
+  if (!(win && win->eventstate)) {
+    return false;
+  }
   const ARegion *region = CTX_wm_region(C);
   if (region == nullptr) {
     return false;
@@ -2631,7 +2637,7 @@ void ED_operatortypes_ui()
 
 void ED_keymap_ui(wmKeyConfig *keyconf)
 {
-  WM_keymap_ensure(keyconf, "User Interface", 0, 0);
+  WM_keymap_ensure(keyconf, "User Interface", SPACE_EMPTY, RGN_TYPE_WINDOW);
 
   eyedropper_modal_keymap(keyconf);
   eyedropper_colorband_modal_keymap(keyconf);

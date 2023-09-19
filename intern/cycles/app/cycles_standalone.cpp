@@ -54,8 +54,9 @@ static void session_print(const string &str)
   int len = str.size();
   maxlen = max(len, maxlen);
 
-  for (int i = len; i < maxlen; i++)
+  for (int i = len; i < maxlen; i++) {
     printf(" ");
+  }
 
   /* flush because we don't write an end of line */
   fflush(stdout);
@@ -69,8 +70,9 @@ static void session_print_status()
   double progress = options.session->progress.get_progress();
   options.session->progress.get_status(status, substatus);
 
-  if (substatus != "")
+  if (substatus != "") {
     status += ": " + substatus;
+  }
 
   /* print status */
   status = string_printf("Progress %05.2f   %s", (double)progress * 100, status.c_str());
@@ -128,7 +130,7 @@ static void scene_init()
 
   /* Calculate Viewplane */
   if (!rib_mode)
-    options.scene->camera->compute_auto_viewplane();
+  options.scene->camera->compute_auto_viewplane();
   
   session_buffer_params();
   if (rib_mode)
@@ -148,7 +150,7 @@ static void session_init()
   }
 #endif
 
-      if (!options.output_filepath.empty()) {
+  if (!options.output_filepath.empty()) {
     options.session->set_output_driver(make_unique<OIIOOutputDriver>(
         options.output_filepath, options.output_pass, session_print));
   }
@@ -363,8 +365,9 @@ static void keyboard(unsigned char key)
 
 static int files_parse(int argc, const char *argv[])
 {
-  if (argc > 0)
+  if (argc > 0) {
     options.filepath = argv[0];
+  }
 
   return 0;
 }
@@ -387,8 +390,9 @@ static void options_parse(int argc, const char **argv)
   /* List devices for which support is compiled in. */
   vector<DeviceType> types = Device::available_types();
   foreach (DeviceType type, types) {
-    if (device_names != "")
+    if (device_names != "") {
       device_names += ", ";
+    }
 
     device_names += Device::string_from_type(type);
   }
@@ -506,12 +510,14 @@ static void options_parse(int argc, const char **argv)
 
   options.session_params.use_profiling = profile;
 
-  if (ssname == "osl")
+  if (ssname == "osl") {
     options.scene_params.shadingsystem = SHADINGSYSTEM_OSL;
-  else if (ssname == "svm")
+  }
+  else if (ssname == "svm") {
     options.scene_params.shadingsystem = SHADINGSYSTEM_SVM;
+  }
 
-#if !defined(WITH_CYCLES_STANDALONE_GUI)
+#ifndef WITH_CYCLES_STANDALONE_GUI
   options.session_params.background = true;
 #else
   if (options.display_type != "" && options.display_type != "gl" &&
