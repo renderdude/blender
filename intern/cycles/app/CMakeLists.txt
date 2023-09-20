@@ -152,6 +152,7 @@ if(WITH_CYCLES_STANDALONE)
     rib_parser/exporters/materials/materials.h
     rib_parser/exporters/materials/rib_to_cycles.cpp
     rib_parser/exporters/materials/rib_to_cycles.h
+    rib_parser/exporters/materials/shader_defaults.h
     tev/display_driver.cpp
     tev/display_driver.h
   )
