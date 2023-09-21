@@ -3,6 +3,7 @@
 #include "scene/shader_nodes.h"
 
 #include "app/rib_parser/exporters/lights.h"
+#include "util/transform.h"
 
 CCL_NAMESPACE_BEGIN
 
@@ -77,11 +78,21 @@ void export_lights(Scene *scene,
         light->set_sizev(size);
       }
       else if (light_inst.light_type == "PxrRectLight") {
+        // Size is set in the tfm
+        #if 1
+        light->set_sizeu(1.f);
+        light->set_sizev(1.f);
+        #else
         light->set_sizeu(1.f * fabsf(decomp[0].z.w));
         light->set_sizev(1.f * fabsf(decomp[0].z.w));
+        #endif
       }
       else if (light_inst.light_type == "PxrSphereLight") {
+        #if 1
+        light->set_size(0.5f);
+        #else
         light->set_size(0.5f * fabsf(decomp[0].z.w));
+        #endif
 
         bool shaping = false;
         const float shapingConeAngle = light_inst.parameters.get_one_float("shapingConeAngle",
