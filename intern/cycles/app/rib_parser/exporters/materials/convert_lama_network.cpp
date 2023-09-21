@@ -39,7 +39,7 @@ namespace mx = MaterialX;
 CCL_NAMESPACE_BEGIN
 
 // Indent levels for prettying the output.
-static std::string L0 = "";
+static std::string L0;
 static std::string L1 = "  ";
 static std::string L2 = "    ";
 static std::string L3 = "      ";
@@ -239,23 +239,28 @@ void LamaNetwork::remove_external_nodes()
 void LamaNetwork::find_common_references()
 {
   // Extract all external references
-  for (auto &params : _shader_graph.second)
-    for (auto &pp : params.get_parameter_vector())
+  for (auto &params : _shader_graph.second) {
+    for (auto &pp : params.get_parameter_vector()) {
       if (pp->name != "shader_type") {
         if (pp->storage == Container_Type::Reference) {
           vector<string> tokens;
           string_split(tokens, pp->strings()[0], ":");
-          if (_non_lama_nodes.find(tokens[0]) != _non_lama_nodes.end())
+          if (_non_lama_nodes.find(tokens[0]) != _non_lama_nodes.end()) {
             _common_ext_refs[pp->name].push_back(pp);
+          }
         }
       }
+    }
+  }
 
   // Simplify to just the common ones
   for (auto it = _common_ext_refs.begin(); it != _common_ext_refs.end();) {
-    if (it->second.size() == 1)
+    if (it->second.size() == 1) {
       it = _common_ext_refs.erase(it);
-    else
+    }
+    else {
       it++;
+    }
   }
 }
 
@@ -263,9 +268,9 @@ void LamaNetwork::find_parameters()
 {
   // Catagorized all Lama node references into constants, or internal/external references
   for (auto &params : _shader_graph.second) {
-    auto shader_type = params.get_parameter("shader_type");
+    auto *shader_type = params.get_parameter("shader_type");
     _handle_to_params[shader_type->strings()[2]] = params;
-    for (auto &pp : params.get_parameter_vector()) {
+    for (const auto &pp : params.get_parameter_vector()) {
       if (pp->name != "shader_type") {
         if (pp->storage != Container_Type::Reference) {
           _constants[shader_type->strings()[2]].push_back(pp);
@@ -273,10 +278,16 @@ void LamaNetwork::find_parameters()
         else {
           vector<string> tokens;
           string_split(tokens, pp->strings()[0], ":");
-          if (_non_lama_nodes.find(tokens[0]) != _non_lama_nodes.end())
+          if (_non_lama_nodes.find(tokens[0]) != _non_lama_nodes.end()) {
             _external_references[shader_type->strings()[2]].push_back(pp);
-          else
+          }
+          else {
             _internal_references[shader_type->strings()[2]].push_back(pp);
+          }
+          // Now yank parameters that need rescaling
+          if (tokens[1] == "out_specularWeight") {
+            _rescaled_parameters[shader_type->strings()[2]].push_back(pp);
+          }
         }
       }
     }
@@ -292,7 +303,7 @@ void LamaNetwork::remap_parameters()
   remapper["normal"] = 1;
   remapper["mix"] = 1;
   for (auto ref : _external_references) {
-    for (auto pp : ref.second) {
+    for (auto *pp : ref.second) {
       if ((_common_ext_refs.find(pp->name) == _common_ext_refs.end())) {
         if (remapper.find(pp->name) != remapper.end()) {
           _remapped_params[ref.first][pp] = pp->name + "_" + std::to_string(remapper[pp->name]);
@@ -304,15 +315,18 @@ void LamaNetwork::remap_parameters()
   std::map<std::string, std::string> remap;
 
   for (auto ref : _common_ext_refs) {
-    if (remapper.find(ref.first) == remapper.end())
+    if (remapper.find(ref.first) == remapper.end()) {
       remapper[ref.first] = 1;
-    for (auto pp : ref.second) {
+    }
+    for (auto *pp : ref.second) {
       std::string remapped_name = pp->name + "_" + std::to_string(remapper[pp->name]);
       remapper[pp->name] = remapper[pp->name] + 1;
-      if (remap.find(pp->strings()[0]) == remap.end())
+      if (remap.find(pp->strings()[0]) == remap.end()) {
         remap[pp->strings()[0]] = remapped_name;
-      else
+      }
+      else {
         remapped_name = remap[pp->strings()[0]];
+      }
 
       _remapped_params["common"][pp] = remapped_name;
     }
@@ -322,11 +336,11 @@ void LamaNetwork::remap_parameters()
 std::string LamaNetwork::generate_parameters()
 {
   // Build up the strings() for the nodedef and surfaceshader components
-  std::string inputs = "";
+  std::string inputs;
   for (auto &params : _shader_graph.second) {
-    auto shader_type = params.get_parameter("shader_type");
+    auto *shader_type = params.get_parameter("shader_type");
     inputs += L2 + "<!--" + shader_type->strings()[1] + "-->\n";
-    for (auto &pp : params.get_parameter_vector()) {
+    for (const auto &pp : params.get_parameter_vector()) {
       if (pp->name != "shader_type" && pp->storage == Container_Type::Reference) {
         bool export_ref = (_common_ext_refs.find(pp->name) != _common_ext_refs.end());
         if (export_ref) {
@@ -340,12 +354,14 @@ std::string LamaNetwork::generate_parameters()
         }
         else {
           // Remove any internal references (between lama nodes) from the interface
-          if (_internal_references.find(shader_type->strings()[2]) != _internal_references.end())
-            for (auto pp_ir : _internal_references[shader_type->strings()[2]]) {
+          if (_internal_references.find(shader_type->strings()[2]) != _internal_references.end()) {
+            for (auto *pp_ir : _internal_references[shader_type->strings()[2]]) {
               export_ref = pp_ir == pp;
-              if (export_ref)
+              if (export_ref) {
                 break;
+              }
             }
+          }
         }
         if (!export_ref) {
           std::string iface_name = remapped_name(shader_type->strings()[2], pp, pp->name);
@@ -357,7 +373,7 @@ std::string LamaNetwork::generate_parameters()
   }
   inputs += L2 + "<!--common-->\n";
   for (auto it = _common_ext_refs.begin(); it != _common_ext_refs.end(); it++) {
-    for (auto pp : it->second) {
+    for (auto *pp : it->second) {
       std::string iface_name = remapped_name("common", pp, it->first);
       inputs += L2 + "<input name=\"" + iface_name + "\" type=\"" + lama_type(pp);
       inputs += "\" value=\"" + lama_default(pp) + "\"/>\n";
@@ -374,30 +390,62 @@ std::string LamaNetwork::generate_parameters()
 void LamaNetwork::split_nodegraph()
 {
   std::vector<Parameter_Dictionary> new_nodes;
+  std::map<std::string, bool> split_nodes;
 
   for (auto &params : _shader_graph.second) {
-    auto shader_type = params.get_parameter("shader_type");
+    auto *shader_type = params.get_parameter("shader_type");
+    int split_type = 0;
     bool is_bsdf = true;
-    bool needs_splitting = false;
 
     if (shader_type->strings()[1] == "LamaEmission") {
-      is_bsdf = false;
       _has_emission_node = true;
+      is_bsdf = false;
     }
     else if (shader_type->strings()[1] != "LamaSurface") {
       if (shader_type->strings()[1] == "LamaAdd" || shader_type->strings()[1] == "LamaMix") {
         std::string mat1 = params.get_parameter("material1")->strings()[0];
         std::string mat2 = params.get_parameter("material2")->strings()[0];
-        if (!(_handle_to_lama[mat1].second && _handle_to_lama[mat2].second))
-          needs_splitting = true;
+        auto hm1 = _handle_to_lama[mat1];
+        auto hm2 = _handle_to_lama[mat2];
+        if (hm1.second ^ hm2.second) {  // XOR, if only one of the two is false
+          split_type = 1;
+        }
+        else if (!(hm1.second | hm2.second)) {  // !OR, both are false
+          auto find_hm1 = split_nodes.find(hm1.first);
+          auto find_hm2 = split_nodes.find(hm2.first);
+          if (find_hm1 == split_nodes.end() && find_hm2 == split_nodes.end()) {
+            // Neither input is split, e.g., two emission nodes, so propogate as
+            // an emission node
+            is_bsdf = false;
+          }
+          else if (find_hm1 != split_nodes.end() && find_hm2 != split_nodes.end()) {
+            // Both nodes are split
+            split_type = 2;
+          }
+          else {
+            // One of the two is split
+            split_type = 3;
+          }
+        }
       }
-      if (needs_splitting) {
+    }
+    switch (split_type) {
+      case 0: {  // default, no node needs to be split
+        _handle_to_lama[shader_type->strings()[2]] = std::make_pair(shader_type->strings()[2],
+                                                                    is_bsdf);
+        break;
+      }
+      case 1: {
+        _handle_to_lama[shader_type->strings()[2]] = std::make_pair(shader_type->strings()[2],
+                                                                    false);
         _a_node_was_split = true;
         Parsed_Parameter_Vector new_params;
-        for (auto pp : params.get_parameter_vector())
+        for (auto *pp : params.get_parameter_vector()) {
           new_params.push_back(new Parsed_Parameter(*pp));
+        }
         Parameter_Dictionary edf_dict(new_params);
         Parsed_Parameter *edf_shader_type = edf_dict.get_parameter("shader_type");
+        split_nodes[shader_type->strings()[2]] = true;
         edf_shader_type->strings()[2] += "_EDF";
         shader_type->strings()[2] += "_BSDF";
         std::string mat1 = params.get_parameter("material1")->strings()[0];
@@ -406,16 +454,19 @@ void LamaNetwork::split_nodegraph()
         // mat1 points to the EDF node
         if (!_handle_to_lama[mat1].second) {
           params.remove_bxdf("material1");
-          if (_handle_to_lama.find(mat2) == _handle_to_lama.end())
+          if (_handle_to_lama.find(mat2) == _handle_to_lama.end()) {
             params.get_parameter("material2")->strings()[0] += "_BSDF";
+          }
           edf_dict.remove_bxdf("material2");
-          if (_handle_to_lama.find(mat1) == _handle_to_lama.end())
+          if (_handle_to_lama.find(mat1) == _handle_to_lama.end()) {
             edf_dict.get_parameter("material1")->strings()[0] += "_EDF";
+          }
         }
         else {
           params.remove_bxdf("material2");
-          if (_handle_to_lama.find(mat1) == _handle_to_lama.end())
+          if (_handle_to_lama.find(mat1) == _handle_to_lama.end()) {
             params.get_parameter("material1")->strings()[0] += "_BSDF";
+          }
           edf_dict.remove_bxdf("material1");
           if (_handle_to_lama.find(mat2) == _handle_to_lama.end())
             edf_dict.get_parameter("material2")->strings()[0] += "_EDF";
@@ -425,14 +476,53 @@ void LamaNetwork::split_nodegraph()
         _handle_to_lama[edf_shader_type->strings()[2]] = std::make_pair(shader_type->strings()[2],
                                                                         false);
         new_nodes.push_back(edf_dict);
+        break;
       }
-      else
+      case 2: {
+        File_Loc loc;
+        error_exit(&loc, "Unhandled case: two EDFs\n");
+        break;
+      }
+      case 3: {
+        Parsed_Parameter_Vector new_params;
+        for (auto *pp : params.get_parameter_vector()) {
+          new_params.push_back(new Parsed_Parameter(*pp));
+        }
+        Parameter_Dictionary edf_dict(new_params);
+        Parsed_Parameter *edf_shader_type = edf_dict.get_parameter("shader_type");
+        split_nodes[shader_type->strings()[2]] = true;
+        edf_shader_type->strings()[2] += "_EDF";
+        shader_type->strings()[2] += "_BSDF";
+        std::string mat1 = params.get_parameter("material1")->strings()[0];
+        std::string mat2 = params.get_parameter("material2")->strings()[0];
+
+        // We know that one of the two nodes is actually a split
+        if (split_nodes.find(mat1) != split_nodes.end()) {
+          // It's first one, handle the BSDF side first
+          params.remove_bxdf("material2");
+          params.get_parameter("material1")->strings()[0] += "_BSDF";
+          // Now the EDF side
+          edf_dict.get_parameter("material1")->strings()[0] += "_EDF";
+        }
+        else {
+          // second is a split
+          params.remove_bxdf("material1");
+          params.get_parameter("material2")->strings()[0] += "_BSDF";
+          // Now the EDF side
+          edf_dict.get_parameter("material2")->strings()[0] += "_EDF";
+        }
         _handle_to_lama[shader_type->strings()[2]] = std::make_pair(shader_type->strings()[2],
-                                                                    is_bsdf);
+                                                                    true);
+        _handle_to_lama[edf_shader_type->strings()[2]] = std::make_pair(shader_type->strings()[2],
+                                                                        false);
+        new_nodes.push_back(edf_dict);
+        break;
+      }
     }
   }
-  for (auto node : new_nodes)
+  for (auto node : new_nodes) {
     _shader_graph.second.push_back(node);
+  }
 }
 
 void LamaNetwork::map_renderman_to_mtlx()
@@ -448,7 +538,8 @@ void LamaNetwork::map_renderman_to_mtlx()
         pp->name = "normal";
       }
       else if ((pp->name == "diffuseColor") || (pp->name == "sssColor") ||
-               (pp->name == "sheenColor") || (pp->name == "emissionColor")) {
+               (pp->name == "sheenColor") || (pp->name == "emissionColor"))
+      {
         pp->name = "color";
       }
     }
@@ -497,11 +588,37 @@ void LamaNetwork::match_renderman_definitions()
   }
 }
 
+std::string LamaNetwork::rescale_parameters()
+{
+  std::string def;
+
+  for (auto &ref : _rescaled_parameters) {
+    vector<string> tokens;
+    string_split(tokens, ref.second[0]->strings()[0], ":");
+
+    if (tokens[1] == "out_specularWeight") {
+      std::string iface_name = remapped_name(ref.first, ref.second[0], ref.second[0]->name);
+      def += L2 + "<subtract name=\"specular_weight_to_origin\" type=\"float\">\n";
+      def += L3 + "<input name=\"in1\" type=\"float\" interfacename=\"" + iface_name + "\"/>\n";
+      def += L3 + "<input name=\"in2\" type=\"float\" value=\"0.5\"/>\n";
+      def += L2 + "</subtract>\n";
+
+      def += L2 + "<multiply name=\"rescale_specular_weight\" type=\"float\">\n";
+      def += L3 + "<input name=\"in1\" type=\"float\" nodename=\"specular_weight_to_origin\"/>\n";
+      def += L3 + "<input name=\"in2\" type=\"float\" value=\"2.0\"/>\n";
+      def += L2 + "</multiply>\n";
+
+      ref.second[0]->strings()[0] = "rescale_specular_weight";
+    }
+  }
+  return def;
+}
+
 std::string LamaNetwork::generate_nodegraph()
 {
   // Now, build up the nodegraph
   std::string node_graph = L1 + "<nodegraph name=\"NG\" nodedef=\"NDInputs\">\n";
-  std::string def = "";
+  std::string def;
   // Starting with constants
   for (auto it = _constants.begin(); it != _constants.end(); it++) {
     for (auto pp : it->second) {
@@ -525,6 +642,9 @@ std::string LamaNetwork::generate_nodegraph()
     }
   }
   node_graph += def;
+
+  // Rescale parameters to map RenderMan values back to MaterialX
+  // node_graph += rescale_parameters();
 
   // Now the Lama nodes
   for (auto &params : _shader_graph.second) {
@@ -696,12 +816,12 @@ void LamaNetwork::generate_mtlx_definition()
 void LamaNetwork::adjust_connections()
 {
   for (auto const &params : _lama_shader_graph.second) {
-    auto pxrblender_pp = params.get_parameter("shader_type");
+    const auto *pxrblender_pp = params.get_parameter("shader_type");
     if (pxrblender_pp->strings()[1].find("PxrBlender") != std::string::npos) {
-      auto param = params.get_parameter("Normal");
+      const auto *param = params.get_parameter("Normal");
       if (param && param->storage == Container_Type::Reference) {
         auto lama_osl_node = _lama_shader_graph.second.back();
-        for (auto osl_pp : lama_osl_node.get_parameter_vector()) {
+        for (auto *osl_pp : lama_osl_node.get_parameter_vector()) {
           if (osl_pp->name.find("normal") != std::string::npos &&
               osl_pp->storage == Container_Type::Reference)
           {

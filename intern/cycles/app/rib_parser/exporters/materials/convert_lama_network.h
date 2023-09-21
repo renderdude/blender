@@ -11,15 +11,14 @@ using Vector_Dictionary = std::pair<std::string, std::vector<Parameter_Dictionar
 
 class LamaNetwork {
  public:
-  LamaNetwork(Vector_Dictionary &shader_graph) : _shader_graph(shader_graph)
-  {
-  }
-  ~LamaNetwork()
-  {
-  }
+  LamaNetwork(Vector_Dictionary &shader_graph) : _shader_graph(shader_graph) {}
+  ~LamaNetwork() = default;
 
   Vector_Dictionary convert();
-  bool has_emission() { return _has_emission_node; }
+  bool has_emission()
+  {
+    return _has_emission_node;
+  }
 
  private:
   bool generate_osl(std::string shader_name);
@@ -28,11 +27,12 @@ class LamaNetwork {
   void find_common_references();
   void find_parameters();
   void remap_parameters();
-	void split_nodegraph();
+  void split_nodegraph();
   void map_renderman_to_mtlx();
-	void match_renderman_definitions();
+  void match_renderman_definitions();
   std::string generate_parameters();
   std::string generate_nodegraph();
+  std::string rescale_parameters();
   void adjust_connections();
 
   std::string remapped_name(std::string node_name, Parsed_Parameter *param, std::string def_name)
@@ -60,6 +60,29 @@ class LamaNetwork {
     return iface_name;
   }
 
+  void update_remapped_name(std::string node_name, Parsed_Parameter *param, std::string new_name)
+  {
+    bool found = false;
+    if (_remapped_params.find(node_name) != _remapped_params.end()) {
+      auto& remap = _remapped_params[node_name];
+      if (remap.find(param) != remap.end()) {
+        remap[param] = new_name;
+        found = true;
+      }
+    }
+
+    // Check "common" if not found
+    if (!found) {
+      if (_remapped_params.find("common") != _remapped_params.end()) {
+        auto& remap = _remapped_params["common"];
+        if (remap.find(param) != remap.end()) {
+          remap[param] = new_name;
+          found = true;
+        }
+      }
+    }
+  }
+
   bool _a_node_was_split = false;
   bool _has_emission_node = false;
   Vector_Dictionary &_shader_graph;
@@ -67,9 +90,8 @@ class LamaNetwork {
   std::string _mtlx_def;
   Parameter_Dictionary _lama_surface;
   std::map<std::string, Parameter_Dictionary *> _non_lama_nodes;
-  std::map<std::string, vector<Parsed_Parameter *>> _common_ext_refs;
-  std::map<std::string, vector<Parsed_Parameter *>> _constants, _external_references,
-      _internal_references;
+  std::map<std::string, vector<Parsed_Parameter *>> _common_ext_refs, _constants,
+      _external_references, _internal_references, _rescaled_parameters;
   std::map<std::string, Parameter_Dictionary> _handle_to_params;
   std::map<std::string, std::map<Parsed_Parameter *, std::string>> _remapped_params;
   std::map<std::string, std::pair<std::string, bool>> _handle_to_lama;
