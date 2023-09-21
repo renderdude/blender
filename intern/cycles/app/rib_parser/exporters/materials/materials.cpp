@@ -77,55 +77,54 @@ class RIBtoCycles {
       }};
 #endif
 
-  const PxrDisneytoPrincipled PxrDisney = {
-      {"principled_bsdf"},
-      {
-          { "baseColor", ustring("base_color")},
-          { "subsurfaceColor", ustring("subsurface_color")},
-          { "metallic", ustring("metallic")},
-          { "subsurface", ustring("subsurface")},
-          //{ "", ustring("subsurface_radius")},
-          //{ "", ustring("subsurface_ior")},
-          //{ "", ustring("subsurface_anisotropy")},
-          { "specular", ustring("specular")},
-          { "roughness", ustring("roughness")},
-          //{ "", ustring("specular_tint")},
-          { "anisotropic", ustring("anisotropic")},
-          { "sheen", ustring("sheen")},
-          //{ "", ustring("sheen_roughness")},
-          { "sheenTint", ustring("sheen_tint")},
-          { "clearcoat", ustring("clearcoat")},
-          //{ "", ustring("clearcoat_roughness")},
-          //{ "", ustring("ior")},
-          //{ "", ustring("transmission")},
-          //{ "", ustring("anisotropic_rotation")},
-          { "emitColor", ustring("emission")},
-          //{ "", ustring("emission_strength")},
-      }};
+  const PxrDisneytoPrincipled PxrDisney = {{"principled_bsdf"},
+                                           {
+                                               {"baseColor", ustring("base_color")},
+                                               {"subsurfaceColor", ustring("subsurface_color")},
+                                               {"metallic", ustring("metallic")},
+                                               {"subsurface", ustring("subsurface")},
+                                               //{ "", ustring("subsurface_radius")},
+                                               //{ "", ustring("subsurface_ior")},
+                                               //{ "", ustring("subsurface_anisotropy")},
+                                               {"specular", ustring("specular")},
+                                               {"roughness", ustring("roughness")},
+                                               //{ "", ustring("specular_tint")},
+                                               {"anisotropic", ustring("anisotropic")},
+                                               {"sheen", ustring("sheen")},
+                                               //{ "", ustring("sheen_roughness")},
+                                               {"sheenTint", ustring("sheen_tint")},
+                                               {"clearcoat", ustring("clearcoat")},
+                                               //{ "", ustring("clearcoat_roughness")},
+                                               //{ "", ustring("ior")},
+                                               //{ "", ustring("transmission")},
+                                               //{ "", ustring("anisotropic_rotation")},
+                                               {"emitColor", ustring("emission")},
+                                               //{ "", ustring("emission_strength")},
+                                           }};
 
   const PxrDisneyBsdftoPrincipled PxrDisneyBsdf = {
       {"principled_bsdf"},
       {
-          { "baseColor", ustring("base_color")},
-          { "subsurfaceColor", ustring("subsurface_color")},
-          { "metallic", ustring("metallic")},
-          { "subsurface", ustring("subsurface")},
+          {"baseColor", ustring("base_color")},
+          {"subsurfaceColor", ustring("subsurface_color")},
+          {"metallic", ustring("metallic")},
+          {"subsurface", ustring("subsurface")},
           //{ "", ustring("subsurface_radius")},
           //{ "", ustring("subsurface_ior")},
           //{ "", ustring("subsurface_anisotropy")},
-          { "specReflectScale", ustring("specular")},
-          { "roughness", ustring("roughness")},
-          { "specularTint", ustring("specular_tint")},
-          { "anisotropic", ustring("anisotropic")},
-          { "sheen", ustring("sheen")},
+          {"specReflectScale", ustring("specular")},
+          {"roughness", ustring("roughness")},
+          {"specularTint", ustring("specular_tint")},
+          {"anisotropic", ustring("anisotropic")},
+          {"sheen", ustring("sheen")},
           //{ "", ustring("sheen_roughness")},
-          { "sheenTint", ustring("sheen_tint")},
-          { "clearcoat", ustring("clearcoat")},
+          {"sheenTint", ustring("sheen_tint")},
+          {"clearcoat", ustring("clearcoat")},
           //{ "", ustring("clearcoat_roughness")},
-          { "ior", ustring("ior")},
-          { "diffTrans", ustring("transmission")},
+          {"ior", ustring("ior")},
+          {"diffTrans", ustring("transmission")},
           //{ "", ustring("anisotropic_rotation")},
-          { "emitColor", ustring("emission")},
+          {"emitColor", ustring("emission")},
           //{ "", ustring("emission_strength")},
       }};
 
@@ -199,7 +198,7 @@ class RIBtoCycles {
     }
     else if (nodeType == "PxrNormalMap") {
       bool has_texture_node = false;
-      for ( auto pp: pv)
+      for (auto pp : pv)
         if (pp->name == "inputRGB" && pp->storage == Container_Type::Reference) {
           has_texture_node = true;
           break;
@@ -349,9 +348,10 @@ void RIBCyclesMaterials::populate_shader_graph(Vector_Dictionary sg)
   LamaNetwork lama(sg);
   Vector_Dictionary shader_graph = lama.convert();
 
-  if (lama.has_emission())
-    _shader->set_emission_sampling_method(EmissionSampling::EMISSION_SAMPLING_NONE);
-  
+  if (lama.has_emission()) {
+    _shader->set_emission_sampling_method(EmissionSampling::EMISSION_SAMPLING_AUTO);
+  }
+
   std::string shader_id = shader_graph.first;
   std::string shader_name, shader_type, handle;
   std::string shader_path = path_get("shader");
