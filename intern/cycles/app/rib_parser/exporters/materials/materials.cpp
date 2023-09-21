@@ -515,6 +515,7 @@ void RIBCyclesMaterials::add_default_renderman_inputs(Shader *shader)
     for (ShaderNode *node : graph->nodes) {
       if (node->is_a(link.first))
         graph->connect(link.second.first, node->input(link.second.second.c_str()));
+        connected_texco = true;
     }
   }
 
