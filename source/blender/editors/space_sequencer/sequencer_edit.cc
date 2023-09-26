@@ -68,8 +68,8 @@
 #include "UI_resources.hh"
 #include "UI_view2d.hh"
 
-#include "DEG_depsgraph.h"
-#include "DEG_depsgraph_build.h"
+#include "DEG_depsgraph.hh"
+#include "DEG_depsgraph_build.hh"
 
 /* Own include. */
 #include "sequencer_intern.hh"
@@ -82,7 +82,7 @@ struct TransSeq {
   int start, machine;
   int startofs, endofs;
   int anim_startofs, anim_endofs;
-  /* int final_left, final_right; */ /* UNUSED */
+  // int final_left, final_right; /* UNUSED. */
   int len;
   float content_start;
 };

@@ -25,13 +25,13 @@
 #include "BKE_lib_id.h"
 #include "BKE_lib_query.h"
 #include "BKE_lib_remap.h"
-#include "BKE_screen.h"
+#include "BKE_screen.hh"
 
 #include "RNA_access.hh"
 #include "RNA_define.hh"
 #include "RNA_enum_types.hh"
 
-#include "DEG_depsgraph.h"
+#include "DEG_depsgraph.hh"
 
 #include "IMB_imbuf_types.h"
 
@@ -448,7 +448,7 @@ static int /*eContextResult*/ image_context(const bContext *C,
 
   if (CTX_data_dir(member)) {
     CTX_data_dir_set(result, image_context_dir);
-    /* TODO(sybren): return CTX_RESULT_OK; */
+    // return CTX_RESULT_OK; /* TODO(@sybren). */
   }
   else if (CTX_data_equals(member, "edit_image")) {
     CTX_data_id_pointer_set(result, (ID *)ED_space_image(sima));

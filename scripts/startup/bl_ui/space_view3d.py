@@ -1976,7 +1976,7 @@ class VIEW3D_MT_select_edit_metaball(Menu):
 
 
 class VIEW3D_MT_edit_lattice_context_menu(Menu):
-    bl_label = "Lattice Context Menu"
+    bl_label = "Lattice"
 
     def draw(self, _context):
         layout = self.layout
@@ -2343,7 +2343,7 @@ class VIEW3D_MT_surface_add(Menu):
 
 
 class VIEW3D_MT_edit_metaball_context_menu(Menu):
-    bl_label = "Metaball Context Menu"
+    bl_label = "Metaball"
 
     def draw(self, _context):
         layout = self.layout
@@ -2582,8 +2582,6 @@ class VIEW3D_MT_object_relations(Menu):
     def draw(self, _context):
         layout = self.layout
 
-        layout.operator("object.make_override_library", text="Make Library Override...")
-
         layout.operator("object.make_dupli_face")
 
         layout.separator()
@@ -2631,10 +2629,13 @@ class VIEW3D_MT_object(Menu):
         layout.separator()
 
         layout.menu("VIEW3D_MT_object_asset", icon='ASSET_MANAGER')
-        layout.menu("VIEW3D_MT_object_parent")
         layout.menu("VIEW3D_MT_object_collection")
+
+        layout.separator()
+
+        layout.menu("VIEW3D_MT_object_liboverride", icon="LIBRARY_DATA_OVERRIDE")
         layout.menu("VIEW3D_MT_object_relations")
-        layout.menu("VIEW3D_MT_object_liboverride")
+        layout.menu("VIEW3D_MT_object_parent")
         layout.menu("VIEW3D_MT_object_constraints")
         layout.menu("VIEW3D_MT_object_track")
         layout.menu("VIEW3D_MT_make_links")
@@ -2730,7 +2731,7 @@ class VIEW3D_MT_object_clear(Menu):
 
 
 class VIEW3D_MT_object_context_menu(Menu):
-    bl_label = "Object Context Menu"
+    bl_label = "Object"
 
     def draw(self, context):
         layout = self.layout
@@ -3795,7 +3796,7 @@ class VIEW3D_MT_particle(Menu):
 
 
 class VIEW3D_MT_particle_context_menu(Menu):
-    bl_label = "Particle Context Menu"
+    bl_label = "Particle"
 
     def draw(self, context):
         layout = self.layout
@@ -4079,7 +4080,7 @@ class VIEW3D_MT_pose_apply(Menu):
 
 
 class VIEW3D_MT_pose_context_menu(Menu):
-    bl_label = "Pose Context Menu"
+    bl_label = "Pose"
 
     def draw(self, _context):
         layout = self.layout
@@ -4272,7 +4273,7 @@ class VIEW3D_MT_edit_mesh_context_menu(Menu):
         if is_vert_mode:
             col = row.column(align=True)
 
-            col.label(text="Vertex Context Menu", icon='VERTEXSEL')
+            col.label(text="Vertex", icon='VERTEXSEL')
             col.separator()
 
             # Additive Operators
@@ -4309,6 +4310,10 @@ class VIEW3D_MT_edit_mesh_context_menu(Menu):
 
             col.separator()
 
+            col.operator("transform.vert_crease")
+
+            col.separator()
+
             # Removal Operators
             if selected_verts_len > 1:
                 col.menu("VIEW3D_MT_edit_mesh_merge", text="Merge Vertices")
@@ -4319,7 +4324,7 @@ class VIEW3D_MT_edit_mesh_context_menu(Menu):
 
         if is_edge_mode:
             col = row.column(align=True)
-            col.label(text="Edge Context Menu", icon='EDGESEL')
+            col.label(text="Edge", icon='EDGESEL')
             col.separator()
 
             # Additive Operators
@@ -4393,7 +4398,7 @@ class VIEW3D_MT_edit_mesh_context_menu(Menu):
 
             col = row.column(align=True)
 
-            col.label(text="Face Context Menu", icon='FACESEL')
+            col.label(text="Face", icon='FACESEL')
             col.separator()
 
             # Additive Operators
@@ -5030,7 +5035,7 @@ class VIEW3D_MT_edit_curve_clean(Menu):
 
 
 class VIEW3D_MT_edit_curve_context_menu(Menu):
-    bl_label = "Curve Context Menu"
+    bl_label = "Curve"
 
     def draw(self, _context):
         # TODO(campbell): match mesh vertex menu.
@@ -5213,7 +5218,7 @@ class VIEW3D_MT_edit_font(Menu):
 
 
 class VIEW3D_MT_edit_font_context_menu(Menu):
-    bl_label = "Text Context Menu"
+    bl_label = "Text"
 
     def draw(self, _context):
         layout = self.layout
@@ -5348,7 +5353,7 @@ class VIEW3D_MT_edit_armature(Menu):
 
 
 class VIEW3D_MT_armature_context_menu(Menu):
-    bl_label = "Armature Context Menu"
+    bl_label = "Armature"
 
     def draw(self, context):
         layout = self.layout
@@ -7809,7 +7814,7 @@ class VIEW3D_MT_gpencil_edit_context_menu(Menu):
         if is_point_mode or is_segment_mode:
             col = row.column(align=True)
 
-            col.label(text="Point Context Menu", icon='GP_SELECT_POINTS')
+            col.label(text="Point", icon='GP_SELECT_POINTS')
             col.separator()
 
             # Additive Operators
@@ -7860,7 +7865,7 @@ class VIEW3D_MT_gpencil_edit_context_menu(Menu):
         if is_stroke_mode:
 
             col = row.column(align=True)
-            col.label(text="Stroke Context Menu", icon='GP_SELECT_STROKES')
+            col.label(text="Stroke", icon='GP_SELECT_STROKES')
             col.separator()
 
             # Main Strokes Operators
@@ -7960,7 +7965,7 @@ class VIEW3D_PT_gpencil_sculpt_automasking(Panel):
 class VIEW3D_PT_gpencil_sculpt_context_menu(Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'WINDOW'
-    bl_label = "Sculpt Context Menu"
+    bl_label = "Sculpt"
     bl_ui_units_x = 12
 
     def draw(self, context):
@@ -7980,7 +7985,7 @@ class VIEW3D_PT_gpencil_sculpt_context_menu(Panel):
 class VIEW3D_PT_gpencil_weight_context_menu(Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'WINDOW'
-    bl_label = "Weight Paint Context Menu"
+    bl_label = "Weight Paint"
     bl_ui_units_x = 12
 
     def draw(self, context):
@@ -7999,7 +8004,7 @@ class VIEW3D_PT_gpencil_weight_context_menu(Panel):
 class VIEW3D_PT_gpencil_draw_context_menu(Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'WINDOW'
-    bl_label = "Draw Context Menu"
+    bl_label = "Draw"
     bl_ui_units_x = 12
 
     def draw(self, context):
@@ -8037,7 +8042,7 @@ class VIEW3D_PT_gpencil_draw_context_menu(Panel):
 class VIEW3D_PT_gpencil_vertex_context_menu(Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'WINDOW'
-    bl_label = "Vertex Paint Context Menu"
+    bl_label = "Vertex Paint"
     bl_ui_units_x = 12
 
     def draw(self, context):
@@ -8076,7 +8081,7 @@ class VIEW3D_PT_paint_vertex_context_menu(Panel):
     # Only for popover, these are dummy values.
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'WINDOW'
-    bl_label = "Vertex Paint Context Menu"
+    bl_label = "Vertex Paint"
 
     def draw(self, context):
         layout = self.layout
@@ -8114,7 +8119,7 @@ class VIEW3D_PT_paint_texture_context_menu(Panel):
     # Only for popover, these are dummy values.
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'WINDOW'
-    bl_label = "Texture Paint Context Menu"
+    bl_label = "Texture Paint"
 
     def draw(self, context):
         layout = self.layout
@@ -8153,7 +8158,7 @@ class VIEW3D_PT_paint_weight_context_menu(Panel):
     # Only for popover, these are dummy values.
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'WINDOW'
-    bl_label = "Weights Context Menu"
+    bl_label = "Weights"
 
     def draw(self, context):
         layout = self.layout
@@ -8263,7 +8268,7 @@ class VIEW3D_PT_sculpt_context_menu(Panel):
     # Only for popover, these are dummy values.
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'WINDOW'
-    bl_label = "Sculpt Context Menu"
+    bl_label = "Sculpt"
 
     def draw(self, context):
         layout = self.layout

@@ -26,7 +26,7 @@
 #include "BKE_deform.h"
 #include "BKE_mesh.hh"
 #include "BKE_modifier.h"
-#include "BKE_screen.h"
+#include "BKE_screen.hh"
 
 #include "UI_interface.hh"
 #include "UI_resources.hh"
@@ -42,7 +42,7 @@
 #include "bmesh.h"
 #include "bmesh_tools.h"
 
-#include "DEG_depsgraph_query.h"
+#include "DEG_depsgraph_query.hh"
 
 static void init_data(ModifierData *md)
 {

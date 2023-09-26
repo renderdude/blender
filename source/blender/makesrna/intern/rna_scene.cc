@@ -65,7 +65,7 @@
 
 #include "BLI_threads.h"
 
-#include "DEG_depsgraph.h"
+#include "DEG_depsgraph.hh"
 
 #ifdef WITH_OPENEXR
 const EnumPropertyItem rna_enum_exr_codec_items[] = {
@@ -738,7 +738,7 @@ const EnumPropertyItem rna_enum_grease_pencil_selectmode_items[] = {
 #  include "BKE_node.h"
 #  include "BKE_pointcache.h"
 #  include "BKE_scene.h"
-#  include "BKE_screen.h"
+#  include "BKE_screen.hh"
 #  include "BKE_unit.h"
 
 #  include "NOD_composite.h"
@@ -751,8 +751,8 @@ const EnumPropertyItem rna_enum_grease_pencil_selectmode_items[] = {
 #  include "ED_scene.hh"
 #  include "ED_view3d.hh"
 
-#  include "DEG_depsgraph_build.h"
-#  include "DEG_depsgraph_query.h"
+#  include "DEG_depsgraph_build.hh"
+#  include "DEG_depsgraph_query.hh"
 
 #  include "SEQ_relations.h"
 #  include "SEQ_sequencer.h"
@@ -4466,7 +4466,7 @@ static void rna_def_view_layer_aov(BlenderRNA *brna)
 static void rna_def_view_layer_lightgroups(BlenderRNA *brna, PropertyRNA *cprop)
 {
   StructRNA *srna;
-  /*  PropertyRNA *prop; */
+  // PropertyRNA *prop;
 
   FunctionRNA *func;
   PropertyRNA *parm;

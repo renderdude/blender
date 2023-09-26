@@ -79,7 +79,7 @@
 #include "BKE_packedFile.h"
 #include "BKE_report.h"
 #include "BKE_scene.h"
-#include "BKE_screen.h"
+#include "BKE_screen.hh"
 #include "BKE_sound.h"
 #include "BKE_undo_system.h"
 #include "BKE_workspace.h"
@@ -123,7 +123,7 @@
 #  include "BPY_extern_run.h"
 #endif
 
-#include "DEG_depsgraph.h"
+#include "DEG_depsgraph.hh"
 
 #include "WM_api.hh"
 #include "WM_message.hh"
@@ -345,7 +345,7 @@ static void wm_file_read_setup_wm_keep_old(const bContext *C,
 }
 
 static void wm_file_read_setup_wm_use_new(bContext *C,
-                                          Main * /* bmain */,
+                                          Main * /*bmain*/,
                                           BlendFileReadWMSetupData *wm_setup_data,
                                           wmWindowManager *wm)
 {

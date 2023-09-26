@@ -23,7 +23,7 @@
 #include "BKE_global.h"
 #include "BKE_lib_query.h"
 #include "BKE_lib_remap.h"
-#include "BKE_screen.h"
+#include "BKE_screen.hh"
 #include "BKE_sequencer_offscreen.h"
 
 #include "GPU_state.h"
@@ -202,7 +202,11 @@ static void sequencer_free(SpaceLink *sl)
   SpaceSeq *sseq = (SpaceSeq *)sl;
   SequencerScopes *scopes = &sseq->scopes;
 
-  /* XXX  if (sseq->gpd) BKE_gpencil_free_data(sseq->gpd); */
+#if 0
+  if (sseq->gpd) {
+    BKE_gpencil_free_data(sseq->gpd);
+  }
+#endif
 
   if (scopes->zebra_ibuf) {
     IMB_freeImBuf(scopes->zebra_ibuf);
@@ -298,7 +302,7 @@ static SpaceLink *sequencer_duplicate(SpaceLink *sl)
   SpaceSeq *sseqn = static_cast<SpaceSeq *>(MEM_dupallocN(sl));
 
   /* Clear or remove stuff from old. */
-  /* XXX  sseq->gpd = gpencil_data_duplicate(sseq->gpd, false); */
+  // sseq->gpd = gpencil_data_duplicate(sseq->gpd, false);
 
   memset(&sseqn->scopes, 0, sizeof(sseqn->scopes));
   memset(&sseqn->runtime, 0, sizeof(sseqn->runtime));

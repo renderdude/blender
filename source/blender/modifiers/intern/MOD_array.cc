@@ -36,7 +36,7 @@
 #include "BKE_mesh.hh"
 #include "BKE_modifier.h"
 #include "BKE_object_deform.h"
-#include "BKE_screen.h"
+#include "BKE_screen.hh"
 
 #include "UI_interface.hh"
 #include "UI_resources.hh"
@@ -47,8 +47,8 @@
 #include "MOD_ui_common.hh"
 #include "MOD_util.hh"
 
-#include "DEG_depsgraph.h"
-#include "DEG_depsgraph_query.h"
+#include "DEG_depsgraph.hh"
+#include "DEG_depsgraph_query.hh"
 
 #include "GEO_mesh_merge_by_distance.hh"
 

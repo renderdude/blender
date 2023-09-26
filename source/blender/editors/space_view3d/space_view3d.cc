@@ -49,7 +49,7 @@
 #include "BKE_mesh.hh"
 #include "BKE_object.h"
 #include "BKE_scene.h"
-#include "BKE_screen.h"
+#include "BKE_screen.hh"
 #include "BKE_viewer_path.h"
 #include "BKE_workspace.h"
 
@@ -87,8 +87,8 @@
 #  include "BPY_extern.h"
 #endif
 
-#include "DEG_depsgraph.h"
-#include "DEG_depsgraph_build.h"
+#include "DEG_depsgraph.hh"
+#include "DEG_depsgraph_build.hh"
 
 #include "view3d_intern.h" /* own include */
 #include "view3d_navigate.hh"
@@ -1626,6 +1626,11 @@ static void view3d_header_region_listener(const wmRegionListenerParams *params)
           blender::ed::geometry::clear_operator_asset_trees();
           ED_region_tag_redraw(region);
           break;
+        default:
+          if (ELEM(wmn->action, NA_ADDED, NA_REMOVED)) {
+            blender::ed::geometry::clear_operator_asset_trees();
+            ED_region_tag_redraw(region);
+          }
       }
       break;
     case NC_NODE:
@@ -2286,6 +2291,7 @@ void ED_spacetype_view3d()
   art->listener = ED_asset_shelf_region_listen;
   art->poll = ED_asset_shelf_regions_poll;
   art->snap_size = ED_asset_shelf_region_snap;
+  art->on_user_resize = ED_asset_shelf_region_on_user_resize;
   art->context = ED_asset_shelf_context;
   art->init = view3d_asset_shelf_region_init;
   art->layout = ED_asset_shelf_region_layout;

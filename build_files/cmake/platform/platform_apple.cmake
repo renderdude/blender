@@ -192,8 +192,6 @@ set(PLATFORM_LINKFLAGS
   "-fexceptions -framework CoreServices -framework Foundation -framework IOKit -framework AppKit -framework Cocoa -framework Carbon -framework AudioUnit -framework AudioToolbox -framework CoreAudio -framework Metal -framework QuartzCore"
 )
 
-list(APPEND PLATFORM_LINKLIBS c++)
-
 if(WITH_OPENIMAGEDENOISE)
   if("${CMAKE_OSX_ARCHITECTURES}" STREQUAL "arm64")
     # OpenImageDenoise uses BNNS from the Accelerate framework.
@@ -425,8 +423,10 @@ string(APPEND PLATFORM_LINKFLAGS
   " -Wl,-unexported_symbols_list,'${PLATFORM_SYMBOLS_MAP}'"
 )
 
-string(APPEND CMAKE_CXX_FLAGS " -stdlib=libc++")
-string(APPEND PLATFORM_LINKFLAGS " -stdlib=libc++")
+# Use old, slower linker for now to avoid many linker warnings.
+if(${XCODE_VERSION} VERSION_GREATER_EQUAL 15.0)
+  string(APPEND PLATFORM_LINKFLAGS " -Wl,-ld_classic")
+endif()
 
 # Make stack size more similar to Embree, required for Embree.
 string(APPEND PLATFORM_LINKFLAGS_EXECUTABLE " -Wl,-stack_size,0x100000")

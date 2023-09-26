@@ -37,8 +37,8 @@
 #include "BKE_mesh_mapping.hh"
 #include "BKE_node.h"
 
-#include "DEG_depsgraph.h"
-#include "DEG_depsgraph_query.h"
+#include "DEG_depsgraph.hh"
+#include "DEG_depsgraph_query.hh"
 
 #include "ED_image.hh"
 #include "ED_mesh.hh"
@@ -1520,7 +1520,7 @@ static int uv_reveal_exec(bContext *C, wmOperator *op)
               BM_ELEM_CD_SET_BOOL(l, offsets.select_vert, select);
               BM_ELEM_CD_SET_BOOL(l, offsets.select_edge, select);
             }
-            /* BM_face_select_set(em->bm, efa, true); */
+            // BM_face_select_set(em->bm, efa, true);
             BM_elem_flag_enable(efa, BM_ELEM_TAG);
           }
         }
@@ -1546,7 +1546,7 @@ static int uv_reveal_exec(bContext *C, wmOperator *op)
                 BM_ELEM_CD_SET_BOOL(l, offsets.select_edge, select);
               }
             }
-            /* BM_face_select_set(em->bm, efa, true); */
+            // BM_face_select_set(em->bm, efa, true);
             BM_elem_flag_enable(efa, BM_ELEM_TAG);
           }
         }
@@ -1560,7 +1560,7 @@ static int uv_reveal_exec(bContext *C, wmOperator *op)
             BM_ELEM_CD_SET_BOOL(l, offsets.select_vert, select);
             BM_ELEM_CD_SET_BOOL(l, offsets.select_edge, select);
           }
-          /* BM_face_select_set(em->bm, efa, true); */
+          // BM_face_select_set(em->bm, efa, true);
           BM_elem_flag_enable(efa, BM_ELEM_TAG);
         }
       }
@@ -1573,7 +1573,7 @@ static int uv_reveal_exec(bContext *C, wmOperator *op)
             BM_ELEM_CD_SET_BOOL(l, offsets.select_vert, select);
             BM_ELEM_CD_SET_BOOL(l, offsets.select_edge, select);
           }
-          /* BM_face_select_set(em->bm, efa, true); */
+          // BM_face_select_set(em->bm, efa, true);
           BM_elem_flag_enable(efa, BM_ELEM_TAG);
         }
       }

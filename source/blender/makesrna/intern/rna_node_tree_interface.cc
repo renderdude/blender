@@ -24,11 +24,6 @@ const EnumPropertyItem rna_enum_node_tree_interface_item_type_items[] = {
 static const EnumPropertyItem node_tree_interface_socket_in_out_items[] = {
     {NODE_INTERFACE_SOCKET_INPUT, "INPUT", 0, "Input", "Generate a input node socket"},
     {NODE_INTERFACE_SOCKET_OUTPUT, "OUTPUT", 0, "Output", "Generate a output node socket"},
-    {NODE_INTERFACE_SOCKET_INPUT | NODE_INTERFACE_SOCKET_OUTPUT,
-     "BOTH",
-     0,
-     "Both",
-     "Generate both input and output node socket"},
     {0, nullptr, 0, nullptr, nullptr}};
 
 #ifdef RNA_RUNTIME
@@ -439,11 +434,8 @@ static bNodeTreeInterfaceSocket *rna_NodeTreeInterfaceItems_new_socket(
   }
   const char *socket_type = typeinfo->idname;
   NodeTreeInterfaceSocketFlag flag = NodeTreeInterfaceSocketFlag(in_out);
-  bNodeTreeInterfaceSocket *socket = interface->add_socket(name ? name : "",
-                                                           description ? description : "",
-                                                           socket_type ? socket_type : "",
-                                                           flag,
-                                                           parent);
+  bNodeTreeInterfaceSocket *socket = interface->add_socket(
+      name, description, socket_type, flag, parent);
 
   if (socket == nullptr) {
     BKE_report(reports, RPT_ERROR, "Unable to create socket");
@@ -918,6 +910,13 @@ static void rna_def_node_interface_socket(BlenderRNA *brna)
   RNA_def_property_ui_text(prop,
                            "Hide in Modifier",
                            "Don't show the input value in the geometry nodes modifier interface");
+  RNA_def_property_update(prop, NC_NODE | NA_EDITED, "rna_NodeTreeInterfaceItem_update");
+
+  prop = RNA_def_property(srna, "force_non_field", PROP_BOOLEAN, PROP_NONE);
+  RNA_def_property_boolean_sdna(prop, nullptr, "flag", NODE_INTERFACE_SOCKET_SINGLE_VALUE_ONLY);
+  RNA_def_property_clear_flag(prop, PROP_ANIMATABLE);
+  RNA_def_property_ui_text(
+      prop, "Single Value", "Only allow single value inputs rather than fields");
   RNA_def_property_update(prop, NC_NODE | NA_EDITED, "rna_NodeTreeInterfaceItem_update");
 
   prop = RNA_def_property(srna, "attribute_domain", PROP_ENUM, PROP_NONE);

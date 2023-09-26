@@ -32,13 +32,13 @@
 #include "BKE_object.h"
 #include "BKE_pointcloud.h"
 #include "BKE_report.h"
-#include "BKE_screen.h"
+#include "BKE_screen.hh"
 
 #include "DNA_object_types.h"
 #include "DNA_scene_types.h"
 
-#include "DEG_depsgraph.h"
-#include "DEG_depsgraph_query.h"
+#include "DEG_depsgraph.hh"
+#include "DEG_depsgraph_query.hh"
 
 #include "RNA_access.hh"
 #include "RNA_define.hh"
@@ -381,7 +381,7 @@ static void draw_property_for_socket(const bNodeTree &node_tree,
   SNPRINTF(rna_path, "[\"%s\"]", socket_id_esc);
 
   uiLayout *row = uiLayoutRow(layout, true);
-  uiLayoutSetPropDecorate(row, true);
+  uiLayoutSetPropDecorate(row, false);
 
   /* Use #uiItemPointerR to draw pointer properties because #uiItemR would not have enough
    * information about what type of ID to select for editing the values. This is because
@@ -651,16 +651,15 @@ static void catalog_assets_draw(const bContext *C, Menu *menu)
   uiLayout *layout = menu->layout;
   uiItemS(layout);
 
+  wmOperatorType *ot = WM_operatortype_find("GEOMETRY_OT_execute_node_group", true);
   for (const asset_system::AssetRepresentation *asset : assets) {
-    uiLayout *col = uiLayoutColumn(layout, false);
-    wmOperatorType *ot = WM_operatortype_find("GEOMETRY_OT_execute_node_group", true);
     PointerRNA props_ptr;
-    uiItemFullO_ptr(col,
+    uiItemFullO_ptr(layout,
                     ot,
                     IFACE_(asset->get_name().c_str()),
                     ICON_NONE,
                     nullptr,
-                    WM_OP_INVOKE_DEFAULT,
+                    WM_OP_INVOKE_REGION_WIN,
                     UI_ITEM_NONE,
                     &props_ptr);
     asset::operator_asset_reference_props_set(*asset, props_ptr);
@@ -695,15 +694,16 @@ static void catalog_assets_draw_unassigned(const bContext *C, Menu *menu)
   if (!tree) {
     return;
   }
+  uiLayout *layout = menu->layout;
+  wmOperatorType *ot = WM_operatortype_find("GEOMETRY_OT_execute_node_group", true);
   for (const asset_system::AssetRepresentation *asset : tree->unassigned_assets) {
-    wmOperatorType *ot = WM_operatortype_find("GEOMETRY_OT_execute_node_group", true);
     PointerRNA props_ptr;
-    uiItemFullO_ptr(menu->layout,
+    uiItemFullO_ptr(layout,
                     ot,
                     IFACE_(asset->get_name().c_str()),
                     ICON_NONE,
                     nullptr,
-                    WM_OP_INVOKE_DEFAULT,
+                    WM_OP_INVOKE_REGION_WIN,
                     UI_ITEM_NONE,
                     &props_ptr);
     asset::operator_asset_reference_props_set(*asset, props_ptr);
@@ -720,12 +720,12 @@ MenuType node_group_operator_assets_menu_unassigned()
   type.flag = MenuTypeFlag::ContextDependent;
   type.description = N_(
       "Tool node group assets not assigned to a catalog.\n"
-      "Catalogs can be assigned in the Asset Browser.");
+      "Catalogs can be assigned in the Asset Browser");
   return type;
 }
 
 void ui_template_node_operator_asset_menu_items(uiLayout &layout,
-                                                bContext &C,
+                                                const bContext &C,
                                                 const StringRef catalog_path)
 {
   bScreen &screen = *CTX_wm_screen(&C);
@@ -752,7 +752,7 @@ void ui_template_node_operator_asset_menu_items(uiLayout &layout,
   uiItemMContents(col, "GEO_MT_node_operator_catalog_assets");
 }
 
-void ui_template_node_operator_asset_root_items(uiLayout &layout, bContext &C)
+void ui_template_node_operator_asset_root_items(uiLayout &layout, const bContext &C)
 {
   bScreen &screen = *CTX_wm_screen(&C);
   const Object *active_object = CTX_data_active_object(&C);
@@ -786,7 +786,7 @@ void ui_template_node_operator_asset_root_items(uiLayout &layout, bContext &C)
   if (!tree->unassigned_assets.is_empty()) {
     uiItemM(&layout,
             "GEO_MT_node_operator_catalog_assets_unassigned",
-            IFACE_("No Catalog"),
+            IFACE_("Unassigned"),
             ICON_NONE);
   }
 }

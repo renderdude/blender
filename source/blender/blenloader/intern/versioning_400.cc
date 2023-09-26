@@ -12,6 +12,9 @@
 
 #include "CLG_log.h"
 
+/* Define macros in `DNA_genfile.h`. */
+#define DNA_GENFILE_VERSIONING_MACROS
+
 #include "DNA_brush_types.h"
 #include "DNA_camera_types.h"
 #include "DNA_light_types.h"
@@ -24,6 +27,8 @@
 #include "DNA_defaults.h"
 #include "DNA_genfile.h"
 #include "DNA_particle_types.h"
+
+#undef DNA_GENFILE_VERSIONING_MACROS
 
 #include "BLI_assert.h"
 #include "BLI_listbase.h"
@@ -288,11 +293,11 @@ void do_versions_after_linking_400(FileData *fd, Main *bmain)
   }
 
   if (!MAIN_VERSION_FILE_ATLEAST(bmain, 400, 21)) {
-    if (!DNA_struct_elem_find(fd->filesdna, "bPoseChannel", "BoneColor", "color")) {
+    if (!DNA_struct_member_exists(fd->filesdna, "bPoseChannel", "BoneColor", "color")) {
       version_bonegroup_migrate_color(bmain);
     }
 
-    if (!DNA_struct_elem_find(fd->filesdna, "bArmature", "ListBase", "collections")) {
+    if (!DNA_struct_member_exists(fd->filesdna, "bArmature", "ListBase", "collections")) {
       version_bonelayers_to_bonecollections(bmain);
       version_bonegroups_to_bonecollections(bmain);
     }
@@ -687,6 +692,19 @@ static void version_principled_bsdf_emission(bNodeTree *ntree)
   }
 }
 
+/* Rename various Principled BSDF sockets. */
+static void version_principled_bsdf_rename_sockets(bNodeTree *ntree)
+{
+  version_node_input_socket_name(ntree, SH_NODE_BSDF_PRINCIPLED, "Emission", "Emission Color");
+  version_node_input_socket_name(ntree, SH_NODE_BSDF_PRINCIPLED, "Specular", "Specular IOR Level");
+  version_node_input_socket_name(
+      ntree, SH_NODE_BSDF_PRINCIPLED, "Subsurface", "Subsurface Weight");
+  version_node_input_socket_name(
+      ntree, SH_NODE_BSDF_PRINCIPLED, "Transmission", "Transmission Weight");
+  version_node_input_socket_name(ntree, SH_NODE_BSDF_PRINCIPLED, "Coat", "Coat Weight");
+  version_node_input_socket_name(ntree, SH_NODE_BSDF_PRINCIPLED, "Sheen", "Sheen Weight");
+}
+
 /* Replace old Principled Hair BSDF as a variant in the new Principled Hair BSDF. */
 static void version_replace_principled_hair_model(bNodeTree *ntree)
 {
@@ -791,6 +809,174 @@ static void version_principled_bsdf_coat(bNodeTree *ntree)
       ntree, SH_NODE_BSDF_PRINCIPLED, "Clearcoat Normal", "Coat Normal");
 }
 
+/* Convert specular tint in Principled BSDF. */
+static void version_principled_bsdf_specular_tint(bNodeTree *ntree)
+{
+  LISTBASE_FOREACH (bNode *, node, &ntree->nodes) {
+    if (node->type != SH_NODE_BSDF_PRINCIPLED) {
+      continue;
+    }
+    bNodeSocket *specular_tint_sock = nodeFindSocket(node, SOCK_IN, "Specular Tint");
+    if (specular_tint_sock->type == SOCK_RGBA) {
+      /* Node is already updated. */
+      continue;
+    }
+
+    bNodeSocket *base_color_sock = nodeFindSocket(node, SOCK_IN, "Base Color");
+    float specular_tint_old = *version_cycles_node_socket_float_value(specular_tint_sock);
+    float *base_color = version_cycles_node_socket_rgba_value(base_color_sock);
+
+    /* Change socket type to Color. */
+    nodeModifySocketTypeStatic(ntree, node, specular_tint_sock, SOCK_RGBA, 0);
+
+    static float one[] = {1.0f, 1.0f, 1.0f, 1.0f};
+
+    /* If any of the two inputs is dynamic, we add a Mix node. */
+    if (base_color_sock->link || specular_tint_sock->link) {
+      bNode *mix = nodeAddStaticNode(nullptr, ntree, SH_NODE_MIX);
+      static_cast<NodeShaderMix *>(mix->storage)->data_type = SOCK_RGBA;
+      mix->locx = node->locx - 170;
+      mix->locy = node->locy - 120;
+
+      bNodeSocket *a_in = nodeFindSocket(mix, SOCK_IN, "A_Color");
+      bNodeSocket *b_in = nodeFindSocket(mix, SOCK_IN, "B_Color");
+      bNodeSocket *fac_in = nodeFindSocket(mix, SOCK_IN, "Factor_Float");
+      bNodeSocket *result_out = nodeFindSocket(mix, SOCK_OUT, "Result_Color");
+
+      copy_v4_v4(version_cycles_node_socket_rgba_value(a_in), one);
+      copy_v4_v4(version_cycles_node_socket_rgba_value(b_in), base_color);
+      *version_cycles_node_socket_float_value(fac_in) = specular_tint_old;
+
+      if (base_color_sock->link) {
+        nodeAddLink(
+            ntree, base_color_sock->link->fromnode, base_color_sock->link->fromsock, mix, b_in);
+      }
+      if (specular_tint_sock->link) {
+        nodeAddLink(ntree,
+                    specular_tint_sock->link->fromnode,
+                    specular_tint_sock->link->fromsock,
+                    mix,
+                    fac_in);
+        nodeRemLink(ntree, specular_tint_sock->link);
+      }
+      nodeAddLink(ntree, mix, result_out, node, specular_tint_sock);
+    }
+
+    float *specular_tint = version_cycles_node_socket_rgba_value(specular_tint_sock);
+    /* Mix the fixed values. */
+    interp_v4_v4v4(specular_tint, one, base_color, specular_tint_old);
+  }
+}
+
+static void version_copy_socket(bNodeTreeInterfaceSocket &dst,
+                                const bNodeTreeInterfaceSocket &src,
+                                char *identifier)
+{
+  /* Node socket copy function based on bNodeTreeInterface::item_copy to avoid using blenkernel. */
+  dst.name = BLI_strdup(src.name);
+  dst.description = BLI_strdup_null(src.description);
+  dst.socket_type = BLI_strdup(src.socket_type);
+  dst.default_attribute_name = BLI_strdup_null(src.default_attribute_name);
+  dst.identifier = identifier;
+  if (src.properties) {
+    dst.properties = IDP_CopyProperty_ex(src.properties, 0);
+  }
+  if (src.socket_data != nullptr) {
+    dst.socket_data = MEM_dupallocN(src.socket_data);
+    /* No user count increment needed, gets reset after versioning. */
+  }
+}
+
+static int version_nodes_find_valid_insert_position_for_item(const bNodeTreeInterfacePanel &panel,
+                                                             const bNodeTreeInterfaceItem &item,
+                                                             const int initial_pos)
+{
+  const bool sockets_above_panels = !(panel.flag &
+                                      NODE_INTERFACE_PANEL_ALLOW_SOCKETS_AFTER_PANELS);
+  const blender::Span<const bNodeTreeInterfaceItem *> items = {panel.items_array, panel.items_num};
+
+  int pos = initial_pos;
+
+  if (sockets_above_panels) {
+    if (item.item_type == NODE_INTERFACE_PANEL) {
+      /* Find the closest valid position from the end, only panels at or after #position. */
+      for (int test_pos = items.size() - 1; test_pos >= initial_pos; test_pos--) {
+        if (test_pos < 0) {
+          /* Initial position is out of range but valid. */
+          break;
+        }
+        if (items[test_pos]->item_type != NODE_INTERFACE_PANEL) {
+          /* Found valid position, insert after the last socket item. */
+          pos = test_pos + 1;
+          break;
+        }
+      }
+    }
+    else {
+      /* Find the closest valid position from the start, no panels at or after #position. */
+      for (int test_pos = 0; test_pos <= initial_pos; test_pos++) {
+        if (test_pos >= items.size()) {
+          /* Initial position is out of range but valid. */
+          break;
+        }
+        if (items[test_pos]->item_type == NODE_INTERFACE_PANEL) {
+          /* Found valid position, inserting moves the first panel. */
+          pos = test_pos;
+          break;
+        }
+      }
+    }
+  }
+
+  return pos;
+}
+
+static void version_nodes_insert_item(bNodeTreeInterfacePanel &parent,
+                                      bNodeTreeInterfaceSocket &socket,
+                                      int position)
+{
+  /* Apply any constraints on the item positions. */
+  position = version_nodes_find_valid_insert_position_for_item(parent, socket.item, position);
+  position = std::min(std::max(position, 0), parent.items_num);
+
+  blender::MutableSpan<bNodeTreeInterfaceItem *> old_items = {parent.items_array,
+                                                              parent.items_num};
+  parent.items_num++;
+  parent.items_array = MEM_cnew_array<bNodeTreeInterfaceItem *>(parent.items_num, __func__);
+  parent.items().take_front(position).copy_from(old_items.take_front(position));
+  parent.items().drop_front(position + 1).copy_from(old_items.drop_front(position));
+  parent.items()[position] = &socket.item;
+
+  if (old_items.data()) {
+    MEM_freeN(old_items.data());
+  }
+}
+
+/* Node group interface copy function based on bNodeTreeInterface::insert_item_copy. */
+static void version_node_group_split_socket(bNodeTreeInterface &tree_interface,
+                                            bNodeTreeInterfaceSocket &socket,
+                                            bNodeTreeInterfacePanel *parent,
+                                            int position)
+{
+  if (parent == nullptr) {
+    parent = &tree_interface.root_panel;
+  }
+
+  bNodeTreeInterfaceSocket *csocket = static_cast<bNodeTreeInterfaceSocket *>(
+      MEM_dupallocN(&socket));
+  /* Generate a new unique identifier.
+   * This might break existing links, but the identifiers were duplicate anyway. */
+  char *dst_identifier = BLI_sprintfN("Socket_%d", tree_interface.next_uid++);
+  version_copy_socket(*csocket, socket, dst_identifier);
+
+  version_nodes_insert_item(*parent, *csocket, position);
+
+  /* Original socket becomes output. */
+  socket.flag &= ~NODE_INTERFACE_SOCKET_INPUT;
+  /* Copied socket becomes input. */
+  csocket->flag &= ~NODE_INTERFACE_SOCKET_OUTPUT;
+}
+
 void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
 {
   if (!MAIN_VERSION_FILE_ATLEAST(bmain, 400, 1)) {
@@ -889,7 +1075,7 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
   }
 
   if (!MAIN_VERSION_FILE_ATLEAST(bmain, 400, 12)) {
-    if (!DNA_struct_elem_find(fd->filesdna, "LightProbe", "int", "grid_bake_samples")) {
+    if (!DNA_struct_member_exists(fd->filesdna, "LightProbe", "int", "grid_bake_samples")) {
       LISTBASE_FOREACH (LightProbe *, lightprobe, &bmain->lightprobes) {
         lightprobe->grid_bake_samples = 2048;
         lightprobe->surfel_density = 1.0f;
@@ -902,19 +1088,19 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
     }
 
     /* Set default bake resolution. */
-    if (!DNA_struct_elem_find(fd->filesdna, "LightProbe", "int", "resolution")) {
+    if (!DNA_struct_member_exists(fd->filesdna, "LightProbe", "int", "resolution")) {
       LISTBASE_FOREACH (LightProbe *, lightprobe, &bmain->lightprobes) {
         lightprobe->resolution = LIGHT_PROBE_RESOLUTION_1024;
       }
     }
 
-    if (!DNA_struct_elem_find(fd->filesdna, "World", "int", "probe_resolution")) {
+    if (!DNA_struct_member_exists(fd->filesdna, "World", "int", "probe_resolution")) {
       LISTBASE_FOREACH (World *, world, &bmain->worlds) {
         world->probe_resolution = LIGHT_PROBE_RESOLUTION_1024;
       }
     }
 
-    if (!DNA_struct_elem_find(fd->filesdna, "LightProbe", "float", "grid_surface_bias")) {
+    if (!DNA_struct_member_exists(fd->filesdna, "LightProbe", "float", "grid_surface_bias")) {
       LISTBASE_FOREACH (LightProbe *, lightprobe, &bmain->lightprobes) {
         lightprobe->grid_surface_bias = 0.05f;
         lightprobe->grid_escape_bias = 0.1f;
@@ -982,7 +1168,8 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
   }
 
   if (!MAIN_VERSION_FILE_ATLEAST(bmain, 400, 14)) {
-    if (!DNA_struct_elem_find(fd->filesdna, "SceneEEVEE", "RaytraceEEVEE", "reflection_options")) {
+    if (!DNA_struct_member_exists(
+            fd->filesdna, "SceneEEVEE", "RaytraceEEVEE", "reflection_options")) {
       LISTBASE_FOREACH (Scene *, scene, &bmain->scenes) {
         scene->eevee.reflection_options.flag = RAYTRACE_EEVEE_USE_DENOISE;
         scene->eevee.reflection_options.denoise_stages = RAYTRACE_EEVEE_DENOISE_SPATIAL |
@@ -1000,7 +1187,7 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
       }
     }
 
-    if (!DNA_struct_find(fd->filesdna, "RegionAssetShelf")) {
+    if (!DNA_struct_exists(fd->filesdna, "RegionAssetShelf")) {
       LISTBASE_FOREACH (bScreen *, screen, &bmain->screens) {
         LISTBASE_FOREACH (ScrArea *, area, &screen->areabase) {
           LISTBASE_FOREACH (SpaceLink *, sl, &area->spacedata) {
@@ -1048,7 +1235,7 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
   }
 
   if (!MAIN_VERSION_FILE_ATLEAST(bmain, 400, 17)) {
-    if (!DNA_struct_find(fd->filesdna, "NodeShaderHairPrincipled")) {
+    if (!DNA_struct_exists(fd->filesdna, "NodeShaderHairPrincipled")) {
       FOREACH_NODETREE_BEGIN (bmain, ntree, id) {
         if (ntree->type == NTREE_SHADER) {
           version_replace_principled_hair_model(ntree);
@@ -1058,7 +1245,7 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
     }
 
     /* Panorama properties shared with Eevee. */
-    if (!DNA_struct_elem_find(fd->filesdna, "Camera", "float", "fisheye_fov")) {
+    if (!DNA_struct_member_exists(fd->filesdna, "Camera", "float", "fisheye_fov")) {
       Camera default_cam = *DNA_struct_default_get(Camera);
       LISTBASE_FOREACH (Camera *, camera, &bmain->cameras) {
         IDProperty *ccam = version_cycles_properties_from_ID(&camera->id);
@@ -1107,7 +1294,7 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
       }
     }
 
-    if (!DNA_struct_elem_find(fd->filesdna, "LightProbe", "float", "grid_flag")) {
+    if (!DNA_struct_member_exists(fd->filesdna, "LightProbe", "float", "grid_flag")) {
       LISTBASE_FOREACH (LightProbe *, lightprobe, &bmain->lightprobes) {
         /* Keep old behavior of baking the whole lighting. */
         lightprobe->grid_flag = LIGHTPROBE_GRID_CAPTURE_WORLD | LIGHTPROBE_GRID_CAPTURE_INDIRECT |
@@ -1115,7 +1302,7 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
       }
     }
 
-    if (!DNA_struct_elem_find(fd->filesdna, "SceneEEVEE", "int", "gi_irradiance_pool_size")) {
+    if (!DNA_struct_member_exists(fd->filesdna, "SceneEEVEE", "int", "gi_irradiance_pool_size")) {
       LISTBASE_FOREACH (Scene *, scene, &bmain->scenes) {
         scene->eevee.gi_irradiance_pool_size = 16;
       }
@@ -1186,6 +1373,76 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
     }
   }
 
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 400, 24)) {
+    FOREACH_NODETREE_BEGIN (bmain, ntree, id) {
+      if (ntree->type == NTREE_SHADER) {
+        /* Convert coat inputs on the Principled BSDF. */
+        version_principled_bsdf_coat(ntree);
+        /* Convert subsurface inputs on the Principled BSDF. */
+        version_principled_bsdf_subsurface(ntree);
+        /* Convert emission on the Principled BSDF. */
+        version_principled_bsdf_emission(ntree);
+      }
+    }
+    FOREACH_NODETREE_END;
+
+    {
+      LISTBASE_FOREACH (bScreen *, screen, &bmain->screens) {
+        LISTBASE_FOREACH (ScrArea *, area, &screen->areabase) {
+          LISTBASE_FOREACH (SpaceLink *, sl, &area->spacedata) {
+            const ListBase *regionbase = (sl == area->spacedata.first) ? &area->regionbase :
+                                                                         &sl->regionbase;
+            LISTBASE_FOREACH (ARegion *, region, regionbase) {
+              if (region->regiontype != RGN_TYPE_ASSET_SHELF) {
+                continue;
+              }
+
+              RegionAssetShelf *shelf_data = static_cast<RegionAssetShelf *>(region->regiondata);
+              if (shelf_data && shelf_data->active_shelf &&
+                  (shelf_data->active_shelf->preferred_row_count == 0)) {
+                shelf_data->active_shelf->preferred_row_count = 1;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    /* Convert sockets with both input and output flag into two separate sockets. */
+    FOREACH_NODETREE_BEGIN (bmain, ntree, id) {
+      blender::Vector<bNodeTreeInterfaceSocket *> sockets_to_split;
+      ntree->tree_interface.foreach_item([&](bNodeTreeInterfaceItem &item) {
+        if (item.item_type == NODE_INTERFACE_SOCKET) {
+          bNodeTreeInterfaceSocket &socket = reinterpret_cast<bNodeTreeInterfaceSocket &>(item);
+          if ((socket.flag & NODE_INTERFACE_SOCKET_INPUT) &&
+              (socket.flag & NODE_INTERFACE_SOCKET_OUTPUT)) {
+            sockets_to_split.append(&socket);
+          }
+        }
+        return true;
+      });
+
+      for (bNodeTreeInterfaceSocket *socket : sockets_to_split) {
+        const int position = ntree->tree_interface.find_item_position(socket->item);
+        bNodeTreeInterfacePanel *parent = ntree->tree_interface.find_item_parent(socket->item);
+        version_node_group_split_socket(ntree->tree_interface, *socket, parent, position + 1);
+      }
+    }
+    FOREACH_NODETREE_END;
+  }
+
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 400, 25)) {
+    FOREACH_NODETREE_BEGIN (bmain, ntree, id) {
+      if (ntree->type == NTREE_SHADER) {
+        /* Convert specular tint on the Principled BSDF. */
+        version_principled_bsdf_specular_tint(ntree);
+        /* Rename some sockets. */
+        version_principled_bsdf_rename_sockets(ntree);
+      }
+    }
+    FOREACH_NODETREE_END;
+  }
+
   /**
    * Versioning code until next subversion bump goes here.
    *
@@ -1198,17 +1455,5 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
    */
   {
     /* Keep this block, even when empty. */
-
-    FOREACH_NODETREE_BEGIN (bmain, ntree, id) {
-      if (ntree->type == NTREE_SHADER) {
-        /* Convert coat inputs on the Principled BSDF. */
-        version_principled_bsdf_coat(ntree);
-        /* Convert subsurface inputs on the Principled BSDF. */
-        version_principled_bsdf_subsurface(ntree);
-        /* Convert emission on the Principled BSDF. */
-        version_principled_bsdf_emission(ntree);
-      }
-    }
-    FOREACH_NODETREE_END;
   }
 }

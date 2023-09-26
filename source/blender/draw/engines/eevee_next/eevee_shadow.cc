@@ -662,7 +662,8 @@ void ShadowModule::init()
   const int2 atlas_extent = shadow_page_size_ * int2(SHADOW_PAGE_PER_ROW);
   const int atlas_layers = divide_ceil_u(shadow_page_len_, SHADOW_PAGE_PER_LAYER);
 
-  eGPUTextureUsage tex_usage = GPU_TEXTURE_USAGE_SHADER_READ | GPU_TEXTURE_USAGE_SHADER_WRITE;
+  eGPUTextureUsage tex_usage = GPU_TEXTURE_USAGE_SHADER_READ | GPU_TEXTURE_USAGE_SHADER_WRITE |
+                               GPU_TEXTURE_USAGE_ATOMIC;
   if (atlas_tx_.ensure_2d_array(atlas_type, atlas_extent, atlas_layers, tex_usage)) {
     /* Global update. */
     do_full_update = true;
@@ -1160,7 +1161,7 @@ float ShadowModule::tilemap_pixel_radius()
 /* Update all shadow regions visible inside the view.
  * If called multiple time for the same view, it will only do the depth buffer scanning
  * to check any new opaque surfaces.
- * Needs to be called after LightModule::set_view(); */
+ * Needs to be called after `LightModule::set_view();`. */
 void ShadowModule::set_view(View &view)
 {
   GPUFrameBuffer *prev_fb = GPU_framebuffer_active_get();
