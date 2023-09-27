@@ -1885,12 +1885,17 @@ typedef struct SceneEEVEE {
   int shadow_cube_size;
   int shadow_cascade_size;
   int shadow_pool_size;
+  int shadow_ray_count;
+  int shadow_step_count;
+  float shadow_normal_bias;
+  char _pad[4];
 
   int ray_split_settings;
   int ray_tracing_method;
 
   struct RaytraceEEVEE reflection_options;
   struct RaytraceEEVEE refraction_options;
+  struct RaytraceEEVEE diffuse_options;
 
   struct LightCache *light_cache DNA_DEPRECATED;
   struct LightCache *light_cache_data;
@@ -2051,6 +2056,13 @@ typedef struct Scene {
 
   /** Settings to be override by work-spaces. */
   IDProperty *layer_properties;
+
+  /**
+   * Frame range used for simulations in geometry nodes by default, if SCE_CUSTOM_SIMULATION_RANGE
+   * is set. Individual simulations can overwrite this though.
+   */
+  int simulation_frame_start;
+  int simulation_frame_end;
 
   struct SceneDisplay display;
   struct SceneEEVEE eevee;
@@ -2491,6 +2503,7 @@ enum {
   SCE_FRAME_DROP = 1 << 3,
   SCE_KEYS_NO_SELONLY = 1 << 4,
   SCE_READFILE_LIBLINK_NEED_SETSCENE_CHECK = 1 << 5,
+  SCE_CUSTOM_SIMULATION_RANGE = 1 << 6,
 };
 
 /* Return flag BKE_scene_base_iter_next functions. */

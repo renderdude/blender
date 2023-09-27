@@ -90,7 +90,7 @@
 #include "SEQ_channels.h"
 #include "SEQ_effects.h"
 #include "SEQ_iterator.h"
-#include "SEQ_retiming.h"
+#include "SEQ_retiming.hh"
 #include "SEQ_sequencer.h"
 #include "SEQ_time.h"
 
@@ -680,10 +680,10 @@ static bool do_versions_sequencer_init_retiming_tool_data(Sequence *seq, void *u
 
   const int content_length = SEQ_time_strip_length_get(scene, seq);
 
-  SEQ_retiming_data_ensure(scene, seq);
+  SEQ_retiming_data_ensure(seq);
 
-  SeqRetimingHandle *handle = &seq->retiming_handles[seq->retiming_handle_num - 1];
-  handle->strip_frame_index = round_fl_to_int(content_length / seq->speed_factor);
+  SeqRetimingKey *key = &seq->retiming_keys[seq->retiming_keys_num - 1];
+  key->strip_frame_index = round_fl_to_int(content_length / seq->speed_factor);
   seq->speed_factor = 1.0f;
 
   return true;
@@ -2476,7 +2476,8 @@ void blo_do_versions_300(FileData *fd, Library * /*lib*/, Main *bmain)
     }
     FOREACH_NODETREE_END;
 
-    if (!DNA_struct_member_exists(fd->filesdna, "FileAssetSelectParams", "short", "import_method")) {
+    if (!DNA_struct_member_exists(fd->filesdna, "FileAssetSelectParams", "short", "import_method"))
+    {
       LISTBASE_FOREACH (bScreen *, screen, &bmain->screens) {
         LISTBASE_FOREACH (ScrArea *, area, &screen->areabase) {
           LISTBASE_FOREACH (SpaceLink *, sl, &area->spacedata) {
