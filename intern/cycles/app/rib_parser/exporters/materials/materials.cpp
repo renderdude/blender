@@ -198,15 +198,18 @@ class RIBtoCycles {
     }
     else if (nodeType == "PxrNormalMap") {
       bool has_texture_node = false;
-      for (auto pp : pv)
+      for (auto *pp : pv) {
         if (pp->name == "inputRGB" && pp->storage == Container_Type::Reference) {
           has_texture_node = true;
           break;
         }
-      if (has_texture_node)
-        result = new RIBtoCyclesMapping(PxrNormalMap);
-      else
-        result = new PxrNormalMaptoCycles(PxrMultiNodeNormalMap);
+      }
+      if (has_texture_node) {
+        result = new PxrNormalMaptoCycles(PxrNormalMap);
+      }
+      else {
+        result = new PxrImageNormalMaptoCycles(PxrMultiNodeNormalMap);
+      }
     }
     else {
       result = new RIBtoCyclesMapping(PxrDefault);
@@ -263,14 +266,14 @@ void RIBCyclesMaterials::update_connections(RIBtoCyclesMapping *mapping,
                                             ShaderGraph *shader_graph,
                                             vector<Parsed_Parameter const *> &pv)
 {
-  for (auto pp : pv) {
+  for (const auto *pp : pv) {
     if (pp->storage == Container_Type::Reference) {
       vector<string> tokens;
       string_split(tokens, pp->strings()[0], ":");
       std::string dst_socket_name = pp->name;
 
       std::string input_name = mapping->parameter_name(dst_socket_name);
-      std::string shader_name = "";
+      std::string shader_name;
       if (input_name.find(":") != std::string::npos) {
         vector<string> tokens;
         string_split(tokens, input_name, ":");
@@ -359,21 +362,22 @@ void RIBCyclesMaterials::populate_shader_graph(Vector_Dictionary sg)
   std::map<std::string, vector<Parsed_Parameter const *>> connections;
   vector<vector<Parsed_Parameter *>> terminals;
 
-  auto graph = new ShaderGraph();
+  auto *graph = new ShaderGraph();
 
   for (auto const &params : shader_graph.second) {
     RIBtoCyclesMapping *mapping;
 
     auto pv = params.get_parameter_vector();
-    auto pp = params.get_parameter("shader_type");
+    const auto *pp = params.get_parameter("shader_type");
     if (pp) {
       shader_type = pp->strings()[0];
       shader_name = pp->strings()[1];
       handle = pp->strings()[2];
       mapping = sRIBtoCycles->find(shader_name, pv);
 
-      if (!mapping->create_shader_node(shader_name, shader_path, graph, _scene))
+      if (!mapping->create_shader_node(shader_name, shader_path, graph, _scene)) {
         continue;
+      }
 
       mapping->add_to_graph(graph);
       _nodes.emplace(handle, mapping);
@@ -412,7 +416,7 @@ void RIBCyclesMaterials::populate_shader_graph(Vector_Dictionary sg)
 
   // Finally connect the terminals to the graph output (Surface, Volume, Displacement)
   for (const auto &terminal_entry : terminals) {
-    for (auto pp : terminal_entry) {
+    for (auto *pp : terminal_entry) {
       if (!pp->name.compare("shader_type")) {
         shader_type = pp->strings()[0];
         shader_name = pp->strings()[1];
@@ -457,13 +461,14 @@ void RIBCyclesMaterials::populate_shader_graph(Vector_Dictionary sg)
     }
 
     ShaderOutput *output = outputName ? node->output(outputName) : nullptr;
-    if (!output)
+    if (!output) {
       for (auto *const out : node->outputs) {
         if (out->socket_type.type == SocketType::CLOSURE) {
           output = out;
           break;
         }
       }
+    }
 
     if (!output) {
       fprintf(stderr,
@@ -481,14 +486,14 @@ void RIBCyclesMaterials::populate_shader_graph(Vector_Dictionary sg)
 
 void RIBCyclesMaterials::add_default_renderman_inputs(Shader *shader)
 {
-  ShaderNode *geom = NULL;
-  ShaderNode *texco = NULL;
-  ShaderNode *sep_xyz = NULL;
-  ShaderNode *sep_uv = NULL;
+  ShaderNode *geom = nullptr;
+  ShaderNode *texco = nullptr;
+  ShaderNode *sep_xyz = nullptr;
+  ShaderNode *sep_uv = nullptr;
   bool found_geom = false, found_texco = false;
   bool connected_geom = false, connected_texco = false;
 
-  auto graph = shader->graph;
+  auto *graph = shader->graph;
   // First check if ShaderGraph::simplify added a geometry or texture coordinate node
   for (ShaderNode *node : graph->nodes) {
     if (node->is_a(GeometryNode::node_type)) {
@@ -501,10 +506,12 @@ void RIBCyclesMaterials::add_default_renderman_inputs(Shader *shader)
     }
   }
 
-  if (!texco)
+  if (!texco) {
     texco = graph->create_node<TextureCoordinateNode>();
-  if (!geom)
+  }
+  if (!geom) {
     geom = graph->create_node<GeometryNode>();
+  }
 
   using Link_Map = std::unordered_map<const NodeType *, std::pair<ShaderOutput *, std::string>>;
   Link_Map links = {
@@ -513,9 +520,10 @@ void RIBCyclesMaterials::add_default_renderman_inputs(Shader *shader)
 
   for (auto link : links) {
     for (ShaderNode *node : graph->nodes) {
-      if (node->is_a(link.first))
+      if (node->is_a(link.first)) {
         graph->connect(link.second.first, node->input(link.second.second.c_str()));
         connected_texco = true;
+      }
     }
   }
 
@@ -524,22 +532,30 @@ void RIBCyclesMaterials::add_default_renderman_inputs(Shader *shader)
     bool has_u = false, has_v = false;
     bool has_x = false, has_y = false, has_z = false;
     for (ShaderInput *input : node->inputs) {
-      if (!input->name().compare("s") || !input->name().compare("S"))
+      if (!input->name().compare("s") || !input->name().compare("S")) {
         has_s = true;
-      else if (!input->name().compare("t") || !input->name().compare("T"))
+      }
+      else if (!input->name().compare("t") || !input->name().compare("T")) {
         has_t = true;
-      else if (!input->name().compare("st") || !input->name().compare("ST"))
+      }
+      else if (!input->name().compare("st") || !input->name().compare("ST")) {
         has_st = true;
-      else if (!input->name().compare("u") || !input->name().compare("U"))
+      }
+      else if (!input->name().compare("u") || !input->name().compare("U")) {
         has_u = true;
-      else if (!input->name().compare("v") || !input->name().compare("V"))
+      }
+      else if (!input->name().compare("v") || !input->name().compare("V")) {
         has_v = true;
-      else if (!input->name().compare("x") || !input->name().compare("X"))
+      }
+      else if (!input->name().compare("x") || !input->name().compare("X")) {
         has_x = true;
-      else if (!input->name().compare("y") || !input->name().compare("Y"))
+      }
+      else if (!input->name().compare("y") || !input->name().compare("Y")) {
         has_y = true;
-      else if (!input->name().compare("z") || !input->name().compare("Z"))
+      }
+      else if (!input->name().compare("z") || !input->name().compare("Z")) {
         has_z = true;
+      }
     }
 
     for (ShaderInput *input : node->inputs) {
@@ -623,14 +639,18 @@ void RIBCyclesMaterials::add_default_renderman_inputs(Shader *shader)
     }
   }
 
-  if (!found_geom && connected_geom)
+  if (!found_geom && connected_geom) {
     graph->add(geom);
-  if (!found_texco && connected_texco)
+  }
+  if (!found_texco && connected_texco) {
     graph->add(texco);
-  if (sep_uv)
+  }
+  if (sep_uv) {
     graph->add(sep_uv);
-  if (sep_xyz)
+  }
+  if (sep_xyz) {
     graph->add(sep_xyz);
+  }
 }
 
 CCL_NAMESPACE_END

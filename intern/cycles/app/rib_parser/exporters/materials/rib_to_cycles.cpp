@@ -22,16 +22,19 @@ bool create_shader_node(std::string const &nodeType,
   else {
     check_if_osl = true;
     auto sn = nodeType;
-    if (!sn.empty())
+    if (!sn.empty()) {
       shader_name = nodeType;
+    }
   }
 
   if (check_if_osl) {
-    if (string_startswith(shader_name, "Pxr"))
+    if (string_startswith(shader_name, "Pxr")) {
       shader_name = shader_name + ".oso";
+    }
     if (string_endswith(shader_name, ".oso")) {
-      if (path_is_relative(shader_name))
+      if (path_is_relative(shader_name)) {
         shader_name = path_join(path, shader_name);
+      }
       *node = OSLShaderManager::osl_node(graph, scene->shader_manager, shader_name, "");
     }
     else {
@@ -73,11 +76,12 @@ bool RIBtoCyclesMapping::create_shader_node(std::string const &shader,
 void RIBtoCyclesMapping::update_parameters(Parameter_Dictionary const &parameters,
                                            vector<Parsed_Parameter const *> &connections)
 {
-  for (const auto param : parameters.get_parameter_vector()) {
+  for (auto *const param : parameters.get_parameter_vector()) {
     // Check if the parameter is a connection, and defer processing
     // if it is
-    if (param->storage == Container_Type::Reference)
+    if (param->storage == Container_Type::Reference) {
       connections.push_back(param);
+    }
     else {
       // See if the parameter name is in Pixar terms, and needs to be converted
       const std::string input_name = parameter_name(param->name);
@@ -105,13 +109,15 @@ bool RIBtoMultiNodeCycles::create_shader_node(std::string const &shader,
   bool result = true;
   ShaderNode *node = nullptr;
 
-  for (auto &node_type : _nodeType)
+  for (auto &node_type : _nodeType) {
     if (::ccl::create_shader_node(node_type, shader, path, graph, scene, &node)) {
       _nodes.push_back(node);
       _node_map[node_type] = node;
     }
-    else
+    else {
       result = false;
+    }
+  }
 
   // Create the internal connection map
   for (auto pp : _connectionMap) {
@@ -168,11 +174,12 @@ bool RIBtoMultiNodeCycles::create_shader_node(std::string const &shader,
 void RIBtoMultiNodeCycles::update_parameters(Parameter_Dictionary const &parameters,
                                              vector<Parsed_Parameter const *> &connections)
 {
-  for (const auto param : parameters.get_parameter_vector()) {
+  for (auto *const param : parameters.get_parameter_vector()) {
     // Check if the parameter is a connection, and defer processing
     // if it is
-    if (param->storage == Container_Type::Reference)
+    if (param->storage == Container_Type::Reference) {
       connections.push_back(param);
+    }
     else {
       // See if the parameter name is in Pixar terms, and needs to be converted
       const std::string input_name = parameter_name(param->name);
@@ -206,7 +213,7 @@ bool PxrNormalMaptoCycles::create_shader_node(std::string const &shader,
   bool result = true;
   ShaderNode *node = nullptr;
 
-  for (auto &node_type : _nodeType)
+  for (auto &node_type : _nodeType) {
     if (::ccl::create_shader_node(node_type, shader, path, graph, scene, &node)) {
       _nodes.push_back(node);
       _node_map[node_type] = node;
@@ -218,8 +225,10 @@ bool PxrNormalMaptoCycles::create_shader_node(std::string const &shader,
         NormalMapNode *itn = (NormalMapNode *)node;
       }
     }
-    else
+    else {
       result = false;
+    }
+  }
 
   // Create the internal connection map
   for (auto pp : _connectionMap) {
@@ -297,12 +306,13 @@ void PxrSurfacetoPrincipled::update_parameters(Parameter_Dictionary const &param
 {
   // Exactly the same as the base except we create a map of the parameters for
   // later retrieval
-  for (const auto param : parameters.get_parameter_vector()) {
+  for (auto *const param : parameters.get_parameter_vector()) {
     // Check if the parameter is a connection, and defer processing
     // if it is
     _parameters[param->name] = param;
-    if (param->storage == Container_Type::Reference)
+    if (param->storage == Container_Type::Reference) {
       connections.push_back(param);
+    }
     else {
       // See if the parameter name is in Pixar terms, and needs to be converted
       const std::string input_name = parameter_name(param->name);
@@ -407,12 +417,13 @@ void PxrDisneytoPrincipled::update_parameters(Parameter_Dictionary const &parame
 {
   // Exactly the same as the base except we create a map of the parameters for
   // later retrieval
-  for (const auto param : parameters.get_parameter_vector()) {
+  for (auto *const param : parameters.get_parameter_vector()) {
     // Check if the parameter is a connection, and defer processing
     // if it is
     _parameters[param->name] = param;
-    if (param->storage == Container_Type::Reference)
+    if (param->storage == Container_Type::Reference) {
       connections.push_back(param);
+    }
     else {
       // See if the parameter name is in Pixar terms, and needs to be converted
       const std::string input_name = parameter_name(param->name);
@@ -439,7 +450,8 @@ void PxrDisneytoPrincipled::update_parameters(Parameter_Dictionary const &parame
   if ((param = _parameters["emitColor"])) {
     if (param->storage != Container_Type::Reference) {
       updated_param.type = Parameter_Type::Real;
-      float3 hsv = rgb_to_hsv(make_float3(param->floats()[0], param->floats()[1], param->floats()[2]));
+      float3 hsv = rgb_to_hsv(
+          make_float3(param->floats()[0], param->floats()[1], param->floats()[2]));
       updated_param.add_float(hsv[2]);
       input = find_socket("emission_strength", _nodes.back());
       set_node_value(_nodes.back(), *input, &updated_param);
@@ -448,16 +460,17 @@ void PxrDisneytoPrincipled::update_parameters(Parameter_Dictionary const &parame
 }
 
 void PxrDisneyBsdftoPrincipled::update_parameters(Parameter_Dictionary const &parameters,
-                                              vector<Parsed_Parameter const *> &connections)
+                                                  vector<Parsed_Parameter const *> &connections)
 {
   // Exactly the same as the base except we create a map of the parameters for
   // later retrieval
-  for (const auto param : parameters.get_parameter_vector()) {
+  for (auto *const param : parameters.get_parameter_vector()) {
     // Check if the parameter is a connection, and defer processing
     // if it is
     _parameters[param->name] = param;
-    if (param->storage == Container_Type::Reference)
+    if (param->storage == Container_Type::Reference) {
       connections.push_back(param);
+    }
     else {
       // See if the parameter name is in Pixar terms, and needs to be converted
       const std::string input_name = parameter_name(param->name);
@@ -484,7 +497,8 @@ void PxrDisneyBsdftoPrincipled::update_parameters(Parameter_Dictionary const &pa
   if ((param = _parameters["emitColor"])) {
     if (param->storage != Container_Type::Reference) {
       updated_param.type = Parameter_Type::Real;
-      float3 hsv = rgb_to_hsv(make_float3(param->floats()[0], param->floats()[1], param->floats()[2]));
+      float3 hsv = rgb_to_hsv(
+          make_float3(param->floats()[0], param->floats()[1], param->floats()[2]));
       updated_param.add_float(hsv[2]);
       input = find_socket("emission_strength", _nodes.back());
       set_node_value(_nodes.back(), *input, &updated_param);
@@ -495,7 +509,7 @@ void PxrDisneyBsdftoPrincipled::update_parameters(Parameter_Dictionary const &pa
       updated_param.floats().clear();
       updated_param.type = Parameter_Type::Real;
       // RenderMan diffTrans is in the range [0,2] so rescale back to [0,1]
-      updated_param.add_float(param->floats()[0]/2.0f);
+      updated_param.add_float(param->floats()[0] / 2.0f);
       input = find_socket("transmission", _nodes.back());
       set_node_value(_nodes.back(), *input, &updated_param);
     }
