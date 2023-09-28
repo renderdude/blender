@@ -459,6 +459,17 @@ void ImageTextureNode::compile(OSLCompiler &compiler)
   const bool compress_as_srgb = metadata.compress_as_srgb;
   const ustring known_colorspace = metadata.colorspace;
 
+  // See if metadata is valid
+  if (strcmp(metadata.colorspace_file_format, "") == 0 && metadata.colorspace_file_hint.empty()) {
+    auto suffix = this->filename.find_last_of(".tex");
+    if (suffix < this->filename.length()) {
+      std::cerr << "**************" << std::endl;
+      std::cerr << this->filename << std::endl;
+      std::cerr << "This ImageTexture is of an unknown file format. It appears to be a pixar texture file which is unsupported. ";
+      std::cerr << "Recommend to convert the file format from 'pixar' to 'openexr'." << std::endl;
+      std::cerr << "**************" << std::endl;
+    }
+  }
   if (handle.svm_slot() == -1) {
     compiler.parameter_texture(
         "filename", filename, compress_as_srgb ? u_colorspace_raw : known_colorspace);
