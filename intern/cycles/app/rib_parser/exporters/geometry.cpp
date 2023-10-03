@@ -592,7 +592,13 @@ void RIBCyclesMesh::create_uv_map(Parsed_Parameter *param)
     ustring sign_name = ustring("uv.tangent_sign");
     bool need_sign = (_geom->need_attribute(_scene, sign_name) ||
                       _geom->need_attribute(_scene, sign_std));
+    Parsed_Parameter const *param = _shape.parameters.get_parameter("N");
+    bool need_normals = param == nullptr && subdivision;
+    if (need_normals)
+      _geom->add_vertex_normals();
     mikk_compute_tangents("uv", _geom, need_sign);
+    if (need_normals)
+        _geom->attributes.remove(ATTR_STD_VERTEX_NORMAL);
   }
 }
 
