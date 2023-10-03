@@ -74,6 +74,16 @@ template<typename DstType> array<DstType> convert_to_cycles_array(Parsed_Paramet
   exit(-1);
 }
 
+template<> array<float> convert_to_cycles_array<float>(Parsed_Parameter const* param)
+{
+  array<float> cyclesArray;
+  cyclesArray.reserve(param->floats().size());
+  for (size_t i = 0; i < param->floats().size(); i++) {
+    cyclesArray.push_back_reserved(param->floats()[i]);
+  }
+  return cyclesArray;
+}
+
 template<> array<float3> convert_to_cycles_array<float3>(Parsed_Parameter const* param)
 {
   array<float3> cyclesArray;
