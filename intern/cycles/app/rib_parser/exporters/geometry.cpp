@@ -431,10 +431,23 @@ void RIBCyclesMesh::populate_normals()
     }
   }
   else if (interpolation == Container_Type::Uniform) {
-    float3 *const N = _geom->attributes.add(ATTR_STD_FACE_NORMAL)->data_float3();
-    for (size_t i = 0; i < _geom->num_triangles(); ++i) {
-      N[i] = orientation * normals[i / 2];
+    float3 *const N = _geom->attributes.add(ATTR_STD_VERTEX_NORMAL)->data_float3();
+    const vector<int> vertIndx = _shape.parameters.get_int_array("vertices");
+    const vector<int> vertCounts = _shape.parameters.get_int_array("nvertices");
+    int index_offset = 0;
+
+    for (size_t i = 0; i < vertCounts.size(); i++) {
+      for (int j = 0; j < vertCounts[i]; j++) {
+        int v0 = vertIndx[index_offset + j];
+        N[v0] += orientation * normals[index_offset];
+      }
+
+      index_offset += vertCounts[i];
     }
+
+    // Now normalize
+    for (size_t i = 0; i < _geom->get_verts().size(); ++i)
+      N[i] = normalize(N[i]);
   }
   else if (interpolation == Container_Type::Vertex || interpolation == Container_Type::Varying) {
     float3 *const N = _geom->attributes.add(ATTR_STD_VERTEX_NORMAL)->data_float3();
@@ -444,7 +457,6 @@ void RIBCyclesMesh::populate_normals()
   }
   else if (interpolation == Container_Type::FaceVarying) {
     // Cycles has no standard attribute for face-varying normals, so this is a lossy transformation
-#if 1
     float3 *const N = _geom->attributes.add(ATTR_STD_VERTEX_NORMAL)->data_float3();
     const vector<int> vertIndx = _shape.parameters.get_int_array("vertices");
     const vector<int> vertCounts = _shape.parameters.get_int_array("nvertices");
@@ -462,24 +474,6 @@ void RIBCyclesMesh::populate_normals()
     // Now normalize
     for (size_t i = 0; i < _geom->get_verts().size(); ++i)
       N[i] = normalize(N[i]);
-#else
-    float3 *const N = _geom->attributes.add(ATTR_STD_FACE_NORMAL)->data_float3();
-    int index_offset = 0;
-    size_t tri_index = 0;
-    const vector<int> vertCounts = _shape.parameters.get_int_array("nvertices");
-    for (size_t i = 0; i < vertCounts.size(); i++) {
-      for (int j = 0; j < vertCounts[i] - 2; j++) {
-        int v0 = index_offset;
-        int v1 = index_offset + j + 1;
-        int v2 = index_offset + j + 2;
-
-        float3 average_normal = normals[v0] + normals[v1] + normals[v2];
-        N[tri_index++] = orientation * normalize(average_normal);
-      }
-
-      index_offset += vertCounts[i];
-    }
-#endif
   }
 }
 
