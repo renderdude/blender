@@ -109,7 +109,28 @@ class RIBtoMultiNodeCycles : public RIBtoCyclesMapping {
   std::map<std::string, ShaderNode *> _node_map;
 };
 
-class PxrNormalMaptoCycles : public RIBtoMultiNodeCycles {
+// Specializations
+class PxrNormalMaptoCycles : public RIBtoCyclesMapping {
+ public:
+  using RIBtoCyclesMapping::RIBtoCyclesMapping;
+
+  void update_parameters(Parameter_Dictionary const &params,
+                         vector<Parsed_Parameter const *> &connections);
+ private:
+  std::unordered_map<std::string, Parsed_Parameter *> _parameters;
+};
+
+class PxrRamptoCycles : public RIBtoCyclesMapping {
+ public:
+  using RIBtoCyclesMapping::RIBtoCyclesMapping;
+
+  void update_parameters(Parameter_Dictionary const &params,
+                         vector<Parsed_Parameter const *> &connections);
+ private:
+  std::unordered_map<std::string, Parsed_Parameter *> _parameters;
+};
+
+class PxrImageNormalMaptoCycles : public RIBtoMultiNodeCycles {
  public:
   using RIBtoMultiNodeCycles::RIBtoMultiNodeCycles;
 
@@ -129,7 +150,6 @@ class RIBtoCyclesTexture : public RIBtoCyclesMapping {
                                   Scene *scene);
 };
 
-// Specializations
 class PxrSurfacetoPrincipled : public RIBtoCyclesMapping {
  public:
   using RIBtoCyclesMapping::RIBtoCyclesMapping;

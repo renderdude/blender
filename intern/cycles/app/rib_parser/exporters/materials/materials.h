@@ -34,8 +34,8 @@ class RIBCyclesMaterials {
                           ShaderGraph *shader_graph,
                           vector<Parsed_Parameter const *> &pv);
   void populate_shader_graph(Vector_Dictionary shader_graph);
-
   void add_default_renderman_inputs(Shader *shader);
+  void fix_normal_maps();
 
  private:
   Scene *_scene = nullptr;

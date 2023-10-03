@@ -128,7 +128,7 @@ class RIBtoCycles {
           //{ "", ustring("emission_strength")},
       }};
 
-  const PxrNormalMaptoCycles PxrMultiNodeNormalMap = {
+  const PxrImageNormalMaptoCycles PxrMultiNodeNormalMap = {
       // Nodes
       {"image_texture", "normal_map"},
       // Input Parameters
@@ -142,7 +142,7 @@ class RIBtoCycles {
           {"image_texture:color", ustring("normal_map:color")},
       }};
 
-  const RIBtoCyclesMapping PxrNormalMap = {
+  const PxrNormalMaptoCycles PxrNormalMap = {
       // Nodes
       {"normal_map"},
       // Input Parameters
@@ -160,6 +160,16 @@ class RIBtoCycles {
                                                {"lightColor", ustring("Color")},
                                                {"strength", ustring("Strength")},
                                            }};
+
+  const PxrRamptoCycles PxrRamp = {{"rgb_ramp"},
+                                   {
+                                       {"splineMap", ustring("fac")},
+                                       {"resultRGB", ustring("color")},
+                                       {"resultR", ustring("color")},
+                                       {"resultG", ustring("color")},
+                                       {"resultB", ustring("color")},
+                                       {"resultA", ustring("alpha")},
+                                   }};
 
   const RIBtoCyclesTexture PxrTexture = {{"image_texture"},
                                          {
@@ -192,6 +202,9 @@ class RIBtoCycles {
     }
     else if (nodeType == "PxrMeshLight") {
       result = new RIBtoCyclesMapping(PxrMeshLight);
+    }
+    else if (nodeType == "PxrRamp") {
+      result = new PxrRamptoCycles(PxrRamp);
     }
     else if (nodeType == "PxrTexture") {
       result = new RIBtoCyclesMapping(PxrTexture);
@@ -230,6 +243,7 @@ void RIBCyclesMaterials::export_materials()
     initialize();
     populate_shader_graph(shader);
     add_default_renderman_inputs(_shader);
+    fix_normal_maps();
 
     _shader->tag_update(_scene);
     // pool.push(function_bind(&ShaderGraph::simplify, _shader->graph, _scene));
@@ -346,16 +360,16 @@ void RIBCyclesMaterials::update_connections(RIBtoCyclesMapping *mapping,
   }
 }
 
-void RIBCyclesMaterials::populate_shader_graph(Vector_Dictionary sg)
+void RIBCyclesMaterials::populate_shader_graph(Vector_Dictionary shader_graph)
 {
-  LamaNetwork lama(sg);
-  Vector_Dictionary shader_graph = lama.convert();
+  LamaNetwork lama(shader_graph);
+  Vector_Dictionary lama_shader_graph = lama.convert();
 
   if (lama.has_emission()) {
     _shader->set_emission_sampling_method(EmissionSampling::EMISSION_SAMPLING_AUTO);
   }
 
-  std::string shader_id = shader_graph.first;
+  std::string shader_id = lama_shader_graph.first;
   std::string shader_name, shader_type, handle;
   std::string shader_path = path_get("shader");
 
@@ -364,7 +378,7 @@ void RIBCyclesMaterials::populate_shader_graph(Vector_Dictionary sg)
 
   auto *graph = new ShaderGraph();
 
-  for (auto const &params : shader_graph.second) {
+  for (auto const &params : lama_shader_graph.second) {
     RIBtoCyclesMapping *mapping;
 
     auto pv = params.get_parameter_vector();
@@ -650,6 +664,22 @@ void RIBCyclesMaterials::add_default_renderman_inputs(Shader *shader)
   }
   if (sep_xyz) {
     graph->add(sep_xyz);
+  }
+}
+
+void RIBCyclesMaterials::fix_normal_maps()
+{
+  for (auto *node : _shader->graph->nodes) {
+    if (node->is_a(ImageTextureNode::node_type)) {
+      ImageTextureNode *itn = (ImageTextureNode *)node;
+      for (auto *output : itn->outputs) {
+        for (auto *link : output->links) {
+          if (link->parent->is_a(NormalMapNode::node_type)) {
+            itn->set_colorspace(ustring("Non-Color"));
+          }
+        }
+      }
+    }
   }
 }
 
