@@ -1021,7 +1021,7 @@ void Ri::Light(const std::string &name,
       // If we're processing the light instance (only occurs with a mesh light),
       // we need to create an emission shader that's picked up by the geometry
       // at a later point.
-      if (len <= 2) {
+      if (_lights.find(handle) != _lights.end() && len <= 2) {
         auto it = osl_shader_group.find(material_id);
         if (it != osl_shader_group.end())
           osl_shader_group.erase(it);
