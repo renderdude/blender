@@ -1,6 +1,7 @@
 #include "app/rib_parser/error.h"
 #include "app/rib_parser/parsed_parameter.h"
 #include "app/rib_parser/scene_entities.h"
+#include "kernel/types.h"
 #include "scene/camera.h"
 #include "scene/mesh.h"
 #include "scene/object.h"
@@ -267,14 +268,25 @@ void RIBCyclesMesh::export_geometry()
                                                   (*_shape.render_from_object));
     _instances[i]->set_tfm(tfm);
 
-    /* Not sure where to pull visibility from a RIB file
-    if (HdChangeTracker::IsVisibilityDirty(*dirtyBits, id)) {
-      for (Object *instance : _instances) {
-        instance->set_visibility(Base::IsVisible() ? ~0 : 0);
-      }
+    uint visibility = PATH_RAY_ALL_VISIBILITY;
+    int rib_vis = _inst_v[i].parameters.at("visibility").get_one_int("camera", 1);
+    if (rib_vis == 0) {
+      visibility &= ~PATH_RAY_CAMERA;
     }
-  */
+    rib_vis = _inst_v[i].parameters.at("visibility").get_one_int("indirect", 1);
+    if (rib_vis == 0) {
+      visibility &= ~PATH_RAY_REFLECT;
+    }
+    rib_vis = _inst_v[i].parameters.at("visibility").get_one_int("transmission", 1);
+    if (rib_vis == 0) {
+      visibility &= ~PATH_RAY_SHADOW;
+    }
+
+    for (Object *instance : _instances) {
+      instance->set_visibility(visibility);
+    }
   }
+
   for (Object *instance : _instances) {
     instance->tag_update(_scene);
     instance->compute_bounds(instance->use_motion());
@@ -598,7 +610,7 @@ void RIBCyclesMesh::create_uv_map(Parsed_Parameter *param)
       _geom->add_vertex_normals();
     mikk_compute_tangents("uv", _geom, need_sign);
     if (need_normals)
-        _geom->attributes.remove(ATTR_STD_VERTEX_NORMAL);
+      _geom->attributes.remove(ATTR_STD_VERTEX_NORMAL);
   }
 }
 
