@@ -154,6 +154,10 @@ class RIBtoCycles {
 
   const RIBtoCyclesMapping PxrDefault = {{""}, {}};
   const RIBtoCyclesMapping PxrBlack = {{"diffuse_bsdf"}, {}};
+  const RIBtoCyclesMapping PxrDiffuse = {{"diffuse_bsdf"},
+  {
+                                               {"diffuseColor", ustring("color")},
+  }};
 
   const RIBtoCyclesMapping PxrMeshLight = {{"emission"},
                                            {
@@ -199,6 +203,9 @@ class RIBtoCycles {
     }
     else if (nodeType == "PxrBlack") {
       result = new RIBtoCyclesMapping(PxrBlack);
+    }
+    else if (nodeType == "PxrDiffuse") {
+      result = new RIBtoCyclesMapping(PxrDiffuse);
     }
     else if (nodeType == "PxrMeshLight") {
       result = new RIBtoCyclesMapping(PxrMeshLight);

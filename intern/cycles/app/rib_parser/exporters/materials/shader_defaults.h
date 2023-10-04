@@ -34,12 +34,20 @@ void fill(PrincipledBsdfNode *node)
   node->set_alpha(1.0f);
 }
 
+void fill(DiffuseBsdfNode *node)
+{
+  node->set_color(make_float3(0.5, 0.5, 0.5));
+}
+
 ShaderNode *create_shader(const NodeType *node_type)
 {
   ShaderNode *node = static_cast<ShaderNode *>(node_type->create(node_type));
 
   if (node->is_a(PrincipledBsdfNode::node_type)) {
     fill((PrincipledBsdfNode *)node);
+  }
+  if (node->is_a(DiffuseBsdfNode::node_type)) {
+    fill((DiffuseBsdfNode *)node);
   }
 
   return node;
