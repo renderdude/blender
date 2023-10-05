@@ -46,7 +46,7 @@ ShaderNode *create_shader(const NodeType *node_type)
   if (node->is_a(PrincipledBsdfNode::node_type)) {
     fill((PrincipledBsdfNode *)node);
   }
-  if (node->is_a(DiffuseBsdfNode::node_type)) {
+  else if (node->is_a(DiffuseBsdfNode::node_type)) {
     fill((DiffuseBsdfNode *)node);
   }
 
