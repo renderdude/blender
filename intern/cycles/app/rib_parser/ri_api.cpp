@@ -1029,7 +1029,7 @@ void Ri::Light(const std::string &name,
         Parameter_Dictionary light_dict(light_params, graphics_state.light_attributes);
         float strength = 1.0f;
 
-        float exposure = light_dict.get_one_float("exposure", 1.0);
+        float exposure = light_dict.get_one_float("exposure", 0.0);
         strength *= exp2(exposure);
 
         float intensity = light_dict.get_one_float("intensity", 1.0);

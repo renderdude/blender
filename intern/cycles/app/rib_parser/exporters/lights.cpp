@@ -54,7 +54,7 @@ void export_lights(Scene *scene,
                                                        make_float3(1.0f, 1.0f, 1.0f));
       strength = make_float3(color[0], color[1], color[2]);
 
-      float exposure = light_inst.parameters.get_one_float("exposure", 1.0);
+      float exposure = light_inst.parameters.get_one_float("exposure", 0.0);
       strength *= exp2(exposure);
 
       float intensity = light_inst.parameters.get_one_float("intensity", 1.0);
