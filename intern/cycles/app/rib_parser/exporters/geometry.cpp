@@ -226,8 +226,17 @@ void RIBCyclesMesh::export_geometry()
         }
       }
 
-      for (Node *shader : usedShaders) {
-        static_cast<Shader *>(shader)->tag_used(_scene);
+      needs_emission_normalization = false;
+
+      if (_inst_v[i].parameters.find("Ri") != _inst_v[i].parameters.end()) {
+        if (_inst_v[i].parameters.at("Ri").get_one_bool("areaNormalize", false)) {
+          for (Node *shader : usedShaders) {
+            static_cast<Shader *>(shader)->tag_used(_scene);
+            for (ShaderNode *snode : static_cast<Shader *>(shader)->graph->nodes) {
+              needs_emission_normalization |= snode->has_surface_emission();
+            }
+          }
+        }
       }
 
       _geom->set_used_shaders(usedShaders);
@@ -282,8 +291,9 @@ void RIBCyclesMesh::export_geometry()
       visibility &= ~PATH_RAY_SHADOW;
     }
 
-    for (Object *instance : _instances) {
-      instance->set_visibility(visibility);
+    _instances[i]->set_visibility(visibility);
+    if (needs_emission_normalization) {
+      normalize_emission(_instances[i]);
     }
   }
 
@@ -946,4 +956,50 @@ Shape_Scene_Entity RIBCyclesMesh::reduce_geometry_by_faceset(Shape_Scene_Entity 
   return new_shape;
 }
 
+// This will likely produce weird results if 2+ objects of different sizes share
+// the same shader with normalization on
+void RIBCyclesMesh::normalize_emission(Object *instance)
+{
+  Mesh *mesh = static_cast<Mesh *>(instance->get_geometry());
+  bool transform_applied = mesh->transform_applied;
+  Transform tfm = instance->get_tfm();
+  std::unordered_map<int, float> totarea;
+
+  size_t mesh_num_triangles = mesh->num_triangles();
+  for (size_t i = 0; i < mesh_num_triangles; i++) {
+    int shader_index = mesh->get_shader()[i];
+
+    if (totarea.find(shader_index) == totarea.end()) {
+      totarea[shader_index] = 0.f;
+    }
+    Mesh::Triangle t = mesh->get_triangle(i);
+    float3 p1 = mesh->get_verts()[t.v[0]];
+    float3 p2 = mesh->get_verts()[t.v[1]];
+    float3 p3 = mesh->get_verts()[t.v[2]];
+
+    if (!transform_applied) {
+      p1 = transform_point(&tfm, p1);
+      p2 = transform_point(&tfm, p2);
+      p3 = transform_point(&tfm, p3);
+    }
+
+    totarea[shader_index] += triangle_area(p1, p2, p3);
+  }
+
+  for (auto &[key, value] : totarea) {
+    Shader *shader = static_cast<Shader *>(mesh->get_used_shaders()[key]);
+    for (auto node : shader->graph->nodes) {
+      if (node->is_a(PrincipledBsdfNode::node_type)) {
+        PrincipledBsdfNode *bsdf = (PrincipledBsdfNode *)node;
+        float strength = bsdf->get_emission_strength();
+        bsdf->set_emission_strength(strength / value);
+      }
+      else if (node->is_a(EmissionNode::node_type)) {
+        EmissionNode *bsdf = (EmissionNode *)node;
+        float strength = bsdf->get_strength();
+        bsdf->set_strength(strength / value);
+      }
+    }
+  }
+}
 CCL_NAMESPACE_END

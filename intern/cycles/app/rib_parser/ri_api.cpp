@@ -1034,11 +1034,18 @@ void Ri::Light(const std::string &name,
 
         float intensity = light_dict.get_one_float("intensity", 1.0);
         strength *= intensity;
+
         param = new Parsed_Parameter(Parameter_Type::Real, "strength", loc);
         param->may_be_unused = true;
         param->add_float(strength);
         light_params.push_back(param);
         Bxdf(name, handle, light_params, loc);
+
+        param = new Parsed_Parameter(Parameter_Type::Boolean, "areaNormalize", loc);
+        param->may_be_unused = true;
+        param->add_bool((light_dict.get_one_int("areaNormalize", 0) == 1));
+        graphics_state.rib_attributes["Ri"].push_back(param);
+
         graphics_state.current_material_name = material_id;
         graphics_state.current_material_index = -1;
       }

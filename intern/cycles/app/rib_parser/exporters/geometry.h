@@ -40,10 +40,11 @@ class RIBCyclesMesh {
   void populate_topology();
   void populate_shader_graph(bool initializing = false);
   void create_uv_map(Parsed_Parameter* param);
-  Shape_Scene_Entity reduce_geometry_by_faceset(Shape_Scene_Entity const& shape, vector<int> const& faceset);
 
   Parsed_Parameter* compute_triangulated_uniform_primvar(const Parsed_Parameter* param);
   Parsed_Parameter* compute_triangulated_face_varying_primvar(const Parsed_Parameter* param);
+  Shape_Scene_Entity reduce_geometry_by_faceset(Shape_Scene_Entity const& shape, vector<int> const& faceset);
+  void normalize_emission(Object* instance);
 
  private:
   Scene *_scene = nullptr;
@@ -56,6 +57,7 @@ class RIBCyclesMesh {
   vector<int3> triangles;
   BoundBox _bounds{BoundBox::empty};
   Shape_Scene_Entity _shape;
+  bool needs_emission_normalization = false;
 
   void compute_triangle_indices(const vector<int>& vertices,
                                 const vector<int>& nvertices,
