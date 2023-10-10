@@ -454,21 +454,21 @@ void LamaNetwork::split_nodegraph()
         // mat1 points to the EDF node
         if (!_handle_to_lama[mat1].second) {
           params.remove_bxdf("material1");
-          if (_handle_to_lama.find(mat2) == _handle_to_lama.end()) {
+          if (split_nodes.find(mat2) != split_nodes.end()) {
             params.get_parameter("material2")->strings()[0] += "_BSDF";
           }
           edf_dict.remove_bxdf("material2");
-          if (_handle_to_lama.find(mat1) == _handle_to_lama.end()) {
+          if (split_nodes.find(mat1) != split_nodes.end()) {
             edf_dict.get_parameter("material1")->strings()[0] += "_EDF";
           }
         }
         else {
           params.remove_bxdf("material2");
-          if (_handle_to_lama.find(mat1) == _handle_to_lama.end()) {
+          if (split_nodes.find(mat1) != split_nodes.end()) {
             params.get_parameter("material1")->strings()[0] += "_BSDF";
           }
           edf_dict.remove_bxdf("material1");
-          if (_handle_to_lama.find(mat2) == _handle_to_lama.end())
+          if (split_nodes.find(mat2) != split_nodes.end())
             edf_dict.get_parameter("material2")->strings()[0] += "_EDF";
         }
         _handle_to_lama[shader_type->strings()[2]] = std::make_pair(shader_type->strings()[2],
