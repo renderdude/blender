@@ -587,8 +587,6 @@ def _template_items_tool_select(
                  {"properties": [("deselect_all", True)]}),
                 (operator, {"type": 'LEFTMOUSE', "value": 'PRESS', "shift": True},
                  {"properties": [("deselect_all", False), ("toggle", True)]}),
-                ("transform.translate", {"type": 'LEFTMOUSE', "value": 'CLICK_DRAG'},
-                 {"properties": [("release_confirm", True)]}),
             ]
 
     if params.select_mouse == 'LEFTMOUSE':
@@ -4571,6 +4569,11 @@ def km_grease_pencil_paint(_params):
     )
 
     items.extend([
+        *_template_paint_radial_control("gpencil_paint"),
+        ("brush.scale_size", {"type": 'LEFT_BRACKET', "value": 'PRESS', "repeat": True},
+         {"properties": [("scalar", 0.9)]}),
+        ("brush.scale_size", {"type": 'RIGHT_BRACKET', "value": 'PRESS', "repeat": True},
+         {"properties": [("scalar", 1.0 / 0.9)]}),
         ("grease_pencil.brush_stroke", {"type": 'LEFTMOUSE', "value": 'PRESS'}, None),
         ("grease_pencil.brush_stroke", {"type": 'LEFTMOUSE', "value": 'PRESS', "ctrl": True},
          {"properties": [("mode", 'INVERT')]}),
@@ -4801,7 +4804,7 @@ def km_pose(params):
         op_menu("VIEW3D_MT_bone_options_toggle", {"type": 'W', "value": 'PRESS', "shift": True}),
         op_menu("VIEW3D_MT_bone_options_enable", {"type": 'W', "value": 'PRESS', "shift": True, "ctrl": True}),
         op_menu("VIEW3D_MT_bone_options_disable", {"type": 'W', "value": 'PRESS', "alt": True}),
-        ("armature.layers_show_all", {"type": 'ACCENT_GRAVE', "value": 'PRESS', "ctrl": True}, None),
+        ("armature.collection_show_all", {"type": 'ACCENT_GRAVE', "value": 'PRESS', "ctrl": True}, None),
         op_menu("VIEW3D_MT_bone_collections", {"type": 'M', "value": 'PRESS', "shift": True}),
         ("armature.move_to_collection", {"type": 'M', "value": 'PRESS'}, None),
         ("transform.bbone_resize", {"type": 'S', "value": 'PRESS', "shift": True, "ctrl": True, "alt": True}, None),
@@ -5431,6 +5434,27 @@ def km_sculpt(params):
         op_menu_pie("VIEW3D_MT_sculpt_automasking_pie", {"type": 'A', "alt": True, "value": 'PRESS'}),
         op_menu_pie("VIEW3D_MT_sculpt_face_sets_edit_pie", {"type": 'W', "value": 'PRESS', "alt": True}),
         *_template_items_context_panel("VIEW3D_PT_sculpt_context_menu", params.context_menu_event),
+        # Tools
+        ("paint.brush_select", {"type": 'V', "value": 'PRESS'},
+         {"properties": [("sculpt_tool", 'DRAW')]}),
+        ("paint.brush_select", {"type": 'S', "value": 'PRESS'},
+         {"properties": [("sculpt_tool", 'SMOOTH')]}),
+        ("paint.brush_select", {"type": 'P', "value": 'PRESS'},
+         {"properties": [("sculpt_tool", 'PINCH')]}),
+        ("paint.brush_select", {"type": 'I', "value": 'PRESS'},
+         {"properties": [("sculpt_tool", 'INFLATE')]}),
+        ("paint.brush_select", {"type": 'G', "value": 'PRESS'},
+         {"properties": [("sculpt_tool", 'GRAB')]}),
+        ("paint.brush_select", {"type": 'T', "value": 'PRESS', "shift": True},
+         {"properties": [("sculpt_tool", 'SCRAPE')]}),
+        ("paint.brush_select", {"type": 'C', "value": 'PRESS'},
+         {"properties": [("sculpt_tool", 'CLAY_STRIPS')]}),
+        ("paint.brush_select", {"type": 'C', "value": 'PRESS', "shift": True},
+         {"properties": [("sculpt_tool", 'CREASE')]}),
+        ("paint.brush_select", {"type": 'K', "value": 'PRESS'},
+         {"properties": [("sculpt_tool", 'SNAKE_HOOK')]}),
+        ("paint.brush_select", {"type": 'M', "value": 'PRESS'},
+         {"properties": [("sculpt_tool", 'MASK'), ("toggle", True), ("create_missing", True)]}),
     ])
 
     # Lasso Masking.
@@ -5726,7 +5750,7 @@ def km_edit_armature(params):
         op_menu("VIEW3D_MT_bone_options_enable", {"type": 'W', "value": 'PRESS', "shift": True, "ctrl": True}),
         op_menu("VIEW3D_MT_bone_options_disable", {"type": 'W', "value": 'PRESS', "alt": True}),
         # Armature/bone layers.
-        ("armature.layers_show_all", {"type": 'ACCENT_GRAVE', "value": 'PRESS', "ctrl": True}, None),
+        ("armature.collection_show_all", {"type": 'ACCENT_GRAVE', "value": 'PRESS', "ctrl": True}, None),
         op_menu("VIEW3D_MT_bone_collections", {"type": 'M', "value": 'PRESS', "shift": True}),
         ("armature.move_to_collection", {"type": 'M', "value": 'PRESS'}, None),
         # Special transforms.

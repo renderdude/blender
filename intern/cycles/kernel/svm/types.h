@@ -13,7 +13,7 @@ CCL_NAMESPACE_BEGIN
 /* SVM stack offsets with this value indicate that it's not on the stack */
 #define SVM_STACK_INVALID 255
 
-#define SVM_BUMP_EVAL_STATE_SIZE 4
+#define SVM_BUMP_EVAL_STATE_SIZE 10
 
 /* Nodes */
 
@@ -441,8 +441,8 @@ typedef enum ClosureType {
   CLOSURE_BSDF_HAIR_TRANSMISSION_ID,
 
   /* Glass */
-  CLOSURE_BSDF_MICROFACET_BECKMANN_GLASS_ID,
-  CLOSURE_BSDF_MICROFACET_GGX_GLASS_ID,
+  CLOSURE_BSDF_MICROFACET_BECKMANN_GLASS_ID,  /* virtual closure */
+  CLOSURE_BSDF_MICROFACET_GGX_GLASS_ID,       /* virtual closure */
   CLOSURE_BSDF_MICROFACET_MULTI_GGX_GLASS_ID, /* virtual closure */
   CLOSURE_BSDF_HAIR_CHIANG_ID,
   CLOSURE_BSDF_HAIR_HUANG_ID,

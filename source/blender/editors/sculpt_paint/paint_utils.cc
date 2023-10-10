@@ -33,7 +33,7 @@
 #include "BKE_material.h"
 #include "BKE_mesh.hh"
 #include "BKE_mesh_runtime.hh"
-#include "BKE_object.h"
+#include "BKE_object.hh"
 #include "BKE_paint.hh"
 #include "BKE_report.h"
 
@@ -62,7 +62,7 @@
 #include "BLI_sys_types.h"
 #include "ED_mesh.hh" /* for face mask functions */
 
-#include "DRW_select_buffer.h"
+#include "DRW_select_buffer.hh"
 
 #include "WM_api.hh"
 #include "WM_types.hh"

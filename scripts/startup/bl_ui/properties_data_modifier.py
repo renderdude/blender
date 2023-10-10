@@ -14,11 +14,15 @@ class ModifierButtonsPanel:
 
 
 class ModifierAddMenu:
-    MODIFIER_TYPES_TO_LABELS = {enum_it.identifier: enum_it.name
-                                for enum_it in bpy.types.Modifier.bl_rna.properties['type'].enum_items_static}
-    MODIFIER_TYPES_TO_ICONS = {enum_it.identifier: enum_it.icon
-                               for enum_it in bpy.types.Modifier.bl_rna.properties['type'].enum_items_static}
-    MODIFIER_TYPES_I18N_CONTEXT = bpy.types.Modifier.bl_rna.properties['type'].translation_context
+    MODIFIER_TYPES_TO_LABELS = {
+        enum_it.identifier: enum_it.name
+        for enum_it in bpy.types.Modifier.bl_rna.properties["type"].enum_items_static
+    }
+    MODIFIER_TYPES_TO_ICONS = {
+        enum_it.identifier: enum_it.icon
+        for enum_it in bpy.types.Modifier.bl_rna.properties["type"].enum_items_static
+    }
+    MODIFIER_TYPES_I18N_CONTEXT = bpy.types.Modifier.bl_rna.properties["type"].translation_context
 
     @classmethod
     def operator_modifier_add(cls, layout, mod_type):
@@ -48,12 +52,12 @@ class DATA_PT_modifiers(ModifierButtonsPanel, Panel):
 
 class OBJECT_MT_modifier_add(ModifierAddMenu, Menu):
     bl_label = "Add Modifier"
-    bl_options = {'SEARCH_ON_KEY_PRESS'}
 
     def draw(self, context):
         layout = self.layout
         ob_type = context.object.type
-        geometry_nodes_supported = ob_type in {'MESH', 'CURVE', 'CURVES', 'FONT', 'SURFACE', 'VOLUME', 'POINTCLOUD'}
+        geometry_nodes_supported = ob_type in {'MESH', 'CURVE', 'CURVES',
+                                               'FONT', 'SURFACE', 'VOLUME', 'POINTCLOUD', 'GREASEPENCIL'}
         if geometry_nodes_supported:
             self.operator_modifier_add(layout, 'NODES')
             layout.separator()

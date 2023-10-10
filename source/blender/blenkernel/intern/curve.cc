@@ -48,7 +48,7 @@
 #include "BKE_lib_id.h"
 #include "BKE_lib_query.h"
 #include "BKE_main.h"
-#include "BKE_object.h"
+#include "BKE_object.hh"
 #include "BKE_vfont.h"
 
 #include "DEG_depsgraph.hh"
@@ -5427,11 +5427,7 @@ void BKE_curve_material_remap(Curve *cu, const uint *remap, uint remap_len)
     }
 
     for (i = 0; i <= charinfo_len; i++) {
-      if (strinfo[i].mat_nr > 0) {
-        strinfo[i].mat_nr -= 1;
-        MAT_NR_REMAP(strinfo[i].mat_nr);
-        strinfo[i].mat_nr += 1;
-      }
+      MAT_NR_REMAP(strinfo[i].mat_nr);
     }
   }
   else {

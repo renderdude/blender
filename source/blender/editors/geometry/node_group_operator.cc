@@ -30,7 +30,7 @@
 #include "BKE_mesh.hh"
 #include "BKE_mesh_wrapper.hh"
 #include "BKE_node_runtime.hh"
-#include "BKE_object.h"
+#include "BKE_object.hh"
 #include "BKE_pointcloud.h"
 #include "BKE_report.h"
 #include "BKE_screen.hh"
@@ -806,6 +806,8 @@ static void catalog_assets_draw_unassigned(const bContext *C, Menu *menu)
                     UI_ITEM_NONE,
                     &props_ptr);
     WM_operator_properties_id_lookup_set_from_id(&props_ptr, &group->id);
+    /* Also set the name so it can be used for #run_node_group_get_name. */
+    RNA_string_set(&props_ptr, "name", group->id.name + 2);
   }
 }
 
@@ -845,7 +847,6 @@ void ui_template_node_operator_asset_menu_items(uiLayout &layout,
   if (path_ptr.data == nullptr) {
     return;
   }
-  uiItemS(&layout);
   uiLayout *col = uiLayoutColumn(&layout, false);
   uiLayoutSetContextPointer(col, "asset_catalog_path", &path_ptr);
   uiItemMContents(col, "GEO_MT_node_operator_catalog_assets");

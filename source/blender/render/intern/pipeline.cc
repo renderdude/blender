@@ -57,7 +57,7 @@
 #include "BKE_modifier.h"
 #include "BKE_node.hh"
 #include "BKE_node_runtime.hh"
-#include "BKE_object.h"
+#include "BKE_object.hh"
 #include "BKE_pointcache.h"
 #include "BKE_report.h"
 #include "BKE_scene.h"
@@ -2459,7 +2459,10 @@ void RE_RenderAnim(Render *re,
 void RE_PreviewRender(Render *re, Main *bmain, Scene *sce)
 {
   /* Ensure within GPU render boundary. */
-  GPU_render_begin();
+  const bool use_gpu = GPU_backend_get_type() != GPU_BACKEND_NONE;
+  if (use_gpu) {
+    GPU_render_begin();
+  }
 
   Object *camera;
   int winx, winy;
@@ -2483,7 +2486,9 @@ void RE_PreviewRender(Render *re, Main *bmain, Scene *sce)
   }
 
   /* Close GPU render boundary. */
-  GPU_render_end();
+  if (use_gpu) {
+    GPU_render_end();
+  }
 }
 
 /* NOTE: repeated win/disprect calc... solve that nicer, also in compo. */

@@ -46,7 +46,7 @@
 #include "BKE_mesh_legacy_convert.hh"
 #include "BKE_mesh_runtime.hh"
 #include "BKE_node.hh"
-#include "BKE_object.h"
+#include "BKE_object.hh"
 #include "BKE_scene.h"
 
 #include "ANIM_bone_collections.h"
@@ -215,6 +215,11 @@ static void bc_add_armature_collections(COLLADAFW::Node *node,
                                         ExtraTags *node_extra_tags,
                                         bArmature *arm)
 {
+  if (!node_extra_tags) {
+    /* No 'extra' tags means that there are no bone collections. */
+    return;
+  }
+
   std::vector<std::string> collection_names = node_extra_tags->dataSplitString("collections");
   std::vector<std::string> visible_names = node_extra_tags->dataSplitString("visible_collections");
   std::set<std::string> visible_names_set(visible_names.begin(), visible_names.end());

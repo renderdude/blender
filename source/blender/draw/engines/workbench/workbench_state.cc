@@ -8,7 +8,7 @@
 #include "BKE_editmesh.h"
 #include "BKE_mesh_types.hh"
 #include "BKE_modifier.h"
-#include "BKE_object.h"
+#include "BKE_object.hh"
 #include "BKE_paint.hh"
 #include "BKE_particle.h"
 #include "BKE_pbvh_api.hh"
@@ -173,6 +173,8 @@ void SceneState::init(Object *camera_ob /*=nullptr*/)
              shading.flag & V3D_SHADING_DEPTH_OF_FIELD;
 
   draw_object_id = draw_outline || draw_curvature;
+
+  overlays_enabled = v3d && !(v3d->flag2 & V3D_HIDE_OVERLAYS);
 };
 
 static const CustomData *get_loop_custom_data(const Mesh *mesh)

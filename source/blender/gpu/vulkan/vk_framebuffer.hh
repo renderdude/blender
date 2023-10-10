@@ -55,6 +55,9 @@ class VKFrameBuffer : public FrameBuffer {
 
   void attachment_set_loadstore_op(GPUAttachmentType type, GPULoadStore /*ls*/) override;
 
+  void subpass_transition(const GPUAttachmentState depth_attachment_state,
+                          Span<GPUAttachmentState> color_attachment_states) override;
+
   void read(eGPUFrameBufferBits planes,
             eGPUDataFormat format,
             const int area[4],
@@ -105,6 +108,15 @@ class VKFrameBuffer : public FrameBuffer {
    * set, when activating the frame buffer.
    */
   void update_size();
+
+  /**
+   * Return the number of color attachments of this frame buffer, including unused color
+   * attachments.
+   *
+   * Framebuffers can have unused attachments. When higher attachment slots are being used, unused
+   * lower attachment slots will be counted as they are required resources in renderpasses.
+   */
+  int color_attachments_resource_size() const;
 
  private:
   void update_attachments();

@@ -40,7 +40,7 @@
 #include "BKE_mesh.hh"
 #include "BKE_mesh_fair.hh"
 #include "BKE_mesh_mapping.hh"
-#include "BKE_object.h"
+#include "BKE_object.hh"
 #include "BKE_paint.hh"
 #include "BKE_pbvh_api.hh"
 
@@ -156,7 +156,7 @@ static void do_draw_face_sets_brush_task(Object *ob, const Brush *brush, PBVHNod
                                                                     sqrtf(test.dist),
                                                                     vd.no,
                                                                     vd.fno,
-                                                                    vd.mask ? *vd.mask : 0.0f,
+                                                                    vd.mask,
                                                                     vd.vertex,
                                                                     thread_id,
                                                                     &automask_data);
@@ -177,7 +177,7 @@ static void do_draw_face_sets_brush_task(Object *ob, const Brush *brush, PBVHNod
                                                                   sqrtf(test.dist),
                                                                   vd.no,
                                                                   vd.fno,
-                                                                  vd.mask ? *vd.mask : 0.0f,
+                                                                  vd.mask,
                                                                   vd.vertex,
                                                                   thread_id,
                                                                   &automask_data);
@@ -235,7 +235,7 @@ static void do_relax_face_sets_brush_task(Object *ob,
                                                                 sqrtf(test.dist),
                                                                 vd.no,
                                                                 vd.fno,
-                                                                vd.mask ? *vd.mask : 0.0f,
+                                                                vd.mask,
                                                                 vd.vertex,
                                                                 thread_id,
                                                                 &automask_data);
@@ -1203,6 +1203,7 @@ static void sculpt_face_set_edit_fair_face_set(Object *ob,
   for (int i = 0; i < totvert; i++) {
     if (fair_verts[i]) {
       interp_v3_v3v3(positions[i], orig_positions[i], positions[i], strength);
+      BKE_pbvh_vert_tag_update_normal(ss->pbvh, BKE_pbvh_index_to_vertex(ss->pbvh, i));
     }
   }
 }

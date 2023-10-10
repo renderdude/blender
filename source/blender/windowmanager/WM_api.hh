@@ -52,6 +52,7 @@ struct wmGizmo;
 struct wmGizmoMap;
 struct wmGizmoMapType;
 struct wmJob;
+struct wmJobWorkerStatus;
 struct wmOperator;
 struct wmOperatorType;
 struct wmPaintCursor;
@@ -1514,10 +1515,7 @@ void WM_jobs_customdata_set(wmJob *, void *customdata, void (*free)(void *));
 void WM_jobs_timer(wmJob *, double timestep, unsigned int note, unsigned int endnote);
 void WM_jobs_delay_start(wmJob *, double delay_time);
 
-using wm_jobs_start_callback = void (*)(void *custom_data,
-                                        bool *stop,
-                                        bool *do_update,
-                                        float *progress);
+using wm_jobs_start_callback = void (*)(void *custom_data, wmJobWorkerStatus *worker_status);
 void WM_jobs_callbacks(wmJob *,
                        wm_jobs_start_callback startjob,
                        void (*initjob)(void *),
@@ -1540,11 +1538,11 @@ void WM_jobs_start(wmWindowManager *wm, wmJob *);
 /**
  * Signal job(s) from this owner or callback to stop, timer is required to get handled.
  */
-void WM_jobs_stop(wmWindowManager *wm, const void *owner, void *startjob);
+void WM_jobs_stop(wmWindowManager *wm, const void *owner, wm_jobs_start_callback startjob);
 /**
  * Actually terminate thread and job timer.
  */
-void WM_jobs_kill(wmWindowManager *wm, void *owner, void (*)(void *, bool *, bool *, float *));
+void WM_jobs_kill(wmWindowManager *wm, void *owner, wm_jobs_start_callback startjob);
 /**
  * Wait until every job ended.
  */

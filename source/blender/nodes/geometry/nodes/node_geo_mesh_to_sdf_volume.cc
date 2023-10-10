@@ -9,7 +9,7 @@
 #include "BKE_mesh.hh"
 #include "BKE_mesh_runtime.hh"
 #include "BKE_mesh_wrapper.hh"
-#include "BKE_object.h"
+#include "BKE_object.hh"
 #include "BKE_volume.h"
 
 #include "GEO_mesh_to_volume.hh"
@@ -38,10 +38,10 @@ static void node_declare(NodeDeclarationBuilder &b)
       .subtype(PROP_DISTANCE);
   b.add_input<decl::Float>("Voxel Amount").default_value(64.0f).min(0.0f).max(FLT_MAX);
   b.add_input<decl::Float>("Half-Band Width")
-      .description("Half the width of the narrow band in voxel units")
       .default_value(3.0f)
       .min(1.01f)
-      .max(10.0f);
+      .max(10.0f)
+      .description("Half the width of the narrow band in voxel units");
   b.add_output<decl::Geometry>("Volume").translation_context(BLT_I18NCONTEXT_ID_ID);
 }
 

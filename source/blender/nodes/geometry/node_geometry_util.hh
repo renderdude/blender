@@ -99,10 +99,6 @@ class EvaluateAtIndexInput final : public bke::GeometryFieldInput {
   }
 };
 
-std::string socket_identifier_for_simulation_item(const NodeSimulationItem &item);
-
-void socket_declarations_for_simulation_items(Span<NodeSimulationItem> items,
-                                              NodeDeclaration &r_declaration);
 const CPPType &get_simulation_item_cpp_type(eNodeSocketDatatype socket_type);
 const CPPType &get_simulation_item_cpp_type(const NodeSimulationItem &item);
 
@@ -126,9 +122,6 @@ void copy_with_checked_indices(const GVArray &src,
                                const IndexMask &mask,
                                GMutableSpan dst);
 
-void socket_declarations_for_repeat_items(const Span<NodeRepeatItem> items,
-                                          NodeDeclaration &r_declaration);
-
 namespace enums {
 
 const EnumPropertyItem *attribute_type_type_with_socket_fn(bContext * /*C*/,
@@ -137,6 +130,11 @@ const EnumPropertyItem *attribute_type_type_with_socket_fn(bContext * /*C*/,
                                                            bool *r_free);
 
 bool generic_attribute_type_supported(const EnumPropertyItem &item);
+
+const EnumPropertyItem *domain_experimental_grease_pencil_version3_fn(bContext * /*C*/,
+                                                                      PointerRNA * /*ptr*/,
+                                                                      PropertyRNA * /*prop*/,
+                                                                      bool *r_free);
 
 }  // namespace enums
 

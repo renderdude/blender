@@ -54,7 +54,8 @@ class RENDER_PT_color_management(RenderButtonsPanel, Panel):
         'BLENDER_RENDER',
         'BLENDER_EEVEE',
         'BLENDER_EEVEE_NEXT',
-        'BLENDER_WORKBENCH'}
+        'BLENDER_WORKBENCH',
+    }
 
     def draw(self, context):
 
@@ -92,7 +93,8 @@ class RENDER_PT_color_management_display_settings(RenderButtonsPanel, Panel):
         'BLENDER_RENDER',
         'BLENDER_EEVEE',
         'BLENDER_EEVEE_NEXT',
-        'BLENDER_WORKBENCH'}
+        'BLENDER_WORKBENCH',
+    }
 
     def draw(self, context):
         layout = self.layout
@@ -122,7 +124,8 @@ class RENDER_PT_color_management_curves(RenderButtonsPanel, Panel):
         'BLENDER_RENDER',
         'BLENDER_EEVEE',
         'BLENDER_EEVEE_NEXT',
-        'BLENDER_WORKBENCH'}
+        'BLENDER_WORKBENCH',
+    }
 
     def draw_header(self, context):
 
@@ -894,6 +897,7 @@ class RENDER_PT_eevee_next_indirect_lighting(RenderButtonsPanel, Panel):
         col.operator("object.lightprobe_cache_free", text="Delete Light Caches").subset = 'ALL'
 
         col.prop(props, "gi_irradiance_pool_size", text="Pool Size")
+        col.prop(props, "gi_cubemap_resolution", text="Probe Resolution")
 
 
 class RENDER_PT_eevee_indirect_lighting_display(RenderButtonsPanel, Panel):
@@ -1057,7 +1061,8 @@ class RENDER_PT_gpencil(RenderButtonsPanel, Panel):
         'BLENDER_RENDER',
         'BLENDER_EEVEE',
         'BLENDER_EEVEE_NEXT',
-        'BLENDER_WORKBENCH'}
+        'BLENDER_WORKBENCH',
+    }
 
     def draw(self, context):
         layout = self.layout
@@ -1149,7 +1154,8 @@ class RENDER_PT_simplify(RenderButtonsPanel, Panel):
         'BLENDER_RENDER',
         'BLENDER_EEVEE',
         'BLENDER_EEVEE_NEXT',
-        'BLENDER_WORKBENCH'}
+        'BLENDER_WORKBENCH',
+    }
 
     def draw_header(self, context):
         rd = context.scene.render
@@ -1166,7 +1172,8 @@ class RENDER_PT_simplify_viewport(RenderButtonsPanel, Panel):
         'BLENDER_RENDER',
         'BLENDER_EEVEE',
         'BLENDER_EEVEE_NEXT',
-        'BLENDER_WORKBENCH'}
+        'BLENDER_WORKBENCH',
+    }
 
     def draw(self, context):
         layout = self.layout
@@ -1199,7 +1206,8 @@ class RENDER_PT_simplify_render(RenderButtonsPanel, Panel):
         'BLENDER_RENDER',
         'BLENDER_EEVEE',
         'BLENDER_EEVEE_NEXT',
-        'BLENDER_WORKBENCH'}
+        'BLENDER_WORKBENCH',
+    }
 
     def draw(self, context):
         layout = self.layout

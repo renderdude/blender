@@ -53,7 +53,7 @@
 #include "BKE_lib_query.h"
 #include "BKE_lib_remap.h"
 #include "BKE_main.h"
-#include "BKE_object.h"
+#include "BKE_object.hh"
 #include "BKE_report.h"
 #include "BKE_scene.h"
 #include "BKE_screen.hh"
@@ -1002,7 +1002,7 @@ static void id_local_fn(bContext *C,
     }
   }
   else if (ID_IS_OVERRIDE_LIBRARY_REAL(tselem->id)) {
-    BKE_lib_override_library_make_local(tselem->id);
+    BKE_lib_override_library_make_local(CTX_data_main(C), tselem->id);
   }
 }
 
@@ -3732,7 +3732,7 @@ static int do_outliner_operation_event(bContext *C,
   return OPERATOR_CANCELLED;
 }
 
-static int outliner_operation(bContext *C, wmOperator * /*op*/, const wmEvent *event)
+static int outliner_operation_invoke(bContext *C, wmOperator * /*op*/, const wmEvent *event)
 {
   ARegion *region = CTX_wm_region(C);
   SpaceOutliner *space_outliner = CTX_wm_space_outliner(C);
@@ -3762,7 +3762,7 @@ void OUTLINER_OT_operation(wmOperatorType *ot)
   ot->idname = "OUTLINER_OT_operation";
   ot->description = "Context menu for item operations";
 
-  ot->invoke = outliner_operation;
+  ot->invoke = outliner_operation_invoke;
 
   ot->poll = ED_operator_outliner_active;
 }

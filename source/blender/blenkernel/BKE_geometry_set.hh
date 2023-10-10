@@ -400,6 +400,12 @@ struct GeometrySet {
   void replace_grease_pencil(GreasePencil *grease_pencil,
                              GeometryOwnershipType ownership = GeometryOwnershipType::Owned);
 
+  friend bool operator==(const GeometrySet &a, const GeometrySet &b)
+  {
+    /* This compares only the component pointers, not the actual geometry data. */
+    return Span(a.components_) == Span(b.components_);
+  }
+
  private:
   /**
    * Retrieve the pointer to a component without creating it if it does not exist,
@@ -684,8 +690,8 @@ class GeometryComponentEditData final : public GeometryComponent {
 
 /**
  * A geometry component that stores #GreasePencil data.
- * This component does not implement an attribute API, because the #GreasePencil data itself does
- * not store any attributes, only the individual drawings within it.
+ * The attributes on this component are only on the layer domain. Each individual layer represents
+ * a #CurvesGeometry with its own curve and point domain. See #CurveComponent.
  */
 class GreasePencilComponent : public GeometryComponent {
  private:
@@ -719,6 +725,9 @@ class GreasePencilComponent : public GeometryComponent {
   void ensure_owns_direct_data() override;
 
   static constexpr inline GeometryComponent::Type static_type = Type::GreasePencil;
+
+  std::optional<AttributeAccessor> attributes() const final;
+  std::optional<MutableAttributeAccessor> attributes_for_write() final;
 };
 
 }  // namespace blender::bke

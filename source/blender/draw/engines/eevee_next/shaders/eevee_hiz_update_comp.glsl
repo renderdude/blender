@@ -45,7 +45,11 @@ void main()
   /* Copy level 0. */
   ivec2 src_px = ivec2(kernel_origin + local_px) * 2;
   vec2 samp_co = (vec2(src_px) + 0.5) / vec2(textureSize(depth_tx, 0));
+#ifdef HIZ_LAYER
+  vec4 samp = textureGather(depth_layered_tx, vec3(samp_co, float(layer_id)));
+#else
   vec4 samp = textureGather(depth_tx, samp_co);
+#endif
 
   if (update_mip_0) {
     imageStore(out_mip_0, src_px + ivec2(0, 1), samp.xxxx);
@@ -112,8 +116,8 @@ void main()
 
       mask_shift = 1;
 
-      /* Level 7. */
-      downsample_level(out_mip_7, 7);
+      /* Level 7 requires barriers inside a non-uniform control flow. */
+      // downsample_level(out_mip_7, 7);
 
       /* Limited by OpenGL maximum of 8 image slot. */
       // downsample_level(out_mip_8, 8);

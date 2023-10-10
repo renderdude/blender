@@ -129,6 +129,9 @@ ccl_device
       ClosureType subsurface_method = (ClosureType)data_node2.z;
 
       float3 valid_reflection_N = maybe_ensure_valid_specular_reflection(sd, N);
+      float3 coat_normal = stack_valid(coat_normal_offset) ?
+                               stack_load_float3(stack, coat_normal_offset) :
+                               sd->N;
 
       // get the base color
       uint4 data_base_color = read_node(kg, &offset);
@@ -190,23 +193,24 @@ ccl_device
             sd, sizeof(SheenBsdf), sheen_weight * rgb_to_spectrum(sheen_tint) * weight);
 
         if (bsdf) {
-          bsdf->N = N;
+          bsdf->N = safe_normalize(mix(N, coat_normal, saturatef(coat_weight)));
           bsdf->roughness = sheen_roughness;
 
           /* setup bsdf */
-          sd->flag |= bsdf_sheen_setup(kg, sd, bsdf);
+          const int sheen_flag = bsdf_sheen_setup(kg, sd, bsdf);
 
-          /* Attenuate lower layers */
-          Spectrum albedo = bsdf_albedo(kg, sd, (ccl_private ShaderClosure *)bsdf, true, false);
-          weight *= 1.0f - reduce_max(safe_divide_color(albedo, weight));
+          if (sheen_flag) {
+            sd->flag |= sheen_flag;
+
+            /* Attenuate lower layers */
+            Spectrum albedo = bsdf_albedo(kg, sd, (ccl_private ShaderClosure *)bsdf, true, false);
+            weight *= 1.0f - reduce_max(safe_divide_color(albedo, weight));
+          }
         }
       }
 
       /* Second layer: Coat */
       if (coat_weight > CLOSURE_WEIGHT_CUTOFF) {
-        float3 coat_normal = stack_valid(coat_normal_offset) ?
-                                 stack_load_float3(stack, coat_normal_offset) :
-                                 sd->N;
         coat_normal = maybe_ensure_valid_specular_reflection(sd, coat_normal);
         if (reflective_caustics) {
           ccl_private MicrofacetBsdf *bsdf = (ccl_private MicrofacetBsdf *)bsdf_alloc(
@@ -323,8 +327,19 @@ ccl_device
         }
       }
 
+      /* Apply IOR adjustment */
+      float eta = ior;
+      float f0 = F0_from_ior(eta);
+      if (specular_ior_level != 0.5f) {
+        f0 *= 2.0f * specular_ior_level;
+        eta = ior_from_F0(f0);
+        if (ior < 1.0f) {
+          eta = 1.0f / eta;
+        }
+      }
+
       /* Specular component */
-      if (reflective_caustics) {
+      if (reflective_caustics && eta != 1.0f) {
         ccl_private MicrofacetBsdf *bsdf = (ccl_private MicrofacetBsdf *)bsdf_alloc(
             sd, sizeof(MicrofacetBsdf), weight);
         ccl_private FresnelGeneralizedSchlick *fresnel =
@@ -333,17 +348,6 @@ ccl_device
                              NULL;
 
         if (bsdf && fresnel) {
-          /* Apply IOR adjustment */
-          float eta = ior;
-          float f0 = F0_from_ior(eta);
-          if (specular_ior_level != 0.5f) {
-            f0 *= 2.0f * specular_ior_level;
-            eta = ior_from_F0(f0);
-            if (ior < 1.0f) {
-              eta = 1.0f / eta;
-            }
-          }
-
           bsdf->N = valid_reflection_N;
           bsdf->ior = eta;
           bsdf->T = T;
@@ -377,9 +381,9 @@ ccl_device
 
         bssrdf->radius = rgb_to_spectrum(subsurface_radius * subsurface_scale);
         bssrdf->albedo = rgb_to_spectrum(base_color);
-        bssrdf->N = N;
+        bssrdf->N = maybe_ensure_valid_specular_reflection(sd, N);
         bssrdf->alpha = sqr(roughness);
-        bssrdf->ior = ior;
+        bssrdf->ior = eta;
         bssrdf->anisotropy = stack_load_float(stack, data_subsurf.w);
         if (subsurface_method == CLOSURE_BSSRDF_RANDOM_WALK_SKIN_ID) {
           bssrdf->ior = stack_load_float(stack, data_subsurf.x);
@@ -548,37 +552,38 @@ ccl_device
           !kernel_data.integrator.caustics_refractive && (path_flag & PATH_RAY_DIFFUSE))
         break;
 #endif
-      Spectrum weight = closure_weight * mix_weight;
       ccl_private MicrofacetBsdf *bsdf = (ccl_private MicrofacetBsdf *)bsdf_alloc(
-          sd, sizeof(MicrofacetBsdf), weight);
+          sd, sizeof(MicrofacetBsdf), make_spectrum(mix_weight));
+      ccl_private FresnelGeneralizedSchlick *fresnel =
+          (bsdf != NULL) ? (ccl_private FresnelGeneralizedSchlick *)closure_alloc_extra(
+                               sd, sizeof(FresnelGeneralizedSchlick)) :
+                           NULL;
 
-      if (bsdf) {
+      if (bsdf && fresnel) {
         bsdf->N = maybe_ensure_valid_specular_reflection(sd, N);
         bsdf->T = zero_float3();
-        bsdf->fresnel = NULL;
 
-        float eta = fmaxf(param2, 1e-5f);
-        eta = (sd->flag & SD_BACKFACING) ? 1.0f / eta : eta;
+        float ior = fmaxf(param2, 1e-5f);
+        bsdf->ior = (sd->flag & SD_BACKFACING) ? 1.0f / ior : ior;
+        bsdf->alpha_x = bsdf->alpha_y = sqr(param1);
+
+        fresnel->f0 = make_float3(F0_from_ior(ior));
+        fresnel->f90 = one_spectrum();
+        fresnel->exponent = -ior;
+        const float3 color = stack_load_float3(stack, data_node.z);
+        fresnel->reflection_tint = color;
+        fresnel->transmission_tint = color;
 
         /* setup bsdf */
-        float roughness = sqr(param1);
-        bsdf->alpha_x = roughness;
-        bsdf->alpha_y = roughness;
-        bsdf->ior = eta;
-
         if (type == CLOSURE_BSDF_MICROFACET_BECKMANN_GLASS_ID) {
           sd->flag |= bsdf_microfacet_beckmann_glass_setup(bsdf);
         }
         else {
           sd->flag |= bsdf_microfacet_ggx_glass_setup(bsdf);
-          if (type == CLOSURE_BSDF_MICROFACET_MULTI_GGX_GLASS_ID) {
-            kernel_assert(stack_valid(data_node.z));
-            const Spectrum color = rgb_to_spectrum(stack_load_float3(stack, data_node.z));
-            bsdf_microfacet_setup_fresnel_constant(kg, bsdf, sd, color);
-          }
         }
+        const bool is_multiggx = (type == CLOSURE_BSDF_MICROFACET_MULTI_GGX_GLASS_ID);
+        bsdf_microfacet_setup_fresnel_generalized_schlick(kg, bsdf, sd, fresnel, is_multiggx);
       }
-
       break;
     }
     case CLOSURE_BSDF_ASHIKHMIN_VELVET_ID: {
@@ -830,7 +835,7 @@ ccl_device
       if (bssrdf) {
         bssrdf->radius = rgb_to_spectrum(stack_load_float3(stack, data_node.z) * param1);
         bssrdf->albedo = closure_weight;
-        bssrdf->N = N;
+        bssrdf->N = maybe_ensure_valid_specular_reflection(sd, N);
         bssrdf->ior = param2;
         bssrdf->alpha = 1.0f;
         bssrdf->anisotropy = stack_load_float(stack, data_node.w);

@@ -6,7 +6,7 @@
  * Use screen space tracing against depth buffer to find intersection with the scene.
  */
 
-#pragma BLENDER_REQUIRE(eevee_reflection_probe_eval_lib.glsl)
+#pragma BLENDER_REQUIRE(eevee_lightprobe_eval_lib.glsl)
 #pragma BLENDER_REQUIRE(eevee_bxdf_sampling_lib.glsl)
 #pragma BLENDER_REQUIRE(eevee_sampling_lib.glsl)
 #pragma BLENDER_REQUIRE(eevee_ray_types_lib.glsl)
@@ -20,14 +20,13 @@ void main()
   uvec2 tile_coord = unpackUvec2x16(tiles_coord_buf[gl_WorkGroupID.x]);
   ivec2 texel = ivec2(gl_LocalInvocationID.xy + tile_coord * tile_size);
 
-  ivec2 texel_fullres = texel * uniform_buf.raytrace.resolution_scale +
-                        uniform_buf.raytrace.resolution_bias;
-
-  float depth = texelFetch(depth_tx, texel_fullres, 0).r;
-  vec2 uv = (vec2(texel_fullres) + 0.5) * uniform_buf.raytrace.full_resolution_inv;
-
   vec4 ray_data = imageLoad(ray_data_img, texel);
   float ray_pdf_inv = ray_data.w;
+
+  if (ray_pdf_inv < 0.0) {
+    /* Ray destined to planar trace. */
+    return;
+  }
 
   if (ray_pdf_inv == 0.0) {
     /* Invalid ray or pixels without ray. Do not trace. */
@@ -36,7 +35,14 @@ void main()
     return;
   }
 
+  ivec2 texel_fullres = texel * uniform_buf.raytrace.resolution_scale +
+                        uniform_buf.raytrace.resolution_bias;
+
+  float depth = texelFetch(depth_tx, texel_fullres, 0).r;
+  vec2 uv = (vec2(texel_fullres) + 0.5) * uniform_buf.raytrace.full_resolution_inv;
+
   vec3 P = get_world_space_from_depth(uv, depth);
+  vec3 V = cameraVec(P);
   Ray ray;
   ray.origin = P;
   ray.direction = ray_data.xyz;
@@ -87,10 +93,13 @@ void main()
     // }
   }
   else {
+    /* Using ray direction as geometric normal to bias the sampling position.
+     * This is faster than loading the gbuffer again and averages between reflected and normal
+     * direction over many rays. */
+    vec3 Ng = ray.direction;
     /* Fallback to nearest light-probe. */
-    int closest_probe_id = reflection_probes_find_closest(P);
-    ReflectionProbeData probe = reflection_probe_buf[closest_probe_id];
-    radiance = reflection_probes_sample(ray.direction, 0.0, probe).rgb;
+    LightProbeSample samp = lightprobe_load(P, Ng, V);
+    radiance = lightprobe_eval_direction(samp, ray.direction, safe_rcp(ray_pdf_inv));
     /* Set point really far for correct reprojection of background. */
     hit.time = 10000.0;
   }

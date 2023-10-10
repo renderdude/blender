@@ -1409,12 +1409,18 @@ rna_custom_property_subtype_vector_items = (
     rna_custom_property_subtype_none_item,
     ('COLOR', "Linear Color", "Color in the linear space"),
     ('COLOR_GAMMA', "Gamma-Corrected Color", "Color in the gamma corrected space"),
+    ('TRANSLATION', "Translation", ""),
+    ('DIRECTION', "Direction", ""),
+    ('VELOCITY', "Velocity", ""),
+    ('ACCELERATION', "Acceleration", ""),
     ('EULER', "Euler Angles", "Euler rotation angles in radians"),
     ('QUATERNION', "Quaternion Rotation", "Quaternion rotation (affects NLA blending)"),
+    ('AXISANGLE', "Axis-Angle", "Angle and axis to rotate around"),
+    ('XYZ', "XYZ", ""),
 )
 
 rna_id_type_items = tuple((item.identifier, item.name, item.description, item.icon, item.value)
-                          for item in bpy.types.Action.bl_rna.properties['id_root'].enum_items)
+                          for item in bpy.types.Action.bl_rna.properties["id_root"].enum_items)
 
 
 class WM_OT_properties_edit(Operator):
@@ -2682,6 +2688,9 @@ class WM_OT_batch_rename(Operator):
             ('NODE', "Nodes", ""),
             ('SEQUENCE_STRIP', "Sequence Strips", ""),
             ('ACTION_CLIP', "Action Clips", ""),
+            None,
+            ('SCENE', "Scenes", ""),
+            ('BRUSH', "Brushes", ""),
         ),
         description="Type of data to rename",
     )
@@ -2877,6 +2886,26 @@ class WM_OT_batch_rename(Operator):
                     [id for id in bpy.data.actions if id.library is None],
                     "name",
                     iface_("Action(s)"),
+                )
+            elif data_type == 'SCENE':
+                data = (
+                    (
+                        # Outliner.
+                        cls._selected_ids_from_outliner_by_type(context, bpy.types.Scene)
+                        if ((space_type == 'OUTLINER') and only_selected) else [id for id in bpy.data.scenes if id.library is None]
+                    ),
+                    "name",
+                    iface_("Scene(s)"),
+                )
+            elif data_type == 'BRUSH':
+                data = (
+                    (
+                        # Outliner.
+                        cls._selected_ids_from_outliner_by_type(context, bpy.types.Brush)
+                        if ((space_type == 'OUTLINER') and only_selected) else [id for id in bpy.data.brushes if id.library is None]
+                    ),
+                    "name",
+                    iface_("Brush(es)"),
                 )
             elif data_type in object_data_type_attrs_map.keys():
                 attr, descr, ty = object_data_type_attrs_map[data_type]
@@ -3183,14 +3212,36 @@ class WM_MT_splash_quick_setup(Menu):
         layout = self.layout
         layout.operator_context = 'EXEC_DEFAULT'
 
-        layout.label(text="Quick Setup")
+        old_version = bpy.types.PREFERENCES_OT_copy_prev.previous_version()
+        can_import = bpy.types.PREFERENCES_OT_copy_prev.poll(context) and old_version
 
-        split = layout.split(factor=0.14)  # Left margin.
+        if can_import:
+            layout.label(text="Import Existing Settings")
+            split = layout.split(factor=0.20)  # Left margin.
+            split.label()
+
+            split = split.split(factor=0.73)  # Content width.
+            col = split.column()
+            col.operator(
+                "preferences.copy_prev",
+                text=iface_("Load Blender %d.%d Settings", "Operator") % old_version,
+                icon='DUPLICATE',
+                translate=False,
+            )
+            col.operator(
+                "wm.url_open", text="See What's New...", icon='URL',
+            ).url = "https://wiki.blender.org/wiki/Reference/Release_Notes/4.0"
+            col.separator(factor=2.0)
+
+        if can_import:
+            layout.label(text="Create New Settings")
+        else:
+            layout.label(text="Quick Setup")
+
+        split = layout.split(factor=0.20)  # Left margin.
         split.label()
         split = split.split(factor=0.73)  # Content width.
-
         col = split.column()
-
         col.use_property_split = True
         col.use_property_decorate = False
 
@@ -3219,42 +3270,22 @@ class WM_MT_splash_quick_setup(Menu):
         if has_spacebar_action:
             col.row().prop(kc_prefs, "spacebar_action", text="Spacebar")
 
-        col.separator()
-
         # Themes.
+        col.separator()
         sub = col.column(heading="Theme")
         label = bpy.types.USERPREF_MT_interface_theme_presets.bl_label
         if label == "Presets":
             label = "Blender Dark"
         sub.menu("USERPREF_MT_interface_theme_presets", text=label)
 
-        # Keep height constant.
-        if not has_select_mouse:
-            col.label()
-        if not has_spacebar_action:
-            col.label()
-
-        layout.separator(factor=2.0)
-
-        # Save settings buttons.
-        sub = layout.row()
-
-        old_version = bpy.types.PREFERENCES_OT_copy_prev.previous_version()
-        if bpy.types.PREFERENCES_OT_copy_prev.poll(context) and old_version:
-            sub.operator(
-                "preferences.copy_prev",
-                text=iface_(
-                    "Load %d.%d Settings",
-                    "Operator") %
-                old_version,
-                translate=False)
-            sub.operator("wm.save_userpref", text="Save New Settings")
+        if can_import:
+            sub.label()
+            sub.operator("wm.save_userpref", text="Save New Settings", icon='CHECKMARK')
         else:
             sub.label()
-            sub.label()
-            sub.operator("wm.save_userpref", text="Next")
+            sub.operator("wm.save_userpref", text="Continue")
 
-        layout.separator(factor=2.4)
+        layout.separator(factor=2.0)
 
 
 class WM_MT_splash(Menu):
