@@ -28,16 +28,14 @@ bool create_shader_node(std::string const &nodeType,
   }
 
   if (check_if_osl) {
-    if (string_startswith(shader_name, "Pxr")) {
+    if (!string_endswith(shader_name, ".oso")) {
       shader_name = shader_name + ".oso";
     }
-    if (string_endswith(shader_name, ".oso")) {
-      if (path_is_relative(shader_name)) {
-        shader_name = path_join(path, shader_name);
-      }
-      *node = OSLShaderManager::osl_node(graph, scene->shader_manager, shader_name, "");
+    if (path_is_relative(shader_name)) {
+      shader_name = path_join(path, shader_name);
     }
-    else {
+    *node = OSLShaderManager::osl_node(graph, scene->shader_manager, shader_name, "");
+    if (!node) {
       fprintf(stderr, "Could not create node '%s'", shader_name.c_str());
       result = false;
     }
@@ -330,7 +328,7 @@ void PxrRamptoCycles::update_parameters(Parameter_Dictionary const &parameters,
       }
       else {
         knot_index++;
-        continue; // Duplicate Knot point and we've strided over it
+        continue;  // Duplicate Knot point and we've strided over it
       }
       while (index < 256 && eval_pt < upper_bound) {
         float3 result = lerp(left, right, eval_pt);
