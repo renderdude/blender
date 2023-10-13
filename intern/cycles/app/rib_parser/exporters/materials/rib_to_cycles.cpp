@@ -655,7 +655,7 @@ void PxrDisneyBsdftoPrincipled::update_parameters(Parameter_Dictionary const &pa
       updated_param.type = Parameter_Type::Real;
       // RenderMan diffTrans is in the range [0,2] so rescale back to [0,1]
       updated_param.add_float(param->floats()[0] / 2.0f);
-      input = find_socket("transmission", _nodes.back());
+      input = find_socket("transmission_weight", _nodes.back());
       set_node_value(_nodes.back(), *input, &updated_param);
     }
   }
