@@ -585,6 +585,37 @@ void LamaNetwork::match_renderman_definitions()
         }
       }
     }
+    else if (shader_type->strings()[1] == "LamaDielectric") {
+      auto it = _constants.find(shader_type->strings()[2]);
+      if (it == _constants.end()) {
+        // No entry in _constants, so create a new one
+        Parsed_Parameter *param = new Parsed_Parameter(
+            Parameter_Type::Integer, "fresnelMode", File_Loc());
+        // RenderMan artistic frensel mode is 0, MaterialX it's 1
+        param->add_int(1);
+        params.push_back(param);
+        _constants[shader_type->strings()[2]].push_back(param);
+      }
+      else {
+        bool found = false;
+        for (auto pp : it->second) {
+          if (pp->name == "fresnelMode") {
+            pp->ints()[0] = !pp->ints()[0];
+            found = true;
+            break;
+          }
+        }
+        // No entry, so add one
+        if (!found) {
+          Parsed_Parameter *param = new Parsed_Parameter(
+              Parameter_Type::Integer, "fresnelMode", File_Loc());
+          // RenderMan artistic frensel mode is 0, MaterialX it's 1
+          param->add_int(1);
+          params.push_back(param);
+          it->second.push_back(param);
+        }
+      }
+    }
   }
 }
 
