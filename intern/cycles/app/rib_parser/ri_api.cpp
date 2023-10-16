@@ -39,6 +39,7 @@ namespace bfs = boost::filesystem;
 #include "exporters/materials/materials.h"
 
 #include "app/cycles_xml.h"
+#include "app/rib_parser/param_dict.h"
 #include "app/rib_parser/parsed_parameter.h"
 #include "error.h"
 #include "ri_api.h"
@@ -121,8 +122,10 @@ void Ri::export_to_cycles()
   BoundBox scene_bounds{BoundBox::empty};
 
   export_options(filter, film, _camera[film.camera_name], sampler);
-  RIBCyclesMaterials materials(session->scene, osl_shader_group);
-  materials.export_materials();
+  for (auto shader: osl_shader_group){
+    RIBCyclesMaterials material(session->scene, shader);
+    material.export_materials();
+  }
   for (auto &inst : instance_uses) {
     auto *inst_def = instance_definitions[inst.first];
     if (!inst_def->lights.empty()) {

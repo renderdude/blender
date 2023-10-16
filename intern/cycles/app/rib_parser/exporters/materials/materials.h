@@ -17,8 +17,8 @@ CCL_NAMESPACE_BEGIN
 
 class RIBCyclesMaterials {
  public:
-  RIBCyclesMaterials(Scene *scene, Mapped_Vector_Dictionary osl_shader_group)
-      : _scene(scene), _osl_shader_group(osl_shader_group)
+  RIBCyclesMaterials(Scene *scene, Vector_Dictionary osl_shader)
+      : _scene(scene), _osl_shader(osl_shader)
   {
   }
 
@@ -40,7 +40,7 @@ class RIBCyclesMaterials {
  private:
   Scene *_scene = nullptr;
   Shader *_shader = nullptr;
-  Mapped_Vector_Dictionary _osl_shader_group;
+  Vector_Dictionary _osl_shader;
   std::unordered_map<std::string, class RIBtoCyclesMapping *> _nodes;
 };
 

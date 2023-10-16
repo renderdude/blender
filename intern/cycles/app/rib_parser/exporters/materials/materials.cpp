@@ -246,9 +246,8 @@ void RIBCyclesMaterials::export_materials()
   TaskPool pool;
   set<Shader *> updated_shaders;
 
-  for (const auto &shader : _osl_shader_group) {
     initialize();
-    populate_shader_graph(shader);
+    populate_shader_graph(_osl_shader);
     add_default_renderman_inputs(_shader);
     fix_normal_maps();
 
@@ -260,7 +259,6 @@ void RIBCyclesMaterials::export_materials()
     // updated_shaders.insert(_shader);
 
     _shader = nullptr;
-  }
 
   // pool.wait_work();
 
