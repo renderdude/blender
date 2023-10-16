@@ -17,6 +17,7 @@ CCL_NAMESPACE_BEGIN
    };
 
    class Parameter_Dictionary;
+   using Vector_Dictionary = std::pair<std::string, std::vector<Parameter_Dictionary>>;
    using Mapped_Parameter_Dictionary =
        std::unordered_map< std::string, Parameter_Dictionary >;
    using Mapped_Vector_Dictionary =

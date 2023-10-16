@@ -307,6 +307,16 @@ void Ri::Attribute(const std::string &target, Parsed_Parameter_Vector params, Fi
           graphics_state.reverse_orientation = !graphics_state.reverse_orientation;
     }
   }
+  else if (target == "identifier") {
+    for (Parsed_Parameter *p : params) {
+      if (p->name == "name") {
+        graphics_state.id_string = p->strings()[0];
+      }
+      else if (p->name == "id") {
+        graphics_state.identifier = p->ints()[0];
+      }
+    }
+  }
 }
 
 void Ri::AttributeBegin(File_Loc loc)
@@ -375,12 +385,29 @@ void Ri::Bxdf(const std::string &bxdf,
 
   Parameter_Dictionary dict(std::move(params));
   std::string material_id = dict.get_one_string("__materialid", "");
+  if (graphics_state.remapped_material.find(material_id) != graphics_state.remapped_material.end()) {
+    material_id = graphics_state.remapped_material[material_id];
+    param = dict.get_parameter("__materialid");
+    param->strings()[0] = material_id;
+  }
   if (material_id != "") {
     _shader_id = material_id;
     if (osl_shader_group.find(material_id) == osl_shader_group.end())
       osl_parameters.push_back(dict);
     else {
-      graphics_state.current_material_name = material_id;
+      std::stringstream ss;
+      ss << material_id << "_" << graphics_state.identifier;
+      osl_shader_group[ss.str()] = osl_shader_group[material_id];
+      for (auto& dict: osl_shader_group[ss.str()]) {
+        param = dict.get_parameter("__materialid");
+        if (param) {
+          Parsed_Parameter *pp = new Parsed_Parameter(*param);
+          pp->strings()[0] = ss.str();
+          dict.remove_string("__materialid");
+          dict.push_back(pp);
+        }
+      }
+      graphics_state.current_material_name = ss.str();
       graphics_state.current_material_index = -1;
     }
   }
@@ -1019,12 +1046,11 @@ void Ri::Light(const std::string &name,
   }
   else {
     std::string material_id = entity.parameters.get_one_string("__materialid", "");
-    if (material_id != "") {
-      size_t len = entity.parameters.get_parameter_vector().size();
+    if (!material_id.empty()) {
       // If we're processing the light instance (only occurs with a mesh light),
       // we need to create an emission shader that's picked up by the geometry
       // at a later point.
-      if (_lights.find(handle) != _lights.end() && len <= 2) {
+      if (_lights.find(handle) != _lights.end()) {
         auto it = osl_shader_group.find(material_id);
         if (it != osl_shader_group.end())
           osl_shader_group.erase(it);
@@ -1042,6 +1068,14 @@ void Ri::Light(const std::string &name,
         param->may_be_unused = true;
         param->add_float(strength);
         light_params.push_back(param);
+
+        std::stringstream ss;
+        ss << material_id << "_" << graphics_state.identifier;
+        graphics_state.remapped_material[material_id] = ss.str();
+        material_id = ss.str();
+        param = light_dict.get_parameter("__materialid");
+        param->strings()[0] = material_id;
+
         Bxdf(name, handle, light_params, loc);
 
         param = new Parsed_Parameter(Parameter_Type::Boolean, "areaNormalize", loc);

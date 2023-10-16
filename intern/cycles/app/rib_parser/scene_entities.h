@@ -71,6 +71,10 @@ struct Graphics_State {
 
   int current_material_index = 0;
   std::string current_material_name;
+  std::map<std::string, std::string> remapped_material;
+
+  std::string id_string;
+  int identifier = -1;
 
   std::string area_light_name;
   Parameter_Dictionary area_light_params;
