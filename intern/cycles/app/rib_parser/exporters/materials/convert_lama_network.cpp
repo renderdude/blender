@@ -45,6 +45,17 @@ static std::string L2 = "    ";
 static std::string L3 = "      ";
 static std::string L4 = "        ";
 
+LamaNetwork::LamaNetwork(Vector_Dictionary &shader_graph) {
+  _shader_graph.first = shader_graph.first;
+  Parsed_Parameter_Vector params;
+  for (auto dict: shader_graph.second) {
+    for (auto *param: dict.get_parameter_vector()) {
+      params.push_back(new Parsed_Parameter(*param));
+    }
+    _shader_graph.second.emplace_back(std::move(params));
+  }
+}
+
 bool LamaNetwork::generate_osl(std::string shader_name)
 {
   int result = 0;

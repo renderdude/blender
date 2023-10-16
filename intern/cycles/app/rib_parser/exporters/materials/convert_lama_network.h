@@ -7,11 +7,9 @@
 
 CCL_NAMESPACE_BEGIN
 
-using Vector_Dictionary = std::pair<std::string, std::vector<Parameter_Dictionary>>;
-
 class LamaNetwork {
  public:
-  LamaNetwork(Vector_Dictionary &shader_graph) : _shader_graph(shader_graph) {}
+  LamaNetwork(Vector_Dictionary &shader_graph);
   ~LamaNetwork() = default;
 
   Vector_Dictionary convert();
@@ -85,7 +83,7 @@ class LamaNetwork {
 
   bool _a_node_was_split = false;
   bool _has_emission_node = false;
-  Vector_Dictionary &_shader_graph;
+  Vector_Dictionary _shader_graph;
   Vector_Dictionary _lama_shader_graph;
   std::string _mtlx_def;
   Parameter_Dictionary _lama_surface;
