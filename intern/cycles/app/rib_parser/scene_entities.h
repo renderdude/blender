@@ -37,15 +37,18 @@ struct Transform_Set {
   friend Transform_Set inverse(const Transform_Set &ts)
   {
     Transform_Set tInv;
-    for (int i = 0; i < Max_Transforms; ++i)
+    for (int i = 0; i < Max_Transforms; ++i) {
       tInv.t[i] = projection_inverse(ts.t[i]);
+}
     return tInv;
   }
   bool is_animated() const
   {
-    for (int i = 0; i < Max_Transforms - 1; ++i)
-      if (t[i] != t[i + 1])
+    for (int i = 0; i < Max_Transforms - 1; ++i) {
+      if (t[i] != t[i + 1]) {
         return true;
+}
+}
     return false;
   }
 
@@ -61,9 +64,11 @@ static constexpr int All_Transforms_Bits = (1 << Max_Transforms) - 1;
 struct Graphics_State {
   template<typename F> void for_active_transforms(F func)
   {
-    for (int i = 0; i < Max_Transforms; ++i)
-      if (active_transform_bits & (1 << i))
+    for (int i = 0; i < Max_Transforms; ++i) {
+      if (active_transform_bits & (1 << i)) {
         ctm[i] = func(ctm[i]);
+}
+}
   }
 
   // Graphics_State Public Members

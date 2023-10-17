@@ -1,3 +1,4 @@
+#include "util/defines.h"
 #include <cmath>
 #include <fcntl.h>
 #include <sstream>
@@ -58,18 +59,21 @@ std::vector<std::string> split_string(std::string_view str, char ch)
 {
   std::vector<std::string> strings;
 
-  if (str.empty())
+  if (str.empty()) {
     return strings;
+  }
 
   std::string_view::iterator begin = str.begin();
   while (true) {
     std::string_view::iterator end = begin;
-    while (end != str.end() && *end != ch)
+    while (end != str.end() && *end != ch) {
       ++end;
+    }
 
-    strings.push_back(std::string(begin, end));
-    if (end == str.end())
+    strings.emplace_back(begin, end);
+    if (end == str.end()) {
       break;
+    }
 
     begin = end + 1;
   }
@@ -122,7 +126,7 @@ void Ri::export_to_cycles()
   BoundBox scene_bounds{BoundBox::empty};
 
   export_options(filter, film, _camera[film.camera_name], sampler);
-  for (auto shader: osl_shader_group){
+  for (auto shader : osl_shader_group) {
     RIBCyclesMaterials material(session->scene, shader);
     material.export_materials();
   }
@@ -156,10 +160,10 @@ inline float degrees(float rad)
   return (180 / M_PI_F) * rad;
 }
 
-void Ri::export_options(Scene_Entity &filter,
+void Ri::export_options([[maybe_unused]] Scene_Entity &filter,
                         Scene_Entity &film,
                         Camera_Scene_Entity &camera,
-                        Scene_Entity &sampler)
+                        [[maybe_unused]] Scene_Entity &sampler)
 {
   // Immediately create filter and film
   VLOG(1) << "Starting to create filter and film";
@@ -172,10 +176,11 @@ void Ri::export_options(Scene_Entity &filter,
   // the camera....
   float exposureTime = camera.parameters.get_one_float("shutterclose", 1.f) -
                        camera.parameters.get_one_float("shutteropen", 0.f);
-  if (exposureTime <= 0)
+  if (exposureTime <= 0) {
     error_exit(&camera.loc,
                "The specified camera shutter times imply that the shutter "
                "does not open.  A black image will result.");
+  }
 
   _display_name = film.parameters.get_one_string("filename", "");
 
@@ -196,11 +201,13 @@ void Ri::export_options(Scene_Entity &filter,
 
   cam->set_matrix(t);
   float near = camera.parameters.get_one_float("nearClip", -1.f);
-  if (near > 0)
+  if (near > 0) {
     cam->set_nearclip(near * metersPerUnit);
+  }
   float far = camera.parameters.get_one_float("farClip", -1.f);
-  if (far >= 0)
+  if (far >= 0) {
     cam->set_farclip(far * metersPerUnit);
+  }
 
   // Set FOV
   float fov = camera.parameters.get_one_float("fov", 45.f);
@@ -217,7 +224,7 @@ void Ri::export_options(Scene_Entity &filter,
   cam->update(session->scene);
 }
 
-void Ri::add_light(Light_Scene_Entity light)
+void Ri::add_light([[maybe_unused]] Light_Scene_Entity light)
 {
   // Medium light_medium = get_medium(light.medium, &light.loc);
   std::lock_guard<std::mutex> lock(light_mutex);
@@ -270,30 +277,36 @@ void Ri::add_instance_uses(p_std::span<Instance_Scene_Entity> in)
   std::move(std::begin(in), std::end(in), std::back_inserter(instances));
 }
 
-Ri::~Ri() {}
-
 // RI API Default Implementation
-void Ri::ArchiveBegin(const std::string &name, Parsed_Parameter_Vector params, File_Loc loc)
+void Ri::ArchiveBegin([[maybe_unused]] const std::string &name,
+                      [[maybe_unused]] Parsed_Parameter_Vector params,
+                      [[maybe_unused]] File_Loc loc)
 {
   std::cout << "ArchiveBegin is unimplemented" << std::endl;
 }
 
-void Ri::ArchiveEnd(File_Loc loc)
+void Ri::ArchiveEnd([[maybe_unused]] File_Loc loc)
 {
   std::cout << "ArchiveEnd is unimplemented" << std::endl;
 }
 
-void Ri::AreaLightSource(const std::string &name, Parsed_Parameter_Vector params, File_Loc loc)
+void Ri::AreaLightSource([[maybe_unused]] const std::string &name,
+                         [[maybe_unused]] Parsed_Parameter_Vector params,
+                         [[maybe_unused]] File_Loc loc)
 {
   std::cout << "AreaLightSource is unimplemented." << std::endl;
 }
 
-void Ri::Atmosphere(const std::string &name, Parsed_Parameter_Vector params, File_Loc loc)
+void Ri::Atmosphere([[maybe_unused]] const std::string &name,
+                    [[maybe_unused]] Parsed_Parameter_Vector params,
+                    [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Atmosphere is unimplemented" << std::endl;
 }
 
-void Ri::Attribute(const std::string &target, Parsed_Parameter_Vector params, File_Loc loc)
+void Ri::Attribute(const std::string &target,
+                   Parsed_Parameter_Vector params,
+                   [[maybe_unused]] File_Loc loc)
 {
   for (Parsed_Parameter *p : params) {
     p->may_be_unused = true;
@@ -302,9 +315,11 @@ void Ri::Attribute(const std::string &target, Parsed_Parameter_Vector params, Fi
 
   if (target == "Ri") {
     for (Parsed_Parameter *p : params) {
-      if (p->name == "Orientation")
-        if (p->strings()[0] == "inside")
+      if (p->name == "Orientation") {
+        if (p->strings()[0] == "inside") {
           graphics_state.reverse_orientation = !graphics_state.reverse_orientation;
+        }
+      }
     }
   }
   else if (target == "identifier") {
@@ -324,14 +339,15 @@ void Ri::AttributeBegin(File_Loc loc)
   VERIFY_WORLD("AttributeBegin");
   osl_parameters.clear();
   pushed_graphics_states.push_back(graphics_state);
-  push_stack.push_back(std::make_pair('a', loc));
+  push_stack.emplace_back('a', loc);
 }
 
 void Ri::AttributeEnd(File_Loc loc)
 {
   VERIFY_WORLD("AttributeEnd");
-  if (osl_parameters.size() > 0)
+  if (!osl_parameters.empty()) {
     osl_shader_group[_shader_id] = osl_parameters;
+  }
 
   // Issue error on unmatched _AttributeEnd_
   if (pushed_graphics_states.empty()) {
@@ -350,22 +366,23 @@ void Ri::AttributeEnd(File_Loc loc)
     ss << " at AttributeEnd";
     error_exit_deferred(&loc, ss.str());
   }
-  else
+  else {
     CHECK_EQ(push_stack.back().first, 'a');
+  }
   push_stack.pop_back();
 }
 
-void Ri::Basis(Parsed_Parameter_Vector params, File_Loc loc)
+void Ri::Basis([[maybe_unused]] Parsed_Parameter_Vector params, [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Basis is unimplemented" << std::endl;
 }
 
-void Ri::Begin(const std::string &name, File_Loc loc)
+void Ri::Begin([[maybe_unused]] const std::string &name, [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Begin is unimplemented" << std::endl;
 }
 
-void Ri::Bound(float bound[6], File_Loc loc)
+void Ri::Bound([[maybe_unused]] float bound[6], [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Bound is unimplemented" << std::endl;
 }
@@ -385,20 +402,22 @@ void Ri::Bxdf(const std::string &bxdf,
 
   Parameter_Dictionary dict(std::move(params));
   std::string material_id = dict.get_one_string("__materialid", "");
-  if (graphics_state.remapped_material.find(material_id) != graphics_state.remapped_material.end()) {
+  if (graphics_state.remapped_material.find(material_id) != graphics_state.remapped_material.end())
+  {
     material_id = graphics_state.remapped_material[material_id];
     param = dict.get_parameter("__materialid");
     param->strings()[0] = material_id;
   }
-  if (material_id != "") {
+  if (!material_id.empty()) {
     _shader_id = material_id;
-    if (osl_shader_group.find(material_id) == osl_shader_group.end())
+    if (osl_shader_group.find(material_id) == osl_shader_group.end()) {
       osl_parameters.push_back(dict);
+    }
     else {
       std::stringstream ss;
       ss << material_id << "_" << graphics_state.identifier;
       osl_shader_group[ss.str()] = osl_shader_group[material_id];
-      for (auto& dict: osl_shader_group[ss.str()]) {
+      for (auto &dict : osl_shader_group[ss.str()]) {
         param = dict.get_parameter("__materialid");
         if (param) {
           Parsed_Parameter *pp = new Parsed_Parameter(*param);
@@ -411,8 +430,9 @@ void Ri::Bxdf(const std::string &bxdf,
       graphics_state.current_material_index = -1;
     }
   }
-  else if (string_startswith(bxdf, "Lama"))
+  else if (string_startswith(bxdf, "Lama")) {
     osl_parameters.push_back(dict);
+  }
 }
 
 void Ri::camera(const std::string &name, Parsed_Parameter_Vector params, File_Loc loc)
@@ -422,9 +442,10 @@ void Ri::camera(const std::string &name, Parsed_Parameter_Vector params, File_Lo
   // Specifically, Ri:<something>
   for (auto it = params.begin(); it != params.end(); it++) {
     std::vector<std::string> strings = split_string((*it)->name, ':');
-    if (strings.size() > 1)
+    if (strings.size() > 1) {
       // Could extract the size and check we have that many values below
       (*it)->name = strings[1];
+    }
   }
 
   auto options = _rib_state.options["Ri"];
@@ -432,14 +453,16 @@ void Ri::camera(const std::string &name, Parsed_Parameter_Vector params, File_Lo
   for (auto s : options) {
     auto *param = s.second;
     bool found = false;
-    for (auto it = params.begin(); it != params.end(); it++)
+    for (auto it = params.begin(); it != params.end(); it++) {
       if ((*it)->name == param->name) {
         found = true;
         break;
       }
+    }
 
-    if (!found)
+    if (!found) {
       params.push_back(param);
+    }
   }
 
   Parameter_Dictionary dict(std::move(params));
@@ -449,7 +472,7 @@ void Ri::camera(const std::string &name, Parsed_Parameter_Vector params, File_Lo
     auto world_origin = items->second.find("worldorigin");
     if (world_origin != items->second.end()) {
       if (world_origin->second->strings()[0] == "worldoffset") {
-        auto world_offset = items->second["worldoffset"];
+        auto *world_offset = items->second["worldoffset"];
         _rib_state.world_offset = make_float3(
             -world_offset->floats()[0], -world_offset->floats()[1], -world_offset->floats()[2]);
       }
@@ -473,22 +496,33 @@ void Ri::camera(const std::string &name, Parsed_Parameter_Vector params, File_Lo
   _camera[name].crop_window = _crop_window;
 }
 
-void Ri::Clipping(float cnear, float cfar, File_Loc loc)
+void Ri::Clipping([[maybe_unused]] float cnear,
+                  [[maybe_unused]] float cfar,
+                  [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Clipping is unimplemented" << std::endl;
 }
 
-void Ri::ClippingPlane(float x, float y, float z, float nx, float ny, float nz, File_Loc loc)
+void Ri::ClippingPlane([[maybe_unused]] float x,
+                       [[maybe_unused]] float y,
+                       [[maybe_unused]] float z,
+                       [[maybe_unused]] float nx,
+                       [[maybe_unused]] float ny,
+                       [[maybe_unused]] float nz,
+                       [[maybe_unused]] File_Loc loc)
 {
   std::cout << "ClippingPlane is unimplemented" << std::endl;
 }
 
-void Ri::Color(float r, float g, float b, File_Loc loc)
+void Ri::Color([[maybe_unused]] float r,
+               [[maybe_unused]] float g,
+               [[maybe_unused]] float b,
+               [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Color is unimplemented" << std::endl;
 }
 
-void Ri::ConcatTransform(float transform[16], File_Loc loc)
+void Ri::ConcatTransform([[maybe_unused]] float transform[16], [[maybe_unused]] File_Loc loc)
 {
   graphics_state.for_active_transforms([=](auto t) {
     ProjectionTransform projection = *(ProjectionTransform *)&transform[0];
@@ -496,15 +530,16 @@ void Ri::ConcatTransform(float transform[16], File_Loc loc)
   });
 }
 
-void Ri::CoordinateSystem(std::string const &name, File_Loc loc)
+void Ri::CoordinateSystem(std::string const &name, [[maybe_unused]] File_Loc loc)
 {
   named_coordinate_systems[name] = graphics_state.ctm;
 }
 
 void Ri::CoordSysTransform(std::string const &name, File_Loc loc)
 {
-  if (named_coordinate_systems.find(name) != named_coordinate_systems.end())
+  if (named_coordinate_systems.find(name) != named_coordinate_systems.end()) {
     graphics_state.ctm = named_coordinate_systems[name];
+  }
   else {
     std::stringstream ss;
     ss << "Couldn't find named coordinate system \"" << name << "\"";
@@ -553,8 +588,9 @@ void Ri::Cone(
   }
 
   Parsed_Parameter *param = new Parsed_Parameter(Parameter_Type::Integer, "vertices", loc);
-  for (int i = 0; i < polys.size(); ++i)
+  for (int i = 0; i < polys.size(); ++i) {
     param->add_int(polys[i]);
+  }
   params.push_back(param);
 
   param = new Parsed_Parameter(Parameter_Type::Integer, "nvertices", loc);
@@ -574,8 +610,9 @@ void Ri::Cone(
   param = new Parsed_Parameter(Parameter_Type::Point2, "uv", loc);
   param->storage = Container_Type::Vertex;
   param->elem_per_item = 2;
-  for (int i = 0; i < uvs.size(); ++i)
+  for (int i = 0; i < uvs.size(); ++i) {
     param->add_float(uvs[i]);
+  }
   params.push_back(param);
 
   param = new Parsed_Parameter(Parameter_Type::Integer, "nfaces", loc);
@@ -589,7 +626,7 @@ void Ri::Cone(
   Shape("mesh", params, loc);
 }
 
-void Ri::CropWindow(float xmin, float xmax, float ymin, float ymax, File_Loc loc)
+void Ri::CropWindow(float xmin, float xmax, float ymin, float ymax, [[maybe_unused]] File_Loc loc)
 {
   if (xmin >= 0. && xmin <= 1. && xmin < xmax && xmin >= _crop_window[0] && xmax >= 0. &&
       xmax <= 1. && xmin < xmax && xmax <= _crop_window[1] && ymin >= 0. && ymin <= 1. &&
@@ -601,8 +638,9 @@ void Ri::CropWindow(float xmin, float xmax, float ymin, float ymax, File_Loc loc
     _crop_window[2] = ymin;
     _crop_window[3] = ymax;
 
-    if (_camera_name != "")
+    if (!_camera_name.empty()) {
       _camera[_camera_name].crop_window = _crop_window;
+    }
   }
 }
 
@@ -678,8 +716,9 @@ void Ri::Cylinder(float radius,
   }
 
   Parsed_Parameter *param = new Parsed_Parameter(Parameter_Type::Integer, "vertices", loc);
-  for (int i = 0; i < polys.size(); ++i)
+  for (int i = 0; i < polys.size(); ++i) {
     param->add_int(polys[i]);
+  }
   params.push_back(param);
 
   param = new Parsed_Parameter(Parameter_Type::Integer, "nvertices", loc);
@@ -699,8 +738,9 @@ void Ri::Cylinder(float radius,
   param = new Parsed_Parameter(Parameter_Type::Point2, "uv", loc);
   param->storage = Container_Type::Vertex;
   param->elem_per_item = 2;
-  for (int i = 0; i < uvs.size(); ++i)
+  for (int i = 0; i < uvs.size(); ++i) {
     param->add_float(uvs[i]);
+  }
   params.push_back(param);
 
   param = new Parsed_Parameter(Parameter_Type::Integer, "nfaces", loc);
@@ -714,22 +754,31 @@ void Ri::Cylinder(float radius,
   Shape("mesh", params, loc);
 }
 
-void Ri::Declare(const std::string &name, const std::string &declaration, File_Loc loc)
+void Ri::Declare([[maybe_unused]] const std::string &name,
+                 [[maybe_unused]] const std::string &declaration,
+                 [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Declare is unimplemented" << std::endl;
 }
 
-void Ri::DepthOfField(float fstop, float focallength, float focaldistance, File_Loc loc)
+void Ri::DepthOfField([[maybe_unused]] float fstop,
+                      [[maybe_unused]] float focallength,
+                      [[maybe_unused]] float focaldistance,
+                      [[maybe_unused]] File_Loc loc)
 {
   std::cout << "DepthOfField is unimplemented" << std::endl;
 }
 
-void Ri::Detail(float bound[6], File_Loc loc)
+void Ri::Detail([[maybe_unused]] float bound[6], [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Detail is unimplemented" << std::endl;
 }
 
-void Ri::DetailRange(float offlow, float onlow, float onhigh, float offhigh, File_Loc loc)
+void Ri::DetailRange([[maybe_unused]] float offlow,
+                     [[maybe_unused]] float onlow,
+                     [[maybe_unused]] float onhigh,
+                     [[maybe_unused]] float offhigh,
+                     [[maybe_unused]] File_Loc loc)
 {
   std::cout << "DetailRange is unimplemented" << std::endl;
 }
@@ -754,19 +803,19 @@ void Ri::Disk(
   Shape("disk", params, loc);
 }
 
-void Ri::Displacement(const std::string &displace,
-                      const std::string &name,
-                      Parsed_Parameter_Vector params,
-                      File_Loc loc)
+void Ri::Displacement([[maybe_unused]] const std::string &displace,
+                      [[maybe_unused]] const std::string &name,
+                      [[maybe_unused]] Parsed_Parameter_Vector params,
+                      [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Displacement is unimplemented" << std::endl;
 }
 
-void Ri::Display(const std::string &name,
-                 const std::string &type,
-                 const std::string &mode,
-                 Parsed_Parameter_Vector params,
-                 File_Loc loc)
+void Ri::Display([[maybe_unused]] const std::string &name,
+                 [[maybe_unused]] const std::string &type,
+                 [[maybe_unused]] const std::string &mode,
+                 [[maybe_unused]] Parsed_Parameter_Vector params,
+                 [[maybe_unused]] File_Loc loc)
 {
   VERIFY_OPTIONS("Film");
   // If the first char of `name' is a '+', then it's an additional
@@ -793,88 +842,107 @@ void Ri::Display(const std::string &name,
 
   Parameter_Dictionary dict(std::move(new_params));
   std::string camera_name = dict.get_one_string("camera_name", "");
-  if (camera_name.empty())
+  if (camera_name.empty()) {
     camera_name = _camera_name;
-  else
+  }
+  else {
     _camera_name = camera_name;
+  }
 
   film = Display_Scene_Entity("rgb", std::move(dict), loc, camera_name);
 }
 
-void Ri::DisplayChannel(const std::string &name, Parsed_Parameter_Vector params, File_Loc loc)
+void Ri::DisplayChannel([[maybe_unused]] const std::string &name,
+                        [[maybe_unused]] Parsed_Parameter_Vector params,
+                        [[maybe_unused]] File_Loc loc)
 {
   std::cout << "DisplayChannel " << name << " is unimplemented" << std::endl;
 }
 
-void Ri::DisplayFilter(const std::string &name,
-                       const std::string &type,
-                       Parsed_Parameter_Vector params,
-                       File_Loc loc)
+void Ri::DisplayFilter([[maybe_unused]] const std::string &name,
+                       [[maybe_unused]] const std::string &type,
+                       [[maybe_unused]] Parsed_Parameter_Vector params,
+                       [[maybe_unused]] File_Loc loc)
 {
   std::cout << "DisplayFilter " << name << " is unimplemented" << std::endl;
 }
 
-void Ri::Else(File_Loc loc)
+void Ri::Else([[maybe_unused]] File_Loc loc)
 {
   std::cout << "Else is unimplemented" << std::endl;
 }
 
-void Ri::ElseIf(const std::string &condition, File_Loc loc)
+void Ri::ElseIf([[maybe_unused]] const std::string &condition, [[maybe_unused]] File_Loc loc)
 {
   std::cout << "ElseIf is unimplemented" << std::endl;
 }
 
-void Ri::End(File_Loc loc)
+void Ri::End([[maybe_unused]] File_Loc loc)
 {
   std::cout << "End is unimplemented" << std::endl;
 }
 
-void Ri::Exposure(float gain, float gamma, File_Loc loc)
+void Ri::Exposure([[maybe_unused]] float gain,
+                  [[maybe_unused]] float gamma,
+                  [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Exposure is unimplemented" << std::endl;
 }
 
-void Ri::Exterior(const std::string &name, Parsed_Parameter_Vector params, File_Loc loc)
+void Ri::Exterior([[maybe_unused]] const std::string &name,
+                  [[maybe_unused]] Parsed_Parameter_Vector params,
+                  [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Exterior is unimplemented" << std::endl;
 }
 
-void Ri::Format(int xresolution, int yresolution, float pixelaspectratio, File_Loc loc)
+void Ri::Format([[maybe_unused]] int xresolution,
+                [[maybe_unused]] int yresolution,
+                [[maybe_unused]] float pixelaspectratio,
+                [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Format is unimplemented" << std::endl;
 }
 
-void Ri::FrameAspectRatio(float frameratio, File_Loc loc)
+void Ri::FrameAspectRatio([[maybe_unused]] float frameratio, [[maybe_unused]] File_Loc loc)
 {
   std::cout << "FrameAspectRatio is unimplemented" << std::endl;
 }
 
-void Ri::FrameBegin(int number, File_Loc loc)
+void Ri::FrameBegin([[maybe_unused]] int number, [[maybe_unused]] File_Loc loc)
 {
   std::cout << "FrameBegin is unimplemented" << std::endl;
 }
 
-void Ri::FrameEnd(File_Loc loc)
+void Ri::FrameEnd([[maybe_unused]] File_Loc loc)
 {
   std::cout << "FrameEnd is unimplemented" << std::endl;
 }
 
-void Ri::GeneralPolygon(std::vector<int> nvertices, Parsed_Parameter_Vector params, File_Loc loc)
+void Ri::GeneralPolygon([[maybe_unused]] std::vector<int> nvertices,
+                        [[maybe_unused]] Parsed_Parameter_Vector params,
+                        [[maybe_unused]] File_Loc loc)
 {
   std::cout << "GeneralPolygon is unimplemented" << std::endl;
 }
 
-void Ri::GeometricApproximation(const std::string &type, float value, File_Loc loc)
+void Ri::GeometricApproximation([[maybe_unused]] const std::string &type,
+                                [[maybe_unused]] float value,
+                                [[maybe_unused]] File_Loc loc)
 {
   std::cout << "GeometricApproximation is unimplemented" << std::endl;
 }
 
-void Ri::Geometry(const std::string &type, Parsed_Parameter_Vector params, File_Loc loc)
+void Ri::Geometry([[maybe_unused]] const std::string &type,
+                  [[maybe_unused]] Parsed_Parameter_Vector params,
+                  [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Geometry is unimplemented" << std::endl;
 }
 
-void Ri::Hider(const std::string &name, Parsed_Parameter_Vector params, File_Loc loc)
+void Ri::Hider([[maybe_unused]] const std::string &name,
+               [[maybe_unused]] Parsed_Parameter_Vector params,
+               [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Hider is unimplemented" << std::endl;
 }
@@ -895,8 +963,9 @@ void Ri::HierarchicalSubdivisionMesh(const std::string &scheme,
   params.push_back(param);
 
   param = new Parsed_Parameter(Parameter_Type::Integer, "vertices", loc);
-  for (int i = 0; i < vertices.size(); ++i)
+  for (int i = 0; i < vertices.size(); ++i) {
     param->add_int(vertices[i]);
+  }
   params.push_back(param);
 
   param = new Parsed_Parameter(Parameter_Type::Integer, "nvertices", loc);
@@ -910,72 +979,86 @@ void Ri::HierarchicalSubdivisionMesh(const std::string &scheme,
   params.push_back(param);
 
   param = new Parsed_Parameter(Parameter_Type::String, "tags", loc);
-  for (int i = 0; i < tags.size(); ++i)
+  for (int i = 0; i < tags.size(); ++i) {
     param->add_string(tags[i]);
+  }
   params.push_back(param);
 
   param = new Parsed_Parameter(Parameter_Type::Integer, "nargs", loc);
-  for (int i = 0; i < nargs.size(); ++i)
+  for (int i = 0; i < nargs.size(); ++i) {
     param->add_int(nargs[i]);
+  }
   params.push_back(param);
 
   param = new Parsed_Parameter(Parameter_Type::Integer, "intargs", loc);
-  for (int i = 0; i < intargs.size(); ++i)
+  for (int i = 0; i < intargs.size(); ++i) {
     param->add_int(intargs[i]);
+  }
   params.push_back(param);
 
   param = new Parsed_Parameter(Parameter_Type::Real, "floatargs", loc);
-  for (int i = 0; i < floatargs.size(); ++i)
+  for (int i = 0; i < floatargs.size(); ++i) {
     param->add_float(floatargs[i]);
+  }
   params.push_back(param);
 
   param = new Parsed_Parameter(Parameter_Type::Real, "stringargs", loc);
-  for (int i = 0; i < stringargs.size(); ++i)
+  for (int i = 0; i < stringargs.size(); ++i) {
     param->add_string(stringargs[i]);
+  }
   params.push_back(param);
 
   Shape("subdivision_mesh", params, loc);
 }
-void Ri::Hyperboloid(
-    Point3f point1, Point3f point2, float thetamax, Parsed_Parameter_Vector params, File_Loc loc)
+void Ri::Hyperboloid([[maybe_unused]] Point3f point1,
+                     [[maybe_unused]] Point3f point2,
+                     [[maybe_unused]] float thetamax,
+                     [[maybe_unused]] Parsed_Parameter_Vector params,
+                     [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Hyperboloid is unimplemented" << std::endl;
 }
 
-void Ri::Identity(File_Loc loc)
+void Ri::Identity([[maybe_unused]] File_Loc loc)
 {
   graphics_state.for_active_transforms([](auto t) { return projection_identity(); });
 }
 
-void Ri::IfBegin(const std::string &condition, File_Loc loc)
+void Ri::IfBegin([[maybe_unused]] const std::string &condition, [[maybe_unused]] File_Loc loc)
 {
   std::cout << "IfBegin is unimplemented" << std::endl;
 }
 
-void Ri::IfEnd(File_Loc loc)
+void Ri::IfEnd([[maybe_unused]] File_Loc loc)
 {
   std::cout << "IfEnd is unimplemented" << std::endl;
 }
 
-void Ri::Illuminate(const std::string &light, bool onoff, File_Loc loc)
+void Ri::Illuminate([[maybe_unused]] const std::string &light,
+                    [[maybe_unused]] bool onoff,
+                    [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Illuminate is unimplemented" << std::endl;
 }
 
-void Ri::Imager(const std::string &name, Parsed_Parameter_Vector params, File_Loc loc)
+void Ri::Imager([[maybe_unused]] const std::string &name,
+                [[maybe_unused]] Parsed_Parameter_Vector params,
+                [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Imager is unimplemented" << std::endl;
 }
 
-void Ri::Integrator(const std::string &type,
-                    const std::string &name,
-                    Parsed_Parameter_Vector params,
-                    File_Loc loc)
+void Ri::Integrator([[maybe_unused]] const std::string &type,
+                    [[maybe_unused]] const std::string &name,
+                    [[maybe_unused]] Parsed_Parameter_Vector params,
+                    [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Integrator is unimplemented" << std::endl;
 }
 
-void Ri::Interior(const std::string &name, Parsed_Parameter_Vector params, File_Loc loc)
+void Ri::Interior([[maybe_unused]] const std::string &name,
+                  [[maybe_unused]] Parsed_Parameter_Vector params,
+                  [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Interior is unimplemented" << std::endl;
 }
@@ -992,10 +1075,12 @@ void Ri::Light(const std::string &name,
   for (auto it = graphics_state.shape_attributes.begin();
        it != graphics_state.shape_attributes.end();
        it++)
+  {
     if ((*it)->name == "sides") {
       double_sided = (*it)->floats()[0] == 2;
       break;
     }
+  }
 
   Parsed_Parameter *param;
   // Lights are single-sided by default
@@ -1029,7 +1114,7 @@ void Ri::Light(const std::string &name,
       _cylinder_light_material->push_back(param);
 
       // Check if the light has a materialid parameter
-      if (entity.parameters.get_one_string("__materialid", "") == "") {
+      if (entity.parameters.get_one_string("__materialid", "").empty()) {
         auto light_params = entity.parameters.get_parameter_vector();
         light_params.push_back(param);
         entity = Light_Scene_Entity(
@@ -1041,8 +1126,9 @@ void Ri::Light(const std::string &name,
       }
       _lights[handle] = std::move(entity);
     }
-    else
+    else {
       active_instance_definition->entity.lights.push_back(std::move(entity));
+    }
   }
   else {
     std::string material_id = entity.parameters.get_one_string("__materialid", "");
@@ -1052,8 +1138,9 @@ void Ri::Light(const std::string &name,
       // at a later point.
       if (_lights.find(handle) != _lights.end()) {
         auto it = osl_shader_group.find(material_id);
-        if (it != osl_shader_group.end())
+        if (it != osl_shader_group.end()) {
           osl_shader_group.erase(it);
+        }
         auto light_params = _lights[handle].parameters.get_parameter_vector();
         Parameter_Dictionary light_dict(light_params, graphics_state.light_attributes);
         float strength = 1.0f;
@@ -1086,101 +1173,104 @@ void Ri::Light(const std::string &name,
         graphics_state.current_material_name = material_id;
         graphics_state.current_material_index = -1;
       }
-      else
+      else {
         _lights[handle] = std::move(entity);
+      }
     }
   }
 }
 
-void Ri::LightSource(const std::string &name, Parsed_Parameter_Vector params, File_Loc loc)
+void Ri::LightSource([[maybe_unused]] const std::string &name,
+                     [[maybe_unused]] Parsed_Parameter_Vector params,
+                     [[maybe_unused]] File_Loc loc)
 {
   std::cout << "LightSource is unimplemented." << std::endl;
 }
 
-void Ri::MakeBrickMap(std::vector<std::string> ptcnames,
-                      const std::string &bkmname,
-                      Parsed_Parameter_Vector params,
-                      File_Loc loc)
+void Ri::MakeBrickMap([[maybe_unused]] std::vector<std::string> ptcnames,
+                      [[maybe_unused]] const std::string &bkmname,
+                      [[maybe_unused]] Parsed_Parameter_Vector params,
+                      [[maybe_unused]] File_Loc loc)
 {
   std::cout << "MakeBrickMap is unimplemented" << std::endl;
 }
 
-void Ri::MakeCubeFaceEnvironment(const std::string &px,
-                                 const std::string &nx,
-                                 const std::string &py,
-                                 const std::string &ny,
-                                 const std::string &pz,
-                                 const std::string &nz,
-                                 const std::string &text,
-                                 float fov,
-                                 const std::string &filt,
-                                 float swidth,
-                                 float twidth,
-                                 Parsed_Parameter_Vector params,
-                                 File_Loc loc)
+void Ri::MakeCubeFaceEnvironment([[maybe_unused]] const std::string &px,
+                                 [[maybe_unused]] const std::string &nx,
+                                 [[maybe_unused]] const std::string &py,
+                                 [[maybe_unused]] const std::string &ny,
+                                 [[maybe_unused]] const std::string &pz,
+                                 [[maybe_unused]] const std::string &nz,
+                                 [[maybe_unused]] const std::string &text,
+                                 [[maybe_unused]] float fov,
+                                 [[maybe_unused]] const std::string &filt,
+                                 [[maybe_unused]] float swidth,
+                                 [[maybe_unused]] float twidth,
+                                 [[maybe_unused]] Parsed_Parameter_Vector params,
+                                 [[maybe_unused]] File_Loc loc)
 {
   std::cout << "MakeCubeFaceEnvironment is unimplemented" << std::endl;
 }
 
-void Ri::MakeLatLongEnvironment(const std::string &picturename,
-                                const std::string &texturename,
-                                const std::string &filt,
-                                float swidth,
-                                float twidth,
-                                Parsed_Parameter_Vector params,
-                                File_Loc loc)
+void Ri::MakeLatLongEnvironment([[maybe_unused]] const std::string &picturename,
+                                [[maybe_unused]] const std::string &texturename,
+                                [[maybe_unused]] const std::string &filt,
+                                [[maybe_unused]] float swidth,
+                                [[maybe_unused]] float twidth,
+                                [[maybe_unused]] Parsed_Parameter_Vector params,
+                                [[maybe_unused]] File_Loc loc)
 {
   std::cout << "MakeLatLongEnvironment is unimplemented" << std::endl;
 }
 
-void Ri::MakeShadow(const std::string &picturename,
-                    const std::string &texturename,
-                    Parsed_Parameter_Vector params,
-                    File_Loc loc)
+void Ri::MakeShadow([[maybe_unused]] const std::string &picturename,
+                    [[maybe_unused]] const std::string &texturename,
+                    [[maybe_unused]] Parsed_Parameter_Vector params,
+                    [[maybe_unused]] File_Loc loc)
 {
   std::cout << "MakeShadow is unimplemented" << std::endl;
 }
 
-void Ri::MakeTexture(const std::string &picturename,
-                     const std::string &texturename,
-                     const std::string &swrap,
-                     const std::string &twrap,
-                     const std::string &filt,
-                     float swidth,
-                     float twidth,
-                     Parsed_Parameter_Vector params,
-                     File_Loc loc)
+void Ri::MakeTexture([[maybe_unused]] const std::string &picturename,
+                     [[maybe_unused]] const std::string &texturename,
+                     [[maybe_unused]] const std::string &swrap,
+                     [[maybe_unused]] const std::string &twrap,
+                     [[maybe_unused]] const std::string &filt,
+                     [[maybe_unused]] float swidth,
+                     [[maybe_unused]] float twidth,
+                     [[maybe_unused]] Parsed_Parameter_Vector params,
+                     [[maybe_unused]] File_Loc loc)
 {
   std::cout << "MakeTexture is unimplemented" << std::endl;
 }
 
-void Ri::Matte(bool onoff, File_Loc loc)
+void Ri::Matte([[maybe_unused]] bool onoff, [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Matte is unimplemented" << std::endl;
 }
 
-void Ri::MotionBegin(std::vector<float> times, File_Loc loc)
+void Ri::MotionBegin([[maybe_unused]] std::vector<float> times, [[maybe_unused]] File_Loc loc)
 {
   std::cout << "MotionBegin is unimplemented" << std::endl;
 }
 
-void Ri::MotionEnd(File_Loc loc)
+void Ri::MotionEnd([[maybe_unused]] File_Loc loc)
 {
   std::cout << "MotionEnd is unimplemented" << std::endl;
 }
 
-void Ri::NuPatch(int nu,
-                 int uorder,
-                 float uknot[],
-                 float umin,
-                 float umax,
-                 int nv,
-                 int vorder,
-                 float vknot[],
-                 float vmin,
-                 float vmax,
-                 Parsed_Parameter_Vector params,
-                 File_Loc loc)
+void Ri::NuPatch([[maybe_unused]] int nu,
+                 [[maybe_unused]] int uorder,
+                 [[maybe_unused]] float uknot[],
+                 [[maybe_unused]] float umin,
+                 [[maybe_unused]] float umax,
+                 [[maybe_unused]] int nv,
+                 [[maybe_unused]] int vorder,
+                 [[maybe_unused]] float vknot[],
+                 [[maybe_unused]] float vmin,
+                 [[maybe_unused]] float vmax,
+                 [[maybe_unused]] Parsed_Parameter_Vector params,
+                 [[maybe_unused]] File_Loc loc)
 {
   std::cout << "NuPatch is unimplemented" << std::endl;
 }
@@ -1190,7 +1280,7 @@ void Ri::ObjectBegin(const std::string &name, File_Loc loc)
   VERIFY_WORLD("ObjectBegin");
   pushed_graphics_states.push_back(graphics_state);
 
-  push_stack.push_back(std::make_pair('o', loc));
+  push_stack.emplace_back('o', loc);
 
   if (active_instance_definition) {
     error_exit_deferred(&loc, "ObjectBegin called inside of instance definition");
@@ -1230,8 +1320,9 @@ void Ri::ObjectEnd(File_Loc loc)
     ss << " at ObjectEnd";
     error_exit_deferred(&loc, ss.str());
   }
-  else
+  else {
     CHECK_EQ(push_stack.back().first, 'o');
+  }
   push_stack.pop_back();
 
   if (--active_instance_definition->active_imports == 0) {
@@ -1315,7 +1406,9 @@ void Ri::ObjectInstance(const std::string &name, File_Loc loc)
                                                       render_from_instance));
 }
 
-void Ri::Option(const std::string &name, Parsed_Parameter_Vector params, File_Loc loc)
+void Ri::Option(const std::string &name,
+                Parsed_Parameter_Vector params,
+                [[maybe_unused]] File_Loc loc)
 {
   auto items = _rib_state.options.find(name);
   if (items == _rib_state.options.end()) {
@@ -1330,38 +1423,41 @@ void Ri::Option(const std::string &name, Parsed_Parameter_Vector params, File_Lo
   }
 }
 
-void Ri::Opacity(Parsed_Parameter_Vector params, File_Loc loc)
+void Ri::Opacity([[maybe_unused]] Parsed_Parameter_Vector params, [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Opacity is unimplemented" << std::endl;
 }
 
-void Ri::Orientation(const std::string &orientation, File_Loc loc)
+void Ri::Orientation([[maybe_unused]] const std::string &orientation,
+                     [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Orientation is unimplemented" << std::endl;
 }
 
-void Ri::Paraboloid(float rmax,
-                    float zmin,
-                    float zmax,
-                    float thetamax,
-                    Parsed_Parameter_Vector params,
-                    File_Loc loc)
+void Ri::Paraboloid([[maybe_unused]] float rmax,
+                    [[maybe_unused]] float zmin,
+                    [[maybe_unused]] float zmax,
+                    [[maybe_unused]] float thetamax,
+                    [[maybe_unused]] Parsed_Parameter_Vector params,
+                    [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Paraboloid is unimplemented" << std::endl;
 }
 
-void Ri::Patch(const std::string &type, Parsed_Parameter_Vector params, File_Loc loc)
+void Ri::Patch([[maybe_unused]] const std::string &type,
+               [[maybe_unused]] Parsed_Parameter_Vector params,
+               [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Patch is unimplemented" << std::endl;
 }
 
-void Ri::PatchMesh(const std::string &type,
-                   int nu,
-                   const std::string &uwrap,
-                   int nv,
-                   const std::string &vwrap,
-                   Parsed_Parameter_Vector params,
-                   File_Loc loc)
+void Ri::PatchMesh([[maybe_unused]] const std::string &type,
+                   [[maybe_unused]] int nu,
+                   [[maybe_unused]] const std::string &uwrap,
+                   [[maybe_unused]] int nv,
+                   [[maybe_unused]] const std::string &vwrap,
+                   [[maybe_unused]] Parsed_Parameter_Vector params,
+                   [[maybe_unused]] File_Loc loc)
 {
   std::cout << "PatchMesh is unimplemented" << std::endl;
 }
@@ -1383,32 +1479,40 @@ void Ri::Pattern(const std::string &name,
   osl_parameters.push_back(dict);
 }
 
-void Ri::Perspective(float fov, File_Loc loc)
+void Ri::Perspective([[maybe_unused]] float fov, [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Perspective is unimplemented" << std::endl;
 }
 
-void Ri::PixelFilter(const std::string &name, Parsed_Parameter_Vector params, File_Loc loc)
+void Ri::PixelFilter([[maybe_unused]] const std::string &name,
+                     [[maybe_unused]] Parsed_Parameter_Vector params,
+                     [[maybe_unused]] File_Loc loc)
 {
   std::cout << "PixelFilter is unimplemented." << std::endl;
 }
 
-void Ri::PixelSampleImager(const std::string &name, Parsed_Parameter_Vector params, File_Loc loc)
+void Ri::PixelSampleImager([[maybe_unused]] const std::string &name,
+                           [[maybe_unused]] Parsed_Parameter_Vector params,
+                           [[maybe_unused]] File_Loc loc)
 {
   std::cout << "PixelSampleImager is unimplemented" << std::endl;
 }
 
-void Ri::PixelSamples(float xsamples, float ysamples, File_Loc loc)
+void Ri::PixelSamples([[maybe_unused]] float xsamples,
+                      [[maybe_unused]] float ysamples,
+                      [[maybe_unused]] File_Loc loc)
 {
   std::cout << "PixelSamples is unimplemented" << std::endl;
 }
 
-void Ri::PixelVariance(float variance, File_Loc loc)
+void Ri::PixelVariance([[maybe_unused]] float variance, [[maybe_unused]] File_Loc loc)
 {
   std::cout << "PixelVariance is unimplemented" << std::endl;
 }
 
-void Ri::Points(int npoints, Parsed_Parameter_Vector params, File_Loc loc)
+void Ri::Points([[maybe_unused]] int npoints,
+                [[maybe_unused]] Parsed_Parameter_Vector params,
+                [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Points is unimplemented" << std::endl;
 }
@@ -1422,11 +1526,13 @@ void Ri::PointsGeneralPolygons(std::vector<int> n_loops,
   bool single_only = true;
 
   // Only single loops for now
-  for (int i = 0; single_only && i < n_loops.size(); i++)
+  for (int i = 0; single_only && i < n_loops.size(); i++) {
     single_only = ((int)n_loops[i] == 1);
+  }
 
-  if (single_only)
+  if (single_only) {
     PointsPolygons(n_vertices, vertices, params, loc);
+  }
 }
 
 void Ri::PointsPolygons(std::vector<int> n_vertices,
@@ -1435,14 +1541,16 @@ void Ri::PointsPolygons(std::vector<int> n_vertices,
                         File_Loc loc)
 {
   Parsed_Parameter *param = new Parsed_Parameter(Parameter_Type::Integer, "vertices", loc);
-  for (int i = 0; i < vertices.size(); ++i)
+  for (int i = 0; i < vertices.size(); ++i) {
     param->add_int(vertices[i]);
+  }
   params.push_back(param);
 
   int nfaces = n_vertices.size();
   param = new Parsed_Parameter(Parameter_Type::Integer, "nvertices", loc);
-  for (int i = 0; i < n_vertices.size(); ++i)
+  for (int i = 0; i < n_vertices.size(); ++i) {
     param->add_int(n_vertices[i]);
+  }
   params.push_back(param);
 
   param = new Parsed_Parameter(Parameter_Type::Integer, "nfaces", loc);
@@ -1457,10 +1565,12 @@ void Ri::PointsPolygons(std::vector<int> n_vertices,
         p->storage == Container_Type::Constant && p->floats().size() > 3)
     {
       int num_vals = p->floats().size() / 3;
-      if (num_vals == n_vertices.size())
+      if (num_vals == n_vertices.size()) {
         p->storage = Container_Type::Uniform;
-      else if (num_vals == vertices.size())
+      }
+      else if (num_vals == vertices.size()) {
         p->storage = Container_Type::Vertex;
+      }
     }
   }
 
@@ -1469,7 +1579,9 @@ void Ri::PointsPolygons(std::vector<int> n_vertices,
     if (p->type == Parameter_Type::Normal) {
       if (p->storage == Container_Type::FaceVarying || p->storage == Container_Type::Varying ||
           p->storage == Container_Type::Vertex)
+      {
         has_varying_normals = true;
+      }
       break;
     }
   }
@@ -1482,42 +1594,53 @@ void Ri::PointsPolygons(std::vector<int> n_vertices,
   Shape("mesh", params, loc);
 }
 
-void Ri::Polygon(int nvertices, Parsed_Parameter_Vector params, File_Loc loc)
+void Ri::Polygon([[maybe_unused]] int nvertices,
+                 [[maybe_unused]] Parsed_Parameter_Vector params,
+                 [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Polygon is unimplemented" << std::endl;
 }
 
-void Ri::ProcDelayedReadArchive(Parsed_Parameter_Vector params, File_Loc loc)
+void Ri::ProcDelayedReadArchive([[maybe_unused]] Parsed_Parameter_Vector params,
+                                [[maybe_unused]] File_Loc loc)
 {
   std::cout << "ProcDelayedReadArchive is unimplemented" << std::endl;
 }
 
-void Ri::ProcDynamicLoad(Parsed_Parameter_Vector params, File_Loc loc)
+void Ri::ProcDynamicLoad([[maybe_unused]] Parsed_Parameter_Vector params,
+                         [[maybe_unused]] File_Loc loc)
 {
   std::cout << "ProcDynamicLoad is unimplemented" << std::endl;
 }
 
-void Ri::Procedural(const std::string &proc_name, Parsed_Parameter_Vector params, File_Loc loc)
+void Ri::Procedural([[maybe_unused]] const std::string &proc_name,
+                    [[maybe_unused]] Parsed_Parameter_Vector params,
+                    [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Procedural is unimplemented" << std::endl;
 }
 
-void Ri::Procedural2(const std::string &proc_name, Parsed_Parameter_Vector params, File_Loc loc)
+void Ri::Procedural2([[maybe_unused]] const std::string &proc_name,
+                     [[maybe_unused]] Parsed_Parameter_Vector params,
+                     [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Procedural2 is unimplemented" << std::endl;
 }
 
-void Ri::ProcFree(Parsed_Parameter_Vector params, File_Loc loc)
+void Ri::ProcFree([[maybe_unused]] Parsed_Parameter_Vector params, [[maybe_unused]] File_Loc loc)
 {
   std::cout << "ProcFree is unimplemented" << std::endl;
 }
 
-void Ri::ProcRunProgram(Parsed_Parameter_Vector params, File_Loc loc)
+void Ri::ProcRunProgram([[maybe_unused]] Parsed_Parameter_Vector params,
+                        [[maybe_unused]] File_Loc loc)
 {
   std::cout << "ProcRunProgram is unimplemented" << std::endl;
 }
 
-void Ri::Projection(const std::string &name, Parsed_Parameter_Vector params, File_Loc loc)
+void Ri::Projection(const std::string &name,
+                    Parsed_Parameter_Vector params,
+                    [[maybe_unused]] File_Loc loc)
 {
   auto items = _rib_state.options.find("Ri");
   if (items == _rib_state.options.end()) {
@@ -1532,79 +1655,93 @@ void Ri::Projection(const std::string &name, Parsed_Parameter_Vector params, Fil
   }
 }
 
-void Ri::Quantize(
-    const std::string &type, int one, int min, int max, float ditheramplitude, File_Loc loc)
+void Ri::Quantize([[maybe_unused]] const std::string &type,
+                  [[maybe_unused]] int one,
+                  [[maybe_unused]] int min,
+                  [[maybe_unused]] int max,
+                  [[maybe_unused]] float ditheramplitude,
+                  [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Quantize is unimplemented" << std::endl;
 }
 
-void Ri::ReadArchive(const std::string &name, Parsed_Parameter_Vector params, File_Loc loc)
+void Ri::ReadArchive([[maybe_unused]] const std::string &name,
+                     [[maybe_unused]] Parsed_Parameter_Vector params,
+                     [[maybe_unused]] File_Loc loc)
 {
   std::cout << "ReadArchive is unimplemented" << std::endl;
 }
 
-void Ri::RelativeDetail(float relativedetail, File_Loc loc)
+void Ri::RelativeDetail([[maybe_unused]] float relativedetail, [[maybe_unused]] File_Loc loc)
 {
   std::cout << "RelativeDetail is unimplemented" << std::endl;
 }
 
-void Ri::Resource(const std::string &handle,
-                  const std::string &type,
-                  Parsed_Parameter_Vector params,
-                  File_Loc loc)
+void Ri::Resource([[maybe_unused]] const std::string &handle,
+                  [[maybe_unused]] const std::string &type,
+                  [[maybe_unused]] Parsed_Parameter_Vector params,
+                  [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Resource is unimplemented" << std::endl;
 }
 
-void Ri::ResourceBegin(File_Loc loc)
+void Ri::ResourceBegin([[maybe_unused]] File_Loc loc)
 {
   std::cout << "ResourceBegin is unimplemented" << std::endl;
 }
 
-void Ri::ResourceEnd(File_Loc loc)
+void Ri::ResourceEnd([[maybe_unused]] File_Loc loc)
 {
   std::cout << "ResourceEnd is unimplemented" << std::endl;
 }
 
-void Ri::ReverseOrientation(File_Loc loc)
+void Ri::ReverseOrientation([[maybe_unused]] File_Loc loc)
 {
   VERIFY_WORLD("ReverseOrientation");
   graphics_state.reverse_orientation = !graphics_state.reverse_orientation;
 }
 
-void Ri::Rotate(float angle, float ax, float ay, float az, File_Loc loc)
+void Ri::Rotate(float angle, float ax, float ay, float az, [[maybe_unused]] File_Loc loc)
 {
   graphics_state.for_active_transforms(
       [=](auto t) { return t * transform_rotate(DEG2RADF(angle), make_float3(ax, ay, az)); });
 }
 
-void Ri::Scale(float sx, float sy, float sz, File_Loc loc)
+void Ri::Scale(float sx, float sy, float sz, [[maybe_unused]] File_Loc loc)
 {
   graphics_state.for_active_transforms(
       [=](auto t) { return t * transform_scale(make_float3(sx, sy, sz)); });
 }
 
-void Ri::ScopedCoordinateSystem(const std::string &, File_Loc loc)
+void Ri::ScopedCoordinateSystem([[maybe_unused]] const std::string &name,
+                                [[maybe_unused]] File_Loc loc)
 {
   std::cout << "ScopedCoordinateSystem is unimplemented" << std::endl;
 }
 
-void Ri::ScreenWindow(float left, float right, float bottom, float top, File_Loc loc)
+void Ri::ScreenWindow([[maybe_unused]] float left,
+                      [[maybe_unused]] float right,
+                      [[maybe_unused]] float bottom,
+                      [[maybe_unused]] float top,
+                      [[maybe_unused]] File_Loc loc)
 {
   std::cout << "ScreenWindow is unimplemented" << std::endl;
 }
 
-void Ri::ShadingInterpolation(const std::string &type, File_Loc loc)
+void Ri::ShadingInterpolation([[maybe_unused]] const std::string &type,
+                              [[maybe_unused]] File_Loc loc)
 {
   std::cout << "ShadingInterpolation is unimplemented" << std::endl;
 }
 
-void Ri::ShadingRate(float size, File_Loc loc)
+void Ri::ShadingRate([[maybe_unused]] float size, [[maybe_unused]] File_Loc loc)
 {
   std::cout << "ShadingRate is unimplemented" << std::endl;
 }
 
-void Ri::Shutter(float opentime, float closetime, File_Loc loc)
+void Ri::Shutter([[maybe_unused]] float opentime,
+                 [[maybe_unused]] float closetime,
+                 [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Shutter is unimplemented" << std::endl;
 }
@@ -1616,18 +1753,24 @@ void Ri::Sides(int nsides, File_Loc loc)
   graphics_state.shape_attributes.push_back(param);
 }
 
-void Ri::Skew(
-    float angle, float dx1, float dy1, float dz1, float dx2, float dy2, float dz2, File_Loc loc)
+void Ri::Skew([[maybe_unused]] float angle,
+              [[maybe_unused]] float dx1,
+              [[maybe_unused]] float dy1,
+              [[maybe_unused]] float dz1,
+              [[maybe_unused]] float dx2,
+              [[maybe_unused]] float dy2,
+              [[maybe_unused]] float dz2,
+              [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Skew is unimplemented" << std::endl;
 }
 
-void Ri::SolidBegin(const std::string &type, File_Loc loc)
+void Ri::SolidBegin([[maybe_unused]] const std::string &type, [[maybe_unused]] File_Loc loc)
 {
   std::cout << "SolidBegin is unimplemented" << std::endl;
 }
 
-void Ri::SolidEnd(File_Loc loc)
+void Ri::SolidEnd([[maybe_unused]] File_Loc loc)
 {
   std::cout << "SolidEnd is unimplemented" << std::endl;
 }
@@ -1814,8 +1957,9 @@ void Ri::Sphere(float radius,
   }
 
   Parsed_Parameter *param = new Parsed_Parameter(Parameter_Type::Integer, "vertices", loc);
-  for (int i = 0; i < polys.size(); ++i)
+  for (int i = 0; i < polys.size(); ++i) {
     param->add_int(polys[i]);
+  }
   params.push_back(param);
 
   param = new Parsed_Parameter(Parameter_Type::Integer, "nvertices", loc);
@@ -1852,8 +1996,9 @@ void Ri::Sphere(float radius,
   param = new Parsed_Parameter(Parameter_Type::Normal, "N", loc);
   param->storage = Container_Type::Varying;
   param->elem_per_item = 3;
-  for (int i = 0; i < norms.size(); ++i)
+  for (int i = 0; i < norms.size(); ++i) {
     param->add_float(norms[i]);
+  }
   params.push_back(param);
 
   // rotate to match RenderMan orientation
@@ -1881,53 +2026,61 @@ void Ri::SubdivisionMesh(const std::string &scheme,
   params.push_back(param);
 
   param = new Parsed_Parameter(Parameter_Type::Integer, "vertices", loc);
-  for (int i = 0; i < vertices.size(); ++i)
+  for (int i = 0; i < vertices.size(); ++i) {
     param->add_int(vertices[i]);
+  }
   params.push_back(param);
 
   param = new Parsed_Parameter(Parameter_Type::Integer, "nvertices", loc);
-  for (int i = 0; i < n_vertices.size(); ++i)
+  for (int i = 0; i < n_vertices.size(); ++i) {
     param->add_int(n_vertices[i]);
+  }
   params.push_back(param);
 
   param = new Parsed_Parameter(Parameter_Type::String, "tags", loc);
-  for (int i = 0; i < tags.size(); ++i)
+  for (int i = 0; i < tags.size(); ++i) {
     param->add_string(tags[i]);
+  }
   params.push_back(param);
 
   param = new Parsed_Parameter(Parameter_Type::Integer, "nargs", loc);
-  for (int i = 0; i < nargs.size(); ++i)
+  for (int i = 0; i < nargs.size(); ++i) {
     param->add_int(nargs[i]);
+  }
   params.push_back(param);
 
   param = new Parsed_Parameter(Parameter_Type::Integer, "intargs", loc);
-  for (int i = 0; i < intargs.size(); ++i)
+  for (int i = 0; i < intargs.size(); ++i) {
     param->add_int(intargs[i]);
+  }
   params.push_back(param);
 
   param = new Parsed_Parameter(Parameter_Type::Real, "floatargs", loc);
-  for (int i = 0; i < floatargs.size(); ++i)
+  for (int i = 0; i < floatargs.size(); ++i) {
     param->add_float(floatargs[i]);
+  }
   params.push_back(param);
 
   Shape("subdivision_mesh", params, loc);
 }
 
-void Ri::Surface(const std::string &name, Parsed_Parameter_Vector params, File_Loc loc)
+void Ri::Surface([[maybe_unused]] const std::string &name,
+                 [[maybe_unused]] Parsed_Parameter_Vector params,
+                 [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Surface is unimplemented" << std::endl;
 }
 
-void Ri::System(const std::string &cmd, File_Loc loc)
+void Ri::System([[maybe_unused]] const std::string &cmd, [[maybe_unused]] File_Loc loc)
 {
   std::cout << "System is unimplemented" << std::endl;
 }
 
-void Ri::Texture(const std::string &name,
-                 const std::string &type,
-                 const std::string &texname,
-                 Parsed_Parameter_Vector params,
-                 File_Loc loc)
+void Ri::Texture([[maybe_unused]] const std::string &name,
+                 [[maybe_unused]] const std::string &type,
+                 [[maybe_unused]] const std::string &texname,
+                 [[maybe_unused]] Parsed_Parameter_Vector params,
+                 [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Texture is unimplemented." << std::endl;
 }
@@ -1938,20 +2091,20 @@ void Ri::TextureCoordinates(
   std::cout << "TextureCoordinates is unimplemented" << std::endl;
 }
 
-void Ri::Torus(float majorrad,
-               float minorrad,
-               float phimin,
-               float phimax,
-               float thetamax,
-               Parsed_Parameter_Vector params,
-               File_Loc loc)
+void Ri::Torus([[maybe_unused]] float majorrad,
+               [[maybe_unused]] float minorrad,
+               [[maybe_unused]] float phimin,
+               [[maybe_unused]] float phimax,
+               [[maybe_unused]] float thetamax,
+               [[maybe_unused]] Parsed_Parameter_Vector params,
+               [[maybe_unused]] File_Loc loc)
 {
   std::cout << "Torus is unimplemented" << std::endl;
 }
 
-void Ri::transform(float transform[16], File_Loc loc)
+void Ri::transform(float const* transform, [[maybe_unused]] File_Loc loc)
 {
-  graphics_state.for_active_transforms([=](auto t) {
+  graphics_state.for_active_transforms([=]([[maybe_unused]] auto t) {
     // Stomp the current transform
     ProjectionTransform projection = *(ProjectionTransform *)&transform[0];
     return projection_transpose(projection);
@@ -1961,7 +2114,7 @@ void Ri::transform(float transform[16], File_Loc loc)
 void Ri::TransformBegin(File_Loc loc)
 {
   pushed_graphics_states.push_back(graphics_state);
-  push_stack.push_back(std::make_pair('t', loc));
+  push_stack.emplace_back('t', loc);
 }
 
 void Ri::TransformEnd(File_Loc loc)
@@ -1993,28 +2146,29 @@ void Ri::TransformEnd(File_Loc loc)
     ss << " at TransformEnd";
     error_exit_deferred(&loc, ss.str());
   }
-  else
+  else {
     CHECK_EQ(push_stack.back().first, 't');
+  }
   push_stack.pop_back();
 }
 
-void Ri::Translate(float dx, float dy, float dz, File_Loc loc)
+void Ri::Translate(float dx, float dy, float dz, [[maybe_unused]] File_Loc loc)
 {
   graphics_state.for_active_transforms(
       [=](auto t) { return t * transform_translate(make_float3(dx, dy, dz)); });
 }
 
-void Ri::TrimCurve(int nloops,
-                   int ncurves[],
-                   int order[],
-                   float knot[],
-                   float min[],
-                   float max[],
-                   int n[],
-                   float u[],
-                   float v[],
-                   float w[],
-                   File_Loc loc)
+void Ri::TrimCurve([[maybe_unused]] int nloops,
+                   [[maybe_unused]] int ncurves[],
+                   [[maybe_unused]] int order[],
+                   [[maybe_unused]] float knot[],
+                   [[maybe_unused]] float min[],
+                   [[maybe_unused]] float max[],
+                   [[maybe_unused]] int n[],
+                   [[maybe_unused]] float u[],
+                   [[maybe_unused]] float v[],
+                   [[maybe_unused]] float w[],
+                   [[maybe_unused]] File_Loc loc)
 {
   std::cout << "TrimCurve is unimplemented" << std::endl;
 }
@@ -2024,8 +2178,9 @@ void Ri::WorldBegin(File_Loc loc)
   VERIFY_OPTIONS("WorldBegin");
   // Reset graphics state for _WorldBegin_
   current_block = Block_State::World_Block;
-  for (int i = 0; i < Max_Transforms; ++i)
+  for (int i = 0; i < Max_Transforms; ++i) {
     graphics_state.ctm[i] = projection_identity();
+  }
   named_coordinate_systems["world"] = graphics_state.ctm;
 
   Parsed_Parameter_Vector params;
@@ -2085,7 +2240,7 @@ void Ri::WorldBegin(File_Loc loc)
   }
 }
 
-void Ri::WorldEnd(File_Loc loc)
+void Ri::WorldEnd([[maybe_unused]] File_Loc loc)
 {
   std::cout << "WorldEnd is unimplemented" << std::endl;
 }
@@ -2162,10 +2317,12 @@ void Ri::Shape(const std::string &name, Parsed_Parameter_Vector params, File_Loc
                              object_from_render,
                              area_light_index,
                              graphics_state});
-  if (active_instance_definition)
+  if (active_instance_definition) {
     active_instance_definition->entity.shapes.push_back(std::move(entity));
-  else
+  }
+  else {
     shapes.push_back(std::move(entity));
+  }
 }
 
 CCL_NAMESPACE_END

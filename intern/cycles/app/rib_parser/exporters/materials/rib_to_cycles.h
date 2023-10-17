@@ -83,23 +83,23 @@ class RIBtoMultiNodeCycles : public RIBtoCyclesMapping {
   {
   }
 
-  void add_to_graph(ShaderGraph *graph)
+  void add_to_graph(ShaderGraph *graph) override
   {
-    for (auto node : _nodes) {
+    for (auto *node : _nodes) {
       node->set_owner(graph);
       graph->add(node);
     }
   }
 
-  virtual bool create_shader_node(std::string const &shader,
+   bool create_shader_node(std::string const &shader,
                                   std::string const &path,
                                   ShaderGraph *graph,
-                                  Scene *scene);
+                                  Scene *scene) override;
 
   void update_parameters(Parameter_Dictionary const &params,
-                         vector<Parsed_Parameter const *> &connections);
+                         vector<Parsed_Parameter const *> &connections) override;
 
-  ShaderNode *node(std::string name)
+  ShaderNode *node(std::string name) override
   {
     return _node_map[name];
   }
@@ -115,7 +115,7 @@ class PxrNormalMaptoCycles : public RIBtoCyclesMapping {
   using RIBtoCyclesMapping::RIBtoCyclesMapping;
 
   void update_parameters(Parameter_Dictionary const &params,
-                         vector<Parsed_Parameter const *> &connections);
+                         vector<Parsed_Parameter const *> &connections) override;
  private:
   std::unordered_map<std::string, Parsed_Parameter *> _parameters;
 };
@@ -125,7 +125,7 @@ class PxrRamptoCycles : public RIBtoCyclesMapping {
   using RIBtoCyclesMapping::RIBtoCyclesMapping;
 
   void update_parameters(Parameter_Dictionary const &params,
-                         vector<Parsed_Parameter const *> &connections);
+                         vector<Parsed_Parameter const *> &connections) override;
  private:
   std::unordered_map<std::string, Parsed_Parameter *> _parameters;
 };
@@ -134,20 +134,20 @@ class PxrImageNormalMaptoCycles : public RIBtoMultiNodeCycles {
  public:
   using RIBtoMultiNodeCycles::RIBtoMultiNodeCycles;
 
-  virtual bool create_shader_node(std::string const &shader,
+   bool create_shader_node(std::string const &shader,
                                   std::string const &path,
                                   ShaderGraph *graph,
-                                  Scene *scene);
+                                  Scene *scene) override;
 };
 
 class RIBtoCyclesTexture : public RIBtoCyclesMapping {
  public:
   using RIBtoCyclesMapping::RIBtoCyclesMapping;
 
-  virtual bool create_shader_node(std::string const &shader,
+   bool create_shader_node(std::string const &shader,
                                   std::string const &path,
                                   ShaderGraph *graph,
-                                  Scene *scene);
+                                  Scene *scene) override;
 };
 
 class PxrSurfacetoPrincipled : public RIBtoCyclesMapping {
@@ -155,7 +155,7 @@ class PxrSurfacetoPrincipled : public RIBtoCyclesMapping {
   using RIBtoCyclesMapping::RIBtoCyclesMapping;
 
   void update_parameters(Parameter_Dictionary const &params,
-                         vector<Parsed_Parameter const *> &connections);
+                         vector<Parsed_Parameter const *> &connections) override;
 
  private:
   std::unordered_map<std::string, Parsed_Parameter *> _parameters;
@@ -166,7 +166,7 @@ class PxrDisneytoPrincipled : public RIBtoCyclesMapping {
   using RIBtoCyclesMapping::RIBtoCyclesMapping;
 
   void update_parameters(Parameter_Dictionary const &params,
-                         vector<Parsed_Parameter const *> &connections);
+                         vector<Parsed_Parameter const *> &connections) override;
 
  private:
   std::unordered_map<std::string, Parsed_Parameter *> _parameters;
@@ -177,7 +177,7 @@ class PxrDisneyBsdftoPrincipled : public RIBtoCyclesMapping {
   using RIBtoCyclesMapping::RIBtoCyclesMapping;
 
   void update_parameters(Parameter_Dictionary const &params,
-                         vector<Parsed_Parameter const *> &connections);
+                         vector<Parsed_Parameter const *> &connections) override;
 
  private:
   std::unordered_map<std::string, Parsed_Parameter *> _parameters;

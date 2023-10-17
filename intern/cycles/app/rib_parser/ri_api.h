@@ -32,7 +32,7 @@ std::vector<std::string> split_string(std::string_view str, char ch);
 class Ri {
  public:
   Ri(Session *session) : session(session) {}
-  ~Ri();
+  ~Ri() = default;
   // Ri Interface
 
   void adjust_buffer_parameters(BufferParams *buffer);
@@ -316,7 +316,7 @@ class Ri {
              float thetamax,
              Parsed_Parameter_Vector params,
              File_Loc loc);
-  void transform(float transform[16], File_Loc loc);
+  void transform(float const* transform, File_Loc loc);
   void TransformBegin(File_Loc loc);
   void TransformEnd(File_Loc loc);
   void Translate(float dx, float dy, float dz, File_Loc loc);
@@ -375,7 +375,7 @@ class Ri {
   Active_Instance_Definition *active_instance_definition = nullptr;
 
   struct RIB_State {
-    RIB_State() {}
+    RIB_State() = default;
 
     using Option_Item = std::unordered_map<std::string, Parsed_Parameter *>;
     std::unordered_map<std::string, Option_Item> options;
@@ -429,7 +429,7 @@ class Ri {
   Scene_Entity filter, sampler;
   Display_Scene_Entity film;
   std::map<std::string, Camera_Scene_Entity> _camera;
-  std::string _camera_name = "";
+  std::string _camera_name;
 
   std::string _display_name;
   Parsed_Parameter_Vector *_cylinder_light_material = nullptr;
@@ -443,8 +443,7 @@ class Ri {
     ss << "\" is not allowed"; \
     error_exit(&loc, ss.str()); \
     return; \
-  } \
-  else /* swallow trailing semicolon */
+  } 
 #define VERIFY_WORLD(func) \
   if (current_block == Block_State::Options_Block) { \
     std::stringstream ss; \
@@ -452,8 +451,7 @@ class Ri {
     ss << "\" is not allowed"; \
     error_exit(&loc, ss.str()); \
     return; \
-  } \
-  else /* swallow trailing semicolon */
+  }
 
 CCL_NAMESPACE_END
 
