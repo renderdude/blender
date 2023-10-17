@@ -58,7 +58,7 @@
 
 #include "RE_texture.h"
 
-#include "NOD_composite.h"
+#include "NOD_composite.hh"
 #include "NOD_geometry.hh"
 #include "NOD_socket.hh"
 
@@ -594,7 +594,7 @@ static const EnumPropertyItem node_cryptomatte_layer_name_items[] = {
 #  include "GPU_material.h"
 
 #  include "NOD_common.h"
-#  include "NOD_composite.h"
+#  include "NOD_composite.hh"
 #  include "NOD_geometry.hh"
 #  include "NOD_shader.h"
 #  include "NOD_socket.hh"
@@ -1886,8 +1886,7 @@ static const EnumPropertyItem *rna_GeometryNodeAttributeDomain_attribute_domain_
   for (const EnumPropertyItem *item = rna_enum_attribute_domain_items; item->identifier != nullptr;
        item++)
   {
-    if (!U.experimental.use_grease_pencil_version3 &&
-        item->value == ATTR_DOMAIN_GREASE_PENCIL_LAYER) {
+    if (!U.experimental.use_grease_pencil_version3 && item->value == ATTR_DOMAIN_LAYER) {
       continue;
     }
     RNA_enum_item_add(&item_array, &items_len, item);
@@ -8689,6 +8688,7 @@ static void def_geo_curve_set_handle_type(StructRNA *srna)
 
   prop = RNA_def_property(srna, "handle_type", PROP_ENUM, PROP_NONE);
   RNA_def_property_enum_sdna(prop, nullptr, "handle_type");
+  RNA_def_property_ui_text(prop, "Handle Type", "");
   RNA_def_property_enum_items(prop, rna_node_geometry_curve_handle_type_items);
   RNA_def_property_update(prop, NC_NODE | NA_EDITED, "rna_Node_socket_update");
 
@@ -8979,6 +8979,7 @@ static void def_geo_curve_handle_type_selection(StructRNA *srna)
 
   prop = RNA_def_property(srna, "handle_type", PROP_ENUM, PROP_NONE);
   RNA_def_property_enum_sdna(prop, nullptr, "handle_type");
+  RNA_def_property_ui_text(prop, "Handle Type", "");
   RNA_def_property_enum_items(prop, rna_node_geometry_curve_handle_type_items);
   RNA_def_property_update(prop, NC_NODE | NA_EDITED, "rna_Node_socket_update");
 

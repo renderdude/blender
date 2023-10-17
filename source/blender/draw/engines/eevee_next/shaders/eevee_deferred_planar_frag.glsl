@@ -6,8 +6,8 @@
  * Compute light objects lighting contribution using captured Gbuffer data.
  */
 
+#pragma BLENDER_REQUIRE(draw_view_lib.glsl)
 #pragma BLENDER_REQUIRE(eevee_gbuffer_lib.glsl)
-#pragma BLENDER_REQUIRE(common_view_lib.glsl)
 #pragma BLENDER_REQUIRE(eevee_light_eval_lib.glsl)
 #pragma BLENDER_REQUIRE(eevee_lightprobe_eval_lib.glsl)
 
@@ -19,10 +19,10 @@ void main()
 
   GBufferData gbuf = gbuffer_read(gbuf_header_tx, gbuf_closure_tx, gbuf_color_tx, texel);
 
-  vec3 P = get_world_space_from_depth(uvcoordsvar.xy, depth);
+  vec3 P = drw_point_screen_to_world(vec3(uvcoordsvar.xy, depth));
   vec3 Ng = gbuf.diffuse.N;
-  vec3 V = cameraVec(P);
-  float vPz = dot(cameraForward, P) - dot(cameraForward, cameraPos);
+  vec3 V = drw_world_incident_vector(P);
+  float vPz = dot(drw_view_forward(), P) - dot(drw_view_forward(), drw_view_position());
 
   ClosureLightStack stack;
   stack.cl[0].N = gbuf.diffuse.N;
@@ -39,9 +39,10 @@ void main()
   LightProbeSample samp = lightprobe_load(P, Ng, V);
 
   vec3 radiance = vec3(0.0);
-  radiance += (stack.cl[0].light_shadowed + lightprobe_eval(samp, gbuf.diffuse, V, vec2(0.0))) *
+  radiance += (stack.cl[0].light_shadowed + lightprobe_eval(samp, gbuf.diffuse, P, V, vec2(0.0))) *
               gbuf.diffuse.color;
-  radiance += (stack.cl[1].light_shadowed + lightprobe_eval(samp, gbuf.reflection, V, vec2(0.0))) *
+  radiance += (stack.cl[1].light_shadowed +
+               lightprobe_eval(samp, gbuf.reflection, P, V, vec2(0.0))) *
               gbuf.reflection.color;
 
   out_radiance = vec4(radiance, 0.0);

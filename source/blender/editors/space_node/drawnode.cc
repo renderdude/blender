@@ -61,7 +61,7 @@
 #include "IMB_colormanagement.h"
 #include "IMB_imbuf_types.h"
 
-#include "NOD_composite.h"
+#include "NOD_composite.hh"
 #include "NOD_geometry.hh"
 #include "NOD_node_declaration.hh"
 #include "NOD_shader.h"
@@ -1508,13 +1508,26 @@ static void std_node_socket_interface_draw(ID *id,
   }
 
   col = uiLayoutColumn(layout, false);
-  uiItemR(col, &ptr, "hide_value", DEFAULT_FLAGS, nullptr, ICON_NONE);
 
   const bNodeTree *node_tree = reinterpret_cast<const bNodeTree *>(id);
   if (interface_socket->flag & NODE_INTERFACE_SOCKET_INPUT && node_tree->type == NTREE_GEOMETRY) {
+    if (ELEM(type, SOCK_INT, SOCK_VECTOR)) {
+      uiItemR(col, &ptr, "default_input", DEFAULT_FLAGS, nullptr, ICON_NONE);
+    }
+  }
+
+  {
+    uiLayout *sub = uiLayoutColumn(col, false);
+    uiLayoutSetActive(sub, interface_socket->default_input == NODE_INPUT_DEFAULT_VALUE);
+    uiItemR(sub, &ptr, "hide_value", DEFAULT_FLAGS, nullptr, ICON_NONE);
+  }
+
+  if (interface_socket->flag & NODE_INTERFACE_SOCKET_INPUT && node_tree->type == NTREE_GEOMETRY) {
     uiItemR(col, &ptr, "hide_in_modifier", DEFAULT_FLAGS, nullptr, ICON_NONE);
     if (nodes::socket_type_supports_fields(type)) {
-      uiItemR(col, &ptr, "force_non_field", DEFAULT_FLAGS, nullptr, ICON_NONE);
+      uiLayout *sub = uiLayoutColumn(col, false);
+      uiLayoutSetActive(sub, interface_socket->default_input == NODE_INPUT_DEFAULT_VALUE);
+      uiItemR(sub, &ptr, "force_non_field", DEFAULT_FLAGS, nullptr, ICON_NONE);
     }
   }
 }

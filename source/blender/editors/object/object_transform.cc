@@ -63,6 +63,8 @@
 #include "WM_api.hh"
 #include "WM_types.hh"
 
+#include "ANIM_keyframing.hh"
+
 #include "ED_armature.hh"
 #include "ED_gpencil_legacy.hh"
 #include "ED_keyframing.hh"
@@ -347,7 +349,7 @@ static int object_clear_transform_generic_exec(bContext *C,
     /* run provided clearing function */
     clear_func(ob, clear_delta);
 
-    ED_autokeyframe_object(C, scene, ob, ks);
+    blender::animrig::autokeyframe_object(C, scene, ob, ks);
 
     /* tag for updates */
     DEG_id_tag_update(&ob->id, ID_RECALC_TRANSFORM);
@@ -2082,8 +2084,7 @@ static void object_transform_axis_target_cancel(bContext *C, wmOperator *op)
 static int object_transform_axis_target_invoke(bContext *C, wmOperator *op, const wmEvent *event)
 {
   Depsgraph *depsgraph = CTX_data_ensure_evaluated_depsgraph(C);
-  ViewContext vc;
-  ED_view3d_viewcontext_init(C, &vc, depsgraph);
+  ViewContext vc = ED_view3d_viewcontext_init(C, depsgraph);
 
   if (vc.obact == nullptr || !object_is_target_compat(vc.obact)) {
     /* Falls back to texture space transform. */

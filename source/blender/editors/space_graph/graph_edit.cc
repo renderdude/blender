@@ -47,6 +47,7 @@
 #include "UI_interface.hh"
 #include "UI_view2d.hh"
 
+#include "ANIM_keyframing.hh"
 #include "ED_anim_api.hh"
 #include "ED_keyframes_edit.hh"
 #include "ED_keyframing.hh"
@@ -105,7 +106,6 @@ static const EnumPropertyItem prop_graphkeys_insertkey_types[] = {
 static void insert_graph_keys(bAnimContext *ac, eGraphKeys_InsertKey_Types mode)
 {
   ListBase anim_data = {nullptr, nullptr};
-  ListBase nla_cache = {nullptr, nullptr};
   int filter;
   size_t num_items;
 
@@ -204,17 +204,16 @@ static void insert_graph_keys(bAnimContext *ac, eGraphKeys_InsertKey_Types mode)
        *   up adding the keyframes on a new F-Curve in the action data instead.
        */
       if (ale->id && !ale->owner && !fcu->driver) {
-        insert_keyframe(ac->bmain,
-                        reports,
-                        ale->id,
-                        nullptr,
-                        ((fcu->grp) ? (fcu->grp->name) : (nullptr)),
-                        fcu->rna_path,
-                        fcu->array_index,
-                        &anim_eval_context,
-                        eBezTriple_KeyframeType(ts->keyframe_type),
-                        &nla_cache,
-                        flag);
+        blender::animrig::insert_keyframe(ac->bmain,
+                                          reports,
+                                          ale->id,
+                                          nullptr,
+                                          ((fcu->grp) ? (fcu->grp->name) : (nullptr)),
+                                          fcu->rna_path,
+                                          fcu->array_index,
+                                          &anim_eval_context,
+                                          eBezTriple_KeyframeType(ts->keyframe_type),
+                                          flag);
       }
       else {
         AnimData *adt = ANIM_nla_mapping_get(ac, ale);
@@ -236,8 +235,6 @@ static void insert_graph_keys(bAnimContext *ac, eGraphKeys_InsertKey_Types mode)
       ale->update |= ANIM_UPDATE_DEFAULT;
     }
   }
-
-  BKE_animsys_free_nla_keyframing_context_cache(&nla_cache);
 
   ANIM_animdata_update(ac, &anim_data);
   ANIM_animdata_freelist(&anim_data);

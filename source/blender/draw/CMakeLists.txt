@@ -669,8 +669,13 @@ set(GLSL_SRC
   intern/shaders/draw_debug_info.hh
   intern/shaders/draw_debug_print_display_frag.glsl
   intern/shaders/draw_debug_print_display_vert.glsl
+  intern/shaders/draw_intersect_lib.glsl
+  intern/shaders/draw_math_geom_lib.glsl
+  intern/shaders/draw_model_lib.glsl
   intern/shaders/draw_resource_finalize_comp.glsl
   intern/shaders/draw_view_finalize_comp.glsl
+  intern/shaders/draw_view_lib.glsl
+  intern/shaders/draw_view_reconstruction_lib.glsl
   intern/shaders/draw_visibility_comp.glsl
 
   intern/draw_command_shared.hh
@@ -680,6 +685,7 @@ set(GLSL_SRC
   intern/draw_shader_shared.h
 
   engines/gpencil/shaders/gpencil_frag.glsl
+  engines/gpencil/shaders/grease_pencil_frag.glsl
   engines/gpencil/shaders/gpencil_vert.glsl
   engines/gpencil/shaders/grease_pencil_vert.glsl
   engines/gpencil/shaders/gpencil_antialiasing_frag.glsl

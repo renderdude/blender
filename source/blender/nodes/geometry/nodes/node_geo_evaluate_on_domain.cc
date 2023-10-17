@@ -85,7 +85,7 @@ static void node_update(bNodeTree *ntree, bNode *node)
 static void node_gather_link_searches(GatherLinkSearchOpParams &params)
 {
   const bNodeType &node_type = params.node_type();
-  const std::optional<eCustomDataType> type = node_data_type_to_custom_data_type(
+  const std::optional<eCustomDataType> type = bke::socket_type_to_custom_data_type(
       eNodeSocketDatatype(params.other_socket().type));
   if (type && *type != CD_PROP_STRING) {
     params.add_item(IFACE_("Value"), [node_type, type](LinkSearchOpParams &params) {
@@ -117,13 +117,11 @@ class EvaluateOnDomainInput final : public bke::GeometryFieldInput {
     const CPPType &cpp_type = src_field_.cpp_type();
 
     if (context.type() == GeometryComponent::Type::GreasePencil &&
-        (src_domain_ == ATTR_DOMAIN_GREASE_PENCIL_LAYER) !=
-            (dst_domain == ATTR_DOMAIN_GREASE_PENCIL_LAYER))
+        (src_domain_ == ATTR_DOMAIN_LAYER) != (dst_domain == ATTR_DOMAIN_LAYER))
     {
       /* Evaluate field just for the current layer. */
-      if (src_domain_ == ATTR_DOMAIN_GREASE_PENCIL_LAYER) {
-        const bke::GeometryFieldContext src_domain_context{context,
-                                                           ATTR_DOMAIN_GREASE_PENCIL_LAYER};
+      if (src_domain_ == ATTR_DOMAIN_LAYER) {
+        const bke::GeometryFieldContext src_domain_context{context, ATTR_DOMAIN_LAYER};
         const int layer_index = context.grease_pencil_layer_index();
 
         const IndexMask single_layer_mask = IndexRange(layer_index, 1);

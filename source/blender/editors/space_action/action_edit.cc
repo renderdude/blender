@@ -43,6 +43,7 @@
 
 #include "UI_view2d.hh"
 
+#include "ANIM_keyframing.hh"
 #include "ED_anim_api.hh"
 #include "ED_gpencil_legacy.hh"
 #include "ED_grease_pencil.hh"
@@ -819,8 +820,7 @@ static void insert_grease_pencil_key(bAnimContext *ac,
 static void insert_fcurve_key(bAnimContext *ac,
                               bAnimListElem *ale,
                               const AnimationEvalContext anim_eval_context,
-                              eInsertKeyFlags flag,
-                              ListBase *nla_cache)
+                              eInsertKeyFlags flag)
 {
   FCurve *fcu = (FCurve *)ale->key_data;
 
@@ -838,17 +838,16 @@ static void insert_fcurve_key(bAnimContext *ac,
    *   (TODO: add the full-blown PointerRNA relative parsing case here...)
    */
   if (ale->id && !ale->owner) {
-    insert_keyframe(ac->bmain,
-                    reports,
-                    ale->id,
-                    nullptr,
-                    ((fcu->grp) ? (fcu->grp->name) : (nullptr)),
-                    fcu->rna_path,
-                    fcu->array_index,
-                    &anim_eval_context,
-                    eBezTriple_KeyframeType(ts->keyframe_type),
-                    nla_cache,
-                    flag);
+    blender::animrig::insert_keyframe(ac->bmain,
+                                      reports,
+                                      ale->id,
+                                      nullptr,
+                                      ((fcu->grp) ? (fcu->grp->name) : (nullptr)),
+                                      fcu->rna_path,
+                                      fcu->array_index,
+                                      &anim_eval_context,
+                                      eBezTriple_KeyframeType(ts->keyframe_type),
+                                      flag);
   }
   else {
     AnimData *adt = ANIM_nla_mapping_get(ac, ale);
@@ -871,7 +870,6 @@ static void insert_fcurve_key(bAnimContext *ac,
 static void insert_action_keys(bAnimContext *ac, short mode)
 {
   ListBase anim_data = {nullptr, nullptr};
-  ListBase nla_cache = {nullptr, nullptr};
   eAnimFilter_Flags filter;
 
   Scene *scene = ac->scene;
@@ -919,15 +917,13 @@ static void insert_action_keys(bAnimContext *ac, short mode)
         break;
 
       case ANIMTYPE_FCURVE:
-        insert_fcurve_key(ac, ale, anim_eval_context, flag, &nla_cache);
+        insert_fcurve_key(ac, ale, anim_eval_context, flag);
         break;
 
       default:
         BLI_assert_msg(false, "Keys cannot be inserted into this animation type.");
     }
   }
-
-  BKE_animsys_free_nla_keyframing_context_cache(&nla_cache);
 
   ANIM_animdata_update(ac, &anim_data);
   ANIM_animdata_freelist(&anim_data);

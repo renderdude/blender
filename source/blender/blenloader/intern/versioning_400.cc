@@ -311,6 +311,10 @@ void do_versions_after_linking_400(FileData *fd, Main *bmain)
     }
   }
 
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 400, 34)) {
+    BKE_mesh_legacy_face_map_to_generic(bmain);
+  }
+
   /**
    * Versioning code until next subversion bump goes here.
    *
@@ -619,7 +623,13 @@ static void version_principled_bsdf_subsurface(bNodeTree *ntree)
 
     bNodeSocket *subsurf = nodeFindSocket(node, SOCK_IN, "Subsurface");
     float *subsurf_val = version_cycles_node_socket_float_value(subsurf);
-    *version_cycles_node_socket_float_value(scale_in) = *subsurf_val;
+
+    if (!subsurf->link && *subsurf_val == 0.0f) {
+      *version_cycles_node_socket_float_value(scale_in) = 0.05f;
+    }
+    else {
+      *version_cycles_node_socket_float_value(scale_in) = *subsurf_val;
+    }
 
     if (subsurf->link == nullptr && *subsurf_val == 0.0f) {
       /* Node doesn't use Subsurf, we're done here. */
@@ -1049,6 +1059,30 @@ static void enable_geometry_nodes_is_modifier(Main &bmain)
   }
 }
 
+static void versioning_grease_pencil_stroke_radii_scaling(GreasePencil *grease_pencil)
+{
+  using namespace blender;
+  /* Previously, Grease Pencil used a radius convention where 1 "px" = 0.001 units. This "px" was
+   * the brush size which would be stored in the stroke thickness and then scaled by the point
+   * pressure factor. Finally, the render engine would divide this thickness value by 2000 (we're
+   * going from a thickness to a radius, hence the factor of two) to convert back into blender
+   * units.
+   * Store the radius now directly in blender units. This makes it consistent with how hair curves
+   * handle the radius. */
+  for (GreasePencilDrawingBase *base : grease_pencil->drawings()) {
+    if (base->type != GP_DRAWING) {
+      continue;
+    }
+    bke::greasepencil::Drawing &drawing = reinterpret_cast<GreasePencilDrawing *>(base)->wrap();
+    MutableSpan<float> radii = drawing.radii_for_write();
+    threading::parallel_for(radii.index_range(), 8192, [&](const IndexRange range) {
+      for (const int i : range) {
+        radii[i] /= 2000.0f;
+      }
+    });
+  }
+}
+
 void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
 {
   if (!MAIN_VERSION_FILE_ATLEAST(bmain, 400, 1)) {
@@ -1091,9 +1125,6 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
   }
 
   if (!MAIN_VERSION_FILE_ATLEAST(bmain, 400, 6)) {
-    LISTBASE_FOREACH (Mesh *, mesh, &bmain->meshes) {
-      BKE_mesh_legacy_face_map_to_generic(mesh);
-    }
     FOREACH_NODETREE_BEGIN (bmain, ntree, id) {
       versioning_replace_legacy_glossy_node(ntree);
       versioning_remove_microfacet_sharp_distribution(ntree);
@@ -1676,6 +1707,12 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
     /* Fix node group socket order by sorting outputs and inputs. */
     LISTBASE_FOREACH (bNodeTree *, ntree, &bmain->nodetrees) {
       versioning_node_group_sort_sockets_recursive(ntree->tree_interface.root_panel);
+    }
+  }
+
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 401, 1)) {
+    LISTBASE_FOREACH (GreasePencil *, grease_pencil, &bmain->grease_pencils) {
+      versioning_grease_pencil_stroke_radii_scaling(grease_pencil);
     }
   }
 
