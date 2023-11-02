@@ -850,11 +850,11 @@ static AZone *area_actionzone_refresh_xy(ScrArea *area, const int xy[2], const b
         const ARegion *region = az->region;
         const int local_xy[2] = {xy[0] - region->winrct.xmin, xy[1] - region->winrct.ymin};
 
-        /* Respect button sections: If the mouse is horizontally hovering empty space defined by a
-         * separator-spacer between buttons, don't allow scaling the region from there. Used for
-         * regions that have a transparent background between such button sections, users don't
-         * expect to be able to resize from there. */
-        if (region->visible && (region->flag & RGN_FLAG_RESIZE_RESPECT_BUTTON_SECTIONS) &&
+        /* Respect button sections: Clusters of buttons (separated using separator-spacers) are
+         * drawn with a background, in-between them the region is fully transparent (if "Region
+         * Overlap" is enabled). Only allow dragging visible edges, so at the button sections. */
+        if (region->visible && region->overlap &&
+            (region->flag & RGN_FLAG_RESIZE_RESPECT_BUTTON_SECTIONS) &&
             !UI_region_button_sections_is_inside_x(az->region, local_xy[0]))
         {
           az = nullptr;
@@ -5498,7 +5498,9 @@ struct RegionAlphaInfo {
 float ED_region_blend_alpha(ARegion *region)
 {
   /* check parent too */
-  if (region->regiontimer == nullptr && (region->alignment & RGN_SPLIT_PREV) && region->prev) {
+  if (region->regiontimer == nullptr &&
+      (region->alignment & (RGN_SPLIT_PREV | RGN_ALIGN_HIDE_WITH_PREV)) && region->prev)
+  {
     region = region->prev;
   }
 
@@ -5573,7 +5575,7 @@ void ED_region_visibility_change_update_animated(bContext *C, ScrArea *area, ARe
   }
 
   if (region->next) {
-    if (region->next->alignment & RGN_SPLIT_PREV) {
+    if (region->next->alignment & (RGN_SPLIT_PREV | RGN_ALIGN_HIDE_WITH_PREV)) {
       rgi->child_region = region->next;
     }
   }

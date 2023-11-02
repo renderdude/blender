@@ -517,7 +517,9 @@ else()
   set(WITH_INPUT_IME OFF)
 endif()
 option(WITH_INPUT_NDOF "Enable NDOF input devices (SpaceNavigator and friends)" ON)
-if(UNIX AND NOT APPLE)
+# On Windows and for the Blender application on macOS, portable install
+# is the only supported installation type, so there is no option.
+if(UNIX AND (NOT APPLE OR WITH_PYTHON_MODULE))
   option(WITH_INSTALL_PORTABLE "\
 Install redistributable runtime, otherwise install into CMAKE_INSTALL_PREFIX"
     ON
@@ -851,7 +853,7 @@ Build `extern` dependencies with address sanitizer when WITH_COMPILER_ASAN is on
 Can cause linking issues due to too large binary size."
   OFF
 )
-mark_as_advanced(WITH_EXTERN_ASAN)
+mark_as_advanced(WITH_COMPILER_ASAN_EXTERN)
 
 if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
   if(WITH_COMPILER_ASAN)

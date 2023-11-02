@@ -64,7 +64,8 @@ class VKTexture : public Texture, public VKBindableResource {
   void swizzle_set(const char swizzle_mask[4]) override;
   void mip_range_set(int min, int max) override;
   void *read(int mip, eGPUDataFormat format) override;
-  void read_sub(int mip, eGPUDataFormat format, const int area[4], void *r_data);
+  void read_sub(
+      int mip, eGPUDataFormat format, const int area[4], IndexRange layers, void *r_data);
   void update_sub(
       int mip, int offset[3], int extent[3], eGPUDataFormat format, const void *data) override;
   void update_sub(int offset[3],
@@ -140,7 +141,10 @@ class VKTexture : public Texture, public VKBindableResource {
    *
    * When texture is already in the requested layout, nothing will be done.
    */
-  void layout_ensure(VKContext &context, VkImageLayout requested_layout);
+  void layout_ensure(VKContext &context,
+                     VkImageLayout requested_layout,
+                     VkAccessFlagBits src_access = VK_ACCESS_MEMORY_WRITE_BIT,
+                     VkAccessFlagBits dst_access = VK_ACCESS_MEMORY_READ_BIT);
 
  private:
   /**
@@ -151,7 +155,9 @@ class VKTexture : public Texture, public VKBindableResource {
   void layout_ensure(VKContext &context,
                      IndexRange mipmap_range,
                      VkImageLayout current_layout,
-                     VkImageLayout requested_layout);
+                     VkImageLayout requested_layout,
+                     VkAccessFlagBits src_access,
+                     VkAccessFlagBits dst_access);
 
   /** \} */
 
