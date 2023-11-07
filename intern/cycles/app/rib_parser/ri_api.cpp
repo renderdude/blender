@@ -222,6 +222,7 @@ void Ri::export_options([[maybe_unused]] Scene_Entity &filter,
 
   cam->need_flags_update = true;
   cam->update(session->scene);
+  *session->scene->dicing_camera = *session->scene->camera;
 }
 
 void Ri::add_light([[maybe_unused]] Light_Scene_Entity light)

@@ -748,7 +748,7 @@ void RIBCyclesMesh::populate_topology()
                                                   (*_shape.render_from_object));
 
     _geom->set_subd_dicing_rate(1.0f);
-    _geom->set_subd_max_level(0);
+    _geom->set_subd_max_level(16);
     _geom->set_subd_objecttoworld(tfm);
   }
 }
