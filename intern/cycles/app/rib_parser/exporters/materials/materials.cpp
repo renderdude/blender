@@ -112,7 +112,6 @@ class RIBtoCycles {
           //{ "", ustring("subsurface_radius")},
           //{ "", ustring("subsurface_ior")},
           //{ "", ustring("subsurface_anisotropy")},
-          {"specReflectScale", ustring("specular")},
           {"roughness", ustring("roughness")},
           {"specularTint", ustring("specular_tint")},
           {"anisotropic", ustring("anisotropic")},

@@ -542,13 +542,18 @@ void PxrSurfacetoPrincipled::update_parameters(Parameter_Dictionary const &param
     if ((param = _parameters["specularFresnelMode"])) {
       if (param->ints()[0] == 0) {  // Artistic Mode
         if ((param = _parameters["specularFaceColor"])) {
+          updated_param.floats().clear();
+          updated_param.type = Parameter_Type::Real;
+          updated_param.add_float(1.0);
+          input = find_socket("specular_ior_level", _nodes.back());
+          set_node_value(_nodes.back(), *input, &updated_param);
           if (param->storage != Container_Type::Reference) {
-            float lum = 0.2126 * param->floats()[0] + 0.7152 * param->floats()[1] +
-                        0.0722 * param->floats()[2];
             updated_param.floats().clear();
-            updated_param.type = Parameter_Type::Real;
-            updated_param.add_float(lum);
-            input = find_socket("specular_ior_level", _nodes.back());
+            updated_param.type = Parameter_Type::Color;
+            updated_param.add_float(param->floats()[0]);
+            updated_param.add_float(param->floats()[1]);
+            updated_param.add_float(param->floats()[2]);
+            input = find_socket("specular_tint", _nodes.back());
             set_node_value(_nodes.back(), *input, &updated_param);
           }
         }
@@ -656,6 +661,22 @@ void PxrDisneyBsdftoPrincipled::update_parameters(Parameter_Dictionary const &pa
       // RenderMan diffTrans is in the range [0,2] so rescale back to [0,1]
       updated_param.add_float(param->floats()[0] / 2.0f);
       input = find_socket("transmission_weight", _nodes.back());
+      set_node_value(_nodes.back(), *input, &updated_param);
+    }
+  }
+  if ((param = _parameters["specReflectScale"])) {
+    updated_param.floats().clear();
+    updated_param.type = Parameter_Type::Color;
+    updated_param.add_float(1.0);
+    updated_param.add_float(1.0);
+    updated_param.add_float(1.0);
+    input = find_socket("specular_tint", _nodes.back());
+    set_node_value(_nodes.back(), *input, &updated_param);
+    if (param->storage != Container_Type::Reference) {
+      updated_param.floats().clear();
+      updated_param.type = Parameter_Type::Real;
+      updated_param.add_float(param->floats()[0]);
+      input = find_socket("specular_ior_level", _nodes.back());
       set_node_value(_nodes.back(), *input, &updated_param);
     }
   }
