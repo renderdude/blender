@@ -859,7 +859,7 @@ static VkDescriptorType descriptor_type(const shader::ShaderCreateInfo::Resource
 static VkDescriptorSetLayoutBinding create_descriptor_set_layout_binding(
     const VKDescriptorSet::Location location,
     const shader::ShaderCreateInfo::Resource &resource,
-    VkShaderStageFlagBits vk_shader_stages)
+    VkShaderStageFlags vk_shader_stages)
 {
   VkDescriptorSetLayoutBinding binding = {};
   binding.binding = location;
@@ -872,7 +872,7 @@ static VkDescriptorSetLayoutBinding create_descriptor_set_layout_binding(
 }
 
 static VkDescriptorSetLayoutBinding create_descriptor_set_layout_binding(
-    const VKPushConstants::Layout &push_constants_layout, VkShaderStageFlagBits vk_shader_stages)
+    const VKPushConstants::Layout &push_constants_layout, VkShaderStageFlags vk_shader_stages)
 {
   BLI_assert(push_constants_layout.storage_type_get() ==
              VKPushConstants::StorageType::UNIFORM_BUFFER);
@@ -890,7 +890,7 @@ static void add_descriptor_set_layout_bindings(
     const VKShaderInterface &interface,
     const Vector<shader::ShaderCreateInfo::Resource> &resources,
     Vector<VkDescriptorSetLayoutBinding> &r_bindings,
-    VkShaderStageFlagBits vk_shader_stages)
+    VkShaderStageFlags vk_shader_stages)
 {
   for (const shader::ShaderCreateInfo::Resource &resource : resources) {
     const VKDescriptorSet::Location location = interface.descriptor_set_location(resource);
@@ -909,7 +909,7 @@ static VkDescriptorSetLayoutCreateInfo create_descriptor_set_layout(
     const VKShaderInterface &interface,
     const Vector<shader::ShaderCreateInfo::Resource> &resources,
     Vector<VkDescriptorSetLayoutBinding> &r_bindings,
-    VkShaderStageFlagBits vk_shader_stages)
+    VkShaderStageFlags vk_shader_stages)
 {
   add_descriptor_set_layout_bindings(interface, resources, r_bindings, vk_shader_stages);
   VkDescriptorSetLayoutCreateInfo set_info = {};
@@ -948,9 +948,8 @@ bool VKShader::finalize_descriptor_set_layouts(VkDevice vk_device,
   all_resources.extend(info.batch_resources_);
 
   Vector<VkDescriptorSetLayoutBinding> bindings;
-  const VkShaderStageFlagBits vk_shader_stages = is_graphics_shader() ?
-                                                     VK_SHADER_STAGE_ALL_GRAPHICS :
-                                                     VK_SHADER_STAGE_COMPUTE_BIT;
+  const VkShaderStageFlags vk_shader_stages = is_graphics_shader() ? VK_SHADER_STAGE_ALL_GRAPHICS :
+                                                                     VK_SHADER_STAGE_COMPUTE_BIT;
   VkDescriptorSetLayoutCreateInfo layout_info = create_descriptor_set_layout(
       shader_interface, all_resources, bindings, vk_shader_stages);
   if (vkCreateDescriptorSetLayout(vk_device, &layout_info, vk_allocation_callbacks, &layout_) !=
@@ -1093,6 +1092,15 @@ std::string VKShader::vertex_interface_declare(const shader::ShaderCreateInfo &i
   }
   ss << "\n";
 
+  /* Retarget depth from -1..1 to 0..1. This will be done by geometry stage, when geometry shaders
+   * are used. */
+  const bool has_geometry_stage = bool(info.builtins_ & BuiltinBits::BARYCENTRIC_COORD) ||
+                                  !info.geometry_source_.is_empty();
+  const bool retarget_depth = !has_geometry_stage;
+  if (retarget_depth) {
+    post_main += "gl_Position.z = (gl_Position.z + gl_Position.w) * 0.5;\n";
+  }
+
   if (post_main.empty() == false) {
     std::string pre_main;
     ss << main_function_wrapper(pre_main, post_main);
@@ -1221,6 +1229,14 @@ static StageInterfaceInfo *find_interface_by_name(const Vector<StageInterfaceInf
   return nullptr;
 }
 
+static void declare_emit_vertex(std::stringstream &ss)
+{
+  ss << "void gpu_EmitVertex() {\n";
+  ss << "  gl_Position.z = (gl_Position.z + gl_Position.w) * 0.5;\n";
+  ss << "  EmitVertex();\n";
+  ss << "}\n";
+}
+
 std::string VKShader::geometry_layout_declare(const shader::ShaderCreateInfo &info) const
 {
   std::stringstream ss;
@@ -1243,6 +1259,8 @@ std::string VKShader::geometry_layout_declare(const shader::ShaderCreateInfo &in
     print_interface(ss, "out", *iface, location, suffix);
   }
   ss << "\n";
+
+  declare_emit_vertex(ss);
 
   return ss.str();
 }

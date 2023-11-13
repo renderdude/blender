@@ -23,6 +23,7 @@
 #include "BLI_math_geom.h"
 #include "BLI_math_matrix.h"
 #include "BLI_set.hh"
+#include "BLI_span.hh"
 #include "BLI_task.h"
 #include "BLI_task.hh"
 #include "BLI_utildefines.h"
@@ -1432,39 +1433,6 @@ void SCULPT_orig_vert_data_update(SculptOrigVertData *orig_data, PBVHVertexIter 
   }
 }
 
-void SCULPT_orig_face_data_unode_init(SculptOrigFaceData *data, Object *ob, SculptUndoNode *unode)
-{
-  SculptSession *ss = ob->sculpt;
-  BMesh *bm = ss->bm;
-
-  memset(data, 0, sizeof(*data));
-  data->unode = unode;
-
-  if (bm) {
-    data->bm_log = ss->bm_log;
-  }
-  else {
-    data->face_sets = unode->face_sets.data();
-  }
-}
-
-void SCULPT_orig_face_data_init(SculptOrigFaceData *data,
-                                Object *ob,
-                                PBVHNode *node,
-                                SculptUndoType type)
-{
-  SculptUndoNode *unode;
-  unode = SCULPT_undo_push_node(ob, node, type);
-  SCULPT_orig_face_data_unode_init(data, ob, unode);
-}
-
-void SCULPT_orig_face_data_update(SculptOrigFaceData *orig_data, PBVHFaceIter *iter)
-{
-  if (orig_data->unode->type == SCULPT_UNDO_FACE_SETS) {
-    orig_data->face_set = orig_data->face_sets ? orig_data->face_sets[iter->i] : false;
-  }
-}
-
 static void sculpt_rake_data_update(SculptRakeData *srd, const float co[3])
 {
   float rake_dist = len_v3v3(srd->follow_co, co);
@@ -1561,16 +1529,27 @@ static void paint_mesh_restore_node(Object *ob,
       break;
     }
     case SCULPT_UNDO_FACE_SETS: {
-      SculptOrigFaceData orig_face_data;
-      SCULPT_orig_face_data_unode_init(&orig_face_data, ob, unode);
-      PBVHFaceIter fd;
-      BKE_pbvh_face_iter_begin (ss->pbvh, node, fd) {
-        SCULPT_orig_face_data_update(&orig_face_data, &fd);
-        if (fd.face_set) {
-          *fd.face_set = orig_face_data.face_set;
+      const Span<int> face_sets = unode->face_sets;
+      ss->face_sets = BKE_sculpt_face_sets_ensure(ob);
+      switch (BKE_pbvh_type(ss->pbvh)) {
+        case PBVH_FACES:
+        case PBVH_GRIDS: {
+          const Span<int> faces = unode->face_indices;
+          blender::array_utils::scatter(face_sets, faces, {ss->face_sets, ss->faces_num});
+          break;
+        }
+        case PBVH_BMESH: {
+          BMesh *bm = BKE_pbvh_get_bmesh(ss->pbvh);
+          const int offset = CustomData_get_offset_named(
+              &bm->pdata, CD_PROP_INT32, ".sculpt_face_set");
+          int i = 0;
+          for (BMFace *face : BKE_pbvh_bmesh_node_faces(node)) {
+            BM_ELEM_CD_SET_INT(face, offset, face_sets[i]);
+            i++;
+          }
+          break;
         }
       }
-      BKE_pbvh_face_iter_end(fd);
       BKE_pbvh_node_mark_update_face_sets(node);
       break;
     }
@@ -3319,7 +3298,7 @@ static void do_gravity_task(SculptSession *ss,
                             PBVHNode *node)
 {
   PBVHVertexIter vd;
-  float(*proxy)[3] = BKE_pbvh_node_add_proxy(ss->pbvh, node)->co;
+  const MutableSpan<float3> proxy = BKE_pbvh_node_add_proxy(*ss->pbvh, *node).co;
 
   SculptBrushTest test;
   SculptBrushTestFn sculpt_brush_test_sq_fn = SCULPT_brush_test_init_with_falloff_shape(
@@ -3838,9 +3817,7 @@ static void sculpt_combine_proxies_node(Object &object,
         (SCULPT_undo_push_node(&object, &node, SCULPT_UNDO_COORDS)->co.data()));
   }
 
-  int proxy_count;
-  PBVHProxyNode *proxies;
-  BKE_pbvh_node_get_proxies(&node, &proxies, &proxy_count);
+  MutableSpan<PBVHProxyNode> proxies = BKE_pbvh_node_get_proxies(&node);
 
   Mesh &mesh = *static_cast<Mesh *>(object.data);
   MutableSpan<float3> positions = mesh.vert_positions_for_write();
@@ -3861,8 +3838,8 @@ static void sculpt_combine_proxies_node(Object &object,
       copy_v3_v3(val, vd.co);
     }
 
-    for (int p = 0; p < proxy_count; p++) {
-      add_v3_v3(val, proxies[p].co[vd.i]);
+    for (const PBVHProxyNode &proxy_node : proxies) {
+      add_v3_v3(val, proxy_node.co[vd.i]);
     }
 
     SCULPT_clip(&sd, ss, vd.co, val);
@@ -6198,7 +6175,6 @@ void SCULPT_fake_neighbors_free(Object *ob)
 }
 
 void SCULPT_automasking_node_begin(Object *ob,
-                                   const SculptSession * /*ss*/,
                                    AutomaskingCache *automasking,
                                    AutomaskingNodeData *automask_data,
                                    PBVHNode *node)
@@ -6208,7 +6184,6 @@ void SCULPT_automasking_node_begin(Object *ob,
     return;
   }
 
-  automask_data->node = node;
   automask_data->have_orig_data = automasking->settings.flags &
                                   (BRUSH_AUTOMASKING_BRUSH_NORMAL | BRUSH_AUTOMASKING_VIEW_NORMAL);
 
@@ -6220,9 +6195,7 @@ void SCULPT_automasking_node_begin(Object *ob,
   }
 }
 
-void SCULPT_automasking_node_update(SculptSession * /*ss*/,
-                                    AutomaskingNodeData *automask_data,
-                                    PBVHVertexIter *vd)
+void SCULPT_automasking_node_update(AutomaskingNodeData *automask_data, PBVHVertexIter *vd)
 {
   if (automask_data->have_orig_data) {
     SCULPT_orig_vert_data_update(&automask_data->orig_data, vd);
@@ -6284,32 +6257,6 @@ void SCULPT_stroke_id_ensure(Object *ob)
         CD_PROP_INT8,
         SCULPT_ATTRIBUTE_NAME(automasking_stroke_id),
         &params);
-  }
-}
-
-int SCULPT_face_set_get(const SculptSession *ss, PBVHFaceRef face)
-{
-  switch (BKE_pbvh_type(ss->pbvh)) {
-    case PBVH_BMESH:
-      return 0;
-    case PBVH_FACES:
-    case PBVH_GRIDS:
-      return ss->face_sets[face.i];
-  }
-
-  BLI_assert_unreachable();
-
-  return 0;
-}
-
-void SCULPT_face_set_set(SculptSession *ss, PBVHFaceRef face, int fset)
-{
-  switch (BKE_pbvh_type(ss->pbvh)) {
-    case PBVH_BMESH:
-      break;
-    case PBVH_FACES:
-    case PBVH_GRIDS:
-      ss->face_sets[face.i] = fset;
   }
 }
 

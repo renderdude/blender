@@ -6,6 +6,7 @@
  * \ingroup edcurves
  */
 
+#include "BLI_path_util.h"
 #include "BLI_string.h"
 
 #include "ED_curves.hh"
@@ -329,6 +330,18 @@ static int run_node_group_exec(bContext *C, wmOperator *op)
     BKE_report(op->reports, RPT_ERROR, "Node group must have a group output node");
     return OPERATOR_CANCELLED;
   }
+  for (const bNodeTreeInterfaceSocket *input : node_tree->interface_inputs()) {
+    if (STR_ELEM(input->socket_type,
+                 "NodeSocketObject",
+                 "NodeSocketImage",
+                 "NodeSocketCollection",
+                 "NodeSocketTexture",
+                 "NodeSocketMaterial"))
+    {
+      BKE_report(op->reports, RPT_ERROR, "Data-block inputs are unsupported");
+      return OPERATOR_CANCELLED;
+    }
+  }
 
   IDProperty *properties = replace_inputs_evaluated_data_blocks(*op->properties, *depsgraph);
   BLI_SCOPED_DEFER([&]() { IDP_FreeProperty_ex(properties, false); });
@@ -553,7 +566,7 @@ static std::string run_node_group_get_name(wmOperatorType * /*ot*/, PointerRNA *
       ptr, "relative_asset_identifier", nullptr, 0, &len);
   BLI_SCOPED_DEFER([&]() { MEM_SAFE_FREE(library_asset_identifier); })
   StringRef ref(library_asset_identifier, len);
-  return ref.drop_prefix(ref.find_last_of('/') + 1);
+  return ref.drop_prefix(ref.find_last_of(SEP_STR) + 1);
 }
 
 void GEOMETRY_OT_execute_node_group(wmOperatorType *ot)
