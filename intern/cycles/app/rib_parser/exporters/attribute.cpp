@@ -3,6 +3,7 @@
 #include "app/rib_parser/parsed_parameter.h"
 #include "scene/attribute.h"
 #include "scene/geometry.h"
+#include "scene/mesh.h"
 #include "scene/scene.h"
 #include "util/vector.h"
 
@@ -30,6 +31,9 @@ void apply_primvars(AttributeSet &attributes,
     attrType = TypeFloat2;
     for (int i = 0; i < value->floats().size(); i += 2)
       vf2.push_back(make_float2(value->floats()[i], value->floats()[i + 1]));
+    Mesh *mesh = static_cast<Mesh *>(attributes.geometry);
+    for (int i = 0; i < mesh->get_num_ngons(); i++)
+      vf2.push_back(make_float2(0, 0));
     size = vf2.size() * sizeof(float2);
     data = vf2.data();
   }
