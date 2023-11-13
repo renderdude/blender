@@ -127,6 +127,29 @@ class RIBtoCycles {
           //{ "", ustring("emission_strength")},
       }};
 
+  const PxrMarschnerHairtoPrincipled PxrMarschnerHair = {
+      {"principled_hair_bsdf"},
+      {
+          {"diffuseColor", ustring("color")},
+          {"melanin", ustring("melanin")},
+          {"redness", ustring("melanin_redness")},
+          {"dye", ustring("tint")},
+          //{"", ustring("absorption_coefficient")},
+          //{"", ustring("aspect_ratio")},
+          //{"", ustring("offset")},
+          //{"", ustring("roughness")},
+          //{"", ustring("radial_roughness")},
+          //{"", ustring("coat")},
+          {"specularIor", ustring("ior")},
+          //{"", ustring("random_roughness")},
+          //{"", ustring("random_color")},
+          //{"", ustring("random")},
+          {"specularGainR", ustring("R")},
+          {"specularGainTT", ustring("TT")},
+          {"specularGainTRT", ustring("TRT")},
+          //{"", ustring("surface_mix_weight")},
+      }};
+
   const PxrImageNormalMaptoCycles PxrMultiNodeNormalMap = {
       // Nodes
       {"image_texture", "normal_map"},
@@ -154,9 +177,9 @@ class RIBtoCycles {
   const RIBtoCyclesMapping PxrDefault = {{""}, {}};
   const RIBtoCyclesMapping PxrBlack = {{"diffuse_bsdf"}, {}};
   const RIBtoCyclesMapping PxrDiffuse = {{"diffuse_bsdf"},
-  {
-                                               {"diffuseColor", ustring("color")},
-  }};
+                                         {
+                                             {"diffuseColor", ustring("color")},
+                                         }};
 
   const RIBtoCyclesMapping PxrMeshLight = {{"emission"},
                                            {
@@ -199,6 +222,9 @@ class RIBtoCycles {
     }
     else if (nodeType == "PxrDisneyBsdf") {
       result = new PxrDisneyBsdftoPrincipled(PxrDisneyBsdf);
+    }
+    else if (nodeType == "PxrMarschnerHair") {
+      result = new PxrMarschnerHairtoPrincipled(PxrMarschnerHair);
     }
     else if (nodeType == "PxrBlack") {
       result = new RIBtoCyclesMapping(PxrBlack);
@@ -245,19 +271,19 @@ void RIBCyclesMaterials::export_materials()
   TaskPool pool;
   set<Shader *> updated_shaders;
 
-    initialize();
-    populate_shader_graph(_osl_shader);
-    add_default_renderman_inputs(_shader);
-    fix_normal_maps();
+  initialize();
+  populate_shader_graph(_osl_shader);
+  add_default_renderman_inputs(_shader);
+  fix_normal_maps();
 
-    _shader->tag_update(_scene);
-    // pool.push(function_bind(&ShaderGraph::simplify, _shader->graph, _scene));
-    /* NOTE: Update shaders out of the threads since those routines
-     * are accessing and writing to a global context.
-     */
-    // updated_shaders.insert(_shader);
+  _shader->tag_update(_scene);
+  // pool.push(function_bind(&ShaderGraph::simplify, _shader->graph, _scene));
+  /* NOTE: Update shaders out of the threads since those routines
+   * are accessing and writing to a global context.
+   */
+  // updated_shaders.insert(_shader);
 
-    _shader = nullptr;
+  _shader = nullptr;
 
   // pool.wait_work();
 
@@ -309,24 +335,29 @@ void RIBCyclesMaterials::update_connections(RIBtoCyclesMapping *mapping,
       }
 
       if (!input) {
-        fprintf(stderr,
-                "Ignoring connection on '%s.%s', input '%s' was not found\n",
-                mapping->node(shader_name)->name.c_str(),
-                dst_socket_name.c_str(),
-                input_name.c_str());
+        // Ignore any connections that come from jamming the PxrHairColor into the Hair BSDF
+        if (tokens[0] != _hair_color_handle) {
+          fprintf(stderr,
+                  "Ignoring connection on '%s.%s', input '%s' was not found\n",
+                  mapping->node(shader_name)->name.c_str(),
+                  dst_socket_name.c_str(),
+                  input_name.c_str());
+        }
         continue;
       }
 
       // Now find the output to connect from
       const auto src_node_it = _nodes.find(tokens[0]);
       if (src_node_it == _nodes.end()) {
-        fprintf(stderr,
-                "Ignoring connection from '%s.%s' to '%s.%s', node '%s' was not found\n",
-                tokens[0].c_str(),
-                tokens[1].c_str(),
-                mapping->node(shader_name)->name.c_str(),
-                dst_socket_name.c_str(),
-                tokens[0].c_str());
+        if (tokens[0] != _hair_color_handle) {
+          fprintf(stderr,
+                  "Ignoring connection from '%s.%s' to '%s.%s', node '%s' was not found\n",
+                  tokens[0].c_str(),
+                  tokens[1].c_str(),
+                  mapping->node(shader_name)->name.c_str(),
+                  dst_socket_name.c_str(),
+                  tokens[0].c_str());
+        }
         continue;
       }
 
@@ -381,9 +412,10 @@ void RIBCyclesMaterials::populate_shader_graph(Vector_Dictionary shader_graph)
   vector<vector<Parsed_Parameter *>> terminals;
 
   auto *graph = new ShaderGraph();
+  Parameter_Dictionary hair_color_params;
 
-  for (auto const &params : lama_shader_graph.second) {
-    RIBtoCyclesMapping *mapping;
+  for (auto &params : lama_shader_graph.second) {
+    RIBtoCyclesMapping *mapping = nullptr;
 
     auto pv = params.get_parameter_vector();
     const auto *pp = params.get_parameter("shader_type");
@@ -391,24 +423,40 @@ void RIBCyclesMaterials::populate_shader_graph(Vector_Dictionary shader_graph)
       shader_type = pp->strings()[0];
       shader_name = pp->strings()[1];
       handle = pp->strings()[2];
-      mapping = sRIBtoCycles->find(shader_name, pv);
+      if (shader_name == "PxrHairColor") {
+        hair_color_params = params;
+        _hair_color_handle = handle;
+      }
+      else {
+        if (shader_name == "PxrMarschnerHair") {
+          for (auto *const param : hair_color_params.get_parameter_vector()) {
+            if (param->name != "shader_type") {
+              params.push_back(param);
+            }
+          }
+          pv = params.get_parameter_vector();
+        }
+        mapping = sRIBtoCycles->find(shader_name, pv);
 
-      if (!mapping->create_shader_node(shader_name, shader_path, graph, _scene)) {
-        continue;
+        if (!mapping->create_shader_node(shader_name, shader_path, graph, _scene)) {
+          continue;
+        }
+
+        mapping->add_to_graph(graph);
+        _nodes.emplace(handle, mapping);
+        connections[handle].push_back(pp);
+      }
+    }
+
+    if (mapping) {
+      pp = params.get_parameter("__materialid");
+      if (pp) {
+        terminals.push_back(pv);
+        _shader->name = pp->strings()[0];
       }
 
-      mapping->add_to_graph(graph);
-      _nodes.emplace(handle, mapping);
-      connections[handle].push_back(pp);
+      mapping->update_parameters(params, connections[handle]);
     }
-
-    pp = params.get_parameter("__materialid");
-    if (pp) {
-      terminals.push_back(pv);
-      _shader->name = pp->strings()[0];
-    }
-
-    mapping->update_parameters(params, connections[handle]);
   }
 
   // Now that all nodes have been constructed, iterate the network again and build up any

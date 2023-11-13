@@ -41,6 +41,7 @@ class RIBCyclesMaterials {
   Scene *_scene = nullptr;
   Shader *_shader = nullptr;
   Vector_Dictionary _osl_shader;
+  std::string _hair_color_handle;
   std::unordered_map<std::string, class RIBtoCyclesMapping *> _nodes;
 };
 

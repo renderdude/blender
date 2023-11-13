@@ -2,6 +2,7 @@
 #include "app/rib_parser/error.h"
 #include "app/rib_parser/exporters/materials/shader_defaults.h"
 #include "app/rib_parser/parsed_parameter.h"
+#include "scene/shader_nodes.h"
 #include "util/color.h"
 
 CCL_NAMESPACE_BEGIN
@@ -680,6 +681,39 @@ void PxrDisneyBsdftoPrincipled::update_parameters(Parameter_Dictionary const &pa
       set_node_value(_nodes.back(), *input, &updated_param);
     }
   }
+}
+
+void PxrMarschnerHairtoPrincipled::update_parameters(Parameter_Dictionary const &parameters,
+                                                  vector<Parsed_Parameter const *> &connections)
+{
+  // Exactly the same as the base except we create a map of the parameters for
+  // later retrieval
+  for (auto *const param : parameters.get_parameter_vector()) {
+    // Check if the parameter is a connection, and defer processing
+    // if it is
+    _parameters[param->name] = param;
+    if (param->storage == Container_Type::Reference) {
+      connections.push_back(param);
+    }
+    else {
+      // See if the parameter name is in Pixar terms, and needs to be converted
+      const std::string input_name = parameter_name(param->name);
+
+      // Find the input to write the parameter value to
+      const SocketType *input = find_socket(input_name, _nodes.back());
+
+      if (!input) {
+        VLOG_WARNING << "Could not find parameter '" << param->name.c_str() << "' on node '"
+                     << _nodes.back()->name.c_str() << "'\n";
+        continue;
+      }
+
+      set_node_value(_nodes.back(), *input, param);
+    }
+  }
+
+  // Now handle the funny one-offs that require remapping
+  dynamic_cast<PrincipledHairBsdfNode*>(_nodes.back())->set_parametrization(NodePrincipledHairParametrization::NODE_PRINCIPLED_HAIR_PIGMENT_CONCENTRATION);
 }
 
 CCL_NAMESPACE_END
