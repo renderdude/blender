@@ -29,10 +29,10 @@ class RIBtoCycles {
       {"principled_bsdf"},
       {
           {"diffuseColor", ustring("base_color")},
-          {"subsurfaceColor", ustring("subsurface_color")},
+          {"subsurfaceDmfp", ustring("subsurface_scale")},
           {"subsurfaceDmfpColor", ustring("subsurface_radius")},
           {"subsurfaceIor", ustring("subsurface_ior")},
-          {"subsurfaceGain", ustring("subsurface")},
+          {"subsurfaceGain", ustring("subsurface_weight")},
           {"specularFaceColor", ustring("specular")},
           {"specularRoughness", ustring("roughness")},
           {"clearcoatRoughness", ustring("clearcoat_roughness")},

@@ -2,8 +2,10 @@
 #include "app/rib_parser/error.h"
 #include "app/rib_parser/exporters/materials/shader_defaults.h"
 #include "app/rib_parser/parsed_parameter.h"
+#include "scene/shader_graph.h"
 #include "scene/shader_nodes.h"
 #include "util/color.h"
+#include <OpenImageIO/ustring.h>
 
 CCL_NAMESPACE_BEGIN
 
@@ -513,18 +515,107 @@ void PxrSurfacetoPrincipled::update_parameters(Parameter_Dictionary const &param
     updated_param.payload = vector<float>();
     // diffuse gain
     float gain = 1.0;
-    if ((param = _parameters["diffuseGain"])) {
+    param = _parameters["diffuseGain"];
+    if (param) {
       gain = param->floats()[0];
     }
-    if ((param = _parameters["diffuseColor"])) {
+    param = _parameters["diffuseColor"];
+    ShaderNode *color_hsv_node = nullptr;
+    ShaderNode *color_mix_node = nullptr;
+    if (param) {
+      color_hsv_node = _graph->create_node<HSVNode>();
+      _graph->add(color_hsv_node);
+      color_mix_node = _graph->create_node<MixColorNode>();
+      _graph->add(color_mix_node);
+      ShaderInput *mix_input = color_mix_node->input(ustring("A"));
+      ShaderOutput *hsv_output = color_hsv_node->output(ustring("Color"));
+      _graph->connect(hsv_output, mix_input);
+      input = find_socket("b", color_mix_node);
+      color_mix_node->set(*input, make_float3(gain));
       if (param->storage != Container_Type::Reference) {
-        updated_param.floats().clear();
-        updated_param.type = Parameter_Type::Color;
-        updated_param.add_float(gain * param->floats()[0]);
-        updated_param.add_float(gain * param->floats()[1]);
-        updated_param.add_float(gain * param->floats()[2]);
-        input = find_socket("base_color", _nodes.back());
-        set_node_value(_nodes.back(), *input, &updated_param);
+        input = find_socket("color", color_hsv_node);
+        color_hsv_node->set(
+            *input, make_float3(param->floats()[0], param->floats()[1], param->floats()[2]));
+      }
+      else {
+        connections.erase(std::find(connections.begin(), connections.end(), param));
+        vector<string> tokens;
+        string_split(tokens, param->strings()[0], ":");
+        auto *output_node = _processed_nodes->find(tokens[0])->second;
+        ShaderInput *hsv_input = color_hsv_node->input(ustring("Color"));
+        std::string output_name = output_node->parameter_name(tokens[1]);
+        ShaderOutput *conn_output = nullptr;
+        for (ShaderOutput *out : output_node->node("")->outputs) {
+          if (string_iequals(out->socket_type.name.string(), output_name)) {
+            conn_output = out;
+            break;
+          }
+        }
+
+        _graph->connect(conn_output, hsv_input);
+      }
+      // Check for subsurface, 'cause things get funky
+      bool has_subsurface = false;
+      auto *sssGain = _parameters["subsurfaceGain"];
+      Parsed_Parameter *sssColor = nullptr;
+      if (sssGain) {
+        has_subsurface = sssGain->floats()[0] > 0;
+        if (has_subsurface) {
+          sssColor = _parameters["subsurfaceColor"];
+        }
+      }
+      if (has_subsurface) {
+        ShaderNode *hsv_node = _graph->create_node<HSVNode>();
+        _graph->add(hsv_node);
+        ShaderNode *mix_node = _graph->create_node<MixColorNode>();
+        _graph->add(mix_node);
+        ShaderInput *b_input = mix_node->input(ustring("B"));
+        ShaderOutput *output = hsv_node->output(ustring("Color"));
+        _graph->connect(output, b_input);
+        b_input = _nodes.back()->input(ustring("Base Color"));
+        output = mix_node->output(ustring("Result"));
+        _graph->connect(output, b_input);
+        // Feed in the diffuseColor if it exists
+        if (color_mix_node) {
+          ShaderInput *sss_mix_input = mix_node->input(ustring("A"));
+          ShaderOutput *mix_output = color_mix_node->output(ustring("Result"));
+          _graph->connect(mix_output, sss_mix_input);
+        }
+        if (sssColor) {
+          if (sssColor->storage != Container_Type::Reference) {
+            input = find_socket("color", hsv_node);
+            hsv_node->set(
+                *input,
+                make_float3(sssColor->floats()[0], sssColor->floats()[1], sssColor->floats()[2]));
+          }
+          else {
+            connections.erase(std::find(connections.begin(), connections.end(), sssColor));
+            vector<string> tokens;
+            string_split(tokens, sssColor->strings()[0], ":");
+            auto *output_node = _processed_nodes->find(tokens[0])->second;
+            ShaderInput *hsv_input = hsv_node->input(ustring("Color"));
+            std::string output_name = output_node->parameter_name(tokens[1]);
+            ShaderOutput *conn_output = nullptr;
+            for (ShaderOutput *out : output_node->node("")->outputs) {
+              if (string_iequals(out->socket_type.name.string(), output_name)) {
+                conn_output = out;
+                break;
+              }
+            }
+
+            _graph->connect(conn_output, hsv_input);
+          }
+        }
+        else {
+          input = find_socket("color", hsv_node);
+          // RenderMan default
+          hsv_node->set(*input, make_float3(0.83, 0.791, 0.753));
+        }
+      }
+      else {
+        ShaderInput *bsdf_input = _nodes.back()->input(ustring("Base Color"));
+        ShaderOutput *mix_output = color_mix_node->output(ustring("Result"));
+        _graph->connect(mix_output, bsdf_input);
       }
     }
 
@@ -673,7 +764,7 @@ void PxrDisneyBsdftoPrincipled::update_parameters(Parameter_Dictionary const &pa
 }
 
 void PxrMarschnerHairtoPrincipled::update_parameters(Parameter_Dictionary const &parameters,
-                                                  vector<Parsed_Parameter const *> &connections)
+                                                     vector<Parsed_Parameter const *> &connections)
 {
   // Exactly the same as the base except we create a map of the parameters for
   // later retrieval
@@ -702,7 +793,9 @@ void PxrMarschnerHairtoPrincipled::update_parameters(Parameter_Dictionary const 
   }
 
   // Now handle the funny one-offs that require remapping
-  dynamic_cast<PrincipledHairBsdfNode*>(_nodes.back())->set_parametrization(NodePrincipledHairParametrization::NODE_PRINCIPLED_HAIR_PIGMENT_CONCENTRATION);
+  dynamic_cast<PrincipledHairBsdfNode *>(_nodes.back())
+      ->set_parametrization(
+          NodePrincipledHairParametrization::NODE_PRINCIPLED_HAIR_PIGMENT_CONCENTRATION);
 }
 
 CCL_NAMESPACE_END
