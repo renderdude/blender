@@ -15,7 +15,8 @@
 #include "vk_common.hh"
 #include "vk_debug.hh"
 #include "vk_descriptor_pools.hh"
-#include "vk_sampler.hh"
+#include "vk_samplers.hh"
+#include "vk_timeline_semaphore.hh"
 
 namespace blender::gpu {
 class VKBackend;
@@ -58,10 +59,11 @@ class VKDevice : public NonCopyable {
   VkDevice vk_device_ = VK_NULL_HANDLE;
   uint32_t vk_queue_family_ = 0;
   VkQueue vk_queue_ = VK_NULL_HANDLE;
-  VkCommandPool vk_command_pool_ = VK_NULL_HANDLE;
 
-  /* Dummy sampler for now. */
-  VKSampler sampler_;
+  VKSamplers samplers_;
+
+  /* Semaphore for CPU GPU synchronization when submitting commands to the queue. */
+  VKTimelineSemaphore timeline_semaphore_;
 
   /**
    * Available Contexts for this device.
@@ -76,10 +78,11 @@ class VKDevice : public NonCopyable {
 
   /** Allocator used for texture and buffers and other resources. */
   VmaAllocator mem_allocator_ = VK_NULL_HANDLE;
-  VKDescriptorPools descriptor_pools_;
+  VkPipelineCache vk_pipeline_cache_ = VK_NULL_HANDLE;
 
   /** Limits of the device linked to this context. */
   VkPhysicalDeviceProperties vk_physical_device_properties_ = {};
+  VkPhysicalDeviceMemoryProperties vk_physical_device_memory_properties_ = {};
   /** Features support. */
   VkPhysicalDeviceFeatures vk_physical_device_features_ = {};
   VkPhysicalDeviceVulkan11Features vk_physical_device_vulkan_11_features_ = {};
@@ -142,19 +145,19 @@ class VKDevice : public NonCopyable {
     return vk_queue_;
   }
 
-  VKDescriptorPools &descriptor_pools_get()
+  const uint32_t queue_family_get() const
   {
-    return descriptor_pools_;
-  }
-
-  const uint32_t *queue_family_ptr_get() const
-  {
-    return &vk_queue_family_;
+    return vk_queue_family_;
   }
 
   VmaAllocator mem_allocator_get() const
   {
     return mem_allocator_;
+  }
+
+  VkPipelineCache vk_pipeline_cache_get() const
+  {
+    return vk_pipeline_cache_;
   }
 
   debug::VKDebuggingTools &debugging_tools_get()
@@ -167,14 +170,9 @@ class VKDevice : public NonCopyable {
     return debugging_tools_;
   }
 
-  const VKSampler &sampler_get() const
+  VKSamplers &samplers()
   {
-    return sampler_;
-  }
-
-  const VkCommandPool vk_command_pool_get() const
-  {
-    return vk_command_pool_;
+    return samplers_;
   }
 
   bool is_initialized() const;
@@ -224,15 +222,32 @@ class VKDevice : public NonCopyable {
   void discard_frame_buffer(VkFramebuffer vk_framebuffer);
   void destroy_discarded_resources();
 
+  void memory_statistics_get(int *r_total_mem_kb, int *r_free_mem_kb) const;
+
+  /** \} */
+
+  /* -------------------------------------------------------------------- */
+  /** \name Queue management
+   * \{ */
+
+  VKTimelineSemaphore &timeline_semaphore_get()
+  {
+    return timeline_semaphore_;
+  }
+  const VKTimelineSemaphore &timeline_semaphore_get() const
+  {
+    return timeline_semaphore_;
+  }
+
   /** \} */
 
  private:
   void init_physical_device_properties();
+  void init_physical_device_memory_properties();
   void init_physical_device_features();
   void init_debug_callbacks();
   void init_memory_allocator();
-  void init_command_pools();
-  void init_descriptor_pools();
+  void init_pipeline_cache();
 
   /* During initialization the backend requires access to update the workarounds. */
   friend VKBackend;

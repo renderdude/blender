@@ -102,7 +102,7 @@ class LazyFunctionForSimulationInputNode final : public LazyFunction {
       BLI_assert_unreachable();
     }
     if (!params.output_was_set(0)) {
-      params.set_output(0, fn::ValueOrField<float>(delta_time));
+      params.set_output(0, bke::ValueOrField<float>(delta_time));
     }
   }
 
@@ -241,6 +241,7 @@ static void node_register()
   ntype.declare = node_declare;
   ntype.insert_link = node_insert_link;
   ntype.gather_link_search_ops = nullptr;
+  ntype.no_muting = true;
   node_type_storage(&ntype,
                     "NodeGeometrySimulationInput",
                     node_free_standard_storage,

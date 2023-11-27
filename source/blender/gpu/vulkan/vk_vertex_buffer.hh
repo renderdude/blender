@@ -28,7 +28,9 @@ class VKVertexBuffer : public VertBuf, public VKBindableResource {
 
   void bind_as_ssbo(uint binding) override;
   void bind_as_texture(uint binding) override;
-  void bind(int binding, shader::ShaderCreateInfo::Resource::BindType bind_type) override;
+  void bind(int binding,
+            shader::ShaderCreateInfo::Resource::BindType bind_type,
+            const GPUSamplerState sampler_state) override;
   void wrap_handle(uint64_t handle) override;
 
   void update_sub(uint start, uint len, const void *data) override;
@@ -58,6 +60,9 @@ class VKVertexBuffer : public VertBuf, public VKBindableResource {
 
  private:
   void allocate();
+
+  void upload_data_direct(const VKBuffer &host_buffer);
+  void upload_data_via_staging_buffer(VKContext &context);
 
   /* VKTexture requires access to `buffer_` to convert a vertex buffer to a texture. */
   friend class VKTexture;

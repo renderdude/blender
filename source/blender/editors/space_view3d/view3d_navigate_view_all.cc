@@ -8,8 +8,8 @@
 
 #include "DNA_gpencil_legacy_types.h"
 
-#include "BKE_armature.h"
-#include "BKE_context.h"
+#include "BKE_armature.hh"
+#include "BKE_context.hh"
 #include "BKE_crazyspace.hh"
 #include "BKE_gpencil_geom_legacy.h"
 #include "BKE_layer.h"
@@ -80,7 +80,7 @@ static void view3d_object_calc_minmax(Depsgraph *depsgraph,
       minmax_v3v3_v3(min, max, ob_eval->object_to_world[3]);
     }
     else {
-      BKE_object_minmax(ob_eval, min, max, false);
+      BKE_object_minmax(ob_eval, min, max);
     }
   }
 }

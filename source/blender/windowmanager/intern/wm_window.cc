@@ -31,7 +31,7 @@
 #include "BLT_translation.h"
 
 #include "BKE_blender_version.h"
-#include "BKE_context.h"
+#include "BKE_context.hh"
 #include "BKE_global.h"
 #include "BKE_icons.h"
 #include "BKE_layer.h"
@@ -500,7 +500,10 @@ void wm_window_title(wmWindowManager *wm, wmWindow *win)
                                 (GHOST_SetPath(handle, filepath) == GHOST_kFailure);
 
   std::string str;
-  str += wm->file_saved ? " " : "* ";
+  if (!wm->file_saved) {
+    str += "* ";
+  }
+
   if (has_filepath) {
     const size_t filename_no_ext_len = BLI_path_extension_or_end(filename) - filename;
     str.append(filename, filename_no_ext_len);

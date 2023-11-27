@@ -11,10 +11,11 @@
 #include "BKE_bake_geometry_nodes_modifier.hh"
 #include "BKE_bake_items_socket.hh"
 #include "BKE_compute_contexts.hh"
-#include "BKE_context.h"
+#include "BKE_context.hh"
 #include "BKE_curves.hh"
 #include "BKE_instances.hh"
-#include "BKE_modifier.h"
+#include "BKE_modifier.hh"
+#include "BKE_node_socket_value_cpp_type.hh"
 #include "BKE_object.hh"
 #include "BKE_scene.h"
 
@@ -26,8 +27,6 @@
 #include "NOD_geometry.hh"
 #include "NOD_socket.hh"
 #include "NOD_zone_socket_items.hh"
-
-#include "FN_field_cpp_type.hh"
 
 #include "DNA_curves_types.h"
 #include "DNA_mesh_types.h"
@@ -95,8 +94,8 @@ static std::shared_ptr<AnonymousAttributeFieldInput> make_attribute_field(
     const NodeSimulationItem &item,
     const CPPType &type)
 {
-  AnonymousAttributeIDPtr attribute_id = MEM_new<NodeAnonymousAttributeID>(
-      __func__, self_object, compute_context, node, std::to_string(item.identifier), item.name);
+  AnonymousAttributeIDPtr attribute_id = AnonymousAttributeIDPtr(MEM_new<NodeAnonymousAttributeID>(
+      __func__, self_object, compute_context, node, std::to_string(item.identifier), item.name));
   return std::make_shared<AnonymousAttributeFieldInput>(attribute_id, type, node.label_or_name());
 }
 
@@ -407,8 +406,8 @@ static void mix_simulation_state(const NodeSimulationItem &item,
     case SOCK_ROTATION:
     case SOCK_RGBA: {
       const CPPType &type = get_simulation_item_cpp_type(item);
-      const fn::ValueOrFieldCPPType &value_or_field_type = *fn::ValueOrFieldCPPType::get_from_self(
-          type);
+      const bke::ValueOrFieldCPPType &value_or_field_type =
+          *bke::ValueOrFieldCPPType::get_from_self(type);
       if (value_or_field_type.is_field(prev) || value_or_field_type.is_field(next)) {
         /* Fields are evaluated on geometries and are mixed there. */
         break;
@@ -884,6 +883,7 @@ static void node_register()
   ntype.gather_link_search_ops = nullptr;
   ntype.insert_link = node_insert_link;
   ntype.draw_buttons_ex = node_layout_ex;
+  ntype.no_muting = true;
   node_type_storage(&ntype, "NodeGeometrySimulationOutput", node_free_storage, node_copy_storage);
   nodeRegisterType(&ntype);
 }

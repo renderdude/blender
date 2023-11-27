@@ -63,7 +63,7 @@
 
 #include "BKE_anim_data.h"
 #include "BKE_animsys.h"
-#include "BKE_asset.h"
+#include "BKE_asset.hh"
 #include "BKE_blender_version.h"
 #include "BKE_collection.h"
 #include "BKE_global.h" /* for G */
@@ -75,11 +75,11 @@
 #include "BKE_lib_query.h"
 #include "BKE_lib_remap.h"
 #include "BKE_main.h" /* for Main */
-#include "BKE_main_idmap.h"
-#include "BKE_main_namemap.h"
+#include "BKE_main_idmap.hh"
+#include "BKE_main_namemap.hh"
 #include "BKE_material.h"
 #include "BKE_mesh.hh"
-#include "BKE_modifier.h"
+#include "BKE_modifier.hh"
 #include "BKE_node.hh" /* for tree type defines */
 #include "BKE_object.hh"
 #include "BKE_packedFile.h"
@@ -1912,18 +1912,18 @@ static void after_liblink_id_embedded_id_process(BlendLibReader *reader, ID *id)
     if (scene->master_collection != nullptr) {
       after_liblink_id_process(reader, &scene->master_collection->id);
 
-      if (scene->master_collection->runtime.owner_id == nullptr) {
+      if (scene->master_collection->owner_id == nullptr) {
         CLOG_WARN(&LOG,
                   "NULL owner_id pointer for embedded Scene Collection of %s, should never happen",
                   id->name);
-        scene->master_collection->runtime.owner_id = id;
+        scene->master_collection->owner_id = id;
       }
-      else if (scene->master_collection->runtime.owner_id != id) {
+      else if (scene->master_collection->owner_id != id) {
         CLOG_WARN(&LOG,
                   "Inconsistent owner_id pointer for embedded Scene Collection of %s, should "
                   "never happen",
                   id->name);
-        scene->master_collection->runtime.owner_id = id;
+        scene->master_collection->owner_id = id;
       }
     }
   }

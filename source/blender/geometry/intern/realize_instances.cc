@@ -204,6 +204,7 @@ struct AllMeshesInfo {
   /** True if we know that there are no loose edges in any of the input meshes. */
   bool no_loose_edges_hint = false;
   bool no_loose_verts_hint = false;
+  bool no_overlapping_hint = false;
 };
 
 struct AllCurvesInfo {
@@ -614,7 +615,8 @@ static void gather_realize_tasks_recursive(GatherTasksInfo &gather_info,
         const auto *volume_component = static_cast<const bke::VolumeComponent *>(component);
         if (!gather_info.r_tasks.first_volume) {
           volume_component->add_user();
-          gather_info.r_tasks.first_volume = volume_component;
+          gather_info.r_tasks.first_volume = ImplicitSharingPtr<const bke::VolumeComponent>(
+              volume_component);
         }
         break;
       }
@@ -623,7 +625,8 @@ static void gather_realize_tasks_recursive(GatherTasksInfo &gather_info,
             component);
         if (!gather_info.r_tasks.first_edit_data) {
           edit_component->add_user();
-          gather_info.r_tasks.first_edit_data = edit_component;
+          gather_info.r_tasks.first_edit_data =
+              ImplicitSharingPtr<const bke::GeometryComponentEditData>(edit_component);
         }
         break;
       }
@@ -962,6 +965,10 @@ static AllMeshesInfo preprocess_meshes(const bke::GeometrySet &geometry_set,
       info.order.begin(), info.order.end(), [](const Mesh *mesh) {
         return mesh->runtime->loose_verts_cache.is_cached() && mesh->loose_verts().count == 0;
       });
+  info.no_overlapping_hint = std::all_of(
+      info.order.begin(), info.order.end(), [](const Mesh *mesh) {
+        return mesh->no_overlapping_topology();
+      });
 
   return info;
 }
@@ -1171,6 +1178,9 @@ static void execute_realize_mesh_tasks(const RealizeInstancesOptions &options,
   }
   if (all_meshes_info.no_loose_verts_hint) {
     dst_mesh->tag_loose_verts_none();
+  }
+  if (all_meshes_info.no_overlapping_hint) {
+    dst_mesh->tag_overlapping_none();
   }
 }
 

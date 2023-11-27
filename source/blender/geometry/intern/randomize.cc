@@ -16,7 +16,7 @@
 #include "BKE_attribute.hh"
 #include "BKE_attribute_math.hh"
 #include "BKE_curves.hh"
-#include "BKE_customdata.h"
+#include "BKE_customdata.hh"
 #include "BKE_geometry_set.hh"
 #include "BKE_global.h"
 #include "BKE_instances.hh"
@@ -159,7 +159,7 @@ static void reorder_customdata_groups(CustomData &data,
 
 void debug_randomize_face_order(Mesh *mesh)
 {
-  if (mesh == nullptr || !use_debug_randomization()) {
+  if (mesh == nullptr || mesh->faces_num == 0 || !use_debug_randomization()) {
     return;
   }
 

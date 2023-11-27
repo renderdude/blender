@@ -21,9 +21,9 @@
 
 #include "MEM_guardedalloc.h"
 
-#include "BKE_asset.h"
+#include "BKE_asset.hh"
 #include "BKE_compute_contexts.hh"
-#include "BKE_context.h"
+#include "BKE_context.hh"
 #include "BKE_gpencil_legacy.h"
 #include "BKE_idprop.h"
 #include "BKE_lib_id.h"
@@ -371,7 +371,7 @@ bool push_compute_context_for_tree_path(const SpaceNode &snode,
         }
       }
     }
-    compute_context_builder.push<bke::NodeGroupComputeContext>(*group_node);
+    compute_context_builder.push<bke::GroupNodeComputeContext>(*group_node, *tree);
   }
   return true;
 }
@@ -616,7 +616,9 @@ static void node_area_listener(const wmSpaceTypeListenerParams *params)
       break;
     case NC_NODE:
       if (wmn->action == NA_EDITED) {
-        node_area_tag_tree_recalc(snode, area);
+        if (wmn->reference == snode->id || snode->id == nullptr) {
+          node_area_tag_tree_recalc(snode, area);
+        }
       }
       else if (wmn->action == NA_SELECTED) {
         ED_area_tag_redraw(area);
@@ -764,7 +766,7 @@ static void node_cursor(wmWindow *win, ScrArea *area, ARegion *region)
                            &snode->runtime->cursor[1]);
 
   /* here snode->runtime->cursor is used to detect the node edge for sizing */
-  node_set_cursor(*win, *snode, snode->runtime->cursor);
+  node_set_cursor(*win, *region, *snode, snode->runtime->cursor);
 
   /* XXX snode->runtime->cursor is in placing new nodes space */
   snode->runtime->cursor[0] /= UI_SCALE_FAC;

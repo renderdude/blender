@@ -44,6 +44,7 @@
 #include "BKE_mesh.hh"
 #include "BKE_mesh_runtime.hh"
 #include "BKE_object.hh"
+#include "BKE_object_types.hh"
 #include "BKE_pointcache.h"
 #include "BKE_report.h"
 #include "BKE_rigidbody.h"
@@ -342,7 +343,7 @@ static Mesh *rigidbody_get_mesh(Object *ob)
 
   switch (ob->rigidbody_object->mesh_source) {
     case RBO_MESH_DEFORM:
-      return ob->runtime.mesh_deform_eval;
+      return ob->runtime->mesh_deform_eval;
     case RBO_MESH_FINAL:
       return BKE_object_get_evaluated_mesh(ob);
     case RBO_MESH_BASE:
@@ -350,7 +351,7 @@ static Mesh *rigidbody_get_mesh(Object *ob)
        * on the original; otherwise every time the CoW is recreated it will
        * have to be recomputed. */
       BLI_assert(ob->rigidbody_object->mesh_source == RBO_MESH_BASE);
-      return (Mesh *)ob->runtime.data_orig;
+      return (Mesh *)ob->runtime->data_orig;
   }
 
   /* Just return something sensible so that at least Blender won't crash. */
@@ -492,10 +493,8 @@ static rbCollisionShape *rigidbody_validate_sim_shape_helper(RigidBodyWorld *rbw
    */
   /* XXX: all dimensions are auto-determined now... later can add stored settings for this */
   /* get object dimensions without scaling */
-  if (const std::optional<BoundBox> bb = BKE_object_boundbox_get(ob)) {
-    size[0] = (bb->vec[4][0] - bb->vec[0][0]);
-    size[1] = (bb->vec[2][1] - bb->vec[0][1]);
-    size[2] = (bb->vec[1][2] - bb->vec[0][2]);
+  if (const std::optional<blender::Bounds<blender::float3>> bounds = BKE_object_boundbox_get(ob)) {
+    copy_v3_v3(size, bounds->max - bounds->min);
   }
   mul_v3_fl(size, 0.5f);
 
@@ -1763,19 +1762,19 @@ static void rigidbody_update_sim_ob(Depsgraph *depsgraph, Object *ob, RigidBodyO
   const bool is_selected = base ? (base->flag & BASE_SELECTED) != 0 : false;
 
   if (rbo->shape == RB_SHAPE_TRIMESH && rbo->flag & RBO_FLAG_USE_DEFORM) {
-    Mesh *mesh = ob->runtime.mesh_deform_eval;
+    Mesh *mesh = ob->runtime->mesh_deform_eval;
     if (mesh) {
       float(*positions)[3] = reinterpret_cast<float(*)[3]>(
           mesh->vert_positions_for_write().data());
       int totvert = mesh->totvert;
-      const std::optional<BoundBox> bb = BKE_object_boundbox_get(ob);
+      const std::optional<blender::Bounds<blender::float3>> bounds = BKE_object_boundbox_get(ob);
 
       RB_shape_trimesh_update(static_cast<rbCollisionShape *>(rbo->shared->physics_shape),
                               (float *)positions,
                               totvert,
                               sizeof(float[3]),
-                              bb->vec[0],
-                              bb->vec[6]);
+                              bounds->min,
+                              bounds->max);
     }
   }
 

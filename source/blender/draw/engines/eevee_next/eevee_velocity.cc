@@ -78,7 +78,8 @@ static void step_object_sync_render(void *instance,
 
   /* NOTE: Dummy resource handle since this won't be used for drawing. */
   ResourceHandle resource_handle(0);
-  ObjectHandle &ob_handle = inst.sync.sync_object(ob);
+  ObjectRef ob_ref = DRW_object_ref_get(ob);
+  ObjectHandle &ob_handle = inst.sync.sync_object(ob_ref);
 
   if (partsys_is_visible) {
     auto sync_hair =
@@ -259,13 +260,34 @@ void VelocityModule::geometry_steps_fill()
    * `tot_len * sizeof(float4)` is greater than max SSBO size. */
   geometry_steps[step_]->resize(max_ii(16, dst_ofs));
 
+  PassSimple copy_ps("Velocity Copy Pass");
+  copy_ps.init();
+  copy_ps.state_set(DRW_STATE_NO_DRAW);
+  copy_ps.shader_set(inst_.shaders.static_shader_get(VERTEX_COPY));
+  copy_ps.bind_ssbo("out_buf", *geometry_steps[step_]);
+
   for (VelocityGeometryData &geom : geometry_map.values()) {
-    GPU_storagebuf_copy_sub_from_vertbuf(*geometry_steps[step_],
-                                         geom.pos_buf,
-                                         geom.ofs * sizeof(float4),
-                                         0,
-                                         geom.len * sizeof(float4));
+    const GPUVertFormat *format = GPU_vertbuf_get_format(geom.pos_buf);
+    if (format->stride == 16) {
+      GPU_storagebuf_copy_sub_from_vertbuf(*geometry_steps[step_],
+                                           geom.pos_buf,
+                                           geom.ofs * sizeof(float4),
+                                           0,
+                                           geom.len * sizeof(float4));
+    }
+    else {
+      BLI_assert(format->stride % 4 == 0);
+      copy_ps.bind_ssbo("in_buf", geom.pos_buf);
+      copy_ps.push_constant("start_offset", geom.ofs);
+      copy_ps.push_constant("vertex_stride", int(format->stride / 4));
+      copy_ps.push_constant("vertex_count", geom.len);
+      copy_ps.dispatch(int3(divide_ceil_u(geom.len, VERTEX_COPY_GROUP_SIZE), 1, 1));
+    }
   }
+
+  copy_ps.barrier(GPU_BARRIER_SHADER_STORAGE);
+  inst_.manager->submit(copy_ps);
+
   /* Copy back the #VelocityGeometryIndex into #VelocityObjectData which are
    * indexed using persistent keys (unlike geometries which are indexed by volatile ID). */
   for (VelocityObjectData &vel : velocity_map.values()) {

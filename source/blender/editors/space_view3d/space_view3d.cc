@@ -28,18 +28,19 @@
 #include "BLI_blenlib.h"
 #include "BLI_math_matrix.h"
 #include "BLI_math_vector.h"
+#include "BLI_math_vector.hh"
 #include "BLI_utildefines.h"
 
 #include "BLT_translation.h"
 
-#include "BKE_asset.h"
-#include "BKE_context.h"
-#include "BKE_curve.h"
+#include "BKE_asset.hh"
+#include "BKE_context.hh"
+#include "BKE_curve.hh"
 #include "BKE_global.h"
 #include "BKE_gpencil_legacy.h"
 #include "BKE_icons.h"
 #include "BKE_idprop.h"
-#include "BKE_lattice.h"
+#include "BKE_lattice.hh"
 #include "BKE_layer.h"
 #include "BKE_lib_id.h"
 #include "BKE_lib_query.h"
@@ -50,7 +51,7 @@
 #include "BKE_object.hh"
 #include "BKE_scene.h"
 #include "BKE_screen.hh"
-#include "BKE_viewer_path.h"
+#include "BKE_viewer_path.hh"
 #include "BKE_workspace.h"
 
 #include "ED_asset_shelf.h"
@@ -511,7 +512,7 @@ static void view3d_ob_drop_on_enter(wmDropBox *drop, wmDrag *drag)
   float dimensions[3] = {0.0f};
   if (drag->type == WM_DRAG_ID) {
     Object *ob = (Object *)WM_drag_get_local_ID(drag, ID_OB);
-    BKE_object_dimensions_get(ob, dimensions);
+    BKE_object_dimensions_eval_cached_get(ob, dimensions);
   }
   else {
     AssetMetaData *meta_data = WM_drag_get_asset_meta_data(drag, ID_OB);
@@ -739,6 +740,7 @@ static void view3d_ob_drop_matrix_from_snap(V3DSnapCursorState *snap_state,
                                             Object *ob,
                                             float obmat_final[4][4])
 {
+  using namespace blender;
   V3DSnapCursorData *snap_data = ED_view3d_cursor_snap_data_get();
   BLI_assert(snap_state->draw_box || snap_state->draw_plane);
   UNUSED_VARS_NDEBUG(snap_state);
@@ -749,10 +751,9 @@ static void view3d_ob_drop_matrix_from_snap(V3DSnapCursorState *snap_state,
   mat4_to_size(scale, ob->object_to_world);
   rescale_m4(obmat_final, scale);
 
-  if (const std::optional<BoundBox> bb = BKE_object_boundbox_get(ob)) {
-    float offset[3];
-    BKE_boundbox_calc_center_aabb(&bb.value(), offset);
-    offset[2] = bb->vec[0][2];
+  if (const std::optional<Bounds<float3>> bb = BKE_object_boundbox_get(ob)) {
+    float3 offset = math::midpoint(bb->min, bb->max);
+    offset[2] = bb->min[2];
     mul_mat3_m4_v3(obmat_final, offset);
     sub_v3_v3(obmat_final[3], offset);
   }
