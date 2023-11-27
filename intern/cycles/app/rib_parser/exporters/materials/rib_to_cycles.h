@@ -33,6 +33,13 @@ class RIBtoCyclesMapping {
   {
   }
 
+  void set(ShaderGraph *graph, Scene *scene, std::unordered_map<std::string, RIBtoCyclesMapping *> *nodes)
+  {
+    _graph = graph;
+    _scene = scene;
+    _processed_nodes = nodes;
+  }
+
   ustring nodeType(int index) const
   {
     return ustring(_nodeType[index]);
@@ -48,16 +55,13 @@ class RIBtoCyclesMapping {
   virtual void update_parameters(Parameter_Dictionary const &params,
                                  vector<Parsed_Parameter const *> &connections);
 
-  virtual void add_to_graph(ShaderGraph *graph)
+  virtual void add_to_graph()
   {
-    _nodes.back()->set_owner(graph);
-    graph->add(_nodes.back());
+    _nodes.back()->set_owner(_graph);
+    _graph->add(_nodes.back());
   }
 
-  virtual bool create_shader_node(std::string const &shader,
-                                  std::string const &path,
-                                  ShaderGraph *graph,
-                                  Scene *scene);
+  virtual bool create_shader_node(std::string const &shader, std::string const &path);
 
   virtual ShaderNode *node(std::string name)
   {
@@ -68,6 +72,9 @@ class RIBtoCyclesMapping {
   std::vector<ShaderNode *> _nodes;
   std::vector<std::string> _nodeType;
   ParamMap _paramMap;
+  ShaderGraph *_graph;
+  Scene *_scene;
+  std::unordered_map<std::string, RIBtoCyclesMapping *> *_processed_nodes;
   std::function<void(std::vector<ShaderNode *>)> _remapFunc;
 };
 
@@ -83,18 +90,15 @@ class RIBtoMultiNodeCycles : public RIBtoCyclesMapping {
   {
   }
 
-  void add_to_graph(ShaderGraph *graph) override
+  void add_to_graph() override
   {
     for (auto *node : _nodes) {
-      node->set_owner(graph);
-      graph->add(node);
+      node->set_owner(_graph);
+      _graph->add(node);
     }
   }
 
-   bool create_shader_node(std::string const &shader,
-                                  std::string const &path,
-                                  ShaderGraph *graph,
-                                  Scene *scene) override;
+  bool create_shader_node(std::string const &shader, std::string const &path) override;
 
   void update_parameters(Parameter_Dictionary const &params,
                          vector<Parsed_Parameter const *> &connections) override;
@@ -116,6 +120,7 @@ class PxrNormalMaptoCycles : public RIBtoCyclesMapping {
 
   void update_parameters(Parameter_Dictionary const &params,
                          vector<Parsed_Parameter const *> &connections) override;
+
  private:
   std::unordered_map<std::string, Parsed_Parameter *> _parameters;
 };
@@ -126,6 +131,7 @@ class PxrRamptoCycles : public RIBtoCyclesMapping {
 
   void update_parameters(Parameter_Dictionary const &params,
                          vector<Parsed_Parameter const *> &connections) override;
+
  private:
   std::unordered_map<std::string, Parsed_Parameter *> _parameters;
 };
@@ -134,20 +140,14 @@ class PxrImageNormalMaptoCycles : public RIBtoMultiNodeCycles {
  public:
   using RIBtoMultiNodeCycles::RIBtoMultiNodeCycles;
 
-   bool create_shader_node(std::string const &shader,
-                                  std::string const &path,
-                                  ShaderGraph *graph,
-                                  Scene *scene) override;
+  bool create_shader_node(std::string const &shader, std::string const &path) override;
 };
 
 class RIBtoCyclesTexture : public RIBtoCyclesMapping {
  public:
   using RIBtoCyclesMapping::RIBtoCyclesMapping;
 
-   bool create_shader_node(std::string const &shader,
-                                  std::string const &path,
-                                  ShaderGraph *graph,
-                                  Scene *scene) override;
+  bool create_shader_node(std::string const &shader, std::string const &path) override;
 };
 
 class PxrSurfacetoPrincipled : public RIBtoCyclesMapping {

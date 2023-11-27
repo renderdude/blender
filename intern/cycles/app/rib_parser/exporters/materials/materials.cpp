@@ -437,12 +437,13 @@ void RIBCyclesMaterials::populate_shader_graph(Vector_Dictionary shader_graph)
           pv = params.get_parameter_vector();
         }
         mapping = sRIBtoCycles->find(shader_name, pv);
+        mapping->set(graph, _scene, &_nodes);
 
-        if (!mapping->create_shader_node(shader_name, shader_path, graph, _scene)) {
+        if (!mapping->create_shader_node(shader_name, shader_path)) {
           continue;
         }
 
-        mapping->add_to_graph(graph);
+        mapping->add_to_graph();
         _nodes.emplace(handle, mapping);
         connections[handle].push_back(pp);
       }

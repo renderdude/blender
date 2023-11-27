@@ -57,15 +57,12 @@ const SocketType *find_socket(std::string input_name, ShaderNode *node)
   return input;
 }
 
-bool RIBtoCyclesMapping::create_shader_node(std::string const &shader,
-                                            std::string const &path,
-                                            ShaderGraph *graph,
-                                            Scene *scene)
+bool RIBtoCyclesMapping::create_shader_node(std::string const &shader, std::string const &path)
 {
   bool result = false;
   ShaderNode *node = nullptr;
 
-  if (::ccl::create_shader_node(_nodeType[0], shader, path, graph, scene, &node)) {
+  if (::ccl::create_shader_node(_nodeType[0], shader, path, _graph, _scene, &node)) {
     _nodes.push_back(node);
     result = true;
   }
@@ -99,17 +96,14 @@ void RIBtoCyclesMapping::update_parameters(Parameter_Dictionary const &parameter
   }
 }
 
-bool RIBtoMultiNodeCycles::create_shader_node(std::string const &shader,
-                                              std::string const &path,
-                                              ShaderGraph *graph,
-                                              Scene *scene)
+bool RIBtoMultiNodeCycles::create_shader_node(std::string const &shader, std::string const &path)
 {
   std::string shader_name = shader;
   bool result = true;
   ShaderNode *node = nullptr;
 
   for (auto &node_type : _nodeType) {
-    if (::ccl::create_shader_node(node_type, shader, path, graph, scene, &node)) {
+    if (::ccl::create_shader_node(node_type, shader, path, _graph, _scene, &node)) {
       _nodes.push_back(node);
       _node_map[node_type] = node;
     }
@@ -164,7 +158,7 @@ bool RIBtoMultiNodeCycles::create_shader_node(std::string const &shader,
       continue;
     }
 
-    graph->connect(output, input);
+    _graph->connect(output, input);
   }
 
   return result;
@@ -351,16 +345,14 @@ void PxrRamptoCycles::update_parameters(Parameter_Dictionary const &parameters,
 }
 
 bool PxrImageNormalMaptoCycles::create_shader_node(std::string const &shader,
-                                                   std::string const &path,
-                                                   ShaderGraph *graph,
-                                                   Scene *scene)
+                                                   std::string const &path)
 {
   std::string shader_name = shader;
   bool result = true;
   ShaderNode *node = nullptr;
 
   for (auto &node_type : _nodeType) {
-    if (::ccl::create_shader_node(node_type, shader, path, graph, scene, &node)) {
+    if (::ccl::create_shader_node(node_type, shader, path, _graph, _scene, &node)) {
       _nodes.push_back(node);
       _node_map[node_type] = node;
       if (node->is_a(ImageTextureNode::node_type)) {
@@ -422,21 +414,18 @@ bool PxrImageNormalMaptoCycles::create_shader_node(std::string const &shader,
       continue;
     }
 
-    graph->connect(output, input);
+    _graph->connect(output, input);
   }
 
   return result;
 }
 
-bool RIBtoCyclesTexture::create_shader_node(std::string const &shader,
-                                            std::string const &path,
-                                            ShaderGraph *graph,
-                                            Scene *scene)
+bool RIBtoCyclesTexture::create_shader_node(std::string const &shader, std::string const &path)
 {
   bool result = false;
   ShaderNode *node = nullptr;
 
-  if (::ccl::create_shader_node(_nodeType[0], shader, path, graph, scene, &node)) {
+  if (::ccl::create_shader_node(_nodeType[0], shader, path, _graph, _scene, &node)) {
     _nodes.push_back(node);
     result = true;
     if (node->is_a(ImageTextureNode::node_type)) {
@@ -520,7 +509,7 @@ void PxrSurfacetoPrincipled::update_parameters(Parameter_Dictionary const &param
     set_node_value(_nodes.back(), *input, &updated_param);
   }
   else {
-    // The payload is in an undefinded state, so force it to floats
+    // The payload is could be in an undefinded state, so force it to floats
     updated_param.payload = vector<float>();
     // diffuse gain
     float gain = 1.0;
