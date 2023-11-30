@@ -52,7 +52,7 @@
 #include "RE_pipeline.h"
 
 #ifdef WITH_FFMPEG
-#  include "BKE_writeffmpeg.h"
+#  include "BKE_writeffmpeg.hh"
 #  include "ffmpeg_compat.h"
 #  include <libavcodec/avcodec.h>
 #  include <libavformat/avformat.h>
@@ -740,7 +740,7 @@ const EnumPropertyItem rna_enum_grease_pencil_selectmode_items[] = {
 #  include "BKE_pointcache.h"
 #  include "BKE_scene.h"
 #  include "BKE_screen.hh"
-#  include "BKE_unit.h"
+#  include "BKE_unit.hh"
 
 #  include "NOD_composite.hh"
 

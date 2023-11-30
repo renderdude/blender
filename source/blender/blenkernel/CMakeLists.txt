@@ -9,7 +9,6 @@ set(INC
   ../blentranslation
   ../bmesh
   ../draw
-  ../functions
   ../gpencil_modifiers_legacy
   ../gpu
   ../ikplugin
@@ -482,7 +481,7 @@ set(SRC
   BKE_screen.hh
   BKE_sequencer_offscreen.h
   BKE_shader_fx.h
-  BKE_shrinkwrap.h
+  BKE_shrinkwrap.hh
   BKE_softbody.h
   BKE_sound.h
   BKE_speaker.h
@@ -502,9 +501,9 @@ set(SRC
   BKE_tracking.h
   BKE_type_conversions.hh
   BKE_undo_system.h
-  BKE_unit.h
-  BKE_vfont.h
-  BKE_vfontdata.h
+  BKE_unit.hh
+  BKE_vfont.hh
+  BKE_vfontdata.hh
   BKE_viewer_path.hh
   BKE_volume.hh
   BKE_volume_openvdb.hh
@@ -547,7 +546,7 @@ set(LIB
   PRIVATE bf::dna
   bf_draw
   PRIVATE bf::extern::curve_fit_nd
-  bf_functions
+  PRIVATE bf::functions
   bf_gpencil_modifiers_legacy
   bf_gpu
   bf_ikplugin
@@ -639,8 +638,8 @@ endif()
 
 if(WITH_CODEC_FFMPEG)
   list(APPEND SRC
-    intern/writeffmpeg.c
-    BKE_writeffmpeg.h
+    intern/writeffmpeg.cc
+    BKE_writeffmpeg.hh
   )
   list(APPEND INC
     ../../../intern/ffmpeg
