@@ -213,6 +213,19 @@ void Ri::export_options([[maybe_unused]] Scene_Entity &filter,
   float fov = camera.parameters.get_one_float("fov", 45.f);
   cam->set_fov(radians(fov));
 
+  // Set Depth of Field
+  float fstop = camera.parameters.get_one_float("fStop", 9.999e37);
+  if (fstop < 1e30) {
+    float focaldistance = camera.parameters.get_one_float("focalDistance", 0);
+    float focallength = camera.parameters.get_one_float("focalLength", 0);
+    int blades = camera.parameters.get_one_int("apertureNSides", 0);
+    float apertureAngle = camera.parameters.get_one_float("apertureAngle", 0);
+    cam->set_focaldistance(focaldistance);
+    cam->set_aperturesize(focallength / (2.0 * fstop ));
+    cam->set_blades(blades);
+    cam->set_bladesrotation(apertureAngle);
+  }
+  
   // Set screen window
   auto screen_window = camera.parameters.get_float_array("ScreenWindow");
   cam->set_viewplane_left(screen_window[0]);
