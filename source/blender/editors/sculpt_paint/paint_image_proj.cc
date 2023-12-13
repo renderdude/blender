@@ -61,7 +61,7 @@
 #include "BKE_image.h"
 #include "BKE_layer.h"
 #include "BKE_lib_id.h"
-#include "BKE_main.h"
+#include "BKE_main.hh"
 #include "BKE_material.h"
 #include "BKE_mesh.hh"
 #include "BKE_mesh_mapping.hh"
@@ -106,7 +106,7 @@
 
 #include "IMB_colormanagement.h"
 
-//#include "bmesh_tools.h"
+//#include "bmesh_tools.hh"
 
 #include "paint_intern.hh"
 
@@ -6415,7 +6415,7 @@ bool ED_paint_proj_mesh_data_check(Scene *scene,
                                    bool *r_has_tex,
                                    bool *r_has_stencil)
 {
-  Mesh *me;
+  Mesh *mesh;
   int layernum;
   ImagePaintSettings *imapaint = &scene->toolsettings->imapaint;
   Brush *br = BKE_paint_brush(&imapaint->paint);
@@ -6466,8 +6466,8 @@ bool ED_paint_proj_mesh_data_check(Scene *scene,
     }
   }
 
-  me = BKE_mesh_from_object(ob);
-  layernum = CustomData_number_of_layers(&me->loop_data, CD_PROP_FLOAT2);
+  mesh = BKE_mesh_from_object(ob);
+  layernum = CustomData_number_of_layers(&mesh->loop_data, CD_PROP_FLOAT2);
 
   if (layernum == 0) {
     has_uvs = false;

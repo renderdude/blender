@@ -73,8 +73,8 @@
 #include "BKE_lib_id.h"
 #include "BKE_lib_override.hh"
 #include "BKE_lib_query.h"
-#include "BKE_lib_remap.h"
-#include "BKE_main.h" /* for Main */
+#include "BKE_lib_remap.hh"
+#include "BKE_main.hh" /* for Main */
 #include "BKE_main_idmap.hh"
 #include "BKE_main_namemap.hh"
 #include "BKE_material.h"
@@ -99,7 +99,6 @@
 #include "BLO_readfile.h"
 #include "BLO_undofile.hh"
 
-#include "SEQ_clipboard.hh"
 #include "SEQ_iterator.hh"
 #include "SEQ_modifier.hh"
 #include "SEQ_sequencer.hh"

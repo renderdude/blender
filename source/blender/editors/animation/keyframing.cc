@@ -46,7 +46,7 @@
 #include "ED_screen.hh"
 
 #include "ANIM_animdata.hh"
-#include "ANIM_bone_collections.h"
+#include "ANIM_bone_collections.hh"
 #include "ANIM_fcurve.hh"
 #include "ANIM_keyframing.hh"
 #include "ANIM_rna.hh"
@@ -156,29 +156,6 @@ bAction *ED_id_action_ensure(Main *bmain, ID *id)
   return adt->action;
 }
 
-/** Helper for #update_autoflags_fcurve(). */
-void update_autoflags_fcurve_direct(FCurve *fcu, PropertyRNA *prop)
-{
-  /* set additional flags for the F-Curve (i.e. only integer values) */
-  fcu->flag &= ~(FCURVE_INT_VALUES | FCURVE_DISCRETE_VALUES);
-  switch (RNA_property_type(prop)) {
-    case PROP_FLOAT:
-      /* do nothing */
-      break;
-    case PROP_INT:
-      /* do integer (only 'whole' numbers) interpolation between all points */
-      fcu->flag |= FCURVE_INT_VALUES;
-      break;
-    default:
-      /* do 'discrete' (i.e. enum, boolean values which cannot take any intermediate
-       * values at all) interpolation between all points
-       *    - however, we must also ensure that evaluated values are only integers still
-       */
-      fcu->flag |= (FCURVE_DISCRETE_VALUES | FCURVE_INT_VALUES);
-      break;
-  }
-}
-
 void update_autoflags_fcurve(FCurve *fcu, bContext *C, ReportList *reports, PointerRNA *ptr)
 {
   PointerRNA tmp_ptr;
@@ -205,7 +182,7 @@ void update_autoflags_fcurve(FCurve *fcu, bContext *C, ReportList *reports, Poin
   }
 
   /* update F-Curve flags */
-  update_autoflags_fcurve_direct(fcu, prop);
+  blender::animrig::update_autoflags_fcurve_direct(fcu, prop);
 
   if (old_flag != fcu->flag) {
     /* Same as if keyframes had been changed */

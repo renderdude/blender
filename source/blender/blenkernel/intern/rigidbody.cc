@@ -40,7 +40,7 @@
 #include "BKE_effect.h"
 #include "BKE_global.h"
 #include "BKE_layer.h"
-#include "BKE_main.h"
+#include "BKE_main.hh"
 #include "BKE_mesh.hh"
 #include "BKE_mesh_runtime.hh"
 #include "BKE_object.hh"
@@ -67,7 +67,7 @@ struct rbCollisionShape;
 struct rbConstraint;
 struct rbDynamicsWorld;
 struct rbRigidBody;
-#endif
+#endif /* !WITH_BULLET */
 
 /* ************************************** */
 /* Memory Management */
