@@ -211,6 +211,8 @@ typedef struct bNodeSocketType {
   const CPPTypeHandle *geometry_nodes_cpp_type;
   /* Get geometry nodes cpp value. */
   SocketGetGeometryNodesCPPValueFunction get_geometry_nodes_cpp_value;
+  /* Default value for this socket type. */
+  const void *geometry_nodes_default_cpp_value;
 } bNodeSocketType;
 
 typedef void *(*NodeInitExecFunction)(struct bNodeExecContext *context,
@@ -1322,6 +1324,7 @@ void BKE_nodetree_remove_layer_n(struct bNodeTree *ntree, struct Scene *scene, i
 #define GEO_NODE_INPUT_NAMED_LAYER_SELECTION 2117
 #define GEO_NODE_INDEX_SWITCH 2118
 #define GEO_NODE_INPUT_ACTIVE_CAMERA 2119
+#define GEO_NODE_BAKE 2120
 
 /** \} */
 

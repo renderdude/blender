@@ -1307,6 +1307,7 @@ static void drw_sculpt_get_frustum_planes(const Object *ob, float planes[6][4])
 
 static void drw_sculpt_generate_calls(DRWSculptCallbackData *scd)
 {
+  using namespace blender;
   /* PBVH should always exist for non-empty meshes, created by depsgraph eval. */
   PBVH *pbvh = (scd->ob->sculpt) ? scd->ob->sculpt->pbvh : nullptr;
   if (!pbvh) {
@@ -1331,12 +1332,12 @@ static void drw_sculpt_generate_calls(DRWSculptCallbackData *scd)
   if (p && (p->flags & PAINT_SCULPT_DELAY_UPDATES)) {
     update_frustum.planes = update_planes;
     update_frustum.num_planes = 6;
-    BKE_pbvh_get_frustum_planes(pbvh, &update_frustum);
+    bke::pbvh::get_frustum_planes(pbvh, &update_frustum);
     if (!navigating) {
       drw_sculpt_get_frustum_planes(scd->ob, update_planes);
       update_frustum.planes = update_planes;
       update_frustum.num_planes = 6;
-      BKE_pbvh_set_frustum_planes(pbvh, &update_frustum);
+      bke::pbvh::set_frustum_planes(pbvh, &update_frustum);
     }
   }
   else {
@@ -1363,9 +1364,9 @@ static void drw_sculpt_generate_calls(DRWSculptCallbackData *scd)
   }
 
   Mesh *mesh = static_cast<Mesh *>(scd->ob->data);
-  BKE_pbvh_update_normals(pbvh, mesh->runtime->subdiv_ccg.get());
+  bke::pbvh::update_normals(*pbvh, mesh->runtime->subdiv_ccg.get());
 
-  BKE_pbvh_draw_cb(
+  bke::pbvh::draw_cb(
       *mesh,
       pbvh,
       update_only_visible,

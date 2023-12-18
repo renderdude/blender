@@ -34,10 +34,6 @@ struct Mesh;
 struct Object;
 struct Scene;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /* TODO: Move to `BKE_mesh_types.hh` when possible. */
 typedef enum eMeshBatchDirtyMode {
   BKE_MESH_BATCH_DIRTY_ALL = 0,
@@ -414,8 +410,8 @@ bool BKE_mesh_center_of_volume(const struct Mesh *mesh, float r_cent[3]);
  */
 void BKE_mesh_calc_volume(const float (*vert_positions)[3],
                           int mverts_num,
-                          const struct MLoopTri *mlooptri,
-                          int looptri_num,
+                          const struct MLoopTri *looptris,
+                          int looptris_num,
                           const int *corner_verts,
                           float *r_volume,
                           float r_center[3]);
@@ -558,9 +554,5 @@ void BKE_mesh_debug_print(const struct Mesh *mesh) ATTR_NONNULL(1);
 /* -------------------------------------------------------------------- */
 /** \name Inline Mesh Data Access
  * \{ */
-
-#ifdef __cplusplus
-}
-#endif
 
 /** \} */

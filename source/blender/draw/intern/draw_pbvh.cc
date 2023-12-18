@@ -127,7 +127,7 @@ void extract_data_vert_faces(const PBVH_GPU_Args &args, const Span<T> attribute,
   using Converter = AttributeConverter<T>;
   using VBOType = typename Converter::VBOType;
   const Span<int> corner_verts = args.corner_verts;
-  const Span<MLoopTri> looptris = args.mlooptri;
+  const Span<MLoopTri> looptris = args.looptris;
   const Span<int> looptri_faces = args.looptri_faces;
   const Span<bool> hide_poly = args.hide_poly;
 
@@ -170,7 +170,7 @@ void extract_data_corner_faces(const PBVH_GPU_Args &args, const Span<T> attribut
   using Converter = AttributeConverter<T>;
   using VBOType = typename Converter::VBOType;
 
-  const Span<MLoopTri> looptris = args.mlooptri;
+  const Span<MLoopTri> looptris = args.looptris;
   const Span<int> looptri_faces = args.looptri_faces;
   const Span<bool> hide_poly = args.hide_poly;
 
@@ -351,11 +351,10 @@ struct PBVHBatches {
         break;
       }
       case PBVH_GRIDS: {
-        count = BKE_pbvh_count_grid_quads(args.subdiv_ccg->grid_hidden,
-                                          args.grid_indices.data(),
-                                          args.grid_indices.size(),
-                                          args.ccg_key.grid_size,
-                                          args.ccg_key.grid_size);
+        count = bke::pbvh::count_grid_quads(args.subdiv_ccg->grid_hidden,
+                                            args.grid_indices,
+                                            args.ccg_key.grid_size,
+                                            args.ccg_key.grid_size);
 
         break;
       }
@@ -460,7 +459,7 @@ struct PBVHBatches {
       }
       else {
         for (const int i : IndexRange(3)) {
-          const int vert = args.corner_verts[args.mlooptri[looptri_i].tri[i]];
+          const int vert = args.corner_verts[args.looptris[looptri_i].tri[i]];
           *data = normal_float_to_short(args.vert_normals[vert]);
           data++;
         }
@@ -685,7 +684,7 @@ struct PBVHBatches {
                                                                    ATTR_DOMAIN_POINT)) {
             const VArraySpan<float> mask_span(mask);
             const Span<int> corner_verts = args.corner_verts;
-            const Span<MLoopTri> looptris = args.mlooptri;
+            const Span<MLoopTri> looptris = args.looptris;
             const Span<int> looptri_faces = args.looptri_faces;
             const Span<bool> hide_poly = args.hide_poly;
 
@@ -1045,7 +1044,7 @@ struct PBVHBatches {
       }
 
       const int3 real_edges = bke::mesh::looptri_get_real_edges(
-          edges, args.corner_verts, args.corner_edges, args.mlooptri[looptri_i]);
+          edges, args.corner_verts, args.corner_edges, args.looptris[looptri_i]);
 
       if (real_edges[0] != -1) {
         edge_count++;
@@ -1069,7 +1068,7 @@ struct PBVHBatches {
       }
 
       const int3 real_edges = bke::mesh::looptri_get_real_edges(
-          edges, args.corner_verts, args.corner_edges, args.mlooptri[looptri_i]);
+          edges, args.corner_verts, args.corner_edges, args.looptris[looptri_i]);
 
       if (real_edges[0] != -1) {
         GPU_indexbuf_add_line_verts(&elb_lines, vertex_i, vertex_i + 1);
@@ -1163,8 +1162,8 @@ struct PBVHBatches {
 
     const CCGKey *key = &args.ccg_key;
 
-    uint visible_quad_len = BKE_pbvh_count_grid_quads(
-        grid_hidden, args.grid_indices.data(), totgrid, key->grid_size, display_gridsize);
+    uint visible_quad_len = bke::pbvh::count_grid_quads(
+        grid_hidden, args.grid_indices, key->grid_size, display_gridsize);
 
     GPU_indexbuf_init(&elb, GPU_PRIM_TRIS, 2 * visible_quad_len, INT_MAX);
     GPU_indexbuf_init(&elb_lines,

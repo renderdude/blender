@@ -287,10 +287,10 @@ static void extract_range_iter_looptri_mesh(void *__restrict userdata,
 
   const ExtractorIterData *data = static_cast<ExtractorIterData *>(userdata);
   const MeshRenderData &mr = *data->mr;
-  const MLoopTri *mlt = &((const MLoopTri *)data->elems)[iter];
+  const MLoopTri *lt = &((const MLoopTri *)data->elems)[iter];
   for (const ExtractorRunData &run_data : data->extractors) {
     run_data.extractor->iter_looptri_mesh(
-        mr, mlt, iter, POINTER_OFFSET(extract_data, run_data.data_offset));
+        mr, lt, iter, POINTER_OFFSET(extract_data, run_data.data_offset));
   }
 }
 
@@ -699,6 +699,7 @@ void mesh_buffer_cache_create_requested(TaskGraph *task_graph,
   mr->use_hide = use_hide;
   mr->use_subsurf_fdots = mr->mesh && !mr->mesh->runtime->subsurf_face_dot_tags.is_empty();
   mr->use_final_mesh = do_final;
+  mr->use_simplify_normals = (scene->r.mode & R_SIMPLIFY) && (scene->r.mode & R_SIMPLIFY_NORMALS);
 
 #ifdef DEBUG_TIME
   double rdata_end = PIL_check_seconds_timer();

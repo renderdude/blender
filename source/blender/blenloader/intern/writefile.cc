@@ -762,9 +762,6 @@ static void writelist_id(WriteData *wd, int filecode, const char *structname, co
 #define writestruct(wd, filecode, struct_id, nr, adr) \
   writestruct_nr(wd, filecode, SDNA_TYPE_FROM_STRUCT(struct_id), nr, adr)
 
-#define writelist(wd, filecode, struct_id, lb) \
-  writelist_nr(wd, filecode, SDNA_TYPE_FROM_STRUCT(struct_id), lb)
-
 /** \} */
 
 /* -------------------------------------------------------------------- */
@@ -1237,11 +1234,11 @@ static bool write_file_handle(Main *mainvar,
            * The main reason is that scenes typically have no users, so most linked scene would be
            * systematically 'lost' on file save.
            *
-           * While this change re-indtroduces the 'no-more-used data laying around in files for
+           * While this change re-introduces the 'no-more-used data laying around in files for
            * ever' issue when it comes to scenes, this solution seems to be the most sensible one
            * for the time being, considering that:
            *   - Scene are a top-level container.
-           *   - Linked scenes are typically explicitely linked by the user.
+           *   - Linked scenes are typically explicitly linked by the user.
            *   - Cases where scenes would be indirectly linked by other data (e.g. when linking a
            *     collection or material) can be considered at the very least as not following sane
            *     practice in data dependencies.

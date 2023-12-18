@@ -143,6 +143,7 @@ void RayTraceModule::sync()
     inst_.bind_uniform_data(&pass);
     inst_.irradiance_cache.bind_resources(pass);
     inst_.reflection_probes.bind_resources(pass);
+    inst_.sampling.bind_resources(pass);
     pass.dispatch(raytrace_tracing_dispatch_buf_);
     pass.barrier(GPU_BARRIER_SHADER_IMAGE_ACCESS);
   }
@@ -276,7 +277,7 @@ RayTraceResult RayTraceModule::render(RayTraceBuffer &rt_buffer,
   RaytraceEEVEE options = ray_tracing_options_;
 
   bool use_horizon_scan = options.screen_trace_max_roughness < 1.0f;
-  if ((active_closures == CLOSURE_REFRACTION) || (active_closures == CLOSURE_NONE)) {
+  if (ELEM(active_closures, CLOSURE_REFRACTION, CLOSURE_NONE)) {
     /* Disable horizon scan if there is only a refraction closure. Avoid the setup cost. */
     use_horizon_scan = false;
   }

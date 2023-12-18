@@ -43,7 +43,7 @@ struct PBVHNode {
   /* List of primitives for this node. Semantics depends on
    * PBVH type:
    *
-   * - PBVH_FACES: Indices into the PBVH.looptri array.
+   * - PBVH_FACES: Indices into the #PBVH::looptris array.
    * - PBVH_GRIDS: Multires grid indices.
    * - PBVH_BMESH: Unused.  See PBVHNode.bm_faces.
    *
@@ -97,9 +97,6 @@ struct PBVHNode {
   /* Used for ray-casting: how close the bounding-box is to the ray point. */
   float tmin = 0.0f;
 
-  /* Scalar displacements for sculpt mode's layer brush. */
-  float *layer_disp = nullptr;
-
   blender::Vector<PBVHProxyNode> proxies;
 
   /* Dyntopo */
@@ -128,8 +125,6 @@ struct PBVHNode {
   int debug_draw_gen = 0;
 };
 
-typedef struct PBVHBMeshLog PBVHBMeshLog;
-
 struct PBVH {
   PBVHPublic header;
 
@@ -139,7 +134,6 @@ struct PBVH {
   blender::Array<int> prim_indices;
   int totprim;
   int totvert;
-  int faces_num; /* Do not use directly, use BKE_pbvh_num_faces. */
 
   int leaf_limit;
   int pixel_leaf_limit;
@@ -163,7 +157,7 @@ struct PBVH {
   blender::OffsetIndices<int> faces;
   blender::Span<int> corner_verts;
   /* Owned by the #PBVH, because after deformations they have to be recomputed. */
-  blender::Array<MLoopTri> looptri;
+  blender::Array<MLoopTri> looptris;
   blender::Span<int> looptri_faces;
 
   /* Grid Data */
@@ -197,10 +191,13 @@ struct PBVH {
   CustomDataLayer *color_layer;
   eAttrDomain color_domain;
 
-  bool is_drawing;
+  /* Initialize this to true, instead of waiting for a draw engine
+   * to set it. Prevents a crash in draw manager instancing code.
+   * TODO: This is fragile, another solution should be found. */
+  bool is_drawing = true;
 
   /* Used by DynTopo to invalidate the draw cache. */
-  bool draw_cache_invalid;
+  bool draw_cache_invalid = true;
 
   PBVHGPUFormat *vbo_id;
 
@@ -209,7 +206,8 @@ struct PBVH {
 
 /* pbvh.cc */
 
-void pbvh_grow_nodes(PBVH *bvh, int totnode);
+namespace blender::bke::pbvh {
+
 bool ray_face_intersection_quad(const float ray_start[3],
                                 IsectRayPrecalc *isect_precalc,
                                 const float t0[3],
@@ -242,25 +240,27 @@ bool ray_face_nearest_tri(const float ray_start[3],
 
 /* pbvh_bmesh.cc */
 
-bool pbvh_bmesh_node_raycast(PBVHNode *node,
-                             const float ray_start[3],
-                             const float ray_normal[3],
-                             IsectRayPrecalc *isect_precalc,
-                             float *dist,
-                             bool use_original,
-                             PBVHVertRef *r_active_vertex,
-                             float *r_face_normal);
-bool pbvh_bmesh_node_nearest_to_ray(PBVHNode *node,
-                                    const float ray_start[3],
-                                    const float ray_normal[3],
-                                    float *depth,
-                                    float *dist_sq,
-                                    bool use_original);
+bool bmesh_node_raycast(PBVHNode *node,
+                        const float ray_start[3],
+                        const float ray_normal[3],
+                        IsectRayPrecalc *isect_precalc,
+                        float *dist,
+                        bool use_original,
+                        PBVHVertRef *r_active_vertex,
+                        float *r_face_normal);
+bool bmesh_node_nearest_to_ray(PBVHNode *node,
+                               const float ray_start[3],
+                               const float ray_normal[3],
+                               float *depth,
+                               float *dist_sq,
+                               bool use_original);
 
-void pbvh_bmesh_normals_update(blender::Span<PBVHNode *> nodes);
+void bmesh_normals_update(Span<PBVHNode *> nodes);
 
 /* pbvh_pixels.hh */
 
-void pbvh_node_pixels_free(PBVHNode *node);
-void pbvh_pixels_free(PBVH *pbvh);
-void pbvh_free_draw_buffers(PBVH &pbvh, PBVHNode *node);
+void node_pixels_free(PBVHNode *node);
+void pixels_free(PBVH *pbvh);
+void free_draw_buffers(PBVH &pbvh, PBVHNode *node);
+
+}  // namespace blender::bke::pbvh

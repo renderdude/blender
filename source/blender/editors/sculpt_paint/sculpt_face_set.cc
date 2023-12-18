@@ -454,8 +454,6 @@ void do_draw_face_sets_brush(Sculpt *sd, Object *ob, Span<PBVHNode *> nodes)
 
   BKE_curvemapping_init(brush->curve);
 
-  TaskParallelSettings settings;
-  BKE_pbvh_parallel_range_settings(&settings, true, nodes.size());
   if (ss->cache->alt_smooth) {
     SCULPT_boundary_info_ensure(ob);
     for (int i = 0; i < 4; i++) {
@@ -497,9 +495,8 @@ static void face_sets_update(Object &object,
   threading::parallel_for(nodes.index_range(), 1, [&](const IndexRange range) {
     TLS &tls = all_tls.local();
     for (PBVHNode *node : nodes.slice(range)) {
-      tls.face_indices.clear();
-      BKE_pbvh_node_calc_face_indices(pbvh, *node, tls.face_indices);
-      const Span<int> faces = tls.face_indices;
+      const Span<int> faces = bke::pbvh::node_face_indices_calc_mesh(
+          pbvh, *node, tls.face_indices);
 
       tls.new_face_sets.reinitialize(faces.size());
       MutableSpan<int> new_face_sets = tls.new_face_sets;
@@ -954,9 +951,8 @@ static void face_hide_update(Object &object,
   threading::parallel_for(nodes.index_range(), 1, [&](const IndexRange range) {
     TLS &tls = all_tls.local();
     for (PBVHNode *node : nodes.slice(range)) {
-      tls.face_indices.clear();
-      BKE_pbvh_node_calc_face_indices(pbvh, *node, tls.face_indices);
-      const Span<int> faces = tls.face_indices;
+      const Span<int> faces = bke::pbvh::node_face_indices_calc_mesh(
+          pbvh, *node, tls.face_indices);
 
       tls.new_hide.reinitialize(faces.size());
       MutableSpan<bool> new_hide = tls.new_hide;
@@ -1080,7 +1076,7 @@ static int sculpt_face_set_change_visibility_exec(bContext *C, wmOperator *op)
 
   undo::push_end(&object);
 
-  BKE_pbvh_update_visibility(ss->pbvh);
+  bke::pbvh::update_visibility(*ss->pbvh);
   BKE_sculpt_hide_poly_pointer_update(object);
 
   SCULPT_topology_islands_invalidate(object.sculpt);
