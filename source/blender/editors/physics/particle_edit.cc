@@ -30,6 +30,7 @@
 
 #include "BKE_bvhutils.hh"
 #include "BKE_context.hh"
+#include "BKE_customdata.hh"
 #include "BKE_global.h"
 #include "BKE_layer.h"
 #include "BKE_main.hh"
@@ -535,7 +536,8 @@ static bool PE_create_shape_tree(PEData *data, Object *shapeob)
     return false;
   }
 
-  return (BKE_bvhtree_from_mesh_get(&data->shape_bvh, mesh, BVHTREE_FROM_LOOPTRIS, 4) != nullptr);
+  return (BKE_bvhtree_from_mesh_get(&data->shape_bvh, mesh, BVHTREE_FROM_CORNER_TRIS, 4) !=
+          nullptr);
 }
 
 static void PE_free_shape_tree(PEData *data)
