@@ -54,6 +54,7 @@
 #include "DNA_object_types.h"
 #include "DNA_scene_types.h"
 #include "DNA_screen_types.h"
+#include "DNA_sequence_types.h"
 #include "DNA_space_types.h"
 #include "DNA_userdef_types.h"
 #include "DNA_windowmanager_types.h"
@@ -92,6 +93,7 @@
 
 #include "IMB_imbuf.h"
 #include "IMB_imbuf_types.h"
+#include "IMB_metadata.h"
 #include "IMB_thumbs.h"
 
 #include "ED_asset.hh"
@@ -127,11 +129,11 @@
 
 #include "WM_api.hh"
 #include "WM_message.hh"
-#include "WM_toolsystem.h"
+#include "WM_toolsystem.hh"
 #include "WM_types.hh"
 
 #include "wm.hh"
-#include "wm_event_system.h"
+#include "wm_event_system.hh"
 #include "wm_files.hh"
 #include "wm_window.hh"
 
@@ -1722,6 +1724,12 @@ static ImBuf *blend_file_thumb_from_screenshot(bContext *C, BlendThumbnail **r_t
     /* File-system thumbnail image can be 256x256. */
     IMB_scaleImBuf(ibuf, ex * 2, ey * 2);
 
+    /* Save metadata for quick access. */
+    char version_st[10] = {0};
+    SNPRINTF(version_st, "%d.%01d", BLENDER_VERSION / 100, BLENDER_VERSION % 100);
+    IMB_metadata_ensure(&ibuf->metadata);
+    IMB_metadata_set_field(ibuf->metadata, "Thumb::Blender::Version", version_st);
+
     /* Thumbnail inside blend should be 128x128. */
     ImBuf *thumb_ibuf = IMB_dupImBuf(ibuf);
     IMB_scaleImBuf(thumb_ibuf, ex, ey);
@@ -1831,6 +1839,13 @@ static ImBuf *blend_file_thumb_from_camera(const bContext *C,
     /* dirty oversampling */
     ImBuf *thumb_ibuf;
     thumb_ibuf = IMB_dupImBuf(ibuf);
+
+    /* Save metadata for quick access. */
+    char version_st[10] = {0};
+    SNPRINTF(version_st, "%d.%01d", BLENDER_VERSION / 100, BLENDER_VERSION % 100);
+    IMB_metadata_ensure(&ibuf->metadata);
+    IMB_metadata_set_field(ibuf->metadata, "Thumb::Blender::Version", version_st);
+
     /* BLEN_THUMB_SIZE is size of thumbnail inside blend file: 128x128. */
     IMB_scaleImBuf(thumb_ibuf, BLEN_THUMB_SIZE, BLEN_THUMB_SIZE);
     thumb = BKE_main_thumbnail_from_imbuf(nullptr, thumb_ibuf);
@@ -3142,7 +3157,8 @@ static int wm_recover_last_session_invoke(bContext *C, wmOperator *op, const wmE
   wm_open_init_use_scripts(op, false);
 
   if (wm_operator_close_file_dialog_if_needed(
-          C, op, wm_recover_last_session_after_dialog_callback)) {
+          C, op, wm_recover_last_session_after_dialog_callback))
+  {
     return OPERATOR_INTERFACE;
   }
   return wm_recover_last_session_exec(C, op);
@@ -3552,6 +3568,42 @@ void WM_OT_save_mainfile(wmOperatorType *ot)
                          "Save the current Blender file with a numerically incremented name that "
                          "does not overwrite any existing files");
   RNA_def_property_flag(prop, PropertyFlag(PROP_HIDDEN | PROP_SKIP_SAVE));
+}
+
+/** \} */
+
+/* -------------------------------------------------------------------- */
+/** \name Clear Recent Files List Operator
+ * \{ */
+
+static void wm_clear_recent_files_warning(bContext * /*C*/,
+                                          wmOperator * /*op*/,
+                                          wmWarningDetails *warning)
+{
+  STRNCPY(warning->message, IFACE_("Remove all items from the Recent Files list"));
+  STRNCPY(warning->confirm_button, IFACE_("Remove All"));
+  warning->position = WM_WARNING_POSITION_CENTER;
+  warning->size = WM_WARNING_SIZE_LARGE;
+  warning->cancel_default = true;
+}
+
+static int wm_clear_recent_files_exec(bContext * /*C*/, wmOperator * /*op*/)
+{
+  wm_history_files_free();
+  wm_history_file_write();
+
+  return OPERATOR_FINISHED;
+}
+
+void WM_OT_clear_recent_files(wmOperatorType *ot)
+{
+  ot->name = "Clear Recent Files List";
+  ot->idname = "WM_OT_clear_recent_files";
+  ot->description = "Clear the Recent Files List";
+
+  ot->invoke = WM_operator_confirm;
+  ot->exec = wm_clear_recent_files_exec;
+  ot->warning = wm_clear_recent_files_warning;
 }
 
 /** \} */
