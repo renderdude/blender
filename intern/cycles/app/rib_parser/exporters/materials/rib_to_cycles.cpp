@@ -531,7 +531,11 @@ void PxrSurfacetoPrincipled::update_parameters(Parameter_Dictionary const &param
       ShaderOutput *hsv_output = color_hsv_node->output(ustring("Color"));
       _graph->connect(hsv_output, mix_input);
       input = find_socket("b", color_mix_node);
-      color_mix_node->set(*input, make_float3(gain));
+      color_mix_node->set(*input, make_float3(1.0));
+      input = find_socket("fac", color_mix_node);
+      color_mix_node->set(*input, gain);
+      input = find_socket("blend_type", color_mix_node);
+      color_mix_node->set(*input, ccl::NodeMix::NODE_MIX_MUL);
       if (param->storage != Container_Type::Reference) {
         input = find_socket("color", color_hsv_node);
         color_hsv_node->set(
