@@ -20,7 +20,7 @@ bool create_shader_node(std::string const &nodeType,
   bool check_if_osl = false;
   bool result = true;
   if (const NodeType *node_type = NodeType::find(ustring(nodeType))) {
-    *node = create_shader(node_type);
+    *node = create_shader(shader, node_type);
   }
   else {
     check_if_osl = true;
