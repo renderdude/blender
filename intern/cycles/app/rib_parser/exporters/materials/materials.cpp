@@ -39,7 +39,7 @@ class RIBtoCycles {
           {"glassIor", ustring("ior")},
           {"refractionGain", ustring("transmission")},
           {"glassRoughness", ustring("transmission_roughness")},
-          {"glowGain", ustring("emission")},
+          {"glowGain", ustring("emission_color")},
           {"bumpNormal", ustring("normal")},
       }};
 #else
@@ -98,7 +98,7 @@ class RIBtoCycles {
                                                //{ "", ustring("ior")},
                                                //{ "", ustring("transmission")},
                                                //{ "", ustring("anisotropic_rotation")},
-                                               {"emitColor", ustring("emission")},
+                                               {"emitColor", ustring("emission_color")},
                                                //{ "", ustring("emission_strength")},
                                            }};
 
@@ -123,7 +123,7 @@ class RIBtoCycles {
           {"ior", ustring("ior")},
           {"diffTrans", ustring("transmission")},
           //{ "", ustring("anisotropic_rotation")},
-          {"emitColor", ustring("emission")},
+          {"emitColor", ustring("emission_color")},
           //{ "", ustring("emission_strength")},
       }};
 
