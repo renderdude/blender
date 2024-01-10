@@ -515,14 +515,14 @@ void PxrSurfacetoPrincipled::update_parameters(Parameter_Dictionary const &param
     updated_param.payload = vector<float>();
     // diffuse gain
     float gain = 1.0;
-    param = _parameters["diffuseGain"];
-    if (param) {
+    if (_parameters.find("diffuseGain") != _parameters.end()) {
+      param = _parameters["diffuseGain"];
       gain = param->floats()[0];
     }
-    param = _parameters["diffuseColor"];
     ShaderNode *color_hsv_node = nullptr;
     ShaderNode *color_mix_node = nullptr;
-    if (param) {
+    if (_parameters.find("diffuseColor") != _parameters.end()) {
+      param = _parameters["diffuseColor"];
       color_hsv_node = _graph->create_node<HSVNode>();
       _graph->add(color_hsv_node);
       color_mix_node = _graph->create_node<MixColorNode>();
@@ -530,6 +530,11 @@ void PxrSurfacetoPrincipled::update_parameters(Parameter_Dictionary const &param
       ShaderInput *mix_input = color_mix_node->input(ustring("A"));
       ShaderOutput *hsv_output = color_hsv_node->output(ustring("Color"));
       _graph->connect(hsv_output, mix_input);
+      // For the mix node
+      // 'a' is the output of the HSV node
+      // 'b' is white
+      // 'fac' is the gain
+      // and the mode is multiply
       input = find_socket("b", color_mix_node);
       color_mix_node->set(*input, make_float3(1.0));
       input = find_socket("fac", color_mix_node);
@@ -624,9 +629,11 @@ void PxrSurfacetoPrincipled::update_parameters(Parameter_Dictionary const &param
     }
 
     // Specular
-    if ((param = _parameters["specularFresnelMode"])) {
+    if (_parameters.find("specularFresnelMode") != _parameters.end()) {
+      param = _parameters["specularFresnelMode"];
       if (param->ints()[0] == 0) {  // Artistic Mode
-        if ((param = _parameters["specularFaceColor"])) {
+        if (_parameters.find("specularFaceColor") != _parameters.end()) {
+          param = _parameters["specularFaceColor"];
           updated_param.floats().clear();
           updated_param.type = Parameter_Type::Real;
           updated_param.add_float(1.0);
@@ -682,7 +689,8 @@ void PxrDisneytoPrincipled::update_parameters(Parameter_Dictionary const &parame
   const SocketType *input;
 
   updated_param.payload = vector<float>();
-  if ((param = _parameters["emitColor"])) {
+  if (_parameters.find("emitColor") != _parameters.end()) {
+    param = _parameters["emitColor"];
     if (param->storage != Container_Type::Reference) {
       updated_param.type = Parameter_Type::Real;
       float3 hsv = rgb_to_hsv(
@@ -729,7 +737,8 @@ void PxrDisneyBsdftoPrincipled::update_parameters(Parameter_Dictionary const &pa
   const SocketType *input;
 
   updated_param.payload = vector<float>();
-  if ((param = _parameters["emitColor"])) {
+  if (_parameters.find("emitColor") != _parameters.end()) {
+    param = _parameters["emitColor"];
     if (param->storage != Container_Type::Reference) {
       updated_param.type = Parameter_Type::Real;
       float3 hsv = rgb_to_hsv(
@@ -739,7 +748,8 @@ void PxrDisneyBsdftoPrincipled::update_parameters(Parameter_Dictionary const &pa
       set_node_value(_nodes.back(), *input, &updated_param);
     }
   }
-  if ((param = _parameters["diffTrans"])) {
+  if (_parameters.find("diffTrans") != _parameters.end()) {
+    param = _parameters["diffTrans"];
     if (param->storage != Container_Type::Reference) {
       updated_param.floats().clear();
       updated_param.type = Parameter_Type::Real;
@@ -749,7 +759,8 @@ void PxrDisneyBsdftoPrincipled::update_parameters(Parameter_Dictionary const &pa
       set_node_value(_nodes.back(), *input, &updated_param);
     }
   }
-  if ((param = _parameters["specReflectScale"])) {
+  if (_parameters.find("specReflectScale") != _parameters.end()) {
+    param = _parameters["specReflectScale"];
     updated_param.floats().clear();
     updated_param.type = Parameter_Type::Color;
     updated_param.add_float(1.0);
