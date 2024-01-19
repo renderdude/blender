@@ -35,6 +35,7 @@
 #include "BLI_span.hh"
 #include "BLI_string.h"
 #include "BLI_task.hh"
+#include "BLI_time.h"
 #include "BLI_utildefines.h"
 #include "BLI_vector.hh"
 #include "BLI_virtual_array.hh"
@@ -51,7 +52,7 @@
 #include "BKE_idtype.h"
 #include "BKE_key.h"
 #include "BKE_lib_id.hh"
-#include "BKE_lib_query.h"
+#include "BKE_lib_query.hh"
 #include "BKE_main.hh"
 #include "BKE_material.h"
 #include "BKE_mesh.hh"
@@ -61,8 +62,6 @@
 #include "BKE_modifier.hh"
 #include "BKE_multires.hh"
 #include "BKE_object.hh"
-
-#include "PIL_time.h"
 
 #include "DEG_depsgraph.hh"
 #include "DEG_depsgraph_query.hh"
@@ -96,7 +95,7 @@ static void mesh_init_data(ID *id)
 
   mesh->runtime = new blender::bke::MeshRuntime();
 
-  mesh->face_sets_color_seed = BLI_hash_int(PIL_check_seconds_timer_i() & UINT_MAX);
+  mesh->face_sets_color_seed = BLI_hash_int(BLI_check_seconds_timer_i() & UINT_MAX);
 }
 
 static void mesh_copy_data(Main *bmain, ID *id_dst, const ID *id_src, const int flag)
@@ -644,6 +643,25 @@ MutableSpan<MDeformVert> Mesh::deform_verts_for_write()
 }
 
 namespace blender::bke {
+
+void mesh_ensure_default_color_attribute_on_add(Mesh &mesh,
+                                                const AttributeIDRef &id,
+                                                AttrDomain domain,
+                                                eCustomDataType data_type)
+{
+  if (id.is_anonymous()) {
+    return;
+  }
+  if (!(CD_TYPE_AS_MASK(data_type) & CD_MASK_COLOR_ALL) ||
+      !(ATTR_DOMAIN_AS_MASK(domain) & ATTR_DOMAIN_MASK_COLOR))
+  {
+    return;
+  }
+  if (mesh.default_color_attribute) {
+    return;
+  }
+  mesh.default_color_attribute = BLI_strdupn(id.name().data(), id.name().size());
+}
 
 static void mesh_ensure_cdlayers_primary(Mesh &mesh)
 {

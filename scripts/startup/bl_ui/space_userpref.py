@@ -109,7 +109,10 @@ class USERPREF_MT_save_load(Menu):
         if prefs.use_preferences_save:
             layout.operator("wm.save_userpref", text="Save Preferences")
         sub_revert = layout.column(align=True)
-        sub_revert.active = prefs.is_dirty
+        # NOTE: regarding `factory_startup`. To correctly show the active state of this menu item,
+        # the user preferences themselves would need to have a `factory_startup` state.
+        # Since showing an active menu item whenever factory-startup is used is not such a problem, leave this as-is.
+        sub_revert.active = prefs.is_dirty or bpy.app.factory_startup
         sub_revert.operator("wm.read_userpref", text="Revert to Saved Preferences")
 
         layout.operator_context = 'INVOKE_AREA'
@@ -579,14 +582,17 @@ class USERPREF_PT_animation_keyframes(AnimationPanel, CenterAlignMixIn, Panel):
 
         layout.prop(edit, "key_insert_channels", expand=True)
 
-        col = layout.column()
+        row = layout.row(align=True, heading="Only Insert Needed")
+        row.prop(edit, "use_keyframe_insert_needed", text="Manual", toggle=1)
+        row.prop(edit, "use_auto_keyframe_insert_needed", text="Auto", toggle=1)
+
+        col = layout.column(heading="Keyframing")
         col.prop(edit, "use_visual_keying")
-        col.prop(edit, "use_keyframe_insert_needed", text="Only Insert Needed")
 
         col = layout.column(heading="Auto-Keyframing")
+        col.prop(edit, "use_auto_keying", text="Enable in New Scenes")
         col.prop(edit, "use_auto_keying_warning", text="Show Warning")
         col.prop(edit, "use_keyframe_insert_available", text="Only Insert Available")
-        col.prop(edit, "use_auto_keying", text="Enable in New Scenes")
 
 
 class USERPREF_PT_animation_fcurves(AnimationPanel, CenterAlignMixIn, Panel):

@@ -16,7 +16,7 @@
 #include "BKE_grease_pencil.hh"
 #include "BKE_idtype.h"
 #include "BKE_lib_id.hh"
-#include "BKE_lib_query.h"
+#include "BKE_lib_query.hh"
 #include "BKE_material.h"
 #include "BKE_modifier.hh"
 #include "BKE_object.hh"
@@ -293,6 +293,7 @@ Drawing::Drawing(const Drawing &other)
   this->runtime = MEM_new<bke::greasepencil::DrawingRuntime>(__func__);
 
   this->runtime->triangles_cache = other.runtime->triangles_cache;
+  this->runtime->curve_plane_normals_cache = other.runtime->curve_plane_normals_cache;
 }
 
 Drawing::~Drawing()
@@ -357,6 +358,51 @@ Span<uint3> Drawing::triangles() const
   return this->runtime->triangles_cache.data().as_span();
 }
 
+Span<float3> Drawing::curve_plane_normals() const
+{
+  this->runtime->curve_plane_normals_cache.ensure([&](Vector<float3> &r_data) {
+    const CurvesGeometry &curves = this->strokes();
+    const Span<float3> positions = curves.positions();
+    const OffsetIndices<int> points_by_curve = curves.points_by_curve();
+
+    r_data.reinitialize(curves.curves_num());
+    threading::parallel_for(curves.curves_range(), 512, [&](const IndexRange range) {
+      for (const int curve_i : range) {
+        const IndexRange points = points_by_curve[curve_i];
+        if (points.size() < 2) {
+          r_data[curve_i] = float3(1.0f, 0.0f, 0.0f);
+          continue;
+        }
+
+        /* Calculate normal using Newell's method. */
+        float3 normal(0.0f);
+        float3 prev_point = positions[points.last()];
+        for (const int point_i : points) {
+          const float3 curr_point = positions[point_i];
+          add_newell_cross_v3_v3v3(normal, prev_point, curr_point);
+          prev_point = curr_point;
+        }
+
+        float length;
+        normal = math::normalize_and_get_length(normal, length);
+        /* Check for degenerate case where the points are on a line. */
+        if (math::is_zero(length)) {
+          for (const int point_i : points.drop_back(1)) {
+            float3 segment_vec = math::normalize(positions[point_i] - positions[point_i + 1]);
+            if (math::length_squared(segment_vec) != 0.0f) {
+              normal = float3(segment_vec.y, -segment_vec.x, 0.0f);
+              break;
+            }
+          }
+        }
+
+        r_data[curve_i] = normal;
+      }
+    });
+  });
+  return this->runtime->curve_plane_normals_cache.data().as_span();
+}
+
 const bke::CurvesGeometry &Drawing::strokes() const
 {
   return this->geometry.wrap();
@@ -409,6 +455,7 @@ void Drawing::tag_positions_changed()
 {
   this->strokes_for_write().tag_positions_changed();
   this->runtime->triangles_cache.tag_dirty();
+  this->runtime->curve_plane_normals_cache.tag_dirty();
 }
 
 void Drawing::tag_topology_changed()
@@ -767,16 +814,16 @@ Span<FramesMapKey> Layer::sorted_keys() const
   return this->runtime->sorted_keys_cache_.data();
 }
 
-FramesMapKey Layer::frame_key_at(const int frame_number) const
+std::optional<FramesMapKey> Layer::frame_key_at(const int frame_number) const
 {
   Span<int> sorted_keys = this->sorted_keys();
   /* No keyframes, return no drawing. */
   if (sorted_keys.is_empty()) {
-    return -1;
+    return {};
   }
   /* Before the first drawing, return no drawing. */
   if (frame_number < sorted_keys.first()) {
-    return -1;
+    return {};
   }
   /* After or at the last drawing, return the last drawing. */
   if (frame_number >= sorted_keys.last()) {
@@ -785,21 +832,21 @@ FramesMapKey Layer::frame_key_at(const int frame_number) const
   /* Search for the drawing. upper_bound will get the drawing just after. */
   SortedKeysIterator it = std::upper_bound(sorted_keys.begin(), sorted_keys.end(), frame_number);
   if (it == sorted_keys.end() || it == sorted_keys.begin()) {
-    return -1;
+    return {};
   }
   return *std::prev(it);
 }
 
 const GreasePencilFrame *Layer::frame_at(const int frame_number) const
 {
-  const FramesMapKey frame_key = this->frame_key_at(frame_number);
-  return (frame_key == -1) ? nullptr : this->frames().lookup_ptr(frame_key);
+  const std::optional<FramesMapKey> frame_key = this->frame_key_at(frame_number);
+  return frame_key ? this->frames().lookup_ptr(*frame_key) : nullptr;
 }
 
 GreasePencilFrame *Layer::frame_at(const int frame_number)
 {
-  const FramesMapKey frame_key = this->frame_key_at(frame_number);
-  return (frame_key == -1) ? nullptr : this->frames_for_write().lookup_ptr(frame_key);
+  const std::optional<FramesMapKey> frame_key = this->frame_key_at(frame_number);
+  return frame_key ? this->frames_for_write().lookup_ptr(*frame_key) : nullptr;
 }
 
 int Layer::drawing_index_at(const int frame_number) const
@@ -815,11 +862,11 @@ bool Layer::has_drawing_at(const int frame_number) const
 
 int Layer::get_frame_duration_at(const int frame_number) const
 {
-  const FramesMapKey frame_key = this->frame_key_at(frame_number);
-  if (frame_key == -1) {
+  const std::optional<FramesMapKey> frame_key = this->frame_key_at(frame_number);
+  if (!frame_key) {
     return -1;
   }
-  SortedKeysIterator frame_number_it = std::next(this->sorted_keys().begin(), frame_key);
+  SortedKeysIterator frame_number_it = std::next(this->sorted_keys().begin(), *frame_key);
   if (*frame_number_it == this->sorted_keys().last()) {
     return -1;
   }

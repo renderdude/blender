@@ -52,7 +52,7 @@
 #include "BKE_key.h"
 #include "BKE_lib_id.hh"
 #include "BKE_lib_override.hh"
-#include "BKE_lib_query.h"
+#include "BKE_lib_query.hh"
 #include "BKE_lib_remap.hh"
 #include "BKE_main.hh"
 #include "BKE_main_namemap.hh"
@@ -74,7 +74,7 @@
 // #define DEBUG_TIME
 
 #ifdef DEBUG_TIME
-#  include "PIL_time_utildefines.h"
+#  include "BLI_time_utildefines.h"
 #endif
 
 static CLG_LogRef LOG = {"bke.lib_id"};
