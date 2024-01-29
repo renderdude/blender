@@ -43,7 +43,7 @@
 #include "BKE_constraint.h"
 #include "BKE_curve.hh"
 #include "BKE_idprop.h"
-#include "BKE_idtype.h"
+#include "BKE_idtype.hh"
 #include "BKE_lib_id.hh"
 #include "BKE_lib_query.hh"
 #include "BKE_main.hh"
@@ -3182,9 +3182,13 @@ bool BoneCollection::is_visible_ancestors() const
 {
   return this->flags & BONE_COLLECTION_ANCESTORS_VISIBLE;
 }
-bool BoneCollection::is_visible_effectively() const
+bool BoneCollection::is_visible_with_ancestors() const
 {
   return this->is_visible() && this->is_visible_ancestors();
+}
+bool BoneCollection::is_solo() const
+{
+  return this->flags & BONE_COLLECTION_SOLO;
 }
 
 /** \} */

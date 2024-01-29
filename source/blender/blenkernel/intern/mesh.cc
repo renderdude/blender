@@ -49,7 +49,7 @@
 #include "BKE_editmesh.hh"
 #include "BKE_editmesh_cache.hh"
 #include "BKE_global.h"
-#include "BKE_idtype.h"
+#include "BKE_idtype.hh"
 #include "BKE_key.h"
 #include "BKE_lib_id.hh"
 #include "BKE_lib_query.hh"
@@ -756,7 +756,7 @@ Mesh *BKE_mesh_new_nomain_from_template_ex(const Mesh *me_src,
                                            const int edges_num,
                                            const int tessface_num,
                                            const int faces_num,
-                                           const int loops_num,
+                                           const int corners_num,
                                            const CustomData_MeshMasks mask)
 {
   /* Only do tessface if we are creating tessfaces or copying from mesh with only tessfaces. */
@@ -770,7 +770,7 @@ Mesh *BKE_mesh_new_nomain_from_template_ex(const Mesh *me_src,
   me_dst->verts_num = verts_num;
   me_dst->edges_num = edges_num;
   me_dst->faces_num = faces_num;
-  me_dst->corners_num = loops_num;
+  me_dst->corners_num = corners_num;
   me_dst->totface_legacy = tessface_num;
 
   BKE_mesh_copy_parameters_for_eval(me_dst, me_src);
@@ -782,7 +782,7 @@ Mesh *BKE_mesh_new_nomain_from_template_ex(const Mesh *me_src,
   CustomData_copy_layout(
       &me_src->face_data, &me_dst->face_data, mask.pmask, CD_SET_DEFAULT, faces_num);
   CustomData_copy_layout(
-      &me_src->corner_data, &me_dst->corner_data, mask.lmask, CD_SET_DEFAULT, loops_num);
+      &me_src->corner_data, &me_dst->corner_data, mask.lmask, CD_SET_DEFAULT, corners_num);
   if (do_tessface) {
     CustomData_copy_layout(
         &me_src->fdata_legacy, &me_dst->fdata_legacy, mask.fmask, CD_SET_DEFAULT, tessface_num);
@@ -806,10 +806,10 @@ Mesh *BKE_mesh_new_nomain_from_template(const Mesh *me_src,
                                         const int verts_num,
                                         const int edges_num,
                                         const int faces_num,
-                                        const int loops_num)
+                                        const int corners_num)
 {
   return BKE_mesh_new_nomain_from_template_ex(
-      me_src, verts_num, edges_num, 0, faces_num, loops_num, CD_MASK_EVERYTHING);
+      me_src, verts_num, edges_num, 0, faces_num, corners_num, CD_MASK_EVERYTHING);
 }
 
 void BKE_mesh_eval_delete(Mesh *mesh_eval)
@@ -869,7 +869,7 @@ Mesh *BKE_mesh_from_bmesh_for_eval_nomain(BMesh *bm,
                                           const Mesh *me_settings)
 {
   Mesh *mesh = static_cast<Mesh *>(BKE_id_new_nomain(ID_ME, nullptr));
-  BM_mesh_bm_to_me_for_eval(bm, mesh, cd_mask_extra);
+  BM_mesh_bm_to_me_for_eval(*bm, *mesh, cd_mask_extra);
   BKE_mesh_copy_parameters_for_eval(mesh, me_settings);
   return mesh;
 }

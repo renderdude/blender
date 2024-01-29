@@ -1177,7 +1177,7 @@ static int sculpt_brush_needs_normal(const SculptSession *ss, Sculpt *sd, const 
 
           (mask_tex->brush_map_mode == MTEX_MAP_MODE_AREA)) ||
          sculpt_brush_use_topology_rake(ss, brush) ||
-         BKE_brush_has_cube_tip(brush, PAINT_MODE_SCULPT);
+         BKE_brush_has_cube_tip(brush, PaintMode::Sculpt);
 }
 
 static bool sculpt_brush_needs_rake_rotation(const Brush *brush)
@@ -2411,7 +2411,7 @@ float SCULPT_brush_strength_factor(
   avg *= 1.0f - mask;
 
   /* Auto-masking. */
-  avg *= auto_mask::factor_get(cache->automasking, ss, vertex, automask_data);
+  avg *= auto_mask::factor_get(cache->automasking.get(), ss, vertex, automask_data);
 
   return avg;
 }
@@ -2447,7 +2447,7 @@ void SCULPT_brush_strength_color(
 
   /* Auto-masking. */
   const float automasking_factor = auto_mask::factor_get(
-      cache->automasking, ss, vertex, automask_data);
+      cache->automasking.get(), ss, vertex, automask_data);
 
   const float masks_combined = falloff * paint_mask * automasking_factor;
 
@@ -3324,7 +3324,7 @@ static void do_brush_action(Sculpt *sd,
     float radius_scale = 1.0f;
 
     /* Corners of square brushes can go outside the brush radius. */
-    if (BKE_brush_has_cube_tip(brush, PAINT_MODE_SCULPT)) {
+    if (BKE_brush_has_cube_tip(brush, PaintMode::Sculpt)) {
       radius_scale = M_SQRT2;
     }
 
@@ -3362,7 +3362,8 @@ static void do_brush_action(Sculpt *sd,
       /* Initialize auto-masking cache. */
       if (auto_mask::is_enabled(sd, ss, brush)) {
         ss->cache->automasking = auto_mask::cache_init(sd, brush, ob);
-        ss->last_automasking_settings_hash = auto_mask::settings_hash(ob, ss->cache->automasking);
+        ss->last_automasking_settings_hash = auto_mask::settings_hash(*ob,
+                                                                      *ss->cache->automasking);
       }
       /* Initialize surface smooth cache. */
       if ((brush->sculpt_tool == SCULPT_TOOL_SMOOTH) &&
@@ -4627,7 +4628,7 @@ static void sculpt_update_cache_variants(bContext *C, Sculpt *sd, Object *ob, Po
    * thumb). They depends on initial state and brush coord/pressure/etc.
    * It's more an events design issue, which doesn't split coordinate/pressure/angle changing
    * events. We should avoid this after events system re-design. */
-  if (paint_supports_dynamic_size(brush, PAINT_MODE_SCULPT) || cache->first_time) {
+  if (paint_supports_dynamic_size(brush, PaintMode::Sculpt) || cache->first_time) {
     cache->pressure = RNA_float_get(ptr, "pressure");
   }
 
@@ -4660,7 +4661,7 @@ static void sculpt_update_cache_variants(bContext *C, Sculpt *sd, Object *ob, Po
     }
   }
 
-  if (BKE_brush_use_size_pressure(brush) && paint_supports_dynamic_size(brush, PAINT_MODE_SCULPT))
+  if (BKE_brush_use_size_pressure(brush) && paint_supports_dynamic_size(brush, PaintMode::Sculpt))
   {
     cache->radius = sculpt_brush_dynamic_size_get(brush, cache, cache->initial_radius);
     cache->dyntopo_pixel_radius = sculpt_brush_dynamic_size_get(
@@ -5400,7 +5401,7 @@ static void sculpt_stroke_undo_begin(const bContext *C, wmOperator *op)
   if (brush && brush->sculpt_tool == SCULPT_TOOL_PAINT &&
       SCULPT_use_image_paint_brush(&tool_settings->paint_mode, ob))
   {
-    ED_image_undo_push_begin(op->type->name, PAINT_MODE_SCULPT);
+    ED_image_undo_push_begin(op->type->name, PaintMode::Sculpt);
   }
   else {
     undo::push_begin_ex(ob, sculpt_tool_name(sd));
@@ -5597,10 +5598,6 @@ static void sculpt_stroke_done(const bContext *C, PaintStroke * /*stroke*/)
     smooth_brush_toggle_off(C, &sd->paint, ss->cache);
     /* Refresh the brush pointer in case we switched brush in the toggle function. */
     brush = BKE_paint_brush(&sd->paint);
-  }
-
-  if (auto_mask::is_enabled(sd, ss, brush)) {
-    auto_mask::cache_free(ss->cache->automasking);
   }
 
   BKE_pbvh_node_color_buffer_free(ss->pbvh);

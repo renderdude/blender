@@ -538,6 +538,8 @@ static const EnumPropertyItem rna_enum_curve_display_handle_items[] = {
 
 #ifdef RNA_RUNTIME
 
+#  include <algorithm>
+
 #  include "AS_asset_representation.hh"
 
 #  include "DNA_anim_types.h"
@@ -555,7 +557,7 @@ static const EnumPropertyItem rna_enum_curve_display_handle_items[] = {
 #  include "BKE_global.h"
 #  include "BKE_icons.h"
 #  include "BKE_idprop.h"
-#  include "BKE_layer.h"
+#  include "BKE_layer.hh"
 #  include "BKE_nla.h"
 #  include "BKE_paint.hh"
 #  include "BKE_preferences.h"
@@ -580,7 +582,7 @@ static const EnumPropertyItem rna_enum_curve_display_handle_items[] = {
 
 #  include "GPU_material.h"
 
-#  include "IMB_imbuf_types.h"
+#  include "IMB_imbuf_types.hh"
 
 #  include "UI_interface.hh"
 #  include "UI_view2d.hh"
@@ -1900,7 +1902,7 @@ static void rna_SpaceUVEditor_tile_grid_shape_set(PointerRNA *ptr, const int *va
 
   int clamp[2] = {10, 100};
   for (int i = 0; i < 2; i++) {
-    data->tile_grid_shape[i] = CLAMPIS(values[i], 1, clamp[i]);
+    data->tile_grid_shape[i] = std::clamp(values[i], 1, clamp[i]);
   }
 }
 
@@ -1909,7 +1911,7 @@ static void rna_SpaceUVEditor_custom_grid_subdiv_set(PointerRNA *ptr, const int 
   SpaceImage *data = (SpaceImage *)(ptr->data);
 
   for (int i = 0; i < 2; i++) {
-    data->custom_grid_subdiv[i] = CLAMPIS(values[i], 1, 5000);
+    data->custom_grid_subdiv[i] = std::clamp(values[i], 1, 5000);
   }
 }
 
@@ -2820,13 +2822,13 @@ static int rna_FileAssetSelectParams_asset_library_get(PointerRNA *ptr)
   /* Just an extra sanity check to ensure this isn't somehow called for RNA_FileSelectParams. */
   BLI_assert(ptr->type == &RNA_FileAssetSelectParams);
 
-  return ED_asset_library_reference_to_enum_value(&params->asset_library_ref);
+  return blender::ed::asset::library_reference_to_enum_value(&params->asset_library_ref);
 }
 
 static void rna_FileAssetSelectParams_asset_library_set(PointerRNA *ptr, int value)
 {
   FileAssetSelectParams *params = static_cast<FileAssetSelectParams *>(ptr->data);
-  params->asset_library_ref = ED_asset_library_reference_from_enum_value(value);
+  params->asset_library_ref = blender::ed::asset::library_reference_from_enum_value(value);
 }
 
 static PointerRNA rna_FileAssetSelectParams_filter_id_get(PointerRNA *ptr)

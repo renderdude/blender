@@ -42,8 +42,8 @@ if(NOT DEFINED CMAKE_BUILD_TYPE_INIT)
   set(CMAKE_BUILD_TYPE_INIT "Release")
   # Internal logic caches this variable, avoid showing it by default
   # since it's easy to accidentally set instead of the build type.
-  mark_as_advanced(CMAKE_BUILD_TYPE_INIT)
 endif()
+mark_as_advanced(CMAKE_BUILD_TYPE_INIT)
 
 # Omit superfluous "Up-to-date" messages.
 if(NOT DEFINED CMAKE_INSTALL_MESSAGE)
@@ -761,6 +761,7 @@ endif()
 # Unit testing
 option(WITH_GTESTS "Enable GTest unit testing" OFF)
 option(WITH_GPU_RENDER_TESTS "Enable GPU render related unit testing (EEVEE, Workbench and Grease Pencil)" OFF)
+option(WITH_GPU_RENDER_TESTS_SILENT "Run GPU render tests silently (finished tests will pass). Generated report will show failing tests" ON)
 option(WITH_GPU_DRAW_TESTS "Enable GPU drawing related unit testing (GPU backends and draw manager)" OFF)
 option(WITH_COMPOSITOR_REALTIME_TESTS "Enable regression testing for realtime compositor" OFF)
 if(UNIX AND NOT (APPLE OR HAIKU))

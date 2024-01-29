@@ -6,6 +6,7 @@
  * \ingroup edinterface
  */
 
+#include <algorithm>
 #include <cctype>
 #include <cstddef>
 #include <cstdlib>
@@ -57,8 +58,8 @@
 #include "BKE_global.h"
 #include "BKE_gpencil_modifier_legacy.h"
 #include "BKE_idprop.h"
-#include "BKE_idtype.h"
-#include "BKE_layer.h"
+#include "BKE_idtype.hh"
+#include "BKE_layer.hh"
 #include "BKE_lib_id.hh"
 #include "BKE_lib_override.hh"
 #include "BKE_linestyle.h"
@@ -85,10 +86,10 @@
 #include "ED_screen.hh"
 #include "ED_undo.hh"
 
-#include "IMB_imbuf.h"
-#include "IMB_imbuf_types.h"
-#include "IMB_metadata.h"
-#include "IMB_thumbs.h"
+#include "IMB_imbuf.hh"
+#include "IMB_imbuf_types.hh"
+#include "IMB_metadata.hh"
+#include "IMB_thumbs.hh"
 
 #include "RE_engine.h"
 
@@ -147,7 +148,7 @@ static int template_search_textbut_width(PointerRNA *ptr, PropertyRNA *name_prop
   }
 
   /* Clamp to some min/max width. */
-  return CLAMPIS(
+  return std::clamp(
       estimated_width, TEMPLATE_SEARCH_TEXTBUT_MIN_WIDTH, TEMPLATE_SEARCH_TEXTBUT_MIN_WIDTH * 3);
 }
 
@@ -1373,69 +1374,71 @@ static void template_ID(const bContext *C,
 
     template_id_workspace_pin_extra_icon(template_ui, but);
 
-    if (ID_IS_LINKED(id)) {
-      const bool disabled = !BKE_idtype_idcode_is_localizable(GS(id->name));
-      if (id->tag & LIB_TAG_INDIRECT) {
-        but = uiDefIconBut(block,
-                           UI_BTYPE_BUT,
-                           0,
-                           ICON_LIBRARY_DATA_INDIRECT,
-                           0,
-                           0,
-                           UI_UNIT_X,
-                           UI_UNIT_Y,
-                           nullptr,
-                           0,
-                           0,
-                           0,
-                           0,
-                           TIP_("Indirect library data-block, cannot be made local, "
-                                "Shift + Click to create a library override hierarchy"));
+    if (!hide_buttons) {
+      if (ID_IS_LINKED(id)) {
+        const bool disabled = !BKE_idtype_idcode_is_localizable(GS(id->name));
+        if (id->tag & LIB_TAG_INDIRECT) {
+          but = uiDefIconBut(block,
+                             UI_BTYPE_BUT,
+                             0,
+                             ICON_LIBRARY_DATA_INDIRECT,
+                             0,
+                             0,
+                             UI_UNIT_X,
+                             UI_UNIT_Y,
+                             nullptr,
+                             0,
+                             0,
+                             0,
+                             0,
+                             TIP_("Indirect library data-block, cannot be made local, "
+                                  "Shift + Click to create a library override hierarchy"));
+        }
+        else {
+          but = uiDefIconBut(block,
+                             UI_BTYPE_BUT,
+                             0,
+                             ICON_LIBRARY_DATA_DIRECT,
+                             0,
+                             0,
+                             UI_UNIT_X,
+                             UI_UNIT_Y,
+                             nullptr,
+                             0,
+                             0,
+                             0,
+                             0,
+                             TIP_("Direct linked library data-block, click to make local, "
+                                  "Shift + Click to create a library override"));
+        }
+        if (disabled) {
+          UI_but_flag_enable(but, UI_BUT_DISABLED);
+        }
+        else {
+          UI_but_funcN_set(
+              but, template_id_cb, MEM_dupallocN(template_ui), POINTER_FROM_INT(UI_ID_LOCAL));
+        }
       }
-      else {
-        but = uiDefIconBut(block,
-                           UI_BTYPE_BUT,
-                           0,
-                           ICON_LIBRARY_DATA_DIRECT,
-                           0,
-                           0,
-                           UI_UNIT_X,
-                           UI_UNIT_Y,
-                           nullptr,
-                           0,
-                           0,
-                           0,
-                           0,
-                           TIP_("Direct linked library data-block, click to make local, "
-                                "Shift + Click to create a library override"));
-      }
-      if (disabled) {
-        UI_but_flag_enable(but, UI_BUT_DISABLED);
-      }
-      else {
+      else if (ID_IS_OVERRIDE_LIBRARY(id)) {
+        but = uiDefIconBut(
+            block,
+            UI_BTYPE_BUT,
+            0,
+            ICON_LIBRARY_DATA_OVERRIDE,
+            0,
+            0,
+            UI_UNIT_X,
+            UI_UNIT_Y,
+            nullptr,
+            0,
+            0,
+            0,
+            0,
+            TIP_("Library override of linked data-block, click to make fully local, "
+                 "Shift + Click to clear the library override and toggle if it can be edited"));
         UI_but_funcN_set(
-            but, template_id_cb, MEM_dupallocN(template_ui), POINTER_FROM_INT(UI_ID_LOCAL));
+            but, template_id_cb, MEM_dupallocN(template_ui), POINTER_FROM_INT(UI_ID_OVERRIDE));
       }
-    }
-    else if (ID_IS_OVERRIDE_LIBRARY(id)) {
-      but = uiDefIconBut(
-          block,
-          UI_BTYPE_BUT,
-          0,
-          ICON_LIBRARY_DATA_OVERRIDE,
-          0,
-          0,
-          UI_UNIT_X,
-          UI_UNIT_Y,
-          nullptr,
-          0,
-          0,
-          0,
-          0,
-          TIP_("Library override of linked data-block, click to make fully local, "
-               "Shift + Click to clear the library override and toggle if it can be edited"));
-      UI_but_funcN_set(
-          but, template_id_cb, MEM_dupallocN(template_ui), POINTER_FROM_INT(UI_ID_OVERRIDE));
     }
 
     if ((ID_REAL_USERS(id) > 1) && (hide_buttons == false)) {
@@ -6140,7 +6143,7 @@ struct ProgressTooltip_Store {
   void *owner;
 };
 
-static char *progress_tooltip_func(bContext * /*C*/, void *argN, const char * /*tip*/)
+static std::string progress_tooltip_func(bContext * /*C*/, void *argN, const char * /*tip*/)
 {
   ProgressTooltip_Store *arg = static_cast<ProgressTooltip_Store *>(argN);
   wmWindowManager *wm = arg->wm;
@@ -6159,9 +6162,9 @@ static char *progress_tooltip_func(bContext * /*C*/, void *argN, const char * /*
     BLI_timecode_string_from_time_simple(remaining_str, sizeof(remaining_str), remaining);
   }
 
-  return BLI_sprintfN(
-      "Time Remaining: %s\n"
-      "Time Elapsed: %s",
+  return fmt::format(
+      "Time Remaining: {}\n"
+      "Time Elapsed: {}",
       remaining_str,
       elapsed_str);
 }
@@ -7238,7 +7241,7 @@ static void uiTemplateRecentFiles_tooltip_func(bContext * /*C*/, uiTooltipData *
   if (BLI_stat(path, &status) != -1) {
     char date_st[FILELIST_DIRENTRY_DATE_LEN], time_st[FILELIST_DIRENTRY_TIME_LEN];
     bool is_today, is_yesterday;
-    std::string day_string = ("");
+    std::string day_string;
     BLI_filelist_entry_datetime_to_string(
         nullptr, int64_t(status.st_mtime), false, time_st, date_st, &is_today, &is_yesterday);
     if (is_today || is_yesterday) {
@@ -7272,7 +7275,7 @@ static void uiTemplateRecentFiles_tooltip_func(bContext * /*C*/, uiTooltipData *
   }
 
   if (thumb) {
-    float scale = (72.0f * UI_SCALE_FAC) / float(MAX2(thumb->x, thumb->y));
+    float scale = (72.0f * UI_SCALE_FAC) / float(std::max(thumb->x, thumb->y));
     short size[2] = {short(float(thumb->x) * scale), short(float(thumb->y) * scale)};
     UI_tooltip_text_field_add(tip, {}, {}, UI_TIP_STYLE_SPACER, UI_TIP_LC_NORMAL);
     UI_tooltip_text_field_add(tip, {}, {}, UI_TIP_STYLE_SPACER, UI_TIP_LC_NORMAL);

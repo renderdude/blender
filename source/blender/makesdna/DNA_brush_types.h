@@ -163,6 +163,8 @@ typedef struct BrushCurvesSculptSettings {
   struct CurveMapping *curve_parameter_falloff;
 } BrushCurvesSculptSettings;
 
+/** Max number of propagation steps for automasking settings.*/
+#define AUTOMASKING_BOUNDARY_EDGES_MAX_PROPAGATION_STEPS 20
 typedef struct Brush {
   DNA_DEFINE_CXX_METHODS(Brush)
 
@@ -316,6 +318,11 @@ typedef struct Brush {
   /* automasking */
   int automasking_flags;
   int automasking_boundary_edges_propagation_steps;
+
+  float automasking_start_normal_limit;
+  float automasking_start_normal_falloff;
+  float automasking_view_normal_limit;
+  float automasking_view_normal_falloff;
 
   int elastic_deform_type;
   float elastic_deform_volume_preservation;

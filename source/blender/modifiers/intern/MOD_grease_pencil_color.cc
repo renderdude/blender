@@ -114,7 +114,7 @@ static void modify_stroke_color(Object &ob,
   curves_mask.foreach_index(GrainSize(512), [&](const int64_t curve_i) {
     const Material *ma = BKE_object_material_get(&ob, stroke_materials[curve_i]);
     const MaterialGPencilStyle *gp_style = ma ? ma->gp_style : nullptr;
-    const ColorGeometry4f material_color = (gp_style ? gp_style->fill_rgba :
+    const ColorGeometry4f material_color = (gp_style ? ColorGeometry4f(gp_style->fill_rgba) :
                                                        ColorGeometry4f(0.0f, 0.0f, 0.0f, 0.0f));
 
     const IndexRange points = points_by_curve[curve_i];
@@ -150,7 +150,7 @@ static void modify_fill_color(Object &ob,
   curves_mask.foreach_index(GrainSize(512), [&](int64_t curve_i) {
     const Material *ma = BKE_object_material_get(&ob, stroke_materials[curve_i]);
     const MaterialGPencilStyle *gp_style = ma ? ma->gp_style : nullptr;
-    const ColorGeometry4f material_color = (gp_style ? gp_style->fill_rgba :
+    const ColorGeometry4f material_color = (gp_style ? ColorGeometry4f(gp_style->fill_rgba) :
                                                        ColorGeometry4f(0.0f, 0.0f, 0.0f, 0.0f));
 
     apply_color_factor(fill_colors.span[curve_i], material_color, cmd.hsv);
@@ -217,30 +217,11 @@ static void panel_draw(const bContext *C, Panel *panel)
 
   uiLayoutSetPropSep(layout, true);
 
-  const GreasePencilModifierColorMode color_mode = GreasePencilModifierColorMode(
-      RNA_enum_get(ptr, "color_mode"));
-
   uiItemR(layout, ptr, "color_mode", UI_ITEM_NONE, nullptr, ICON_NONE);
 
-  if (color_mode == MOD_GREASE_PENCIL_COLOR_HARDNESS) {
-    uiItemR(layout, ptr, "hardness_factor", UI_ITEM_NONE, nullptr, ICON_NONE);
-  }
-  else {
-    const bool use_uniform_opacity = RNA_boolean_get(ptr, "use_uniform_opacity");
-    const bool use_weight_as_factor = RNA_boolean_get(ptr, "use_weight_as_factor");
-
-    uiItemR(layout, ptr, "use_uniform_opacity", UI_ITEM_NONE, nullptr, ICON_NONE);
-    const char *text = (use_uniform_opacity) ? IFACE_("Opacity") : IFACE_("Opacity Factor");
-
-    uiLayout *row = uiLayoutRow(layout, true);
-    uiLayoutSetActive(row, !use_weight_as_factor || use_uniform_opacity);
-    uiItemR(row, ptr, "color_factor", UI_ITEM_NONE, text, ICON_NONE);
-    if (!use_uniform_opacity) {
-      uiLayout *sub = uiLayoutRow(row, true);
-      uiLayoutSetActive(sub, true);
-      uiItemR(row, ptr, "use_weight_as_factor", UI_ITEM_NONE, "", ICON_MOD_VERTEX_WEIGHT);
-    }
-  }
+  uiItemR(layout, ptr, "hue", UI_ITEM_R_SLIDER, nullptr, ICON_NONE);
+  uiItemR(layout, ptr, "saturation", UI_ITEM_R_SLIDER, nullptr, ICON_NONE);
+  uiItemR(layout, ptr, "value", UI_ITEM_R_SLIDER, nullptr, ICON_NONE);
 
   LayoutPanelState *influence_panel_state = BKE_panel_layout_panel_state_ensure(
       panel, "influence", true);

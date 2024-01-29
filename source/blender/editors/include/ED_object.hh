@@ -8,8 +8,11 @@
 
 #pragma once
 
+#include <string>
+
 #include "BLI_compiler_attrs.h"
 #include "BLI_string_ref.hh"
+#include "BLI_vector.hh"
 
 #include "DNA_object_enums.h"
 #include "DNA_userdef_enums.h"
@@ -58,10 +61,8 @@ void ED_collection_hide_menu_draw(const bContext *C, uiLayout *layout);
  *   the callers \a filter_fn needs to check of they are editable
  *   (assuming they need to be modified).
  */
-Object **ED_object_array_in_mode_or_selected(bContext *C,
-                                             bool (*filter_fn)(const Object *ob, void *user_data),
-                                             void *filter_user_data,
-                                             uint *r_objects_len);
+blender::Vector<Object *> ED_object_array_in_mode_or_selected(
+    bContext *C, bool (*filter_fn)(const Object *ob, void *user_data), void *filter_user_data);
 
 /* `object_shapekey.cc` */
 
@@ -248,10 +249,12 @@ Base *ED_object_add_duplicate(
     Main *bmain, Scene *scene, ViewLayer *view_layer, Base *base, eDupli_ID_Flags dupflag);
 
 void ED_object_parent(Object *ob, Object *parent, int type, const char *substr);
-char *ED_object_ot_drop_named_material_tooltip(bContext *C, const char *name, const int mval[2]);
-char *ED_object_ot_drop_geometry_nodes_tooltip(bContext *C,
-                                               PointerRNA *properties,
-                                               const int mval[2]);
+std::string ED_object_ot_drop_named_material_tooltip(bContext *C,
+                                                     const char *name,
+                                                     const int mval[2]);
+std::string ED_object_ot_drop_geometry_nodes_tooltip(bContext *C,
+                                                     PointerRNA *properties,
+                                                     const int mval[2]);
 
 /* bitflags for enter/exit editmode */
 enum {

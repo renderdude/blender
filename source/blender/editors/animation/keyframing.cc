@@ -32,7 +32,7 @@
 #include "BKE_context.hh"
 #include "BKE_fcurve.h"
 #include "BKE_global.h"
-#include "BKE_idtype.h"
+#include "BKE_idtype.hh"
 #include "BKE_lib_id.hh"
 #include "BKE_nla.h"
 #include "BKE_report.h"
@@ -1381,7 +1381,13 @@ static KeyingSet *keyingset_get_from_op_with_error(wmOperator *op, PropertyRNA *
   else if (prop_type == PROP_STRING) {
     char type_id[MAX_ID_NAME - 2];
     RNA_property_string_get(op->ptr, prop, type_id);
-    ks = ANIM_keyingset_get_from_idname(scene, type_id);
+
+    if (strcmp(type_id, "__ACTIVE__") == 0) {
+      ks = ANIM_keyingset_get_from_enum_type(scene, scene->active_keyingset);
+    }
+    else {
+      ks = ANIM_keyingset_get_from_idname(scene, type_id);
+    }
 
     if (ks == nullptr) {
       BKE_reportf(op->reports, RPT_ERROR, "Keying set '%s' not found", type_id);

@@ -37,7 +37,7 @@
 #include "BKE_context.hh"
 #include "BKE_global.h"
 #include "BKE_icons.h"
-#include "BKE_layer.h"
+#include "BKE_layer.hh"
 #include "BKE_main.hh"
 #include "BKE_report.h"
 #include "BKE_screen.hh"
@@ -66,8 +66,8 @@
 #include "ED_scene.hh"
 #include "ED_screen.hh"
 
-#include "IMB_imbuf.h"
-#include "IMB_imbuf_types.h"
+#include "IMB_imbuf.hh"
+#include "IMB_imbuf_types.hh"
 
 #include "UI_interface.hh"
 #include "UI_interface_icons.hh"

@@ -29,7 +29,7 @@
 #include "BKE_screen.hh"
 #include "BKE_tracking.h"
 
-#include "IMB_imbuf_types.h"
+#include "IMB_imbuf_types.hh"
 
 #include "ED_anim_api.hh" /* for timeline cursor drawing */
 #include "ED_clip.hh"
@@ -39,7 +39,7 @@
 #include "ED_time_scrub_ui.hh"
 #include "ED_uvedit.hh" /* just for ED_image_draw_cursor */
 
-#include "IMB_imbuf.h"
+#include "IMB_imbuf.hh"
 
 #include "GPU_matrix.h"
 
@@ -523,7 +523,7 @@ static bool clip_drop_poll(bContext * /*C*/, wmDrag *drag, const wmEvent * /*eve
 {
   if (drag->type == WM_DRAG_PATH) {
     const eFileSel_File_Types file_type = eFileSel_File_Types(WM_drag_get_path_file_type(drag));
-    if (ELEM(file_type, 0, FILE_TYPE_IMAGE, FILE_TYPE_MOVIE)) {
+    if (ELEM(file_type, FILE_TYPE_IMAGE, FILE_TYPE_MOVIE)) {
       return true;
     }
   }
