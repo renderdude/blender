@@ -29,7 +29,7 @@
 #include "BKE_armature.hh"
 #include "BKE_context.hh"
 #include "BKE_curve.hh"
-#include "BKE_deform.h"
+#include "BKE_deform.hh"
 #include "BKE_gpencil_legacy.h"
 #include "BKE_grease_pencil.hh"
 #include "BKE_idtype.hh"
@@ -1189,8 +1189,6 @@ static void outliner_draw_restrictbuts(uiBlock *block,
                                     -1,
                                     0,
                                     0,
-                                    0,
-                                    0,
                                     TIP_("Temporarily hide in viewport\n"
                                          "* Shift to set children"));
             UI_but_func_set(
@@ -1216,8 +1214,6 @@ static void outliner_draw_restrictbuts(uiBlock *block,
                                   -1,
                                   0,
                                   0,
-                                  -1,
-                                  -1,
                                   TIP_("Disable selection in viewport\n"
                                        "* Shift to set children"));
           UI_but_func_set(bt, outliner__object_set_flag_recursive_fn, ob, (char *)"hide_select");
@@ -1241,8 +1237,6 @@ static void outliner_draw_restrictbuts(uiBlock *block,
                                   -1,
                                   0,
                                   0,
-                                  -1,
-                                  -1,
                                   TIP_("Globally disable in viewports\n"
                                        "* Shift to set children"));
           UI_but_func_set(bt, outliner__object_set_flag_recursive_fn, ob, (void *)"hide_viewport");
@@ -1266,8 +1260,6 @@ static void outliner_draw_restrictbuts(uiBlock *block,
                                   -1,
                                   0,
                                   0,
-                                  -1,
-                                  -1,
                                   TIP_("Globally disable in renders\n"
                                        "* Shift to set children"));
           UI_but_func_set(bt, outliner__object_set_flag_recursive_fn, ob, (char *)"hide_render");
@@ -1296,8 +1288,6 @@ static void outliner_draw_restrictbuts(uiBlock *block,
                                   -1,
                                   0,
                                   0,
-                                  -1,
-                                  -1,
                                   nullptr);
           UI_but_flag_enable(bt, UI_BUT_DRAG_LOCK);
           if (!props_active.constraint_enable) {
@@ -1324,8 +1314,6 @@ static void outliner_draw_restrictbuts(uiBlock *block,
                                   -1,
                                   0,
                                   0,
-                                  -1,
-                                  -1,
                                   nullptr);
           UI_but_flag_enable(bt, UI_BUT_DRAG_LOCK);
           if (!props_active.modifier_show_viewport) {
@@ -1347,8 +1335,6 @@ static void outliner_draw_restrictbuts(uiBlock *block,
                                   -1,
                                   0,
                                   0,
-                                  -1,
-                                  -1,
                                   nullptr);
           UI_but_flag_enable(bt, UI_BUT_DRAG_LOCK);
           if (!props_active.modifier_show_render) {
@@ -1378,8 +1364,6 @@ static void outliner_draw_restrictbuts(uiBlock *block,
                                   -1,
                                   0,
                                   0,
-                                  -1,
-                                  -1,
                                   TIP_("Restrict visibility in the 3D View\n"
                                        "* Shift to set children"));
           UI_but_func_set(bt, restrictbutton_bone_visibility_fn, bone, nullptr);
@@ -1531,8 +1515,6 @@ static void outliner_draw_restrictbuts(uiBlock *block,
                                   -1,
                                   0,
                                   0,
-                                  -1,
-                                  -1,
                                   nullptr);
           UI_but_flag_enable(bt, UI_BUT_DRAG_LOCK);
           if (node.parent_group() && node.parent_group()->is_visible()) {
@@ -1569,8 +1551,6 @@ static void outliner_draw_restrictbuts(uiBlock *block,
                                       -1,
                                       0,
                                       0,
-                                      0,
-                                      0,
                                       nullptr);
               UI_but_flag_enable(bt, UI_BUT_DRAG_LOCK);
             }
@@ -1587,8 +1567,6 @@ static void outliner_draw_restrictbuts(uiBlock *block,
                                       &layer_collection_ptr,
                                       props.layer_collection_hide_viewport,
                                       -1,
-                                      0,
-                                      0,
                                       0,
                                       0,
                                       TIP_("Temporarily hide in viewport\n"
@@ -1618,8 +1596,6 @@ static void outliner_draw_restrictbuts(uiBlock *block,
                                       -1,
                                       0,
                                       0,
-                                      0,
-                                      0,
                                       TIP_("Mask out objects in collection from view layer\n"
                                            "* Ctrl to isolate collection\n"
                                            "* Shift to set inside collections"));
@@ -1646,8 +1622,6 @@ static void outliner_draw_restrictbuts(uiBlock *block,
                   &layer_collection_ptr,
                   props.layer_collection_indirect_only,
                   -1,
-                  0,
-                  0,
                   0,
                   0,
                   TIP_("Objects in collection only contribute indirectly (through shadows and "
@@ -1679,8 +1653,6 @@ static void outliner_draw_restrictbuts(uiBlock *block,
                                     &collection_ptr,
                                     props.collection_hide_viewport,
                                     -1,
-                                    0,
-                                    0,
                                     0,
                                     0,
                                     TIP_("Globally disable in viewports\n"
@@ -1718,8 +1690,6 @@ static void outliner_draw_restrictbuts(uiBlock *block,
                                     -1,
                                     0,
                                     0,
-                                    0,
-                                    0,
                                     TIP_("Globally disable in renders\n"
                                          "* Ctrl to isolate collection\n"
                                          "* Shift to set inside collections and objects"));
@@ -1751,8 +1721,6 @@ static void outliner_draw_restrictbuts(uiBlock *block,
                                     &collection_ptr,
                                     props.collection_hide_select,
                                     -1,
-                                    0,
-                                    0,
                                     0,
                                     0,
                                     TIP_("Disable selection in viewport\n"
@@ -2555,6 +2523,12 @@ static BIFIconID tree_element_get_icon_from_id(const ID *id)
       return ICON_SEQUENCE;
     case ID_PC:
       return ICON_CURVE_BEZCURVE;
+    case ID_PA:
+      return ICON_PARTICLES;
+    case ID_PAL:
+      return ICON_COLOR;
+    case ID_VF:
+      return ICON_FILE_FONT;
     default:
       return ICON_NONE;
   }
@@ -3018,8 +2992,8 @@ static bool tselem_draw_icon(uiBlock *block,
                  nullptr,
                  0.0,
                  0.0,
-                 1.0,
-                 alpha,
+                 0.0,
+                 0.0f,
                  (data.drag_id && ID_IS_LINKED(data.drag_id)) ? data.drag_id->lib->filepath : "");
   }
 
@@ -3433,16 +3407,12 @@ static void outliner_draw_tree_element(bContext *C,
 
       /* Icons a bit higher. */
       if (TSELEM_OPEN(tselem, space_outliner)) {
-        UI_icon_draw_alpha(float(icon_x) + 2 * ufac,
-                           float(*starty) + 1 * ufac,
-                           ICON_DISCLOSURE_TRI_DOWN,
-                           alpha_fac);
+        UI_icon_draw_alpha(
+            float(icon_x) + 2 * ufac, float(*starty) + 1 * ufac, ICON_DOWNARROW_HLT, alpha_fac);
       }
       else {
-        UI_icon_draw_alpha(float(icon_x) + 2 * ufac,
-                           float(*starty) + 1 * ufac,
-                           ICON_DISCLOSURE_TRI_RIGHT,
-                           alpha_fac);
+        UI_icon_draw_alpha(
+            float(icon_x) + 2 * ufac, float(*starty) + 1 * ufac, ICON_RIGHTARROW, alpha_fac);
       }
     }
     offsx += UI_UNIT_X;

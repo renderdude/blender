@@ -835,7 +835,7 @@
     .factor = 1.0f, \
     .step = 1, \
   }
-  
+
 #define _DNA_DEFAULT_GreasePencilOffsetModifierData \
   { \
     .flag = 0, \
@@ -858,6 +858,18 @@
     .noise_offset = 0.0f, \
     .step = 4, \
     .seed = 1, \
+  }
+
+#define _DNA_DEFAULT_GreasePencilMirrorModifierData \
+  { \
+    .flag = MOD_GREASE_PENCIL_MIRROR_AXIS_X, \
+  }
+
+#define _DNA_DEFAULT_GreasePencilThickModifierData \
+  { \
+    .flag = 0, \
+    .thickness_fac = 1.0f, \
+    .thickness = 0.02, \
   }
 
 /* clang-format off */

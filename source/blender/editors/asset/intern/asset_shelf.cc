@@ -59,23 +59,27 @@ static bool asset_shelf_type_poll(const bContext &C,
     return false;
   }
 
-  BLI_assert_msg(BLI_findindex(&space_type.asset_shelf_types, shelf_type) != -1,
+  BLI_assert_msg(std::find_if(space_type.asset_shelf_types.begin(),
+                              space_type.asset_shelf_types.end(),
+                              [&](const std::unique_ptr<AssetShelfType> &type) {
+                                return type.get() == shelf_type;
+                              }) != space_type.asset_shelf_types.end(),
                  "Asset shelf type is not registered");
   UNUSED_VARS_NDEBUG(space_type);
 
   return !shelf_type->poll || shelf_type->poll(&C, shelf_type);
 }
 
-static AssetShelfType *asset_shelf_type_ensure(const SpaceType &space_type, AssetShelf &shelf)
+static AssetShelfType *asset_shelf_type_ensure(SpaceType &space_type, AssetShelf &shelf)
 {
   if (shelf.type) {
     return shelf.type;
   }
 
-  LISTBASE_FOREACH (AssetShelfType *, shelf_type, &space_type.asset_shelf_types) {
+  for (std::unique_ptr<AssetShelfType> &shelf_type : space_type.asset_shelf_types) {
     if (STREQ(shelf.idname, shelf_type->idname)) {
-      shelf.type = shelf_type;
-      return shelf_type;
+      shelf.type = shelf_type.get();
+      return shelf_type.get();
     }
   }
 
@@ -86,7 +90,7 @@ static AssetShelf *create_shelf_from_type(AssetShelfType &type)
 {
   AssetShelf *shelf = MEM_new<AssetShelf>(__func__);
   *shelf = dna::shallow_zero_initialize();
-  shelf->settings.preview_size = shelf::DEFAULT_TILE_SIZE;
+  shelf->settings.preview_size = DEFAULT_TILE_SIZE;
   shelf->settings.asset_library_reference = asset_system::all_library_reference();
   shelf->type = &type;
   shelf->preferred_row_count = 1;
@@ -133,7 +137,7 @@ static void activate_shelf(RegionAssetShelf &shelf_regiondata, AssetShelf &shelf
  *         current context (all polls failed).
  */
 static AssetShelf *update_active_shelf(const bContext &C,
-                                       const SpaceType &space_type,
+                                       SpaceType &space_type,
                                        RegionAssetShelf &shelf_regiondata)
 {
   /* Note: Don't access #AssetShelf.type directly, use #asset_shelf_type_ensure(). */
@@ -163,8 +167,8 @@ static AssetShelf *update_active_shelf(const bContext &C,
   }
 
   /* Case 3: */
-  LISTBASE_FOREACH (AssetShelfType *, shelf_type, &space_type.asset_shelf_types) {
-    if (asset_shelf_type_poll(C, space_type, shelf_type)) {
+  for (std::unique_ptr<AssetShelfType> &shelf_type : space_type.asset_shelf_types) {
+    if (asset_shelf_type_poll(C, space_type, shelf_type.get())) {
       AssetShelf *new_shelf = create_shelf_from_type(*shelf_type);
       BLI_addhead(&shelf_regiondata.shelves, new_shelf);
       /* Moves ownership to the regiondata. */
@@ -190,14 +194,14 @@ void *region_duplicate(void *regiondata)
     return nullptr;
   }
 
-  return shelf::regiondata_duplicate(shelf_regiondata);
+  return regiondata_duplicate(shelf_regiondata);
 }
 
 void region_free(ARegion *region)
 {
   RegionAssetShelf *shelf_regiondata = RegionAssetShelf::get_from_asset_shelf_region(*region);
   if (shelf_regiondata) {
-    shelf::regiondata_free(&shelf_regiondata);
+    regiondata_free(shelf_regiondata);
   }
   region->regiondata = nullptr;
 }
@@ -211,8 +215,8 @@ static bool asset_shelf_space_poll(const bContext *C, const SpaceLink *space_lin
   const SpaceType *space_type = BKE_spacetype_from_id(space_link->spacetype);
 
   /* Is there any asset shelf type registered that returns true for it's poll? */
-  LISTBASE_FOREACH (AssetShelfType *, shelf_type, &space_type->asset_shelf_types) {
-    if (asset_shelf_type_poll(*C, *space_type, shelf_type)) {
+  for (const std::unique_ptr<AssetShelfType> &shelf_type : space_type->asset_shelf_types) {
+    if (asset_shelf_type_poll(*C, *space_type, shelf_type.get())) {
       return true;
     }
   }
@@ -398,7 +402,7 @@ int tile_height(const AssetShelfSettings &settings)
 
 static int asset_shelf_default_tile_height()
 {
-  return UI_preview_tile_size_x(shelf::DEFAULT_TILE_SIZE);
+  return UI_preview_tile_size_x(DEFAULT_TILE_SIZE);
 }
 
 int region_prefsizey()
@@ -410,7 +414,7 @@ int region_prefsizey()
 void region_layout(const bContext *C, ARegion *region)
 {
   const SpaceLink *space = CTX_wm_space_data(C);
-  const SpaceType *space_type = BKE_spacetype_from_id(space->spacetype);
+  SpaceType *space_type = BKE_spacetype_from_id(space->spacetype);
 
   RegionAssetShelf *shelf_regiondata = RegionAssetShelf::get_from_asset_shelf_region(*region);
   if (!shelf_regiondata) {
@@ -439,7 +443,7 @@ void region_layout(const bContext *C, ARegion *region)
                                      0,
                                      style);
 
-  shelf::build_asset_view(
+  build_asset_view(
       *layout, active_shelf->settings.asset_library_reference, *active_shelf, *C, *region);
 
   int layout_height;
@@ -486,7 +490,7 @@ void header_region_init(wmWindowManager * /*wm*/, ARegion *region)
 void header_region(const bContext *C, ARegion *region)
 {
   const SpaceLink *space = CTX_wm_space_data(C);
-  const SpaceType *space_type = BKE_spacetype_from_id(space->spacetype);
+  SpaceType *space_type = BKE_spacetype_from_id(space->spacetype);
   const ARegion *main_shelf_region = BKE_area_find_region_type(CTX_wm_area(C),
                                                                RGN_TYPE_ASSET_SHELF);
 
@@ -513,7 +517,7 @@ void region_blend_read_data(BlendDataReader *reader, ARegion *region)
   if (!shelf_regiondata) {
     return;
   }
-  shelf::regiondata_blend_read_data(reader, &shelf_regiondata);
+  regiondata_blend_read_data(reader, &shelf_regiondata);
   region->regiondata = shelf_regiondata;
 }
 
@@ -523,7 +527,7 @@ void region_blend_write(BlendWriter *writer, ARegion *region)
   if (!shelf_regiondata) {
     return;
   }
-  shelf::regiondata_blend_write(writer, shelf_regiondata);
+  regiondata_blend_write(writer, shelf_regiondata);
 }
 
 /** \} */
@@ -644,20 +648,21 @@ static uiBut *add_tab_button(uiBlock &block, StringRefNull name)
   const int pad_x = UI_UNIT_X * 0.3f;
   const int but_width = std::min(string_width + 2 * pad_x, UI_UNIT_X * 8);
 
-  uiBut *but = uiDefBut(&block,
-                        UI_BTYPE_TAB,
-                        0,
-                        name.c_str(),
-                        0,
-                        0,
-                        but_width,
-                        UI_UNIT_Y,
-                        nullptr,
-                        0,
-                        0,
-                        0,
-                        0,
-                        "Enable catalog, making contained assets visible in the asset shelf");
+  uiBut *but = uiDefBut(
+      &block,
+      UI_BTYPE_TAB,
+      0,
+      name,
+      0,
+      0,
+      but_width,
+      UI_UNIT_Y,
+      nullptr,
+      0,
+      0,
+      0,
+      0,
+      TIP_("Enable catalog, making contained assets visible in the asset shelf"));
 
   UI_but_drawflag_enable(but, UI_BUT_ALIGN_DOWN);
   UI_but_flag_disable(but, UI_BUT_UNDO);
@@ -673,27 +678,27 @@ static void add_catalog_tabs(AssetShelfSettings &shelf_settings, uiLayout &layou
   {
     uiBut *but = add_tab_button(*block, IFACE_("All"));
     UI_but_func_set(but, [&shelf_settings](bContext &C) {
-      shelf::settings_set_all_catalog_active(shelf_settings);
-      shelf::send_redraw_notifier(C);
+      settings_set_all_catalog_active(shelf_settings);
+      send_redraw_notifier(C);
     });
     UI_but_func_pushed_state_set(but, [&shelf_settings](const uiBut &) -> bool {
-      return shelf::settings_is_all_catalog_active(shelf_settings);
+      return settings_is_all_catalog_active(shelf_settings);
     });
   }
 
   uiItemS(&layout);
 
   /* Regular catalog tabs. */
-  shelf::settings_foreach_enabled_catalog_path(
+  settings_foreach_enabled_catalog_path(
       shelf_settings, [&shelf_settings, block](const asset_system::AssetCatalogPath &path) {
         uiBut *but = add_tab_button(*block, path.name());
 
         UI_but_func_set(but, [&shelf_settings, path](bContext &C) {
-          shelf::settings_set_active_catalog(shelf_settings, path);
-          shelf::send_redraw_notifier(C);
+          settings_set_active_catalog(shelf_settings, path);
+          send_redraw_notifier(C);
         });
         UI_but_func_pushed_state_set(but, [&shelf_settings, path](const uiBut &) -> bool {
-          return shelf::settings_is_active_catalog(shelf_settings, path);
+          return settings_is_active_catalog(shelf_settings, path);
         });
       });
 }

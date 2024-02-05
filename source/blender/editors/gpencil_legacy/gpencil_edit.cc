@@ -37,7 +37,7 @@
 
 #include "BKE_brush.hh"
 #include "BKE_context.hh"
-#include "BKE_deform.h"
+#include "BKE_deform.hh"
 #include "BKE_global.h"
 #include "BKE_gpencil_curve_legacy.h"
 #include "BKE_gpencil_geom_legacy.h"
@@ -1666,7 +1666,7 @@ static int gpencil_strokes_paste_exec(bContext *C, wmOperator *op)
   }
   else if ((BKE_gpencil_layer_is_editable(gpl) == false) && (type == GP_COPY_TO_ACTIVE)) {
     BKE_report(
-        op->reports, RPT_ERROR, "Can not paste strokes when active layer is hidden or locked");
+        op->reports, RPT_ERROR, "Cannot paste strokes when active layer is hidden or locked");
     return OPERATOR_CANCELLED;
   }
   else {

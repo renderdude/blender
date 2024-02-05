@@ -949,7 +949,7 @@ class VIEW3D_HT_header(Header):
                 layout.popover(
                     panel="VIEW3D_PT_gpencil_sculpt_automasking",
                     text="",
-                    icon='MOD_MASK',
+                    icon=VIEW3D_HT_header._gpencil_sculpt_automasking_icon(tool_settings.gpencil_sculpt)
                 )
 
         elif object_mode == 'SCULPT':
@@ -975,7 +975,7 @@ class VIEW3D_HT_header(Header):
             layout.popover(
                 panel="VIEW3D_PT_sculpt_automasking",
                 text="",
-                icon='MOD_MASK',
+                icon=VIEW3D_HT_header._sculpt_automasking_icon(tool_settings.sculpt)
             )
 
         elif object_mode == 'VERTEX_PAINT':
@@ -1079,6 +1079,29 @@ class VIEW3D_HT_header(Header):
 
         # sub.enabled = shading.type != 'RENDERED'
         sub.popover(panel="VIEW3D_PT_shading", text="")
+
+    @staticmethod
+    def _sculpt_automasking_icon(sculpt):
+        automask_enabled = (sculpt.use_automasking_topology or
+                            sculpt.use_automasking_face_sets or
+                            sculpt.use_automasking_boundary_edges or
+                            sculpt.use_automasking_boundary_face_sets or
+                            sculpt.use_automasking_cavity or
+                            sculpt.use_automasking_cavity_inverted or
+                            sculpt.use_automasking_start_normal or
+                            sculpt.use_automasking_view_normal)
+
+        return "CLIPUV_DEHLT" if automask_enabled else "CLIPUV_HLT"
+
+    @staticmethod
+    def _gpencil_sculpt_automasking_icon(gpencil_sculpt):
+        automask_enabled = (gpencil_sculpt.use_automasking_stroke or
+                            gpencil_sculpt.use_automasking_layer_stroke or
+                            gpencil_sculpt.use_automasking_material_stroke or
+                            gpencil_sculpt.use_automasking_material_active or
+                            gpencil_sculpt.use_automasking_layer_active)
+
+        return "CLIPUV_DEHLT" if automask_enabled else "CLIPUV_HLT"
 
 
 class VIEW3D_MT_editor_menus(Menu):
@@ -2380,7 +2403,7 @@ class VIEW3D_MT_curve_add(Menu):
 
         layout.operator_context = 'INVOKE_REGION_WIN'
 
-        layout.operator("curve.primitive_bezier_curve_add", text="Bezier", icon='CURVE_BEZCURVE')
+        layout.operator("curve.primitive_bezier_curve_add", text="Bézier", icon='CURVE_BEZCURVE')
         layout.operator("curve.primitive_bezier_circle_add", text="Circle", icon='CURVE_BEZCIRCLE')
 
         layout.separator()
@@ -5832,6 +5855,7 @@ class VIEW3D_MT_edit_greasepencil_stroke(Menu):
 
         layout.separator()
 
+        layout.menu("GREASE_PENCIL_MT_move_to_layer")
         layout.menu("VIEW3D_MT_grease_pencil_assign_material")
         layout.operator("grease_pencil.set_active_material")
 
@@ -5845,6 +5869,8 @@ class VIEW3D_MT_edit_greasepencil_stroke(Menu):
 
         layout.operator("grease_pencil.set_uniform_thickness")
         layout.operator("grease_pencil.set_uniform_opacity")
+
+        layout.operator_menu_enum("grease_pencil.reorder", text="Reorder", property="direction")
 
 
 class VIEW3D_MT_edit_greasepencil_point(Menu):

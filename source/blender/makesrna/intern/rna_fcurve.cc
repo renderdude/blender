@@ -23,7 +23,7 @@
 #include "RNA_define.hh"
 #include "RNA_enum_types.hh"
 
-#include "rna_internal.h"
+#include "rna_internal.hh"
 
 #include "WM_types.hh"
 
@@ -1772,7 +1772,7 @@ static void rna_def_fmodifier(BlenderRNA *brna)
   // RNA_def_property_override_flag(prop, PROPOVERRIDE_OVERRIDABLE_LIBRARY);
   RNA_def_property_boolean_funcs(prop, nullptr, "rna_FModifier_show_expanded_set");
   RNA_def_property_ui_text(prop, "Expanded", "F-Curve Modifier's panel is expanded in UI");
-  RNA_def_property_ui_icon(prop, ICON_DISCLOSURE_TRI_RIGHT, 1);
+  RNA_def_property_ui_icon(prop, ICON_RIGHTARROW, 1);
 
   prop = RNA_def_property(srna, "mute", PROP_BOOLEAN, PROP_NONE);
   RNA_def_property_boolean_sdna(prop, nullptr, "flag", FMODIFIER_FLAG_MUTED);
@@ -2209,7 +2209,7 @@ static void rna_def_fkeyframe(BlenderRNA *brna)
   srna = RNA_def_struct(brna, "Keyframe", nullptr);
   RNA_def_struct_sdna(srna, "BezTriple");
   RNA_def_struct_ui_text(
-      srna, "Keyframe", "Bezier curve point with two handles defining a Keyframe on an F-Curve");
+      srna, "Keyframe", "Bézier curve point with two handles defining a Keyframe on an F-Curve");
 
   /* Boolean values */
   prop = RNA_def_property(srna, "select_left_handle", PROP_BOOLEAN, PROP_NONE);

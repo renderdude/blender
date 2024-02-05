@@ -26,7 +26,7 @@
 #include "RNA_define.hh"
 #include "RNA_enum_types.hh"
 
-#include "rna_internal.h"
+#include "rna_internal.hh"
 
 #include "IMB_imbuf.hh"
 
@@ -69,7 +69,7 @@ static const EnumPropertyItem sculpt_stroke_method_items[] = {
      "CURVE",
      0,
      "Curve",
-     "Define the stroke curve with a bezier curve (dabs are separated according to spacing)"},
+     "Define the stroke curve with a Bézier curve (dabs are separated according to spacing)"},
     {0, nullptr, 0, nullptr, nullptr},
 };
 
@@ -1029,7 +1029,7 @@ static const EnumPropertyItem *rna_Brush_stroke_itemf(bContext *C,
        "CURVE",
        0,
        "Curve",
-       "Define the stroke curve with a bezier curve. Dabs are separated according to spacing"},
+       "Define the stroke curve with a Bézier curve. Dabs are separated according to spacing"},
       {0, nullptr, 0, nullptr, nullptr},
   };
 
@@ -1045,9 +1045,9 @@ static const EnumPropertyItem *rna_Brush_stroke_itemf(bContext *C,
 }
 
 /* Grease Pencil Drawing Brushes Settings */
-static char *rna_BrushGpencilSettings_path(const PointerRNA * /*ptr*/)
+static std::optional<std::string> rna_BrushGpencilSettings_path(const PointerRNA * /*ptr*/)
 {
-  return BLI_strdup("gpencil_settings");
+  return "gpencil_settings";
 }
 
 static void rna_BrushGpencilSettings_default_eraser_update(Main *bmain,
@@ -1205,9 +1205,9 @@ static void rna_Brush_automasking_cavity_set(PointerRNA *ptr, bool val)
   }
 }
 
-static char *rna_BrushCurvesSculptSettings_path(const PointerRNA * /*ptr*/)
+static std::optional<std::string> rna_BrushCurvesSculptSettings_path(const PointerRNA * /*ptr*/)
 {
-  return BLI_strdup("curves_sculpt_settings");
+  return "curves_sculpt_settings";
 }
 
 #else
@@ -2769,6 +2769,16 @@ static void rna_def_brush(BlenderRNA *brna)
   RNA_def_property_ui_text(prop, "Unprojected Radius", "Radius of brush in Blender units");
   RNA_def_property_update(prop, 0, "rna_Brush_size_update");
 
+  prop = RNA_def_property(srna, "input_samples", PROP_INT, PROP_UNSIGNED);
+  RNA_def_property_int_sdna(prop, nullptr, "input_samples");
+  RNA_def_property_range(prop, 1, PAINT_MAX_INPUT_SAMPLES);
+  RNA_def_property_ui_range(prop, 1, PAINT_MAX_INPUT_SAMPLES, 1, -1);
+  RNA_def_property_ui_text(
+      prop,
+      "Input Samples",
+      "Number of input samples to average together to smooth the brush stroke");
+  RNA_def_property_update(prop, 0, "rna_Brush_update");
+
   prop = RNA_def_property(srna, "jitter", PROP_FLOAT, PROP_NONE);
   RNA_def_property_float_sdna(prop, nullptr, "jitter");
   RNA_def_property_range(prop, 0.0f, 1000.0f);
@@ -3602,7 +3612,7 @@ static void rna_def_brush(BlenderRNA *brna)
   RNA_def_property_ui_text(
       prop,
       "Curve",
-      "Define the stroke curve with a bezier curve. Dabs are separated according to spacing");
+      "Define the stroke curve with a Bézier curve. Dabs are separated according to spacing");
   RNA_def_property_update(prop, 0, "rna_Brush_update");
 
   prop = RNA_def_property(srna, "use_smooth_stroke", PROP_BOOLEAN, PROP_NONE);
