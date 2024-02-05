@@ -24,6 +24,10 @@ namespace bfs = boost::filesystem;
 
 #include "kernel/types.h"
 #include "scene/camera.h"
+#include "scene/shader.h"
+// Have to include shader.h before background.h so that 'set_shader' uses the correct 'set'
+// overload taking a 'Node *', rather than the one taking a 'bool'
+#include "scene/background.h"
 #include "scene/light.h"
 #include "scene/scene.h"
 #include "scene/shader_graph.h"
@@ -148,6 +152,40 @@ void Ri::export_to_cycles()
       }
     }
   }
+
+  // Lifted from hydra/session.cpp
+  Scene *const scene = session->scene;
+
+  // Update background depending on presence of a background light
+  if (scene->light_manager->need_update()) {
+    ccl::Light *background_light = nullptr;
+    for (ccl::Light *light : scene->lights) {
+      if (light->get_light_type() == LIGHT_BACKGROUND) {
+        background_light = light;
+        break;
+      }
+    }
+
+    if (!background_light) {
+      scene->background->set_shader(scene->default_background);
+      scene->background->set_transparent(true);
+
+      /* Set background color depending to non-zero value if there are no
+       * lights in the scene, to match behavior of other renderers. */
+      for (ShaderNode *node : scene->default_background->graph->nodes) {
+        if (node->is_a(BackgroundNode::get_node_type())) {
+          BackgroundNode *bgNode = static_cast<BackgroundNode *>(node);
+          bgNode->set_color((scene->lights.size() == 0) ? make_float3(0.5f) : zero_float3());
+        }
+      }
+    }
+    else {
+      scene->background->set_shader(background_light->get_shader());
+      scene->background->set_transparent(false);
+    }
+
+    scene->background->tag_update(scene);
+  }
 }
 
 inline float radians(float deg)
@@ -221,11 +259,11 @@ void Ri::export_options([[maybe_unused]] Scene_Entity &filter,
     int blades = camera.parameters.get_one_int("apertureNSides", 0);
     float apertureAngle = camera.parameters.get_one_float("apertureAngle", 0);
     cam->set_focaldistance(focaldistance);
-    cam->set_aperturesize(focallength / (2.0 * fstop ));
+    cam->set_aperturesize(focallength / (2.0 * fstop));
     cam->set_blades(blades);
     cam->set_bladesrotation(apertureAngle);
   }
-  
+
   // Set screen window
   auto screen_window = camera.parameters.get_float_array("ScreenWindow");
   cam->set_viewplane_left(screen_window[0]);
@@ -2116,7 +2154,7 @@ void Ri::Torus([[maybe_unused]] float majorrad,
   std::cout << "Torus is unimplemented" << std::endl;
 }
 
-void Ri::transform(float const* transform, [[maybe_unused]] File_Loc loc)
+void Ri::transform(float const *transform, [[maybe_unused]] File_Loc loc)
 {
   graphics_state.for_active_transforms([=]([[maybe_unused]] auto t) {
     // Stomp the current transform

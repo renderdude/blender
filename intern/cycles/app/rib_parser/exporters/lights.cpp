@@ -239,7 +239,7 @@ void populate_shader_graph(Light_Scene_Entity &light_inst, Light *light, bool in
       hasSpatialVarying = true;
     }
 
-    std::string texture_file = light_inst.parameters.get_one_string("textureFile", "");
+    std::string texture_file = light_inst.parameters.get_one_string("lightColorMap", "");
     if (!texture_file.empty()) {
 
       ImageSlotTextureNode *textureNode = nullptr;
@@ -252,11 +252,16 @@ void populate_shader_graph(Light_Scene_Entity &light_inst, Light *light, bool in
         coordNode->set_use_transform(true);
         graph->add(coordNode);
 
+        MappingNode* mapper = graph->create_node<MappingNode>();
+        mapper->set_rotation(make_float3(0, 0, M_PI_2));
+        graph->add(mapper);
+        graph->connect(coordNode->output("Object"), mapper->input("Vector"));
+
         textureNode = graph->create_node<EnvironmentTextureNode>();
         static_cast<EnvironmentTextureNode *>(textureNode)->set_filename(ustring(texture_file));
         graph->add(textureNode);
 
-        graph->connect(coordNode->output("Object"), textureNode->input("Vector"));
+        graph->connect(mapper->output("Vector"), textureNode->input("Vector"));
 
         hasSpatialVarying = true;
       }
