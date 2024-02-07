@@ -157,6 +157,10 @@ def get_effective_preview_denoiser(context):
     return 'OIDN'
 
 
+def has_oidn_gpu_devices(context):
+    return context.preferences.addons[__package__].preferences.has_oidn_gpu_devices()
+
+
 def use_mnee(context):
     # The MNEE kernel doesn't compile on macOS < 13.
     if use_metal(context):
@@ -236,6 +240,11 @@ class CYCLES_RENDER_PT_sampling_viewport_denoise(CyclesButtonsPanel, Panel):
 
         col.prop(cscene, "preview_denoising_start_sample", text="Start Sample")
 
+        if effective_preview_denoiser == 'OPENIMAGEDENOISE':
+            row = col.row()
+            row.active = not use_cpu(context) and has_oidn_gpu_devices(context)
+            row.prop(cscene, "preview_denoising_use_gpu", text="Use GPU")
+
 
 class CYCLES_RENDER_PT_sampling_render(CyclesButtonsPanel, Panel):
     bl_label = "Render"
@@ -294,6 +303,11 @@ class CYCLES_RENDER_PT_sampling_render_denoise(CyclesButtonsPanel, Panel):
         col.prop(cscene, "denoising_input_passes", text="Passes")
         if cscene.denoiser == 'OPENIMAGEDENOISE':
             col.prop(cscene, "denoising_prefilter", text="Prefilter")
+
+        if cscene.denoiser == 'OPENIMAGEDENOISE':
+            row = col.row()
+            row.active = not use_cpu(context) and has_oidn_gpu_devices(context)
+            row.prop(cscene, "denoising_use_gpu", text="Use GPU")
 
 
 class CYCLES_RENDER_PT_sampling_path_guiding(CyclesButtonsPanel, Panel):
@@ -1573,6 +1587,7 @@ class CYCLES_LIGHT_PT_light(CyclesButtonsPanel, Panel):
         col.separator()
 
         if light.type in {'POINT', 'SPOT'}:
+            col.prop(light, "use_soft_falloff")
             col.prop(light, "shadow_soft_size", text="Radius")
         elif light.type == 'SUN':
             col.prop(light, "angle")
@@ -1587,6 +1602,7 @@ class CYCLES_LIGHT_PT_light(CyclesButtonsPanel, Panel):
                 sub.prop(light, "size_y", text="Y")
 
         if not (light.type == 'AREA' and clamp.is_portal):
+            col.separator()
             sub = col.column()
             sub.prop(clamp, "max_bounces")
 

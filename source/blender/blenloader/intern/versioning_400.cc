@@ -2867,6 +2867,45 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
     }
   }
 
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 401, 19)) {
+    LISTBASE_FOREACH (bNodeTree *, ntree, &bmain->nodetrees) {
+      if (ntree->type == NTREE_GEOMETRY) {
+        version_node_socket_name(ntree, FN_NODE_ROTATE_ROTATION, "Rotation 1", "Rotation");
+        version_node_socket_name(ntree, FN_NODE_ROTATE_ROTATION, "Rotation 2", "Rotate By");
+      }
+    }
+  }
+
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 401, 20)) {
+    LISTBASE_FOREACH (Object *, ob, &bmain->objects) {
+      int uid = 1;
+      LISTBASE_FOREACH (ModifierData *, md, &ob->modifiers) {
+        /* These identifiers are not necessarily stable for linked data. If the linked data has a
+         * new modifier inserted, the identifiers of other modifiers can change. */
+        md->persistent_uid = uid++;
+      }
+    }
+  }
+
+  /* Keep point/spot light soft falloff for files created before 4.0. */
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 400, 0)) {
+    LISTBASE_FOREACH (Light *, light, &bmain->lights) {
+      if (light->type == LA_LOCAL || light->type == LA_SPOT) {
+        light->mode |= LA_USE_SOFT_FALLOFF;
+      }
+    }
+  }
+
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 402, 1)) {
+    using namespace blender::bke::greasepencil;
+    /* Initialize newly added scale layer transform to one. */
+    LISTBASE_FOREACH (GreasePencil *, grease_pencil, &bmain->grease_pencils) {
+      for (Layer *layer : grease_pencil->layers_for_write()) {
+        copy_v3_fl(layer->scale, 1.0f);
+      }
+    }
+  }
+
   /**
    * Always bump subversion in BKE_blender_version.h when adding versioning
    * code here, and wrap it inside a MAIN_VERSION_FILE_ATLEAST check.

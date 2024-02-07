@@ -226,7 +226,7 @@ void ShadowPunctual::sync(eLightType light_type,
                           float max_distance,
                           float softness_factor)
 {
-  if (light_type == LIGHT_SPOT) {
+  if (is_spot_light(light_type)) {
     tilemaps_needed_ = (cone_aperture > DEG2RADF(90.0f)) ? 5 : 1;
   }
   else if (is_area_light(light_type)) {
@@ -1273,14 +1273,14 @@ bool ShadowModule::shadow_update_finished()
 {
   if (inst_.is_viewport()) {
     /* For viewport, only run the shadow update once per redraw.
-     * This avoids the stall from the readback and freezes from long shadow update. */
+     * This avoids the stall from the read-back and freezes from long shadow update. */
     return true;
   }
 
   int max_updated_view_count = tilemap_pool.tilemaps_data.size() * SHADOW_TILEMAP_LOD;
   if (max_updated_view_count <= SHADOW_VIEW_MAX) {
-    /* There is enough shadow views to cover all tilemap updates.
-     * No readback needed as it is guaranteed that all of them will be updated. */
+    /* There is enough shadow views to cover all tile-map updates.
+     * No read-back needed as it is guaranteed that all of them will be updated. */
     return true;
   }
 
