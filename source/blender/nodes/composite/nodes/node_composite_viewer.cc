@@ -8,7 +8,7 @@
 
 #include "BLI_math_vector_types.hh"
 
-#include "BKE_global.h"
+#include "BKE_global.hh"
 #include "BKE_image.h"
 
 #include "RNA_access.hh"
@@ -17,7 +17,6 @@
 #include "UI_resources.hh"
 
 #include "GPU_shader.h"
-#include "GPU_state.h"
 #include "GPU_texture.h"
 
 #include "COM_node_operation.hh"

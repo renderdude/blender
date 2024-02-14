@@ -56,7 +56,7 @@ set(SRC
   intern/buffer.c
   intern/cache_mutex.cc
   intern/compute_context.cc
-  intern/convexhull_2d.c
+  intern/convexhull_2d.cc
   intern/cpp_type.cc
   intern/cpp_types.cc
   intern/delaunay_2d.cc
@@ -155,7 +155,7 @@ set(SRC
   intern/timecode.c
   intern/timeit.cc
   intern/uuid.cc
-  intern/uvproject.c
+  intern/uvproject.cc
   intern/vector.cc
   intern/virtual_array.cc
   intern/voxel.c
@@ -498,6 +498,7 @@ if(WITH_GTESTS)
     tests/BLI_bitmap_test.cc
     tests/BLI_bounds_test.cc
     tests/BLI_color_test.cc
+    tests/BLI_convexhull_2d_test.cc
     tests/BLI_cpp_type_test.cc
     tests/BLI_delaunay_2d_test.cc
     tests/BLI_disjoint_set_test.cc

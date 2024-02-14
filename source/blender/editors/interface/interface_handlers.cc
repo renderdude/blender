@@ -42,7 +42,7 @@
 #include "BKE_curveprofile.h"
 #include "BKE_movieclip.h"
 #include "BKE_paint.hh"
-#include "BKE_report.h"
+#include "BKE_report.hh"
 #include "BKE_screen.hh"
 #include "BKE_tracking.h"
 #include "BKE_unit.hh"
@@ -56,7 +56,6 @@
 
 #include "UI_interface.hh"
 #include "UI_string_search.hh"
-#include "UI_view2d.hh"
 
 #include "BLF_api.hh"
 
@@ -70,8 +69,6 @@
 #include "wm_event_system.hh"
 
 #ifdef WITH_INPUT_IME
-#  include "BLT_lang.h"
-#  include "BLT_translation.h"
 #  include "wm_window.hh"
 #endif
 

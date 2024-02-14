@@ -14,11 +14,9 @@
 #include "DNA_screen_types.h"
 
 #include "BKE_asset.hh"
-#include "BKE_report.h"
+#include "BKE_report.hh"
 
-#include "BLT_translation.h"
-
-#include "WM_api.hh"
+#include "BLT_translation.hh"
 
 #include "RNA_access.hh"
 #include "RNA_define.hh"

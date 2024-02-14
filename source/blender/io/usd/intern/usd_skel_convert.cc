@@ -37,7 +37,7 @@
 #include "BKE_modifier.hh"
 #include "BKE_object.hh"
 #include "BKE_object_deform.h"
-#include "BKE_report.h"
+#include "BKE_report.hh"
 
 #include "BLI_map.hh"
 #include "BLI_math_vector.h"
@@ -1311,7 +1311,7 @@ void export_deform_verts(const Mesh *mesh,
         continue;
       }
 
-      int def_nr = static_cast<int>(vert.dw[j].def_nr);
+      int def_nr = int(vert.dw[j].def_nr);
 
       if (def_nr >= joint_index.size()) {
         BLI_assert_unreachable();

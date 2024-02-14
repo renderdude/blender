@@ -724,17 +724,23 @@ static std::unique_ptr<Instances> try_load_instances(const DictionaryValue &io_g
     return {};
   }
 
-  const auto *io_handles = io_instances->lookup_dict("handles");
-  if (!io_handles) {
-    return {};
-  }
-  if (!read_blob_simple_gspan(blob_reader, *io_handles, instances->reference_handles())) {
-    return {};
-  }
-
   MutableAttributeAccessor attributes = instances->attributes_for_write();
   if (!load_attributes(*io_attributes, attributes, blob_reader, blob_sharing)) {
     return {};
+  }
+
+  if (!attributes.contains(".reference_index")) {
+    /* Try reading the reference index attribute from the old bake format from before it was an
+     * attribute. */
+    const auto *io_handles = io_instances->lookup_dict("handles");
+    if (!io_handles) {
+      return {};
+    }
+    if (!read_blob_simple_gspan(
+            blob_reader, *io_handles, instances->reference_handles_for_write()))
+    {
+      return {};
+    }
   }
 
   return instances;
@@ -969,9 +975,6 @@ static std::shared_ptr<DictionaryValue> serialize_geometry_set(const GeometrySet
 
     io_instances->append(
         "transforms", write_blob_simple_gspan(blob_writer, blob_sharing, instances.transforms()));
-    io_instances->append(
-        "handles",
-        write_blob_simple_gspan(blob_writer, blob_sharing, instances.reference_handles()));
 
     auto io_attributes = serialize_attributes(
         instances.attributes(), blob_writer, blob_sharing, {"position"});
@@ -1038,6 +1041,10 @@ static std::shared_ptr<io::serialize::Value> serialize_primitive_value(
     case CD_PROP_QUATERNION: {
       const math::Quaternion value = *static_cast<const math::Quaternion *>(value_ptr);
       return serialize_float_array({&value.x, 4});
+    }
+    case CD_PROP_FLOAT4X4: {
+      const float4x4 value = *static_cast<const float4x4 *>(value_ptr);
+      return serialize_float_array({value.base_ptr(), value.col_len * value.row_len});
     }
     default:
       break;
@@ -1156,6 +1163,9 @@ template<typename T>
     }
     case CD_PROP_QUATERNION: {
       return deserialize_float_array(io_value, {static_cast<float *>(r_value), 4});
+    }
+    case CD_PROP_FLOAT4X4: {
+      return deserialize_float_array(io_value, {static_cast<float *>(r_value), 4 * 4});
     }
     default:
       break;

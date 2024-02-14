@@ -26,7 +26,7 @@
 #include "BLI_time.h"
 #include "BLI_utildefines.h"
 
-#include "BLT_translation.h"
+#include "BLT_translation.hh"
 
 #include "DNA_camera_types.h"
 #include "DNA_node_types.h"
@@ -36,27 +36,23 @@
 
 #include "BKE_colortools.hh"
 #include "BKE_context.hh"
-#include "BKE_global.h"
+#include "BKE_global.hh"
 #include "BKE_icons.h"
 #include "BKE_image.h"
-#include "BKE_image_format.h"
 #include "BKE_image_save.h"
 #include "BKE_layer.hh"
 #include "BKE_lib_id.hh"
 #include "BKE_main.hh"
 #include "BKE_packedFile.h"
-#include "BKE_report.h"
-#include "BKE_scene.h"
+#include "BKE_report.hh"
+#include "BKE_scene.hh"
 
 #include "DEG_depsgraph.hh"
-
-#include "GPU_state.h"
 
 #include "IMB_colormanagement.hh"
 #include "IMB_imbuf.hh"
 #include "IMB_imbuf_types.hh"
 #include "IMB_moviecache.hh"
-#include "IMB_openexr.hh"
 
 #include "RE_pipeline.h"
 
@@ -70,7 +66,6 @@
 #include "ED_paint.hh"
 #include "ED_render.hh"
 #include "ED_screen.hh"
-#include "ED_space_api.hh"
 #include "ED_undo.hh"
 #include "ED_util.hh"
 #include "ED_util_imbuf.hh"

@@ -32,9 +32,7 @@
 
 #include "UI_interface.hh"
 
-#include "BLT_translation.h"
-
-#include "ED_screen.hh"
+#include "BLT_translation.hh"
 
 #include "interface_intern.hh"
 #include "interface_regions_intern.hh"

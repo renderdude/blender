@@ -123,10 +123,10 @@ static bool rna_event_modal_handler_add(bContext *C, ReportList *reports, wmOper
   return WM_event_add_modal_handler_ex(win, area, region, op) != nullptr;
 }
 
-/* XXX, need a way for python to know event types, 0x0110 is hard coded */
 static wmTimer *rna_event_timer_add(wmWindowManager *wm, float time_step, wmWindow *win)
 {
-  return WM_event_timer_add(wm, win, 0x0110, time_step);
+  /* NOTE: we need a way for Python to know event types, `TIMER` is hard coded. */
+  return WM_event_timer_add(wm, win, TIMER, time_step);
 }
 
 static void rna_event_timer_remove(wmWindowManager *wm, wmTimer *timer)
@@ -1032,6 +1032,7 @@ void RNA_api_wm(StructRNA *srna)
   RNA_def_function_flag(func, FUNC_NO_SELF);
 
   parm = RNA_def_property(srna, "is_interface_locked", PROP_BOOLEAN, PROP_NONE);
+  RNA_def_property_boolean_sdna(parm, nullptr, "runtime->is_interface_locked", 0);
   RNA_def_property_ui_text(
       parm,
       "Is Interface Locked",

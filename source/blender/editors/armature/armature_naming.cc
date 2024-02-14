@@ -25,7 +25,7 @@
 #include "BLI_string_utils.hh"
 #include "BLI_utildefines.h"
 
-#include "BLT_translation.h"
+#include "BLT_translation.hh"
 
 #include "BKE_action.h"
 #include "BKE_animsys.h"
@@ -33,7 +33,6 @@
 #include "BKE_constraint.h"
 #include "BKE_context.hh"
 #include "BKE_deform.hh"
-#include "BKE_gpencil_modifier_legacy.h"
 #include "BKE_grease_pencil.hh"
 #include "BKE_layer.hh"
 #include "BKE_main.hh"

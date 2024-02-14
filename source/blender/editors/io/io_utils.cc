@@ -6,13 +6,11 @@
 
 #include "BLI_path_util.h"
 
-#include "BLT_translation.h"
+#include "BLT_translation.hh"
 
 #include "BKE_context.hh"
 
 #include "DNA_space_types.h"
-
-#include "ED_fileselect.hh"
 
 #include "RNA_access.hh"
 #include "RNA_prototypes.h"

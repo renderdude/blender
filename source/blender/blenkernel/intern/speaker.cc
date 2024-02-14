@@ -7,19 +7,16 @@
  */
 
 #include "DNA_defaults.h"
-#include "DNA_object_types.h"
 #include "DNA_sound_types.h"
 #include "DNA_speaker_types.h"
 
 #include "BLI_utildefines.h"
 
-#include "BLT_translation.h"
+#include "BLT_translation.hh"
 
-#include "BKE_anim_data.h"
 #include "BKE_idtype.hh"
 #include "BKE_lib_id.hh"
 #include "BKE_lib_query.hh"
-#include "BKE_main.hh"
 #include "BKE_speaker.h"
 
 #include "BLO_read_write.hh"

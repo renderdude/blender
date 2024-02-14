@@ -20,13 +20,12 @@
 #include "BLI_string.h"
 #include "BLI_utildefines.h"
 
-#include "BLT_translation.h"
+#include "BLT_translation.hh"
 
 #include "BKE_context.hh"
-#include "BKE_global.h"
+#include "BKE_global.hh"
 #include "BKE_idprop.h"
 #include "BKE_lib_id.hh"
-#include "BKE_report.h"
 #include "BKE_screen.hh"
 
 #include "MEM_guardedalloc.h"

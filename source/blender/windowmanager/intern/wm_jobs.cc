@@ -19,9 +19,8 @@
 #include "BLI_time.h"
 #include "BLI_utildefines.h"
 
-#include "BKE_context.hh"
-#include "BKE_global.h"
-#include "BKE_report.h"
+#include "BKE_global.hh"
+#include "BKE_report.hh"
 
 #include "SEQ_prefetch.hh"
 

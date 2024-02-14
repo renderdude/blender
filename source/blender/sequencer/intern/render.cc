@@ -12,7 +12,6 @@
 
 #include "MEM_guardedalloc.h"
 
-#include "DNA_anim_types.h"
 #include "DNA_defaults.h"
 #include "DNA_mask_types.h"
 #include "DNA_scene_types.h"
@@ -30,14 +29,14 @@
 #include "BKE_anim_data.h"
 #include "BKE_animsys.h"
 #include "BKE_fcurve.h"
-#include "BKE_global.h"
+#include "BKE_global.hh"
 #include "BKE_image.h"
 #include "BKE_layer.hh"
 #include "BKE_lib_id.hh"
 #include "BKE_main.hh"
 #include "BKE_mask.h"
 #include "BKE_movieclip.h"
-#include "BKE_scene.h"
+#include "BKE_scene.hh"
 #include "BKE_sequencer_offscreen.h"
 
 #include "DEG_depsgraph.hh"
@@ -48,7 +47,6 @@
 #include "IMB_imbuf_types.hh"
 #include "IMB_metadata.hh"
 
-#include "RNA_access.hh"
 #include "RNA_prototypes.h"
 
 #include "RE_engine.h"
@@ -72,7 +70,6 @@
 #include "prefetch.hh"
 #include "proxy.hh"
 #include "render.hh"
-#include "strip_time.hh"
 #include "utils.hh"
 
 #include <algorithm>

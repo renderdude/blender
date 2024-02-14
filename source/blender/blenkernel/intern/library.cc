@@ -8,10 +8,6 @@
  * Contains code specific to the `Library` ID type.
  */
 
-#include "CLG_log.h"
-
-#include "MEM_guardedalloc.h"
-
 /* all types are needed here, in order to do memory operations */
 #include "DNA_ID.h"
 
@@ -19,11 +15,10 @@
 
 #include "BLI_blenlib.h"
 
-#include "BLT_translation.h"
+#include "BLT_translation.hh"
 
-#include "BKE_bpath.h"
+#include "BKE_bpath.hh"
 #include "BKE_idtype.hh"
-#include "BKE_lib_id.hh"
 #include "BKE_lib_query.hh"
 #include "BKE_library.hh"
 #include "BKE_main.hh"
