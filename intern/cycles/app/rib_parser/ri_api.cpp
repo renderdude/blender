@@ -2308,13 +2308,8 @@ void Ri::add_default_search_paths(std::string filepath)
   Parsed_Parameter *param;
 
   param = new Parsed_Parameter(Parameter_Type::String, "shader_default", File_Loc());
-  std::cout << param->has_bools() << " " << param->has_floats() << " " << param->has_ints() << " "
-            << param->has_strings() << " " << param->payload.index() << std::endl;
   param->payload = vector<std::string>();
   param->add_string(filepath);
-  std::cout << param->has_bools() << " " << param->has_floats() << " " << param->has_ints() << " "
-            << param->has_strings() << " " << param->payload.index() << std::endl;
-
   params.push_back(param);
 
   Option("searchpath", params, File_Loc());
