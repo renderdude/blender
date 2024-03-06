@@ -216,15 +216,15 @@ static void track_markers_startjob(void *tmv, wmJobWorkerStatus *worker_status)
        * exec_time for "Fastest" tracking
        */
 
-      double start_time = BLI_check_seconds_timer(), exec_time;
+      double start_time = BLI_time_now_seconds(), exec_time;
 
       if (!BKE_autotrack_context_step(tmj->context)) {
         break;
       }
 
-      exec_time = BLI_check_seconds_timer() - start_time;
+      exec_time = BLI_time_now_seconds() - start_time;
       if (tmj->delay > float(exec_time)) {
-        BLI_sleep_ms(tmj->delay - float(exec_time));
+        BLI_time_sleep_ms(tmj->delay - float(exec_time));
       }
     }
     else if (!BKE_autotrack_context_step(tmj->context)) {
@@ -270,7 +270,7 @@ static void track_markers_endjob(void *tmv)
   BKE_autotrack_context_sync(tmj->context);
   BKE_autotrack_context_finish(tmj->context);
 
-  DEG_id_tag_update(&tmj->clip->id, ID_RECALC_COPY_ON_WRITE);
+  DEG_id_tag_update(&tmj->clip->id, ID_RECALC_SYNC_TO_EVAL);
   WM_main_add_notifier(NC_SCENE | ND_FRAME, tmj->scene);
 }
 
@@ -446,7 +446,7 @@ static int refine_marker_exec(bContext *C, wmOperator *op)
     }
   }
 
-  DEG_id_tag_update(&clip->id, ID_RECALC_COPY_ON_WRITE);
+  DEG_id_tag_update(&clip->id, ID_RECALC_SYNC_TO_EVAL);
   WM_event_add_notifier(C, NC_MOVIECLIP | NA_EVALUATED, clip);
 
   return OPERATOR_FINISHED;

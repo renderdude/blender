@@ -24,7 +24,7 @@
 
 #include "BKE_colortools.hh"
 #include "BKE_curve.hh"
-#include "BKE_fcurve.h"
+#include "BKE_fcurve.hh"
 
 #include "IMB_colormanagement.hh"
 #include "IMB_imbuf_types.hh"
@@ -1713,6 +1713,8 @@ void BKE_scopes_update(Scopes *scopes,
   }
   if (scopes->vecscope) {
     MEM_freeN(scopes->vecscope);
+  }
+  if (scopes->vecscope_rgb) {
     MEM_freeN(scopes->vecscope_rgb);
   }
 

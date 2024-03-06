@@ -658,6 +658,7 @@ static void print_help(bArgs *ba, bool all)
   BLI_args_print_arg_doc(ba, "--debug-wintab");
   BLI_args_print_arg_doc(ba, "--debug-gpu");
   BLI_args_print_arg_doc(ba, "--debug-gpu-force-workarounds");
+  BLI_args_print_arg_doc(ba, "--debug-gpu-compile-shaders");
   if (defs.with_renderdoc) {
     BLI_args_print_arg_doc(ba, "--debug-gpu-renderdoc");
   }
@@ -763,12 +764,16 @@ static void print_help(bArgs *ba, bool all)
   if (defs.with_ocio) {
     PRINT("  $OCIO                     Path to override the OpenColorIO config file.\n");
   }
-  if (defs.win32) {
-    PRINT("  $TEMP                     Store temporary files here (MS-Windows).\n");
+  if (defs.win32 || all) {
+    PRINT("  $TEMP                      Store temporary files here (MS-Windows).\n");
   }
   if (!defs.win32 || all) {
-    PRINT("  $TMP or $TMPDIR           Store temporary files here (UNIX Systems).\n");
+    /* NOTE: while `TMP` checked, don't include here as it's non-standard & may be removed. */
+    PRINT("  $TMPDIR                    Store temporary files here (UNIX Systems).\n");
   }
+  PRINT(
+      "                             The path must reference an existing directory "
+      "or it will be ignored.\n");
 
 #  undef printf
 #  undef PRINT
@@ -1224,6 +1229,17 @@ static int arg_handle_debug_gpu_set(int /*argc*/, const char ** /*argv*/, void *
   return 0;
 }
 
+static const char arg_handle_debug_gpu_compile_shaders_set_doc[] =
+    "\n"
+    "\tCompile all statically defined shaders to test platform compatibility.";
+static int arg_handle_debug_gpu_compile_shaders_set(int /*argc*/,
+                                                    const char ** /*argv*/,
+                                                    void * /*data*/)
+{
+  G.debug |= G_DEBUG_GPU_COMPILE_SHADERS;
+  return 0;
+}
+
 static const char arg_handle_debug_gpu_renderdoc_set_doc[] =
     "\n"
     "\tEnable Renderdoc integration for GPU frame grabbing and debugging.";
@@ -1600,7 +1616,7 @@ static int arg_handle_output_set(int argc, const char **argv, void *data)
     Scene *scene = CTX_data_scene(C);
     if (scene) {
       STRNCPY(scene->r.pic, argv[1]);
-      DEG_id_tag_update(&scene->id, ID_RECALC_COPY_ON_WRITE);
+      DEG_id_tag_update(&scene->id, ID_RECALC_SYNC_TO_EVAL);
     }
     else {
       fprintf(stderr, "\nError: no blend loaded. cannot use '-o / --render-output'.\n");
@@ -1631,7 +1647,7 @@ static int arg_handle_engine_set(int argc, const char **argv, void *data)
       if (scene) {
         if (BLI_findstring(&R_engines, argv[1], offsetof(RenderEngineType, idname))) {
           STRNCPY_UTF8(scene->r.engine, argv[1]);
-          DEG_id_tag_update(&scene->id, ID_RECALC_COPY_ON_WRITE);
+          DEG_id_tag_update(&scene->id, ID_RECALC_SYNC_TO_EVAL);
         }
         else {
           fprintf(stderr, "\nError: engine not found '%s'\n", argv[1]);
@@ -1675,7 +1691,7 @@ static int arg_handle_image_type_set(int argc, const char **argv, void *data)
       }
       else {
         scene->r.im_format.imtype = imtype_new;
-        DEG_id_tag_update(&scene->id, ID_RECALC_COPY_ON_WRITE);
+        DEG_id_tag_update(&scene->id, ID_RECALC_SYNC_TO_EVAL);
       }
     }
     else {
@@ -1760,11 +1776,11 @@ static int arg_handle_extension_set(int argc, const char **argv, void *data)
     if (scene) {
       if (argv[1][0] == '0') {
         scene->r.scemode &= ~R_EXTENSION;
-        DEG_id_tag_update(&scene->id, ID_RECALC_COPY_ON_WRITE);
+        DEG_id_tag_update(&scene->id, ID_RECALC_SYNC_TO_EVAL);
       }
       else if (argv[1][0] == '1') {
         scene->r.scemode |= R_EXTENSION;
-        DEG_id_tag_update(&scene->id, ID_RECALC_COPY_ON_WRITE);
+        DEG_id_tag_update(&scene->id, ID_RECALC_SYNC_TO_EVAL);
       }
       else {
         fprintf(stderr,
@@ -1916,7 +1932,7 @@ static int arg_handle_frame_start_set(int argc, const char **argv, void *data)
         fprintf(stderr, "\nError: %s '%s %s'.\n", err_msg, arg_id, argv[1]);
       }
       else {
-        DEG_id_tag_update(&scene->id, ID_RECALC_COPY_ON_WRITE);
+        DEG_id_tag_update(&scene->id, ID_RECALC_SYNC_TO_EVAL);
       }
       return 1;
     }
@@ -1950,7 +1966,7 @@ static int arg_handle_frame_end_set(int argc, const char **argv, void *data)
         fprintf(stderr, "\nError: %s '%s %s'.\n", err_msg, arg_id, argv[1]);
       }
       else {
-        DEG_id_tag_update(&scene->id, ID_RECALC_COPY_ON_WRITE);
+        DEG_id_tag_update(&scene->id, ID_RECALC_SYNC_TO_EVAL);
       }
       return 1;
     }
@@ -1976,7 +1992,7 @@ static int arg_handle_frame_skip_set(int argc, const char **argv, void *data)
         fprintf(stderr, "\nError: %s '%s %s'.\n", err_msg, arg_id, argv[1]);
       }
       else {
-        DEG_id_tag_update(&scene->id, ID_RECALC_COPY_ON_WRITE);
+        DEG_id_tag_update(&scene->id, ID_RECALC_SYNC_TO_EVAL);
       }
       return 1;
     }
@@ -2438,6 +2454,11 @@ void main_args_setup(bContext *C, bArgs *ba, bool all)
                CB_EX(arg_handle_debug_mode_generic_set, jobs),
                (void *)G_DEBUG_JOBS);
   BLI_args_add(ba, nullptr, "--debug-gpu", CB(arg_handle_debug_gpu_set), nullptr);
+  BLI_args_add(ba,
+               nullptr,
+               "--debug-gpu-compile-shaders",
+               CB(arg_handle_debug_gpu_compile_shaders_set),
+               nullptr);
   if (defs.with_renderdoc) {
     BLI_args_add(
         ba, nullptr, "--debug-gpu-renderdoc", CB(arg_handle_debug_gpu_renderdoc_set), nullptr);

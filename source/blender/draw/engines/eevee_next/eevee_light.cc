@@ -78,6 +78,8 @@ void Light::sync(ShadowModule &shadows, const Object *ob, float threshold)
   this->power[LIGHT_SPECULAR] = la->spec_fac * shape_power;
   this->power[LIGHT_VOLUME] = la->volume_fac * point_power;
 
+  this->pcf_radius = la->shadow_filter_radius;
+
   eLightType new_type = to_light_type(la->type, la->area_shape, la->mode & LA_USE_SOFT_FALLOFF);
   if (assign_if_different(this->type, new_type)) {
     shadow_discard_safe(shadows);
@@ -95,12 +97,23 @@ void Light::sync(ShadowModule &shadows, const Object *ob, float threshold)
       /* Reuse shape radius as near clip plane. */
       /* This assumes `shape_parameters_set` has already set `radius_squared`. */
       float radius = math::sqrt(this->radius_squared);
+      float shadow_radius = la->shadow_softness_factor * radius;
+      if (ELEM(la->type, LA_LOCAL, LA_SPOT)) {
+        /* `shape_parameters_set` can increase the radius of point and spot lights to ensure a
+         * minimum radius/energy ratio.
+         * But we don't want to take that into account for computing the shadow-map projection,
+         * since non-zero radius introduces padding (required for soft-shadows tracing), reducing
+         * the effective resolution of shadow-maps.
+         * So we use the original light radius instead. */
+        shadow_radius = la->shadow_softness_factor * la->radius;
+      }
       this->punctual->sync(this->type,
                            this->object_mat,
                            la->spotsize,
                            radius,
                            this->influence_radius_max,
-                           la->shadow_softness_factor);
+                           la->shadow_softness_factor,
+                           shadow_radius);
     }
   }
   else {
@@ -338,7 +351,7 @@ void LightModule::end_sync()
   if (sun_lights_len_ + local_lights_len_ > CULLING_MAX_ITEM) {
     sun_lights_len_ = min_ii(sun_lights_len_, CULLING_MAX_ITEM);
     local_lights_len_ = min_ii(local_lights_len_, CULLING_MAX_ITEM - sun_lights_len_);
-    inst_.info = "Error: Too many lights in the scene.";
+    inst_.info += "Error: Too many lights in the scene.\n";
   }
   lights_len_ = sun_lights_len_ + local_lights_len_;
 
@@ -471,7 +484,7 @@ void LightModule::set_view(View &view, const int2 extent)
 void LightModule::debug_draw(View &view, GPUFrameBuffer *view_fb)
 {
   if (inst_.debug_mode == eDebugMode::DEBUG_LIGHT_CULLING) {
-    inst_.info = "Debug Mode: Light Culling Validation";
+    inst_.info += "Debug Mode: Light Culling Validation\n";
     inst_.hiz_buffer.update();
     GPU_framebuffer_bind(view_fb);
     inst_.manager->submit(debug_draw_ps_, view);

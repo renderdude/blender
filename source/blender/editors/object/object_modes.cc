@@ -301,7 +301,7 @@ static bool ed_object_mode_generic_exit_ex(
   }
   else if (ob->mode & OB_MODE_PAINT_GREASE_PENCIL) {
     ob->mode &= ~OB_MODE_PAINT_GREASE_PENCIL;
-    DEG_id_tag_update(&ob->id, ID_RECALC_GEOMETRY | ID_RECALC_COPY_ON_WRITE);
+    DEG_id_tag_update(&ob->id, ID_RECALC_GEOMETRY | ID_RECALC_SYNC_TO_EVAL);
     WM_main_add_notifier(NC_SCENE | ND_MODE | NS_MODE_OBJECT, nullptr);
   }
   else {
@@ -433,7 +433,7 @@ static void object_overlay_mode_transfer_animation_start(bContext *C, Object *ob
 {
   Depsgraph *depsgraph = CTX_data_depsgraph_pointer(C);
   Object *ob_dst_eval = DEG_get_evaluated_object(depsgraph, ob_dst);
-  ob_dst_eval->runtime->overlay_mode_transfer_start_time = BLI_check_seconds_timer();
+  ob_dst_eval->runtime->overlay_mode_transfer_start_time = BLI_time_now_seconds();
 }
 
 static bool object_transfer_mode_to_base(bContext *C, wmOperator *op, Base *base_dst)

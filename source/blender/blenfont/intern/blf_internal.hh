@@ -8,6 +8,9 @@
 
 #pragma once
 
+#include "BLI_string_ref.hh"
+#include "BLI_vector.hh"
+
 struct FontBLF;
 struct GlyphBLF;
 struct GlyphCacheBLF;
@@ -49,18 +52,16 @@ struct rcti;
 extern struct FontBLF *global_font[BLF_MAX_FONT];
 
 void blf_batch_draw_begin(struct FontBLF *font);
-void blf_batch_draw(void);
+void blf_batch_draw();
 
-unsigned int blf_next_p2(unsigned int x);
-unsigned int blf_hash(unsigned int val);
 /**
  * Some font have additional file with metrics information,
  * in general, the extension of the file is: `.afm` or `.pfm`
  */
 char *blf_dir_metrics_search(const char *filepath);
 
-int blf_font_init(void);
-void blf_font_exit(void);
+int blf_font_init();
+void blf_font_exit();
 
 bool blf_font_id_is_valid(int fontid);
 
@@ -76,7 +77,7 @@ bool blf_ensure_face(struct FontBLF *font);
 void blf_ensure_size(struct FontBLF *font);
 
 void blf_draw_buffer__start(struct FontBLF *font);
-void blf_draw_buffer__end(void);
+void blf_draw_buffer__end();
 
 struct FontBLF *blf_font_new_from_filepath(const char *filepath);
 struct FontBLF *blf_font_new_from_mem(const char *name, const unsigned char *mem, size_t mem_size);
@@ -95,6 +96,10 @@ void blf_font_draw__wrap(struct FontBLF *font,
                          const char *str,
                          size_t str_len,
                          struct ResultBLF *r_info);
+
+blender::Vector<blender::StringRef> blf_font_string_wrap(FontBLF *font,
+                                                         blender::StringRef str,
+                                                         int max_pixel_width);
 
 /**
  * Use fixed column width, but an utf8 character may occupy multiple columns.
@@ -173,7 +178,10 @@ void blf_glyph_cache_clear(struct FontBLF *font);
 /**
  * Create (or load from cache) a fully-rendered bitmap glyph.
  */
-struct GlyphBLF *blf_glyph_ensure(struct FontBLF *font, struct GlyphCacheBLF *gc, uint charcode);
+struct GlyphBLF *blf_glyph_ensure(struct FontBLF *font,
+                                  struct GlyphCacheBLF *gc,
+                                  uint charcode,
+                                  uint8_t subpixel = 0);
 
 #ifdef BLF_SUBPIXEL_AA
 struct GlyphBLF *blf_glyph_ensure_subpixel(struct FontBLF *font,
@@ -190,7 +198,6 @@ float blf_character_to_curves(FontBLF *font,
                               struct ListBase *nurbsbase,
                               const float scale);
 
-void blf_glyph_free(struct GlyphBLF *g);
 void blf_glyph_draw(
     struct FontBLF *font, struct GlyphCacheBLF *gc, struct GlyphBLF *g, int x, int y);
 

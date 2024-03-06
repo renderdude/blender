@@ -13,6 +13,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
+#include <optional>
 
 #include "MEM_guardedalloc.h"
 
@@ -99,6 +100,7 @@ static void particle_settings_init(ID *id)
 }
 
 static void particle_settings_copy_data(Main * /*bmain*/,
+                                        std::optional<Library *> /*owner_library*/,
                                         ID *id_dst,
                                         const ID *id_src,
                                         const int /*flag*/)
@@ -379,6 +381,7 @@ static void particle_settings_blend_read_after_liblink(BlendLibReader * /*reader
 IDTypeInfo IDType_ID_PA = {
     /*id_code*/ ID_PA,
     /*id_filter*/ FILTER_ID_PA,
+    /*dependencies_id_types*/ FILTER_ID_OB | FILTER_ID_GR | FILTER_ID_TE,
     /*main_listbase_index*/ INDEX_ID_PA,
     /*struct_size*/ sizeof(ParticleSettings),
     /*name*/ "ParticleSettings",
@@ -1076,7 +1079,7 @@ void psys_copy_particles(ParticleSystem *psys_dst, ParticleSystem *psys_src)
    *
    * Furthermore, #free_hair() always frees `pa->hair` if it's not nullptr, regardless of the
    * particle type. So *not* copying here would cause a double free (or more), e.g. freeing the
-   * copy-on-write copy and the original data will crash Blender.
+   * copy-on-evaluation copy and the original data will crash Blender.
    * In any case, sharing pointers between `psys_src` and `psys_dst` should be forbidden.
    *
    * So while we could in theory 'sanitize' the situation by setting `pa->hair` to nullptr in the
@@ -4083,7 +4086,7 @@ void object_remove_particle_system(Main *bmain,
   DEG_id_tag_update(&ob->id, ID_RECALC_GEOMETRY);
 
   /* Flush object mode. */
-  DEG_id_tag_update(&ob->id, ID_RECALC_COPY_ON_WRITE);
+  DEG_id_tag_update(&ob->id, ID_RECALC_SYNC_TO_EVAL);
 }
 
 ParticleSettings *BKE_particlesettings_add(Main *bmain, const char *name)

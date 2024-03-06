@@ -93,7 +93,7 @@ static void motion_path_get_frame_range_to_draw(bAnimVizSettings *avs,
   }
   else {
     start = avs->path_sf;
-    end = avs->path_ef;
+    end = avs->path_ef + 1;
   }
 
   if (start > end) {
@@ -144,6 +144,14 @@ static void motion_path_cache(OVERLAY_Data *vedata,
   if (len == 0) {
     return;
   }
+
+  /* Avoid 0 size allocations. Current code to calculate motion paths should
+   * sanitize this already [see animviz_verify_motionpaths()], we might however
+   * encounter an older file where this was still possible. */
+  if (mpath->length == 0) {
+    return;
+  }
+
   int start_index = sfra - mpath->start_frame;
 
   float camera_matrix[4][4];

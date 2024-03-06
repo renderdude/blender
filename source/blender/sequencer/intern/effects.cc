@@ -31,7 +31,7 @@
 #include "DNA_space_types.h"
 #include "DNA_vfont_types.h"
 
-#include "BKE_fcurve.h"
+#include "BKE_fcurve.hh"
 #include "BKE_lib_id.hh"
 #include "BKE_main.hh"
 
@@ -165,26 +165,28 @@ static void store_opaque_black_pixel(float *dst)
 static ImBuf *prepare_effect_imbufs(const SeqRenderData *context,
                                     ImBuf *ibuf1,
                                     ImBuf *ibuf2,
-                                    ImBuf *ibuf3)
+                                    ImBuf *ibuf3,
+                                    bool uninitialized_pixels = true)
 {
   ImBuf *out;
   Scene *scene = context->scene;
   int x = context->rectx;
   int y = context->recty;
+  int base_flags = uninitialized_pixels ? IB_uninitialized_pixels : 0;
 
   if (!ibuf1 && !ibuf2 && !ibuf3) {
     /* hmmm, global float option ? */
-    out = IMB_allocImBuf(x, y, 32, IB_rect);
+    out = IMB_allocImBuf(x, y, 32, IB_rect | base_flags);
   }
   else if ((ibuf1 && ibuf1->float_buffer.data) || (ibuf2 && ibuf2->float_buffer.data) ||
            (ibuf3 && ibuf3->float_buffer.data))
   {
     /* if any inputs are rectfloat, output is float too */
 
-    out = IMB_allocImBuf(x, y, 32, IB_rectfloat);
+    out = IMB_allocImBuf(x, y, 32, IB_rectfloat | base_flags);
   }
   else {
-    out = IMB_allocImBuf(x, y, 32, IB_rect);
+    out = IMB_allocImBuf(x, y, 32, IB_rect | base_flags);
   }
 
   if (out->float_buffer.data) {
@@ -2645,11 +2647,11 @@ void SEQ_effect_text_font_load(TextVars *data, const bool do_id_user)
       /* FIXME: This is a band-aid fix. A proper solution has to be worked on by the VSE team.
        *
        * This code can be called from non-main thread, e.g. when copying sequences as part of
-       * depsgraph CoW copy of the evaluated scene. Just skip font loading in that case, BLF code
-       * is not thread-safe, and if this happens from threaded context, it almost certainly means
-       * that a previous attempt to load the font already failed, e.g. because font file-path is
-       * invalid. Proposer fix would likely be to not attempt to reload a failed-to-load font every
-       * time. */
+       * depsgraph evaluated copy of the evaluated scene. Just skip font loading in that case, BLF
+       * code is not thread-safe, and if this happens from threaded context, it almost certainly
+       * means that a previous attempt to load the font already failed, e.g. because font file-path
+       * is invalid. Proposer fix would likely be to not attempt to reload a failed-to-load font
+       * every time. */
       BLI_path_abs(filepath, ID_BLEND_PATH_FROM_GLOBAL(&vfont->id));
 
       data->text_blf_id = BLF_load(filepath);
@@ -2708,7 +2710,9 @@ static ImBuf *do_text_effect(const SeqRenderData *context,
                              ImBuf *ibuf2,
                              ImBuf *ibuf3)
 {
-  ImBuf *out = prepare_effect_imbufs(context, ibuf1, ibuf2, ibuf3);
+  /* Note: text rasterization only fills in part of output image,
+   * need to clear it. */
+  ImBuf *out = prepare_effect_imbufs(context, ibuf1, ibuf2, ibuf3, false);
   TextVars *data = static_cast<TextVars *>(seq->effectdata);
   int width = out->x;
   int height = out->y;

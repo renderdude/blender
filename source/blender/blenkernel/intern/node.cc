@@ -14,6 +14,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
+#include <optional>
 
 /* Allow using deprecated functionality for .blend file I/O. */
 #define DNA_DEPRECATED_ALLOW
@@ -51,7 +52,7 @@
 
 #include "IMB_imbuf.hh"
 
-#include "BKE_anim_data.h"
+#include "BKE_anim_data.hh"
 #include "BKE_animsys.h"
 #include "BKE_asset.hh"
 #include "BKE_bpath.hh"
@@ -150,7 +151,11 @@ static void ntree_init_data(ID *id)
   ntree_set_typeinfo(ntree, nullptr);
 }
 
-static void ntree_copy_data(Main * /*bmain*/, ID *id_dst, const ID *id_src, const int flag)
+static void ntree_copy_data(Main * /*bmain*/,
+                            std::optional<Library *> /*owner_library*/,
+                            ID *id_dst,
+                            const ID *id_src,
+                            const int flag)
 {
   bNodeTree *ntree_dst = reinterpret_cast<bNodeTree *>(id_dst);
   const bNodeTree *ntree_src = reinterpret_cast<const bNodeTree *>(id_src);
@@ -798,10 +803,10 @@ void ntreeBlendWrite(BlendWriter *writer, bNodeTree *ntree)
         /* Not in undo case. */
         if (!BLO_write_is_undo(writer)) {
           switch (ndg->type) {
-            case 2: /* Grrrr! magic numbers :( */
+            case CMP_NODE_GLARE_STREAKS:
               ndg->angle = ndg->streaks;
               break;
-            case 0:
+            case CMP_NODE_GLARE_SIMPLE_STAR:
               ndg->angle = ndg->star_45;
               break;
             default:
@@ -1272,6 +1277,8 @@ static AssetTypeInfo AssetType_NT = {
 IDTypeInfo IDType_ID_NT = {
     /*id_code*/ ID_NT,
     /*id_filter*/ FILTER_ID_NT,
+    /* IDProps of nodes, and #bNode.id, can use any type of ID. */
+    /*dependencies_id_types*/ FILTER_ID_ALL,
     /*main_listbase_index*/ INDEX_ID_NT,
     /*struct_size*/ sizeof(bNodeTree),
     /*name*/ "NodeTree",
@@ -2539,7 +2546,7 @@ void nodeUniqueName(bNodeTree *ntree, bNode *node)
 void nodeUniqueID(bNodeTree *ntree, bNode *node)
 {
   /* Use a pointer cast to avoid overflow warnings. */
-  const double time = BLI_check_seconds_timer() * 1000000.0;
+  const double time = BLI_time_now_seconds() * 1000000.0;
   blender::RandomNumberGenerator id_rng{*reinterpret_cast<const uint32_t *>(&time)};
 
   /* In the unlikely case that the random ID doesn't match, choose a new one until it does. */
@@ -4425,6 +4432,9 @@ const CPPType *socket_type_to_geo_nodes_base_cpp_type(const eNodeSocketDatatype 
       break;
     case SOCK_ROTATION:
       cpp_type = &CPPType::get<math::Quaternion>();
+      break;
+    case SOCK_MATRIX:
+      cpp_type = &CPPType::get<float4x4>();
       break;
     default:
       cpp_type = slow_socket_type_to_geo_nodes_base_cpp_type(type);

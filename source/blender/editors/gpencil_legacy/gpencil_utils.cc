@@ -18,12 +18,14 @@
 #include "BLI_blenlib.h"
 #include "BLI_ghash.h"
 #include "BLI_hash.h"
-#include "BLI_lasso_2d.h"
+#include "BLI_lasso_2d.hh"
 #include "BLI_math_color.h"
 #include "BLI_math_matrix.h"
 #include "BLI_math_vector.hh"
 #include "BLI_time.h"
 #include "BLI_utildefines.h"
+
+#include "BLT_translation.hh"
 
 #include "DNA_brush_types.h"
 #include "DNA_gpencil_legacy_types.h"
@@ -2787,7 +2789,7 @@ void ED_gpencil_tag_scene_gpencil(Scene *scene)
   }
   FOREACH_SCENE_COLLECTION_END;
 
-  DEG_id_tag_update(&scene->id, ID_RECALC_COPY_ON_WRITE);
+  DEG_id_tag_update(&scene->id, ID_RECALC_SYNC_TO_EVAL);
 
   WM_main_add_notifier(NC_GPENCIL | NA_EDITED, nullptr);
 }
@@ -2838,7 +2840,7 @@ void ED_gpencil_init_random_settings(Brush *brush,
                                      const int mval[2],
                                      GpRandomSettings *random_settings)
 {
-  int seed = (uint(ceil(BLI_check_seconds_timer())) + 1) % 128;
+  int seed = (uint(ceil(BLI_time_now_seconds())) + 1) % 128;
   /* Use mouse position to get randomness. */
   int ix = mval[0] * seed;
   int iy = mval[1] * seed;
@@ -2884,7 +2886,7 @@ static void gpencil_sbuffer_vertex_color_random(
 {
   BrushGpencilSettings *brush_settings = brush->gpencil_settings;
   if (brush_settings->flag & GP_BRUSH_GROUP_RANDOM) {
-    int seed = (uint(ceil(BLI_check_seconds_timer())) + 1) % 128;
+    int seed = (uint(ceil(BLI_time_now_seconds())) + 1) % 128;
 
     int ix = int(tpt->m_xy[0] * seed);
     int iy = int(tpt->m_xy[1] * seed);
@@ -3091,9 +3093,8 @@ bool ED_gpencil_stroke_point_is_inside(const bGPDstroke *gps,
     return hit;
   }
 
-  int(*mcoords)[2] = nullptr;
   int len = gps->totpoints;
-  mcoords = static_cast<int(*)[2]>(MEM_mallocN(sizeof(int[2]) * len, __func__));
+  blender::Array<blender::int2> mcoords(len);
 
   /* Convert stroke to 2D array of points. */
   const bGPDspoint *pt;
@@ -3106,14 +3107,11 @@ bool ED_gpencil_stroke_point_is_inside(const bGPDstroke *gps,
 
   /* Compute bound-box of lasso (for faster testing later). */
   rcti rect;
-  BLI_lasso_boundbox(&rect, mcoords, len);
+  BLI_lasso_boundbox(&rect, mcoords);
 
   /* Test if point inside stroke. */
   hit = (!ELEM(V2D_IS_CLIPPED, mval[0], mval[1]) && BLI_rcti_isect_pt(&rect, mval[0], mval[1]) &&
-         BLI_lasso_is_point_inside(mcoords, len, mval[0], mval[1], INT_MAX));
-
-  /* Free memory. */
-  MEM_SAFE_FREE(mcoords);
+         BLI_lasso_is_point_inside(mcoords, mval[0], mval[1], INT_MAX));
 
   return hit;
 }
@@ -3430,7 +3428,7 @@ int ED_gpencil_new_layer_dialog(bContext *C, wmOperator *op)
       bGPdata *gpd = static_cast<bGPdata *>(ob->data);
       gpencil_layer_new_name_get(gpd, name, sizeof(name));
       RNA_property_string_set(op->ptr, prop, name);
-      return WM_operator_props_dialog_popup(C, op, 200);
+      return WM_operator_props_dialog_popup(C, op, 200, IFACE_("Add New Layer"), IFACE_("Add"));
     }
   }
   return 0;

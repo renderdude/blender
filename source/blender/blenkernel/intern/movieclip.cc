@@ -9,6 +9,7 @@
 #include <cstdio>
 #include <cstring>
 #include <fcntl.h>
+#include <optional>
 
 #ifndef WIN32
 #  include <unistd.h>
@@ -81,7 +82,11 @@ static void movie_clip_init_data(ID *id)
   BKE_color_managed_colorspace_settings_init(&movie_clip->colorspace_settings);
 }
 
-static void movie_clip_copy_data(Main * /*bmain*/, ID *id_dst, const ID *id_src, const int flag)
+static void movie_clip_copy_data(Main * /*bmain*/,
+                                 std::optional<Library *> /*owner_library*/,
+                                 ID *id_dst,
+                                 const ID *id_src,
+                                 const int flag)
 {
   MovieClip *movie_clip_dst = (MovieClip *)id_dst;
   const MovieClip *movie_clip_src = (const MovieClip *)id_src;
@@ -279,6 +284,7 @@ static void movieclip_blend_read_data(BlendDataReader *reader, ID *id)
 IDTypeInfo IDType_ID_MC = {
     /*id_code*/ ID_MC,
     /*id_filter*/ FILTER_ID_MC,
+    /*dependencies_id_types*/ FILTER_ID_GD_LEGACY | FILTER_ID_IM,
     /*main_listbase_index*/ INDEX_ID_MC,
     /*struct_size*/ sizeof(MovieClip),
     /*name*/ "MovieClip",

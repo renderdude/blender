@@ -21,7 +21,7 @@
 #include "DNA_view3d_types.h"
 
 #include "BLI_kdtree.h"
-#include "BLI_lasso_2d.h"
+#include "BLI_lasso_2d.hh"
 #include "BLI_listbase.h"
 #include "BLI_math_matrix.h"
 #include "BLI_rand.h"
@@ -550,7 +550,7 @@ static void PE_free_shape_tree(PEData *data)
 
 static void PE_create_random_generator(PEData *data)
 {
-  uint rng_seed = uint(BLI_check_seconds_timer_i() & UINT_MAX);
+  uint rng_seed = uint(BLI_time_now_seconds_i() & UINT_MAX);
   rng_seed ^= POINTER_AS_UINT(data->ob);
   rng_seed ^= POINTER_AS_UINT(data->edit);
   data->rng = BLI_rng_new(rng_seed);
@@ -2447,7 +2447,10 @@ int PE_lasso_select(bContext *C, const int mcoords[][2], const int mcoords_len, 
             ((ED_view3d_project_int_global(region, co, screen_co, V3D_PROJ_TEST_CLIP_WIN) ==
               V3D_PROJ_RET_OK) &&
              BLI_lasso_is_point_inside(
-                 mcoords, mcoords_len, screen_co[0], screen_co[1], IS_CLIPPED) &&
+                 {reinterpret_cast<const blender::int2 *>(mcoords), mcoords_len},
+                 screen_co[0],
+                 screen_co[1],
+                 IS_CLIPPED) &&
              key_test_depth(&data, co, screen_co));
         const int sel_op_result = ED_select_op_action_deselected(
             eSelectOp(sel_op), is_select, is_inside);
@@ -2468,7 +2471,10 @@ int PE_lasso_select(bContext *C, const int mcoords[][2], const int mcoords_len, 
             ((ED_view3d_project_int_global(region, co, screen_co, V3D_PROJ_TEST_CLIP_WIN) ==
               V3D_PROJ_RET_OK) &&
              BLI_lasso_is_point_inside(
-                 mcoords, mcoords_len, screen_co[0], screen_co[1], IS_CLIPPED) &&
+                 {reinterpret_cast<const blender::int2 *>(mcoords), mcoords_len},
+                 screen_co[0],
+                 screen_co[1],
+                 IS_CLIPPED) &&
              key_test_depth(&data, co, screen_co));
         const int sel_op_result = ED_select_op_action_deselected(
             eSelectOp(sel_op), is_select, is_inside);
@@ -5493,7 +5499,7 @@ void ED_object_particle_edit_mode_enter_ex(Depsgraph *depsgraph, Scene *scene, O
   }
 
   toggle_particle_cursor(scene, true);
-  DEG_id_tag_update(&ob->id, ID_RECALC_GEOMETRY | ID_RECALC_COPY_ON_WRITE);
+  DEG_id_tag_update(&ob->id, ID_RECALC_GEOMETRY | ID_RECALC_SYNC_TO_EVAL);
   WM_main_add_notifier(NC_SCENE | ND_MODE | NS_MODE_PARTICLE, nullptr);
 }
 
@@ -5511,7 +5517,7 @@ void ED_object_particle_edit_mode_exit_ex(Scene *scene, Object *ob)
   toggle_particle_cursor(scene, false);
   free_all_psys_edit(ob);
 
-  DEG_id_tag_update(&ob->id, ID_RECALC_GEOMETRY | ID_RECALC_COPY_ON_WRITE);
+  DEG_id_tag_update(&ob->id, ID_RECALC_GEOMETRY | ID_RECALC_SYNC_TO_EVAL);
   WM_main_add_notifier(NC_SCENE | ND_MODE | NS_MODE_OBJECT, nullptr);
 }
 

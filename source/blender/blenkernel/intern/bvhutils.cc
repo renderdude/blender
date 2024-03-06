@@ -932,6 +932,127 @@ BVHTree *BKE_bvhtree_from_mesh_get(BVHTreeFromMesh *data,
   return data->tree;
 }
 
+void BKE_bvhtree_from_mesh_tris_init(const Mesh &mesh,
+                                     const blender::IndexMask &faces_mask,
+                                     BVHTreeFromMesh &r_data)
+{
+  using namespace blender;
+  using namespace blender::bke;
+
+  if (faces_mask.size() == mesh.faces_num) {
+    /* Can use cache if all faces are in the bvh tree. */
+    BKE_bvhtree_from_mesh_get(&r_data, &mesh, BVHTREE_FROM_CORNER_TRIS, 2);
+    return;
+  }
+
+  const Span<float3> positions = mesh.vert_positions();
+  const Span<int2> edges = mesh.edges();
+  const Span<int> corner_verts = mesh.corner_verts();
+  const OffsetIndices faces = mesh.faces();
+  const Span<int3> corner_tris = mesh.corner_tris();
+  bvhtree_from_mesh_setup_data(nullptr,
+                               BVHTREE_FROM_CORNER_TRIS,
+                               positions,
+                               edges,
+                               corner_verts,
+                               corner_tris,
+                               nullptr,
+                               &r_data);
+
+  int tris_num = 0;
+  faces_mask.foreach_index(
+      [&](const int i) { tris_num += mesh::face_triangles_num(faces[i].size()); });
+
+  int active_num = -1;
+  BVHTree *tree = bvhtree_new_common(0.0f, 2, 6, tris_num, active_num);
+  r_data.tree = tree;
+  if (tree == nullptr) {
+    return;
+  }
+
+  faces_mask.foreach_index([&](const int face_i) {
+    const IndexRange triangles_range = mesh::face_triangles_range(faces, face_i);
+    for (const int tri_i : triangles_range) {
+      float co[3][3];
+      copy_v3_v3(co[0], positions[corner_verts[corner_tris[tri_i][0]]]);
+      copy_v3_v3(co[1], positions[corner_verts[corner_tris[tri_i][1]]]);
+      copy_v3_v3(co[2], positions[corner_verts[corner_tris[tri_i][2]]]);
+
+      BLI_bvhtree_insert(tree, tri_i, co[0], 3);
+    }
+  });
+
+  BLI_bvhtree_balance(tree);
+}
+
+void BKE_bvhtree_from_mesh_edges_init(const Mesh &mesh,
+                                      const blender::IndexMask &edges_mask,
+                                      BVHTreeFromMesh &r_data)
+{
+  using namespace blender;
+  using namespace blender::bke;
+
+  if (edges_mask.size() == mesh.edges_num) {
+    /* Can use cache if all edges are in the bvh tree. */
+    BKE_bvhtree_from_mesh_get(&r_data, &mesh, BVHTREE_FROM_EDGES, 2);
+    return;
+  }
+
+  const Span<float3> positions = mesh.vert_positions();
+  const Span<int2> edges = mesh.edges();
+  bvhtree_from_mesh_setup_data(
+      nullptr, BVHTREE_FROM_EDGES, positions, edges, {}, {}, nullptr, &r_data);
+
+  int active_num = -1;
+  BVHTree *tree = bvhtree_new_common(0.0f, 2, 6, edges_mask.size(), active_num);
+  r_data.tree = tree;
+  if (tree == nullptr) {
+    return;
+  }
+
+  edges_mask.foreach_index([&](const int edge_i) {
+    const int2 &edge = edges[edge_i];
+    float co[2][3];
+    copy_v3_v3(co[0], positions[edge[0]]);
+    copy_v3_v3(co[1], positions[edge[1]]);
+    BLI_bvhtree_insert(tree, edge_i, co[0], 2);
+  });
+
+  BLI_bvhtree_balance(tree);
+}
+
+void BKE_bvhtree_from_mesh_verts_init(const Mesh &mesh,
+                                      const blender::IndexMask &verts_mask,
+                                      BVHTreeFromMesh &r_data)
+{
+  using namespace blender;
+  using namespace blender::bke;
+
+  if (verts_mask.size() == mesh.verts_num) {
+    /* Can use cache if all vertices are in the bvh tree. */
+    BKE_bvhtree_from_mesh_get(&r_data, &mesh, BVHTREE_FROM_VERTS, 2);
+    return;
+  }
+
+  const Span<float3> positions = mesh.vert_positions();
+  bvhtree_from_mesh_setup_data(
+      nullptr, BVHTREE_FROM_VERTS, positions, {}, {}, {}, nullptr, &r_data);
+
+  int active_num = -1;
+  BVHTree *tree = bvhtree_new_common(0.0f, 2, 6, verts_mask.size(), active_num);
+  r_data.tree = tree;
+  if (tree == nullptr) {
+    return;
+  }
+
+  verts_mask.foreach_index([&](const int vert_i) {
+    const float3 &position = positions[vert_i];
+    BLI_bvhtree_insert(tree, vert_i, position, 1);
+  });
+
+  BLI_bvhtree_balance(tree);
+}
+
 /** \} */
 
 /* -------------------------------------------------------------------- */
@@ -953,29 +1074,25 @@ void free_bvhtree_from_mesh(BVHTreeFromMesh *data)
 /** \name Point Cloud BVH Building
  * \{ */
 
-[[nodiscard]] BVHTree *BKE_bvhtree_from_pointcloud_get(BVHTreeFromPointCloud *data,
-                                                       const PointCloud *pointcloud,
-                                                       const int tree_type)
+void BKE_bvhtree_from_pointcloud_get(const PointCloud &pointcloud,
+                                     const blender::IndexMask &points_mask,
+                                     BVHTreeFromPointCloud &r_data)
 {
-  int tot_point = pointcloud->totpoint;
-  BVHTree *tree = bvhtree_new_common(0.0f, tree_type, 6, tot_point, tot_point);
+  int active_num = -1;
+  BVHTree *tree = bvhtree_new_common(0.0f, 2, 6, points_mask.size(), active_num);
+  r_data.tree = tree;
   if (!tree) {
-    return nullptr;
+    return;
   }
 
-  const Span<float3> positions = pointcloud->positions();
-  for (const int i : positions.index_range()) {
-    BLI_bvhtree_insert(tree, i, positions[i], 1);
-  }
+  const Span<float3> positions = pointcloud.positions();
+  points_mask.foreach_index([&](const int i) { BLI_bvhtree_insert(tree, i, positions[i], 1); });
 
-  BLI_assert(BLI_bvhtree_get_len(tree) == tot_point);
-  bvhtree_balance(tree, false);
+  BLI_bvhtree_balance(tree);
 
-  data->coords = (const float(*)[3])positions.data();
-  data->tree = tree;
-  data->nearest_callback = nullptr;
-
-  return tree;
+  r_data.coords = (const float(*)[3])positions.data();
+  r_data.tree = tree;
+  r_data.nearest_callback = nullptr;
 }
 
 void free_bvhtree_from_pointcloud(BVHTreeFromPointCloud *data)

@@ -12,6 +12,7 @@
 #include <mutex>
 
 #include "BLI_bit_span.hh"
+#include "BLI_index_mask_fwd.hh"
 #include "BLI_kdopbvh.h"
 #include "BLI_math_vector_types.hh"
 #include "BLI_span.hh"
@@ -115,6 +116,27 @@ BVHTree *BKE_bvhtree_from_mesh_get(BVHTreeFromMesh *data,
                                    int tree_type);
 
 /**
+ * Build a bvh tree from the triangles in the mesh that correspond to the faces in the given mask.
+ */
+void BKE_bvhtree_from_mesh_tris_init(const Mesh &mesh,
+                                     const blender::IndexMask &faces_mask,
+                                     BVHTreeFromMesh &r_data);
+
+/**
+ * Build a bvh tree containing the given edges.
+ */
+void BKE_bvhtree_from_mesh_edges_init(const Mesh &mesh,
+                                      const blender::IndexMask &edges_mask,
+                                      BVHTreeFromMesh &r_data);
+
+/**
+ * Build a bvh tree containing the given vertices.
+ */
+void BKE_bvhtree_from_mesh_verts_init(const Mesh &mesh,
+                                      const blender::IndexMask &verts_mask,
+                                      BVHTreeFromMesh &r_data);
+
+/**
  * Frees data allocated by a call to `bvhtree_from_mesh_*`.
  */
 void free_bvhtree_from_mesh(BVHTreeFromMesh *data);
@@ -139,9 +161,9 @@ struct BVHTreeFromPointCloud {
   const float (*coords)[3];
 };
 
-[[nodiscard]] BVHTree *BKE_bvhtree_from_pointcloud_get(BVHTreeFromPointCloud *data,
-                                                       const PointCloud *pointcloud,
-                                                       int tree_type);
+void BKE_bvhtree_from_pointcloud_get(const PointCloud &pointcloud,
+                                     const blender::IndexMask &points_mask,
+                                     BVHTreeFromPointCloud &r_data);
 
 void free_bvhtree_from_pointcloud(BVHTreeFromPointCloud *data);
 

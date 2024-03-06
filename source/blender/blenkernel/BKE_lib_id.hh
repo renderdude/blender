@@ -30,8 +30,12 @@
  * specific cases requiring advanced (and potentially dangerous) handling.
  */
 
+#include <optional>
+
 #include "BLI_compiler_attrs.h"
+#include "BLI_set.hh"
 #include "BLI_utildefines.h"
+#include "BLI_vector.hh"
 
 #include "DNA_userdef_enums.h"
 
@@ -55,13 +59,29 @@ size_t BKE_libblock_get_alloc_info(short type, const char **name);
  */
 void *BKE_libblock_alloc_notest(short type) ATTR_WARN_UNUSED_RESULT;
 /**
- * Allocates and returns a block of the specified type, with the specified name
+ * Allocates and returns an ID block of the specified type, with the specified name
  * (adjusted as necessary to ensure uniqueness), and appended to the specified list.
  * The user count is set to 1, all other content (apart from name and links) being
  * initialized to zero.
+ *
+ * \note: By default, IDs allocated in a Main database will get the current library of the Main,
+ * i.e. usually (besides in readfile case), they will have a `nullptr` `lib` pointer and be local
+ * data. IDs allocated outside of a Main database will always get a `nullptr` `lib` pointer.
  */
 void *BKE_libblock_alloc(Main *bmain, short type, const char *name, int flag)
     ATTR_WARN_UNUSED_RESULT;
+/**
+ * Same as for #BKE_libblock_alloc, but allows creating a data-block for a given owner library.
+ *
+ * \param owner_library the Library to 'assign' the newly created ID to. Use `nullptr` to make ID
+ * not use any library (i.e. become a local ID). Use `std::nullopt` for default behavior (i.e.
+ * behavior of the #BKE_libblock_alloc function).
+ */
+void *BKE_libblock_alloc_in_lib(Main *bmain,
+                                std::optional<Library *> owner_library,
+                                short type,
+                                const char *name,
+                                int flag) ATTR_WARN_UNUSED_RESULT;
 /**
  * Initialize an ID of given type, such that it has valid 'empty' data.
  * ID is assumed to be just calloc'ed.
@@ -100,9 +120,24 @@ void BKE_lib_libblock_session_uid_renew(ID *id);
 /**
  * Generic helper to create a new empty data-block of given type in given \a bmain database.
  *
+ * \note: By default, IDs created in a Main database will get the current library of the Main,
+ * i.e. usually (besides in readfile case), they will have a `nullptr` `lib` pointer and be local
+ * data. IDs created outside of a Main database will always get a `nullptr` `lib` pointer.
+
  * \param name: can be NULL, in which case we get default name for this ID type.
  */
 void *BKE_id_new(Main *bmain, short type, const char *name);
+/**
+ * Same as for #BKE_id_new, but allows creating a data-block for (whithin) a given owner library.
+ *
+ * \param owner_library the Library to 'assign' the newly created ID to. Use `nullptr` to make ID
+ * not use any library (i.e. become a local ID). Use `std::nullopt` for default behavior (i.e.
+ * behavior of the #BKE_id_new function).
+ */
+void *BKE_id_new_in_lib(Main *bmain,
+                        std::optional<Library *> owner_library,
+                        short type,
+                        const char *name);
 /**
  * Generic helper to create a new temporary empty data-block of given type,
  * *outside* of any Main database.
@@ -137,7 +172,7 @@ enum {
    * specific code in some copy cases (mostly for node trees). */
   LIB_ID_CREATE_LOCAL = 1 << 9,
 
-  /** Create for the depsgraph, when set #LIB_TAG_COPIED_ON_WRITE must be set.
+  /** Create for the depsgraph, when set #LIB_TAG_COPIED_ON_EVAL must be set.
    * Internally this is used to share some pointers instead of duplicating them. */
   LIB_ID_COPY_SET_COPIED_ON_WRITE = 1 << 10,
 
@@ -161,8 +196,6 @@ enum {
   /* *** Ideally we should not have those, but we need them for now... *** */
   /** EXCEPTION! Deep-copy actions used by animation-data of copied ID. */
   LIB_ID_COPY_ACTIONS = 1 << 24,
-  /** Keep the library pointer when copying data-block outside of bmain. */
-  LIB_ID_COPY_KEEP_LIB = 1 << 25,
   /** EXCEPTION! Deep-copy shape-keys used by copied obdata ID. */
   LIB_ID_COPY_SHAPEKEY = 1 << 26,
   /** EXCEPTION! Specific deep-copy of node trees used e.g. for rendering purposes. */
@@ -180,14 +213,34 @@ enum {
   /** Create a local, outside of bmain, data-block to work on. */
   LIB_ID_CREATE_LOCALIZE = LIB_ID_CREATE_NO_MAIN | LIB_ID_CREATE_NO_USER_REFCOUNT |
                            LIB_ID_CREATE_NO_DEG_TAG,
-  /** Generate a local copy, outside of bmain, to work on (used by COW e.g.). */
+  /** Generate a local copy, outside of bmain, to work on (used by copy-on-eval e.g.). */
   LIB_ID_COPY_LOCALIZE = LIB_ID_CREATE_LOCALIZE | LIB_ID_COPY_NO_PREVIEW | LIB_ID_COPY_CACHES |
                          LIB_ID_COPY_NO_LIB_OVERRIDE,
 };
 
 void BKE_libblock_copy_ex(Main *bmain, const ID *id, ID **r_newid, int orig_flag);
 /**
+ * Same as #BKE_libblock_copy_ex, but allows copying data into a library, and not as local data
+ * only.
+ *
+ * \param owner_library the Library to 'assign' the newly created ID to. Use `nullptr` to make ID
+ * not use any library (i.e. become a local ID). Use std::nullopt for default behavior (i.e.
+ * behavior of the #BKE_libblock_copy_ex function).
+ */
+void BKE_libblock_copy_in_lib(Main *bmain,
+                              std::optional<Library *> owner_library,
+                              const ID *id,
+                              ID **r_newid,
+                              int orig_flag);
+
+/**
  * Used everywhere in blenkernel.
+ *
+ * \note Typically, the newly copied ID will be a local data (its `lib` pointer will be `nullptr`).
+ * In practice, ID copying follows the same behavior as ID creation (see #BKE_libblock_alloc
+ * documentation), with one special case: when the special flag #LIB_ID_CREATE_NO_ALLOCATE is
+ * specified, the copied ID will have the same library as the source ID.
+ *
  */
 void *BKE_libblock_copy(Main *bmain, const ID *id) ATTR_WARN_UNUSED_RESULT ATTR_NONNULL();
 
@@ -319,11 +372,23 @@ void BKE_id_delete_ex(Main *bmain, void *idv, const int extra_remapping_flags) A
  * This is more efficient than calling #BKE_id_delete repetitively on a large set of IDs
  * (several times faster when deleting most of the IDs at once).
  *
- * \warning Considered experimental for now, seems to be working OK but this is
- * risky code in a complicated area.
  * \return Number of deleted data-blocks.
  */
 size_t BKE_id_multi_tagged_delete(Main *bmain) ATTR_NONNULL();
+/**
+ * Properly delete all IDs from \a ids_to_delete, from given \a bmain database.
+ *
+ * This is more efficient than calling #BKE_id_delete repetitively on a large set of IDs
+ * (several times faster when deleting most of the IDs at once).
+ *
+ * \note The ID pointers are not removed from the Set (which may contain more pointers than
+ * originally given, when extra users or dependencies also had to be deleted with the original set
+ * of IDs). They are all freed though, so these pointers are all invalid after calling this
+ * function.
+ *
+ * \return Number of deleted data-blocks.
+ */
+size_t BKE_id_multi_delete(Main *bmain, blender::Set<ID *> &ids_to_delete);
 
 /**
  * Add a 'NO_MAIN' data-block to given main (also sets user-counts of its IDs if needed).
@@ -422,6 +487,11 @@ bool BKE_id_copy_is_allowed(const ID *id);
  *
  * \note User-count of new copy is always set to 1.
  *
+ * \note Typically, the newly copied ID will be a local data (its `lib` pointer will be `nullptr`).
+ * In practice, ID copying follows the same behavior as ID creation (see #BKE_libblock_alloc
+ * documentation), with one special case: when the special flag #LIB_ID_CREATE_NO_ALLOCATE is
+ * specified, the copied ID will have the same library as the source ID.
+ *
  * \param bmain: Main database, may be NULL only if LIB_ID_CREATE_NO_MAIN is specified.
  * \param id: Source data-block.
  * \param r_newid: Pointer to new (copied) ID pointer, may be NULL.
@@ -431,6 +501,17 @@ bool BKE_id_copy_is_allowed(const ID *id);
  * \return NULL when copying that ID type is not supported, the new copy otherwise.
  */
 ID *BKE_id_copy_ex(Main *bmain, const ID *id, ID **r_newid, int flag);
+/**
+ * Enable coying non-local data into libraries.
+ *
+ * See #BKE_id_copy_ex for details.
+ *
+ * \param owner_library the Library to 'assign' the newly created ID to. Use `nullptr` to make ID
+ * not use any library (i.e. become a local ID). Use std::nullopt for default behavior (i.e.
+ * behavior of the #BKE_id_copy_ex function).
+ */
+struct ID *BKE_id_copy_in_lib(
+    Main *bmain, std::optional<Library *> owner_library, const ID *id, ID **r_newid, int flag);
 /**
  * Invoke the appropriate copy method for the block and return the new id as result.
  *
@@ -648,9 +729,8 @@ bool BKE_id_is_editable(const Main *bmain, const ID *id);
 
 /**
  * Returns ordered list of data-blocks for display in the UI.
- * Result is list of #LinkData of IDs that must be freed.
  */
-void BKE_id_ordered_list(ListBase *ordered_lb, const ListBase *lb);
+blender::Vector<ID *> BKE_id_ordered_list(const ListBase *lb);
 /**
  * Reorder ID in the list, before or after the "relative" ID.
  */

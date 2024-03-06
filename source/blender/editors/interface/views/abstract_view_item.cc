@@ -200,8 +200,6 @@ void AbstractViewItem::add_rename_button(uiBlock &block)
                                view.get_rename_buffer().data(),
                                1.0f,
                                view.get_rename_buffer().size(),
-                               0,
-                               0,
                                "");
 
   /* Gotta be careful with what's passed to the `arg1` here. Any view data will be freed once the
@@ -381,7 +379,6 @@ class ViewItemAPIWrapper {
                         ICON_NONE,
                         drag_controller->get_drag_type(),
                         drag_controller->create_drag_data(),
-                        0,
                         WM_DRAG_FREE_DATA);
     drag_controller->on_drag_start();
 

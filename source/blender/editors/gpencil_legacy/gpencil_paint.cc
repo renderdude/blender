@@ -2022,7 +2022,7 @@ static void gpencil_init_drawing_brush(bContext *C, tGPsdata *p)
 
   /* Need this update to synchronize brush with draw manager. */
   if (changed) {
-    DEG_id_tag_update(&scene->id, ID_RECALC_COPY_ON_WRITE);
+    DEG_id_tag_update(&scene->id, ID_RECALC_SYNC_TO_EVAL);
   }
 }
 
@@ -2159,7 +2159,7 @@ static tGPsdata *gpencil_session_initpaint(bContext *C, wmOperator *op)
   }
 
   /* Random generator, only init once. */
-  uint rng_seed = uint(BLI_check_seconds_timer_i() & UINT_MAX);
+  uint rng_seed = uint(BLI_time_now_seconds_i() & UINT_MAX);
   rng_seed ^= POINTER_AS_UINT(p);
   p->rng = BLI_rng_new(rng_seed);
 
@@ -2188,7 +2188,7 @@ static void gpencil_session_cleanup(tGPsdata *p)
   gpd->runtime.sbuffer_size = 0;
   gpd->runtime.sbuffer_sflag = 0;
   /* This update is required for update-on-write because the sbuffer data is not longer overwritten
-   * by a copy-on-write. */
+   * by a copy-on-evaluation. */
   ED_gpencil_sbuffer_update_eval(gpd, p->ob_eval);
   p->inittime = 0.0;
 }
@@ -2961,7 +2961,7 @@ static void gpencil_draw_apply_event(bContext *C,
     }
   }
 
-  p->curtime = BLI_check_seconds_timer();
+  p->curtime = BLI_time_now_seconds();
 
   /* handle pressure sensitivity (which is supplied by tablets or otherwise 1.0) */
   p->pressure = event->tablet.pressure;
@@ -3719,7 +3719,7 @@ static int gpencil_draw_modal(bContext *C, wmOperator *op, const wmEvent *event)
       p->paintmode = GP_PAINTMODE_DRAW;
       WM_cursor_modal_restore(p->win);
       ED_gpencil_toggle_brush_cursor(C, true, nullptr);
-      DEG_id_tag_update(&p->scene->id, ID_RECALC_COPY_ON_WRITE);
+      DEG_id_tag_update(&p->scene->id, ID_RECALC_SYNC_TO_EVAL);
     }
     else {
       return OPERATOR_RUNNING_MODAL;

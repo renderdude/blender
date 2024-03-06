@@ -12,6 +12,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cwctype>
+#include <optional>
 
 #include "CLG_log.h"
 
@@ -82,7 +83,11 @@ static void vfont_init_data(ID *id)
   }
 }
 
-static void vfont_copy_data(Main * /*bmain*/, ID *id_dst, const ID * /*id_src*/, const int flag)
+static void vfont_copy_data(Main * /*bmain*/,
+                            std::optional<Library *> /*owner_library*/,
+                            ID *id_dst,
+                            const ID * /*id_src*/,
+                            const int flag)
 {
   VFont *vfont_dst = (VFont *)id_dst;
 
@@ -163,6 +168,7 @@ static void vfont_blend_read_data(BlendDataReader *reader, ID *id)
 IDTypeInfo IDType_ID_VF = {
     /*id_code*/ ID_VF,
     /*id_filter*/ FILTER_ID_VF,
+    /*dependencies_id_types*/ 0,
     /*main_listbase_index*/ INDEX_ID_VF,
     /*struct_size*/ sizeof(VFont),
     /*name*/ "Font",

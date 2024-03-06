@@ -10,6 +10,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <optional>
 
 #include "MEM_guardedalloc.h"
 
@@ -65,7 +66,11 @@ static void texture_init_data(ID *id)
   BKE_imageuser_default(&texture->iuser);
 }
 
-static void texture_copy_data(Main *bmain, ID *id_dst, const ID *id_src, const int flag)
+static void texture_copy_data(Main *bmain,
+                              std::optional<Library *> owner_library,
+                              ID *id_dst,
+                              const ID *id_src,
+                              const int flag)
 {
   Tex *texture_dst = (Tex *)id_dst;
   const Tex *texture_src = (const Tex *)id_src;
@@ -90,8 +95,11 @@ static void texture_copy_data(Main *bmain, ID *id_dst, const ID *id_src, const i
       texture_dst->nodetree = ntreeLocalize(texture_src->nodetree);
     }
     else {
-      BKE_id_copy_ex(
-          bmain, (ID *)texture_src->nodetree, (ID **)&texture_dst->nodetree, flag_private_id_data);
+      BKE_id_copy_in_lib(bmain,
+                         owner_library,
+                         (ID *)texture_src->nodetree,
+                         (ID **)&texture_dst->nodetree,
+                         flag_private_id_data);
     }
     texture_dst->nodetree->owner_id = &texture_dst->id;
   }
@@ -188,6 +196,7 @@ static void texture_blend_read_data(BlendDataReader *reader, ID *id)
 IDTypeInfo IDType_ID_TE = {
     /*id_code*/ ID_TE,
     /*id_filter*/ FILTER_ID_TE,
+    /*dependencies_id_types*/ FILTER_ID_IM | FILTER_ID_OB,
     /*main_listbase_index*/ INDEX_ID_TE,
     /*struct_size*/ sizeof(Tex),
     /*name*/ "Texture",

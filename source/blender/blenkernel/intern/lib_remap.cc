@@ -29,7 +29,7 @@
 #include "BKE_mball.hh"
 #include "BKE_modifier.hh"
 #include "BKE_multires.hh"
-#include "BKE_node.h"
+#include "BKE_node.hh"
 #include "BKE_node_tree_update.hh"
 #include "BKE_object.hh"
 
@@ -123,11 +123,11 @@ static void foreach_libblock_remap_callback_apply(ID *id_owner,
       if (id_remap_data->bmain != nullptr) {
         DEG_id_tag_update_ex(id_remap_data->bmain,
                              id_self,
-                             ID_RECALC_COPY_ON_WRITE | ID_RECALC_TRANSFORM | ID_RECALC_GEOMETRY);
+                             ID_RECALC_SYNC_TO_EVAL | ID_RECALC_TRANSFORM | ID_RECALC_GEOMETRY);
         if (id_self != id_owner) {
           DEG_id_tag_update_ex(id_remap_data->bmain,
                                id_owner,
-                               ID_RECALC_COPY_ON_WRITE | ID_RECALC_TRANSFORM | ID_RECALC_GEOMETRY);
+                               ID_RECALC_SYNC_TO_EVAL | ID_RECALC_TRANSFORM | ID_RECALC_GEOMETRY);
         }
       }
       if (GS(id_owner->name) == ID_NT) {
@@ -256,8 +256,11 @@ static int foreach_libblock_remap_callback(LibraryIDLinkCallbackData *cb_data)
       skip_reference);
 #endif
 
-  if ((id_remap_data->flag & ID_REMAP_FLAG_NEVER_NULL_USAGE) && (cb_flag & IDWALK_CB_NEVER_NULL)) {
-    id_owner->tag |= LIB_TAG_DOIT;
+  if ((id_remap_data->flag & ID_REMAP_STORE_NEVER_NULL_USAGE) &&
+      (cb_flag & IDWALK_CB_NEVER_NULL) &&
+      (expected_mapping_result == ID_REMAP_RESULT_SOURCE_UNASSIGNED))
+  {
+    id_remapper.never_null_users_add(id_owner);
   }
 
   /* Special hack in case it's Object->data and we are in edit mode, and new_id is not nullptr
@@ -566,7 +569,8 @@ static void libblock_remap_foreach_idpair_cb(ID *old_id, ID *new_id, void *user_
   const int remap_flags = data->remap_flags;
 
   BLI_assert(old_id != nullptr);
-  BLI_assert((new_id == nullptr) || GS(old_id->name) == GS(new_id->name));
+  BLI_assert((new_id == nullptr) || remap_flags & ID_REMAP_ALLOW_IDTYPE_MISMATCH ||
+             GS(old_id->name) == GS(new_id->name));
 
   if (free_notifier_reference_cb) {
     free_notifier_reference_cb(old_id);
@@ -715,13 +719,9 @@ void BKE_libblock_remap_multiple(Main *bmain, IDRemapper &mappings, const int re
   BKE_main_unlock(bmain);
 }
 
-void BKE_libblock_unlink(Main *bmain,
-                         void *idv,
-                         const bool do_flag_never_null,
-                         const bool do_skip_indirect)
+void BKE_libblock_unlink(Main *bmain, void *idv, const bool do_skip_indirect)
 {
-  const int remap_flags = (do_skip_indirect ? ID_REMAP_SKIP_INDIRECT_USAGE : 0) |
-                          (do_flag_never_null ? ID_REMAP_FLAG_NEVER_NULL_USAGE : 0);
+  const int remap_flags = (do_skip_indirect ? ID_REMAP_SKIP_INDIRECT_USAGE : 0);
 
   BKE_main_lock(bmain);
 
