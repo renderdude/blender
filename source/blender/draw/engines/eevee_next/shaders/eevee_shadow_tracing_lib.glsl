@@ -429,7 +429,7 @@ vec3 shadow_pcf_offset(LightData light, const bool is_directional, vec3 P, vec3 
     params = shadow_directional_sample_params_get(shadow_tilemaps_tx, light, P);
   }
   else {
-    params = shadow_punctual_sample_params_get(shadow_tilemaps_tx, light, P);
+    params = shadow_punctual_sample_params_get(light, P);
   }
   ShadowTileData tile = shadow_tile_data_get(shadow_tilemaps_tx, params);
   if (!tile.is_allocated) {
@@ -471,6 +471,12 @@ vec3 shadow_pcf_offset(LightData light, const bool is_directional, vec3 P, vec3 
   vec3 offset_P = P + ws_offset;
 
   /* Project the offset position into the surface */
+
+#ifdef GPU_NVIDIA
+  /* Workaround for a bug in the Nvidia shader compiler.
+   * If we don't compute L here again, it breaks shadows on reflection probes. */
+  L = light_vector_get(light, is_directional, P).L;
+#endif
 
   if (abs(dot(Ng, L)) > 0.999) {
     return ws_offset;
