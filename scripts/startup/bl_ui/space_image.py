@@ -194,8 +194,7 @@ class IMAGE_MT_image(Menu):
         ima = sima.image
         show_render = sima.show_render
 
-        layout.operator("image.new", text="New",
-                        text_ctxt=i18n_contexts.id_image)
+        layout.operator("image.new", text="New", text_ctxt=i18n_contexts.id_image)
         layout.operator("image.open", text="Open...", icon='FILE_FOLDER')
 
         layout.operator("image.read_viewlayers")
@@ -313,6 +312,11 @@ class IMAGE_MT_uvs_transform(Menu):
         layout.separator()
 
         layout.operator("transform.shear")
+
+        layout.separator()
+
+        layout.operator("transform.vert_slide")
+        layout.operator("transform.edge_slide")
 
         layout.separator()
 
@@ -562,17 +566,19 @@ class IMAGE_MT_uvs_context_menu(Menu):
 
             layout.operator_enum("uv.align", "axis")  # W, 2/3/4.
 
-            layout.operator_context = 'INVOKE_DEFAULT'
-
-            if is_vert_mode:
-                layout.operator("transform.vert_slide")
-
-            if is_edge_mode:
-                layout.operator("transform.edge_slide")
-
-            layout.operator_context = 'EXEC_REGION_WIN'
-
             layout.separator()
+
+            if is_vert_mode or is_edge_mode:
+                layout.operator_context = 'INVOKE_DEFAULT'
+
+                if is_vert_mode:
+                    layout.operator("transform.vert_slide")
+
+                if is_edge_mode:
+                    layout.operator("transform.edge_slide")
+
+                layout.operator_context = 'EXEC_REGION_WIN'
+                layout.separator()
 
             # Remove
             layout.menu("IMAGE_MT_uvs_merge")
@@ -899,7 +905,7 @@ class IMAGE_HT_header(Header):
                 row.prop(sima, "show_stereo_3d", text="")
             if show_maskedit:
                 row = layout.row()
-                row.popover(panel='IMAGE_PT_mask_display')
+                row.popover(panel="IMAGE_PT_mask_display")
 
             # layers.
             layout.template_image_layers(ima, iuser)

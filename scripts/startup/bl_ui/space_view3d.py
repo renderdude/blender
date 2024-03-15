@@ -460,7 +460,7 @@ class _draw_tool_settings_context_mode:
         if (tool is None) or (not tool.has_datablock):
             return False
 
-        # See: 'VIEW3D_PT_tools_brush', basically a duplicate
+        # See: `VIEW3D_PT_tools_brush`, basically a duplicate
         tool_settings = context.tool_settings
         settings = tool_settings.particle_edit
         brush = settings.brush
@@ -843,8 +843,7 @@ class VIEW3D_HT_header(Header):
 
                 # Curve edit sub-mode.
                 row = layout.row(align=True)
-                row.prop(gpd, "use_curve_edit", text="",
-                         icon='IPO_BEZIER')
+                row.prop(gpd, "use_curve_edit", text="", icon='IPO_BEZIER')
                 sub = row.row(align=True)
                 sub.active = gpd.use_curve_edit
                 sub.popover(
@@ -972,7 +971,10 @@ class VIEW3D_HT_header(Header):
 
             row = layout.row()
             row.popover(panel="VIEW3D_PT_slots_projectpaint", icon=icon)
-            row.popover(panel="VIEW3D_PT_mask", icon='MOD_MASK', text="")
+            row.popover(
+                panel="VIEW3D_PT_mask",
+                icon=VIEW3D_HT_header._texture_mask_icon(tool_settings.image_paint),
+                text="")
         else:
             # Transform settings depending on tool header visibility
             VIEW3D_HT_header.draw_xform_template(layout, context)
@@ -1079,6 +1081,11 @@ class VIEW3D_HT_header(Header):
                             gpencil_sculpt.use_automasking_layer_active)
 
         return "CLIPUV_DEHLT" if automask_enabled else "CLIPUV_HLT"
+
+    @staticmethod
+    def _texture_mask_icon(ipaint):
+        mask_enabled = ipaint.use_stencil_layer or ipaint.use_cavity
+        return "CLIPUV_DEHLT" if mask_enabled else "CLIPUV_HLT"
 
 
 class VIEW3D_MT_editor_menus(Menu):
@@ -3129,9 +3136,7 @@ class VIEW3D_MT_object_apply(Menu):
             text_ctxt=i18n_contexts.default,
         ).target = 'MESH'
         layout.operator("object.duplicates_make_real")
-        layout.operator("object.parent_inverse_apply",
-                        text="Parent Inverse",
-                        text_ctxt=i18n_contexts.default)
+        layout.operator("object.parent_inverse_apply", text="Parent Inverse", text_ctxt=i18n_contexts.default)
 
         layout.template_node_operator_asset_menu_items(catalog_path="Object/Apply")
 
@@ -4104,8 +4109,7 @@ class VIEW3D_MT_bone_collections(Menu):
         layout.separator()
 
         layout.operator("armature.collection_show_all")
-        props = layout.operator("armature.collection_create_and_assign",
-                                text="Assign to New Collection")
+        props = layout.operator("armature.collection_create_and_assign", text="Assign to New Collection")
         props.name = "New Collection"
 
 
@@ -4487,12 +4491,9 @@ class VIEW3D_MT_edit_mesh_context_menu(Menu):
 
             col.separator()
 
-            col.operator("view3d.edit_mesh_extrude_move_normal",
-                         text="Extrude Faces")
-            col.operator("view3d.edit_mesh_extrude_move_shrink_fatten",
-                         text="Extrude Faces Along Normals")
-            col.operator("mesh.extrude_faces_move",
-                         text="Extrude Individual Faces")
+            col.operator("view3d.edit_mesh_extrude_move_normal", text="Extrude Faces")
+            col.operator("view3d.edit_mesh_extrude_move_shrink_fatten", text="Extrude Faces Along Normals")
+            col.operator("mesh.extrude_faces_move", text="Extrude Individual Faces")
 
             col.operator("mesh.inset")
             col.operator("mesh.poke")
@@ -4552,23 +4553,16 @@ class VIEW3D_MT_edit_mesh_extrude(Menu):
         mesh = context.object.data
 
         if mesh.total_face_sel:
-            layout.operator("view3d.edit_mesh_extrude_move_normal",
-                            text="Extrude Faces")
-            layout.operator("view3d.edit_mesh_extrude_move_shrink_fatten",
-                            text="Extrude Faces Along Normals")
-            layout.operator(
-                "mesh.extrude_faces_move",
-                text="Extrude Individual Faces")
-            layout.operator("view3d.edit_mesh_extrude_manifold_normal",
-                            text="Extrude Manifold")
+            layout.operator("view3d.edit_mesh_extrude_move_normal", text="Extrude Faces")
+            layout.operator("view3d.edit_mesh_extrude_move_shrink_fatten", text="Extrude Faces Along Normals")
+            layout.operator("mesh.extrude_faces_move", text="Extrude Individual Faces")
+            layout.operator("view3d.edit_mesh_extrude_manifold_normal", text="Extrude Manifold")
 
         if mesh.total_edge_sel and (select_mode[0] or select_mode[1]):
-            layout.operator("mesh.extrude_edges_move",
-                            text="Extrude Edges")
+            layout.operator("mesh.extrude_edges_move", text="Extrude Edges")
 
         if mesh.total_vert_sel and select_mode[0]:
-            layout.operator("mesh.extrude_vertices_move",
-                            text="Extrude Vertices")
+            layout.operator("mesh.extrude_vertices_move", text="Extrude Vertices")
 
         layout.separator()
 
@@ -4733,10 +4727,8 @@ class VIEW3D_MT_edit_mesh_faces(Menu):
 
         layout.operator_context = 'INVOKE_REGION_WIN'
 
-        layout.operator("view3d.edit_mesh_extrude_move_normal",
-                        text="Extrude Faces")
-        layout.operator("view3d.edit_mesh_extrude_move_shrink_fatten",
-                        text="Extrude Faces Along Normals")
+        layout.operator("view3d.edit_mesh_extrude_move_normal", text="Extrude Faces")
+        layout.operator("view3d.edit_mesh_extrude_move_shrink_fatten", text="Extrude Faces Along Normals")
         layout.operator("mesh.extrude_faces_move", text="Extrude Individual Faces")
 
         layout.separator()
@@ -5656,8 +5648,7 @@ class VIEW3D_MT_edit_gpencil_stroke(Menu):
 
         layout.separator()
 
-        layout.operator_menu_enum("gpencil.stroke_join", "type", text="Join",
-                                  text_ctxt=i18n_contexts.id_gpencil)
+        layout.operator_menu_enum("gpencil.stroke_join", "type", text="Join", text_ctxt=i18n_contexts.id_gpencil)
 
         layout.separator()
 
@@ -8147,8 +8138,7 @@ class VIEW3D_MT_gpencil_edit_context_menu(Menu):
 
             # Removal Operators
             col.operator("gpencil.stroke_merge_by_distance").use_unselected = True
-            col.operator_menu_enum("gpencil.stroke_join", "type", text="Join",
-                                   text_ctxt=i18n_contexts.id_gpencil)
+            col.operator_menu_enum("gpencil.stroke_join", "type", text="Join", text_ctxt=i18n_contexts.id_gpencil)
 
             col.operator("gpencil.stroke_split", text="Split")
             col.operator("gpencil.stroke_separate", text="Separate").mode = 'STROKE'
