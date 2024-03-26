@@ -13,14 +13,14 @@
 
 #include "BKE_context.hh"
 
-#include "GPU_batch.h"
+#include "GPU_batch.hh"
 
 #include "RNA_access.hh"
 #include "RNA_define.hh"
 #include "RNA_prototypes.h"
 
 #include "BKE_global.hh"
-#include "BKE_idprop.h"
+#include "BKE_idprop.hh"
 #include "BKE_main.hh"
 
 #include "WM_api.hh"

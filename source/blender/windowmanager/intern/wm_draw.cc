@@ -36,16 +36,16 @@
 #include "ED_screen.hh"
 #include "ED_view3d.hh"
 
-#include "GPU_batch_presets.h"
-#include "GPU_capabilities.h"
-#include "GPU_context.h"
-#include "GPU_debug.h"
-#include "GPU_framebuffer.h"
-#include "GPU_immediate.h"
-#include "GPU_matrix.h"
-#include "GPU_state.h"
-#include "GPU_texture.h"
-#include "GPU_viewport.h"
+#include "GPU_batch_presets.hh"
+#include "GPU_capabilities.hh"
+#include "GPU_context.hh"
+#include "GPU_debug.hh"
+#include "GPU_framebuffer.hh"
+#include "GPU_immediate.hh"
+#include "GPU_matrix.hh"
+#include "GPU_state.hh"
+#include "GPU_texture.hh"
+#include "GPU_viewport.hh"
 
 #include "RE_engine.h"
 
@@ -891,7 +891,7 @@ void wm_draw_region_blend(ARegion *region, int view, bool blend)
   GPU_shader_uniform_float_ex(shader, rect_geo_loc, 4, 1, rectg);
   GPU_shader_uniform_float_ex(shader, color_loc, 4, 1, blender::float4{1, 1, 1, 1});
 
-  GPUBatch *quad = GPU_batch_preset_quad();
+  blender::gpu::Batch *quad = GPU_batch_preset_quad();
   GPU_batch_set_shader(quad, shader);
   GPU_batch_draw(quad);
 
@@ -1542,6 +1542,13 @@ void wm_draw_update(bContext *C)
   GPU_render_step();
 
   BKE_image_free_unused_gpu_textures();
+
+#ifdef WITH_METAL_BACKEND
+  /* Reset drawable to ensure GPU context activation happens at least once per frame if only a
+   * single context exists. This is required to ensure the default framebuffer is updated
+   * to be the latest backbuffer. */
+  wm_window_clear_drawable(wm);
+#endif
 
   LISTBASE_FOREACH (wmWindow *, win, &wm->windows) {
 #ifdef WIN32

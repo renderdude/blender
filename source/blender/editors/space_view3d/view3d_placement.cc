@@ -31,7 +31,7 @@
 
 #include "UI_resources.hh"
 
-#include "GPU_immediate.h"
+#include "GPU_immediate.hh"
 
 #include "view3d_intern.h"
 
@@ -255,7 +255,7 @@ static void draw_line_loop(const float coords[][3], int coords_len, const float 
   GPUVertFormat *format = immVertexFormat();
   uint pos = GPU_vertformat_attr_add(format, "pos", GPU_COMP_F32, 3, GPU_FETCH_FLOAT);
 
-  GPUVertBuf *vert = GPU_vertbuf_create_with_format(format);
+  blender::gpu::VertBuf *vert = GPU_vertbuf_create_with_format(format);
   GPU_vertbuf_data_alloc(vert, coords_len);
 
   for (int i = 0; i < coords_len; i++) {
@@ -263,7 +263,8 @@ static void draw_line_loop(const float coords[][3], int coords_len, const float 
   }
 
   GPU_blend(GPU_BLEND_ALPHA);
-  GPUBatch *batch = GPU_batch_create_ex(GPU_PRIM_LINE_LOOP, vert, nullptr, GPU_BATCH_OWNS_VBO);
+  blender::gpu::Batch *batch = GPU_batch_create_ex(
+      GPU_PRIM_LINE_LOOP, vert, nullptr, GPU_BATCH_OWNS_VBO);
   GPU_batch_program_set_builtin(batch, GPU_SHADER_3D_POLYLINE_UNIFORM_COLOR);
 
   GPU_batch_uniform_4fv(batch, "color", color);
@@ -287,7 +288,7 @@ static void draw_line_pairs(const float coords_a[][3],
   GPUVertFormat *format = immVertexFormat();
   uint pos = GPU_vertformat_attr_add(format, "pos", GPU_COMP_F32, 3, GPU_FETCH_FLOAT);
 
-  GPUVertBuf *vert = GPU_vertbuf_create_with_format(format);
+  blender::gpu::VertBuf *vert = GPU_vertbuf_create_with_format(format);
   GPU_vertbuf_data_alloc(vert, coords_len * 2);
 
   for (int i = 0; i < coords_len; i++) {
@@ -296,7 +297,8 @@ static void draw_line_pairs(const float coords_a[][3],
   }
 
   GPU_blend(GPU_BLEND_ALPHA);
-  GPUBatch *batch = GPU_batch_create_ex(GPU_PRIM_LINES, vert, nullptr, GPU_BATCH_OWNS_VBO);
+  blender::gpu::Batch *batch = GPU_batch_create_ex(
+      GPU_PRIM_LINES, vert, nullptr, GPU_BATCH_OWNS_VBO);
   GPU_batch_program_set_builtin(batch, GPU_SHADER_3D_POLYLINE_UNIFORM_COLOR);
 
   GPU_batch_uniform_4fv(batch, "color", color);
@@ -333,7 +335,7 @@ static void draw_line_bounds(const BoundBox *bounds, const float color[4])
       {3, 7},
   };
 
-  GPUVertBuf *vert = GPU_vertbuf_create_with_format(format);
+  blender::gpu::VertBuf *vert = GPU_vertbuf_create_with_format(format);
   GPU_vertbuf_data_alloc(vert, ARRAY_SIZE(edges) * 2);
 
   for (int i = 0, j = 0; i < ARRAY_SIZE(edges); i++) {
@@ -342,7 +344,8 @@ static void draw_line_bounds(const BoundBox *bounds, const float color[4])
   }
 
   GPU_blend(GPU_BLEND_ALPHA);
-  GPUBatch *batch = GPU_batch_create_ex(GPU_PRIM_LINES, vert, nullptr, GPU_BATCH_OWNS_VBO);
+  blender::gpu::Batch *batch = GPU_batch_create_ex(
+      GPU_PRIM_LINES, vert, nullptr, GPU_BATCH_OWNS_VBO);
   GPU_batch_program_set_builtin(batch, GPU_SHADER_3D_POLYLINE_UNIFORM_COLOR);
 
   GPU_batch_uniform_4fv(batch, "color", color);

@@ -24,7 +24,7 @@
 
 #include "BKE_addon.h"
 #include "BKE_context.hh"
-#include "BKE_idprop.h"
+#include "BKE_idprop.hh"
 #include "BKE_screen.hh"
 
 #include "ED_asset.hh"
@@ -684,7 +684,7 @@ bool ui_popup_context_menu_for_button(bContext *C, uiBut *but, const wmEvent *ev
         uiItemFullO_ptr(layout,
                         ot,
                         CTX_IFACE_(BLT_I18NCONTEXT_OPERATOR_DEFAULT, "View All in Graph Editor"),
-                        ICON_NONE,
+                        ICON_GRAPH,
                         nullptr,
                         WM_OP_INVOKE_DEFAULT,
                         UI_ITEM_NONE,

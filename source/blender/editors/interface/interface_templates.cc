@@ -52,7 +52,7 @@
 #include "BKE_curveprofile.h"
 #include "BKE_global.hh"
 #include "BKE_gpencil_modifier_legacy.h"
-#include "BKE_idprop.h"
+#include "BKE_idprop.hh"
 #include "BKE_idtype.hh"
 #include "BKE_layer.hh"
 #include "BKE_lib_id.hh"
@@ -3141,7 +3141,7 @@ void uiTemplatePreview(uiLayout *layout,
   Tex *tex = (Tex *)id;
   short *pr_texture = nullptr;
 
-  char _preview_id[UI_MAX_NAME_STR];
+  char _preview_id[sizeof(uiPreview::preview_id)];
 
   if (id && !ELEM(GS(id->name), ID_MA, ID_TE, ID_WO, ID_LA, ID_LS)) {
     RNA_warning("Expected ID of type material, texture, light, world or line style");
@@ -4275,7 +4275,7 @@ static uiBlock *curvemap_tools_func(
     });
   }
 
-  if (show_extend) {
+  if (show_extend && !(cumap->flag & CUMA_USE_WRAPPING)) {
     {
       uiBut *but = uiDefIconTextBut(block,
                                     UI_BTYPE_BUT_MENU,

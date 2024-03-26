@@ -6,8 +6,8 @@
  * \ingroup edgizmolib
  */
 
-#include "GPU_batch.h"
-#include "GPU_immediate.h"
+#include "GPU_batch.hh"
+#include "GPU_immediate.hh"
 
 #include "MEM_guardedalloc.h"
 
@@ -25,9 +25,9 @@ void wm_gizmo_geometryinfo_draw(const GizmoGeomInfo *info,
   /* TODO: store the Batches inside the GizmoGeomInfo and updated it when geom changes
    * So we don't need to re-created and discard it every time */
 
-  GPUVertBuf *vbo;
-  GPUIndexBuf *el;
-  GPUBatch *batch;
+  blender::gpu::VertBuf *vbo;
+  blender::gpu::IndexBuf *el;
+  blender::gpu::Batch *batch;
   GPUIndexBufBuilder elb = {0};
 
   GPUVertFormat format = {0};

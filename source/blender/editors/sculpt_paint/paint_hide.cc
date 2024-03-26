@@ -773,7 +773,7 @@ void PAINT_OT_hide_show(wmOperatorType *ot)
   WM_operator_properties_border(ot);
   hide_show_operator_properties(ot);
   hide_show_operator_gesture_properties(ot);
-  gesture::operator_properties(ot);
+  gesture::operator_properties(ot, gesture::ShapeType::Box);
 }
 
 void PAINT_OT_hide_show_lasso_gesture(wmOperatorType *ot)
@@ -793,7 +793,7 @@ void PAINT_OT_hide_show_lasso_gesture(wmOperatorType *ot)
   WM_operator_properties_gesture_lasso(ot);
   hide_show_operator_properties(ot);
   hide_show_operator_gesture_properties(ot);
-  gesture::operator_properties(ot);
+  gesture::operator_properties(ot, gesture::ShapeType::Lasso);
 }
 
 static void invert_visibility_mesh(Object &object, const Span<PBVHNode *> nodes)
@@ -899,7 +899,6 @@ void PAINT_OT_visibility_invert(wmOperatorType *ot)
   ot->idname = "PAINT_OT_visibility_invert";
   ot->description = "Invert the visibility of all vertices";
 
-  ot->modal = WM_gesture_box_modal;
   ot->exec = visibility_invert_exec;
   ot->poll = SCULPT_mode_poll_view3d;
 
