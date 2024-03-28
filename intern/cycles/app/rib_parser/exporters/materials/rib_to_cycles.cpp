@@ -655,7 +655,7 @@ void PxrSurfacetoPrincipled::update_parameters(Parameter_Dictionary const &param
           input = find_socket("b", color_mix_node);
           color_mix_node->set(*input, make_float3(1.0));
           input = find_socket("fac", color_mix_node);
-          color_mix_node->set(*input, 2);
+          color_mix_node->set(*input, 2.0f);
           input = find_socket("blend_type", color_mix_node);
           color_mix_node->set(*input, ccl::NodeMix::NODE_MIX_MUL);
           if (param->storage != Container_Type::Reference) {
