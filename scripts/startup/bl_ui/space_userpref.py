@@ -671,8 +671,8 @@ class USERPREF_PT_system_os_settings(SystemPanel, CenterAlignMixIn, Panel):
         import sys
         return sys.platform[:3] == "win"
 
-    def draw_centered(self, _context, layout):
-        if _context.preferences.system.is_microsoft_store_install:
+    def draw_centered(self, context, layout):
+        if context.preferences.system.is_microsoft_store_install:
             layout.label(text="Microsoft Store installation")
             layout.label(text="Use Windows 'Default Apps' to associate with blend files")
         else:
@@ -2680,6 +2680,7 @@ class USERPREF_PT_experimental_prototypes(ExperimentalPanel, Panel):
                 ({"property": "enable_overlay_next"}, ("blender/blender/issues/102179", "#102179")),
                 ({"property": "use_extension_repos"}, ("/blender/blender/issues/117286", "#117286")),
                 ({"property": "use_extension_utils"}, ("/blender/blender/issues/117286", "#117286")),
+                ({"property": "use_animation_baklava"}, ("/blender/blender/pulls/114098", "#114098")),
             ),
         )
 
