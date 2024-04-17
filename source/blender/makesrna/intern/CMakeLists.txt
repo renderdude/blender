@@ -112,8 +112,8 @@ if(WITH_EXPERIMENTAL_FEATURES)
   add_definitions(-DWITH_GREASE_PENCIL_V3)
   add_definitions(-DWITH_ANIM_BAKLAVA)
   list(APPEND DEFSRC
-    rna_grease_pencil.cc
     rna_animation_id.cc
+    rna_grease_pencil.cc
   )
 endif()
 
@@ -222,12 +222,6 @@ set(SRC
   ${DEFSRC}
   ${APISRC}
   ../../../../intern/clog/clog.c
-  ../../../../intern/guardedalloc/intern/leak_detector.cc
-  ../../../../intern/guardedalloc/intern/mallocn.c
-  ../../../../intern/guardedalloc/intern/mallocn_guarded_impl.c
-  ../../../../intern/guardedalloc/intern/mallocn_lockfree_impl.c
-  ../../../../intern/guardedalloc/intern/memory_usage.cc
-
   # Needed for defaults.
   ../../../../release/datafiles/userdef/userdef_default.c
   ../../../../release/datafiles/userdef/userdef_default_theme.c
@@ -236,8 +230,8 @@ set(SRC
 set(INC
   .
   ..
-  ../../asset_system
   ../../animrig
+  ../../asset_system
   ../../blenfont
   ../../blenkernel
   ../../blenlib

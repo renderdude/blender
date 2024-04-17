@@ -182,6 +182,7 @@ static void OVERLAY_cache_init(void *vedata)
       OVERLAY_edit_lattice_cache_init(data);
       break;
     case CTX_MODE_PAINT_GREASE_PENCIL:
+    case CTX_MODE_SCULPT_GREASE_PENCIL:
     case CTX_MODE_EDIT_GREASE_PENCIL:
       OVERLAY_edit_grease_pencil_cache_init(data);
       break;
@@ -338,7 +339,8 @@ static void OVERLAY_cache_populate(void *vedata, Object *ob)
   const bool in_paint_mode = (ob == draw_ctx->obact) &&
                              (draw_ctx->object_mode & OB_MODE_ALL_PAINT);
   const bool in_sculpt_curve_mode = (ob == draw_ctx->obact ||
-                                     (is_preview && dupli_parent == draw_ctx->obact)) &&
+                                     (is_preview && dupli_parent == draw_ctx->obact &&
+                                      ob->type == OB_CURVES)) &&
                                     (draw_ctx->object_mode & OB_MODE_SCULPT_CURVES);
   const bool in_sculpt_mode = (ob == draw_ctx->obact) && (ob->sculpt != nullptr) &&
                               (ob->sculpt->mode_type == OB_MODE_SCULPT);

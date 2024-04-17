@@ -1221,6 +1221,25 @@ template<typename T>
   return to_quaternion<T>(MatBase<T, 3, 3>(mat));
 }
 
+/**
+ * This is "safe" in the sense that the input matrix may not actually encode a rotation but can
+ * also contain shearing etc.
+ */
+template<typename T>
+[[nodiscard]] inline QuaternionBase<T> normalized_to_quaternion_safe(const MatBase<T, 3, 3> &mat)
+{
+  /* Conversion to quaternion asserts when the matrix contains some kinds of shearing, conversion
+   * to euler does not. */
+  /* TODO: Find a better algorithm that can convert untrusted matrices to quaternions directly. */
+  return to_quaternion(to_euler(mat));
+}
+
+template<typename T>
+[[nodiscard]] inline QuaternionBase<T> normalized_to_quaternion_safe(const MatBase<T, 4, 4> &mat)
+{
+  return to_quaternion(to_euler(mat));
+}
+
 template<bool AllowNegativeScale, typename T, int NumCol, int NumRow>
 [[nodiscard]] inline VecBase<T, 3> to_scale(const MatBase<T, NumCol, NumRow> &mat)
 {
@@ -1669,7 +1688,7 @@ template<typename T>
   MatBase<T, 4, 4> result = mat;
   const bool is_perspective = mat[2][3] == -1.0f;
   const bool is_perspective_infinite = mat[2][2] == -1.0f;
-  if (is_perspective | is_perspective_infinite) {
+  if (is_perspective || is_perspective_infinite) {
     result[2][0] -= mat[0][0] * offset.x / math::length(float3(mat[0][0], mat[1][0], mat[2][0]));
     result[2][1] -= mat[1][1] * offset.y / math::length(float3(mat[0][1], mat[1][1], mat[2][1]));
   }

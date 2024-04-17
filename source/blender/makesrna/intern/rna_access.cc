@@ -2162,6 +2162,11 @@ static bool rna_property_editable_do(const PointerRNA *ptr,
   return true;
 }
 
+bool RNA_property_is_runtime(const PropertyRNA *prop)
+{
+  return prop->flag_internal & PROP_INTERN_RUNTIME;
+}
+
 bool RNA_property_editable(const PointerRNA *ptr, PropertyRNA *prop)
 {
   return rna_property_editable_do(ptr, prop, -1, nullptr);
@@ -4385,10 +4390,10 @@ bool RNA_property_collection_lookup_string_supported(PropertyRNA *prop)
           RNA_property_collection_lookup_string_has_nameprop(prop));
 }
 
-int RNA_property_collection_lookup_int(PointerRNA *ptr,
-                                       PropertyRNA *prop,
-                                       int key,
-                                       PointerRNA *r_ptr)
+bool RNA_property_collection_lookup_int(PointerRNA *ptr,
+                                        PropertyRNA *prop,
+                                        int key,
+                                        PointerRNA *r_ptr)
 {
   CollectionPropertyRNA *cprop = (CollectionPropertyRNA *)rna_ensure_property(prop);
 
@@ -4418,7 +4423,7 @@ int RNA_property_collection_lookup_int(PointerRNA *ptr,
   return iter.valid;
 }
 
-int RNA_property_collection_lookup_string_index(
+bool RNA_property_collection_lookup_string_index(
     PointerRNA *ptr, PropertyRNA *prop, const char *key, PointerRNA *r_ptr, int *r_index)
 {
   CollectionPropertyRNA *cprop = (CollectionPropertyRNA *)rna_ensure_property(prop);
@@ -4438,8 +4443,8 @@ int RNA_property_collection_lookup_string_index(
   /* no callback defined, compare with name properties if they exist */
   CollectionPropertyIterator iter;
   PropertyRNA *nameprop;
-  char name[256], *nameptr;
-  int found = 0;
+  char name_buf[256], *name;
+  bool found = false;
   int keylen = strlen(key);
   int namelen;
   int index = 0;
@@ -4449,15 +4454,16 @@ int RNA_property_collection_lookup_string_index(
     if (iter.ptr.data && iter.ptr.type->nameproperty) {
       nameprop = iter.ptr.type->nameproperty;
 
-      nameptr = RNA_property_string_get_alloc(&iter.ptr, nameprop, name, sizeof(name), &namelen);
+      name = RNA_property_string_get_alloc(
+          &iter.ptr, nameprop, name_buf, sizeof(name_buf), &namelen);
 
-      if ((keylen == namelen) && STREQ(nameptr, key)) {
+      if ((keylen == namelen) && STREQ(name, key)) {
         *r_ptr = iter.ptr;
-        found = 1;
+        found = true;
       }
 
-      if (name != nameptr) {
-        MEM_freeN(nameptr);
+      if (name != name_buf) {
+        MEM_freeN(name);
       }
 
       if (found) {
@@ -4478,19 +4484,19 @@ int RNA_property_collection_lookup_string_index(
   return iter.valid;
 }
 
-int RNA_property_collection_lookup_string(PointerRNA *ptr,
-                                          PropertyRNA *prop,
-                                          const char *key,
-                                          PointerRNA *r_ptr)
+bool RNA_property_collection_lookup_string(PointerRNA *ptr,
+                                           PropertyRNA *prop,
+                                           const char *key,
+                                           PointerRNA *r_ptr)
 {
   int index;
   return RNA_property_collection_lookup_string_index(ptr, prop, key, r_ptr, &index);
 }
 
-int RNA_property_collection_assign_int(PointerRNA *ptr,
-                                       PropertyRNA *prop,
-                                       const int key,
-                                       const PointerRNA *assign_ptr)
+bool RNA_property_collection_assign_int(PointerRNA *ptr,
+                                        PropertyRNA *prop,
+                                        const int key,
+                                        const PointerRNA *assign_ptr)
 {
   CollectionPropertyRNA *cprop = (CollectionPropertyRNA *)rna_ensure_property(prop);
 
@@ -4501,7 +4507,7 @@ int RNA_property_collection_assign_int(PointerRNA *ptr,
     return cprop->assignint(ptr, key, assign_ptr);
   }
 
-  return 0;
+  return false;
 }
 
 bool RNA_property_collection_type_get(PointerRNA *ptr, PropertyRNA *prop, PointerRNA *r_ptr)

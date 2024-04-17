@@ -224,10 +224,19 @@ void AssetList::iterate(AssetListHandleIterFn fn) const
 
 void AssetList::iterate(AssetListIterFn fn) const
 {
-  this->iterate([&fn](AssetHandle handle) {
-    auto &asset = reinterpret_cast<asset_system::AssetRepresentation &>(*handle.file_data->asset);
-    return fn(asset);
-  });
+  FileList *files = filelist_;
+  const int numfiles = filelist_files_ensure(files);
+
+  for (int i = 0; i < numfiles; i++) {
+    asset_system::AssetRepresentation *asset = filelist_entry_get_asset_representation(files, i);
+    if (!asset) {
+      continue;
+    }
+
+    if (!fn(*asset)) {
+      break;
+    }
+  }
 }
 
 void AssetList::ensure_previews_job(const bContext *C)
@@ -352,10 +361,10 @@ void storage_tag_main_data_dirty()
   }
 }
 
-void storage_id_remap(ID *id_new, ID *id_old)
+void storage_id_remap(ID *id_old, ID *id_new)
 {
   for (AssetList &list : global_storage().values()) {
-    list.remap_id(id_new, id_old);
+    list.remap_id(id_old, id_new);
   }
 }
 
