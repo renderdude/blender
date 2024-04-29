@@ -454,7 +454,7 @@ static void gesture_begin(bContext &C, gesture::GestureData &gesture_data)
   generate_geometry(gesture_data);
   SCULPT_topology_islands_invalidate(ss);
   BKE_sculpt_update_object_for_edit(depsgraph, gesture_data.vc.obact, false);
-  undo::push_node(gesture_data.vc.obact, nullptr, undo::Type::Geometry);
+  undo::push_node(*gesture_data.vc.obact, nullptr, undo::Type::Geometry);
 }
 
 static int bm_face_isect_pair(BMFace *f, void * /*user_data*/)
@@ -591,16 +591,13 @@ static void gesture_end(bContext & /*C*/, gesture::GestureData &gesture_data)
 
   free_geometry(gesture_data);
 
-  undo::push_node(gesture_data.vc.obact, nullptr, undo::Type::Geometry);
+  undo::push_node(*gesture_data.vc.obact, nullptr, undo::Type::Geometry);
   BKE_mesh_batch_cache_dirty_tag(mesh, BKE_MESH_BATCH_DIRTY_ALL);
   DEG_id_tag_update(&gesture_data.vc.obact->id, ID_RECALC_GEOMETRY);
 }
 
 static void init_operation(gesture::GestureData &gesture_data, wmOperator &op)
 {
-  gesture_data.operation = reinterpret_cast<gesture::Operation *>(
-      MEM_cnew<TrimOperation>(__func__));
-
   TrimOperation *trim_operation = (TrimOperation *)gesture_data.operation;
 
   trim_operation->op.begin = gesture_begin;
@@ -725,6 +722,8 @@ static int gesture_box_exec(bContext *C, wmOperator *op)
     return OPERATOR_CANCELLED;
   }
 
+  gesture_data->operation = reinterpret_cast<gesture::Operation *>(
+      MEM_cnew<TrimOperation>(__func__));
   initialize_cursor_info(*C, *op, *gesture_data);
   init_operation(*gesture_data, *op);
 
@@ -754,6 +753,8 @@ static int gesture_lasso_exec(bContext *C, wmOperator *op)
     return OPERATOR_CANCELLED;
   }
 
+  gesture_data->operation = reinterpret_cast<gesture::Operation *>(
+      MEM_cnew<TrimOperation>(__func__));
   initialize_cursor_info(*C, *op, *gesture_data);
   init_operation(*gesture_data, *op);
 

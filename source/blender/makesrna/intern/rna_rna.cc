@@ -78,7 +78,8 @@ const EnumPropertyItem rna_enum_property_type_items[] = {
   {PROP_DISTANCE, "DISTANCE", 0, "Distance", ""}, \
   {PROP_DISTANCE_CAMERA, "DISTANCE_CAMERA", 0, "Camera Distance", ""}, \
   {PROP_POWER, "POWER", 0, "Power", ""}, \
-  {PROP_TEMPERATURE, "TEMPERATURE", 0, "Temperature", ""}
+  {PROP_TEMPERATURE, "TEMPERATURE", 0, "Temperature", ""}, \
+  {PROP_WAVELENGTH, "WAVELENGTH", 0, "Wavelength", ""}
 
 #define RNA_ENUM_PROPERTY_SUBTYPE_NUMBER_ARRAY_ITEMS \
   {PROP_COLOR, "COLOR", 0, "Color", ""}, \
@@ -150,6 +151,7 @@ const EnumPropertyItem rna_enum_property_unit_items[] = {
     {PROP_UNIT_CAMERA, "CAMERA", 0, "Camera", ""},
     {PROP_UNIT_POWER, "POWER", 0, "Power", ""},
     {PROP_UNIT_TEMPERATURE, "TEMPERATURE", 0, "Temperature", ""},
+    {PROP_UNIT_WAVELENGTH, "WAVELENGTH", 0, "Wavelength", ""},
     {0, nullptr, 0, nullptr, nullptr},
 };
 
@@ -250,8 +252,12 @@ const EnumPropertyItem rna_enum_property_string_search_flag_items[] = {
 #  include "BKE_idprop.hh"
 #  include "BKE_lib_override.hh"
 
+#  include "RNA_path.hh"
+
 #  include <optional>
 #  include <string>
+
+#  include <fmt/format.h>
 
 static CLG_LogRef LOG_COMPARE_OVERRIDE = {"rna.rna_compare_override"};
 
@@ -2550,15 +2556,21 @@ bool rna_property_override_apply_default(Main *bmain,
   if (prop_src_type != prop_dst_type ||
       (prop_storage && prop_src_type != RNA_property_type(prop_storage)))
   {
+    std::optional<std::string> prop_rna_path = rnaapply_ctx.liboverride_property ?
+                                                   rnaapply_ctx.liboverride_property->rna_path :
+                                                   RNA_path_from_ID_to_property(ptr_dst, prop_dst);
     CLOG_WARN(&LOG_COMPARE_OVERRIDE,
               "%s.%s: Inconsistency between stored property type (%d) and linked reference one "
               "(%d), skipping liboverride apply",
               ptr_dst->owner_id->name,
-              rnaapply_ctx.liboverride_property->rna_path,
+              prop_rna_path ? prop_rna_path->c_str() :
+                              fmt::format(" ... .{}", prop_dst->name).c_str(),
               prop_src_type,
               prop_dst_type);
     /* Keep the liboverride property, update its type to the new actual one. */
-    rnaapply_ctx.liboverride_property->rna_prop_type = prop_dst_type;
+    if (rnaapply_ctx.liboverride_property) {
+      rnaapply_ctx.liboverride_property->rna_prop_type = prop_dst_type;
+    }
     return false;
   }
 

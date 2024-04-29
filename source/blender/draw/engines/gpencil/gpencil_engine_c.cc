@@ -781,9 +781,11 @@ static GPENCIL_tObject *grease_pencil_object_cache_populate(GPENCIL_PrivateData 
     const VArray<int> stroke_materials = *attributes.lookup_or_default<int>(
         "material_index", bke::AttrDomain::Curve, 0);
 
-    const bool only_lines =
-        !ELEM(ob->mode, OB_MODE_PAINT_GREASE_PENCIL, OB_MODE_WEIGHT_PAINT, OB_MODE_VERTEX_PAINT) &&
-        info.frame_number != pd->cfra && pd->use_multiedit_lines_only;
+    const bool only_lines = !ELEM(ob->mode,
+                                  OB_MODE_PAINT_GPENCIL_LEGACY,
+                                  OB_MODE_WEIGHT_GPENCIL_LEGACY,
+                                  OB_MODE_VERTEX_GPENCIL_LEGACY) &&
+                            info.frame_number != pd->cfra && pd->use_multiedit_lines_only;
     const bool is_onion = info.onion_id != 0;
 
     visible_strokes.foreach_index([&](const int stroke_i) {
@@ -1217,7 +1219,7 @@ void GPENCIL_draw_scene(void *ved)
 
   /* Fade 3D objects. */
   if ((!pd->is_render) && (pd->fade_3d_object_opacity > -1.0f) && (pd->obact != nullptr) &&
-      (ELEM(pd->obact->type, OB_GPENCIL_LEGACY, OB_GREASE_PENCIL)))
+      ELEM(pd->obact->type, OB_GPENCIL_LEGACY, OB_GREASE_PENCIL))
   {
     float background_color[3];
     ED_view3d_background_color_get(pd->scene, pd->v3d, background_color);

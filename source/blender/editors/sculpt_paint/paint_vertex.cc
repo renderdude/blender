@@ -408,7 +408,7 @@ void mode_exit_generic(Object *ob, const eObjectMode mode_flag)
 bool mode_toggle_poll_test(bContext *C)
 {
   Object *ob = CTX_data_active_object(C);
-  if (ob == nullptr || !ELEM(ob->type, OB_MESH, OB_GREASE_PENCIL)) {
+  if (ob == nullptr || ob->type != OB_MESH) {
     return false;
   }
   if (!ob->data || ID_IS_LINKED(ob->data)) {
@@ -1699,8 +1699,19 @@ static void vpaint_do_draw(bContext *C,
           float tex_alpha = 1.0;
           if (vpd->is_texbrush) {
             /* NOTE: we may want to paint alpha as vertex color alpha. */
-            tex_alpha = paint_and_tex_color_alpha<Color>(
-                vp, vpd, vpd->vertexcosnos[v_index].co, &color_final);
+
+            /* If the active area is being applied for symmetry, flip it
+             * across the symmetry axis and rotate it back to the original
+             * position in order to project it. This insures that the
+             * brush texture will be oriented correctly.
+             * This is the method also used in #sculpt_apply_texture(). */
+            float symm_point[3];
+            if (cache->radial_symmetry_pass) {
+              mul_m4_v3(cache->symm_rot_mat_inv.ptr(), vpd->vertexcosnos[v_index].co);
+            }
+            flip_v3_v3(symm_point, vpd->vertexcosnos[v_index].co, cache->mirror_symmetry_pass);
+
+            tex_alpha = paint_and_tex_color_alpha<Color>(vp, vpd, symm_point, &color_final);
           }
 
           Color color_orig(0, 0, 0, 0);
@@ -1787,7 +1798,7 @@ static void vpaint_paint_leaves(bContext *C,
                                 Span<PBVHNode *> nodes)
 {
   for (PBVHNode *node : nodes) {
-    undo::push_node(ob, node, undo::Type::Color);
+    undo::push_node(*ob, node, undo::Type::Color);
   }
 
   const Brush *brush = ob->sculpt->cache->brush;
@@ -2142,7 +2153,7 @@ static void fill_mesh_color(Mesh &mesh,
                             const bool use_face_sel,
                             const bool affect_alpha)
 {
-  if (BMEditMesh *em = mesh.runtime->edit_mesh) {
+  if (BMEditMesh *em = mesh.runtime->edit_mesh.get()) {
     BMesh *bm = em->bm;
     const std::string name = attribute_name;
     const CustomDataLayer *layer = BKE_id_attributes_color_find(&mesh.id, name.c_str());
@@ -2235,7 +2246,7 @@ static int vertex_color_set_exec(bContext *C, wmOperator *op)
   undo::push_begin(obact, op);
   Vector<PBVHNode *> nodes = blender::bke::pbvh::search_gather(obact->sculpt->pbvh, {});
   for (PBVHNode *node : nodes) {
-    undo::push_node(obact, node, undo::Type::Color);
+    undo::push_node(*obact, node, undo::Type::Color);
   }
 
   paint_object_attributes_active_color_fill_ex(obact, paintcol, true, affect_alpha);

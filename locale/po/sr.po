@@ -1,9 +1,9 @@
 
 msgid ""
 msgstr ""
-"Project-Id-Version: Blender 4.2.0 Alpha (b'c30667711948')\n"
+"Project-Id-Version: Blender 4.2.0 Alpha (b'3a5389d5abe0')\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-04-15 10:09+0000\n"
+"POT-Creation-Date: 2024-04-29 07:27+0000\n"
 "PO-Revision-Date: 2012-09-07 22:32+0100\n"
 "Last-Translator: Nikola Radovanovic <cobisimo@gmail.com>\n"
 "Language-Team: Nikola Radovanovic\n"
@@ -4982,6 +4982,10 @@ msgid "Relative Offset"
 msgstr "Релативно растојање"
 
 
+msgid "Add another object's transformation to the total offset"
+msgstr "Примени трансформацију објекта на његове податке"
+
+
 msgid "Speed Factor"
 msgstr "Фактор брзине"
 
@@ -5581,10 +5585,6 @@ msgstr "Користи додатну провидност"
 
 msgid "Restore Mesh"
 msgstr "Врати"
-
-
-msgid "Relax"
-msgstr "Опусти"
 
 
 msgid "Vertex Paint Tool"
@@ -9043,6 +9043,10 @@ msgid "Show/Hide"
 msgstr "Прикажи/сакриј"
 
 
+msgid "Zoom"
+msgstr "Увећање"
+
+
 msgid "Console"
 msgstr "Конзола"
 
@@ -9658,10 +9662,6 @@ msgstr "Додаје стално растојање"
 
 msgid "Merge Vertices"
 msgstr "Спој темена"
-
-
-msgid "Add another object's transformation to the total offset"
-msgstr "Примени трансформацију објекта на његове податке"
 
 
 msgid "Bevel Modifier"
@@ -11086,10 +11086,6 @@ msgstr "Центар X"
 
 msgid "Center Y"
 msgstr "Центар Y"
-
-
-msgid "Zoom"
-msgstr "Увећање"
 
 
 msgid "Octagonal"
@@ -13518,6 +13514,10 @@ msgid "Add Circle"
 msgstr "Додај круг"
 
 
+msgid "Handles"
+msgstr "Ручке"
+
+
 msgid "Duplicate"
 msgstr "Дуплирај"
 
@@ -13782,10 +13782,6 @@ msgstr "Постави врсту криве"
 
 msgid "Set type of active spline"
 msgstr "Поставља врсту активне криве линије"
-
-
-msgid "Handles"
-msgstr "Ручке"
 
 
 msgid "Split off selected points from connected unselected points"
@@ -16482,10 +16478,6 @@ msgid "Make Links"
 msgstr "Направи везе"
 
 
-msgid "Makes a link between selected output in input sockets"
-msgstr "Ствара везу између изабраних "
-
-
 msgctxt "Operator"
 msgid "Link to Viewer Node"
 msgstr "Веза на чвор прегледача"
@@ -18380,6 +18372,10 @@ msgid "Falloff Type"
 msgstr "Врста опадања"
 
 
+msgid "Relax"
+msgstr "Опусти"
+
+
 msgid "Sharpen"
 msgstr "Изоштрено"
 
@@ -18403,9 +18399,8 @@ msgid "Set Persistent Base"
 msgstr "Постави трајну основу"
 
 
-msgctxt "Operator"
-msgid "Sculpt UVs"
-msgstr "UV вајање"
+msgid "Use Laplacian method for relaxation"
+msgstr "Користи Лапласов метод за опуштање"
 
 
 msgctxt "Operator"
@@ -23812,10 +23807,6 @@ msgid "Snap during transform"
 msgstr "Лепи приликом трансформације"
 
 
-msgid "Use Laplacian method for relaxation"
-msgstr "Користи Лапласов метод за опуштање"
-
-
 msgid "UV Sculpt"
 msgstr "UV вајање"
 
@@ -24798,10 +24789,6 @@ msgid "Unlock Tracks"
 msgstr "Откључај стазе"
 
 
-msgid "Zoom %d:%d"
-msgstr "Приближи %d:%d"
-
-
 msgctxt "Operator"
 msgid "Autocomplete"
 msgstr "Самодопуњавање"
@@ -24990,10 +24977,6 @@ msgid "Online Manual"
 msgstr "Упутство на интернету"
 
 
-msgid "Slot %d"
-msgstr "Слот %d"
-
-
 msgctxt "Operator"
 msgid "Make"
 msgstr "Направи"
@@ -25105,10 +25088,6 @@ msgstr "Текст: спољашњи"
 
 msgid "Text: Internal"
 msgstr "Текст: унутрашњи"
-
-
-msgid "File: %s"
-msgstr "Датотека: %s"
 
 
 msgctxt "Operator"
@@ -25707,10 +25686,6 @@ msgid "<No ID pointer>"
 msgstr "<Без ID показивача>"
 
 
-msgid "<Missing ID block>"
-msgstr "<Недостаје ID блок>"
-
-
 msgid "No F-Curve to add keyframes to"
 msgstr "Кадар за ибацивање кључног кадра"
 
@@ -25742,6 +25717,10 @@ msgstr "Генератор"
 
 msgid "Stepped"
 msgstr "Корачање"
+
+
+msgid "Slot %d"
+msgstr "Слот %d"
 
 
 msgid "Key %d"
@@ -26627,6 +26606,10 @@ msgstr "Кадар: %d / %d"
 
 msgid "Frame: - / %d"
 msgstr "Кадар: - / %d"
+
+
+msgid "File: %s"
+msgstr "Датотека: %s"
 
 
 msgid "unsupported movie clip format"

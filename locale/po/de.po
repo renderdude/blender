@@ -1,9 +1,9 @@
 
 msgid ""
 msgstr ""
-"Project-Id-Version: Blender 4.2.0 Alpha (b'c30667711948')\n"
+"Project-Id-Version: Blender 4.2.0 Alpha (b'3a5389d5abe0')\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-04-15 10:09+0000\n"
+"POT-Creation-Date: 2024-04-29 07:27+0000\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Martin Reininger <martinreininger@gmx.net>\n"
 "Language-Team: German translation team\n"
@@ -582,32 +582,16 @@ msgid "After Current"
 msgstr "Nach Aktuellem"
 
 
-msgid "Number of frames to show after the current frame (only for 'Around Current Frame' Onion-skinning method)"
-msgstr "Anzahl der Bilder, die nach dem aktuellen Bild angezeigt werden(nur für 'das aktuelle Bild' Zwiebelschalen-Methode)"
-
-
 msgid "Before Current"
 msgstr "Vor Aktuellem"
-
-
-msgid "Number of frames to show before the current frame (only for 'Around Current Frame' Onion-skinning method)"
-msgstr "Anzahl der Bilder, die vor dem aktuellen Bild angezeigt werden(nur für 'das aktuelle Bild' Zwiebelschalen-Methode)"
 
 
 msgid "End Frame"
 msgstr "Endbild"
 
 
-msgid "End frame of range of paths to display/calculate (not for 'Around Current Frame' Onion-skinning method)"
-msgstr "Endbild der Pfadspanne, das angezeigt/berechnet werden soll (nicht für 'das aktuelle Bild' Zwiebelschalen-Methode)"
-
-
 msgid "Start Frame"
 msgstr "Startbild"
-
-
-msgid "Starting frame of range of paths to display/calculate (not for 'Around Current Frame' Onion-skinning method)"
-msgstr "Startbild der Pfadspanne, das angezeigt/berechnet werden soll (nicht für 'das aktuelle Bild' Zwiebelschalen-Methode)"
 
 
 msgid "Frame Step"
@@ -4457,10 +4441,6 @@ msgstr "Parallelkameras ohne Konvergenz"
 
 msgid "Toe-in"
 msgstr "Vorspur"
-
-
-msgid "Rotated cameras, looking at the convergence distance"
-msgstr "Gedrehte Kameras, Blick auf den Konvergenzabstand"
 
 
 msgid "Interocular Distance"
@@ -11300,10 +11280,6 @@ msgid "Invert mask"
 msgstr "Maskierung invertieren"
 
 
-msgid "GPencil Sculpt Guide"
-msgstr "Wachsstift-Skulptur Anleitung"
-
-
 msgid "Circular"
 msgstr "Kreisähnlich"
 
@@ -11574,10 +11550,6 @@ msgid "Gizmos"
 msgstr "Gizmos"
 
 
-msgid "Has Reports"
-msgstr "Hat Berichte"
-
-
 msgid "Gizmo Properties"
 msgstr "Gizmo Eigenschaften"
 
@@ -11746,16 +11718,12 @@ msgid "Enable offset"
 msgstr "Versatz aktivieren"
 
 
-msgid "Enable object offset"
-msgstr "Objektversatz aktivieren"
+msgid "Add another object's transformation to the total offset"
+msgstr "Andere Objekttransformation zum gesamten Versatz hinzufügen"
 
 
 msgid "Shift"
 msgstr "Umschalt"
-
-
-msgid "Enable shift"
-msgstr "Veränderung aktivieren"
 
 
 msgid "Uniform Scale"
@@ -13387,22 +13355,6 @@ msgstr "Weicher Strich"
 
 msgid "Use this brush in grease pencil vertex color mode"
 msgstr "Diesen Wachsstift im Eckpunktfarbmodus verwenden"
-
-
-msgid "Grab UVs"
-msgstr "UV's verschieben"
-
-
-msgid "Relax"
-msgstr "Entspannen"
-
-
-msgid "Relax UVs"
-msgstr "UVs entspannen"
-
-
-msgid "Pinch UVs"
-msgstr "UVs klemmen"
 
 
 msgid "Vertex Paint Tool"
@@ -19931,10 +19883,6 @@ msgid "Falloff"
 msgstr "Abfall"
 
 
-msgid "Falloff type the feather"
-msgstr "Abfalltyp der Feder"
-
-
 msgid "Smooth falloff"
 msgstr "Weicher Abfall"
 
@@ -20274,6 +20222,10 @@ msgstr "Zeigen/Verbergen"
 
 msgid "Context Menu"
 msgstr "Kontextmenü"
+
+
+msgid "Zoom"
+msgstr "Zoom"
 
 
 msgid "Console"
@@ -21216,10 +21168,6 @@ msgstr "Endpunkte zusammenführen"
 
 msgid "Merge vertices in first and last duplicates"
 msgstr "Punkte im ersten und letzten Duplikat zusammenführen"
-
-
-msgid "Add another object's transformation to the total offset"
-msgstr "Andere Objekttransformation zum gesamten Versatz hinzufügen"
 
 
 msgid "Bevel Modifier"
@@ -24444,10 +24392,6 @@ msgid "Spin"
 msgstr "Drehen"
 
 
-msgid "Zoom"
-msgstr "Zoom"
-
-
 msgid "Bokeh shape rotation offset"
 msgstr "Rotationsmodus"
 
@@ -25669,6 +25613,10 @@ msgid "Subdivide Mesh"
 msgstr "Masche unterteilen"
 
 
+msgid "Mouse Position"
+msgstr "Mausposition"
+
+
 msgid "Selection"
 msgstr "Auswahl"
 
@@ -26317,14 +26265,6 @@ msgstr "Modulo"
 
 msgid "Vector Rotate"
 msgstr "Vektor Rotieren"
-
-
-msgid "Invert angle"
-msgstr "Achse invertieren"
-
-
-msgid "Type of rotation"
-msgstr "Rotationstyp"
 
 
 msgid "Rotate a point using X axis"
@@ -29071,6 +29011,10 @@ msgid "Convert Particle System to Curves"
 msgstr "Partikelsysteme zu Kurven konvertieren"
 
 
+msgid "Handles"
+msgstr "Griffe"
+
+
 msgid "Duplicate"
 msgstr "Duplizieren"
 
@@ -29477,10 +29421,6 @@ msgstr "Splinetyp setzen"
 
 msgid "Set type of active spline"
 msgstr "Typ des aktiven Splines festlegen"
-
-
-msgid "Handles"
-msgstr "Griffe"
 
 
 msgctxt "Operator"
@@ -34498,10 +34438,6 @@ msgid "Make Links"
 msgstr "Verknüpfen"
 
 
-msgid "Makes a link between selected output in input sockets"
-msgstr "Verbindung zwischen Ausgangs- und Eingangsbuchse erzeugen"
-
-
 msgctxt "Operator"
 msgid "Link to Viewer Node"
 msgstr "An Ansicht ausrichten"
@@ -38328,6 +38264,10 @@ msgid "Scale mesh"
 msgstr "Masche skalieren"
 
 
+msgid "Relax"
+msgstr "Entspannen"
+
+
 msgid "Relax mesh"
 msgstr "Masche entspannen"
 
@@ -38387,9 +38327,16 @@ msgid "Trim Mode"
 msgstr "Trim-Modus"
 
 
-msgctxt "Operator"
-msgid "Sculpt UVs"
-msgstr "Skulpturmodus"
+msgid "Grab UVs"
+msgstr "UV's verschieben"
+
+
+msgid "Pinch UVs"
+msgstr "UVs klemmen"
+
+
+msgid "Relax UVs"
+msgstr "UVs entspannen"
 
 
 msgctxt "Operator"
@@ -38755,10 +38702,6 @@ msgstr "Verknüpfte auswählen"
 msgctxt "Operator"
 msgid "Select Side"
 msgstr "Seite auswählen"
-
-
-msgid "Mouse Position"
-msgstr "Mausposition"
 
 
 msgid "No Change"
@@ -42136,10 +42079,6 @@ msgid "Effects"
 msgstr "Effekte"
 
 
-msgid "Spot Shape"
-msgstr "Punkt-Form"
-
-
 msgid "Text Boxes"
 msgstr "Textboxen"
 
@@ -43062,13 +43001,13 @@ msgstr "Radieren"
 
 
 msgctxt "Operator"
-msgid "Tint"
-msgstr "Farbton"
+msgid "Cutter"
+msgstr "Messer"
 
 
 msgctxt "Operator"
-msgid "Cutter"
-msgstr "Messer"
+msgid "Tint"
+msgstr "Farbton"
 
 
 msgctxt "Operator"
@@ -47227,16 +47166,8 @@ msgid "Factor for ambient occlusion blending"
 msgstr "Faktor für Ambient Occlusion Überblendung"
 
 
-msgid "4 px"
-msgstr "4 px"
-
-
 msgid "Light Threshold"
 msgstr "Lichtschwellwert"
-
-
-msgid "Background Separation"
-msgstr "Hintergrundtrennung"
 
 
 msgid "Motion steps"
@@ -47269,10 +47200,6 @@ msgstr "Weiche Schatten"
 
 msgid "Viewport Denoising"
 msgstr "Viewport entrauschen"
-
-
-msgid "2 px"
-msgstr "2 px"
 
 
 msgid "Grease Pencil Render"
@@ -49087,10 +49014,6 @@ msgid "Display Frames"
 msgstr "Einzelbilder anzeigen"
 
 
-msgid "Separate Colors"
-msgstr "Farben trennen"
-
-
 msgid "Transform markers as well as strips"
 msgstr "Marker so wie Streifen transformieren"
 
@@ -50882,10 +50805,6 @@ msgstr "Nur Orte"
 
 msgid "Transform Parents"
 msgstr "Elterntransformation"
-
-
-msgid "Relaxation Method"
-msgstr "Entspannungs-Methode"
 
 
 msgid "UV Sculpt"
@@ -52950,10 +52869,6 @@ msgid "Torus"
 msgstr "Torus"
 
 
-msgid "Removed %d empty and/or fake-user only Actions"
-msgstr "Entfernte %d leere und/oder Schwindelbenutzer Aktionen"
-
-
 msgid "Nothing to bake"
 msgstr "Nichts zu backen"
 
@@ -52994,10 +52909,6 @@ msgid "Could not make new image"
 msgstr "Neues Bild konnte nicht erstellt werden"
 
 
-msgid "Could not find image '%s'"
-msgstr "Bild '%s' konnte nicht gefunden werden"
-
-
 msgid "Image editor could not be launched, ensure that the path in User Preferences > File is valid, and Blender has rights to launch it"
 msgstr "Bildeditor konnte nicht gestartet werden, stelle sicher das der Pfad unter Benutzereinstellungen > Datei gültig ist und Blender die Rechte besitzt um diesen zu öffnen"
 
@@ -53014,20 +52925,8 @@ msgid "Other object is not a mesh"
 msgstr "Anderes Objekt ist keine Masche"
 
 
-msgid "Object: %s, Mesh: '%s' has no UVs"
-msgstr "Objekt: %s, Masche: '%s' hat keine UVs"
-
-
 msgid "Active camera is not in this scene"
 msgstr "Aktive Kamera ist nicht in dieser Szene"
-
-
-msgid "Skipping '%s', not a mesh"
-msgstr "Überspringe '%s', ist keine Masche"
-
-
-msgid "No animation data to convert on object: %r"
-msgstr "Keine Animationsdaten zum konvertieren am Objekt: %r"
 
 
 msgid "Active object is not a mesh"
@@ -53042,14 +52941,6 @@ msgid "Built without Fluid modifier"
 msgstr "Bauen ohne Flüssigkeitsmodifierung"
 
 
-msgid "Object %r already has a particle system"
-msgstr "Objekt %r hat bereits in Partikelsystem"
-
-
-msgid "Unknown file type: %r"
-msgstr "Unbekannter Dateityp: %r"
-
-
 msgid "Failed to create presets path"
 msgstr "Voreinstellungspfad konnte nicht erstellt werden"
 
@@ -53058,28 +52949,12 @@ msgid "Unable to remove default presets"
 msgstr "Standardmäßige Voreinstellung konnte nicht gelöscht werden"
 
 
-msgid "Unable to remove preset: %r"
-msgstr "Voreinstellung konnte nicht gelöscht werden: %r"
-
-
 msgid "Failed to execute the preset: "
 msgstr "Voreinstellung konnte nicht ausgeführt werden: "
 
 
 msgid "No other objects selected"
 msgstr "Keine anderen Objekte selektiert"
-
-
-msgid "File %r not found"
-msgstr "Datei %r nicht gefunden"
-
-
-msgid ""
-"Couldn't run external animation player with command %r\n"
-"%s"
-msgstr ""
-"Externer Animations Player konnte mit dem commando %r\n"
-"%s nicht gestartet werden"
 
 
 msgid "Reload Start-Up file to restore settings"
@@ -53098,28 +52973,8 @@ msgid "Failed to get add-ons path"
 msgstr "Add-On Pfad konnte nicht genommen werden"
 
 
-msgid "Modules Installed (%s) from %r into %r"
-msgstr "Module installiert (%s) von %r nach %r"
-
-
-msgid "Add-on path %r could not be found"
-msgstr "Add-On Pfad %r konnte nicht gefunden werden"
-
-
-msgid "Expected a zip-file %r"
-msgstr "Erwartet eine Zip-Datei %r"
-
-
-msgid "Template Installed (%s) from %r into %r"
-msgstr "Template installiert (%s) von %r nach %r"
-
-
 msgid "Failed to create Studio Light path"
 msgstr "Studiolicht Pfad konnte nicht erstellt werden"
-
-
-msgid "StudioLight Installed %r into %r"
-msgstr "Studiolicht installiert %r nach %r"
 
 
 msgid "Failed to get Studio Light path"
@@ -53128,30 +52983,6 @@ msgstr "Studiolicht Pfad konnte nicht genommen werden"
 
 msgid "Warning, file already exists. Overwrite existing file?"
 msgstr "Warnung, die Datei existiert bereits. Existierende Datei überschreiben?"
-
-
-msgid "Installing keymap failed: %s"
-msgstr "Schlüsselkarte installieren fehlgeschlagen: %s"
-
-
-msgid "This script was written Blender version %d.%d.%d and might not function (correctly), though it is enabled"
-msgstr "Dieses Skript wurde geschrieben für die Blender Version %d.%d.%d und funktioniert eventuellerweise nicht (richtig), überdenke es zu aktivieren"
-
-
-msgid "File already installed to %r"
-msgstr "Datei ist bereits installiert auf %r"
-
-
-msgid "Source file is in the add-on search path: %r"
-msgstr "Quelldatei ist in dem Add-On Suchpfad: %r"
-
-
-msgid "Remove Add-on: %r?"
-msgstr "Add-on entfernen: %r?"
-
-
-msgid "Path: %r"
-msgstr "Pfad: %r"
 
 
 msgid "Active face must be a quad"
@@ -53174,10 +53005,6 @@ msgid "See OperatorList.txt text block"
 msgstr "OperatorList.txt Textblock anschauen"
 
 
-msgid "Renamed %d of %d %s"
-msgstr "Umbenannt %d of %d %s"
-
-
 msgctxt "Operator"
 msgid "Open..."
 msgstr "Öffnen..."
@@ -53191,24 +53018,8 @@ msgid "Licensed under the GNU General Public License"
 msgstr "Lizensiert unter der GNU General Public License"
 
 
-msgid "%s: %s"
-msgstr "%s: %s"
-
-
-msgid "Nothing to operate on: %s[ ].%s"
-msgstr "Nichts zum arbeiten an: %s[ ].%s"
-
-
 msgid "File path was not set"
 msgstr "Dateipfad ist nicht gesetzt"
-
-
-msgid "File '%s' not found"
-msgstr "Datei '%s' nicht gefunden"
-
-
-msgid "No reference available %r, Update info in 'rna_manual_reference.py' or callback to bpy.utils.manual_map()"
-msgstr "Keine Referenz verfügbar %r, Updateinfo in 'rna_manual_reference.py' oder Rückruf zu bpy.utils.manual_map()"
 
 
 msgid "Direct execution not supported"
@@ -53229,10 +53040,6 @@ msgstr "Eigenschaften können nicht beim überschreiben von Daten hinzugefügt w
 
 msgid "Cannot remove properties from override data"
 msgstr "Eigenschaften können nicht von überschriebenen Daten entfernt werden"
-
-
-msgid "Tool %r not found for space %r"
-msgstr "Werkzeug %r nicht gefunden für Raum %r"
 
 
 msgid "Getting Started"
@@ -53273,10 +53080,6 @@ msgid "Assign"
 msgstr "Zuweisen"
 
 
-msgid "Operator not found: bpy.ops.%s"
-msgstr "Aktion nicht gefunden: bpy.ops.%s"
-
-
 msgid "Add-on Bug"
 msgstr "Add-on Bug"
 
@@ -53313,10 +53116,6 @@ msgid "User Communities"
 msgstr "Benutzergemeinden"
 
 
-msgid "Non boolean value found: %s[ ].%s"
-msgstr "Keine boolsche Variable gefunden: %s[].%s"
-
-
 msgid "Object(s)"
 msgstr "Objekt(e)"
 
@@ -53327,22 +53126,6 @@ msgstr "Buchstabe"
 
 msgid "Strip From"
 msgstr "Entfernen von"
-
-
-msgid "Rename %d %s"
-msgstr "Umbenennen %d %s"
-
-
-msgid "Date: %s %s"
-msgstr "Datum: %s %s"
-
-
-msgid "Hash: %s"
-msgstr "Prüfsumme: %s"
-
-
-msgid "Branch: %s"
-msgstr "Abzweig: %s"
 
 
 msgctxt "Operator"
@@ -53902,10 +53685,6 @@ msgid "Unlocked"
 msgstr "Entsperrt"
 
 
-msgid "Frame: %d (%s)"
-msgstr "Einzelbild: %d (%s)"
-
-
 msgid "Stroke Color"
 msgstr "Strichfarbe"
 
@@ -54049,14 +53828,6 @@ msgstr "Name des Streifens"
 
 msgid "Buffer"
 msgstr "Puffer"
-
-
-msgid "Custom (%.4g fps)"
-msgstr "Benutzerdefiniert (%.4g fps)"
-
-
-msgid "%.4g fps"
-msgstr "%.4g fps"
 
 
 msgid "Mask Mapping"
@@ -54234,10 +54005,6 @@ msgstr "Alles verbinden"
 msgctxt "Operator"
 msgid "Disconnect All"
 msgstr "Alles trennen"
-
-
-msgid "%d fluid particles for this frame"
-msgstr "%d Flüssigkeits-Partikel für diesen Frame"
 
 
 msgid "Speed Multiplier"
@@ -54892,11 +54659,6 @@ msgstr "Tracks für Ort"
 
 
 msgctxt "Operator"
-msgid "Zoom"
-msgstr "Zoom"
-
-
-msgctxt "Operator"
 msgid "Set Wall"
 msgstr "Wand festlegen"
 
@@ -54936,11 +54698,6 @@ msgstr "Schlüsselbildtyp B festlegen"
 
 
 msgctxt "Operator"
-msgid "View Fit"
-msgstr "Ansicht einpassen"
-
-
-msgctxt "Operator"
 msgid "Enable Markers"
 msgstr "Marker aktivieren"
 
@@ -54948,10 +54705,6 @@ msgstr "Marker aktivieren"
 msgctxt "Operator"
 msgid "Unlock Tracks"
 msgstr "Spuren freigeben"
-
-
-msgid "Zoom %d:%d"
-msgstr "Zoom %d:%d"
 
 
 msgctxt "Operator"
@@ -55300,6 +55053,11 @@ msgstr "Dezimieren (Verhältnis)"
 msgctxt "Operator"
 msgid "Selection to Cursor Value"
 msgstr "Auswahl an Cursorvariable"
+
+
+msgctxt "Operator"
+msgid "Zoom Region..."
+msgstr "Bereich zoomen..."
 
 
 msgctxt "Operator"
@@ -55821,10 +55579,6 @@ msgid "Anchor X"
 msgstr "Anker X"
 
 
-msgid "%14s"
-msgstr "%14s"
-
-
 msgid "Position X"
 msgstr "Position X"
 
@@ -56135,14 +55889,6 @@ msgstr "Text: Extern"
 
 msgid "Text: Internal"
 msgstr "Text: Intern"
-
-
-msgid "File: *%s (unsaved)"
-msgstr "Datei: *%s (nicht gespeichert)"
-
-
-msgid "File: %s"
-msgstr "Datei: %s"
 
 
 msgctxt "Operator"
@@ -56637,10 +56383,6 @@ msgid "Missing script files"
 msgstr "Fehlende Skriptdateien"
 
 
-msgid "No custom %s configured"
-msgstr "Kein Benutzerdefiniertes %s konfiguriert"
-
-
 msgid "Error (see console)"
 msgstr "Fehler (siehe Konsole)"
 
@@ -56675,14 +56417,6 @@ msgstr "Warnung:"
 
 msgid "Internet:"
 msgstr "Internet:"
-
-
-msgid "Color Set %d"
-msgstr "Farbset %d"
-
-
-msgid "Color %d"
-msgstr "Farbe %d"
 
 
 msgctxt "Operator"
@@ -56723,11 +56457,6 @@ msgstr "Lokale Ansicht umschalten"
 msgctxt "Operator"
 msgid "Active Camera"
 msgstr "Aktive Kamera"
-
-
-msgctxt "Operator"
-msgid "Zoom Region..."
-msgstr "Bereich zoomen..."
 
 
 msgctxt "Operator"
@@ -58101,10 +57830,6 @@ msgid "Ignore Transparent"
 msgstr "Ignoriere Transparent"
 
 
-msgid "<Missing ID block>"
-msgstr "<Fehlender ID Block>"
-
-
 msgid "User Library"
 msgstr "Benutzer-Bibliothek"
 
@@ -58470,14 +58195,6 @@ msgstr "BIBL: Daten beziehen sich auf die Hauptdatei .blend: '%s' von %s"
 
 msgid "LIB: %s: '%s' is directly linked from '%s' (parent '%s'), but is a non-linkable data type"
 msgstr "BIBL: %s: '%s' ist direkt von '%s' (übergeordnete '%s') verknüpft, ist aber ein nicht verknüpfbarer Datentyp"
-
-
-msgid "Read packed library:  '%s', parent '%s'"
-msgstr "Lese gepackte Bibliothek: '%s', Kind '%s'"
-
-
-msgid "Read library:  '%s', '%s', parent '%s'"
-msgstr "Bibliothek lesen: '%s', '%s', übergeordnete '%s'"
 
 
 msgid "Cannot find lib '%s'"
@@ -58876,6 +58593,10 @@ msgstr "Palette erstellt"
 
 msgid "Cannot Paint while play animation"
 msgstr "Kann nicht malen, während Animation wiedergegeben wird"
+
+
+msgid "%s: %s"
+msgstr "%s: %s"
 
 
 msgid "Non-Keyboard Shortcut"
@@ -60493,6 +60214,10 @@ msgid "Duplicate Current"
 msgstr "Auswahl duplizieren"
 
 
+msgid "Active group is locked, aborting"
+msgstr "Aktive Gruppe ist gesperrt, abbrechen"
+
+
 msgid "Packed MultiLayer files cannot be painted"
 msgstr "Gepackte Mehrfachebenen Dateien können nicht gemalt werden"
 
@@ -60531,10 +60256,6 @@ msgstr "OpenGL Off-Screen Puffer Erzeugung fehlgeschlagen: %s"
 
 msgid "Missing%s%s%s%s detected!"
 msgstr "Fehlende%s%s%s%s gefunden!"
-
-
-msgid "Active group is locked, aborting"
-msgstr "Aktive Gruppe ist gesperrt, abbrechen"
 
 
 msgid "Mirror group is locked, aborting"
@@ -60643,6 +60364,10 @@ msgstr "Einzelbild: %d / %d"
 
 msgid "Frame: - / %d"
 msgstr "Einzelbild: - / %d"
+
+
+msgid "File: %s"
+msgstr "Datei: %s"
 
 
 msgid "unsupported movie clip format"

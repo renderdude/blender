@@ -108,6 +108,8 @@ static bool has_libdecor = true;
 #  endif
 #endif
 
+static signed char has_wl_trackpad_physical_direction = -1;
+
 #include "IMB_imbuf.hh"
 #include "IMB_imbuf_types.hh"
 
@@ -188,15 +190,6 @@ static bool use_gnome_confine_hack = false;
  * See: https://bugs.kde.org/show_bug.cgi?id=461001
  */
 #define USE_KDE_TABLET_HIDDEN_CURSOR_HACK
-
-/**
- * When GNOME is found, require `libdecor`.
- * This is a hack because it seems there is no way to check if the compositor supports
- * server side decorations when initializing WAYLAND.
- */
-#ifdef WITH_GHOST_WAYLAND_LIBDECOR
-#  define USE_GNOME_NEEDS_LIBDECOR_HACK
-#endif
 
 /** \} */
 
@@ -723,6 +716,8 @@ struct GWL_SeatStatePointerScroll {
   int32_t discrete_xy[2] = {0, 0};
   /** Discrete scrolling, v8 of the seat API (handled & reset with pointer "frame" callback). */
   int32_t discrete120_xy[2] = {0, 0};
+  /** Accumulated value from `discrete120_xy`, not reset between "frame" callbacks. */
+  int32_t discrete120_xy_accum[2] = {0, 0};
   /** True when the axis is inverted (also known is "natural" scrolling). */
   bool inverted_xy[2] = {false, false};
   /** The source of scroll event. */
@@ -1358,7 +1353,6 @@ struct GWL_Display {
 
 #ifdef WITH_GHOST_WAYLAND_LIBDECOR
   GWL_LibDecor_System *libdecor = nullptr;
-  bool libdecor_required = false;
 #endif
   GWL_XDG_Decor_System *xdg_decor = nullptr;
 
@@ -3389,7 +3383,7 @@ static void data_device_handle_drop(void *data, wl_data_device * /*wl_data_devic
       GHOST_TDragnDropTypes ghost_dnd_type = GHOST_kDragnDropTypeUnknown;
       void *ghost_dnd_data = nullptr;
 
-      /* Failure to receive drop data . */
+      /* Failure to receive drop data. */
       if (mime_receive == ghost_wl_mime_text_uri) {
         const char file_proto[] = "file://";
         /* NOTE: some applications CRLF (`\r\n`) GTK3 for e.g. & others don't `pcmanfm-qt`.
@@ -3616,7 +3610,7 @@ static void cursor_surface_handle_leave(void *data, wl_surface *wl_surface, wl_o
 }
 
 static void cursor_surface_handle_preferred_buffer_scale(void * /*data*/,
-                                                         struct wl_surface * /*wl_surface*/,
+                                                         wl_surface * /*wl_surface*/,
                                                          int32_t factor)
 {
   /* Only available in interface version 6. */
@@ -3624,7 +3618,7 @@ static void cursor_surface_handle_preferred_buffer_scale(void * /*data*/,
 }
 
 static void cursor_surface_handle_preferred_buffer_transform(void * /*data*/,
-                                                             struct wl_surface * /*wl_surface*/,
+                                                             wl_surface * /*wl_surface*/,
                                                              uint32_t transform)
 {
   /* Only available in interface version 6. */
@@ -3813,12 +3807,13 @@ static void pointer_handle_frame(void *data, wl_pointer * /*wl_pointer*/)
 
   /* Handle value120 to discrete steps first. */
   if (seat->pointer_scroll.discrete120_xy[0] || seat->pointer_scroll.discrete120_xy[1]) {
-    /* The values will have been normalized so 120 represents a single click-step. */
-    seat->pointer_scroll.discrete_xy[0] = seat->pointer_scroll.discrete120_xy[0] / 120;
-    seat->pointer_scroll.discrete_xy[1] = seat->pointer_scroll.discrete120_xy[1] / 120;
-
-    seat->pointer_scroll.discrete120_xy[0] = 0;
-    seat->pointer_scroll.discrete120_xy[1] = 0;
+    for (int i = 0; i < 2; i++) {
+      seat->pointer_scroll.discrete120_xy_accum[i] += seat->pointer_scroll.discrete120_xy[i];
+      seat->pointer_scroll.discrete120_xy[i] = 0;
+      /* The values will have been normalized so 120 represents a single click-step. */
+      seat->pointer_scroll.discrete_xy[i] = seat->pointer_scroll.discrete120_xy_accum[i] / 120;
+      seat->pointer_scroll.discrete120_xy_accum[i] -= seat->pointer_scroll.discrete_xy[i] * 120;
+    }
   }
 
   /* Multiple wheel events may have been generated and it's not known which.
@@ -6143,13 +6138,13 @@ static void output_handle_scale(void *data, wl_output * /*wl_output*/, const int
   output->system->output_scale_update(output);
 }
 
-static void output_handle_name(void * /*data*/, struct wl_output * /*wl_output*/, const char *name)
+static void output_handle_name(void * /*data*/, wl_output * /*wl_output*/, const char *name)
 {
   /* Only available in interface version 4. */
   CLOG_INFO(LOG, 2, "name (%s)", name);
 }
 static void output_handle_description(void * /*data*/,
-                                      struct wl_output * /*wl_output*/,
+                                      wl_output * /*wl_output*/,
                                       const char *description)
 {
   /* Only available in interface version 4. */
@@ -6407,6 +6402,8 @@ static void gwl_registry_wl_seat_add(GWL_Display *display, const GWL_RegisteryAd
   display->seats.push_back(seat);
   wl_seat_add_listener(seat->wl.seat, &seat_listener, seat);
   gwl_registry_entry_add(display, params, static_cast<void *>(seat));
+
+  has_wl_trackpad_physical_direction = version >= 9;
 }
 static void gwl_registry_wl_seat_update(GWL_Display *display,
                                         const GWL_RegisteryUpdate_Params &params)
@@ -6973,16 +6970,6 @@ static void global_handle_add(void *data,
 
     added = display->registry_entry != registry_entry_prev;
   }
-  else {
-    /* Not found. */
-#ifdef USE_GNOME_NEEDS_LIBDECOR_HACK
-    if (STRPREFIX(interface, "gtk_shell")) { /* `gtk_shell1` at time of writing. */
-      /* Only require `libdecor` when built with X11 support,
-       * otherwise there is nothing to fall back on. */
-      display->libdecor_required = true;
-    }
-#endif
-  }
 
   CLOG_INFO(LOG,
             2,
@@ -7140,24 +7127,34 @@ GHOST_SystemWayland::GHOST_SystemWayland(bool background)
   }
 
 #ifdef WITH_GHOST_WAYLAND_LIBDECOR
-  if (display_->libdecor_required) {
+  bool libdecor_required = false;
+  {
+    /* This seems to be the most reliable way to check if GNOME is running.
+     * Ideally it would be possible to check if the compositor supports SSD. */
+    const char *xdg_current_desktop = getenv("XDG_CURRENT_DESKTOP");
+    if (xdg_current_desktop && STREQ(xdg_current_desktop, "GNOME")) {
+      libdecor_required = true;
+    }
+  }
+
+  if (libdecor_required) {
     /* Ignore windowing requirements when running in background mode,
      * as it doesn't make sense to fall back to X11 because of windowing functionality
      * in background mode, also LIBDECOR is crashing in background mode `blender -b -f 1`
      * for e.g. while it could be fixed, requiring the library at all makes no sense. */
     if (background) {
-      display_->libdecor_required = false;
+      libdecor_required = false;
     }
 #  ifdef WITH_GHOST_X11
     else if (!has_libdecor && !ghost_wayland_is_x11_available()) {
       /* Only require LIBDECOR when X11 is available, otherwise there is nothing to fall back to.
        * It's better to open without window decorations than failing entirely. */
-      display_->libdecor_required = false;
+      libdecor_required = false;
     }
 #  endif /* WITH_GHOST_X11 */
   }
 
-  if (display_->libdecor_required) {
+  if (libdecor_required) {
     gwl_xdg_decor_system_destroy(display_, display_->xdg_decor);
     display_->xdg_decor = nullptr;
 
@@ -8364,6 +8361,9 @@ GHOST_TSuccess GHOST_SystemWayland::cursor_visibility_set(const bool visible)
 
 GHOST_TCapabilityFlag GHOST_SystemWayland::getCapabilities() const
 {
+  GHOST_ASSERT(has_wl_trackpad_physical_direction != -1,
+               "The trackpad direction was expected to be initialized");
+
   return GHOST_TCapabilityFlag(
       GHOST_CAPABILITY_FLAG_ALL &
       ~(
@@ -8385,7 +8385,9 @@ GHOST_TCapabilityFlag GHOST_SystemWayland::getCapabilities() const
            * is negligible. */
           GHOST_kCapabilityGPUReadFrontBuffer |
           /* This WAYLAND back-end has not yet implemented desktop color sample. */
-          GHOST_kCapabilityDesktopSample));
+          GHOST_kCapabilityDesktopSample |
+          /* This flag will eventually be removed. */
+          (has_wl_trackpad_physical_direction ? 0 : GHOST_kCapabilityTrackpadPhysicalDirection)));
 }
 
 bool GHOST_SystemWayland::cursor_grab_use_software_display_get(const GHOST_TGrabCursorMode mode)

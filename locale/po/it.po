@@ -1,9 +1,9 @@
 
 msgid ""
 msgstr ""
-"Project-Id-Version: Blender 4.2.0 Alpha (b'c30667711948')\n"
+"Project-Id-Version: Blender 4.2.0 Alpha (b'3a5389d5abe0')\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-04-15 10:09+0000\n"
+"POT-Creation-Date: 2024-04-29 07:27+0000\n"
 "PO-Revision-Date: 2024-03-01 16:11+0000\n"
 "Last-Translator: Alessandro Vecchio <alessandrovecchio1907@gmail.com>\n"
 "Language-Team: Italian <https://translate.blender.org/projects/blender-ui/ui/it/>\n"
@@ -687,32 +687,16 @@ msgid "After Current"
 msgstr "Dopo Corrente"
 
 
-msgid "Number of frames to show after the current frame (only for 'Around Current Frame' Onion-skinning method)"
-msgstr "Numero di fotogrammi da mostrare dopo quello corrente (solo per il metodo Onion-skinning 'Per Fotogramma Corrente')"
-
-
 msgid "Before Current"
 msgstr "Prima Corrente"
-
-
-msgid "Number of frames to show before the current frame (only for 'Around Current Frame' Onion-skinning method)"
-msgstr "Numero di fotogrammi da mostrare prima di quello corrente (solo per il metodo Onion-skinning 'Per Fotogramma Corrente')"
 
 
 msgid "End Frame"
 msgstr "Ultimo Fotogramma"
 
 
-msgid "End frame of range of paths to display/calculate (not for 'Around Current Frame' Onion-skinning method)"
-msgstr "Fotogramma finale dell'intervallo dei percorsi da mostrare/calcolare (non per il metodo Onion-skinning 'Per Fotogramma Corrente')"
-
-
 msgid "Start Frame"
 msgstr "Primo Fotogramma"
-
-
-msgid "Starting frame of range of paths to display/calculate (not for 'Around Current Frame' Onion-skinning method)"
-msgstr "Fotogramma iniziale dell'intervallo dei percorsi da mostrare/calcolare (non per il metodo Onion-skinning 'Per Fotogramma Corrente')"
 
 
 msgid "Frame Step"
@@ -4614,10 +4598,6 @@ msgstr "Camere parallele senza convergenza"
 
 msgid "Toe-in"
 msgstr "Convergenti"
-
-
-msgid "Rotated cameras, looking at the convergence distance"
-msgstr "Camere ruotate, che puntano alla distanza di convergenza"
 
 
 msgid "Interocular Distance"
@@ -12136,10 +12116,6 @@ msgid "Invert mask"
 msgstr "Inverti maschera"
 
 
-msgid "GPencil Sculpt Guide"
-msgstr "Guida alla Scultura GPencil"
-
-
 msgid "Direction of lines"
 msgstr "Direzione delle linee"
 
@@ -12444,8 +12420,16 @@ msgid "The size of the geometry will determine the distance between arrayed item
 msgstr "La dimensione della geometria determinerà la distanza tra gli elementi duplicati"
 
 
+msgid "Add another object's transformation to the total offset"
+msgstr "Aggiunge la trasformazione di un altro oggetto allo scostamento totale"
+
+
 msgid "Shift"
 msgstr "Shift"
+
+
+msgid "Add an offset relative to the object's bounding box"
+msgstr "Aggiunge uno scostamento basato sulla gabbia d'inviluppo dell'oggetto"
 
 
 msgid "Uniform Scale"
@@ -13577,22 +13561,6 @@ msgstr "Tratto Omogeneo"
 
 msgid "Automatically adjust strength to give consistent results for different spacings"
 msgstr "Aggiusta automaticamente la forza per dare risultati consistenti per spaziature differenti"
-
-
-msgid "Grab UVs"
-msgstr "Sposta UVs"
-
-
-msgid "Relax"
-msgstr "Rilascia"
-
-
-msgid "Relax UVs"
-msgstr "Rilascia UVs"
-
-
-msgid "Pinch UVs"
-msgstr "Pizzica UVs"
 
 
 msgid "Vertex Paint Tool"
@@ -20538,10 +20506,6 @@ msgid "Falloff"
 msgstr "Decadimento"
 
 
-msgid "Falloff type the feather"
-msgstr "Tipo decadimento sfumatura"
-
-
 msgid "Smooth falloff"
 msgstr "Decadimento levigato"
 
@@ -20793,6 +20757,10 @@ msgstr "Rifinisci"
 
 msgid "Show/Hide"
 msgstr "Mostra/Nascondi"
+
+
+msgid "Zoom"
+msgstr "Zoom"
 
 
 msgid "Console"
@@ -21735,14 +21703,6 @@ msgstr "Unisce i vertici dei duplicati adiacenti"
 
 msgid "Merge vertices in first and last duplicates"
 msgstr "Unisce i vertici del primo e dell'ultimo duplicato"
-
-
-msgid "Add another object's transformation to the total offset"
-msgstr "Aggiunge la trasformazione di un altro oggetto allo scostamento totale"
-
-
-msgid "Add an offset relative to the object's bounding box"
-msgstr "Aggiunge uno scostamento basato sulla gabbia d'inviluppo dell'oggetto"
 
 
 msgid "Bevel Modifier"
@@ -25507,10 +25467,6 @@ msgstr "Y Centro"
 
 msgid "Spin"
 msgstr "Rivoluzione"
-
-
-msgid "Zoom"
-msgstr "Zoom"
 
 
 msgid "Defocus"
@@ -29835,6 +29791,10 @@ msgid "Add Circle"
 msgstr "Aggiungi Cerchio"
 
 
+msgid "Handles"
+msgstr "Maniglie"
+
+
 msgctxt "Operator"
 msgid "Toggle Cyclic"
 msgstr "Alterna Ciclico"
@@ -30232,10 +30192,6 @@ msgstr "Imposta Tipo Spline"
 
 msgid "Set type of active spline"
 msgstr "Imposta il tipo della spline attiva"
-
-
-msgid "Handles"
-msgstr "Maniglie"
 
 
 msgctxt "Operator"
@@ -35492,10 +35448,6 @@ msgid "Make Links"
 msgstr "Crea Connessioni"
 
 
-msgid "Makes a link between selected output in input sockets"
-msgstr "Crea una connessione tra l'uscita selezionata ed i connettori d'ingresso"
-
-
 msgid "Replace socket connections with the new links"
 msgstr "Rimpiazza i legami fra i connettori con le nuove connessioni"
 
@@ -39871,6 +39823,10 @@ msgid "Falloff Type"
 msgstr "Tipo Decadimento"
 
 
+msgid "Relax"
+msgstr "Rilascia"
+
+
 msgid "Sharpen"
 msgstr "Affilatura"
 
@@ -39901,13 +39857,20 @@ msgid "Symmetrize the topology modifications"
 msgstr "Rende simmetriche le modifiche della topologia"
 
 
-msgctxt "Operator"
-msgid "Sculpt UVs"
-msgstr "Scolpisci UV"
+msgid "Grab UVs"
+msgstr "Sposta UVs"
 
 
-msgid "Switch brush to relax mode for duration of stroke"
-msgstr "Dispone il pennello nel modo morbido per la durata del tratto"
+msgid "Pinch UVs"
+msgstr "Pizzica UVs"
+
+
+msgid "Relax UVs"
+msgstr "Rilascia UVs"
+
+
+msgid "Algorithm used for UV relaxation"
+msgstr "Algoritmo usato per il rilassamento dell'UV"
 
 
 msgctxt "Operator"
@@ -44204,10 +44167,6 @@ msgstr "Animazione Percorso"
 
 msgid "Effects"
 msgstr "Effetti"
-
-
-msgid "Spot Shape"
-msgstr "Forma Spot"
 
 
 msgid "Text Boxes"
@@ -50552,14 +50511,6 @@ msgid "Show overexposed areas with zebra stripes"
 msgstr "Mostra aree sovraesposte con una zebratura"
 
 
-msgid "Separate Colors"
-msgstr "Separa Colori"
-
-
-msgid "Separate color channels in preview"
-msgstr "Separa i canali colore nell'anteprima"
-
-
 msgid "View Type"
 msgstr "Tipo Vista"
 
@@ -52404,14 +52355,6 @@ msgid "Keep UV and edit mode mesh selection in sync"
 msgstr "Mantiene sincronizzata la selezione delle UV e della mesh in Modalità Modifica"
 
 
-msgid "Relaxation Method"
-msgstr "Metodo Rilassamento"
-
-
-msgid "Algorithm used for UV relaxation"
-msgstr "Algoritmo usato per il rilassamento dell'UV"
-
-
 msgid "UV Sculpt"
 msgstr "Scultura UV"
 
@@ -53572,21 +53515,9 @@ msgid "Active object is not a mesh"
 msgstr "L'oggetto attivo non è una mesh"
 
 
-msgid "Remove Add-on: %r?"
-msgstr "Rimuove Add-on: %r?"
-
-
-msgid "Path: %r"
-msgstr "Percorso: %r"
-
-
 msgctxt "Operator"
 msgid "Open..."
 msgstr "Apri..."
-
-
-msgid "%s: %s"
-msgstr "%s: %s"
 
 
 msgctxt "Operator"
@@ -53929,10 +53860,6 @@ msgid "Unlocked"
 msgstr "Sbloccato"
 
 
-msgid "Frame: %d (%s)"
-msgstr "Fotogramma: %d (%s)"
-
-
 msgid "Parent:"
 msgstr "Genitore:"
 
@@ -54160,18 +54087,6 @@ msgid "Display percentage makes dynamics inaccurate without baking"
 msgstr "Visualizzare la percentuale rende imprecisa la dinamica senza baking"
 
 
-msgid "Iterations: %d .. %d (avg. %d)"
-msgstr "Ripetizioni: %d .. %d (med. %d)"
-
-
-msgid "Error: %.5f .. %.5f (avg. %.5f)"
-msgstr "Errore: %.5f .. %.5f (med. %.5f)"
-
-
-msgid "Spacing: %g"
-msgstr "Spaziatura: %g"
-
-
 msgid "Not yet functional"
 msgstr "Non ancora funzionale"
 
@@ -54184,10 +54099,6 @@ msgstr "Connetti Tutto"
 msgctxt "Operator"
 msgid "Disconnect All"
 msgstr "Disconnetti Tutto"
-
-
-msgid "%d fluid particles for this frame"
-msgstr "%d particelle fluide per questo frame"
 
 
 msgid "Dynamic Mesh"
@@ -54491,11 +54402,6 @@ msgstr "Mostra Tracce"
 
 
 msgctxt "Operator"
-msgid "View Fit"
-msgstr "Adatta Vista"
-
-
-msgctxt "Operator"
 msgid "Enable Markers"
 msgstr "Abilita Marcatori"
 
@@ -54503,10 +54409,6 @@ msgstr "Abilita Marcatori"
 msgctxt "Operator"
 msgid "Unlock Tracks"
 msgstr "Sblocca Tracce"
-
-
-msgid "Zoom %d:%d"
-msgstr "Zoom %d:%d"
 
 
 msgctxt "Operator"
@@ -54689,6 +54591,11 @@ msgstr "Tipo Curva di Raccordo"
 
 
 msgctxt "Operator"
+msgid "Zoom Region..."
+msgstr "Zoom Regione..."
+
+
+msgctxt "Operator"
 msgid "Less"
 msgstr "Meno"
 
@@ -54728,13 +54635,13 @@ msgid "By Distance"
 msgstr "Per Distanza"
 
 
-msgid "Show Same Material"
-msgstr "Mostra Stesso Materiale"
-
-
 msgctxt "Operator"
 msgid "Render Slot Cycle Next"
 msgstr "Slot Render Successivo"
+
+
+msgid "Show Same Material"
+msgstr "Mostra Stesso Materiale"
 
 
 msgctxt "Operator"
@@ -54988,10 +54895,6 @@ msgid "Backdrop Zoom Out"
 msgstr "Rimpicciolisci Sfondo"
 
 
-msgid "Slot %d"
-msgstr "Slot %d"
-
-
 msgctxt "Operator"
 msgid "Show One Level"
 msgstr "Mostra Un Livello"
@@ -55206,10 +55109,6 @@ msgid "Pack"
 msgstr "Comprimi"
 
 
-msgid "Original frame range: %d-%d (%d)"
-msgstr "Intervallo fotogrammi originale: %d-%d (%d)"
-
-
 msgid "Source Channel"
 msgstr "Canale Sorgente"
 
@@ -55299,10 +55198,6 @@ msgstr "Testo: Esterno"
 
 msgid "Text: Internal"
 msgstr "Testo: Interno"
-
-
-msgid "File: %s"
-msgstr "File: %s"
 
 
 msgctxt "Operator"
@@ -55684,10 +55579,6 @@ msgid "User:"
 msgstr "Utente:"
 
 
-msgid "Color Set %d"
-msgstr "Set Colori %d"
-
-
 msgctxt "Operator"
 msgid "Documentation"
 msgstr "Documentazione"
@@ -55731,11 +55622,6 @@ msgstr "Camera Attiva"
 msgctxt "Operator"
 msgid "Orbit Opposite"
 msgstr "Orbita di Fronte"
-
-
-msgctxt "Operator"
-msgid "Zoom Region..."
-msgstr "Zoom Regione..."
 
 
 msgctxt "Operator"
@@ -56750,10 +56636,6 @@ msgid "Add UVs"
 msgstr "Aggiungi UV"
 
 
-msgid "<Missing ID block>"
-msgstr "<ID Blocco Mancante>"
-
-
 msgid "No AnimData to set action on"
 msgstr "Livello dell'animazione su cui eseguire l'azione"
 
@@ -56885,6 +56767,10 @@ msgstr "Passo"
 
 msgid "GP_Layer"
 msgstr "Livello_Matita"
+
+
+msgid "Slot %d"
+msgstr "Slot %d"
 
 
 msgid "Could not write image: %s"
@@ -57065,14 +56951,6 @@ msgstr "Impossibile aprire"
 
 msgid "Library '%s', '%s' had multiple instances, save and reload!"
 msgstr "La libreria '%s', '%s' ha istanze multiple, salva e ricarica!"
-
-
-msgid "Read packed library:  '%s', parent '%s'"
-msgstr "Lettura libreria incorporata: '%s', parentela '%s'"
-
-
-msgid "Read library:  '%s', '%s', parent '%s'"
-msgstr "Lettura libreria: '%s', '%s', parentela '%s'"
 
 
 msgid "Cannot find lib '%s'"
@@ -57483,6 +57361,10 @@ msgstr "Sessione Linea Matita: Premi e trascina LMB per disegnare | ESC/Invio pe
 
 msgid "Failed to set value"
 msgstr "Impossibile impostare il valore"
+
+
+msgid "%s: %s"
+msgstr "%s: %s"
 
 
 msgid "Non-Keyboard Shortcut"
@@ -58972,6 +58854,10 @@ msgid "Duplicate Current"
 msgstr "Duplica Corrente"
 
 
+msgid "Active group is locked, aborting"
+msgstr "Il gruppo attivo è bloccato, comando annullato"
+
+
 msgid "Sample color for %s"
 msgstr "Campione colore per %s"
 
@@ -59002,10 +58888,6 @@ msgstr "Nessuna camera attiva impostata"
 
 msgid "Missing%s%s%s%s detected!"
 msgstr "Rilevata mancanza di%s%s%s%s!"
-
-
-msgid "Active group is locked, aborting"
-msgstr "Il gruppo attivo è bloccato, comando annullato"
 
 
 msgid "Mirror group is locked, aborting"
@@ -59154,6 +59036,10 @@ msgstr "Fotogramma: %d / %d"
 
 msgid "Frame: - / %d"
 msgstr "Fotogramma: - / %d"
+
+
+msgid "File: %s"
+msgstr "File: %s"
 
 
 msgid "Cannot read '%s': %s"
@@ -59519,18 +59405,6 @@ msgstr "Riordina"
 
 msgid "Copy to object"
 msgstr "Copia a oggetto"
-
-
-msgid "Number of users of this data-block"
-msgstr "Numero di utilizzatori di questo Blocco-dati"
-
-
-msgid "Data-block will be retained using a fake user"
-msgstr "Il Blocco-Dati sarà conservato usando un utilizzatore fittizio"
-
-
-msgid "Data-block has no users and will be deleted"
-msgstr "Il Blocco-Dati non ha un utilizzatore e sarà cancellato"
 
 
 msgid "Library path '%s' does not exist, correct this before saving"

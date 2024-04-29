@@ -36,6 +36,7 @@ FEATURES = [
 # List of extensions blender uses. These can extend enum flags.
 EXTENSIONS = [
     "VK_KHR_swapchain",
+    "VK_KHR_dynamic_rendering",
 ]
 
 # List of vkCmd commands blender uses.
@@ -58,8 +59,8 @@ COMMANDS_TO_GEN = [
     "vkCmdBindVertexBuffers",
     "vkCmdBindPipeline",
 
-    "vkCmdBeginRenderPass",
-    "vkCmdEndRenderPass",
+    "vkCmdBeginRendering",
+    "vkCmdEndRendering",
     "vkCmdDraw",
     "vkCmdDrawIndexed",
     "vkCmdDrawIndirect",
@@ -248,7 +249,7 @@ def generate_struct_to_string_cpp(struct, flags_to_generate, enums_to_generate, 
         elif member_type in enums_to_generate:
             result += f"to_string({vk_name_parameter}.{member_name})"
         elif member_type in structs_to_generate:
-            result += f"\"\\n\";\n"
+            result += "std::endl;\n"
             result += f"  ss << std::string(indentation_level * 2 + 2, ' ') << to_string({vk_name_parameter}.{member_name}, indentation_level + 1);\n"
             result += f"  ss << std::string(indentation_level * 2, ' ')"
             indentation_used = True

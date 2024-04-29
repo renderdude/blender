@@ -35,6 +35,7 @@ struct GPUMaterial;
 struct GPUNodeStack;
 struct ID;
 struct ImBuf;
+struct LibraryForeachIDData;
 struct Light;
 struct Main;
 struct Material;
@@ -916,6 +917,7 @@ void BKE_nodetree_remove_layer_n(bNodeTree *ntree, Scene *scene, int layer_index
 #define SH_NODE_COMBINE_COLOR 711
 #define SH_NODE_SEPARATE_COLOR 712
 #define SH_NODE_MIX 713
+#define SH_NODE_BSDF_RAY_PORTAL 714
 
 /** \} */
 
@@ -1277,6 +1279,9 @@ void BKE_nodetree_remove_layer_n(bNodeTree *ntree, Scene *scene, int layer_index
 #define GEO_NODE_POINTS_TO_SDF_GRID 2128
 #define GEO_NODE_GRID_TO_MESH 2129
 #define GEO_NODE_DISTRIBUTE_POINTS_IN_GRID 2130
+#define GEO_NODE_SDF_GRID_BOOLEAN 2131
+#define GEO_NODE_TOOL_VIEWPORT_TRANSFORM 2132
+#define GEO_NODE_TOOL_MOUSE_POSITION 2133
 
 /** \} */
 
@@ -1319,6 +1324,7 @@ void BKE_nodetree_remove_layer_n(bNodeTree *ntree, Scene *scene, int layer_index
 #define FN_NODE_SEPARATE_TRANSFORM 1236
 #define FN_NODE_INVERT_MATRIX 1237
 #define FN_NODE_TRANSPOSE_MATRIX 1238
+#define FN_NODE_PROJECT_POINT 1239
 
 /** \} */
 
@@ -1415,6 +1421,14 @@ void node_socket_move_default_value(Main &bmain,
  * \note ID user reference-counting and changing the `nodes_by_id` vector are up to the caller.
  */
 void node_free_node(bNodeTree *tree, bNode *node);
+
+/**
+ * Iterate over all ID usages of the given node.
+ * Can be used with #BKE_library_foreach_subdata_ID_link.
+ *
+ * See BKE_lib_query.hh and #IDTypeInfo.foreach_id for more details.
+ */
+void node_node_foreach_id(bNode *node, LibraryForeachIDData *data);
 
 /**
  * Set the mute status of a single link.

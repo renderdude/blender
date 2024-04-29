@@ -1,9 +1,9 @@
 
 msgid ""
 msgstr ""
-"Project-Id-Version: Blender 4.2.0 Alpha (b'c30667711948')\n"
+"Project-Id-Version: Blender 4.2.0 Alpha (b'3a5389d5abe0')\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-04-15 10:09+0000\n"
+"POT-Creation-Date: 2024-04-29 07:27+0000\n"
 "PO-Revision-Date: 2023-12-12 02:28+0000\n"
 "Last-Translator: Zdeněk Doležal <Griperis@outlook.cz>\n"
 "Language-Team: Czech <https://translate.blender.org/projects/blender-ui/ui/cs/>\n"
@@ -655,32 +655,16 @@ msgid "After Current"
 msgstr "Po aktualním"
 
 
-msgid "Number of frames to show after the current frame (only for 'Around Current Frame' Onion-skinning method)"
-msgstr "Počet snímků, které se mají zobrazit za aktuálním snímkem (pouze pro metodu zobrazení cibule \"Kolem aktuálního snímku\")"
-
-
 msgid "Before Current"
 msgstr "Před aktuálním"
-
-
-msgid "Number of frames to show before the current frame (only for 'Around Current Frame' Onion-skinning method)"
-msgstr "Počet snímků, které se mají zobrazit před aktuálním snímkem (pouze pro metodu zobrazení cibule \"Kolem aktuálního snímku\")"
 
 
 msgid "End Frame"
 msgstr "Poslední snímek"
 
 
-msgid "End frame of range of paths to display/calculate (not for 'Around Current Frame' Onion-skinning method)"
-msgstr "Koncový snímek rozsahu cest, které mají být použity k zobrazení/výpočtu (nikoli pro metodu onionového vzhledu \"Kolem aktuálního snímku\")"
-
-
 msgid "Start Frame"
 msgstr "První frame"
-
-
-msgid "Starting frame of range of paths to display/calculate (not for 'Around Current Frame' Onion-skinning method)"
-msgstr "Počáteční snímek rozsahu cest, které mají být zobrazěn/vypočítán (nikoli pro metodu onion-skinningu \"Around Current Frame\")"
 
 
 msgid "Frame Step"
@@ -8210,8 +8194,16 @@ msgid "Random seed"
 msgstr "Náhodný seed"
 
 
+msgid "Add another object's transformation to the total offset"
+msgstr "Použije viditelné transformace objektu pro jeho data"
+
+
 msgid "Shift"
 msgstr "Z prava"
+
+
+msgid "Add an offset relative to the object's bounding box"
+msgstr "Přidat vazbu pro aktivní kost"
 
 
 msgid "Uniform Scale"
@@ -9176,22 +9168,6 @@ msgid "Smooth Stroke"
 msgstr "Hladký Tah"
 
 
-msgid "Grab UVs"
-msgstr "Přesun"
-
-
-msgid "Relax"
-msgstr "Obnovit"
-
-
-msgid "Relax UVs"
-msgstr "Vložit"
-
-
-msgid "Pinch UVs"
-msgstr "Seškrcení"
-
-
 msgid "Vertex Paint Tool"
 msgstr "Kreslení vertexů"
 
@@ -9548,20 +9524,12 @@ msgid "Usage"
 msgstr "Využití"
 
 
-msgid "How to use this collection in line art"
-msgstr "Jak použít tuto kolekci v kresbě tužkou"
-
-
 msgid "Occlusion Only"
 msgstr "Pouze Okluze"
 
 
 msgid "Only use the collection to produce occlusion"
 msgstr "Použít pouze tuto kolekci k generování okluze"
-
-
-msgid "Don't use this collection in line art"
-msgstr "Nepoužít tuto kolekci v kresbě tužkou"
 
 
 msgid "Intersection Only"
@@ -14198,10 +14166,6 @@ msgid "Falloff"
 msgstr "Sestup"
 
 
-msgid "Falloff type the feather"
-msgstr "Odsazení typ peří"
-
-
 msgid "Smooth falloff"
 msgstr "Hladký útlum"
 
@@ -14393,6 +14357,10 @@ msgstr "Zobrazit/skrýt"
 
 msgid "Context Menu"
 msgstr "Nabídka Kontextu"
+
+
+msgid "Zoom"
+msgstr "Přiblížit"
 
 
 msgid "Console"
@@ -15095,14 +15063,6 @@ msgstr "Přidat vazbu pro aktivní kost"
 
 msgid "Merge Vertices"
 msgstr "Sloučit vlastnosti"
-
-
-msgid "Add another object's transformation to the total offset"
-msgstr "Použije viditelné transformace objektu pro jeho data"
-
-
-msgid "Add an offset relative to the object's bounding box"
-msgstr "Přidat vazbu pro aktivní kost"
 
 
 msgid "Bevel Modifier"
@@ -17390,10 +17350,6 @@ msgid "Spin"
 msgstr "Točit"
 
 
-msgid "Zoom"
-msgstr "Přiblížit"
-
-
 msgid "Defocus"
 msgstr "Deformace"
 
@@ -18070,6 +18026,10 @@ msgid "Z Up"
 msgstr "Posun nahoru"
 
 
+msgid "Mouse Position"
+msgstr "Poloha Myši"
+
+
 msgid "Selection"
 msgstr "Výběr"
 
@@ -18633,14 +18593,6 @@ msgstr "Normalizovat A"
 
 msgid "Vector Rotate"
 msgstr "Vektorová Rotace"
-
-
-msgid "Invert angle"
-msgstr "Invertovat úhel"
-
-
-msgid "Type of rotation"
-msgstr "Typ rotace"
 
 
 msgid "Z Axis"
@@ -21135,6 +21087,10 @@ msgid "Add Circle"
 msgstr "NURBS kruh"
 
 
+msgid "Handles"
+msgstr "Mód Úchopu"
+
+
 msgctxt "Operator"
 msgid "Toggle Cyclic"
 msgstr "Uzavřený/otevřený"
@@ -21450,10 +21406,6 @@ msgstr "Hranaté"
 
 msgid "Set type of active spline"
 msgstr "Renderovat plošky z obou stran"
-
-
-msgid "Handles"
-msgstr "Mód Úchopu"
 
 
 msgctxt "Operator"
@@ -29042,6 +28994,10 @@ msgid "Filter Mesh"
 msgstr "Filtrovat Síť"
 
 
+msgid "Relax"
+msgstr "Obnovit"
+
+
 msgid "Sharpen"
 msgstr "Ostré"
 
@@ -29077,9 +29033,24 @@ msgid "Shape Orientation"
 msgstr "Orientace Tvaru"
 
 
-msgctxt "Operator"
-msgid "Sculpt UVs"
-msgstr "Tesat"
+msgid "Grab UVs"
+msgstr "Přesun"
+
+
+msgid "Pinch UVs"
+msgstr "Seškrcení"
+
+
+msgid "Relax UVs"
+msgstr "Vložit"
+
+
+msgid "Algorithm used for UV relaxation"
+msgstr "X-ová velikost aktivního MetaElementu"
+
+
+msgid "Use HC method for relaxation"
+msgstr "Orientace manipulátorů (Klávesová zkratka: Alt Space)"
 
 
 msgctxt "Operator"
@@ -29468,10 +29439,6 @@ msgstr "Přidat vazbu aktivní kosti"
 msgctxt "Operator"
 msgid "Select Side"
 msgstr "Vybrat Stranu"
-
-
-msgid "Mouse Position"
-msgstr "Poloha Myši"
 
 
 msgid "No Change"
@@ -33379,13 +33346,13 @@ msgstr "Smazat"
 
 
 msgctxt "Operator"
-msgid "Tint"
-msgstr "Odstín"
+msgid "Cutter"
+msgstr "Řezačka"
 
 
 msgctxt "Operator"
-msgid "Cutter"
-msgstr "Řezačka"
+msgid "Tint"
+msgstr "Odstín"
 
 
 msgctxt "Operator"
@@ -36126,10 +36093,6 @@ msgid "Minimum light intensity for a light to contribute to the lighting"
 msgstr "Minimální intenzita světla pro světlo, které přispívá k osvětlení"
 
 
-msgid "Background Separation"
-msgstr "Oddělení pozadí"
-
-
 msgid "Lower values will reduce background bleeding onto foreground elements"
 msgstr "Nižší hodnoty sníží krvácení pozadí na prvky v popředí"
 
@@ -36258,16 +36221,8 @@ msgid "Distribute more samples closer to the camera"
 msgstr "Distribuovat více vzorků blíže ke kameře"
 
 
-msgid "Number of samples to compute volumetric effects"
-msgstr "Počet vzorků pro výpočet volumetrických efektů"
-
-
 msgid "Start distance of the volumetric effect"
 msgstr "Počáteční vzdálenost volumetrického efektu"
-
-
-msgid "Control the quality of the volumetric effects (lower size increase vram usage and quality)"
-msgstr "Kontrolovat kvalitu volumetrických efektů (menší velikost zvyšuje využití VRAM a kvalitu)"
 
 
 msgid "Render settings"
@@ -37749,10 +37704,6 @@ msgid "Show Overlays"
 msgstr "Zobrazit Překrytí"
 
 
-msgid "Separate Colors"
-msgstr "Oddělit"
-
-
 msgid "View Type"
 msgstr "Zobrazit Typ"
 
@@ -39181,18 +39132,6 @@ msgid "UV Sync Selection"
 msgstr "Vybrat cestu"
 
 
-msgid "Relaxation Method"
-msgstr "Seskupený objekt"
-
-
-msgid "Algorithm used for UV relaxation"
-msgstr "X-ová velikost aktivního MetaElementu"
-
-
-msgid "Use HC method for relaxation"
-msgstr "Orientace manipulátorů (Klávesová zkratka: Alt Space)"
-
-
 msgid "UV Sculpt"
 msgstr "Tesat"
 
@@ -40123,10 +40062,6 @@ msgid "Characters"
 msgstr "Znaky"
 
 
-msgid "Date: %s %s"
-msgstr "Datum: %s %s"
-
-
 msgctxt "Operator"
 msgid "Location"
 msgstr "Umístění"
@@ -40576,10 +40511,6 @@ msgid "Buffer"
 msgstr "Z-Buffer"
 
 
-msgid "Custom (%.4g fps)"
-msgstr "Vlastní (%.4g fps)"
-
-
 msgid "Mask Mapping"
 msgstr "Mapování Masky"
 
@@ -40697,14 +40628,6 @@ msgstr "Odstranit Úpravy"
 
 msgid "Use Timing"
 msgstr "Použít Čásování"
-
-
-msgid "Iterations: %d .. %d (avg. %d)"
-msgstr "Iterace: %d .. %d (průměr %d)"
-
-
-msgid "Spacing: %g"
-msgstr "Rozestup: %g"
 
 
 msgid "Not yet functional"
@@ -41206,11 +41129,6 @@ msgstr "Nastavit Osu Y"
 
 msgid "No active track"
 msgstr "Žádná aktivní stopa"
-
-
-msgctxt "Operator"
-msgid "Zoom"
-msgstr "Přiblížit"
 
 
 msgctxt "Operator"
@@ -41912,10 +41830,6 @@ msgid "Pack"
 msgstr "Zabalit"
 
 
-msgid "Original frame range: %d-%d (%d)"
-msgstr "Původní rozsah snímků: %d-%d (%d)"
-
-
 msgid "Source Channel"
 msgstr "Zdrojový kanál"
 
@@ -41998,14 +41912,6 @@ msgid "Text: Internal"
 msgstr "Text: Interní"
 
 
-msgid "File: *%s (unsaved)"
-msgstr "Soubor: *%s (neuložený)"
-
-
-msgid "File: %s"
-msgstr "Soubor: %s"
-
-
 msgctxt "Operator"
 msgid "Move Marker"
 msgstr "Posunout značku"
@@ -42038,40 +41944,8 @@ msgid "Drag:"
 msgstr "Táhnout:"
 
 
-msgid ""
-"%s\n"
-"• %s toggles snap while dragging.\n"
-"• %s toggles dragging from the center.\n"
-"• %s toggles fixed aspect"
-msgstr ""
-"%s\n"
-"• %s přepíná přichytávání během tažení.\n"
-"• %s přepíná tažení od středu.\n"
-"• %s přepíná fixní aspekt"
-
-
 msgid "Depth:"
 msgstr "Hloubka:"
-
-
-msgid "Weight: %.3f"
-msgstr "Hmotnost: %.3f"
-
-
-msgid ""
-"Measure distance and angles.\n"
-"• %s anywhere for new measurement.\n"
-"• Drag ruler segment to measure an angle.\n"
-"• %s to remove the active ruler.\n"
-"• Ctrl while dragging to snap.\n"
-"• Shift while dragging to measure surface thickness"
-msgstr ""
-"Změřit vzdálenost a úhly\n"
-"• %s kamkoliv pro nové měření.\n"
-"• K měření úhlu, posunout část pravítka.\n"
-"• %s k odebrání aktivního pravítka.\n"
-"• Ctrl během posouvání k přichycení .\n"
-"• Shift během posouvání k změření tloušťky povrchu"
 
 
 msgid "Intersections"
@@ -42389,10 +42263,6 @@ msgid "Fly/Walk"
 msgstr "Létat/Chodit"
 
 
-msgid "No custom %s configured"
-msgstr "Žádná vlastní %s nastavena"
-
-
 msgid "Description:"
 msgstr "Popis:"
 
@@ -42419,14 +42289,6 @@ msgstr "Varování:"
 
 msgid "Internet:"
 msgstr "Internet:"
-
-
-msgid "Color Set %d"
-msgstr "Sada Barev %d"
-
-
-msgid "Color %d"
-msgstr "Barva %d"
 
 
 msgctxt "Operator"
@@ -45206,16 +45068,16 @@ msgid "No more keyframes to jump to in this direction"
 msgstr "Uložit současný soubor na vybrané umístění"
 
 
+msgid "Active group is locked, aborting"
+msgstr "Skupina pro akce je zamčena"
+
+
 msgid "Image data could not be found"
 msgstr "Název materiálu"
 
 
 msgid "No active camera set"
 msgstr "Přidat primitivum"
-
-
-msgid "Active group is locked, aborting"
-msgstr "Skupina pro akce je zamčena"
 
 
 msgid "No active vertex group for painting, aborting"
@@ -45272,6 +45134,10 @@ msgstr "Šířka:"
 
 msgid "Height:"
 msgstr "Výška:"
+
+
+msgid "File: %s"
+msgstr "Soubor: %s"
 
 
 msgid "unsupported movie clip format"

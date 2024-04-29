@@ -520,7 +520,7 @@ struct BlendePyContextStore {
   bool has_win;
 };
 
-static void arg_py_context_backup(bContext *C, BlendePyContextStore *c_py, const char *script_id)
+static void arg_py_context_backup(bContext *C, BlendePyContextStore *c_py)
 {
   c_py->wm = CTX_wm_manager(C);
   c_py->scene = CTX_data_scene(C);
@@ -530,11 +530,11 @@ static void arg_py_context_backup(bContext *C, BlendePyContextStore *c_py, const
     CTX_wm_window_set(C, static_cast<wmWindow *>(c_py->wm->windows.first));
   }
   else {
+    /* NOTE: this should never happen, although it may be possible when loading
+     * `.blend` files without windowing data. Whatever the case, it shouldn't crash,
+     * although typical scripts that accesses the context is not expected to work usefully. */
     c_py->win = nullptr;
-    fprintf(stderr,
-            "Python script \"%s\" "
-            "running with missing context data.\n",
-            script_id);
+    fprintf(stderr, "Python script running with missing context data.\n");
   }
 }
 
@@ -558,7 +558,7 @@ static void arg_py_context_restore(bContext *C, BlendePyContextStore *c_py)
 #    define BPY_CTX_SETUP(_cmd) \
       { \
         BlendePyContextStore py_c; \
-        arg_py_context_backup(C, &py_c, argv[1]); \
+        arg_py_context_backup(C, &py_c); \
         { \
           _cmd; \
         } \
@@ -1646,57 +1646,91 @@ static int arg_handle_start_with_console(int /*argc*/, const char ** /*argv*/, v
   return 0;
 }
 
-static const char arg_handle_register_extension_doc[] =
-    "\n\t"
-    "Register blend-file extension for current user, then exit (Windows only).";
-static int arg_handle_register_extension(int /*argc*/, const char ** /*argv*/, void * /*data*/)
+static bool arg_handle_extension_registration(const bool do_register, const bool all_users)
 {
+  /* Logic runs in #main_args_handle_registration. */
+  char *error_msg = nullptr;
+  bool result = WM_platform_assosiate_set(do_register, all_users, &error_msg);
+  if (error_msg) {
+    fprintf(stderr, "Error: %s\n", error_msg);
+    MEM_freeN(error_msg);
+  }
+
 #  ifdef WIN32
-  G.background = 1;
-  BLI_windows_register_blend_extension(false);
   TerminateProcess(GetCurrentProcess(), 0);
 #  endif
-  return 0;
+  return result;
+}
+
+static const char arg_handle_register_extension_doc[] =
+    "\n\t"
+    "Register blend-file extension for current user, then exit (Windows & Linux only).";
+static int arg_handle_register_extension(int argc, const char **argv, void *data)
+{
+  G.quiet = true;
+  background_mode_set();
+
+#  if !(defined(WIN32) && defined(__APPLE__))
+  if (!main_arg_deferred_is_set()) {
+    main_arg_deferred_setup(arg_handle_register_extension, argc, argv, data);
+    return argc - 1;
+  }
+#  endif
+  arg_handle_extension_registration(true, false);
+  return argc - 1;
 }
 
 static const char arg_handle_register_extension_all_doc[] =
     "\n\t"
-    "Register blend-file extension for all users, then exit (Windows only).";
-static int arg_handle_register_extension_all(int /*argc*/, const char ** /*argv*/, void * /*data*/)
+    "Register blend-file extension for all users, then exit (Windows & Linux only).";
+static int arg_handle_register_extension_all(int argc, const char **argv, void *data)
 {
-#  ifdef WIN32
-  G.background = 1;
-  BLI_windows_register_blend_extension(true);
-  TerminateProcess(GetCurrentProcess(), 0);
+  G.quiet = true;
+  background_mode_set();
+
+#  if !(defined(WIN32) && defined(__APPLE__))
+  if (!main_arg_deferred_is_set()) {
+    main_arg_deferred_setup(arg_handle_register_extension_all, argc, argv, data);
+    return argc - 1;
+  }
 #  endif
-  return 0;
+  arg_handle_extension_registration(true, true);
+  return argc - 1;
 }
 
 static const char arg_handle_unregister_extension_doc[] =
     "\n\t"
-    "Unregister blend-file extension for current user, then exit (Windows only).";
-static int arg_handle_unregister_extension(int /*argc*/, const char ** /*argv*/, void * /*data*/)
+    "Unregister blend-file extension for current user, then exit (Windows & Linux only).";
+static int arg_handle_unregister_extension(int argc, const char **argv, void *data)
 {
-#  ifdef WIN32
-  G.background = 1;
-  BLI_windows_unregister_blend_extension(false);
-  TerminateProcess(GetCurrentProcess(), 0);
+  G.quiet = true;
+  background_mode_set();
+
+#  if !(defined(WIN32) && defined(__APPLE__))
+  if (!main_arg_deferred_is_set()) {
+    main_arg_deferred_setup(arg_handle_unregister_extension, argc, argv, data);
+    return argc - 1;
+  }
 #  endif
+  arg_handle_extension_registration(false, false);
   return 0;
 }
 
 static const char arg_handle_unregister_extension_all_doc[] =
     "\n\t"
-    "Unregister blend-file extension for all users, then exit (Windows only).";
-static int arg_handle_unregister_extension_all(int /*argc*/,
-                                               const char ** /*argv*/,
-                                               void * /*data*/)
+    "Unregister blend-file extension for all users, then exit (Windows & Linux only).";
+static int arg_handle_unregister_extension_all(int argc, const char **argv, void *data)
 {
-#  ifdef WIN32
-  G.background = 1;
-  BLI_windows_unregister_blend_extension(true);
-  TerminateProcess(GetCurrentProcess(), 0);
+  G.quiet = true;
+  background_mode_set();
+
+#  if !(defined(WIN32) && defined(__APPLE__))
+  if (!main_arg_deferred_is_set()) {
+    main_arg_deferred_setup(arg_handle_unregister_extension_all, argc, argv, data);
+    return argc - 1;
+  }
 #  endif
+  arg_handle_extension_registration(false, true);
   return 0;
 }
 
@@ -2243,7 +2277,7 @@ static int arg_handle_python_expr_run(int argc, const char **argv, void *data)
 static const char arg_handle_python_console_run_doc[] =
     "\n\t"
     "Run Blender with an interactive console.";
-static int arg_handle_python_console_run(int /*argc*/, const char **argv, void *data)
+static int arg_handle_python_console_run(int /*argc*/, const char ** /*argv*/, void *data)
 {
 #  ifdef WITH_PYTHON
   bContext *C = static_cast<bContext *>(data);

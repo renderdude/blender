@@ -621,9 +621,9 @@ static void mywrite_id_begin(WriteData *wd, ID *id)
     MemFileChunk *prev_memchunk = curr_memchunk != nullptr ?
                                       static_cast<MemFileChunk *>(curr_memchunk->prev) :
                                       nullptr;
-    if ((curr_memchunk == nullptr || curr_memchunk->id_session_uid != id->session_uid ||
-         (prev_memchunk != nullptr &&
-          (prev_memchunk->id_session_uid == curr_memchunk->id_session_uid))))
+    if (curr_memchunk == nullptr || curr_memchunk->id_session_uid != id->session_uid ||
+        (prev_memchunk != nullptr &&
+         (prev_memchunk->id_session_uid == curr_memchunk->id_session_uid)))
     {
       if (MemFileChunk *ref = wd->mem.id_session_uid_mapping.lookup_default(id->session_uid,
                                                                             nullptr))
@@ -1783,9 +1783,19 @@ int BLO_get_struct_id_by_name(BlendWriter *writer, const char *struct_name)
   return struct_id;
 }
 
+void BLO_write_char_array(BlendWriter *writer, uint num, const char *data_ptr)
+{
+  BLO_write_raw(writer, sizeof(char) * size_t(num), data_ptr);
+}
+
 void BLO_write_int8_array(BlendWriter *writer, uint num, const int8_t *data_ptr)
 {
   BLO_write_raw(writer, sizeof(int8_t) * size_t(num), data_ptr);
+}
+
+void BLO_write_uint8_array(BlendWriter *writer, uint num, const uint8_t *data_ptr)
+{
+  BLO_write_raw(writer, sizeof(uint8_t) * size_t(num), data_ptr);
 }
 
 void BLO_write_int32_array(BlendWriter *writer, uint num, const int32_t *data_ptr)

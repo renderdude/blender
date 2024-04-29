@@ -860,13 +860,6 @@ enum {
   UV_SCULPT_ALL_ISLANDS = 2,
 };
 
-/** #ToolSettings::uv_relax_method */
-enum {
-  UV_SCULPT_TOOL_RELAX_LAPLACIAN = 1,
-  UV_SCULPT_TOOL_RELAX_HC = 2,
-  UV_SCULPT_TOOL_RELAX_COTAN = 3,
-};
-
 /* Stereo Flags. */
 #define STEREO_RIGHT_NAME "right"
 #define STEREO_LEFT_NAME "left"
@@ -1100,7 +1093,11 @@ typedef struct CurvesSculpt {
 } CurvesSculpt;
 
 typedef struct UvSculpt {
-  Paint paint;
+  struct CurveMapping *strength_curve;
+  int size;
+  float strength;
+  int8_t curve_preset; /* #eBrushCurvePreset. */
+  char _pad[7];
 } UvSculpt;
 
 /** Grease pencil drawing brushes. */
@@ -1513,7 +1510,7 @@ typedef struct ToolSettings {
   VPaint *wpaint;
   Sculpt *sculpt;
   /** UV smooth. */
-  UvSculpt *uvsculpt;
+  UvSculpt uvsculpt;
   /** Gpencil paint. */
   GpPaint *gp_paint;
   /** Gpencil vertex paint. */
@@ -1665,9 +1662,10 @@ typedef struct ToolSettings {
 
   /* UV painting. */
   char uv_sculpt_settings;
-  char uv_relax_method;
 
   char workspace_tool_type;
+
+  char _pad5[1];
 
   /**
    * XXX: these `sculpt_paint_*` fields are deprecated, use the
@@ -1800,17 +1798,13 @@ typedef struct RaytraceEEVEE {
   /** Thickness in world space each surface will have during screen space tracing. */
   float screen_trace_thickness;
   /** Maximum roughness before using horizon scan. */
-  float screen_trace_max_roughness;
+  float trace_max_roughness;
   /** Resolution downscale factor. */
   int resolution_scale;
-  /** Maximum intensity a ray can have. */
-  float sample_clamp;
   /** #RaytraceEEVEE_Flag. */
   int flag;
   /** #RaytraceEEVEE_DenoiseStages. */
   int denoise_stages;
-
-  char _pad0[4];
 } RaytraceEEVEE;
 
 typedef struct SceneEEVEE {
@@ -1879,7 +1873,12 @@ typedef struct SceneEEVEE {
   int shadow_pool_size;
   int shadow_ray_count;
   int shadow_step_count;
-  float shadow_normal_bias;
+  char _pad[4];
+
+  float clamp_surface_direct;
+  float clamp_surface_indirect;
+  float clamp_volume_direct;
+  float clamp_volume_indirect;
 
   int ray_tracing_method;
 
@@ -2416,6 +2415,7 @@ enum {
   SEQ_SNAP_TO_STRIPS = 1 << 0,
   SEQ_SNAP_TO_CURRENT_FRAME = 1 << 1,
   SEQ_SNAP_TO_STRIP_HOLD = 1 << 2,
+  SEQ_SNAP_TO_MARKERS = 1 << 3,
 };
 
 /** #SequencerToolSettings::snap_flag */
@@ -2844,6 +2844,7 @@ enum {
   SCE_EEVEE_SHADOW_ENABLED = (1 << 24),
   SCE_EEVEE_RAYTRACE_OPTIONS_SPLIT = (1 << 25),
   SCE_EEVEE_SHADOW_JITTERED_VIEWPORT = (1 << 26),
+  SCE_EEVEE_VOLUME_CUSTOM_RANGE = (1 << 27),
 };
 
 typedef enum RaytraceEEVEE_Flag {
@@ -2857,7 +2858,8 @@ typedef enum RaytraceEEVEE_DenoiseStages {
 } RaytraceEEVEE_DenoiseStages;
 
 typedef enum RaytraceEEVEE_Method {
-  RAYTRACE_EEVEE_METHOD_NONE = 0,
+  /* NOTE: Each method contains the previous one. */
+  RAYTRACE_EEVEE_METHOD_PROBE = 0,
   RAYTRACE_EEVEE_METHOD_SCREEN = 1,
   /* TODO(fclem): Hardware ray-tracing. */
   // RAYTRACE_EEVEE_METHOD_HARDWARE = 2,

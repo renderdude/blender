@@ -1,9 +1,9 @@
 
 msgid ""
 msgstr ""
-"Project-Id-Version: Blender 4.2.0 Alpha (b'c30667711948')\n"
+"Project-Id-Version: Blender 4.2.0 Alpha (b'3a5389d5abe0')\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-04-15 10:09+0000\n"
+"POT-Creation-Date: 2024-04-29 07:27+0000\n"
 "PO-Revision-Date: 2016-04-23 22:41+0300\n"
 "Last-Translator: Yousef Harfoush <bat3a@msn.com>\n"
 "Language-Team: Yousef Harfoush, Amine Moussaoui <bat3a@msn.com>\n"
@@ -423,32 +423,16 @@ msgid "After Current"
 msgstr "ﻲﻟﺎﺤﻟﺍ ﺪﻌﺑ"
 
 
-msgid "Number of frames to show after the current frame (only for 'Around Current Frame' Onion-skinning method)"
-msgstr "(ﺔﻴﻓﺎﻔﺸﻟﺍ ﻞﻴﻌﻔﺗ ﺔﻘﻳﺮﻃ 'ﻲﻟﺎﺤﻟﺍ ﺭﺎﻃﻹ﻿ﺍ ﻝﻮﺣ' ﻞﺟﺃ ﻦﻣ ﻂﻘﻓ) ﻲﻟﺎﺤﻟﺍ ﺭﺎﻃﻹ﻿ﺍ ﺪﻌﺑ ﺓﺮﻫﺎﻈﻟﺍ ﺕﺍﺭﺎﻃﻹ﻿ﺍ ﺩﺪﻋ"
-
-
 msgid "Before Current"
 msgstr "ﻲﻟﺎﺤﻟﺍ ﻞﺒﻗ"
-
-
-msgid "Number of frames to show before the current frame (only for 'Around Current Frame' Onion-skinning method)"
-msgstr "(ﺔﻴﻓﺎﻔﺸﻟﺍ ﻞﻴﻌﻔﺗ ﺔﻘﻳﺮﻃ 'ﻲﻟﺎﺤﻟﺍ ﺭﺎﻃﻹ﻿ﺍ ﻝﻮﺣ' ﻞﺟﻷ﻿ ﻂﻘﻓ) ﻲﻟﺎﺤﻟﺍ ﺭﺎﻃﻹ﻿ﺍ ﻞﺒﻗ ﺓﺮﻫﺎﻈﻟﺍ ﺮﻃﻷ﻿ﺍ ﺩﺪﻋ"
 
 
 msgid "End Frame"
 msgstr "ﺔﻳﺎﻬﻨﻟﺍ ﺭﺎﻃﺇ"
 
 
-msgid "End frame of range of paths to display/calculate (not for 'Around Current Frame' Onion-skinning method)"
-msgstr "(ﺔﻴﻓﺎﻔﺸﻟﺍ ﻞﻴﻌﻔﺗ ﺔﻘﻳﺮﻃ 'ﻲﻠﺤﻟﺍ ﺭﺎﻃﻹ﻿ﺍ ﻝﻮﺣ' ﻞﺟﺃ ﻦﻣ ﺲﻴﻟ) ﺏﺎﺴﺤﻟﺍ/ﺭﺎﻬﻇﻺ﻿ﻟ ﺕﺍﺭﺎﺴﻤﻟﺍ ﻕﺎﻄﻧ ﻞﺟﺃ ﻦﻣ ﺔﻳﺎﻬﻨﻟﺍ ﺭﺎﻃﺇ"
-
-
 msgid "Start Frame"
 msgstr "ﺔﻳﺍﺪﺒﻟﺍ ﺭﺎﻃﺇ"
-
-
-msgid "Starting frame of range of paths to display/calculate (not for 'Around Current Frame' Onion-skinning method)"
-msgstr "(ﺔﻴﻓﺎﻔﺸﻟﺍ ﻞﻴﻌﻔﺗ ﺔﻘﻳﺮﻃ 'ﻲﻟﺎﺤﻟﺍ ﺭﺎﻃﻺ﻿ﻟﺍ ﻝﻮﺣ' ﻞﺟﺃ ﻦﻣ ﺲﻴﻟ) ﺏﺎﺴﺤﻟﺍ/ﺭﺎﻬﻇﻺ﻿ﻟ ﺕﺍﺭﺎﺴﻤﻟﺍ ﻕﺎﻄﻧ ﻞﺟﺃ ﻦﻣ ﺔﻳﺍﺪﺒﻟﺍ ﺭﺎﻃﺇ"
 
 
 msgid "Frame Step"
@@ -2329,10 +2313,6 @@ msgstr "ءﺎﻘﺘﻟﺇ ﻥﻭﺪﺑ ﺔﻳﺯﺍﻮﺘﻣ ﺍﺮﻴﻤﻛ"
 
 msgid "Toe-in"
 msgstr "ﻞﺧﺍﺪّﻟ ﻢﺿ"
-
-
-msgid "Rotated cameras, looking at the convergence distance"
-msgstr "ءﺎﻘﺘﻟﻻ﻿ﺍ ﺔﻓﺎﺴﻤﻟ ﻪﺠﺘﺗ ,ﺓﺭﺍﺪﻣ ﺕﺍﺮﻴﻤﻛ"
 
 
 msgid "Interocular Distance"
@@ -9304,10 +9284,6 @@ msgid "Brush Height"
 msgstr "ﺓﺎﺷﺮﻔﻟﺍ ﻉﺎﻔﺗﺭﺍ"
 
 
-msgid "Affectable height of brush (layer height for layer tool, i.e.)"
-msgstr "(ﻼ﻿ﺜﻣ ,ﺔﻘﺒﻄﻟﺍ ﺓﺍﺩﻻ﻿ ﺔﻘﺒﻄﻟﺍ ﻉﺎﻔﺗﺭﺍ) ﺮﺛّﺄﺘﻠﻟ ﻞﺑﺎﻗ ﺓﺎﺷﺮﻔﻟﺍ ﻉﺎﻔﺗﺭﺍ"
-
-
 msgid "Brush Icon Filepath"
 msgstr "ﺓﺎﺷﺮﻔﻟﺍ ﺔﻧﻮﻘﻳﺍ ﻒﻠﻣ ﺭﺎﺴﻣ"
 
@@ -9722,14 +9698,6 @@ msgstr "ﻢﻌﻧﺍ ﺭﺎﺴﻣ ﻊﺒﺘﺘﻟ ﺓﺭﺄﻔﻟﺍ ﻦﻋ ﺓ�
 
 msgid "Automatically adjust strength to give consistent results for different spacings"
 msgstr "ﺔﻔﻠﺘﺨﻤﻟﺍ ﺕﺍﺪﻋﺎﺒﺘﻠﻟ ﺔﻘﺳﺎﻨﺘﻣ ﺞﺋﺎﺘﻧ ءﺎﻄﻋﻹ﻿ ﺎﻴﺗﺍﺫ ﺓﻮﻘﻟﺍ ﻝﺪّﻋ"
-
-
-msgid "Relax UVs"
-msgstr "UVs ـﻟﺍ ﻲﺧﺭﺍ"
-
-
-msgid "Pinch UVs"
-msgstr "UVs ـﻟﺍ ﻖﻴﺿ"
 
 
 msgid "Vertex Paint Tool"
@@ -16303,10 +16271,6 @@ msgid "Falloff"
 msgstr "ﻲﺷﻼ﻿ﺘﻟﺍ"
 
 
-msgid "Falloff type the feather"
-msgstr "ﻲﺷﻼ﻿ﺘﻟﺍ ﻉﻮﻧ"
-
-
 msgid "Smooth falloff"
 msgstr "ﻢﻴﻌﻨﺘﻟﺍ ﺶﻣﺎﻫ"
 
@@ -16514,6 +16478,10 @@ msgstr "ءﺎﻨﺒﻟﺍ ﺓﺩﺎﻋﺍ"
 
 msgid "Track"
 msgstr "ﺐﻘّﻌﺗ"
+
+
+msgid "Zoom"
+msgstr "ﺐﻳﺮﻘﺗ"
 
 
 msgid "Console"
@@ -19621,10 +19589,6 @@ msgid "Center Y"
 msgstr "Y ﺰﻛﺮﻣ"
 
 
-msgid "Zoom"
-msgstr "ﺐﻳﺮﻘﺗ"
-
-
 msgid "Defocus"
 msgstr "ﺰﻴﻛﺮﺘﻟﺍ ﻞﻴﻠﻘﺗ"
 
@@ -22426,6 +22390,10 @@ msgid "Add Circle"
 msgstr "ﺓﺮﺋﺍﺩ ﻒﺿﺍ"
 
 
+msgid "Handles"
+msgstr "ﺾﺑﺎﻘﻣ"
+
+
 msgctxt "Operator"
 msgid "Toggle Cyclic"
 msgstr "ﻱﺭﻭﺪﻟﺍ ﺐﻠﻗﺍ"
@@ -22663,10 +22631,6 @@ msgstr "ﻰﻨﺤﻨﻤﻟﺍ ﻉﻮﻧ ﻊﺿ"
 
 msgid "Set type of active spline"
 msgstr "ﻝﺎﻌﻔﻟﺍ ﻰﻨﺤﻨﻤﻟﺍ ﻉﻮﻧ ﻊﺿ"
-
-
-msgid "Handles"
-msgstr "ﺾﺑﺎﻘﻣ"
 
 
 msgctxt "Operator"
@@ -27560,9 +27524,24 @@ msgid "Reset the copy of the mesh that is being sculpted on"
 msgstr "ﻪﻴﻠﻋ ﺖﺤﻨﻟﺍ ﻢﺘﻳ ﻱﺬﻟﺍ ﻢﺴﺠﻤﻟﺍ ﺕﻼ﻿ﻳﺪﻌﺗ ﻲﻐﻟﺍ"
 
 
-msgctxt "Operator"
-msgid "Sculpt UVs"
-msgstr "UV'sـﻟﺍ ﺖﺤﻧﺍ"
+msgid "Pinch UVs"
+msgstr "UVs ـﻟﺍ ﻖﻴﺿ"
+
+
+msgid "Relax UVs"
+msgstr "UVs ـﻟﺍ ﻲﺧﺭﺍ"
+
+
+msgid "Algorithm used for UV relaxation"
+msgstr "UV ـﻟﺍ ءﺎﺧﺭﻹ﻿ ﺔﻠﻤﻌﺘﺴﻣ ﺔﻴﻣﺯﺭﺍﻮﺧ"
+
+
+msgid "Use Laplacian method for relaxation"
+msgstr " ءﺎﺧﺭﻺ﻿ﻟ ﻥﺎﻴﺳﻼ﻿ﺑﻻ﻿ ﺔﻘﻳﺮﻃ ﻡﺪﺨﺘﺳﺍ"
+
+
+msgid "Use HC method for relaxation"
+msgstr " ءﺎﺧﺭﻺ﻿ﻟ HC ﺔﻘﻳﺮﻃ ﻡﺪﺨﺘﺳﺍ"
 
 
 msgctxt "Operator"
@@ -29684,10 +29663,6 @@ msgstr "ﺓﺮﻘﻓ"
 
 msgid "Path Animation"
 msgstr "ﺭﺎﺴﻤﻟﺍ ﺔﻛﺮﺣ"
-
-
-msgid "Spot Shape"
-msgstr "ءﻮﻀﻟﺍ ﺔﻌﻘﺑ ﻞﻜﺷ"
 
 
 msgid "Text Boxes"
@@ -33844,10 +33819,6 @@ msgid "Show current frame only"
 msgstr "ﻂﻘﻓ ﻲﻟﺎﺤﻟﺍ ﺭﺎﻃﻻ﻿ﺍ ﺮﻬﻇﺍ"
 
 
-msgid "Separate Colors"
-msgstr "ﻥﺍﻮﻟﻻ﻿ﺍ ﻞﺼﻓﺍ"
-
-
 msgid "View Type"
 msgstr "ﺽﺮﻌﻟﺍ ﻉﻮﻧ"
 
@@ -34962,22 +34933,6 @@ msgstr " UV ﺭﺎﻴﺘﺧﺍ ﺔﻨﻣﺍﺰﻣ"
 
 msgid "Keep UV and edit mode mesh selection in sync"
 msgstr "ﻦﻣﺍﺰﺗ ﻲﻓ ﺮﻳﺮﺤﺘﻟﺍ ﻭ UV ﻊﺿﻮﻟ ﻢﺴﺠﻤﻟﺍ ﺭﺎﻴﺘﺧﺍ ﻖﺑﺃ"
-
-
-msgid "Relaxation Method"
-msgstr "ﺢﻳّﺮﺘﻟﺍ ﺔﻘﻳﺮﻃ"
-
-
-msgid "Algorithm used for UV relaxation"
-msgstr "UV ـﻟﺍ ءﺎﺧﺭﻹ﻿ ﺔﻠﻤﻌﺘﺴﻣ ﺔﻴﻣﺯﺭﺍﻮﺧ"
-
-
-msgid "Use Laplacian method for relaxation"
-msgstr " ءﺎﺧﺭﻺ﻿ﻟ ﻥﺎﻴﺳﻼ﻿ﺑﻻ﻿ ﺔﻘﻳﺮﻃ ﻡﺪﺨﺘﺳﺍ"
-
-
-msgid "Use HC method for relaxation"
-msgstr " ءﺎﺧﺭﻺ﻿ﻟ HC ﺔﻘﻳﺮﻃ ﻡﺪﺨﺘﺳﺍ"
 
 
 msgid "UV Sculpt"
@@ -36341,11 +36296,6 @@ msgstr "ﺕﺍﺭﺎﺴﻤﻟﺍ ﺮﻬﻇﺃ"
 
 
 msgctxt "Operator"
-msgid "View Fit"
-msgstr "ﺮﻈﻨﻤﻟﺍ ﺐﺳﺎﻧ"
-
-
-msgctxt "Operator"
 msgid "Enable Markers"
 msgstr "ﺕﺎﻣﻼ﻿ﻌﻟﺍ ﻞﻌّﻓ"
 
@@ -36652,10 +36602,6 @@ msgid "Online Manual"
 msgstr "ﺖﻧﺮﺘﻧﻻ﻿ﺍ ﻰﻠﻋ ﻡﺍﺪﺨﺘﺴﻤﻟﺍ ﻞﻴﻟﺩ"
 
 
-msgid "Slot %d"
-msgstr "‬%d‪ ﺔﺤﺘﻓ"
-
-
 msgctxt "Operator"
 msgid "Make"
 msgstr "ﻞﻌﺟﺇ"
@@ -36786,10 +36732,6 @@ msgstr "ﻲﺟﺭﺎﺧ :ﺺﻧ"
 
 msgid "Text: Internal"
 msgstr "ﻲﻠﺧﺍﺩ :ﺺﻧ"
-
-
-msgid "File: %s"
-msgstr "‬%s‪ :ﻒﻠﻣ"
 
 
 msgctxt "Operator"
@@ -37461,10 +37403,6 @@ msgid "in memory to enable editing!"
 msgstr "!ﻞﻳﺪﻌﺘﻟﺍ ﻞﻴﻌﻔﺘﻟ ﺓﺮﻛﺍﺬﻟﺍ ﻲﻓ"
 
 
-msgid "<Missing ID block>"
-msgstr "ﺓﺩﻮﻘﻔﻣ ﺕﺎﻧﺎﻴﺒﻟﺍ ﺔﻠﺘﻛ"
-
-
 msgid "No AnimData to set action on"
 msgstr "ﺙﺪﺤﻟﺍ ﺎﻬﻴﻠﻋ ﺽﻭﺮﻌﻤﻟﺍ ﺔﻛﺮﺤﻟﺍ ﺔﻘﺒﻃ"
 
@@ -37532,6 +37470,10 @@ msgstr "ﻡﺪﻘﺘﻣ"
 
 msgid "GP_Layer"
 msgstr "ﺕﺎﻈﺣﻼ﻿ﻣ ﺔﻘﺒﻃ"
+
+
+msgid "Slot %d"
+msgstr "‬%d‪ ﺔﺤﺘﻓ"
 
 
 msgid "Did not write, no Multilayer Image"
@@ -38543,12 +38485,12 @@ msgid "No more markers to jump to in this direction"
 msgstr "ﻩﺎﺠﺗﻹ﻿ﺍ ﺍﺬﻫ ﻲﻓ ﺎﻬﻴﻟﺍ ﺰﻔﻘﻠﻟ ﻯﺮﺧﺃ ﺕﺎﻣﻼ﻿ﻋ ﻱﺍ ﺪﺟﻮﺗ ﻻ﻿"
 
 
-msgid "No active camera set"
-msgstr "ﻞﻌﻔﻣ ﺭﺎﺴﻣ ﻻ﻿"
-
-
 msgid "Active group is locked, aborting"
 msgstr "ﺔﻠﻔﻘﻣ ﺙﺪﺤﻟﺍ ﺔﻋﻮﻤﺠﻣ"
+
+
+msgid "No active camera set"
+msgstr "ﻞﻌﻔﻣ ﺭﺎﺴﻣ ﻻ﻿"
 
 
 msgid "No active vertex group for painting, aborting"
@@ -38621,6 +38563,10 @@ msgstr "‬%d‬ ‪%d‪:ﺭﺎﻃﺍ"
 
 msgid "Frame: - / %d"
 msgstr "‬%d‪ / -:ﺭﺎﻃﺍ"
+
+
+msgid "File: %s"
+msgstr "‬%s‪ :ﻒﻠﻣ"
 
 
 msgid "unsupported movie clip format"
