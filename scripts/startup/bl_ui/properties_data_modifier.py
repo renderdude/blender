@@ -56,9 +56,14 @@ class OBJECT_MT_modifier_add(ModifierAddMenu, Menu):
 
     def draw(self, context):
         layout = self.layout
-        ob_type = context.object.type
-        geometry_nodes_supported = ob_type in {'MESH', 'CURVE', 'CURVES',
-                                               'FONT', 'VOLUME', 'POINTCLOUD', 'GREASEPENCIL'}
+        ob = context.object
+        if not ob:
+            return
+        ob_type = ob.type
+        geometry_nodes_supported = ob_type in {
+            'MESH', 'CURVE', 'CURVES',
+            'FONT', 'VOLUME', 'POINTCLOUD', 'GREASEPENCIL',
+        }
 
         if layout.operator_context == 'EXEC_REGION_WIN':
             layout.operator_context = 'INVOKE_REGION_WIN'

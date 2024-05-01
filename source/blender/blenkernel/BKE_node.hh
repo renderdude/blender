@@ -349,6 +349,13 @@ struct bNodeType {
   /** Get extra information that is drawn next to the node. */
   NodeExtraInfoFunction get_extra_info;
 
+  /**
+   * Registers operators that are specific to this node. This allows nodes to be more
+   * self-contained compared to the alternative to registering all operators in a more central
+   * place.
+   */
+  void (*register_operators)();
+
   /** True when the node cannot be muted. */
   bool no_muting;
   /** True when the node still works but it's usage is discouraged. */
@@ -1325,6 +1332,7 @@ void BKE_nodetree_remove_layer_n(bNodeTree *ntree, Scene *scene, int layer_index
 #define FN_NODE_INVERT_MATRIX 1237
 #define FN_NODE_TRANSPOSE_MATRIX 1238
 #define FN_NODE_PROJECT_POINT 1239
+#define FN_NODE_ALIGN_ROTATION_TO_VECTOR 1240
 
 /** \} */
 
@@ -1621,10 +1629,10 @@ void node_type_socket_templates(bNodeType *ntype,
 void node_type_size(bNodeType *ntype, int width, int minwidth, int maxwidth);
 
 enum class eNodeSizePreset : int8_t {
-  DEFAULT,
-  SMALL,
-  MIDDLE,
-  LARGE,
+  Default,
+  Small,
+  Middle,
+  Large,
 };
 
 void node_type_size_preset(bNodeType *ntype, eNodeSizePreset size);

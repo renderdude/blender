@@ -714,7 +714,7 @@ bool SCULPT_poll(bContext *C);
 
 /**
  * Returns true if sculpt session can handle color attributes
- * (BKE_pbvh_type(ss->pbvh) == PBVH_FACES).  If false an error
+ * (BKE_pbvh_type(*ss->pbvh) == PBVH_FACES).  If false an error
  * message will be shown to the user.  Operators should return
  * OPERATOR_CANCELLED in this case.
  *
@@ -1787,6 +1787,7 @@ void SCULPT_OT_project_line_gesture(wmOperatorType *ot);
 namespace blender::ed::sculpt_paint::trim {
 void SCULPT_OT_trim_lasso_gesture(wmOperatorType *ot);
 void SCULPT_OT_trim_box_gesture(wmOperatorType *ot);
+void SCULPT_OT_trim_line_gesture(wmOperatorType *ot);
 }
 
 /** \} */
