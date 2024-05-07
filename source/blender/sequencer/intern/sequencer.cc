@@ -61,7 +61,7 @@ StripProxy *seq_strip_proxy_alloc()
   StripProxy *strip_proxy = static_cast<StripProxy *>(
       MEM_callocN(sizeof(StripProxy), "StripProxy"));
   strip_proxy->quality = 50;
-  strip_proxy->build_tc_flags = SEQ_PROXY_TC_ALL;
+  strip_proxy->build_tc_flags = SEQ_PROXY_TC_RECORD_RUN | SEQ_PROXY_TC_RECORD_RUN_NO_GAPS;
   strip_proxy->tc = SEQ_PROXY_TC_RECORD_RUN;
   return strip_proxy;
 }
@@ -265,8 +265,7 @@ Editing *SEQ_editing_ensure(Scene *scene)
     ed = scene->ed = static_cast<Editing *>(MEM_callocN(sizeof(Editing), "addseq"));
     ed->seqbasep = &ed->seqbase;
     ed->cache = nullptr;
-    ed->cache_flag = SEQ_CACHE_STORE_FINAL_OUT;
-    ed->cache_flag |= SEQ_CACHE_STORE_RAW;
+    ed->cache_flag = (SEQ_CACHE_STORE_FINAL_OUT | SEQ_CACHE_STORE_RAW);
     ed->show_missing_media_flag = SEQ_EDIT_SHOW_MISSING_MEDIA;
     ed->displayed_channels = &ed->channels;
     SEQ_channels_ensure(ed->displayed_channels);
@@ -954,7 +953,7 @@ static void seq_update_scene_strip_sound(Sequence *seq)
   }
 
   /* Set `seq->scene` volume.
-   * Note: Currently this doesn't work well, when this property is animated. Scene strip volume is
+   * NOTE: Currently this doesn't work well, when this property is animated. Scene strip volume is
    * also controlled by `seq_update_sound_properties()` via `seq->volume` which works if animated.
    *
    * Ideally, the entire `BKE_scene_update_sound()` will happen from a dependency graph, so

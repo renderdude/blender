@@ -2672,6 +2672,9 @@ NODE_DEFINE(PrincipledBsdfNode)
   SOCKET_IN_COLOR(emission_color, "Emission Color", one_float3());
   SOCKET_IN_FLOAT(emission_strength, "Emission Strength", 0.0f);
 
+  SOCKET_IN_FLOAT(thin_film_thickness, "Thin Film Thickness", 0.0f);
+  SOCKET_IN_FLOAT(thin_film_ior, "Thin Film IOR", 1.3f);
+
   SOCKET_IN_FLOAT(surface_mix_weight, "SurfaceMixWeight", 0.0f, SocketType::SVM_INTERNAL);
 
   SOCKET_OUT_CLOSURE(BSDF, "BSDF");
@@ -2773,6 +2776,8 @@ void PrincipledBsdfNode::compile(SVMCompiler &compiler)
   int alpha_offset = compiler.stack_assign_if_linked(alpha_in);
   int emission_strength_offset = compiler.stack_assign_if_linked(emission_strength_in);
   int emission_color_offset = compiler.stack_assign(input("Emission Color"));
+  int thin_film_thickness_offset = compiler.stack_assign(input("Thin Film Thickness"));
+  int thin_film_ior_offset = compiler.stack_assign(input("Thin Film IOR"));
 
   compiler.add_node(
       NODE_CLOSURE_BSDF,
@@ -2811,12 +2816,13 @@ void PrincipledBsdfNode::compile(SVMCompiler &compiler)
                     subsurface_scale_offset,
                     subsurface_anisotropy_offset);
 
-  compiler.add_node(
-      compiler.encode_uchar4(
-          alpha_offset, emission_strength_offset, emission_color_offset, SVM_STACK_INVALID),
-      __float_as_int(get_float(alpha_in->socket_type)),
-      __float_as_int(get_float(emission_strength_in->socket_type)),
-      SVM_STACK_INVALID);
+  compiler.add_node(compiler.encode_uchar4(alpha_offset,
+                                           emission_strength_offset,
+                                           emission_color_offset,
+                                           thin_film_thickness_offset),
+                    __float_as_int(get_float(alpha_in->socket_type)),
+                    __float_as_int(get_float(emission_strength_in->socket_type)),
+                    thin_film_ior_offset);
 }
 
 void PrincipledBsdfNode::compile(OSLCompiler &compiler)

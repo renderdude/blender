@@ -658,7 +658,7 @@ void ui_but_to_pixelrect(rcti *rect,
                          const uiBut *but);
 rcti ui_to_pixelrect(const ARegion *region, const uiBlock *block, const rctf *src_rect);
 
-void ui_block_to_region_fl(const ARegion *region, const uiBlock *block, float *r_x, float *r_y);
+void ui_block_to_region_fl(const ARegion *region, const uiBlock *block, float *x, float *y);
 void ui_block_to_window_fl(const ARegion *region, const uiBlock *block, float *x, float *y);
 void ui_block_to_window(const ARegion *region, const uiBlock *block, int *x, int *y);
 void ui_block_to_region_rctf(const ARegion *region,
@@ -1298,8 +1298,14 @@ int ui_id_icon_get(const bContext *C, ID *id, bool big);
 
 /* interface_icons_event.cc */
 
-void icon_draw_rect_input(
-    float x, float y, int w, int h, float alpha, short event_type, short event_value);
+void icon_draw_rect_input(float x,
+                          float y,
+                          int w,
+                          int h,
+                          float alpha,
+                          short event_type,
+                          short event_value,
+                          bool inverted = false);
 
 /* resources.cc */
 
@@ -1573,7 +1579,7 @@ namespace blender::interface::internal {
 /**
  * Get the driver(s) of the given property.
  *
- * Note: intended to be used in conjunction with `paste_property_drivers()` below.
+ * \note intended to be used in conjunction with `paste_property_drivers()` below.
  *
  * \param ptr: The RNA pointer of the property.
  * \param prop: The property RNA of the property.
@@ -1588,7 +1594,7 @@ namespace blender::interface::internal {
  * zero-sized if no drivers were fetched (e.g. if the property had no drivers).
  * Otherwise the vector will be the size of the underlying property (e.g. 4 for
  * an array property with 4 elements, 1 for a non-array property).  For array
- * properties, elements without drivers will be nullptrs.
+ * properties, elements without drivers will be null.
  */
 blender::Vector<FCurve *> get_property_drivers(
     PointerRNA *ptr, PropertyRNA *prop, bool get_all, int index, bool *r_is_array_prop);
@@ -1600,7 +1606,7 @@ blender::Vector<FCurve *> get_property_drivers(
  * property, just some elements of an array property, or a single driver for a
  * non-array property.
  *
- * Note: intended to be used in conjunction with `get_property_drivers()` above.
+ * \note intended to be used in conjunction with `get_property_drivers()` above.
  * The destination property should have the same type and (if an array property)
  * length as the source property passed to `get_property_drivers()`.
  *

@@ -20,7 +20,7 @@ namespace blender::bke::greasepencil::tests {
 /* --------------------------------------------------------------------------------------------- */
 /* Grease Pencil ID Tests. */
 
-/* Note: Using a struct with constructor and destructor instead of a fixture here, to have all the
+/* NOTE: Using a struct with constructor and destructor instead of a fixture here, to have all the
  * tests in the same group (`greasepencil`). */
 struct GreasePencilIDTestContext {
   Main *bmain = nullptr;
@@ -98,7 +98,7 @@ struct GreasePencilHelper : public ::GreasePencil {
   GreasePencilHelper()
   {
     this->root_group_ptr = MEM_new<greasepencil::LayerGroup>(__func__);
-    this->active_layer = nullptr;
+    this->active_node = nullptr;
 
     CustomData_reset(&this->layers_data);
 

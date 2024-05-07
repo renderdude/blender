@@ -11,6 +11,7 @@
 
 #include "BKE_context.hh"
 #include "BKE_lib_id.hh"
+#include "BKE_mesh_wrapper.hh"
 #include "BKE_object.hh"
 #include "BKE_report.hh"
 #include "BKE_scene.hh"
@@ -85,7 +86,7 @@ void export_frame(Depsgraph *depsgraph,
       char filepath[FILE_MAX];
       STRNCPY(filepath, export_params.filepath);
       BLI_path_suffix(filepath, FILE_MAX, object_name, "");
-      /* Make sure we have .stl extension (case insensitive). */
+      /* Make sure we have `.stl` extension (case insensitive). */
       if (!BLI_path_extension_check(filepath, ".stl")) {
         BLI_path_extension_ensure(filepath, FILE_MAX, ".stl");
       }
@@ -104,6 +105,9 @@ void export_frame(Depsgraph *depsgraph,
     Object *obj_eval = DEG_get_evaluated_object(depsgraph, object);
     Mesh *mesh = export_params.apply_modifiers ? BKE_object_get_evaluated_mesh(obj_eval) :
                                                  BKE_object_get_pre_modified_mesh(obj_eval);
+
+    /* Ensure data exists if currently in edit mode. */
+    BKE_mesh_wrapper_ensure_mdata(mesh);
 
     /* Calculate transform. */
     float global_scale = export_params.global_scale * scene_unit_scale;

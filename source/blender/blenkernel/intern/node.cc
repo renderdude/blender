@@ -386,6 +386,9 @@ void node_node_foreach_id(bNode *node, LibraryForeachIDData *data)
   LISTBASE_FOREACH (bNodeSocket *, sock, &node->outputs) {
     BKE_LIB_FOREACHID_PROCESS_FUNCTION_CALL(data, library_foreach_node_socket(sock, data));
   }
+
+  /* Note that this ID pointer is only a cache, it may be outdated. */
+  BKE_LIB_FOREACHID_PROCESS_ID(data, node->runtime->owner_tree, IDWALK_CB_LOOPBACK);
 }
 
 static void node_foreach_id(ID *id, LibraryForeachIDData *data)
@@ -453,7 +456,7 @@ static void node_foreach_path(ID *id, BPathForeachPathData *bpath_data)
   }
 }
 
-static ID **node_owner_pointer_get(ID *id)
+static ID **node_owner_pointer_get(ID *id, const bool debug_relationship_assert)
 {
   if ((id->flag & LIB_EMBEDDED_DATA) == 0) {
     return nullptr;
@@ -462,8 +465,10 @@ static ID **node_owner_pointer_get(ID *id)
   // BLI_assert((id->tag & LIB_TAG_NO_MAIN) == 0);
 
   bNodeTree *ntree = reinterpret_cast<bNodeTree *>(id);
-  BLI_assert(ntree->owner_id != nullptr);
-  BLI_assert(ntreeFromID(ntree->owner_id) == ntree);
+  if (debug_relationship_assert) {
+    BLI_assert(ntree->owner_id != nullptr);
+    BLI_assert(ntreeFromID(ntree->owner_id) == ntree);
+  }
 
   return &ntree->owner_id;
 }
@@ -909,7 +914,7 @@ static void ntree_blend_write(BlendWriter *writer, ID *id, const void *id_addres
 
   if (!BLO_write_is_undo(writer)) {
     /* Generate legacy inputs/outputs socket ListBase for forward compatibility.
-     * Note: this has to happen before writing the ntree struct itself so that the ListBase
+     * NOTE: this has to happen before writing the ntree struct itself so that the ListBase
      * first/last pointers are valid. */
     blender::bke::forward_compat::construct_interface_as_legacy_sockets(ntree);
   }
@@ -3724,7 +3729,7 @@ void ntreeNodeFlagSet(const bNodeTree *ntree, const int flag, const bool enable)
 
 }  // namespace blender::bke
 
-bNodeTree *ntreeLocalize(bNodeTree *ntree)
+bNodeTree *ntreeLocalize(bNodeTree *ntree, ID *new_owner_id)
 {
   if (ntree == nullptr) {
     return nullptr;
@@ -3732,15 +3737,20 @@ bNodeTree *ntreeLocalize(bNodeTree *ntree)
 
   /* Make full copy outside of Main database.
    * NOTE: previews are not copied here. */
-  bNodeTree *ltree = reinterpret_cast<bNodeTree *>(BKE_id_copy_ex(
-      nullptr, &ntree->id, nullptr, (LIB_ID_COPY_LOCALIZE | LIB_ID_COPY_NO_ANIMDATA)));
+  bNodeTree *ltree = reinterpret_cast<bNodeTree *>(
+      BKE_id_copy_in_lib(nullptr,
+                         std::nullopt,
+                         &ntree->id,
+                         new_owner_id,
+                         nullptr,
+                         (LIB_ID_COPY_LOCALIZE | LIB_ID_COPY_NO_ANIMDATA)));
 
   ltree->id.tag |= LIB_TAG_LOCALIZED;
 
   LISTBASE_FOREACH (bNode *, node, &ltree->nodes) {
     bNodeTree *group = reinterpret_cast<bNodeTree *>(node->id);
     if (node->is_group() && group != nullptr) {
-      node->id = reinterpret_cast<ID *>(ntreeLocalize(group));
+      node->id = reinterpret_cast<ID *>(ntreeLocalize(group, nullptr));
     }
   }
 
@@ -3836,20 +3846,26 @@ bNode *nodeGetActive(bNodeTree *ntree)
   return nullptr;
 }
 
-void nodeSetSelected(bNode *node, const bool select)
+bool nodeSetSelected(bNode *node, const bool select)
 {
-  if (select) {
-    node->flag |= NODE_SELECT;
-    return;
+  bool changed = false;
+  if (select != ((node->flag & NODE_SELECT) != 0)) {
+    changed = true;
+    SET_FLAG_FROM_TEST(node->flag, select, NODE_SELECT);
   }
-  node->flag &= ~NODE_SELECT;
-  /* deselect sockets too */
+  if (select) {
+    return changed;
+  }
+  /* Deselect sockets too. */
   LISTBASE_FOREACH (bNodeSocket *, sock, &node->inputs) {
+    changed |= (sock->flag & NODE_SELECT) != 0;
     sock->flag &= ~NODE_SELECT;
   }
   LISTBASE_FOREACH (bNodeSocket *, sock, &node->outputs) {
+    changed |= (sock->flag & NODE_SELECT) != 0;
     sock->flag &= ~NODE_SELECT;
   }
+  return changed;
 }
 
 void nodeClearActive(bNodeTree *ntree)

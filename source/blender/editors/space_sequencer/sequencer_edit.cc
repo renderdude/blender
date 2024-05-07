@@ -1669,7 +1669,7 @@ static int sequencer_delete_exec(bContext *C, wmOperator *op)
 
   SEQ_prefetch_stop(scene);
 
-  for (Sequence *seq : selected_strips_from_context(C)) {
+  for (Sequence *seq : ED_sequencer_selected_strips_from_context(C)) {
     SEQ_edit_flag_for_removal(scene, seqbasep, seq);
     if (delete_data) {
       sequencer_delete_strip_data(C, seq);
@@ -2979,7 +2979,7 @@ static int sequencer_export_subtitles_exec(bContext *C, wmOperator *op)
   Sequence *seq, *seq_next;
   Editing *ed = SEQ_editing_get(scene);
   ListBase text_seq = {nullptr};
-  int iter = 1; /* Sequence numbers in .srt files are 1-indexed. */
+  int iter = 1; /* Sequence numbers in `.srt` files are 1-indexed. */
   FILE *file;
   char filepath[FILE_MAX];
 

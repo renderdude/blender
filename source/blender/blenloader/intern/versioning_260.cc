@@ -1060,7 +1060,7 @@ static bNodeSocket *version_make_socket_stub(const char *idname,
   socket->storage = nullptr;
   socket->flag |= SOCK_COLLAPSED;
 
-  /* Note: technically socket values can store ref-counted ID pointers, but at this stage the
+  /* NOTE: technically socket values can store ref-counted ID pointers, but at this stage the
    * refcount can be ignored. It gets recomputed after lib-linking for all ID pointers. Socket
    * values don't have allocated data, so a simple duplication works here. */
   socket->default_value = default_value ? MEM_dupallocN(default_value) : nullptr;
@@ -1255,8 +1255,7 @@ void blo_do_versions_260(FileData *fd, Library * /*lib*/, Main *bmain)
           clip->aspy = 1.0f;
         }
 
-        clip->proxy.build_tc_flag = IMB_TC_RECORD_RUN | IMB_TC_FREE_RUN |
-                                    IMB_TC_INTERPOLATED_REC_DATE_FREE_RUN;
+        clip->proxy.build_tc_flag = IMB_TC_RECORD_RUN;
 
         if (clip->proxy.build_size_flag == 0) {
           clip->proxy.build_size_flag = IMB_PROXY_25;
