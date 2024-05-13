@@ -30,7 +30,7 @@ NodeGraph::~NodeGraph()
 
 void NodeGraph::from_bNodeTree(const CompositorContext &context, bNodeTree *tree)
 {
-  add_bNodeTree(context, 0, tree, NODE_INSTANCE_KEY_BASE);
+  add_bNodeTree(context, 0, tree, bke::NODE_INSTANCE_KEY_BASE);
 }
 
 bNodeSocket *NodeGraph::find_b_node_input(bNode *b_node, const char *identifier)
@@ -87,7 +87,7 @@ void NodeGraph::add_bNodeTree(const CompositorContext &context,
 
   /* add all nodes of the tree to the node list */
   for (bNode *node = (bNode *)tree->nodes.first; node; node = node->next) {
-    bNodeInstanceKey key = BKE_node_instance_key(parent_key, tree, node);
+    bNodeInstanceKey key = bke::BKE_node_instance_key(parent_key, tree, node);
     add_bNode(context, tree, node, key, is_active_group);
   }
 
@@ -107,12 +107,6 @@ void NodeGraph::add_bNode(const CompositorContext &context,
   /* replace muted nodes by proxies for internal links */
   if (b_node->flag & NODE_MUTED) {
     add_proxies_mute(b_ntree, b_node, key, is_active_group);
-    return;
-  }
-
-  /* replace slow nodes with proxies for fast execution */
-  if (context.is_fast_calculation() && !COM_bnode_is_fast_node(*b_node)) {
-    add_proxies_skip(b_ntree, b_node, key, is_active_group);
     return;
   }
 
@@ -217,7 +211,7 @@ void NodeGraph::add_proxies_group_inputs(bNode *b_node, bNode *b_node_io)
   BLI_assert(b_group_tree); /* should have been checked in advance */
 
   /* not important for proxies */
-  bNodeInstanceKey key = NODE_INSTANCE_KEY_BASE;
+  bNodeInstanceKey key = bke::NODE_INSTANCE_KEY_BASE;
   bool is_active_group = false;
 
   for (bNodeSocket *b_sock_io = (bNodeSocket *)b_node_io->outputs.first; b_sock_io;
@@ -239,7 +233,7 @@ void NodeGraph::add_proxies_group_outputs(const CompositorContext & /*context*/,
   BLI_assert(b_group_tree); /* should have been checked in advance */
 
   /* not important for proxies */
-  bNodeInstanceKey key = NODE_INSTANCE_KEY_BASE;
+  bNodeInstanceKey key = bke::NODE_INSTANCE_KEY_BASE;
   bool is_active_group = false;
 
   for (bNodeSocket *b_sock_io = (bNodeSocket *)b_node_io->inputs.first; b_sock_io;

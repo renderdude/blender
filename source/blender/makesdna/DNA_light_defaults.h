@@ -42,9 +42,9 @@
     .spec_fac = 1.0f, \
     .transmission_fac = 1.0f, \
     .volume_fac = 1.0f, \
-    .shadow_trace_distance = 10.0f, \
     .shadow_filter_radius = 1.0f, \
     .shadow_resolution_scale = 1.0f, \
+    .shadow_maximum_resolution = 0.001f, \
     .att_dist = 40.0f, \
     .sun_angle = DEG2RADF(0.526f), \
     .area_spread = DEG2RADF(180.0f), \

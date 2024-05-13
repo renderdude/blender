@@ -153,12 +153,13 @@ class DATA_PT_EEVEE_light_shadow(DataButtonsPanel, Panel):
         layout.active = context.scene.eevee.use_shadows and light.use_shadow
 
         col = layout.column()
-        if light.type == 'SUN':
-            col.prop(light, "shadow_trace_distance", text="Distance")
-            col.separator()
-
         col.prop(light, "shadow_filter_radius", text="Filter")
-        col.prop(light, "shadow_resolution_scale", text="Resolution")
+
+        sub = col.column(align=True)
+        row = sub.row(align=True)
+        row.prop(light, "shadow_maximum_resolution", text="Resolution")
+        row.prop(light, "use_absolute_resolution", text="", icon='DRIVER_DISTANCE')
+        sub.prop(light, "shadow_resolution_scale", text="Scale")
 
 
 class DATA_PT_EEVEE_light_influence(DataButtonsPanel, Panel):

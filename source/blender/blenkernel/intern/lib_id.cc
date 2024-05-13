@@ -219,6 +219,12 @@ void BKE_lib_id_clear_library_data(Main *bmain, ID *id, const int flags)
 
   if (ID_IS_ASSET(id)) {
     if ((flags & LIB_ID_MAKELOCAL_ASSET_DATA_CLEAR) != 0) {
+      const IDTypeInfo *idtype_info = BKE_idtype_get_info_from_id(id);
+      if (idtype_info && idtype_info->asset_type_info &&
+          idtype_info->asset_type_info->on_clear_asset_fn)
+      {
+        idtype_info->asset_type_info->on_clear_asset_fn(id, id->asset_data);
+      }
       BKE_asset_metadata_free(&id->asset_data);
     }
     else {
@@ -391,7 +397,7 @@ void BKE_id_newptr_and_tag_clear(ID *id)
   if (key != nullptr) {
     BKE_id_newptr_and_tag_clear(&key->id);
   }
-  bNodeTree *ntree = ntreeFromID(id);
+  bNodeTree *ntree = blender::bke::ntreeFromID(id);
   if (ntree != nullptr) {
     BKE_id_newptr_and_tag_clear(&ntree->id);
   }
@@ -534,7 +540,8 @@ void BKE_lib_id_make_local_generic(Main *bmain, ID *id, const int flags)
       if (key && key_new) {
         ID_NEW_SET(key, key_new);
       }
-      bNodeTree *ntree = ntreeFromID(id), *ntree_new = ntreeFromID(id_new);
+      bNodeTree *ntree = blender::bke::ntreeFromID(id),
+                *ntree_new = blender::bke::ntreeFromID(id_new);
       if (ntree && ntree_new) {
         ID_NEW_SET(ntree, ntree_new);
       }
@@ -873,8 +880,8 @@ static void id_swap(Main *bmain,
     id_b->recalc = id_a_back.recalc;
   }
 
-  id_embedded_swap((ID **)BKE_ntree_ptr_from_id(id_a),
-                   (ID **)BKE_ntree_ptr_from_id(id_b),
+  id_embedded_swap((ID **)blender::bke::BKE_ntree_ptr_from_id(id_a),
+                   (ID **)blender::bke::BKE_ntree_ptr_from_id(id_b),
                    do_full_id,
                    remapper_id_a,
                    remapper_id_b);
@@ -1940,7 +1947,7 @@ void BKE_library_make_local(Main *bmain,
     const bool do_skip = (id && !BKE_idtype_idcode_is_linkable(GS(id->name)));
 
     for (; id; id = static_cast<ID *>(id->next)) {
-      ID *ntree = (ID *)ntreeFromID(id);
+      ID *ntree = (ID *)blender::bke::ntreeFromID(id);
 
       id->tag &= ~LIB_TAG_DOIT;
       if (ntree != nullptr) {

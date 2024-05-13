@@ -69,15 +69,15 @@ static void node_gather_link_search_ops(GatherLinkSearchOpParams &params)
     });
     const eNodeSocketDatatype other_type = eNodeSocketDatatype(params.other_socket().type);
     if (params.node_tree().typeinfo->validate_link(other_type, SOCK_INT)) {
-      params.add_item(IFACE_("X"), [node_type](LinkSearchOpParams &params) {
+      params.add_item(IFACE_("X"), [](LinkSearchOpParams &params) {
         bNode &node = params.add_node("GeometryNodeSampleGridIndex");
         params.update_and_connect_available_socket(node, "X");
       });
-      params.add_item(IFACE_("Y"), [node_type](LinkSearchOpParams &params) {
+      params.add_item(IFACE_("Y"), [](LinkSearchOpParams &params) {
         bNode &node = params.add_node("GeometryNodeSampleGridIndex");
         params.update_and_connect_available_socket(node, "Y");
       });
-      params.add_item(IFACE_("Z"), [node_type](LinkSearchOpParams &params) {
+      params.add_item(IFACE_("Z"), [](LinkSearchOpParams &params) {
         bNode &node = params.add_node("GeometryNodeSampleGridIndex");
         params.update_and_connect_available_socket(node, "Z");
       });
@@ -238,7 +238,7 @@ static void node_rna(StructRNA *srna)
 
 static void node_register()
 {
-  static bNodeType ntype;
+  static blender::bke::bNodeType ntype;
 
   geo_node_type_base(
       &ntype, GEO_NODE_SAMPLE_GRID_INDEX, "Sample Grid Index", NODE_CLASS_CONVERTER);
@@ -248,7 +248,7 @@ static void node_register()
   ntype.geometry_node_execute = node_geo_exec;
   ntype.draw_buttons = node_layout;
   ntype.geometry_node_execute = node_geo_exec;
-  nodeRegisterType(&ntype);
+  blender::bke::nodeRegisterType(&ntype);
 
   node_rna(ntype.rna_ext.srna);
 }

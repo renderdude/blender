@@ -665,14 +665,11 @@ static blender::float4x2 get_legacy_texture_matrix(bGPDstroke *gps)
   return texture_matrix * strokemat4x3;
 }
 
-static void legacy_gpencil_frame_to_grease_pencil_drawing(const bGPDframe &gpf,
-                                                          const ListBase &vertex_group_names,
-                                                          GreasePencilDrawing &r_drawing)
+static Drawing legacy_gpencil_frame_to_grease_pencil_drawing(const bGPDframe &gpf,
+                                                             const ListBase &vertex_group_names)
 {
-  /* Construct an empty CurvesGeometry in-place. */
-  new (&r_drawing.geometry) CurvesGeometry();
-  r_drawing.base.type = GP_DRAWING;
-  r_drawing.runtime = MEM_new<bke::greasepencil::DrawingRuntime>(__func__);
+  /* Create a new empty drawing. */
+  Drawing drawing;
 
   /* Get the number of points, number of strokes and the offsets for each stroke. */
   Vector<int> offsets;
@@ -703,11 +700,10 @@ static void legacy_gpencil_frame_to_grease_pencil_drawing(const bGPDframe &gpf,
 
   /* Return if the legacy frame contains no strokes (or zero points). */
   if (num_strokes == 0) {
-    return;
+    return drawing;
   }
 
   /* Resize the CurvesGeometry. */
-  Drawing &drawing = r_drawing.wrap();
   CurvesGeometry &curves = drawing.strokes_for_write();
   curves.resize(num_points, num_strokes);
   curves.offsets_for_write().copy_from(offsets);
@@ -904,6 +900,8 @@ static void legacy_gpencil_frame_to_grease_pencil_drawing(const bGPDframe &gpf,
   stroke_hardnesses.finish();
   stroke_point_aspect_ratios.finish();
   stroke_materials.finish();
+
+  return drawing;
 }
 
 static void legacy_gpencil_to_grease_pencil(ConversionData &conversion_data,
@@ -930,16 +928,7 @@ static void legacy_gpencil_to_grease_pencil(ConversionData &conversion_data,
   SET_FLAG_FROM_TEST(
       grease_pencil.flag, (gpd.draw_mode == GP_DRAWMODE_3D), GREASE_PENCIL_STROKE_ORDER_3D);
 
-  int num_drawings = 0;
-  LISTBASE_FOREACH (bGPDlayer *, gpl, &gpd.layers) {
-    num_drawings += BLI_listbase_count(&gpl->frames);
-  }
-
-  grease_pencil.drawing_array_num = num_drawings;
-  grease_pencil.drawing_array = reinterpret_cast<GreasePencilDrawingBase **>(
-      MEM_cnew_array<GreasePencilDrawing *>(num_drawings, __func__));
-
-  int i = 0, layer_idx = 0;
+  int layer_idx = 0;
   LISTBASE_FOREACH_INDEX (bGPDlayer *, gpl, &gpd.layers, layer_idx) {
     /* Create a new layer. */
     Layer &new_layer = grease_pencil.add_layer(
@@ -984,27 +973,25 @@ static void legacy_gpencil_to_grease_pencil(ConversionData &conversion_data,
     new_layer.opacity = gpl->opacity;
 
     LISTBASE_FOREACH (bGPDframe *, gpf, &gpl->frames) {
-      grease_pencil.drawing_array[i] = reinterpret_cast<GreasePencilDrawingBase *>(
-          MEM_new<GreasePencilDrawing>(__func__));
-      GreasePencilDrawing &drawing = *reinterpret_cast<GreasePencilDrawing *>(
-          grease_pencil.drawing_array[i]);
-
-      /* Convert the frame to a drawing. */
-      legacy_gpencil_frame_to_grease_pencil_drawing(*gpf, gpd.vertex_group_names, drawing);
-
-      /* Add the frame to the layer. */
-      if (GreasePencilFrame *new_frame = new_layer.add_frame(gpf->framenum, i)) {
-        new_frame->type = gpf->key_type;
-        SET_FLAG_FROM_TEST(new_frame->flag, (gpf->flag & GP_FRAME_SELECT), GP_FRAME_SELECTED);
+      Drawing *dst_drawing = grease_pencil.insert_frame(
+          new_layer, gpf->framenum, 0, eBezTriple_KeyframeType(gpf->key_type));
+      if (dst_drawing == nullptr) {
+        /* Might fail because GPv2 technically allowed overlapping keyframes on the same frame
+         * (very unlikely to occur in real world files). In GPv3, keyframes always have to be on
+         * different frames. In this case we can't create a keyframe and have to skip it. */
+        continue;
       }
-      i++;
+      /* Convert the frame to a drawing. */
+      *dst_drawing = legacy_gpencil_frame_to_grease_pencil_drawing(*gpf, gpd.vertex_group_names);
+
+      /* This frame was just inserted above, so it should always exist. */
+      GreasePencilFrame &new_frame = *new_layer.frame_at(gpf->framenum);
+      SET_FLAG_FROM_TEST(new_frame.flag, (gpf->flag & GP_FRAME_SELECT), GP_FRAME_SELECTED);
     }
 
     if ((gpl->flag & GP_LAYER_ACTIVE) != 0) {
       grease_pencil.set_active_layer(&new_layer);
     }
-
-    /* TODO: Update drawing user counts. */
   }
 
   /* Second loop, to write to layer attributes after all layers were created. */
@@ -1065,7 +1052,7 @@ static bNodeTree *offset_radius_node_tree_add(ConversionData &conversion_data, L
   using namespace blender;
   /* NOTE: DO NOT translate this ID name, it is used to find a potentially already existing
    * node-tree. */
-  bNodeTree *group = BKE_node_tree_add_in_lib(
+  bNodeTree *group = bke::BKE_node_tree_add_in_lib(
       &conversion_data.bmain, library, OFFSET_RADIUS_NODETREE_NAME, "GeometryNodeTree");
 
   if (!group->geometry_node_asset_traits) {
@@ -1088,80 +1075,80 @@ static bNodeTree *offset_radius_node_tree_add(ConversionData &conversion_data, L
   group->tree_interface.add_socket(
       DATA_("Layer"), "", "NodeSocketString", NODE_INTERFACE_SOCKET_INPUT, nullptr);
 
-  bNode *group_output = nodeAddNode(nullptr, group, "NodeGroupOutput");
+  bNode *group_output = bke::nodeAddNode(nullptr, group, "NodeGroupOutput");
   group_output->locx = 800;
   group_output->locy = 160;
-  bNode *group_input = nodeAddNode(nullptr, group, "NodeGroupInput");
+  bNode *group_input = bke::nodeAddNode(nullptr, group, "NodeGroupInput");
   group_input->locx = 0;
   group_input->locy = 160;
 
-  bNode *set_curve_radius = nodeAddNode(nullptr, group, "GeometryNodeSetCurveRadius");
+  bNode *set_curve_radius = bke::nodeAddNode(nullptr, group, "GeometryNodeSetCurveRadius");
   set_curve_radius->locx = 600;
   set_curve_radius->locy = 160;
-  bNode *named_layer_selection = nodeAddNode(
+  bNode *named_layer_selection = bke::nodeAddNode(
       nullptr, group, "GeometryNodeInputNamedLayerSelection");
   named_layer_selection->locx = 200;
   named_layer_selection->locy = 100;
-  bNode *input_radius = nodeAddNode(nullptr, group, "GeometryNodeInputRadius");
+  bNode *input_radius = bke::nodeAddNode(nullptr, group, "GeometryNodeInputRadius");
   input_radius->locx = 0;
   input_radius->locy = 0;
 
-  bNode *add = nodeAddNode(nullptr, group, "ShaderNodeMath");
+  bNode *add = bke::nodeAddNode(nullptr, group, "ShaderNodeMath");
   add->custom1 = NODE_MATH_ADD;
   add->locx = 200;
   add->locy = 0;
 
-  bNode *clamp_radius = nodeAddNode(nullptr, group, "ShaderNodeClamp");
+  bNode *clamp_radius = bke::nodeAddNode(nullptr, group, "ShaderNodeClamp");
   clamp_radius->locx = 400;
   clamp_radius->locy = 0;
-  bNodeSocket *sock_max = nodeFindSocket(clamp_radius, SOCK_IN, "Max");
+  bNodeSocket *sock_max = bke::nodeFindSocket(clamp_radius, SOCK_IN, "Max");
   static_cast<bNodeSocketValueFloat *>(sock_max->default_value)->value = FLT_MAX;
 
-  nodeAddLink(group,
-              group_input,
-              nodeFindSocket(group_input, SOCK_OUT, "Socket_0"),
-              set_curve_radius,
-              nodeFindSocket(set_curve_radius, SOCK_IN, "Curve"));
-  nodeAddLink(group,
-              set_curve_radius,
-              nodeFindSocket(set_curve_radius, SOCK_OUT, "Curve"),
-              group_output,
-              nodeFindSocket(group_output, SOCK_IN, "Socket_1"));
+  bke::nodeAddLink(group,
+                   group_input,
+                   bke::nodeFindSocket(group_input, SOCK_OUT, "Socket_0"),
+                   set_curve_radius,
+                   bke::nodeFindSocket(set_curve_radius, SOCK_IN, "Curve"));
+  bke::nodeAddLink(group,
+                   set_curve_radius,
+                   bke::nodeFindSocket(set_curve_radius, SOCK_OUT, "Curve"),
+                   group_output,
+                   bke::nodeFindSocket(group_output, SOCK_IN, "Socket_1"));
 
-  nodeAddLink(group,
-              group_input,
-              nodeFindSocket(group_input, SOCK_OUT, "Socket_3"),
-              named_layer_selection,
-              nodeFindSocket(named_layer_selection, SOCK_IN, "Name"));
-  nodeAddLink(group,
-              named_layer_selection,
-              nodeFindSocket(named_layer_selection, SOCK_OUT, "Selection"),
-              set_curve_radius,
-              nodeFindSocket(set_curve_radius, SOCK_IN, "Selection"));
+  bke::nodeAddLink(group,
+                   group_input,
+                   bke::nodeFindSocket(group_input, SOCK_OUT, "Socket_3"),
+                   named_layer_selection,
+                   bke::nodeFindSocket(named_layer_selection, SOCK_IN, "Name"));
+  bke::nodeAddLink(group,
+                   named_layer_selection,
+                   bke::nodeFindSocket(named_layer_selection, SOCK_OUT, "Selection"),
+                   set_curve_radius,
+                   bke::nodeFindSocket(set_curve_radius, SOCK_IN, "Selection"));
 
-  nodeAddLink(group,
-              group_input,
-              nodeFindSocket(group_input, SOCK_OUT, "Socket_2"),
-              add,
-              nodeFindSocket(add, SOCK_IN, "Value"));
-  nodeAddLink(group,
-              input_radius,
-              nodeFindSocket(input_radius, SOCK_OUT, "Radius"),
-              add,
-              nodeFindSocket(add, SOCK_IN, "Value_001"));
-  nodeAddLink(group,
-              add,
-              nodeFindSocket(add, SOCK_OUT, "Value"),
-              clamp_radius,
-              nodeFindSocket(clamp_radius, SOCK_IN, "Value"));
-  nodeAddLink(group,
-              clamp_radius,
-              nodeFindSocket(clamp_radius, SOCK_OUT, "Result"),
-              set_curve_radius,
-              nodeFindSocket(set_curve_radius, SOCK_IN, "Radius"));
+  bke::nodeAddLink(group,
+                   group_input,
+                   bke::nodeFindSocket(group_input, SOCK_OUT, "Socket_2"),
+                   add,
+                   bke::nodeFindSocket(add, SOCK_IN, "Value"));
+  bke::nodeAddLink(group,
+                   input_radius,
+                   bke::nodeFindSocket(input_radius, SOCK_OUT, "Radius"),
+                   add,
+                   bke::nodeFindSocket(add, SOCK_IN, "Value_001"));
+  bke::nodeAddLink(group,
+                   add,
+                   bke::nodeFindSocket(add, SOCK_OUT, "Value"),
+                   clamp_radius,
+                   bke::nodeFindSocket(clamp_radius, SOCK_IN, "Value"));
+  bke::nodeAddLink(group,
+                   clamp_radius,
+                   bke::nodeFindSocket(clamp_radius, SOCK_OUT, "Result"),
+                   set_curve_radius,
+                   bke::nodeFindSocket(set_curve_radius, SOCK_IN, "Radius"));
 
   LISTBASE_FOREACH (bNode *, node, &group->nodes) {
-    nodeSetSelected(node, false);
+    bke::nodeSetSelected(node, false);
   }
 
   return group;
@@ -2844,7 +2831,7 @@ static void legacy_gpencil_sanitize_annotations(Main &bmain)
 
   ID *id_iter;
   FOREACH_MAIN_ID_BEGIN (&bmain, id_iter) {
-    if (bNodeTree *node_tree = ntreeFromID(id_iter)) {
+    if (bNodeTree *node_tree = bke::ntreeFromID(id_iter)) {
       sanitize_gpv2_annotation(&node_tree->gpd);
     }
   }

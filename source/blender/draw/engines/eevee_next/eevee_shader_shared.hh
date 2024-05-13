@@ -917,8 +917,7 @@ struct LightSunData {
   int2 clipmap_base_offset_pos;
   /** Angle covered by the light shape for shadow ray casting. */
   float shadow_angle;
-  /** Trace distance around the shading point. */
-  float shadow_trace_distance;
+  float _pad5;
 
   /** Offset to convert from world units to tile space of the clipmap_lod_max. */
   float2 clipmap_origin;
@@ -964,7 +963,8 @@ struct LightData {
 
   /* Shadow Map resolution bias. */
   float lod_bias;
-  float _pad0;
+  /* Shadow Map resolution maximum resolution. */
+  float lod_min;
   float _pad1;
   float _pad2;
 
@@ -1128,7 +1128,6 @@ static inline LightSunData light_sun_data_get(LightData light)
   SAFE_ASSIGN_FLOAT_AS_INT2_COMBINE(clipmap_base_offset_neg, _pad7, shadow_projection_shift)
   SAFE_ASSIGN_FLOAT_AS_INT2_COMBINE(clipmap_base_offset_pos, _pad0_reserved, _pad1_reserved)
   SAFE_ASSIGN_FLOAT(shadow_angle, _pad1)
-  SAFE_ASSIGN_FLOAT(shadow_trace_distance, _pad2)
   SAFE_ASSIGN_FLOAT2(clipmap_origin, _pad3)
   SAFE_ASSIGN_FLOAT_AS_INT(clipmap_lod_min, _pad4)
   SAFE_ASSIGN_FLOAT_AS_INT(clipmap_lod_max, _pad5)
@@ -1218,8 +1217,8 @@ struct ShadowTileMapData {
   int tiles_index;
   /** Index of persistent data in the persistent data buffer. */
   int clip_data_index;
-  /** Bias LOD to tag for usage to lower the amount of tile used. */
-  float lod_bias;
+
+  float _pad0;
   /** Light type this tilemap is from. */
   eLightType light_type;
   /** True if the tilemap is part of area light shadow and is one of the side projections. */
@@ -1248,11 +1247,11 @@ struct ShadowRenderView {
    * Use sign to determine with case we are in.
    */
   float clip_distance_inv;
-  /* Viewport to submit the geometry of this tilemap view to. */
+  /** Viewport to submit the geometry of this tile-map view to. */
   uint viewport_index;
-  /* True if comming from a sun light shadow. */
-  bool32_t is_directionnal;
-  /* If directionnal, distance along the negative Z axis of the near clip in view space. */
+  /** True if coming from a sun light shadow. */
+  bool32_t is_directional;
+  /** If directional, distance along the negative Z axis of the near clip in view space. */
   float clip_near;
 };
 BLI_STATIC_ASSERT_ALIGN(ShadowRenderView, 16)

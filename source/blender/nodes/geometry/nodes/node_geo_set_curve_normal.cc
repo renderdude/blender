@@ -79,7 +79,7 @@ static void set_grease_pencil_normal(GreasePencil &grease_pencil,
 {
   using namespace blender::bke::greasepencil;
   for (const int layer_index : grease_pencil.layers().index_range()) {
-    Drawing *drawing = get_eval_grease_pencil_layer_drawing_for_write(grease_pencil, layer_index);
+    Drawing *drawing = grease_pencil.get_eval_drawing(*grease_pencil.layer(layer_index));
     if (drawing == nullptr) {
       continue;
     }
@@ -134,7 +134,7 @@ static void node_rna(StructRNA *srna)
 
 static void node_register()
 {
-  static bNodeType ntype;
+  static blender::bke::bNodeType ntype;
   geo_node_type_base(&ntype, GEO_NODE_SET_CURVE_NORMAL, "Set Curve Normal", NODE_CLASS_GEOMETRY);
   ntype.declare = node_declare;
   ntype.updatefunc = node_update;
@@ -142,7 +142,7 @@ static void node_register()
   ntype.initfunc = node_init;
   ntype.draw_buttons = node_layout;
 
-  nodeRegisterType(&ntype);
+  blender::bke::nodeRegisterType(&ntype);
 
   node_rna(ntype.rna_ext.srna);
 }

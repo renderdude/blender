@@ -84,18 +84,12 @@ void GrabOperation::foreach_grabbed_drawing(
     if (data.point_mask.is_empty()) {
       return;
     }
-    const Layer &layer = *grease_pencil.layers()[data.layer_index];
+    const Layer &layer = *grease_pencil.layer(data.layer_index);
     /* If a new frame is created, could be impossible find the stroke. */
-    const int drawing_index = layer.drawing_index_at(data.frame_number);
-    if (drawing_index < 0) {
+    bke::greasepencil::Drawing *drawing = grease_pencil.get_drawing_at(layer, data.frame_number);
+    if (drawing == nullptr) {
       return;
     }
-    GreasePencilDrawingBase &drawing_base = *grease_pencil.drawing(drawing_index);
-    if (drawing_base.type != GP_DRAWING) {
-      return;
-    }
-    bke::greasepencil::Drawing &drawing =
-        reinterpret_cast<GreasePencilDrawing &>(drawing_base).wrap();
 
     ed::greasepencil::DrawingPlacement placement(scene, region, view3d, object_eval, layer);
     if (placement.use_project_to_surface()) {
@@ -115,7 +109,7 @@ void GrabOperation::foreach_grabbed_drawing(
         data.frame_number,
         data.multi_frame_falloff,
         std::move(placement),
-        drawing);
+        *drawing);
     if (fn(params, data.point_mask, data.weights)) {
       changed = true;
     }
@@ -151,8 +145,7 @@ void GrabOperation::on_stroke_begin(const bContext &C, const InputSample &start_
     BLI_assert(info.layer_index >= 0);
     PointWeights &data = this->drawing_data[i];
 
-    const bke::greasepencil::Layer &layer = *grease_pencil.layers()[info.layer_index];
-    BLI_assert(layer.drawing_index_at(info.frame_number) >= 0);
+    const bke::greasepencil::Layer &layer = *grease_pencil.layer(info.layer_index);
     BLI_assert(grease_pencil.get_drawing_at(layer, info.frame_number) == &info.drawing);
 
     ed::greasepencil::DrawingPlacement placement(scene, region, view3d, ob_eval, layer);

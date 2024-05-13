@@ -393,7 +393,7 @@ static void screen_opengl_render_doit(const bContext *C, OGLRender *oglrender, R
       else {
         rect = ibuf_result->byte_buffer.data;
       }
-      BKE_image_stamp_buf(scene, camera, nullptr, rect, rectf, rr->rectx, rr->recty, 4);
+      BKE_image_stamp_buf(scene, camera, nullptr, rect, rectf, rr->rectx, rr->recty);
     }
     RE_render_result_rect_from_ibuf(rr, ibuf_result, oglrender->view_id);
     IMB_freeImBuf(ibuf_result);
@@ -616,7 +616,6 @@ static int gather_frames_to_render_for_id(LibraryIDLinkCallbackData *cb_data)
     case ID_SCR: /* Screen */
     case ID_GR:  /* Group */
     case ID_AC:  /* bAction */
-    case ID_AN:  /* Animation */
     case ID_BR:  /* Brush */
     case ID_WM:  /* WindowManager */
     case ID_LS:  /* FreestyleLineStyle */

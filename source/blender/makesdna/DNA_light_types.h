@@ -79,10 +79,10 @@ typedef struct Light {
   float volume_fac;
 
   float att_dist;
-  float shadow_trace_distance;
   float shadow_filter_radius;
   float shadow_resolution_scale;
-  char _pad0[4];
+  float shadow_maximum_resolution;
+  char _pad3[4];
 
   /* Preview */
   struct PreviewImage *preview;
@@ -145,6 +145,8 @@ enum {
   LA_SHAD_CONTACT = 1 << 19,
   LA_CUSTOM_ATTENUATION = 1 << 20,
   LA_USE_SOFT_FALLOFF = 1 << 21,
+  /** Use absolute resolution clamping instead of relative. */
+  LA_SHAD_RES_ABSOLUTE = 1 << 22,
 };
 
 /** #Light::falloff_type */

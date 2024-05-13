@@ -100,7 +100,6 @@ struct ShadowTileMap : public ShadowTileMapData {
   void sync_orthographic(const float4x4 &object_mat_,
                          int2 origin_offset,
                          int clipmap_level,
-                         float lod_bias_,
                          eShadowProjectionType projection_type_);
 
   void sync_cubeface(eLightType light_type_,
@@ -109,8 +108,7 @@ struct ShadowTileMap : public ShadowTileMapData {
                      float far,
                      float side,
                      float shift,
-                     eCubeFace face,
-                     float lod_bias_);
+                     eCubeFace face);
 
   void debug_draw() const;
 
@@ -323,8 +321,6 @@ class ShadowModule {
 
   /** For now, needs to be hardcoded. */
   int shadow_page_size_ = SHADOW_PAGE_RES;
-  /** Amount of bias to apply to the LOD computed at the tile usage tagging stage. */
-  float lod_bias_ = 0.0f;
   /** Maximum number of allocated pages. Maximum value is SHADOW_MAX_TILEMAP. */
   int shadow_page_len_ = SHADOW_MAX_TILEMAP;
   /** Global switch. */
@@ -368,11 +364,6 @@ class ShadowModule {
     return data_;
   }
 
-  float get_global_lod_bias()
-  {
-    return lod_bias_;
-  }
-
   /* Set all shadows to update. To be called before `end_sync`. */
   void reset()
   {
@@ -411,7 +402,7 @@ class ShadowPunctual : public NonCopyable, NonMovable {
   /** Light position. */
   float3 position_;
   /** Used to compute near and far clip distances. */
-  float max_distance_, light_radius_;
+  float max_distance_;
   /** Number of tile-maps needed to cover the light angular extents. */
   int tilemaps_needed_;
 
@@ -431,7 +422,6 @@ class ShadowPunctual : public NonCopyable, NonMovable {
   void sync(eLightType light_type,
             const float4x4 &object_mat,
             float cone_aperture,
-            float light_shape_radius,
             float max_distance);
 
   /**
@@ -442,7 +432,7 @@ class ShadowPunctual : public NonCopyable, NonMovable {
   /**
    * Allocate shadow tile-maps and setup views for rendering.
    */
-  void end_sync(Light &light, float lod_bias);
+  void end_sync(Light &light);
 
  private:
   /**
@@ -459,16 +449,12 @@ class ShadowDirectional : public NonCopyable, NonMovable {
   ShadowModule &shadows_;
   /** Tile-map for each clip-map level. */
   Vector<ShadowTileMap *> tilemaps_;
-  /** User minimum resolution. */
-  float min_resolution_;
   /** Copy of object matrix. Normalized. */
   float4x4 object_mat_;
   /** Current range of clip-map / cascades levels covered by this shadow. */
   IndexRange levels_range;
   /** Angle of the shadowed light shape. Might be scaled compared to the shading disk. */
   float disk_shape_angle_;
-  /** Maximum distance a shadow map ray can be travel. */
-  float trace_distance_;
 
  public:
   ShadowDirectional(ShadowModule &module) : shadows_(module){};
@@ -483,20 +469,17 @@ class ShadowDirectional : public NonCopyable, NonMovable {
   /**
    * Sync shadow parameters but do not allocate any shadow tile-maps.
    */
-  void sync(const float4x4 &object_mat,
-            float min_resolution,
-            float shadow_disk_angle,
-            float trace_distance);
+  void sync(const float4x4 &object_mat, float shadow_disk_angle);
 
   /**
    * Release the tile-maps that will not be used in the current frame.
    */
-  void release_excess_tilemaps(const Camera &camera, float lod_bias);
+  void release_excess_tilemaps(const Camera &camera);
 
   /**
    * Allocate shadow tile-maps and setup views for rendering.
    */
-  void end_sync(Light &light, const Camera &camera, float lod_bias);
+  void end_sync(Light &light, const Camera &camera);
 
   /* Return coverage of the whole tile-map in world unit. */
   static float coverage_get(int lvl)
@@ -514,10 +497,10 @@ class ShadowDirectional : public NonCopyable, NonMovable {
 
  private:
   IndexRange clipmap_level_range(const Camera &camera);
-  IndexRange cascade_level_range(const Camera &camera, float lod_bias);
+  IndexRange cascade_level_range(const Camera &camera);
 
   void cascade_tilemaps_distribution(Light &light, const Camera &camera);
-  void clipmap_tilemaps_distribution(Light &light, const Camera &camera, float lod_bias);
+  void clipmap_tilemaps_distribution(Light &light, const Camera &camera);
 
   void cascade_tilemaps_distribution_near_far_points(const Camera &camera,
                                                      float3 &near_point,

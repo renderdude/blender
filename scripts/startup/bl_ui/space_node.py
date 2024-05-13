@@ -22,6 +22,9 @@ from bl_ui.space_toolsystem_common import (
 )
 from bl_ui.properties_material import (
     EEVEE_MATERIAL_PT_settings,
+    EEVEE_NEXT_MATERIAL_PT_settings,
+    EEVEE_NEXT_MATERIAL_PT_settings_surface,
+    EEVEE_NEXT_MATERIAL_PT_settings_volume,
     MATERIAL_PT_viewport,
 )
 from bl_ui.properties_world import (
@@ -94,10 +97,14 @@ class NODE_HT_header(Header):
 
             if snode.shader_type == 'WORLD':
                 NODE_MT_editor_menus.draw_collapsible(context, layout)
+                world = scene.world
 
                 if snode_id:
                     row = layout.row()
                     row.prop(snode_id, "use_nodes")
+
+                    if world and world.use_eevee_finite_volume:
+                        row.operator("world.convert_volume_to_mesh", emboss=False, icon='WORLD', text="Convert Volume")
 
                 layout.separator_spacer()
 
@@ -303,25 +310,29 @@ class NODE_MT_select(Menu):
     def draw(self, _context):
         layout = self.layout
 
+        layout.operator("node.select_all", text="All").action = 'SELECT'
+        layout.operator("node.select_all", text="None").action = 'DESELECT'
+        layout.operator("node.select_all", text="Invert").action = 'INVERT'
+
+        layout.separator()
+
         layout.operator("node.select_box").tweak = False
         layout.operator("node.select_circle")
         layout.operator_menu_enum("node.select_lasso", "mode")
 
         layout.separator()
-        layout.operator("node.select_all").action = 'TOGGLE'
-        layout.operator("node.select_all", text="Invert").action = 'INVERT'
-        layout.operator("node.select_linked_from")
-        layout.operator("node.select_linked_to")
+        layout.operator("node.select_linked_from", text="Linked from")
+        layout.operator("node.select_linked_to", text="Linked to")
 
         layout.separator()
 
-        layout.operator("node.select_grouped").extend = False
+        layout.operator_menu_enum("node.select_grouped", "type", text="Select Grouped")
         layout.operator("node.select_same_type_step", text="Activate Same Type Previous").prev = True
         layout.operator("node.select_same_type_step", text="Activate Same Type Next").prev = False
 
         layout.separator()
 
-        layout.operator("node.find_node")
+        layout.operator("node.find_node", text="Find Node...")
 
 
 class NODE_MT_node(Menu):
@@ -819,25 +830,19 @@ class NODE_PT_quality(bpy.types.Panel):
         layout.use_property_split = True
         layout.use_property_decorate = False
 
+        scene = context.scene
+        rd = scene.render
+
         snode = context.space_data
         tree = snode.node_tree
         prefs = bpy.context.preferences
 
-        use_realtime = False
         col = layout.column()
         if prefs.experimental.use_experimental_compositors:
-            col.prop(tree, "execution_mode")
-            use_realtime = tree.execution_mode == 'REALTIME'
-        col.prop(tree, "precision")
+            col.prop(rd, "compositor_device", text="Device")
+        col.prop(rd, "compositor_precision", text="Precision")
 
         col = layout.column()
-        col.active = not use_realtime
-        col.prop(tree, "render_quality", text="Render")
-        col.prop(tree, "edit_quality", text="Edit")
-
-        col = layout.column()
-        col.active = not use_realtime
-        col.prop(tree, "use_two_pass")
         col.prop(tree, "use_viewer_border")
 
         col = layout.column()
@@ -897,7 +902,7 @@ class NODE_PT_node_tree_interface(Panel):
     bl_space_type = 'NODE_EDITOR'
     bl_region_type = 'UI'
     bl_category = "Group"
-    bl_label = "Interface"
+    bl_label = "Group Sockets"
 
     @classmethod
     def poll(cls, context):
@@ -963,7 +968,7 @@ class NODE_PT_node_tree_properties(Panel):
     bl_space_type = 'NODE_EDITOR'
     bl_region_type = 'UI'
     bl_category = "Group"
-    bl_label = "Properties"
+    bl_label = "Group"
 
     @classmethod
     def poll(cls, context):
@@ -975,8 +980,6 @@ class NODE_PT_node_tree_properties(Panel):
             return False
         if group.is_embedded_data:
             return False
-        if group.bl_idname != "GeometryNodeTree":
-            return False
         return True
 
     def draw(self, context):
@@ -986,9 +989,22 @@ class NODE_PT_node_tree_properties(Panel):
         layout.use_property_split = True
         layout.use_property_decorate = False
 
-        col = layout.column()
-        col.prop(group, "is_modifier")
-        col.prop(group, "is_tool")
+        layout.prop(group, "name", text="Name")
+
+        if group.asset_data:
+            layout.prop(group.asset_data, "description", text="Description")
+        else:
+            layout.prop(group, "description", text="Description")
+
+        layout.prop(group, "color_tag")
+
+        if group.bl_idname == "GeometryNodeTree":
+            header, body = layout.panel("group_usage")
+            header.label(text="Usage")
+            if body:
+                col = body.column(align=True)
+                col.prop(group, "is_modifier")
+                col.prop(group, "is_tool")
 
 
 # Grease Pencil properties
@@ -1046,9 +1062,9 @@ classes = (
     NODE_PT_geometry_node_tool_mode,
     NODE_PT_geometry_node_tool_options,
     NODE_PT_node_color_presets,
+    NODE_PT_node_tree_properties,
     NODE_MT_node_tree_interface_context_menu,
     NODE_PT_node_tree_interface,
-    NODE_PT_node_tree_properties,
     NODE_PT_active_node_generic,
     NODE_PT_active_node_color,
     NODE_PT_texture_mapping,
@@ -1060,6 +1076,9 @@ classes = (
     NODE_PT_active_node_properties,
 
     node_panel(EEVEE_MATERIAL_PT_settings),
+    node_panel(EEVEE_NEXT_MATERIAL_PT_settings),
+    node_panel(EEVEE_NEXT_MATERIAL_PT_settings_surface),
+    node_panel(EEVEE_NEXT_MATERIAL_PT_settings_volume),
     node_panel(MATERIAL_PT_viewport),
     node_panel(WORLD_PT_viewport_display),
     node_panel(DATA_PT_light),

@@ -57,8 +57,12 @@ static int grease_pencil_layer_add_exec(bContext *C, wmOperator *op)
     grease_pencil.move_node_after(new_layer.as_node(),
                                   grease_pencil.get_active_layer()->as_node());
   }
+  else if (grease_pencil.has_active_group()) {
+    grease_pencil.move_node_into(new_layer.as_node(), *grease_pencil.get_active_group());
+  }
+
   grease_pencil.set_active_layer(&new_layer);
-  grease_pencil.insert_blank_frame(new_layer, scene->r.cfra, 0, BEZT_KEYTYPE_KEYFRAME);
+  grease_pencil.insert_frame(new_layer, scene->r.cfra);
 
   DEG_id_tag_update(&grease_pencil.id, ID_RECALC_GEOMETRY);
   WM_event_add_notifier(C, NC_GPENCIL | ND_DATA | NA_SELECTED, &grease_pencil);
@@ -209,8 +213,7 @@ static int grease_pencil_layer_active_exec(bContext *C, wmOperator *op)
   GreasePencil &grease_pencil = *static_cast<GreasePencil *>(object->data);
   int layer_index = RNA_int_get(op->ptr, "layer");
 
-  const Layer &layer = *grease_pencil.layers()[layer_index];
-
+  const Layer &layer = *grease_pencil.layer(layer_index);
   if (grease_pencil.is_layer_active(&layer)) {
     return OPERATOR_CANCELLED;
   }
@@ -289,6 +292,45 @@ static void GREASE_PENCIL_OT_layer_group_add(wmOperatorType *ot)
       ot->srna, "new_layer_group_name", nullptr, INT16_MAX, "Name", "Name of the new layer group");
   RNA_def_property_flag(prop, PROP_SKIP_SAVE);
   ot->prop = prop;
+}
+
+static int grease_pencil_layer_group_remove_exec(bContext *C, wmOperator *op)
+{
+  using namespace blender::bke::greasepencil;
+  Object *object = CTX_data_active_object(C);
+  const bool keep_children = RNA_boolean_get(op->ptr, "keep_children");
+  GreasePencil &grease_pencil = *static_cast<GreasePencil *>(object->data);
+
+  if (!grease_pencil.has_active_group()) {
+    return OPERATOR_CANCELLED;
+  }
+
+  grease_pencil.remove_group(*grease_pencil.get_active_group(), keep_children);
+
+  DEG_id_tag_update(&grease_pencil.id, ID_RECALC_GEOMETRY);
+  WM_event_add_notifier(C, NC_GPENCIL | ND_DATA | NA_SELECTED, &grease_pencil);
+
+  return OPERATOR_FINISHED;
+}
+
+static void GREASE_PENCIL_OT_layer_group_remove(wmOperatorType *ot)
+{
+  /* identifiers */
+  ot->name = "Remove Layer Group";
+  ot->idname = "GREASE_PENCIL_OT_layer_group_remove";
+  ot->description = "Remove Grease Pencil layer group in the active object";
+
+  /* callbacks */
+  ot->exec = grease_pencil_layer_group_remove_exec;
+  ot->poll = active_grease_pencil_poll;
+
+  ot->flag = OPTYPE_REGISTER | OPTYPE_UNDO;
+
+  RNA_def_boolean(ot->srna,
+                  "keep_children",
+                  false,
+                  "Keep children nodes",
+                  "Keep the children nodes of the group and only delete the group itself");
 }
 
 static int grease_pencil_layer_hide_exec(bContext *C, wmOperator *op)
@@ -495,26 +537,27 @@ static int grease_pencil_layer_duplicate_exec(bContext *C, wmOperator *op)
 
   /* Duplicate layer. */
   Layer &active_layer = *grease_pencil.get_active_layer();
-  Layer &new_layer = grease_pencil.add_layer(active_layer);
+  Layer &new_layer = grease_pencil.duplicate_layer(active_layer);
 
   /* Clear source keyframes and recreate them with duplicated drawings. */
   new_layer.frames_for_write().clear();
-  for (auto [key, frame] : active_layer.frames().items()) {
-    const int duration = frame.is_implicit_hold() ? 0 : active_layer.get_frame_duration_at(key);
-    const int drawing_index = grease_pencil.drawings().size();
-    GreasePencilFrame *new_frame = new_layer.add_frame(key, drawing_index, duration);
-    new_frame->type = frame.type;
-    if (empty_keyframes) {
-      grease_pencil.add_empty_drawings(1);
-    }
-    else {
-      const Drawing &drawing = *grease_pencil.get_drawing_at(active_layer, key);
-      grease_pencil.add_duplicate_drawings(1, drawing);
+  for (auto [frame_number, frame] : active_layer.frames().items()) {
+    const int duration = active_layer.get_frame_duration_at(frame_number);
+
+    Drawing *dst_drawing = grease_pencil.insert_frame(
+        new_layer, frame_number, duration, eBezTriple_KeyframeType(frame.type));
+    if (!empty_keyframes) {
+      BLI_assert(dst_drawing != nullptr);
+      /* TODO: This can fail (return `nullptr`) if the drawing is a drawing reference! */
+      const Drawing &src_drawing = *grease_pencil.get_drawing_at(active_layer, frame_number);
+      /* Duplicate the drawing. */
+      *dst_drawing = src_drawing;
     }
   }
 
   grease_pencil.move_node_after(new_layer.as_node(), active_layer.as_node());
   grease_pencil.set_active_layer(&new_layer);
+
   DEG_id_tag_update(&grease_pencil.id, ID_RECALC_GEOMETRY);
   WM_event_add_notifier(C, NC_GPENCIL | ND_DATA | NA_SELECTED, nullptr);
   return OPERATOR_FINISHED;
@@ -716,6 +759,7 @@ void ED_operatortypes_grease_pencil_layers()
   WM_operatortype_append(GREASE_PENCIL_OT_layer_duplicate);
 
   WM_operatortype_append(GREASE_PENCIL_OT_layer_group_add);
+  WM_operatortype_append(GREASE_PENCIL_OT_layer_group_remove);
 
   WM_operatortype_append(GREASE_PENCIL_OT_layer_mask_add);
   WM_operatortype_append(GREASE_PENCIL_OT_layer_mask_remove);

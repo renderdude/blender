@@ -50,8 +50,7 @@ static void node_geo_exec(GeoNodeExecParams params)
     if (GreasePencil *grease_pencil = geometry_set.get_grease_pencil_for_write()) {
       using namespace blender::bke::greasepencil;
       for (const int layer_index : grease_pencil->layers().index_range()) {
-        Drawing *drawing = get_eval_grease_pencil_layer_drawing_for_write(*grease_pencil,
-                                                                          layer_index);
+        Drawing *drawing = grease_pencil->get_eval_drawing(*grease_pencil->layer(layer_index));
         if (drawing == nullptr) {
           continue;
         }
@@ -69,12 +68,12 @@ static void node_geo_exec(GeoNodeExecParams params)
 
 static void node_register()
 {
-  static bNodeType ntype;
+  static blender::bke::bNodeType ntype;
 
   geo_node_type_base(&ntype, GEO_NODE_SET_CURVE_RADIUS, "Set Curve Radius", NODE_CLASS_GEOMETRY);
   ntype.geometry_node_execute = node_geo_exec;
   ntype.declare = node_declare;
-  nodeRegisterType(&ntype);
+  blender::bke::nodeRegisterType(&ntype);
 }
 NOD_REGISTER_NODE(node_register)
 
