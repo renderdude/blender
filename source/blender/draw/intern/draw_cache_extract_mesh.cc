@@ -40,15 +40,15 @@
 
 namespace blender::draw {
 
-int mesh_render_mat_len_get(const Object *object, const Mesh *mesh)
+int mesh_render_mat_len_get(const Object &object, const Mesh &mesh)
 {
-  if (mesh->runtime->edit_mesh != nullptr) {
-    const Mesh *editmesh_eval_final = BKE_object_get_editmesh_eval_final(object);
+  if (mesh.runtime->edit_mesh != nullptr) {
+    const Mesh *editmesh_eval_final = BKE_object_get_editmesh_eval_final(&object);
     if (editmesh_eval_final != nullptr) {
       return std::max<int>(1, editmesh_eval_final->totcol);
     }
   }
-  return std::max<int>(1, mesh->totcol);
+  return std::max<int>(1, mesh.totcol);
 }
 
 /* ---------------------------------------------------------------------- */
@@ -555,19 +555,18 @@ static TaskNode *mesh_extract_render_data_node_create(TaskGraph *task_graph,
 /** \name Extract Loop
  * \{ */
 
-void mesh_buffer_cache_create_requested(TaskGraph *task_graph,
+void mesh_buffer_cache_create_requested(TaskGraph &task_graph,
                                         MeshBatchCache &cache,
                                         MeshBufferCache &mbc,
-                                        Object *object,
-                                        Mesh *mesh,
-
+                                        Object &object,
+                                        Mesh &mesh,
                                         const bool is_editmode,
                                         const bool is_paint_mode,
                                         const bool edit_mode_active,
                                         const float4x4 &object_to_world,
                                         const bool do_final,
                                         const bool do_uvedit,
-                                        const Scene *scene,
+                                        const Scene &scene,
                                         const ToolSettings *ts,
                                         const bool use_hide)
 {
@@ -601,7 +600,7 @@ void mesh_buffer_cache_create_requested(TaskGraph *task_graph,
    *                                               +-----> | extract_task2_loop_3 |
    *                                                       +----------------------+
    */
-  const bool do_hq_normals = (scene->r.perf_flag & SCE_PERF_HQ_NORMALS) != 0 ||
+  const bool do_hq_normals = (scene.r.perf_flag & SCE_PERF_HQ_NORMALS) != 0 ||
                              GPU_use_hq_normals_workaround();
 
   /* Create an array containing all the extractors that needs to be executed. */
@@ -645,7 +644,6 @@ void mesh_buffer_cache_create_requested(TaskGraph *task_graph,
   EXTRACT_ADD_REQUESTED(vbo, attr_viewer);
   EXTRACT_ADD_REQUESTED(vbo, vnor);
 
-  EXTRACT_ADD_REQUESTED(ibo, points);
   EXTRACT_ADD_REQUESTED(ibo, fdots);
   EXTRACT_ADD_REQUESTED(ibo, lines_paint_mask);
   EXTRACT_ADD_REQUESTED(ibo, lines_adjacency);
@@ -657,7 +655,8 @@ void mesh_buffer_cache_create_requested(TaskGraph *task_graph,
 #undef EXTRACT_ADD_REQUESTED
 
   if (extractors.is_empty() && !DRW_ibo_requested(buffers.ibo.lines) &&
-      !DRW_ibo_requested(buffers.ibo.lines_loose) && !DRW_ibo_requested(buffers.ibo.tris))
+      !DRW_ibo_requested(buffers.ibo.lines_loose) && !DRW_ibo_requested(buffers.ibo.tris) &&
+      !DRW_ibo_requested(buffers.ibo.points))
   {
     return;
   }
@@ -678,7 +677,7 @@ void mesh_buffer_cache_create_requested(TaskGraph *task_graph,
                                                ts);
   mr->use_subsurf_fdots = mr->mesh && !mr->mesh->runtime->subsurf_face_dot_tags.is_empty();
   mr->use_final_mesh = do_final;
-  mr->use_simplify_normals = (scene->r.mode & R_SIMPLIFY) && (scene->r.mode & R_SIMPLIFY_NORMALS);
+  mr->use_simplify_normals = (scene.r.mode & R_SIMPLIFY) && (scene.r.mode & R_SIMPLIFY_NORMALS);
 
 #ifdef DEBUG_TIME
   double rdata_end = BLI_time_now_seconds();
@@ -688,46 +687,62 @@ void mesh_buffer_cache_create_requested(TaskGraph *task_graph,
   eMRDataType data_flag = extractors.data_types();
 
   TaskNode *task_node_mesh_render_data = mesh_extract_render_data_node_create(
-      task_graph, *mr, mbc, iter_type, data_flag);
+      &task_graph, *mr, mbc, iter_type, data_flag);
 
   /* Simple heuristic. */
   const bool use_thread = (mr->corners_num + mr->loose_indices_num) > MIN_RANGE_LEN;
 
   if (DRW_ibo_requested(buffers.ibo.tris)) {
-    struct LooseEdgedata {
+    struct TaskData {
       MeshRenderData &mr;
       MeshBufferCache &mbc;
       MeshBatchCache &cache;
     };
     TaskNode *task_node = BLI_task_graph_node_create(
-        task_graph,
+        &task_graph,
         [](void *__restrict task_data) {
-          const LooseEdgedata &data = *static_cast<LooseEdgedata *>(task_data);
+          const TaskData &data = *static_cast<TaskData *>(task_data);
           const SortedFaceData &face_sorted = mesh_render_data_faces_sorted_ensure(data.mr,
                                                                                    data.mbc);
           extract_tris(data.mr, face_sorted, data.cache, *data.mbc.buff.ibo.tris);
         },
-        new LooseEdgedata{*mr, mbc, cache},
-        [](void *task_data) { delete static_cast<LooseEdgedata *>(task_data); });
+        new TaskData{*mr, mbc, cache},
+        [](void *task_data) { delete static_cast<TaskData *>(task_data); });
     BLI_task_graph_edge_create(task_node_mesh_render_data, task_node);
   }
   if (DRW_ibo_requested(buffers.ibo.lines) || DRW_ibo_requested(buffers.ibo.lines_loose)) {
-    struct LooseEdgedata {
+    struct TaskData {
       MeshRenderData &mr;
       MeshBufferList &buffers;
       MeshBatchCache &cache;
     };
     TaskNode *task_node = BLI_task_graph_node_create(
-        task_graph,
+        &task_graph,
         [](void *__restrict task_data) {
-          const LooseEdgedata &data = *static_cast<LooseEdgedata *>(task_data);
+          const TaskData &data = *static_cast<TaskData *>(task_data);
           extract_lines(data.mr,
                         data.buffers.ibo.lines,
                         data.buffers.ibo.lines_loose,
                         data.cache.no_loose_wire);
         },
-        new LooseEdgedata{*mr, buffers, cache},
-        [](void *task_data) { delete static_cast<LooseEdgedata *>(task_data); });
+        new TaskData{*mr, buffers, cache},
+        [](void *task_data) { delete static_cast<TaskData *>(task_data); });
+    BLI_task_graph_edge_create(task_node_mesh_render_data, task_node);
+  }
+
+  if (DRW_ibo_requested(buffers.ibo.points)) {
+    struct TaskData {
+      MeshRenderData &mr;
+      MeshBufferList &buffers;
+    };
+    TaskNode *task_node = BLI_task_graph_node_create(
+        &task_graph,
+        [](void *__restrict task_data) {
+          const TaskData &data = *static_cast<TaskData *>(task_data);
+          extract_points(data.mr, *data.buffers.ibo.points);
+        },
+        new TaskData{*mr, buffers},
+        [](void *task_data) { delete static_cast<TaskData *>(task_data); });
     BLI_task_graph_edge_create(task_node_mesh_render_data, task_node);
   }
 
@@ -739,7 +754,7 @@ void mesh_buffer_cache_create_requested(TaskGraph *task_graph,
         ExtractorRunDatas *single_threaded_extractors = new ExtractorRunDatas();
         single_threaded_extractors->append(extractor);
         TaskNode *task_node = extract_task_node_create(
-            task_graph, *mr, cache, single_threaded_extractors, &buffers, false);
+            &task_graph, *mr, cache, single_threaded_extractors, &buffers, false);
 
         BLI_task_graph_edge_create(task_node_mesh_render_data, task_node);
       }
@@ -750,7 +765,7 @@ void mesh_buffer_cache_create_requested(TaskGraph *task_graph,
     extractors.filter_threaded_extractors_into(*multi_threaded_extractors);
     if (!multi_threaded_extractors->is_empty()) {
       TaskNode *task_node = extract_task_node_create(
-          task_graph, *mr, cache, multi_threaded_extractors, &buffers, true);
+          &task_graph, *mr, cache, multi_threaded_extractors, &buffers, true);
 
       BLI_task_graph_edge_create(task_node_mesh_render_data, task_node);
     }
@@ -763,7 +778,7 @@ void mesh_buffer_cache_create_requested(TaskGraph *task_graph,
     /* Run all requests on the same thread. */
     ExtractorRunDatas *extractors_copy = new ExtractorRunDatas(extractors);
     TaskNode *task_node = extract_task_node_create(
-        task_graph, *mr, cache, extractors_copy, &buffers, false);
+        &task_graph, *mr, cache, extractors_copy, &buffers, false);
 
     BLI_task_graph_edge_create(task_node_mesh_render_data, task_node);
   }
@@ -843,7 +858,6 @@ void mesh_buffer_cache_create_requested_subdiv(MeshBatchCache &cache,
   EXTRACT_ADD_REQUESTED(vbo, edge_idx);
   EXTRACT_ADD_REQUESTED(vbo, face_idx);
   EXTRACT_ADD_REQUESTED(vbo, edge_fac);
-  EXTRACT_ADD_REQUESTED(ibo, points);
   EXTRACT_ADD_REQUESTED(vbo, edit_data);
   EXTRACT_ADD_REQUESTED(vbo, edituv_data);
   /* Make sure UVs are computed before edituv stuffs. */
@@ -859,7 +873,8 @@ void mesh_buffer_cache_create_requested_subdiv(MeshBatchCache &cache,
 #undef EXTRACT_ADD_REQUESTED
 
   if (extractors.is_empty() && !DRW_ibo_requested(buffers.ibo.lines) &&
-      !DRW_ibo_requested(buffers.ibo.lines_loose) && !DRW_ibo_requested(buffers.ibo.tris))
+      !DRW_ibo_requested(buffers.ibo.lines_loose) && !DRW_ibo_requested(buffers.ibo.tris) &&
+      !DRW_ibo_requested(buffers.ibo.points))
   {
     return;
   }
@@ -867,7 +882,7 @@ void mesh_buffer_cache_create_requested_subdiv(MeshBatchCache &cache,
   mesh_render_data_update_normals(mr, MR_DATA_TAN_LOOP_NOR);
   mesh_render_data_update_loose_geom(
       mr, mbc, MR_ITER_LOOSE_EDGE | MR_ITER_LOOSE_VERT, MR_DATA_LOOSE_GEOM);
-  DRW_subdivide_loose_geom(&subdiv_cache, &mbc);
+  DRW_subdivide_loose_geom(subdiv_cache, mbc);
 
   if (DRW_ibo_requested(buffers.ibo.lines) || DRW_ibo_requested(buffers.ibo.lines_loose)) {
     extract_lines_subdiv(
@@ -875,6 +890,9 @@ void mesh_buffer_cache_create_requested_subdiv(MeshBatchCache &cache,
   }
   if (DRW_ibo_requested(buffers.ibo.tris)) {
     extract_tris_subdiv(subdiv_cache, cache, *buffers.ibo.tris);
+  }
+  if (DRW_ibo_requested(buffers.ibo.points)) {
+    extract_points_subdiv(mr, subdiv_cache, *buffers.ibo.points);
   }
 
   void *data_stack = MEM_mallocN(extractors.data_size_total(), __func__);
