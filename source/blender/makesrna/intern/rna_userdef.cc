@@ -454,6 +454,45 @@ static void rna_userdef_script_autoexec_update(Main * /*bmain*/,
   USERDEF_TAG_DIRTY;
 }
 
+static void rna_userdef_use_online_access_set(PointerRNA *ptr, bool value)
+{
+  /* A `set` function is needed to clear the override flags. */
+  UserDef *userdef = (UserDef *)ptr->data;
+
+  if ((G.f & G_FLAG_INTERNET_ALLOW) == 0) {
+    if (G.f & G_FLAG_INTERNET_OVERRIDE_PREF_OFFLINE) {
+      /* The `editable` check should account for this, assert since this is security related. */
+      BLI_assert_unreachable();
+      return;
+    }
+  }
+
+  if (value) {
+    userdef->flag |= USER_INTERNET_ALLOW;
+    G.f |= G_FLAG_INTERNET_ALLOW;
+  }
+  else {
+    userdef->flag &= ~USER_INTERNET_ALLOW;
+    G.f &= ~G_FLAG_INTERNET_ALLOW;
+  }
+
+  /* Once the user edits this option (even to set it to the value it was)
+   * it's no longer considered overridden. */
+  G.f &= ~G_FLAG_INTERNET_OVERRIDE_PREF_ANY;
+}
+
+static int rna_userdef_use_online_access_editable(const PointerRNA * /*ptr*/, const char **r_info)
+{
+  if ((G.f & G_FLAG_INTERNET_ALLOW) == 0) {
+    /* Return 0 when blender was invoked with `--offline-mode` "forced". */
+    if (G.f & G_FLAG_INTERNET_OVERRIDE_PREF_OFFLINE) {
+      *r_info = "Launched with \"--offline-mode\", cannot be changed";
+      return 0;
+    }
+  }
+  return PROP_EDITABLE;
+}
+
 static void rna_userdef_script_directory_name_set(PointerRNA *ptr, const char *value)
 {
   bUserScriptDirectory *script_dir = static_cast<bUserScriptDirectory *>(ptr->data);
@@ -6143,6 +6182,19 @@ static void rna_def_userdef_system(BlenderRNA *brna)
       prop,
       "GPU Backend",
       "GPU backend to use (requires restarting Blender for changes to take effect)");
+
+  /* Network. */
+
+  prop = RNA_def_property(srna, "use_online_access", PROP_BOOLEAN, PROP_NONE);
+  RNA_def_property_boolean_sdna(prop, nullptr, "flag", USER_INTERNET_ALLOW);
+  RNA_def_property_boolean_funcs(prop, nullptr, "rna_userdef_use_online_access_set");
+  RNA_def_property_ui_text(
+      prop,
+      "Allow Online Access",
+      "Allow internet access. Blender may access configured online extension repositories. "
+      "Installed third party add-ons may access the internet for their own functionality");
+  RNA_def_property_editable_func(prop, "rna_userdef_use_online_access_editable");
+  RNA_def_property_update(prop, 0, "rna_userdef_update");
 
   /* Audio */
 
