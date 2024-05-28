@@ -2852,6 +2852,7 @@ class VIEW3D_MT_image_add(Menu):
         # auto detect which mode to use otherwise.
         layout.operator("object.empty_image_add", text="Reference", icon='IMAGE_REFERENCE').background = False
         layout.operator("object.empty_image_add", text="Background", icon='IMAGE_BACKGROUND').background = True
+        layout.operator("image.import_as_mesh_planes", text="Mesh Plane", icon='MESH_PLANE')
 
 
 class VIEW3D_MT_object_relations(Menu):
@@ -3006,9 +3007,9 @@ class VIEW3D_MT_object_clear(Menu):
     def draw(self, _context):
         layout = self.layout
 
-        layout.operator("object.location_clear", text="Location").clear_delta = False
-        layout.operator("object.rotation_clear", text="Rotation").clear_delta = False
-        layout.operator("object.scale_clear", text="Scale").clear_delta = False
+        layout.operator("object.location_clear", text="Location", text_ctxt=i18n_contexts.default).clear_delta = False
+        layout.operator("object.rotation_clear", text="Rotation", text_ctxt=i18n_contexts.default).clear_delta = False
+        layout.operator("object.scale_clear", text="Scale", text_ctxt=i18n_contexts.default).clear_delta = False
 
         layout.separator()
 
@@ -4260,9 +4261,9 @@ class VIEW3D_MT_pose_transform(Menu):
 
         layout.separator()
 
-        layout.operator("pose.loc_clear", text="Location")
-        layout.operator("pose.rot_clear", text="Rotation")
-        layout.operator("pose.scale_clear", text="Scale")
+        layout.operator("pose.loc_clear", text="Location", text_ctxt=i18n_contexts.default)
+        layout.operator("pose.rot_clear", text="Rotation", text_ctxt=i18n_contexts.default)
+        layout.operator("pose.scale_clear", text="Scale", text_ctxt=i18n_contexts.default)
 
         layout.separator()
 
@@ -6158,6 +6159,7 @@ class VIEW3D_MT_edit_curves_control_points(Menu):
     def draw(self, _context):
         layout = self.layout
 
+        layout.operator("curves.extrude_move")
         layout.operator_menu_enum("curves.handle_type_set", "type")
 
 
@@ -6169,6 +6171,18 @@ class VIEW3D_MT_edit_curves_segments(Menu):
 
         layout.operator("curves.subdivide")
         layout.operator("curves.switch_direction")
+
+
+class VIEW3D_MT_edit_curves_context_menu(Menu):
+    bl_label = "Curves"
+
+    def draw(self, _context):
+        layout = self.layout
+
+        layout.operator_context = 'INVOKE_DEFAULT'
+
+        layout.operator("curves.subdivide")
+        layout.operator("curves.extrude_move")
 
 
 class VIEW3D_MT_edit_pointcloud(Menu):
@@ -7106,9 +7120,9 @@ class VIEW3D_PT_gizmo_display(Panel):
         col.active = view.show_gizmo and view.show_gizmo_context
         col.label(text="Object Gizmos")
         col.prop(scene.transform_orientation_slots[1], "type", text="")
-        col.prop(view, "show_gizmo_object_translate", text="Move")
-        col.prop(view, "show_gizmo_object_rotate", text="Rotate")
-        col.prop(view, "show_gizmo_object_scale", text="Scale")
+        col.prop(view, "show_gizmo_object_translate", text="Move", text_ctxt=i18n_contexts.operator_default)
+        col.prop(view, "show_gizmo_object_rotate", text="Rotate", text_ctxt=i18n_contexts.operator_default)
+        col.prop(view, "show_gizmo_object_scale", text="Scale", text_ctxt=i18n_contexts.operator_default)
 
         layout.separator()
 
@@ -7193,6 +7207,8 @@ class VIEW3D_PT_overlay_guides(Panel):
         sub = split.column()
         sub.prop(overlay, "show_text", text="Text Info")
         sub.prop(overlay, "show_stats", text="Statistics")
+        if view.region_3d.view_perspective == 'CAMERA':
+            sub.prop(overlay, "show_camera_guides", text="Camera Guides")
 
         sub = split.column()
         sub.prop(overlay, "show_cursor", text="3D Cursor")
@@ -7859,9 +7875,14 @@ class VIEW3D_PT_snapping(Panel):
 
         col.label(text="Affect")
         row = col.row(align=True)
-        row.prop(tool_settings, "use_snap_translate", text="Move", toggle=True)
-        row.prop(tool_settings, "use_snap_rotate", text="Rotate", toggle=True)
-        row.prop(tool_settings, "use_snap_scale", text="Scale", toggle=True)
+        row.prop(
+            tool_settings,
+            "use_snap_translate",
+            text="Move",
+            text_ctxt=i18n_contexts.operator_default,
+            toggle=True)
+        row.prop(tool_settings, "use_snap_rotate", text="Rotate", text_ctxt=i18n_contexts.operator_default, toggle=True)
+        row.prop(tool_settings, "use_snap_scale", text="Scale", text_ctxt=i18n_contexts.operator_default, toggle=True)
         col.label(text="Rotation Increment")
         row = col.row(align=True)
         row.prop(tool_settings, "snap_angle_increment_3d", text="")
@@ -7954,6 +7975,8 @@ class VIEW3D_PT_gpencil_origin(Panel):
             row = layout.row()
             if context.preferences.experimental.use_grease_pencil_version3:
                 row.prop(tool_settings, "gpencil_surface_offset", text="")
+                row = layout.row()
+                row.prop(tool_settings, "use_gpencil_project_only_selected")
             else:
                 row.prop(gpd, "zdepth_offset", text="")
 
@@ -9324,6 +9347,7 @@ classes = (
     VIEW3D_MT_edit_curves_add,
     VIEW3D_MT_edit_curves_segments,
     VIEW3D_MT_edit_curves_control_points,
+    VIEW3D_MT_edit_curves_context_menu,
     VIEW3D_MT_edit_pointcloud,
     VIEW3D_MT_object_mode_pie,
     VIEW3D_MT_view_pie,

@@ -985,7 +985,7 @@ struct LightData {
   /** Index of the first tile-map. Set to LIGHT_NO_SHADOW if light is not casting shadow. */
   int tilemap_index;
   /* Radius in pixels for shadow filtering. */
-  float pcf_radius;
+  float filter_radius;
 
   /* Shadow Map resolution bias. */
   float lod_bias;
@@ -1485,7 +1485,7 @@ static inline ShadowTileDataPacked shadow_tile_pack(ShadowTileData tile)
 struct ShadowSamplingTile {
   /** Page inside the virtual shadow map atlas. */
   uint3 page;
-  /** LOD pointed to LOD 0 tile page. */
+  /** LOD pointed by LOD 0 tile page. */
   uint lod;
   /** Offset to the texel position to align with the LOD page start. (directional only). */
   uint2 lod_offset;
@@ -1932,12 +1932,12 @@ BLI_STATIC_ASSERT_ALIGN(RayTraceData, 16)
 struct AOData {
   float2 pixel_size;
   float distance;
-  float quality;
+  float lod_factor;
 
-  float thickness;
+  float thickness_near;
+  float thickness_far;
   float angle_bias;
-  float _pad1;
-  float _pad2;
+  float gi_distance;
 };
 BLI_STATIC_ASSERT_ALIGN(AOData, 16)
 

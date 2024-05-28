@@ -619,10 +619,10 @@ static void mywrite_id_begin(WriteData *wd, ID *id)
 
     /* If current next memchunk does not match the ID we are about to write, or is not the _first_
      * one for said ID, try to find the correct memchunk in the mapping using ID's session_uid. */
-    MemFileChunk *curr_memchunk = wd->mem.reference_current_chunk;
-    MemFileChunk *prev_memchunk = curr_memchunk != nullptr ?
-                                      static_cast<MemFileChunk *>(curr_memchunk->prev) :
-                                      nullptr;
+    const MemFileChunk *curr_memchunk = wd->mem.reference_current_chunk;
+    const MemFileChunk *prev_memchunk = curr_memchunk != nullptr ?
+                                            static_cast<MemFileChunk *>(curr_memchunk->prev) :
+                                            nullptr;
     if (curr_memchunk == nullptr || curr_memchunk->id_session_uid != id->session_uid ||
         (prev_memchunk != nullptr &&
          (prev_memchunk->id_session_uid == curr_memchunk->id_session_uid)))
@@ -1348,8 +1348,11 @@ static bool write_file_handle(Main *mainvar,
 
         /* If not writing undo data, properly set directly linked IDs as `LIB_TAG_EXTERN`. */
         if (!wd->use_memfile) {
-          BKE_library_foreach_ID_link(
-              bmain, id, write_id_direct_linked_data_process_cb, nullptr, IDWALK_READONLY);
+          BKE_library_foreach_ID_link(bmain,
+                                      id,
+                                      write_id_direct_linked_data_process_cb,
+                                      nullptr,
+                                      IDWALK_READONLY | IDWALK_INCLUDE_UI);
         }
 
         if (do_override) {

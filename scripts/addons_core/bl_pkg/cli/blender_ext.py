@@ -676,6 +676,23 @@ def remote_url_get(url: str) -> str:
     return url
 
 
+def remote_url_params_strip(url: str) -> str:
+    # Parse the URL to get its scheme, domain, and query parameters.
+    parsed_url = urllib.parse.urlparse(url)
+
+    # Combine the scheme, netloc, path without any other parameters, stripping the URL.
+    new_url = urllib.parse.urlunparse((
+        parsed_url.scheme,
+        parsed_url.netloc,
+        parsed_url.path,
+        None,  # `parsed_url.params,`
+        None,  # `parsed_url.query,`
+        None,  # `parsed_url.fragment,`
+    ))
+
+    return new_url
+
+
 # -----------------------------------------------------------------------------
 # ZipFile Helpers
 
@@ -906,8 +923,6 @@ class PathPatternMatch:
 # URL Downloading
 
 # Originally based on `urllib.request.urlretrieve`.
-
-
 def url_retrieve_to_data_iter(
         url: str,
         *,
@@ -1074,14 +1089,19 @@ def url_retrieve_exception_as_message(
     Provides more user friendly messages when reading from a URL fails.
     """
     # These exceptions may occur when reading from the file-system or a URL.
+    url_strip = remote_url_params_strip(url)
     if isinstance(ex, FileNotFoundError):
-        return "{:s}: file-not-found ({:s}) reading {!r}!".format(prefix, str(ex), url)
+        return "{:s}: file-not-found ({:s}) reading {!r}!".format(prefix, str(ex), url_strip)
     if isinstance(ex, TimeoutError):
-        return "{:s}: timeout ({:s}) reading {!r}!".format(prefix, str(ex), url)
+        return "{:s}: timeout ({:s}) reading {!r}!".format(prefix, str(ex), url_strip)
     if isinstance(ex, urllib.error.URLError):
-        return "{:s}: URL error ({:s}) reading {!r}!".format(prefix, str(ex), url)
+        if isinstance(ex, urllib.error.HTTPError):
+            if ex.code == 403:
+                return "{:s}: HTTP error (403) access token may be incorrect, reading {!r}!".format(prefix, url_strip)
+            return "{:s}: HTTP error ({:s}) reading {!r}!".format(prefix, str(ex), url_strip)
+        return "{:s}: URL error ({:s}) reading {!r}!".format(prefix, str(ex), url_strip)
 
-    return "{:s}: unexpected error ({:s}) reading {!r}!".format(prefix, str(ex), url)
+    return "{:s}: unexpected error ({:s}) reading {!r}!".format(prefix, str(ex), url_strip)
 
 
 def pkg_idname_is_valid_or_error(pkg_idname: str) -> Optional[str]:
@@ -1498,7 +1518,7 @@ def pkg_manifest_is_valid_or_error_all(
 # Standalone Utilities
 
 
-def url_request_headers_create(*, accept_json: bool, user_agent: str) -> Dict[str, str]:
+def url_request_headers_create(*, accept_json: bool, user_agent: str, access_token: str) -> Dict[str, str]:
     headers = {}
     if accept_json:
         # Default for JSON requests this allows top-level URL's to be used.
@@ -1507,6 +1527,10 @@ def url_request_headers_create(*, accept_json: bool, user_agent: str) -> Dict[st
     if user_agent:
         # Typically: `Blender/4.2.0 (Linux x84_64; cycle=alpha)`.
         headers["User-Agent"] = user_agent
+
+    if access_token:
+        headers["Authorization"] = "Bearer {:s}".format(access_token)
+
     return headers
 
 
@@ -1624,6 +1648,7 @@ def repo_sync_from_remote(
         remote_url: str,
         local_dir: str,
         online_user_agent: str,
+        access_token: str,
         timeout_in_seconds: float,
         extension_override: str,
 ) -> bool:
@@ -1659,7 +1684,11 @@ def repo_sync_from_remote(
             for (read, size) in url_retrieve_to_filepath_iter_or_filesystem(
                     remote_json_url,
                     local_json_path_temp,
-                    headers=url_request_headers_create(accept_json=True, user_agent=online_user_agent),
+                    headers=url_request_headers_create(
+                        accept_json=True,
+                        user_agent=online_user_agent,
+                        access_token=access_token,
+                    ),
                     chunk_size=CHUNK_SIZE_DEFAULT,
                     timeout_in_seconds=timeout_in_seconds,
             ):
@@ -1937,6 +1966,19 @@ def generic_arg_online_user_agent(subparse: argparse.ArgumentParser) -> None:
     )
 
 
+def generic_arg_access_token(subparse: argparse.ArgumentParser) -> None:
+    subparse.add_argument(
+        "--access-token",
+        dest="access_token",
+        type=str,
+        help=(
+            "Access token for remote repositories which require authorized access."
+        ),
+        default="",
+        required=False,
+    )
+
+
 def generic_arg_timeout(subparse: argparse.ArgumentParser) -> None:
     subparse.add_argument(
         "--timeout",
@@ -2077,6 +2119,7 @@ class subcmd_client:
             msg_fn: MessageFn,
             remote_url: str,
             online_user_agent: str,
+            access_token: str,
             timeout_in_seconds: float,
     ) -> bool:
         remote_json_url = remote_url_get(remote_url)
@@ -2086,7 +2129,11 @@ class subcmd_client:
             result = io.BytesIO()
             for block in url_retrieve_to_data_iter_or_filesystem(
                     remote_json_url,
-                    headers=url_request_headers_create(accept_json=True, user_agent=online_user_agent),
+                    headers=url_request_headers_create(
+                        accept_json=True,
+                        user_agent=online_user_agent,
+                        access_token=access_token,
+                    ),
                     chunk_size=CHUNK_SIZE_DEFAULT,
                     timeout_in_seconds=timeout_in_seconds,
             ):
@@ -2122,6 +2169,7 @@ class subcmd_client:
             remote_url: str,
             local_dir: str,
             online_user_agent: str,
+            access_token: str,
             timeout_in_seconds: float,
             force_exit_ok: bool,
             extension_override: str,
@@ -2134,6 +2182,7 @@ class subcmd_client:
             remote_url=remote_url,
             local_dir=local_dir,
             online_user_agent=online_user_agent,
+            access_token=access_token,
             timeout_in_seconds=timeout_in_seconds,
             extension_override=extension_override,
         )
@@ -2281,6 +2330,7 @@ class subcmd_client:
             local_cache: bool,
             packages: Sequence[str],
             online_user_agent: str,
+            access_token: str,
             timeout_in_seconds: float,
     ) -> bool:
         # Extract...
@@ -2295,6 +2345,9 @@ class subcmd_client:
 
         # Ensure a private directory so a local cache can be created.
         local_cache_dir = repo_local_private_dir_ensure_with_subdir(local_dir=local_dir, subdir="cache")
+
+        # Needed so relative paths can be properly calculated.
+        remote_url_strip = remote_url_params_strip(remote_url)
 
         # TODO: this could be optimized to only lookup known ID's.
         json_data_pkg_info_map: Dict[str, Dict[str, Any]] = {
@@ -2344,10 +2397,10 @@ class subcmd_client:
 
                 # Remote path.
                 if pkg_archive_url.startswith("./"):
-                    if remote_url_has_filename_suffix(remote_url):
-                        filepath_remote_archive = remote_url.rpartition("/")[0] + pkg_archive_url[1:]
+                    if remote_url_has_filename_suffix(remote_url_strip):
+                        filepath_remote_archive = remote_url_strip.rpartition("/")[0] + pkg_archive_url[1:]
                     else:
-                        filepath_remote_archive = remote_url.rstrip("/") + pkg_archive_url[1:]
+                        filepath_remote_archive = remote_url_strip.rstrip("/") + pkg_archive_url[1:]
                 else:
                     filepath_remote_archive = pkg_archive_url
 
@@ -2375,7 +2428,11 @@ class subcmd_client:
                         with open(filepath_local_cache_archive, "wb") as fh_cache:
                             for block in url_retrieve_to_data_iter_or_filesystem(
                                     filepath_remote_archive,
-                                    headers=url_request_headers_create(accept_json=False, user_agent=online_user_agent),
+                                    headers=url_request_headers_create(
+                                        accept_json=False,
+                                        user_agent=online_user_agent,
+                                        access_token=access_token,
+                                    ),
                                     chunk_size=CHUNK_SIZE_DEFAULT,
                                     timeout_in_seconds=timeout_in_seconds,
                             ):
@@ -2937,6 +2994,7 @@ def argparse_create_client_list(subparsers: "argparse._SubParsersAction[argparse
     generic_arg_remote_url(subparse)
     generic_arg_local_dir(subparse)
     generic_arg_online_user_agent(subparse)
+    generic_arg_access_token(subparse)
 
     generic_arg_output_type(subparse)
     generic_arg_timeout(subparse)
@@ -2946,6 +3004,7 @@ def argparse_create_client_list(subparsers: "argparse._SubParsersAction[argparse
             msg_fn_from_args(args),
             args.remote_url,
             online_user_agent=args.online_user_agent,
+            access_token=args.access_token,
             timeout_in_seconds=args.timeout,
         ),
     )
@@ -2965,6 +3024,7 @@ def argparse_create_client_sync(subparsers: "argparse._SubParsersAction[argparse
     generic_arg_remote_url(subparse)
     generic_arg_local_dir(subparse)
     generic_arg_online_user_agent(subparse)
+    generic_arg_access_token(subparse)
 
     generic_arg_output_type(subparse)
     generic_arg_timeout(subparse)
@@ -2977,6 +3037,7 @@ def argparse_create_client_sync(subparsers: "argparse._SubParsersAction[argparse
             remote_url=args.remote_url,
             local_dir=args.local_dir,
             online_user_agent=args.online_user_agent,
+            access_token=args.access_token,
             timeout_in_seconds=args.timeout,
             force_exit_ok=args.force_exit_ok,
             extension_override=args.extension_override,
@@ -3018,6 +3079,7 @@ def argparse_create_client_install(subparsers: "argparse._SubParsersAction[argpa
     generic_arg_local_dir(subparse)
     generic_arg_local_cache(subparse)
     generic_arg_online_user_agent(subparse)
+    generic_arg_access_token(subparse)
 
     generic_arg_output_type(subparse)
     generic_arg_timeout(subparse)
@@ -3030,6 +3092,7 @@ def argparse_create_client_install(subparsers: "argparse._SubParsersAction[argpa
             local_cache=args.local_cache,
             packages=args.packages.split(","),
             online_user_agent=args.online_user_agent,
+            access_token=args.access_token,
             timeout_in_seconds=args.timeout,
         ),
     )

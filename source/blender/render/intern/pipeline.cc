@@ -63,7 +63,6 @@
 
 #include "NOD_composite.hh"
 
-#include "COM_profile.hh"
 #include "COM_render_context.hh"
 
 #include "DEG_depsgraph.hh"
@@ -227,6 +226,13 @@ static void stats_background(void * /*arg*/, RenderStats *rs)
   fflush(stdout);
 
   BLI_mutex_unlock(&mutex);
+}
+
+void RE_ReferenceRenderResult(RenderResult *rr)
+{
+  /* There is no need to lock as the user-counted render results are protected by mutex at the
+   * higher call stack level. */
+  ++rr->user_counter;
 }
 
 void RE_FreeRenderResult(RenderResult *rr)
@@ -1299,7 +1305,6 @@ static void do_render_compositor(Render *re)
         }
 
         blender::realtime_compositor::RenderContext compositor_render_context;
-        blender::compositor::ProfilerData profiler_data;
         LISTBASE_FOREACH (RenderView *, rv, &re->result->views) {
           ntreeCompositExecTree(re,
                                 re->pipeline_scene_eval,
@@ -1307,7 +1312,7 @@ static void do_render_compositor(Render *re)
                                 &re->r,
                                 rv->name,
                                 &compositor_render_context,
-                                profiler_data);
+                                nullptr);
         }
         compositor_render_context.save_file_outputs(re->pipeline_scene_eval);
 
