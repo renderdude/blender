@@ -372,6 +372,66 @@ static const int2 offset_by_direction[num_directions] = {
     {-1, 0},
 };
 
+static void dilate(ImageBufferAccessor &buffer, int iterations = 1)
+{
+  const MutableSpan<ColorGeometry4b> pixels = buffer.pixels();
+
+  blender::Stack<int> active_pixels;
+  for ([[maybe_unused]] const int iter : IndexRange(iterations)) {
+    for (const int i : pixels.index_range()) {
+      /* Ignore already filled pixels */
+      if (get_flag(pixels[i], ColorFlag::Fill)) {
+        continue;
+      }
+      const int2 coord = buffer.coord_from_index(i);
+
+      /* Add to stack if any neighbor is filled. */
+      for (const int2 offset : offset_by_direction) {
+        if (buffer.is_valid_coord(coord + offset) &&
+            get_flag(buffer.pixel_from_coord(coord + offset), ColorFlag::Fill))
+        {
+          active_pixels.push(i);
+        }
+      }
+    }
+
+    while (!active_pixels.is_empty()) {
+      const int index = active_pixels.pop();
+      set_flag(buffer.pixels()[index], ColorFlag::Fill, true);
+    }
+  }
+}
+
+static void erode(ImageBufferAccessor &buffer, int iterations = 1)
+{
+  const MutableSpan<ColorGeometry4b> pixels = buffer.pixels();
+
+  blender::Stack<int> active_pixels;
+  for ([[maybe_unused]] const int iter : IndexRange(iterations)) {
+    for (const int i : pixels.index_range()) {
+      /* Ignore empty pixels */
+      if (!get_flag(pixels[i], ColorFlag::Fill)) {
+        continue;
+      }
+      const int2 coord = buffer.coord_from_index(i);
+
+      /* Add to stack if any neighbor is empty. */
+      for (const int2 offset : offset_by_direction) {
+        if (buffer.is_valid_coord(coord + offset) &&
+            !get_flag(buffer.pixel_from_coord(coord + offset), ColorFlag::Fill))
+        {
+          active_pixels.push(i);
+        }
+      }
+    }
+
+    while (!active_pixels.is_empty()) {
+      const int index = active_pixels.pop();
+      set_flag(buffer.pixels()[index], ColorFlag::Fill, false);
+    }
+  }
+}
+
 /* Wrap to valid direction, must be less than 3 * num_directions. */
 static int wrap_dir_3n(const int dir)
 {
@@ -390,7 +450,7 @@ struct FillBoundary {
  * This is a Blender customized version of the general algorithm described
  * in https://en.wikipedia.org/wiki/Moore_neighborhood
  */
-static FillBoundary build_fill_boundary(const ImageBufferAccessor &buffer)
+static FillBoundary build_fill_boundary(const ImageBufferAccessor &buffer, bool include_holes)
 {
   using BoundarySection = std::list<int>;
   using BoundaryStartMap = Map<int, BoundarySection>;
@@ -415,6 +475,11 @@ static FillBoundary build_fill_boundary(const ImageBufferAccessor &buffer)
         if (!filled_left && filled_right && !border_right) {
           /* Empty index list indicates uninitialized section. */
           starts.add(index_right, {});
+          /* First filled pixel on the line is in the outer boundary.
+           * Pixels further to the right are part of holes and can be disregarded. */
+          if (!include_holes) {
+            break;
+          }
         }
       }
     }
@@ -429,10 +494,10 @@ static FillBoundary build_fill_boundary(const ImageBufferAccessor &buffer)
   /* Find the next filled pixel in clockwise direction from the current. */
   auto find_next_neighbor = [&](NeighborIterator &iter) -> bool {
     const int2 iter_coord = buffer.coord_from_index(iter.index);
-    for (const int i : IndexRange(num_directions).drop_front(1)) {
+    for (const int i : IndexRange(num_directions)) {
       /* Invert direction (add 4) and start at next direction (add 1..n).
        * This can not be greater than 3*num_directions-1, wrap accordingly. */
-      const int neighbor_dir = wrap_dir_3n(iter.direction + 4 + i);
+      const int neighbor_dir = wrap_dir_3n(iter.direction + 5 + i);
       const int2 neighbor_coord = iter_coord + offset_by_direction[neighbor_dir];
       if (!buffer.is_valid_coord(neighbor_coord)) {
         continue;
@@ -657,7 +722,18 @@ static bke::CurvesGeometry process_image(Image &ima,
     }
   }
 
-  const FillBoundary boundary = build_fill_boundary(buffer);
+  const int dilate_pixels = brush.gpencil_settings->dilate_pixels;
+  if (dilate_pixels > 0) {
+    dilate(buffer, dilate_pixels);
+  }
+  else if (dilate_pixels < 0) {
+    erode(buffer, -dilate_pixels);
+  }
+
+  /* In regular mode create only the outline of the filled area.
+   * In inverted mode create a boundary for every filled area. */
+  const bool fill_holes = invert;
+  const FillBoundary boundary = build_fill_boundary(buffer, fill_holes);
 
   return boundary_to_curves(scene,
                             view_context,

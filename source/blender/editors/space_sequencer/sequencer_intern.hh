@@ -130,8 +130,10 @@ void draw_seq_strip_thumbnail(View2D *v2d,
                               Sequence *seq,
                               float y1,
                               float y2,
+                              float y_top,
                               float pixelx,
-                              float pixely);
+                              float pixely,
+                              float round_radius);
 
 /* sequencer_draw_channels.c */
 
@@ -233,6 +235,7 @@ void SEQUENCER_OT_scene_frame_range_update(wmOperatorType *ot);
 
 void SEQUENCER_OT_select_all(wmOperatorType *ot);
 void SEQUENCER_OT_select(wmOperatorType *ot);
+void SEQUENCER_OT_select_handle(wmOperatorType *ot);
 void SEQUENCER_OT_select_side_of_frame(wmOperatorType *ot);
 void SEQUENCER_OT_select_more(wmOperatorType *ot);
 void SEQUENCER_OT_select_less(wmOperatorType *ot);
@@ -329,6 +332,7 @@ SeqRetimingKey *retiming_mousover_key_get(const bContext *C, const int mval[2], 
 int left_fake_key_frame_get(const bContext *C, const Sequence *seq);
 int right_fake_key_frame_get(const bContext *C, const Sequence *seq);
 bool retiming_keys_are_visible(const SpaceSeq *sseq);
+rctf seq_retiming_keys_box_get(const Scene *scene, const View2D *v2d, const Sequence *seq);
 
 /* `sequencer_timeline_draw.cc` */
 blender::Vector<Sequence *> sequencer_visible_strips_get(const bContext *C);

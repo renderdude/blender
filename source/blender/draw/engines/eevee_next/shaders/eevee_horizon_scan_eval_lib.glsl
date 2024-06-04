@@ -65,7 +65,7 @@ struct HorizonScanResult {
  */
 HorizonScanResult horizon_scan_eval(vec3 vP,
                                     vec3 vN,
-                                    vec2 noise,
+                                    vec3 noise,
                                     vec2 pixel_size,
                                     float search_distance,
                                     float thickness_near,
@@ -112,6 +112,8 @@ HorizonScanResult horizon_scan_eval(vec3 vP,
 
     horizon_scan_projected_normal_to_plane_angle_and_length(vN, vV, vT, vB, vN_length, vN_angle);
 
+    vN_angle += (noise.z - 0.5) * (M_PI / 32.0) * angle_bias;
+
     SphericalHarmonicL1 sh_slice = spherical_harmonics_L1_new();
     float weight_slice;
 
@@ -140,7 +142,7 @@ HorizonScanResult horizon_scan_eval(vec3 vP,
           time += 1.0;
         }
 
-        float lod = 1.0 + float(j >> 2) * uniform_buf.ao.lod_factor;
+        float lod = 1.0 + float(j) * uniform_buf.ao.lod_factor;
 
         vec2 sample_uv = ssray.origin.xy + ssray.direction.xy * time;
         float sample_depth = textureLod(hiz_tx, sample_uv * uniform_buf.hiz.uv_scale, lod).r;

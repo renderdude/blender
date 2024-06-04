@@ -23,7 +23,7 @@
 
 #include "BKE_brush.hh"
 #include "BKE_bvhutils.hh"
-#include "BKE_ccg.h"
+#include "BKE_ccg.hh"
 #include "BKE_collision.h"
 #include "BKE_colortools.hh"
 #include "BKE_context.hh"
@@ -314,7 +314,8 @@ static void do_cloth_brush_build_constraints_task(Object &ob,
 
   PBVHVertexIter vd;
 
-  const bool pin_simulation_boundary = ss.cache != nullptr && brush != nullptr &&
+  const bool is_brush_has_stroke_cache = ss.cache != nullptr && brush != nullptr;
+  const bool pin_simulation_boundary = is_brush_has_stroke_cache &&
                                        brush->flag2 & BRUSH_CLOTH_PIN_SIMULATION_BOUNDARY &&
                                        brush->cloth_simulation_area_type !=
                                            BRUSH_CLOTH_SIMULATION_AREA_DYNAMIC;
@@ -323,8 +324,7 @@ static void do_cloth_brush_build_constraints_task(Object &ob,
 
   /* Brush can be nullptr in tools that use the solver without relying of constraints with
    * deformation positions. */
-  const bool cloth_is_deform_brush = ss.cache != nullptr && brush != nullptr &&
-                                     is_cloth_deform_brush(*brush);
+  const bool cloth_is_deform_brush = is_brush_has_stroke_cache && is_cloth_deform_brush(*brush);
 
   const bool use_falloff_plane = brush->cloth_force_falloff_type ==
                                  BRUSH_CLOTH_FORCE_FALLOFF_PLANE;
@@ -375,7 +375,7 @@ static void do_cloth_brush_build_constraints_task(Object &ob,
       }
     }
 
-    if (brush && brush->sculpt_tool == SCULPT_TOOL_CLOTH) {
+    if (is_brush_has_stroke_cache && brush->sculpt_tool == SCULPT_TOOL_CLOTH) {
       /* The cloth brush works by applying forces in most of its modes, but some of them require
        * deformation coordinates to make the simulation stable. */
       if (brush->cloth_deform_type == BRUSH_CLOTH_DEFORM_GRAB) {
@@ -1479,7 +1479,7 @@ static int sculpt_cloth_filter_modal(bContext *C, wmOperator *op, const wmEvent 
   if (event->type == LEFTMOUSE && event->val == KM_RELEASE) {
     filter::cache_free(ss);
     undo::push_end(ob);
-    SCULPT_flush_update_done(C, ob, SCULPT_UPDATE_COORDS);
+    flush_update_done(C, ob, UpdateType::Position);
     return OPERATOR_FINISHED;
   }
 
@@ -1518,7 +1518,7 @@ static int sculpt_cloth_filter_modal(bContext *C, wmOperator *op, const wmEvent 
   if (ss.deform_modifiers_active || ss.shapekey_active) {
     SCULPT_flush_stroke_deform(sd, ob, true);
   }
-  SCULPT_flush_update_step(C, SCULPT_UPDATE_COORDS);
+  flush_update_step(C, UpdateType::Position);
   return OPERATOR_RUNNING_MODAL;
 }
 

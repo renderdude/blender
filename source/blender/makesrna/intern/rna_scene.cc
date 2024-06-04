@@ -6048,7 +6048,8 @@ static void rna_def_scene_render_view(BlenderRNA *brna)
   RNA_def_property_boolean_negative_sdna(prop, nullptr, "viewflag", SCE_VIEW_DISABLE);
   RNA_def_property_clear_flag(prop, PROP_ANIMATABLE);
   RNA_def_property_ui_text(prop, "Enabled", "Disable or enable the render view");
-  RNA_def_property_update(prop, NC_SCENE | ND_RENDER_OPTIONS, nullptr);
+  RNA_def_property_update(
+      prop, NC_SCENE | ND_RENDER_OPTIONS | NC_NODE | ND_DISPLAY, "rna_Scene_compositor_update");
 }
 
 static void rna_def_render_views(BlenderRNA *brna, PropertyRNA *cprop)
@@ -7995,15 +7996,6 @@ static void rna_def_scene_eevee(BlenderRNA *brna)
         prop, "Cubemap Display Size", "Size of the cubemap spheres to debug captured light");
     RNA_def_property_update(prop, NC_SCENE | ND_RENDER_OPTIONS, nullptr);
   }
-
-  prop = RNA_def_property(srna, "gi_auto_bake", PROP_BOOLEAN, PROP_NONE);
-  RNA_def_property_boolean_sdna(prop, nullptr, "flag", SCE_EEVEE_GI_AUTOBAKE);
-  RNA_def_property_ui_text(prop, "Auto Bake", "Auto bake indirect lighting when editing probes");
-
-  prop = RNA_def_property(srna, "gi_cache_info", PROP_STRING, PROP_NONE);
-  RNA_def_property_string_sdna(prop, nullptr, "light_cache_info");
-  RNA_def_property_clear_flag(prop, PROP_EDITABLE);
-  RNA_def_property_ui_text(prop, "Light Cache Info", "Info on current cache status");
 
   prop = RNA_def_property(srna, "gi_irradiance_pool_size", PROP_ENUM, PROP_NONE);
   RNA_def_property_enum_items(prop, eevee_pool_size_items);

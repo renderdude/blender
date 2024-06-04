@@ -918,17 +918,6 @@ class RENDER_PT_eevee_indirect_lighting(RenderButtonsPanel, Panel):
         scene = context.scene
         props = scene.eevee
 
-        col = layout.column()
-        col.operator("scene.light_cache_bake", text="Bake Indirect Lighting", icon='RENDER_STILL')
-        col.operator("scene.light_cache_bake", text="Bake Cubemap Only", icon='LIGHTPROBE_SPHERE').subset = 'CUBEMAPS'
-        col.operator("scene.light_cache_free", text="Delete Lighting Cache")
-
-        cache_info = scene.eevee.gi_cache_info
-        if cache_info:
-            col.label(text=rpt_(cache_info), translate=False)
-
-        col.prop(props, "gi_auto_bake")
-
         col.prop(props, "gi_diffuse_bounces")
         col.prop(props, "gi_cubemap_resolution")
         col.prop(props, "gi_visibility_resolution", text="Diffuse Occlusion")
@@ -1358,8 +1347,8 @@ classes = (
     RENDER_PT_eevee_next_raytracing_presets,
     RENDER_PT_eevee_next_raytracing,
     RENDER_PT_eevee_next_screen_trace,
-    RENDER_PT_eevee_next_gi_approximation,
     RENDER_PT_eevee_next_denoise,
+    RENDER_PT_eevee_next_gi_approximation,
     RENDER_PT_eevee_motion_blur,
     RENDER_PT_eevee_volumetric,
     RENDER_PT_eevee_volumetric_lighting,

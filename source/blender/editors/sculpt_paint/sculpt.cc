@@ -40,7 +40,7 @@
 
 #include "BKE_attribute.hh"
 #include "BKE_brush.hh"
-#include "BKE_ccg.h"
+#include "BKE_ccg.hh"
 #include "BKE_colortools.hh"
 #include "BKE_context.hh"
 #include "BKE_customdata.hh"
@@ -191,7 +191,7 @@ const float *SCULPT_vertex_co_get(const SculptSession &ss, PBVHVertRef vertex)
       const int grid_index = vertex.i / key->grid_area;
       const int index_in_grid = vertex.i - grid_index * key->grid_area;
       CCGElem *elem = ss.subdiv_ccg->grids[grid_index];
-      return CCG_elem_co(key, CCG_elem_offset(key, elem, index_in_grid));
+      return CCG_elem_co(*key, CCG_elem_offset(*key, elem, index_in_grid));
     }
   }
   return nullptr;
@@ -246,7 +246,7 @@ const blender::float3 SCULPT_vertex_normal_get(const SculptSession &ss, PBVHVert
       const int grid_index = vertex.i / key->grid_area;
       const int index_in_grid = vertex.i - grid_index * key->grid_area;
       CCGElem *elem = ss.subdiv_ccg->grids[grid_index];
-      return CCG_elem_no(key, CCG_elem_offset(key, elem, index_in_grid));
+      return CCG_elem_no(*key, CCG_elem_offset(*key, elem, index_in_grid));
     }
   }
   BLI_assert_unreachable();
@@ -321,7 +321,7 @@ float SCULPT_mask_get_at_grids_vert_index(const SubdivCCG &subdiv_ccg,
   const int grid_index = vert_index / key.grid_area;
   const int index_in_grid = vert_index - grid_index * key.grid_area;
   CCGElem *elem = subdiv_ccg.grids[grid_index];
-  return *CCG_elem_offset_mask(&key, elem, index_in_grid);
+  return CCG_elem_offset_mask(key, elem, index_in_grid);
 }
 
 PBVHVertRef SCULPT_active_vertex_get(const SculptSession &ss)
@@ -661,39 +661,12 @@ static void sculpt_vertex_neighbor_add(SculptVertexNeighborIter *iter,
                                        PBVHVertRef neighbor,
                                        int neighbor_index)
 {
-  for (int i = 0; i < iter->size; i++) {
-    if (iter->neighbors[i].i == neighbor.i) {
-      return;
-    }
+  if (iter->neighbors.contains(neighbor)) {
+    return;
   }
 
-  if (iter->size >= iter->capacity) {
-    iter->capacity += SCULPT_VERTEX_NEIGHBOR_FIXED_CAPACITY;
-
-    if (iter->neighbors == iter->neighbors_fixed) {
-      iter->neighbors = static_cast<PBVHVertRef *>(
-          MEM_mallocN(iter->capacity * sizeof(PBVHVertRef), "neighbor array"));
-      memcpy(iter->neighbors, iter->neighbors_fixed, sizeof(PBVHVertRef) * iter->size);
-    }
-    else {
-      iter->neighbors = static_cast<PBVHVertRef *>(MEM_reallocN_id(
-          iter->neighbors, iter->capacity * sizeof(PBVHVertRef), "neighbor array"));
-    }
-
-    if (iter->neighbor_indices == iter->neighbor_indices_fixed) {
-      iter->neighbor_indices = static_cast<int *>(
-          MEM_mallocN(iter->capacity * sizeof(int), "neighbor array"));
-      memcpy(iter->neighbor_indices, iter->neighbor_indices_fixed, sizeof(int) * iter->size);
-    }
-    else {
-      iter->neighbor_indices = static_cast<int *>(
-          MEM_reallocN_id(iter->neighbor_indices, iter->capacity * sizeof(int), "neighbor array"));
-    }
-  }
-
-  iter->neighbors[iter->size] = neighbor;
-  iter->neighbor_indices[iter->size] = neighbor_index;
-  iter->size++;
+  iter->neighbors.append(neighbor);
+  iter->neighbor_indices.append(neighbor_index);
 }
 
 static void sculpt_vertex_neighbors_get_bmesh(PBVHVertRef vertex, SculptVertexNeighborIter *iter)
@@ -701,11 +674,9 @@ static void sculpt_vertex_neighbors_get_bmesh(PBVHVertRef vertex, SculptVertexNe
   BMVert *v = (BMVert *)vertex.i;
   BMIter liter;
   BMLoop *l;
-  iter->size = 0;
   iter->num_duplicates = 0;
-  iter->capacity = SCULPT_VERTEX_NEIGHBOR_FIXED_CAPACITY;
-  iter->neighbors = iter->neighbors_fixed;
-  iter->neighbor_indices = iter->neighbor_indices_fixed;
+  iter->neighbors.clear();
+  iter->neighbor_indices.clear();
 
   BM_ITER_ELEM (l, &liter, v, BM_LOOPS_OF_VERT) {
     const BMVert *adj_v[2] = {l->prev->v, l->next->v};
@@ -719,15 +690,27 @@ static void sculpt_vertex_neighbors_get_bmesh(PBVHVertRef vertex, SculptVertexNe
   }
 }
 
+Span<BMVert *> vert_neighbors_get_bmesh(BMVert &vert, Vector<BMVert *, 64> &neighbors)
+{
+  BMIter liter;
+  BMLoop *l;
+  BM_ITER_ELEM (l, &liter, &vert, BM_LOOPS_OF_VERT) {
+    for (BMVert *other_vert : {l->prev->v, l->next->v}) {
+      if (other_vert != &vert) {
+        neighbors.append(other_vert);
+      }
+    }
+  }
+  return neighbors;
+}
+
 static void sculpt_vertex_neighbors_get_faces(const SculptSession &ss,
                                               PBVHVertRef vertex,
                                               SculptVertexNeighborIter *iter)
 {
-  iter->size = 0;
   iter->num_duplicates = 0;
-  iter->capacity = SCULPT_VERTEX_NEIGHBOR_FIXED_CAPACITY;
-  iter->neighbors = iter->neighbors_fixed;
-  iter->neighbor_indices = iter->neighbor_indices_fixed;
+  iter->neighbors.clear();
+  iter->neighbor_indices.clear();
 
   for (const int face_i : ss.vert_to_face_map[vertex.i]) {
     if (ss.hide_poly && ss.hide_poly[face_i]) {
@@ -774,11 +757,9 @@ static void sculpt_vertex_neighbors_get_grids(const SculptSession &ss,
   SubdivCCGNeighbors neighbors;
   BKE_subdiv_ccg_neighbor_coords_get(*ss.subdiv_ccg, coord, include_duplicates, neighbors);
 
-  iter->size = 0;
   iter->num_duplicates = neighbors.num_duplicates;
-  iter->capacity = SCULPT_VERTEX_NEIGHBOR_FIXED_CAPACITY;
-  iter->neighbors = iter->neighbors_fixed;
-  iter->neighbor_indices = iter->neighbor_indices_fixed;
+  iter->neighbors.clear();
+  iter->neighbor_indices.clear();
 
   for (const int i : neighbors.coords.index_range()) {
     int v = neighbors.coords[i].grid_index * key->grid_area +
@@ -1345,7 +1326,7 @@ static void restore_mask(Object &object, const Span<PBVHNode *> nodes)
               CCGElem *elem = grids[grid];
               for (const int i : IndexRange(key.grid_area)) {
                 if (grid_hidden.is_empty() || !grid_hidden[grid][i]) {
-                  *CCG_elem_offset_mask(&key, elem, i) = unode->mask[index];
+                  CCG_elem_offset_mask(key, elem, i) = unode->mask[index];
                 }
                 index++;
               }
@@ -1471,7 +1452,7 @@ static void restore_position(Object &object, const Span<PBVHNode *> nodes)
               CCGElem *elem = grids[grid];
               for (const int i : IndexRange(key.grid_area)) {
                 if (grid_hidden.is_empty() || !grid_hidden[grid][i]) {
-                  copy_v3_v3(CCG_elem_offset_co(&key, elem, i), unode->position[index]);
+                  CCG_elem_offset_co(key, elem, i) = unode->position[index];
                 }
                 index++;
               }
@@ -4173,12 +4154,6 @@ void SCULPT_cache_free(blender::ed::sculpt_paint::StrokeCache *cache)
   MEM_SAFE_FREE(cache->layer_displacement_factor);
   MEM_SAFE_FREE(cache->detail_directions);
 
-  for (int i = 0; i < PAINT_SYMM_AREAS; i++) {
-    if (cache->boundaries[i]) {
-      boundary::data_free(cache->boundaries[i]);
-    }
-  }
-
   if (cache->cloth_sim) {
     cloth::simulation_free(cache->cloth_sim);
   }
@@ -5306,9 +5281,10 @@ static void sculpt_restore_mesh(const Sculpt &sd, Object &ob)
   }
 }
 
-void SCULPT_flush_update_step(bContext *C, SculptUpdateType update_flags)
+namespace blender::ed::sculpt_paint {
+
+void flush_update_step(bContext *C, UpdateType update_type)
 {
-  using namespace blender;
   Depsgraph &depsgraph = *CTX_data_depsgraph_pointer(C);
   Object &ob = *CTX_data_active_object(C);
   SculptSession &ss = *ob.sculpt;
@@ -5328,9 +5304,9 @@ void SCULPT_flush_update_step(bContext *C, SculptUpdateType update_flags)
     multires_mark_as_modified(&depsgraph, &ob, MULTIRES_COORDS_MODIFIED);
   }
 
-  if ((update_flags & SCULPT_UPDATE_IMAGE) != 0) {
+  if ((update_type == UpdateType::Image) != 0) {
     ED_region_tag_redraw(&region);
-    if (update_flags == SCULPT_UPDATE_IMAGE) {
+    if (update_type == UpdateType::Image) {
       /* Early exit when only need to update the images. We don't want to tag any geometry updates
        * that would rebuilt the PBVH. */
       return;
@@ -5352,7 +5328,7 @@ void SCULPT_flush_update_step(bContext *C, SculptUpdateType update_flags)
      * only the part of the 3D viewport where changes happened. */
     rcti r;
 
-    if (update_flags & SCULPT_UPDATE_COORDS) {
+    if (update_type == UpdateType::Position) {
       bke::pbvh::update_bounds(*ss.pbvh, PBVH_UpdateBB);
     }
 
@@ -5374,7 +5350,7 @@ void SCULPT_flush_update_step(bContext *C, SculptUpdateType update_flags)
     }
   }
 
-  if (update_flags & SCULPT_UPDATE_COORDS && !ss.shapekey_active) {
+  if (update_type == UpdateType::Position && !ss.shapekey_active) {
     if (BKE_pbvh_type(*ss.pbvh) == PBVH_FACES) {
       /* Updating mesh positions without marking caches dirty is generally not good, but since
        * sculpt mode has special requirements and is expected to have sole ownership of the mesh it
@@ -5403,9 +5379,8 @@ void SCULPT_flush_update_step(bContext *C, SculptUpdateType update_flags)
   }
 }
 
-void SCULPT_flush_update_done(const bContext *C, Object &ob, SculptUpdateType update_flags)
+void flush_update_done(const bContext *C, Object &ob, UpdateType update_type)
 {
-  using namespace blender;
   /* After we are done drawing the stroke, check if we need to do a more
    * expensive depsgraph tag to update geometry. */
   wmWindowManager *wm = CTX_wm_manager(C);
@@ -5443,7 +5418,7 @@ void SCULPT_flush_update_done(const bContext *C, Object &ob, SculptUpdateType up
       }
     }
 
-    if (update_flags & SCULPT_UPDATE_IMAGE) {
+    if (update_type == UpdateType::Image) {
       LISTBASE_FOREACH (ScrArea *, area, &screen->areabase) {
         SpaceLink *sl = static_cast<SpaceLink *>(area->spacedata.first);
         if (sl->spacetype != SPACE_IMAGE) {
@@ -5454,20 +5429,20 @@ void SCULPT_flush_update_done(const bContext *C, Object &ob, SculptUpdateType up
     }
   }
 
-  if (update_flags & SCULPT_UPDATE_COORDS) {
+  if (update_type == UpdateType::Position) {
     bke::pbvh::update_bounds(*ss.pbvh, PBVH_UpdateOriginalBB);
 
     /* Coordinates were modified, so fake neighbors are not longer valid. */
     SCULPT_fake_neighbors_free(ob);
   }
 
-  if (update_flags & SCULPT_UPDATE_MASK) {
+  if (update_type == UpdateType::Mask) {
     bke::pbvh::update_mask(*ss.pbvh);
   }
 
   BKE_sculpt_attributes_destroy_temporary_stroke(&ob);
 
-  if (update_flags & SCULPT_UPDATE_COORDS) {
+  if (update_type == UpdateType::Position) {
     if (BKE_pbvh_type(*ss.pbvh) == PBVH_BMESH) {
       BKE_pbvh_bmesh_after_stroke(*ss.pbvh);
     }
@@ -5484,6 +5459,8 @@ void SCULPT_flush_update_done(const bContext *C, Object &ob, SculptUpdateType up
     DEG_id_tag_update(&ob.id, ID_RECALC_GEOMETRY);
   }
 }
+
+}  // namespace blender::ed::sculpt_paint
 
 /* Returns whether the mouse/stylus is over the mesh (1)
  * or over the background (0). */
@@ -5658,18 +5635,18 @@ static void sculpt_stroke_update_step(bContext *C,
 
   /* Cleanup. */
   if (brush.sculpt_tool == SCULPT_TOOL_MASK) {
-    SCULPT_flush_update_step(C, SCULPT_UPDATE_MASK);
+    flush_update_step(C, UpdateType::Mask);
   }
   else if (SCULPT_tool_is_paint(brush.sculpt_tool)) {
     if (SCULPT_use_image_paint_brush(tool_settings.paint_mode, ob)) {
-      SCULPT_flush_update_step(C, SCULPT_UPDATE_IMAGE);
+      flush_update_step(C, UpdateType::Image);
     }
     else {
-      SCULPT_flush_update_step(C, SCULPT_UPDATE_COLOR);
+      flush_update_step(C, UpdateType::Color);
     }
   }
   else {
-    SCULPT_flush_update_step(C, SCULPT_UPDATE_COORDS);
+    flush_update_step(C, UpdateType::Position);
   }
 }
 
@@ -5716,19 +5693,19 @@ static void sculpt_stroke_done(const bContext *C, PaintStroke * /*stroke*/)
   sculpt_stroke_undo_end(C, brush);
 
   if (brush->sculpt_tool == SCULPT_TOOL_MASK) {
-    SCULPT_flush_update_done(C, ob, SCULPT_UPDATE_MASK);
+    flush_update_done(C, ob, UpdateType::Mask);
   }
   else if (brush->sculpt_tool == SCULPT_TOOL_PAINT) {
     if (SCULPT_use_image_paint_brush(tool_settings->paint_mode, ob)) {
-      SCULPT_flush_update_done(C, ob, SCULPT_UPDATE_IMAGE);
+      flush_update_done(C, ob, UpdateType::Image);
     }
     else {
       BKE_sculpt_attributes_destroy_temporary_stroke(&ob);
-      SCULPT_flush_update_done(C, ob, SCULPT_UPDATE_COLOR);
+      flush_update_done(C, ob, UpdateType::Color);
     }
   }
   else {
-    SCULPT_flush_update_done(C, ob, SCULPT_UPDATE_COORDS);
+    flush_update_done(C, ob, UpdateType::Position);
   }
 
   WM_event_add_notifier(C, NC_OBJECT | ND_DRAW, &ob);
