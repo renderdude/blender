@@ -632,6 +632,8 @@ option(WITH_CYCLES_STANDALONE "Build Cycles standalone application" OFF)
 option(WITH_CYCLES_STANDALONE_GUI "Build Cycles standalone with GUI" OFF)
 option(WITH_CYCLES_PRECOMPUTE "Build Cycles data precomputation tool" OFF)
 
+option(WITH_CYCLES_DISTRIBUTED "Build Cycles for distributed rendering" OFF)
+
 option(WITH_CYCLES_HYDRA_RENDER_DELEGATE "Build Cycles Hydra render delegate" OFF)
 
 option(WITH_CYCLES_DEBUG_NAN "\
@@ -2767,6 +2769,7 @@ if(FIRST_RUN)
     info_cfg_option(WITH_CYCLES_OSL)
     info_cfg_option(WITH_CYCLES_EMBREE)
     info_cfg_option(WITH_CYCLES_PATH_GUIDING)
+    info_cfg_option(WITH_CYCLES_DISTRIBUTED)
     if(NOT APPLE)
       info_cfg_option(WITH_CYCLES_DEVICE_OPTIX)
       info_cfg_option(WITH_CYCLES_DEVICE_CUDA)

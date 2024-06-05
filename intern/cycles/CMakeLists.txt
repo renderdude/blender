@@ -218,6 +218,10 @@ include_directories(
   ${PUGIXML_INCLUDE_DIR}
 )
 
+if(WITH_CYCLES_DISTRIBUTED)
+  add_definitions(-DWITH_CYCLES_DISTRIBUTED)
+endif()
+
 if(WITH_CYCLES_DEBUG)
   add_definitions(-DWITH_CYCLES_DEBUG)
 endif()
