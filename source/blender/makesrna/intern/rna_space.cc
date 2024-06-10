@@ -6086,7 +6086,7 @@ static void rna_def_space_sequencer(BlenderRNA *brna)
 
   prop = RNA_def_property(srna, "show_seconds", PROP_BOOLEAN, PROP_NONE);
   RNA_def_property_boolean_negative_sdna(prop, nullptr, "flag", SEQ_DRAWFRAMES);
-  RNA_def_property_ui_text(prop, "Show Seconds", "Show timing in seconds not frames");
+  RNA_def_property_ui_text(prop, "Use Timecode", "Show timing as a timecode instead of frames");
   RNA_def_property_update(prop, NC_SPACE | ND_SPACE_SEQUENCER, nullptr);
 
   prop = RNA_def_property(srna, "show_markers", PROP_BOOLEAN, PROP_NONE);
@@ -6420,7 +6420,7 @@ static void rna_def_space_dopesheet(BlenderRNA *brna)
   /* display */
   prop = RNA_def_property(srna, "show_seconds", PROP_BOOLEAN, PROP_NONE);
   RNA_def_property_boolean_sdna(prop, nullptr, "flag", SACTION_DRAWTIME);
-  RNA_def_property_ui_text(prop, "Show Seconds", "Show timing in seconds not frames");
+  RNA_def_property_ui_text(prop, "Use Timecode", "Show timing as a timecode instead of frames");
   RNA_def_property_update(prop, NC_SPACE | ND_SPACE_DOPESHEET, nullptr);
 
   prop = RNA_def_property(srna, "show_sliders", PROP_BOOLEAN, PROP_NONE);
@@ -6568,7 +6568,7 @@ static void rna_def_space_graph(BlenderRNA *brna)
   /* display */
   prop = RNA_def_property(srna, "show_seconds", PROP_BOOLEAN, PROP_NONE);
   RNA_def_property_boolean_sdna(prop, nullptr, "flag", SIPO_DRAWTIME);
-  RNA_def_property_ui_text(prop, "Show Seconds", "Show timing in seconds not frames");
+  RNA_def_property_ui_text(prop, "Use Timecode", "Show timing as a timecode instead of frames");
   RNA_def_property_update(prop, NC_SPACE | ND_SPACE_GRAPH, nullptr);
 
   prop = RNA_def_property(srna, "show_sliders", PROP_BOOLEAN, PROP_NONE);
@@ -6692,7 +6692,7 @@ static void rna_def_space_nla(BlenderRNA *brna)
   /* display */
   prop = RNA_def_property(srna, "show_seconds", PROP_BOOLEAN, PROP_NONE);
   RNA_def_property_boolean_sdna(prop, nullptr, "flag", SNLA_DRAWTIME);
-  RNA_def_property_ui_text(prop, "Show Seconds", "Show timing in seconds not frames");
+  RNA_def_property_ui_text(prop, "Use Timecode", "Show timing as a timecode instead of frames");
   RNA_def_property_update(prop, NC_SPACE | ND_SPACE_NLA, nullptr);
 
   prop = RNA_def_property(srna, "show_strip_curves", PROP_BOOLEAN, PROP_NONE);
@@ -7580,6 +7580,15 @@ static void rna_def_space_node_overlay(BlenderRNA *brna)
       prop, "Show Wire Colors", "Color node links based on their connected sockets");
   RNA_def_property_update(prop, NC_SPACE | ND_SPACE_NODE, nullptr);
 
+  prop = RNA_def_property(srna, "show_reroute_auto_labels", PROP_BOOLEAN, PROP_NONE);
+  RNA_def_property_boolean_sdna(
+      prop, nullptr, "overlay.flag", SN_OVERLAY_SHOW_REROUTE_AUTO_LABELS);
+  RNA_def_property_boolean_default(prop, false);
+  RNA_def_property_ui_text(prop,
+                           "Show Reroute Auto Labels",
+                           "Label reroute nodes based on the label of connected reroute nodes");
+  RNA_def_property_update(prop, NC_SPACE | ND_SPACE_NODE, nullptr);
+
   prop = RNA_def_property(srna, "show_timing", PROP_BOOLEAN, PROP_NONE);
   RNA_def_property_boolean_sdna(prop, nullptr, "overlay.flag", SN_OVERLAY_SHOW_TIMINGS);
   RNA_def_property_boolean_default(prop, false);
@@ -8115,7 +8124,7 @@ static void rna_def_space_clip(BlenderRNA *brna)
   /* timeline */
   prop = RNA_def_property(srna, "show_seconds", PROP_BOOLEAN, PROP_NONE);
   RNA_def_property_boolean_sdna(prop, nullptr, "flag", SC_SHOW_SECONDS);
-  RNA_def_property_ui_text(prop, "Show Seconds", "Show timing in seconds not frames");
+  RNA_def_property_ui_text(prop, "Use Timecode", "Show timing as a timecode instead of frames");
   RNA_def_property_update(prop, NC_MOVIECLIP | ND_DISPLAY, nullptr);
 
   /* grease pencil source */

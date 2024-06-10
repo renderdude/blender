@@ -340,6 +340,11 @@ enum PathTraceDimension {
 enum SamplingPattern {
   SAMPLING_PATTERN_SOBOL_BURLEY = 0,
   SAMPLING_PATTERN_TABULATED_SOBOL = 1,
+  SAMPLING_PATTERN_BLUE_NOISE_PURE = 2,
+  SAMPLING_PATTERN_BLUE_NOISE_FIRST = 3,
+  SAMPLING_PATTERN_BLUE_NOISE_ROUND = 4,
+  /* Never used in kernel. */
+  SAMPLING_PATTERN_AUTOMATIC = 5,
 
   SAMPLING_NUM_PATTERNS,
 };
@@ -572,6 +577,7 @@ typedef enum PassType {
   PASS_CATEGORY_DATA_END = 63,
 
   PASS_BAKE_PRIMITIVE,
+  PASS_BAKE_SEED,
   PASS_BAKE_DIFFERENTIAL,
   PASS_CATEGORY_BAKE_END = 95,
 
@@ -753,7 +759,7 @@ typedef struct Intersection {
 } Intersection;
 
 /* On certain GPUs (Apple Silicon), splitting every integrator state field into its own separate
- * array can be detrimental for cache utilisation. By enabling __INTEGRATOR_GPU_PACKED_STATE__, we
+ * array can be detrimental for cache utilization. By enabling __INTEGRATOR_GPU_PACKED_STATE__, we
  * specify that certain fields should be packed together. This improves cache hit ratios in cases
  * where fields are often accessed together (e.g. "ray" and "isect").
  */

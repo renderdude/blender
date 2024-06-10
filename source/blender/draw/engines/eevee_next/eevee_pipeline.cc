@@ -188,7 +188,7 @@ void ShadowPipeline::sync()
   bool shadow_update_tbdr = (ShadowModule::shadow_technique == ShadowTechnique::TILE_COPY);
   if (shadow_update_tbdr) {
     draw::PassMain::Sub &pass = render_ps_.sub("Shadow.TilePageClear");
-    pass.subpass_transition(GPU_ATTACHEMENT_WRITE, {GPU_ATTACHEMENT_WRITE});
+    pass.subpass_transition(GPU_ATTACHMENT_WRITE, {GPU_ATTACHMENT_WRITE});
     pass.shader_set(inst_.shaders.static_shader_get(SHADOW_PAGE_TILE_CLEAR));
     /* Only manually clear depth of the updated tiles.
      * This is because the depth is initialized to near depth using attachments for fast clear and
@@ -232,7 +232,7 @@ void ShadowPipeline::sync()
     pass.state_set(DRW_STATE_DEPTH_ALWAYS);
     /* Metal have implicit sync with Raster Order Groups. Other backend need to have manual
      * sub-pass transition to allow reading the frame-buffer. This is a no-op on Metal. */
-    pass.subpass_transition(GPU_ATTACHEMENT_WRITE, {GPU_ATTACHEMENT_READ});
+    pass.subpass_transition(GPU_ATTACHMENT_WRITE, {GPU_ATTACHMENT_READ});
     pass.bind_image(SHADOW_ATLAS_IMG_SLOT, inst_.shadows.atlas_tx_);
     pass.bind_ssbo("dst_coord_buf", inst_.shadows.dst_coord_buf_);
     pass.bind_ssbo("src_coord_buf", inst_.shadows.src_coord_buf_);
@@ -450,12 +450,12 @@ void ForwardPipeline::render(View &view,
 void DeferredLayerBase::gbuffer_pass_sync(Instance &inst)
 {
   gbuffer_ps_.init();
-  gbuffer_ps_.subpass_transition(GPU_ATTACHEMENT_WRITE,
-                                 {GPU_ATTACHEMENT_WRITE,
-                                  GPU_ATTACHEMENT_WRITE,
-                                  GPU_ATTACHEMENT_WRITE,
-                                  GPU_ATTACHEMENT_WRITE,
-                                  GPU_ATTACHEMENT_WRITE});
+  gbuffer_ps_.subpass_transition(GPU_ATTACHMENT_WRITE,
+                                 {GPU_ATTACHMENT_WRITE,
+                                  GPU_ATTACHMENT_WRITE,
+                                  GPU_ATTACHMENT_WRITE,
+                                  GPU_ATTACHMENT_WRITE,
+                                  GPU_ATTACHMENT_WRITE});
   /* G-buffer. */
   gbuffer_ps_.bind_image(GBUF_NORMAL_SLOT, &inst.gbuffer.normal_img_tx);
   gbuffer_ps_.bind_image(GBUF_CLOSURE_SLOT, &inst.gbuffer.closure_img_tx);
@@ -501,6 +501,30 @@ void DeferredLayerBase::gbuffer_pass_sync(Instance &inst)
 
 void DeferredLayer::begin_sync()
 {
+  if (GPU_use_parallel_compilation()) {
+    /* Pre-compile specialization constants in parallel. */
+    Vector<ShaderSpecialization> specializations;
+    for (int i = 0; i < 3; i++) {
+      GPUShader *sh = inst_.shaders.static_shader_get(eShaderType(DEFERRED_LIGHT_SINGLE + i));
+      for (bool use_split_indirect : {false, true}) {
+        for (bool use_lightprobe_eval : {false, true}) {
+          for (bool use_transmission : {false, true}) {
+            specializations.append(
+                {sh,
+                 {{"render_pass_shadow_id", inst_.render_buffers.data.shadow_id},
+                  {"use_split_indirect", use_split_indirect},
+                  {"use_lightprobe_eval", use_lightprobe_eval},
+                  {"use_transmission", use_transmission},
+                  {"shadow_ray_count", inst_.shadows.get_data().ray_count},
+                  {"shadow_ray_step_count", inst_.shadows.get_data().step_count}}});
+          }
+        }
+      }
+    }
+
+    GPU_shaders_precompile_specializations(specializations);
+  }
+
   {
     prepass_ps_.init();
     /* Textures. */
@@ -561,12 +585,12 @@ void DeferredLayer::end_sync(bool is_first_pass, bool is_last_pass)
     {
       GPUShader *sh = inst_.shaders.static_shader_get(DEFERRED_TILE_CLASSIFY);
       PassMain::Sub &sub = gbuffer_ps_.sub("StencilClassify");
-      sub.subpass_transition(GPU_ATTACHEMENT_WRITE, /* Needed for depth test. */
-                             {GPU_ATTACHEMENT_IGNORE,
-                              GPU_ATTACHEMENT_READ, /* Header. */
-                              GPU_ATTACHEMENT_IGNORE,
-                              GPU_ATTACHEMENT_IGNORE,
-                              GPU_ATTACHEMENT_IGNORE});
+      sub.subpass_transition(GPU_ATTACHMENT_WRITE, /* Needed for depth test. */
+                             {GPU_ATTACHMENT_IGNORE,
+                              GPU_ATTACHMENT_READ, /* Header. */
+                              GPU_ATTACHMENT_IGNORE,
+                              GPU_ATTACHMENT_IGNORE,
+                              GPU_ATTACHMENT_IGNORE});
       sub.shader_set(sh);
       sub.state_set(DRW_STATE_WRITE_STENCIL | DRW_STATE_STENCIL_ALWAYS);
       if (GPU_stencil_export_support()) {
