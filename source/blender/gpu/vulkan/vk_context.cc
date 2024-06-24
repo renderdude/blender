@@ -46,10 +46,8 @@ VKContext::~VKContext()
     GPU_texture_free(surface_texture_);
     surface_texture_ = nullptr;
   }
-  if (use_render_graph) {
-    render_graph.free_data();
-  }
-  VKBackend::get().device_.context_unregister(*this);
+  render_graph.free_data();
+  VKBackend::get().device.context_unregister(*this);
 
   delete imm;
   imm = nullptr;
@@ -60,12 +58,11 @@ VKContext::~VKContext()
 void VKContext::sync_backbuffer()
 {
   if (ghost_context_) {
-    VKDevice &device = VKBackend::get().device_;
-    if (!command_buffers_.is_initialized()) {
-      command_buffers_.init(device);
+    VKDevice &device = VKBackend::get().device;
+    if (!is_init_) {
+      is_init_ = true;
       descriptor_pools_.init(device);
       device.init_dummy_buffer(*this);
-      device.init_dummy_color_attachment();
     }
     descriptor_pools_.reset();
   }
@@ -118,33 +115,35 @@ void VKContext::activate()
 
 void VKContext::deactivate()
 {
+  /* Draw manager draws in a different context than the rest of the UI. Although run from the
+   * same thread. Commands inside the render-graph need to be submitted into the device queue. */
+  flush_render_graph();
   immDeactivate();
   is_active_ = false;
 }
 
 void VKContext::begin_frame() {}
 
-void VKContext::end_frame()
+void VKContext::end_frame() {}
+
+void VKContext::flush() {}
+
+void VKContext::flush_render_graph()
 {
-  if (!use_render_graph) {
-    VKDevice &device = VKBackend::get().device_get();
-    device.destroy_discarded_resources();
+  if (has_active_framebuffer()) {
+    VKFrameBuffer &framebuffer = *active_framebuffer_get();
+    if (framebuffer.is_rendering()) {
+      framebuffer.rendering_end(*this);
+    }
   }
+  render_graph.submit();
 }
 
-void VKContext::flush()
-{
-  command_buffers_.submit();
-}
-
-void VKContext::finish()
-{
-  command_buffers_.finish();
-}
+void VKContext::finish() {}
 
 void VKContext::memory_statistics_get(int *r_total_mem_kb, int *r_free_mem_kb)
 {
-  const VKDevice &device = VKBackend::get().device_get();
+  const VKDevice &device = VKBackend::get().device;
   device.memory_statistics_get(r_total_mem_kb, r_free_mem_kb);
 }
 
@@ -183,12 +182,7 @@ void VKContext::activate_framebuffer(VKFrameBuffer &framebuffer)
   active_fb = &framebuffer;
   framebuffer.update_size();
   framebuffer.update_srgb();
-  if (use_render_graph) {
-    framebuffer.rendering_reset();
-  }
-  else {
-    command_buffers_get().begin_render_pass(framebuffer);
-  }
+  framebuffer.rendering_reset();
 }
 
 VKFrameBuffer *VKContext::active_framebuffer_get() const
@@ -205,12 +199,7 @@ void VKContext::deactivate_framebuffer()
 {
   VKFrameBuffer *framebuffer = active_framebuffer_get();
   BLI_assert(framebuffer != nullptr);
-  if (use_render_graph) {
-    framebuffer->rendering_end(*this);
-  }
-  else {
-    command_buffers_get().end_render_pass(*framebuffer);
-  }
+  framebuffer->rendering_end(*this);
   active_fb = nullptr;
 }
 
@@ -225,43 +214,52 @@ void VKContext::rendering_end()
 /** \} */
 
 /* -------------------------------------------------------------------- */
-/** \name Compute pipeline
+/** \name Pipeline
  * \{ */
 
-void VKContext::bind_compute_pipeline()
-{
-  VKShader *shader = unwrap(this->shader);
-  BLI_assert(shader);
-  VKPipeline &pipeline = shader->pipeline_get();
-  pipeline.bind(*this, VK_PIPELINE_BIND_POINT_COMPUTE);
-  shader->push_constants.update(*this);
-  if (shader->has_descriptor_set()) {
-    descriptor_set_.bind(*this, shader->vk_pipeline_layout_get(), VK_PIPELINE_BIND_POINT_COMPUTE);
-  }
-}
-
-void VKContext::update_pipeline_data(render_graph::VKPipelineData &pipeline_data)
+void VKContext::update_pipeline_data(GPUPrimType primitive,
+                                     VKVertexAttributeObject &vao,
+                                     render_graph::VKPipelineData &r_pipeline_data)
 {
   VKShader &vk_shader = unwrap(*shader);
-  pipeline_data.vk_pipeline_layout = vk_shader.vk_pipeline_layout_get();
-  pipeline_data.vk_pipeline = vk_shader.ensure_and_get_compute_pipeline();
+  BLI_assert(vk_shader.is_graphics_shader());
+  VKFrameBuffer &framebuffer = *active_framebuffer_get();
+  update_pipeline_data(
+      vk_shader,
+      vk_shader.ensure_and_get_graphics_pipeline(primitive, vao, state_manager_get(), framebuffer),
+      r_pipeline_data);
+}
+
+void VKContext::update_pipeline_data(render_graph::VKPipelineData &r_pipeline_data)
+{
+  VKShader &vk_shader = unwrap(*shader);
+  BLI_assert(vk_shader.is_compute_shader());
+  update_pipeline_data(vk_shader, vk_shader.ensure_and_get_compute_pipeline(), r_pipeline_data);
+}
+
+void VKContext::update_pipeline_data(VKShader &vk_shader,
+                                     VkPipeline vk_pipeline,
+                                     render_graph::VKPipelineData &r_pipeline_data)
+{
+  r_pipeline_data.vk_pipeline_layout = vk_shader.vk_pipeline_layout;
+  r_pipeline_data.vk_pipeline = vk_pipeline;
 
   /* Update push constants. */
-  pipeline_data.push_constants_data = nullptr;
-  pipeline_data.push_constants_size = 0;
+  r_pipeline_data.push_constants_data = nullptr;
+  r_pipeline_data.push_constants_size = 0;
   const VKPushConstants::Layout &push_constants_layout =
       vk_shader.interface_get().push_constants_layout_get();
   vk_shader.push_constants.update(*this);
   if (push_constants_layout.storage_type_get() == VKPushConstants::StorageType::PUSH_CONSTANTS) {
-    pipeline_data.push_constants_size = push_constants_layout.size_in_bytes();
-    pipeline_data.push_constants_data = vk_shader.push_constants.data();
+    r_pipeline_data.push_constants_size = push_constants_layout.size_in_bytes();
+    r_pipeline_data.push_constants_data = vk_shader.push_constants.data();
   }
 
   /* Update descriptor set. */
-  pipeline_data.vk_descriptor_set = VK_NULL_HANDLE;
+  r_pipeline_data.vk_descriptor_set = VK_NULL_HANDLE;
   if (vk_shader.has_descriptor_set()) {
     descriptor_set_.update(*this);
-    pipeline_data.vk_descriptor_set = descriptor_set_get().active_descriptor_set()->vk_handle();
+    r_pipeline_data.vk_descriptor_set = descriptor_set_get().active_descriptor_set()->vk_handle();
   }
 }
 
@@ -270,33 +268,6 @@ render_graph::VKResourceAccessInfo &VKContext::update_and_get_access_info()
   access_info_.reset();
   state_manager_get().apply_bindings(*this, access_info_);
   return access_info_;
-}
-
-/** \} */
-
-/* -------------------------------------------------------------------- */
-/** \name Graphics pipeline
- * \{ */
-
-void VKContext::bind_graphics_pipeline(const GPUPrimType prim_type,
-                                       const VKVertexAttributeObject &vertex_attribute_object)
-{
-  VKShader *shader = unwrap(this->shader);
-  BLI_assert(shader);
-  BLI_assert_msg(
-      prim_type != GPU_PRIM_POINTS || shader->interface_get().is_point_shader(),
-      "GPU_PRIM_POINTS is used with a shader that doesn't set point size before "
-      "drawing fragments. Calling code should be adapted to use a shader that sets the "
-      "gl_PointSize before entering the fragment stage. For example `GPU_SHADER_3D_POINT_*`.");
-
-  shader->update_graphics_pipeline(*this, prim_type, vertex_attribute_object);
-
-  VKPipeline &pipeline = shader->pipeline_get();
-  pipeline.bind(*this, VK_PIPELINE_BIND_POINT_GRAPHICS);
-  shader->push_constants.update(*this);
-  if (shader->has_descriptor_set()) {
-    descriptor_set_.bind(*this, shader->vk_pipeline_layout_get(), VK_PIPELINE_BIND_POINT_GRAPHICS);
-  }
 }
 
 /** \} */
@@ -345,44 +316,20 @@ void VKContext::swap_buffers_pre_handler(const GHOST_VulkanSwapChainData &swap_c
   region.dstSubresource.baseArrayLayer = 0;
   region.dstSubresource.layerCount = 1;
 
-  if (use_render_graph) {
-    /* Swap chain commands are CPU synchronized at this moment, allowing to temporary add the swap
-     * chain image as device resources. When we move towards GPU swap chain synchronization we need
-     * to keep track of the swap chain image between frames. */
-    VKDevice &device = VKBackend::get().device_get();
-    device.resources.add_image(swap_chain_data.image,
-                               VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-                               render_graph::ResourceOwner::SWAP_CHAIN);
+  /* Swap chain commands are CPU synchronized at this moment, allowing to temporary add the swap
+   * chain image as device resources. When we move towards GPU swap chain synchronization we need
+   * to keep track of the swap chain image between frames. */
+  VKDevice &device = VKBackend::get().device;
+  device.resources.add_image(swap_chain_data.image,
+                             VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+                             render_graph::ResourceOwner::SWAP_CHAIN);
 
-    framebuffer.rendering_end(*this);
-    render_graph.add_node(blit_image);
-    render_graph.submit_for_present(swap_chain_data.image);
+  framebuffer.rendering_end(*this);
+  render_graph.add_node(blit_image);
+  render_graph.submit_for_present(swap_chain_data.image);
 
-    device.resources.remove_image(swap_chain_data.image);
-    device.destroy_discarded_resources();
-  }
-  else {
-    /*
-     * Ensure no graphics/compute commands are scheduled. They could use the back buffer, which
-     * layout is altered here.
-     */
-    command_buffers_get().submit();
-
-    VKTexture wrapper("display_texture");
-    wrapper.init(swap_chain_data.image,
-                 VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-                 to_gpu_format(swap_chain_data.format));
-    wrapper.layout_ensure(*this, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-    framebuffer.color_attachment_layout_ensure(*this, 0, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-
-    command_buffers_get().blit(wrapper,
-                               VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                               *color_attachment,
-                               VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                               Span<VkImageBlit>(&region, 1));
-    wrapper.layout_ensure(*this, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-    command_buffers_get().submit();
-  }
+  device.resources.remove_image(swap_chain_data.image);
+  device.destroy_discarded_resources();
 }
 
 void VKContext::swap_buffers_post_handler()

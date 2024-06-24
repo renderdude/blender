@@ -121,7 +121,7 @@ void VKBackend::detect_workarounds(VKDevice &device)
 void VKBackend::platform_exit()
 {
   GPG.clear();
-  VKDevice &device = VKBackend::get().device_;
+  VKDevice &device = VKBackend::get().device;
   if (device.is_initialized()) {
     device.deinit();
   }
@@ -131,7 +131,7 @@ void VKBackend::delete_resources() {}
 
 void VKBackend::samplers_update()
 {
-  VKDevice &device = VKBackend::get().device_;
+  VKDevice &device = VKBackend::get().device;
   if (device.is_initialized()) {
     device.reinit();
   }
@@ -140,22 +140,13 @@ void VKBackend::samplers_update()
 void VKBackend::compute_dispatch(int groups_x_len, int groups_y_len, int groups_z_len)
 {
   VKContext &context = *VKContext::get();
-  if (use_render_graph) {
-    render_graph::VKResourceAccessInfo &resources = context.update_and_get_access_info();
-    render_graph::VKDispatchNode::CreateInfo dispatch_info(resources);
-    context.update_pipeline_data(dispatch_info.dispatch_node.pipeline_data);
-    dispatch_info.dispatch_node.group_count_x = groups_x_len;
-    dispatch_info.dispatch_node.group_count_y = groups_y_len;
-    dispatch_info.dispatch_node.group_count_z = groups_z_len;
-    context.render_graph.add_node(dispatch_info);
-  }
-  else {
-    render_graph::VKResourceAccessInfo resource_access_info = {};
-    context.state_manager_get().apply_bindings(context, resource_access_info);
-    context.bind_compute_pipeline();
-    VKCommandBuffers &command_buffers = context.command_buffers_get();
-    command_buffers.dispatch(groups_x_len, groups_y_len, groups_z_len);
-  }
+  render_graph::VKResourceAccessInfo &resources = context.update_and_get_access_info();
+  render_graph::VKDispatchNode::CreateInfo dispatch_info(resources);
+  context.update_pipeline_data(dispatch_info.dispatch_node.pipeline_data);
+  dispatch_info.dispatch_node.group_count_x = groups_x_len;
+  dispatch_info.dispatch_node.group_count_y = groups_y_len;
+  dispatch_info.dispatch_node.group_count_z = groups_z_len;
+  context.render_graph.add_node(dispatch_info);
 }
 
 void VKBackend::compute_dispatch_indirect(StorageBuf *indirect_buf)
@@ -163,21 +154,12 @@ void VKBackend::compute_dispatch_indirect(StorageBuf *indirect_buf)
   BLI_assert(indirect_buf);
   VKContext &context = *VKContext::get();
   VKStorageBuffer &indirect_buffer = *unwrap(indirect_buf);
-  if (use_render_graph) {
-    render_graph::VKResourceAccessInfo &resources = context.update_and_get_access_info();
-    render_graph::VKDispatchIndirectNode::CreateInfo dispatch_indirect_info(resources);
-    context.update_pipeline_data(dispatch_indirect_info.dispatch_indirect_node.pipeline_data);
-    dispatch_indirect_info.dispatch_indirect_node.buffer = indirect_buffer.vk_handle();
-    dispatch_indirect_info.dispatch_indirect_node.offset = 0;
-    context.render_graph.add_node(dispatch_indirect_info);
-  }
-  else {
-    render_graph::VKResourceAccessInfo resource_access_info = {};
-    context.state_manager_get().apply_bindings(context, resource_access_info);
-    context.bind_compute_pipeline();
-    VKCommandBuffers &command_buffers = context.command_buffers_get();
-    command_buffers.dispatch(indirect_buffer);
-  }
+  render_graph::VKResourceAccessInfo &resources = context.update_and_get_access_info();
+  render_graph::VKDispatchIndirectNode::CreateInfo dispatch_indirect_info(resources);
+  context.update_pipeline_data(dispatch_indirect_info.dispatch_indirect_node.pipeline_data);
+  dispatch_indirect_info.dispatch_indirect_node.buffer = indirect_buffer.vk_handle();
+  dispatch_indirect_info.dispatch_indirect_node.offset = 0;
+  context.render_graph.add_node(dispatch_indirect_info);
 }
 
 Context *VKBackend::context_alloc(void *ghost_window, void *ghost_context)
@@ -188,12 +170,12 @@ Context *VKBackend::context_alloc(void *ghost_window, void *ghost_context)
   }
 
   BLI_assert(ghost_context != nullptr);
-  if (!device_.is_initialized()) {
-    device_.init(ghost_context);
+  if (!device.is_initialized()) {
+    device.init(ghost_context);
   }
 
-  VKContext *context = new VKContext(ghost_window, ghost_context, device_.resources);
-  device_.context_register(*context);
+  VKContext *context = new VKContext(ghost_window, ghost_context, device.resources);
+  device.context_register(*context);
   GHOST_SetVulkanSwapBuffersCallbacks((GHOST_ContextHandle)ghost_context,
                                       VKContext::swap_buffers_pre_callback,
                                       VKContext::swap_buffers_post_callback);
@@ -225,7 +207,7 @@ IndexBuf *VKBackend::indexbuf_alloc()
   return new VKIndexBuffer();
 }
 
-PixelBuffer *VKBackend::pixelbuf_alloc(uint size)
+PixelBuffer *VKBackend::pixelbuf_alloc(size_t size)
 {
   return new VKPixelBuffer(size);
 }
@@ -245,12 +227,12 @@ Texture *VKBackend::texture_alloc(const char *name)
   return new VKTexture(name);
 }
 
-UniformBuf *VKBackend::uniformbuf_alloc(int size, const char *name)
+UniformBuf *VKBackend::uniformbuf_alloc(size_t size, const char *name)
 {
   return new VKUniformBuffer(size, name);
 }
 
-StorageBuf *VKBackend::storagebuf_alloc(int size, GPUUsageType usage, const char *name)
+StorageBuf *VKBackend::storagebuf_alloc(size_t size, GPUUsageType usage, const char *name)
 {
   return new VKStorageBuffer(size, usage, name);
 }
@@ -279,6 +261,9 @@ void VKBackend::capabilities_init(VKDevice &device)
   /* Reset all capabilities from previous context. */
   GCaps = {};
   GCaps.geometry_shader_support = true;
+  GCaps.texture_view_support = true;
+  GCaps.stencil_export_support = device.supports_extension(
+      VK_EXT_SHADER_STENCIL_EXPORT_EXTENSION_NAME);
   GCaps.shader_draw_parameters_support =
       device.physical_device_vulkan_11_features_get().shaderDrawParameters;
 

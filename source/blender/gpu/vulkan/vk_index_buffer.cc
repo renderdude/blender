@@ -41,11 +41,6 @@ void VKIndexBuffer::upload_data()
   ensure_updated();
 }
 
-void VKIndexBuffer::bind(VKContext &context)
-{
-  context.command_buffers_get().bind(buffer_get(), to_vk_index_type(index_type_));
-}
-
 void VKIndexBuffer::bind_as_ssbo(uint binding)
 {
   VKContext::get()->state_manager_get().storage_buffer_bind(*this, binding);
@@ -99,6 +94,10 @@ void VKIndexBuffer::allocate()
   debug::object_label(buffer_.vk_handle(), "IndexBuffer");
 }
 
+const VKBuffer &VKIndexBuffer::buffer_get() const
+{
+  return is_subrange_ ? unwrap(src_)->buffer_ : buffer_;
+}
 VKBuffer &VKIndexBuffer::buffer_get()
 {
   return is_subrange_ ? unwrap(src_)->buffer_ : buffer_;

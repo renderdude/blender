@@ -9,12 +9,16 @@ __all__ = (
     "update_non_blocking",
     "update_in_progress",
     "update_ui_text",
+    "update_ui_region_register",
+    "update_ui_region_unregister",
 )
 
-
-import os
-import bpy
 import sys
+import os
+
+import bpy
+
+from bpy.app.translations import pgettext_rpt as rpt_
 
 from . import bl_extension_ops
 from . import bl_extension_utils
@@ -97,7 +101,7 @@ def sync_apply_locked(repos_notify, repos_notify_files, unique_ext):
             repo_directories=repo_directories,
             cookie=cookie_from_session(),
     ) as lock_result:
-        for directory, repo_files in zip(repo_directories, repos_notify_files):
+        for directory, repo_files in zip(repo_directories, repos_notify_files, strict=True):
             repo_files = [os.path.join(directory, filepath_rel) for filepath_rel in repo_files]
 
             # If locking failed, remove the temporary files that were written to.
@@ -173,6 +177,10 @@ def sync_status_generator(repos_fn):
 
     from functools import partial
 
+    prefs = bpy.context.preferences
+    network_timeout = prefs.system.network_timeout
+    network_connection_limit = prefs.system.network_connection_limit
+
     cmd_batch_partial = []
     for repo_item, do_online_sync in repos_and_do_online:
         # Local only repositories should still refresh, but not run the sync.
@@ -184,6 +192,7 @@ def sync_status_generator(repos_fn):
             remote_url=bl_extension_ops.url_append_defaults(repo_item.remote_url),
             online_user_agent=bl_extension_ops.online_user_agent_from_blender(),
             access_token=repo_item.access_token,
+            timeout=network_timeout,
             # Never sleep while there is no input, as this blocks Blender.
             use_idle=False,
             # Needed so the user can exit blender without warnings about a broken pipe.
@@ -220,6 +229,7 @@ def sync_status_generator(repos_fn):
         # Used as a prefix in status.
         title="Update",
         batch=cmd_batch_partial,
+        batch_job_limit=network_connection_limit,
     )
     del cmd_batch_partial
 
@@ -349,7 +359,7 @@ class NotifyHandle:
 
     def ui_text(self):
         if self.sync_info is None:
-            return "Checking for Extension Updates", 'SORTTIME', WM_EXTENSIONS_UPDATE_CHECKING
+            return rpt_("Checking for Extension Updates"), 'SORTTIME', WM_EXTENSIONS_UPDATE_CHECKING
         status_data, update_count, extra_warnings = self.sync_info
         text, icon = bl_extension_utils.CommandBatch.calc_status_text_icon_from_data(
             status_data, update_count,
@@ -362,6 +372,8 @@ class NotifyHandle:
 
 # A list of `NotifyHandle`, only the first item is allowed to be running.
 _notify_queue = []
+# A set of regions to update on redraw.
+_notify_regions = set()
 
 
 def _ui_refresh_apply():
@@ -376,6 +388,8 @@ def _ui_refresh_apply():
                         if region.type != 'WINDOW':
                             continue
                         region.tag_redraw()
+
+    _region_refresh_registered()
 
 
 def _ui_refresh_timer():
@@ -428,18 +442,68 @@ def _ui_refresh_timer():
 
 
 # -----------------------------------------------------------------------------
+# Internal Region Updating
+
+# Update these regions whenever changes to the notifications occur.
+
+def _region_exists(region):
+    # TODO: this is a workaround for there being no good way to inspect temporary regions.
+    # A better solution could be to store the `PyObject` in the `ARegion` so that it gets invalidated when freed.
+    # This is a bigger change though - so use the context override as a way to check if a region is valid.
+    exists = False
+    try:
+        with bpy.context.temp_override(region=region):
+            exists = True
+    except TypeError:
+        pass
+    return exists
+
+
+def _region_list_ensure_valid():
+    # Avoid accumulating stale regions.
+    regions_stale = []
+    for region in _notify_regions:
+        if not _region_exists(region):
+            regions_stale.append(region)
+    for region in regions_stale:
+        _notify_regions.remove(region)
+
+
+def _region_refresh_registered():
+    regions_stale = []
+    for region in _notify_regions:
+        if not _region_exists(region):
+            regions_stale.append(region)
+            continue
+
+        region.tag_redraw()
+        region.tag_refresh_ui()
+    for region in regions_stale:
+        _notify_regions.remove(region)
+
+
+# -----------------------------------------------------------------------------
 # Public API
 
 
-def update_non_blocking(*, repos_fn):
+def update_non_blocking(*, repos_fn, immediate=False):
     # Perform a non-blocking update on ``repos``.
     # Updates are queued in case some are already running.
     # `repos_fn` A generator or function that returns a list of ``(RepoItem, do_online_sync)`` pairs.
     # Some repositories don't check for update on startup for e.g.
 
+    # Needed so `update_in_progress` doesn't get confused by an old completed item hanging around.
+    # Further, there is no need to keep this item any longer than is needed if a new notification is added.
+    while _notify_queue and _notify_queue[0].is_complete:
+        del _notify_queue[0]
+
     _notify_queue.append(NotifyHandle(repos_fn))
     if not bpy.app.timers.is_registered(_ui_refresh_timer):
-        bpy.app.timers.register(_ui_refresh_timer, first_interval=TIME_WAIT_INIT, persistent=True)
+        bpy.app.timers.register(
+            _ui_refresh_timer,
+            first_interval=0.0 if immediate else TIME_WAIT_INIT,
+            persistent=True,
+        )
     return True
 
 
@@ -457,3 +521,13 @@ def update_ui_text():
         text = ""
         icon = 'NONE'
     return text, icon
+
+
+def update_ui_region_register(region):
+    # Avoid accumulating stale regions.
+    _region_list_ensure_valid()
+    _notify_regions.add(region)
+
+
+def update_ui_region_unregister(region):
+    _notify_regions.discard(region)

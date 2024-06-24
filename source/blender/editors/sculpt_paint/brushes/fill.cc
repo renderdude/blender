@@ -36,18 +36,6 @@ struct LocalData {
   Vector<float3> translations;
 };
 
-BLI_NOINLINE static void calc_plane_side_factors(const Span<float3> vert_positions,
-                                                 const Span<int> verts,
-                                                 const float4 &plane,
-                                                 const MutableSpan<float> factors)
-{
-  for (const int i : verts.index_range()) {
-    if (plane_point_side_v3(plane, vert_positions[verts[i]]) > 0.0f) {
-      factors[i] = 0.0f;
-    }
-  }
-}
-
 static void calc_faces(const Sculpt &sd,
                        const Brush &brush,
                        const float4 &plane,
@@ -60,7 +48,7 @@ static void calc_faces(const Sculpt &sd,
                        const MutableSpan<float3> positions_orig)
 {
   SculptSession &ss = *object.sculpt;
-  StrokeCache &cache = *ss.cache;
+  const StrokeCache &cache = *ss.cache;
   Mesh &mesh = *static_cast<Mesh *>(object.data);
 
   const Span<int> verts = bke::pbvh::node_unique_verts(node);
@@ -77,34 +65,25 @@ static void calc_faces(const Sculpt &sd,
   const MutableSpan<float> distances = tls.distances;
   calc_distance_falloff(
       ss, positions_eval, verts, eBrushFalloffShape(brush.falloff_shape), distances, factors);
-  calc_brush_strength_factors(ss, brush, verts, distances, factors);
+  calc_brush_strength_factors(cache, brush, distances, factors);
 
-  if (ss.cache->automasking) {
-    auto_mask::calc_vert_factors(object, *ss.cache->automasking, node, verts, factors);
+  if (cache.automasking) {
+    auto_mask::calc_vert_factors(object, *cache.automasking, node, verts, factors);
   }
 
   calc_brush_texture_factors(ss, brush, positions_eval, verts, factors);
 
   scale_factors(factors, strength);
 
-  calc_plane_side_factors(positions_eval, verts, plane, factors);
+  filter_above_plane_factors(positions_eval, verts, plane, factors);
 
   tls.translations.reinitialize(verts.size());
   const MutableSpan<float3> translations = tls.translations;
-  scrape_calc_translations(positions_eval, verts, plane, translations);
-  scrape_calc_plane_trim_limit(brush, *ss.cache, translations, factors);
+  calc_translations_to_plane(positions_eval, verts, plane, translations);
+  filter_plane_trim_limit_factors(brush, cache, translations, factors);
   scale_translations(translations, factors);
 
-  clip_and_lock_translations(sd, ss, positions_eval, verts, translations);
-
-  apply_translations_to_pbvh(*ss.pbvh, verts, translations);
-
-  if (!ss.deform_imats.is_empty()) {
-    apply_crazyspace_to_translations(ss.deform_imats, verts, translations);
-  }
-
-  apply_translations(translations, verts, positions_orig);
-  apply_translations_to_shape_keys(object, verts, translations, positions_orig);
+  write_translations(sd, object, positions_eval, verts, translations, positions_orig);
 }
 
 static void calc_grids(
@@ -135,18 +114,19 @@ static void calc_grids(
         i++;
         continue;
       }
-      if (!sculpt_brush_test_sq_fn(test, CCG_elem_offset_co(key, elem, j))) {
+      const float3 &co = CCG_elem_offset_co(key, elem, j);
+      if (!sculpt_brush_test_sq_fn(test, co)) {
         i++;
         continue;
       }
-      if (!SCULPT_plane_point_side(CCG_elem_offset_co(key, elem, j), plane)) {
+      if (!SCULPT_plane_point_side(co, plane)) {
         i++;
         continue;
       }
 
       float3 closest;
-      closest_to_plane_normalized_v3(closest, plane, CCG_elem_offset_co(key, elem, j));
-      const float3 translation = closest - CCG_elem_offset_co(key, elem, j);
+      closest_to_plane_normalized_v3(closest, plane, co);
+      const float3 translation = closest - co;
 
       if (!SCULPT_plane_trim(*ss.cache, brush, translation)) {
         i++;
@@ -157,7 +137,7 @@ static void calc_grids(
       const float fade = SCULPT_brush_strength_factor(
           ss,
           brush,
-          CCG_elem_offset_co(key, elem, j),
+          co,
           math::sqrt(test.dist),
           CCG_elem_offset_no(key, elem, j),
           nullptr,

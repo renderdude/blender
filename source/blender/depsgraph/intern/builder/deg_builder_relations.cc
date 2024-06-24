@@ -2167,6 +2167,9 @@ void DepsgraphRelationBuilder::build_driver_id_property(const PointerRNA &target
   if (!rna_prop_affects_parameters_node(&ptr, prop)) {
     return;
   }
+  if (ptr.owner_id) {
+    build_id(ptr.owner_id);
+  }
   const char *prop_identifier = RNA_property_identifier((PropertyRNA *)prop);
   /* Custom properties of bones are placed in their components to improve granularity. */
   OperationKey id_property_key;
@@ -3076,7 +3079,9 @@ void DepsgraphRelationBuilder::build_nodetree(bNodeTree *ntree)
       }
     }
     else {
-      BLI_assert_msg(0, "Unknown ID type used for node");
+      /* Ignore this case. It can happen when the node type is not known currently. Either because
+       * it belongs to an add-on or because it comes from a different Blender version that does
+       * support the ID type here already. */
     }
   }
 

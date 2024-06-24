@@ -472,9 +472,6 @@ static const EnumPropertyItem *rna_NodeTreeInterfaceSocket_attribute_domain_item
   for (const EnumPropertyItem *item = rna_enum_attribute_domain_items; item->identifier != nullptr;
        item++)
   {
-    if (!U.experimental.use_grease_pencil_version3 && item->value == int(bke::AttrDomain::Layer)) {
-      continue;
-    }
     RNA_enum_item_add(&item_array, &items_len, item);
   }
   RNA_enum_item_end(&item_array, &items_len);
@@ -721,6 +718,7 @@ static const EnumPropertyItem *rna_NodeTreeInterfaceSocketFloat_subtype_itemf(
                                    PROP_TIME_ABSOLUTE,
                                    PROP_DISTANCE,
                                    PROP_WAVELENGTH,
+                                   PROP_COLOR_TEMPERATURE,
                                    PROP_NONE},
                                   r_free);
 }
@@ -798,6 +796,12 @@ void rna_NodeTreeInterfaceSocketVector_default_value_range(
   *max = FLT_MAX;
   *softmin = dval->min;
   *softmax = dval->max;
+}
+
+static const EnumPropertyItem *rna_NodeTreeInterfaceSocketString_subtype_itemf(
+    bContext * /*C*/, PointerRNA * /*ptr*/, PropertyRNA * /*prop*/, bool *r_free)
+{
+  return rna_subtype_filter_itemf({PROP_FILEPATH, PROP_NONE}, r_free);
 }
 
 /* using a context update function here, to avoid searching the node if possible */

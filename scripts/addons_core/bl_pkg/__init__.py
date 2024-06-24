@@ -16,6 +16,26 @@ bl_info = {
 }
 
 if "bpy" in locals():
+    # This doesn't need to be inline because sub-modules aren't important into the global name-space.
+    # The check for `bpy` ensures this is always assigned before use.
+    # pylint: disable-next=used-before-assignment
+    _local_module_reload()
+
+import bpy
+
+from bpy.props import (
+    BoolProperty,
+    EnumProperty,
+    IntProperty,
+    PointerProperty,
+    StringProperty,
+)
+
+
+# -----------------------------------------------------------------------------
+# Local Module Reload
+
+def _local_module_reload():
     import importlib
     from . import (
         bl_extension_cli,
@@ -31,46 +51,6 @@ if "bpy" in locals():
     importlib.reload(bl_extension_ops)
     importlib.reload(bl_extension_ui)
     importlib.reload(bl_extension_utils)
-    del (
-        bl_extension_cli,
-        bl_extension_local,
-        bl_extension_notify,
-        bl_extension_ops,
-        bl_extension_ui,
-        bl_extension_utils,
-    )
-    del importlib
-
-import bpy
-
-from bpy.props import (
-    BoolProperty,
-    EnumProperty,
-    IntProperty,
-    PointerProperty,
-    StringProperty,
-)
-
-from bpy.types import (
-    AddonPreferences,
-)
-
-
-class BlExtPreferences(AddonPreferences):
-    bl_idname = __name__
-    timeout: IntProperty(
-        name="Time Out",
-        default=10,
-    )
-    show_development_reports: BoolProperty(
-        name="Show Development Reports",
-        description=(
-            "Show the result of running commands in the main interface. "
-            "This has the advantage that multiple processes that run at once have their errors properly grouped, "
-            "which is not the case for reports which are mixed together"
-        ),
-        default=False,
-    )
 
 
 class StatusInfoUI:
@@ -144,22 +124,10 @@ def repo_stats_calc_outdated_for_repo_directory(repo_directory):
     if pkg_manifest_local is None:
         return 0
 
-    if False:
-        # TODO: support this, currently creating this data involves a conversion which isn't free.
-        # This can probably be done once and cached, but for now use another function that provides this.
-        pkg_manifest_remote = repo_cache_store.refresh_remote_from_directory(
-            directory=repo_directory,
-            error_fn=print,
-        )
-    else:
-        pkg_manifest_remote = None
-        for pkg_manifest_remote_test in repo_cache_store.pkg_manifest_from_remote_ensure(
-                error_fn=print,
-                ignore_missing=True,
-                directory_subset=[repo_directory],
-        ):
-            pkg_manifest_remote = pkg_manifest_remote_test
-            break
+    pkg_manifest_remote = repo_cache_store.refresh_remote_from_directory(
+        directory=repo_directory,
+        error_fn=print,
+    )
 
     if pkg_manifest_remote is None:
         return 0
@@ -171,7 +139,7 @@ def repo_stats_calc_outdated_for_repo_directory(repo_directory):
         if item_remote is None:
             continue
 
-        if item_remote["version"] != item_local["version"]:
+        if item_remote.version != item_local.version:
             package_count += 1
     return package_count
 
@@ -214,6 +182,7 @@ def print_debug(*args, **kw):
 
 def repos_to_notify():
     import os
+    from . import bl_extension_ops
     from .bl_extension_utils import (
         repo_index_outdated,
         scandir_with_demoted_errors,
@@ -301,6 +270,11 @@ def repos_to_notify():
 
 @bpy.app.handlers.persistent
 def extenion_repos_sync(*_):
+    # Ignore in background mode as this is for the UI to stay in sync.
+    # Automated tasks must sync explicitly.
+    if bpy.app.background:
+        return
+
     # This is called from operators (create or an explicit call to sync)
     # so calling a modal operator is "safe".
     if (active_repo := repo_active_or_none()) is None:
@@ -309,8 +283,14 @@ def extenion_repos_sync(*_):
     print_debug("SYNC:", active_repo.name)
     # There may be nothing to upgrade.
 
-    # FIXME: don't use the operator, this is error prone.
-    # The same method used to update the status-bar on startup would be preferable.
+    if not active_repo.use_remote_url:
+        return
+
+    # NOTE: both `extensions.repo_sync_all` and `bl_extension_notify.update_non_blocking` can be used here.
+    # Call the modal operator in this case as this handler is called after adding a repository.
+    # The operator has the benefit of showing a progress bar and reporting errors.
+    # Since this function is used after adding a new repository, it's important the user is aware of any
+    # errors synchronizing data as there may be connection/access issues they need to resolve.
     if not bpy.ops.extensions.repo_sync_all.poll():
         print("skipping sync, poll failed")
         return
@@ -338,13 +318,14 @@ def extenion_repos_files_clear(directory, _):
     from .bl_extension_utils import (
         scandir_with_demoted_errors,
         PKG_MANIFEST_FILENAME_TOML,
+        REPO_LOCAL_PRIVATE_DIR,
     )
     # Unlikely but possible a new repository is immediately removed before initializing,
     # avoid errors in this case.
     if not os.path.isdir(directory):
         return
 
-    if os.path.isdir(path := os.path.join(directory, ".blender_ext")):
+    if os.path.isdir(path := os.path.join(directory, REPO_LOCAL_PRIVATE_DIR)):
         try:
             shutil.rmtree(path)
         except Exception as ex:
@@ -384,6 +365,7 @@ def monkeypatch_extenions_repos_update_pre_impl():
 
 def monkeypatch_extenions_repos_update_post_impl():
     import os
+    # pylint: disable-next=redefined-outer-name
     from . import bl_extension_ops
 
     repo_cache_store = repo_cache_store_ensure()
@@ -463,8 +445,7 @@ def monkeypatch_install():
 def monkeypatch_uninstall():
     handlers = bpy.app.handlers._extension_repos_update_pre
     fn_override = monkeypatch_extensions_repos_update_pre
-    for i in range(len(handlers)):
-        fn = handlers[i]
+    for i, fn in enumerate(handlers):
         if fn is fn_override:
             handlers[i] = fn_override._fn_orig
             del fn_override._fn_orig
@@ -472,8 +453,7 @@ def monkeypatch_uninstall():
 
     handlers = bpy.app.handlers._extension_repos_update_post
     fn_override = monkeypatch_extenions_repos_update_post
-    for i in range(len(handlers)):
-        fn = handlers[i]
+    for i, fn in enumerate(handlers):
         if fn is fn_override:
             handlers[i] = fn_override._fn_orig
             del fn_override._fn_orig
@@ -498,7 +478,7 @@ def repo_cache_store_ensure():
         bl_extension_ops,
         bl_extension_utils,
     )
-    _repo_cache_store = bl_extension_utils.RepoCacheStore()
+    _repo_cache_store = bl_extension_utils.RepoCacheStore(bpy.app.version)
     bl_extension_ops.repo_cache_store_refresh_from_prefs(_repo_cache_store)
     return _repo_cache_store
 
@@ -537,7 +517,7 @@ def theme_preset_draw(menu, context):
         repo_item = repos_all[i]
         directory = repo_item.directory
         for pkg_idname, value in pkg_manifest_local.items():
-            if value["type"] != "theme":
+            if value.type != "theme":
                 continue
 
             theme_dir, theme_files = pkg_theme_file_list(directory, pkg_idname)
@@ -561,7 +541,6 @@ class BlExtDummyGroup(bpy.types.PropertyGroup):
 # Registration
 
 classes = (
-    BlExtPreferences,
     BlExtDummyGroup,
 )
 
@@ -585,6 +564,10 @@ def register():
     bl_extension_ops.register()
     bl_extension_ui.register()
 
+    WindowManager.addon_tags = PointerProperty(
+        name="Addon Tags",
+        type=BlExtDummyGroup,
+    )
     WindowManager.extension_tags = PointerProperty(
         name="Extension Tags",
         type=BlExtDummyGroup,
@@ -615,11 +598,6 @@ def register():
     WindowManager.extension_installed_only = BoolProperty(
         name="Show Installed Extensions",
         description="Only show installed extensions",
-    )
-    WindowManager.extension_show_legacy_addons = BoolProperty(
-        name="Show Legacy Add-ons",
-        description="Show add-ons which are not packaged as extensions",
-        default=True,
     )
 
     from bl_ui.space_userpref import USERPREF_MT_interface_theme_presets
@@ -656,7 +634,6 @@ def unregister():
     del WindowManager.extension_type
     del WindowManager.extension_enabled_only
     del WindowManager.extension_installed_only
-    del WindowManager.extension_show_legacy_addons
 
     for cls in classes:
         bpy.utils.unregister_class(cls)

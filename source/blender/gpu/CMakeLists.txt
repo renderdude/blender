@@ -198,8 +198,6 @@ set(VULKAN_SRC
   vulkan/vk_batch.cc
   vulkan/vk_bindable_resource.cc
   vulkan/vk_buffer.cc
-  vulkan/vk_command_buffer.cc
-  vulkan/vk_command_buffers.cc
   vulkan/vk_common.cc
   vulkan/vk_context.cc
   vulkan/vk_data_conversion.cc
@@ -216,9 +214,7 @@ set(VULKAN_SRC
   vulkan/vk_index_buffer.cc
   vulkan/vk_memory.cc
   vulkan/vk_memory_layout.cc
-  vulkan/vk_pipeline.cc
   vulkan/vk_pipeline_pool.cc
-  vulkan/vk_pipeline_state.cc
   vulkan/vk_pixel_buffer.cc
   vulkan/vk_push_constants.cc
   vulkan/vk_query.cc
@@ -226,6 +222,7 @@ set(VULKAN_SRC
   vulkan/render_graph/vk_command_buffer_wrapper.cc
   vulkan/render_graph/vk_command_builder.cc
   vulkan/render_graph/vk_render_graph.cc
+  vulkan/render_graph/vk_render_graph_links.cc
   vulkan/render_graph/vk_resource_access_info.cc
   vulkan/render_graph/vk_resource_state_tracker.cc
   vulkan/render_graph/vk_scheduler.cc
@@ -239,7 +236,6 @@ set(VULKAN_SRC
   vulkan/vk_state_manager.cc
   vulkan/vk_storage_buffer.cc
   vulkan/vk_texture.cc
-  vulkan/vk_timeline_semaphore.cc
   vulkan/vk_to_string.cc
   vulkan/vk_uniform_buffer.cc
   vulkan/vk_vertex_attribute_object.cc
@@ -249,8 +245,6 @@ set(VULKAN_SRC
   vulkan/vk_batch.hh
   vulkan/vk_bindable_resource.hh
   vulkan/vk_buffer.hh
-  vulkan/vk_command_buffer.hh
-  vulkan/vk_command_buffers.hh
   vulkan/vk_common.hh
   vulkan/vk_context.hh
   vulkan/vk_data_conversion.hh
@@ -267,9 +261,7 @@ set(VULKAN_SRC
   vulkan/vk_index_buffer.hh
   vulkan/vk_memory.hh
   vulkan/vk_memory_layout.hh
-  vulkan/vk_pipeline.hh
   vulkan/vk_pipeline_pool.hh
-  vulkan/vk_pipeline_state.hh
   vulkan/vk_pixel_buffer.hh
   vulkan/vk_push_constants.hh
   vulkan/vk_query.hh
@@ -283,11 +275,16 @@ set(VULKAN_SRC
   vulkan/render_graph/nodes/vk_copy_image_node.hh
   vulkan/render_graph/nodes/vk_copy_image_to_buffer_node.hh
   vulkan/render_graph/nodes/vk_dispatch_node.hh
+  vulkan/render_graph/nodes/vk_draw_node.hh
+  vulkan/render_graph/nodes/vk_draw_indexed_node.hh
+  vulkan/render_graph/nodes/vk_draw_indexed_indirect_node.hh
+  vulkan/render_graph/nodes/vk_draw_indirect_node.hh
   vulkan/render_graph/nodes/vk_end_rendering_node.hh
   vulkan/render_graph/nodes/vk_fill_buffer_node.hh
   vulkan/render_graph/nodes/vk_node_info.hh
   vulkan/render_graph/nodes/vk_pipeline_data.hh
   vulkan/render_graph/nodes/vk_synchronization_node.hh
+  vulkan/render_graph/nodes/vk_update_mipmaps_node.hh
   vulkan/render_graph/vk_command_buffer_wrapper.hh
   vulkan/render_graph/vk_command_builder.hh
   vulkan/render_graph/vk_render_graph.hh
@@ -306,7 +303,6 @@ set(VULKAN_SRC
   vulkan/vk_state_manager.hh
   vulkan/vk_storage_buffer.hh
   vulkan/vk_texture.hh
-  vulkan/vk_timeline_semaphore.hh
   vulkan/vk_to_string.hh
   vulkan/vk_uniform_buffer.hh
   vulkan/vk_vertex_attribute_object.hh
@@ -594,6 +590,7 @@ set(GLSL_SRC
   shaders/material/gpu_shader_material_tex_brick.glsl
   shaders/material/gpu_shader_material_tex_checker.glsl
   shaders/material/gpu_shader_material_tex_environment.glsl
+  shaders/material/gpu_shader_material_tex_gabor.glsl
   shaders/material/gpu_shader_material_tex_gradient.glsl
   shaders/material/gpu_shader_material_tex_image.glsl
   shaders/material/gpu_shader_material_tex_magic.glsl
@@ -949,6 +946,7 @@ if(WITH_GTESTS)
       vulkan/render_graph/tests/vk_render_graph_test_compute.cc
       vulkan/render_graph/tests/vk_render_graph_test_present.cc
       vulkan/render_graph/tests/vk_render_graph_test_render.cc
+      vulkan/render_graph/tests/vk_render_graph_test_scheduler.cc
       vulkan/render_graph/tests/vk_render_graph_test_transfer.cc
     )
   endif()
