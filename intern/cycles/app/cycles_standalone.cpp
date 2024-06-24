@@ -70,7 +70,7 @@ static void session_print_status()
   double progress = options.session->progress.get_progress();
   options.session->progress.get_status(status, substatus);
 
-  if (substatus != "") {
+  if (!substatus.empty()) {
     status += ": " + substatus;
   }
 

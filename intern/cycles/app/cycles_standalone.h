@@ -21,7 +21,7 @@ struct Options {
   bool show_help, interactive, pause;
   string output_filepath;
   string output_pass;
-  string display_type = "";
+  string display_type;
   string display_server = "127.0.0.1:14158";
   std::vector<float> crop_window = {0., 1., 0., 1.};
   bool crop_window_set = false;
