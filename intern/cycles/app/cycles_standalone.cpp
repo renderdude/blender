@@ -42,6 +42,10 @@
 #  include "opengl/window.h"
 #endif
 
+#ifdef WITH_CYCLES_DISTRIBUTED
+# include "distributed/distributed.h"
+#endif
+
 CCL_NAMESPACE_BEGIN
 
 static void session_print(const string &str)
@@ -416,6 +420,15 @@ static void options_parse(int argc, const char **argv)
              "--shadingsys %s",
              &ssname,
              "Shading system to use: svm, osl",
+#endif
+#ifdef WITH_CYCLES_DISTRIBUTED
+             "--bind %s",
+             &options.bind_to,
+             "The port to bind to. This is ZeroMQ syntax \
+so it should look something like: -b tcp://*:5555",
+             "--connect %s",
+             &options.connect_to,
+             "The port to connect to. This is ZeroMQ syntax so it should look something like: -c tcp://localhost:5555",
 #endif
              "--display-type %s",
              &options.display_type,

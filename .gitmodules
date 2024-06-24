@@ -32,3 +32,6 @@
 	path = tests/data
 	url = https://projects.blender.org/blender/blender-test-data.git
 	branch = main
+[submodule "intern/cycles/distributed/mpl"]
+	path = intern/cycles/distributed/mpl
+	url = https://github.com/renderdude/mpl.git

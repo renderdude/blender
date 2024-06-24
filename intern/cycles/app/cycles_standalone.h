@@ -25,6 +25,10 @@ struct Options {
   string display_server = "127.0.0.1:14158";
   std::vector<float> crop_window = {0., 1., 0., 1.};
   bool crop_window_set = false;
+#ifdef WITH_CYCLES_DISTRIBUTED
+  string connect_to;
+  string bind_to;
+#endif
 } options;
 
 CCL_NAMESPACE_END

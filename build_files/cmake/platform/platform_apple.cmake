@@ -354,6 +354,7 @@ if(WITH_CYCLES AND WITH_CYCLES_DISTRIBUTED)
           NAMES zmq.hpp
           PATHS ${PC_ZeroMQ_INCLUDE_DIRS}
           )
+  message(STATUS "Found ZeroMQ includes: ${ZeroMQ_INCLUDE_DIR}")
 
   ## use the hint from above to find the location of libzmq
   find_library(ZeroMQ_LIBRARY

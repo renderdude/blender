@@ -37,6 +37,10 @@ set(LIB
   cycles_util
 )
 
+if(WITH_CYCLES_DISTRIBUTED)
+  list(APPEND LIB cycles_distributed)
+endif()
+
 include (CheckCXXSourceCompiles)
 
 check_cxx_source_compiles ("
