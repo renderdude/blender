@@ -11,6 +11,8 @@ __all__ = (
     "display_errors",
     "register",
     "unregister",
+
+    "ExtensionUI_Visibility",
 )
 
 import bpy
@@ -32,6 +34,15 @@ from bl_ui.space_userpref import (
 # So without showing a distinction - the existence of these buttons is not clear.
 USE_SHOW_ADDON_TYPE_AS_TEXT = True
 USE_SHOW_ADDON_TYPE_AS_ICON = True
+
+# Hide these add-ons when enabled (unless running with extensions debugging enabled).
+SECRET_ADDONS = {__package__}
+
+# For official extensions, it's policy that the website in the JSON listing overrides the developers own website.
+# This incurs and awkward lookup although it's not likely to cause a noticeable slowdown.
+# This choice moves away from the `blender_manifest.toml` being the source of truth for an extensions meta-data
+# so we might want to reconsider this as this at some point.
+USE_ADDON_IGNORE_EXTENSION_MANIFEST_HACK = True
 
 
 # -----------------------------------------------------------------------------
@@ -165,6 +176,34 @@ addon_type_icon = (
     'PACKAGE',  # `ADDON_TYPE_LEGACY_OTHER`.
 )
 
+if USE_ADDON_IGNORE_EXTENSION_MANIFEST_HACK:
+    # WARNING: poor performance, acceptable as it's only called for expanded add-ons (but not ideal).
+    def addon_ignore_manifest_website_hack_remote_or_default(module_name, item_doc_url):
+        from . import repo_cache_store_ensure
+        from .bl_extension_ops import (
+            extension_repos_read,
+        )
+
+        repos_all = extension_repos_read()
+        repo_module, pkg_id = module_name.split(".")[1:]
+        item_remote = None
+
+        repo_cache_store = repo_cache_store_ensure()
+
+        for repo_index, pkg_manifest_remote in enumerate(
+                repo_cache_store.pkg_manifest_from_remote_ensure(
+                    error_fn=print,
+                    ignore_missing=True,
+                )
+        ):
+            if repos_all[repo_index].module == repo_module:
+                if pkg_manifest_remote is not None:
+                    item_remote = pkg_manifest_remote.get(pkg_id)
+                break
+        if item_remote is None:
+            return item_doc_url
+        return item_remote.website or item_doc_url
+
 
 # This function generalizes over displaying extension & legacy add-ons,
 # (hence the many "item_*" arguments).
@@ -222,7 +261,9 @@ def addon_draw_item_expanded(
     if item_doc_url:
         col_a.label(text="Website")
         col_b.split(factor=0.5).operator(
-            "wm.url_open", text=domain_extract_from_url(item_doc_url), icon='HELP',
+            "wm.url_open",
+            text=domain_extract_from_url(item_doc_url),
+            icon='HELP' if addon_type in {ADDON_TYPE_LEGACY_CORE, ADDON_TYPE_LEGACY_USER} else 'URL',
         ).url = item_doc_url
     # Only add "Report a Bug" button if tracker_url is set
     # or the add-on is bundled (use official tracker then).
@@ -370,6 +411,7 @@ def addons_panel_draw_items(
         addon_tags_exclude,  # `Set[str]`
         enabled_only,  # `bool`
         addon_extension_manifest_map,  # `Dict[str, PkgManifest_Normalized]`
+        show_development,  # `bool`
 ):
     # NOTE: this duplicates logic from `USERPREF_PT_addons` eventually this logic should be used instead.
     # Don't de-duplicate the logic as this is a temporary state - as long as extensions remains experimental.
@@ -403,8 +445,16 @@ def addons_panel_draw_items(
                 item_version = item_local.version
                 item_doc_url = item_local.website
                 item_tracker_url = ""
+
+                if USE_ADDON_IGNORE_EXTENSION_MANIFEST_HACK:
+                    item_doc_url = addon_ignore_manifest_website_hack_remote_or_default(module_name, item_doc_url)
+
             del item_local
         else:
+            # Weak but allow some add-ons to be hidden, as they're for internal use.
+            if (module_name in SECRET_ADDONS) and is_enabled and (show_development is False):
+                continue
+
             item_name = bl_info["name"]
             # A "." is added to the extensions manifest tag-line.
             # Avoid duplicate dot for legacy add-ons.
@@ -477,10 +527,13 @@ def addons_panel_draw_items(
                 # Expanded from both legacy add-ons & extensions.
                 item_name=item_name,
                 item_description=item_description,
+                # pylint: disable-next=used-before-assignment
                 item_maintainer=item_maintainer,
+                # pylint: disable-next=used-before-assignment
                 item_version=item_version,
                 item_warning_legacy=item_warning_legacy,
                 item_doc_url=item_doc_url,
+                # pylint: disable-next=used-before-assignment
                 item_tracker_url=item_tracker_url,
             )
 
@@ -496,6 +549,7 @@ def addons_panel_draw_impl(
         search_casefold,  # `str`
         addon_tags_exclude,  # `Set[str]`
         enabled_only,  # `bool`
+        show_development,  # `bool`
 ):
     """
     Show all the items... we may want to paginate at some point.
@@ -560,6 +614,7 @@ def addons_panel_draw_impl(
         addon_tags_exclude=addon_tags_exclude,
         enabled_only=enabled_only,
         addon_extension_manifest_map=addon_extension_manifest_map,
+        show_development=show_development,
     )
 
     # Append missing scripts
@@ -616,7 +671,7 @@ def addons_panel_draw(panel, context):
     split = layout.split(factor=0.5)
     row_a = split.row()
     row_b = split.row()
-    row_a.prop(wm, "addon_search", text="", icon='VIEWZOOM')
+    row_a.prop(wm, "addon_search", text="", icon='VIEWZOOM', placeholder="Search Add-ons")
     row_b.prop(view, "show_addons_enabled_only", text="Enabled Only")
     rowsub = row_b.row(align=True)
 
@@ -636,7 +691,239 @@ def addons_panel_draw(panel, context):
         wm.addon_search.casefold(),
         addon_tags_exclude,
         view.show_addons_enabled_only,
+        show_development=prefs.experimental.use_extensions_debug,
     )
+
+
+# -----------------------------------------------------------------------------
+# Extensions Data Iterator
+#
+# Light weight wrapper for extension local and remote extension manifest data.
+# Used for display purposes. Includes some information for filtering.
+
+from collections import namedtuple
+
+ExtensionUI = namedtuple(
+    "ExtensionUI",
+    (
+        "repo_index",
+        "pkg_id",
+        "item_local",
+        "item_remote",
+        "is_enabled",
+        "is_outdated",
+    ),
+)
+del namedtuple
+
+
+class ExtensionUI_FilterParams:
+    __slots__ = (
+        "search_casefold",
+        "tags_exclude",
+        "filter_by_type",
+        "addons_enabled",
+        "active_theme_info",
+        "repos_all",
+
+        # From the window manager.
+        "show_installed_enabled",
+        "show_installed_disabled",
+        "show_available",
+
+        # Write variables, use this to check if the panels should be shown (even when collapsed).
+        "has_installed_enabled",
+        "has_installed_disabled",
+        "has_available",
+    )
+
+    def __init__(
+            self,
+            *,
+            search_casefold,
+            tags_exclude,
+            filter_by_type,
+            addons_enabled,
+            active_theme_info,
+            repos_all,
+            show_installed_enabled,
+            show_installed_disabled,
+            show_available,
+    ):
+        self.search_casefold = search_casefold
+        self.tags_exclude = tags_exclude
+        self.filter_by_type = filter_by_type
+        self.addons_enabled = addons_enabled
+        self.active_theme_info = active_theme_info
+        self.repos_all = repos_all
+        self.show_installed_enabled = show_installed_enabled
+        self.show_installed_disabled = show_installed_disabled
+        self.show_available = show_available
+
+        self.has_installed_enabled = False
+        self.has_installed_disabled = False
+        self.has_available = False
+
+    @staticmethod
+    def default_from_context(context):
+        from .bl_extension_ops import (
+            blender_filter_by_type_map,
+            extension_repos_read,
+        )
+
+        wm = context.window_manager
+        prefs = context.preferences
+
+        repos_all = extension_repos_read()
+
+        filter_by_type = blender_filter_by_type_map[wm.extension_type]
+        show_addons = filter_by_type in {"", "add-on"}
+        show_themes = filter_by_type in {"", "theme"}
+
+        if show_addons:
+            addons_enabled = {addon.module for addon in prefs.addons} if show_addons else None
+        else:
+            addons_enabled = None  # Unused.
+
+        if show_themes:
+            active_theme_info = pkg_repo_and_id_from_theme_path(repos_all, prefs.themes[0].filepath)
+        else:
+            active_theme_info = None  # Unused.
+
+        # Create a set of tags marked False to simplify exclusion & avoid it altogether when all tags are enabled.
+        extension_tags_exclude = {k for (k, v) in wm.get("extension_tags", {}).items() if v is False}
+
+        return ExtensionUI_FilterParams(
+            search_casefold=wm.extension_search.casefold(),
+            tags_exclude=extension_tags_exclude,
+            filter_by_type=filter_by_type,
+            addons_enabled=addons_enabled,
+            active_theme_info=active_theme_info,
+            repos_all=repos_all,
+
+            # Extensions don't different between these (add-ons do).
+            show_installed_enabled=wm.extension_show_panel_installed,
+            show_installed_disabled=wm.extension_show_panel_installed,
+            show_available=wm.extension_show_panel_available,
+        )
+
+    # The main function that iterates over remote data and decides what is "visible".
+    def extension_ui_visible(
+            self,
+            repo_index,  # `int`
+            pkg_manifest_local,  # `Dict[str, PkgManifest_Normalized]`
+            pkg_manifest_remote,  # `Dict[str, PkgManifest_Normalized]`
+    ):
+        from .bl_extension_ops import (
+            pkg_info_check_exclude_filter,
+        )
+
+        show_addons = self.filter_by_type in {"", "add-on"}
+
+        if show_addons:
+            repo_module_prefix = pkg_repo_module_prefix(self.repos_all[repo_index])
+
+        for pkg_id, (item_local, item_remote) in pkg_manifest_zip_all_items(pkg_manifest_local, pkg_manifest_remote):
+
+            is_installed = item_local is not None
+
+            item = item_local or item_remote
+            if self.filter_by_type and (self.filter_by_type != item.type):
+                continue
+            if self.search_casefold and (not pkg_info_check_exclude_filter(item, self.search_casefold)):
+                continue
+
+            if self.tags_exclude:
+                if tags_exclude_match(item.tags, self.tags_exclude):
+                    continue
+
+            is_addon = False
+            is_theme = False
+            match item.type:
+                case "add-on":
+                    is_addon = True
+                case "theme":
+                    is_theme = True
+
+            if is_addon:
+                if is_installed:
+                    # Currently we only need to know the module name once installed.
+                    addon_module_name = repo_module_prefix + pkg_id
+                    # pylint: disable-next=possibly-used-before-assignment
+                    is_enabled = addon_module_name in self.addons_enabled
+
+                else:
+                    is_enabled = False
+                    addon_module_name = None
+            elif is_theme:
+                # pylint: disable-next=possibly-used-before-assignment
+                is_enabled = (repo_index, pkg_id) == self.active_theme_info
+                addon_module_name = None
+            else:
+                # TODO: ability to disable.
+                is_enabled = is_installed
+                addon_module_name = None
+
+            item_version = item.version
+            if item_local is None or item_remote is None:
+                item_remote_version = None
+                is_outdated = False
+            else:
+                item_remote_version = item_remote.version
+                is_outdated = item_remote_version != item_version
+
+            if is_installed:
+                if is_enabled:
+                    self.has_installed_enabled = True
+                    if not self.show_installed_enabled:
+                        continue
+                else:
+                    self.has_installed_disabled = True
+                    if not self.show_installed_disabled:
+                        continue
+            else:
+                self.has_available = True
+                if not self.show_available:
+                    continue
+
+            yield ExtensionUI(repo_index, pkg_id, item_local, item_remote, is_enabled, is_outdated)
+
+
+# The purpose of this class is to allow operators to check if an extension is visible without operator
+# logic depending on UI internals such as `ExtensionUI_FilterParams` & `ExtensionUI`,
+# the state of panels and so on. As this is used by operators it's intended for a one-off usage
+# (operating on visible extensions), so a performance trade-off to keep the API simple is acceptable.
+# It could also be optimized in the future to avoid calculating all data up-front - if that's ever needed.
+
+class ExtensionUI_Visibility:
+    __slots__ = (
+        "_visible",
+    )
+
+    def __init__(self, context, repo_cache_store):
+        visible = set()
+
+        params = ExtensionUI_FilterParams.default_from_context(context)
+
+        for repo_index, (
+                pkg_manifest_local,
+                pkg_manifest_remote,
+        ) in enumerate(zip(
+            repo_cache_store.pkg_manifest_from_local_ensure(error_fn=print),
+            repo_cache_store.pkg_manifest_from_remote_ensure(error_fn=print),
+            strict=True,
+        )):
+            for ext_ui in params.extension_ui_visible(
+                    repo_index,
+                    pkg_manifest_local,
+                    pkg_manifest_remote,
+            ):
+                visible.add((ext_ui.pkg_id, repo_index))
+
+        self._visible = visible
+
+    def test(self, key):
+        return key in self._visible
 
 
 # -----------------------------------------------------------------------------
@@ -715,6 +1002,49 @@ class notify_info:
                     notify_info._update_state = True
         return in_progress
 
+    @staticmethod
+    def update_show_in_preferences():
+        """
+        An update was triggered externally (not from the interface).
+        Without this call, the message in the preferences UI will not display.
+        """
+        # Skip checking updates when:
+        # - False, updates are running already no need to request displaying again.
+        # - None, updates have not yet run, meaning they will be displayed when the preferences are next drawn.
+        if notify_info._update_state is not True:
+            return
+
+        # NOTE: we could assert `bl_extension_notify.update_in_progress` since it is expected
+        # this function is called when updates have been started, however it's functionally a NOP
+        # where this case is detected and the notification state will switch to being "complete"
+        # (when `update_ensure` runs).
+        notify_info._update_state = False
+
+# Simple data-storage while drawing.
+# NOTE: could be a named-tuple except the `layout_panel` needs to be mutable.
+
+
+class ExtensionUI_Section:
+    __slots__ = (
+        # Label & panel property or None not to define a header,
+        # in this case the previous panel is used.
+        "panel_header",
+        "do_sort",
+
+        "enabled",
+        "extension_ui_list",
+    )
+
+    def __init__(self, *, panel_header, do_sort):
+        self.panel_header = panel_header
+        self.do_sort = do_sort
+
+        self.enabled = True
+        self.extension_ui_list = []
+
+    def sort_by_name(self):
+        self.extension_ui_list.sort(key=lambda ext_ui: (ext_ui.item_local or ext_ui.item_remote).name.casefold())
+
 
 def extensions_panel_draw_online_extensions_request_impl(
         self,
@@ -787,34 +1117,187 @@ def extensions_map_from_legacy_addons_reverse_lookup(pkg_id):
     return ""
 
 
+def extension_draw_item(
+        layout,
+        *,
+        pkg_id,  # `str`
+        item_local,  # `Optional[PkgManifest_Normalized]`
+        item_remote,  # `Optional[PkgManifest_Normalized]`
+        is_enabled,  # `bool`
+        is_outdated,  # `bool`
+        show,  # `bool`.
+        mark,  # `Optional[bool]`.
+
+        # General vars.
+        repo_index,  # `int`
+        repo_item,  # `RepoItem`
+        operation_in_progress,  # `bool`
+):
+    item = item_local or item_remote
+    is_installed = item_local is not None
+    has_remote = repo_item.remote_url != ""
+
+    # Left align so the operator text isn't centered.
+    colsub = layout.column()
+    row = colsub.row(align=True)
+
+    if show:
+        props = row.operator("extensions.package_show_clear", text="", icon='DOWNARROW_HLT', emboss=False)
+    else:
+        props = row.operator("extensions.package_show_set", text="", icon='RIGHTARROW', emboss=False)
+    props.pkg_id = pkg_id
+    props.repo_index = repo_index
+    del props
+
+    if mark is not None:
+        if mark:
+            props = row.operator("extensions.package_mark_clear", text="", icon='RADIOBUT_ON', emboss=False)
+        else:
+            props = row.operator("extensions.package_mark_set", text="", icon='RADIOBUT_OFF', emboss=False)
+        props.pkg_id = pkg_id
+        props.repo_index = repo_index
+        del props
+
+    sub = row.row()
+    sub.active = is_enabled
+    # Without checking `is_enabled` here, there is no way for the user to know if an extension
+    # is enabled or not, which is useful to show - when they may be considering removing/updating
+    # extensions based on them being used or not.
+    sub.label(text=item.name, translate=False)
+
+    del sub
+
+    # Add a top-level row so `row_right` can have a grayed out button/label
+    # without graying out the menu item since# that is functional.
+    row_right_toplevel = row.row(align=True)
+    if operation_in_progress:
+        row_right_toplevel.enabled = False
+    row_right_toplevel.alignment = 'RIGHT'
+    row_right = row_right_toplevel.row()
+    row_right.alignment = 'RIGHT'
+
+    if has_remote and (item_remote is not None):
+        if is_installed:
+            # Include uninstall below.
+            if is_outdated:
+                props = row_right.operator("extensions.package_install", text="Update")
+                props.repo_index = repo_index
+                props.pkg_id = pkg_id
+                del props
+        else:
+            props = row_right.operator("extensions.package_install", text="Install")
+            props.repo_index = repo_index
+            props.pkg_id = pkg_id
+            del props
+    else:
+        # Right space for alignment with the button.
+        if has_remote and (item_remote is None):
+            # There is a local item with no remote
+            row_right.label(text="Orphan   ")
+
+        row_right.active = False
+
+    row_right = row_right_toplevel.row(align=True)
+    row_right.alignment = 'RIGHT'
+    row_right.separator()
+
+    # NOTE: Keep space between any buttons and this menu to prevent stray clicks accidentally running install.
+    # The separator is around together with the align to give some space while keeping the button and the menu still close-by.
+    # Used `extension_path` so the menu can access "this" extension.
+    row_right.context_string_set("extension_path", "{:s}.{:s}".format(repo_item.module, pkg_id))
+    row_right.menu("USERPREF_MT_extensions_item", text="", icon='DOWNARROW_HLT')
+    del row_right
+    del row_right_toplevel
+
+    if show:
+        import os
+        from bpy.app.translations import pgettext_iface as iface_
+
+        col = layout.column()
+
+        row = col.row()
+        row.active = is_enabled
+
+        # The full tagline may be multiple lines (not yet supported by Blender's UI).
+        row.label(text=" {:s}.".format(item.tagline), translate=False)
+
+        col.separator(type='LINE')
+        del col
+
+        col_info = layout.column()
+        col_info.active = is_enabled
+        split = col_info.split(factor=0.15)
+        col_a = split.column()
+        col_b = split.column()
+        col_a.alignment = "RIGHT"
+
+        if value := (item_remote or item_local).website:
+            col_a.label(text="Website")
+            col_b.split(factor=0.5).operator(
+                "wm.url_open", text=domain_extract_from_url(value), icon='URL',
+            ).url = value
+        del value
+
+        if item.type == "add-on":
+            col_a.label(text="Permissions")
+            # WARNING: while this is documented to be a dict, old packages may contain a list of strings.
+            # As it happens dictionary keys & list values both iterate over string,
+            # however we will want to show the dictionary values eventually.
+            if (value := item.permissions):
+                col_b.label(text=", ".join([iface_(x).title() for x in value]), translate=False)
+            else:
+                col_b.label(text="No permissions specified")
+            del value
+
+        col_a.label(text="Maintainer")
+        col_b.label(text=item.maintainer, translate=False)
+
+        col_a.label(text="Version")
+        if is_outdated:
+            col_b.label(
+                text=iface_("{:s} ({:s} available)").format(item.version, item_remote.version),
+                translate=False,
+            )
+        else:
+            col_b.label(text=item.version, translate=False)
+
+        if has_remote and (item_remote is not None):
+            col_a.label(text="Size")
+            col_b.label(text=size_as_fmt_string(item_remote.archive_size), translate=False)
+
+        col_a.label(text="License")
+        col_b.label(text=item.license, translate=False)
+
+        col_a.label(text="Repository")
+        col_b.label(text=repo_item.name, translate=False)
+
+        if is_installed:
+            col_a.label(text="Path")
+            col_b.label(text=os.path.join(repo_item.directory, pkg_id), translate=False)
+
+
 def extensions_panel_draw_impl(
         self,
         context,  # `bpy.types.Context`
-        search_casefold,   # `str`
-        filter_by_type,  # `str`
-        extension_tags_exclude,  # `Set[str]`
-        enabled_only,  # `bool`
-        updates_only,  # `bool`
-        installed_only,  # `bool`
+        params,  # `ExtensionUI_FilterParams`
         operation_in_progress,  # `bool`
         show_development,  # `bool`
 ):
     """
     Show all the items... we may want to paginate at some point.
     """
-    import os
     from bpy.app.translations import (
         pgettext_iface as iface_,
     )
     from .bl_extension_ops import (
         blender_extension_mark,
         blender_extension_show,
-        extension_repos_read,
-        pkg_info_check_exclude_filter,
         repo_cache_store_refresh_from_prefs,
     )
 
     from . import repo_cache_store_ensure
+
+    prefs = context.preferences
 
     repo_cache_store = repo_cache_store_ensure()
 
@@ -824,34 +1307,18 @@ def extensions_panel_draw_impl(
 
     layout = self.layout
 
-    prefs = context.preferences
-
-    if updates_only:
-        installed_only = True
-
     # Define a top-most column to place warnings (if-any).
     # Needed so the warnings aren't mixed in with other content.
     layout_topmost = layout.column()
 
-    repos_all = extension_repos_read()
-
     if bpy.app.online_access:
-        if notify_info.update_ensure(repos_all):
+        if notify_info.update_ensure(params.repos_all):
             # TODO: should be part of the status bar.
             from .bl_extension_notify import update_ui_text
             text, icon = update_ui_text()
             if text:
                 layout_topmost.box().label(text=text, icon=icon)
             del text, icon
-
-    # To access enabled add-ons.
-    show_addons = filter_by_type in {"", "add-on"}
-    show_themes = filter_by_type in {"", "theme"}
-    if show_addons:
-        addons_enabled = {addon.module for addon in prefs.addons}
-
-    if show_themes:
-        active_theme_info = pkg_repo_and_id_from_theme_path(repos_all, prefs.themes[0].filepath)
 
     # Collect exceptions accessing repositories, and optionally show them.
     errors_on_draw = []
@@ -906,6 +1373,33 @@ def extensions_panel_draw_impl(
     #
     #   TODO(@ideasman42): handle permissions on upgrade.
 
+    section_list = (
+        # Installed (upgrade, enabled).
+        ExtensionUI_Section(panel_header=(iface_("Installed"), "extension_show_panel_installed"), do_sort=True),
+        # Installed (upgrade, disabled). Use the previous panel.
+        ExtensionUI_Section(panel_header=None, do_sort=True),
+        # Installed (up-to-date, enabled). Use the previous panel.
+        ExtensionUI_Section(panel_header=None, do_sort=True),
+        # Installed (up-to-date, disabled).
+        ExtensionUI_Section(panel_header=None, do_sort=True),
+        # Available (remaining).
+        # NOTE: don't use A-Z here to prevent name manipulation to bring an extension up on the ranks.
+        ExtensionUI_Section(panel_header=(iface_("Available"), "extension_show_panel_available"), do_sort=False),
+    )
+    # The key is: (is_outdated, is_enabled) or None for the rest.
+    section_table = {
+        (True, True): section_list[0],
+        (True, False): section_list[1],
+        (False, True): section_list[2],
+        (False, False): section_list[3],
+    }
+    section_installed = section_list[0]
+    section_available = section_list[4]
+
+    repo_index = -1
+    pkg_manifest_local = None
+    pkg_manifest_remote = None
+
     for repo_index, (
             pkg_manifest_local,
             pkg_manifest_remote,
@@ -920,7 +1414,7 @@ def extensions_panel_draw_impl(
         # IO errors in general and it is better to show a warning than to ignore the error entirely
         # or cause a trace-back which breaks the UI.
         if (remote_ex is not None) or (local_ex is not None):
-            repo = repos_all[repo_index]
+            repo = params.repos_all[repo_index]
             # NOTE: `FileNotFoundError` occurs when a repository has been added but has not update with its remote.
             # We may want a way for users to know a repository is missing from the view and they need to run update
             # to access its extensions.
@@ -939,7 +1433,7 @@ def extensions_panel_draw_impl(
                 local_ex = None
             continue
 
-        has_remote = repos_all[repo_index].remote_url != ""
+        has_remote = params.repos_all[repo_index].remote_url != ""
         if pkg_manifest_remote is None:
             if has_remote:
                 # NOTE: it would be nice to detect when the repository ran sync and it failed.
@@ -951,7 +1445,7 @@ def extensions_panel_draw_impl(
                             "Repository: \"{:s}\" remote data unavailable, "
                             "sync with the remote repository."
                         ).format(
-                            repos_all[repo_index].name,
+                            params.repos_all[repo_index].name,
                         )
                     )
                 elif prefs.extensions.use_online_access_handled is False:
@@ -971,240 +1465,75 @@ def extensions_panel_draw_impl(
                             "Repository: \"{:s}\" remote data unavailable, "
                             "either allow \"Online Access\" or disable the repository to suppress this message"
                         ).format(
-                            repos_all[repo_index].name,
+                            params.repos_all[repo_index].name,
                         )
                     )
                 continue
 
-        repo_module_prefix = pkg_repo_module_prefix(repos_all[repo_index])
-
-        for pkg_id, (item_local, item_remote) in pkg_manifest_zip_all_items(pkg_manifest_local, pkg_manifest_remote):
-            item = item_local or item_remote
-            if filter_by_type and (filter_by_type != item.type):
-                continue
-            if search_casefold and (not pkg_info_check_exclude_filter(item, search_casefold)):
-                continue
-
-            is_installed = item_local is not None
-
-            if installed_only and (is_installed == 0):
-                continue
-
-            if extension_tags_exclude:
-                if tags_exclude_match(item.tags, extension_tags_exclude):
-                    continue
-
-            is_addon = False
-            is_theme = False
-            match item.type:
-                case "add-on":
-                    is_addon = True
-                case "theme":
-                    is_theme = True
-
-            if is_addon:
-                if is_installed:
-                    # Currently we only need to know the module name once installed.
-                    addon_module_name = repo_module_prefix + pkg_id
-                    # pylint: disable-next=possibly-used-before-assignment
-                    is_enabled = addon_module_name in addons_enabled
-
-                else:
-                    is_enabled = False
-                    addon_module_name = None
-            elif is_theme:
-                # pylint: disable-next=possibly-used-before-assignment
-                is_enabled = (repo_index, pkg_id) == active_theme_info
-                addon_module_name = None
-            else:
-                # TODO: ability to disable.
-                is_enabled = is_installed
-                addon_module_name = None
-
-            if enabled_only and (not is_enabled):
-                continue
-
-            item_version = item.version
-            if item_local is None:
-                item_local_version = None
-                is_outdated = False
-            else:
-                item_local_version = item_local.version
-                is_outdated = item_local_version != item_version
-
-            if updates_only:
-                if not is_outdated:
-                    continue
-
-            key = (pkg_id, repo_index)
-            if show_development:
-                mark = key in blender_extension_mark
-            show = key in blender_extension_show
-            del key
-
-            box = layout.box()
-
-            # Left align so the operator text isn't centered.
-            colsub = box.column()
-            row = colsub.row(align=True)
-            # row.label
-            if show:
-                props = row.operator("extensions.package_show_clear", text="", icon='DOWNARROW_HLT', emboss=False)
-            else:
-                props = row.operator("extensions.package_show_set", text="", icon='RIGHTARROW', emboss=False)
-            props.pkg_id = pkg_id
-            props.repo_index = repo_index
-            del props
-
-            if show_development:
-                if mark:
-                    props = row.operator("extensions.package_mark_clear", text="", icon='RADIOBUT_ON', emboss=False)
-                else:
-                    props = row.operator("extensions.package_mark_set", text="", icon='RADIOBUT_OFF', emboss=False)
-                props.pkg_id = pkg_id
-                props.repo_index = repo_index
-                del props
-
-            sub = row.row()
-            sub.active = is_enabled
-            # Without checking `is_enabled` here, there is no way for the user to know if an extension
-            # is enabled or not, which is useful to show - when they may be considering removing/updating
-            # extensions based on them being used or not.
-            sub.label(
-                text=(
-                    item.name if (is_enabled or is_installed is False) else
-                    item.name + iface_(" (disabled)")
-                ),
-                translate=False,
+        for ext_ui in params.extension_ui_visible(
+                repo_index,
+                pkg_manifest_local,
+                pkg_manifest_remote,
+        ):
+            section = (
+                section_available if ext_ui.item_local is None else
+                section_table[ext_ui.is_outdated, ext_ui.is_enabled]
             )
-            del sub
+            section.extension_ui_list.append(ext_ui)
 
-            # Add a top-level row so `row_right` can have a grayed out button/label
-            # without graying out the menu item since# that is functional.
-            row_right_toplevel = row.row(align=True)
-            if operation_in_progress:
-                row_right_toplevel.enabled = False
-            row_right_toplevel.alignment = 'RIGHT'
-            row_right = row_right_toplevel.row(align=True)
-            row_right.alignment = 'RIGHT'
+    del repo_index, pkg_manifest_local, pkg_manifest_remote
 
-            if has_remote and (item_remote is not None):
-                if is_installed:
-                    # Include uninstall below.
-                    if is_outdated:
-                        props = row_right.operator("extensions.package_install", text="Update")
-                        props.repo_index = repo_index
-                        props.pkg_id = pkg_id
-                        del props
-                    else:
-                        # Right space for alignment with the button.
-                        row_right.label(text="Installed   ")
-                        row_right.active = False
-                else:
-                    props = row_right.operator("extensions.package_install", text="Install")
-                    props.repo_index = repo_index
-                    props.pkg_id = pkg_id
-                    del props
-            else:
-                # Right space for alignment with the button.
-                if has_remote and (item_remote is None):
-                    # There is a local item with no remote
-                    row_right.label(text="Orphan   ")
-                else:
-                    row_right.label(text="Installed   ")
+    section_installed.enabled = (params.has_installed_enabled or params.has_installed_disabled)
+    section_available.enabled = params.has_available
 
-                row_right.active = False
+    layout_panel = None
 
-            row_right = row_right_toplevel.row(align=True)
-            row_right.alignment = 'RIGHT'
+    for section in section_list:
+        if not section.enabled:
+            continue
 
-            row_right.context_string_set("extension_path", "{:s}.{:s}".format(repos_all[repo_index].module, pkg_id))
+        if section.panel_header:
+            label, prop_id = section.panel_header
+            layout_header, layout_panel = layout.panel_prop(context.window_manager, prop_id)
+            layout_header.label(text=label, translate=False)
+            del label, prop_id, layout_header
 
-            row_right.menu("USERPREF_MT_extensions_item", text="", icon='DOWNARROW_HLT')
-            del row_right
-            del row_right_toplevel
+        if layout_panel is None:
+            continue
+        if not section.extension_ui_list:
+            continue
 
-            if show:
-                col = box.column()
+        if section.do_sort:
+            section.sort_by_name()
 
-                row = col.row()
+        for ext_ui in section.extension_ui_list:
+            extension_draw_item(
+                layout_panel.box(),
+                pkg_id=ext_ui.pkg_id,
+                item_local=ext_ui.item_local,
+                item_remote=ext_ui.item_remote,
+                is_enabled=ext_ui.is_enabled,
+                is_outdated=ext_ui.is_outdated,
+                show=(ext_ui.pkg_id, ext_ui.repo_index) in blender_extension_show,
+                mark=((ext_ui.pkg_id, ext_ui.repo_index) in blender_extension_mark) if show_development else None,
 
-                # The full tagline may be multiple lines (not yet supported by Blender's UI).
-                row.label(text=" {:s}.".format(item.tagline), translate=False)
-
-                col.separator(type='LINE')
-                del col
-
-                col_info = box.column()
-                col_info.active = is_enabled
-                split = col_info.split(factor=0.15)
-                col_a = split.column()
-                col_b = split.column()
-                col_a.alignment = "RIGHT"
-
-                if is_addon:
-                    col_a.label(text="Permissions")
-                    # WARNING: while this is documented to be a dict, old packages may contain a list of strings.
-                    # As it happens dictionary keys & list values both iterate over string,
-                    # however we will want to show the dictionary values eventually.
-                    if (value := item.permissions):
-                        col_b.label(text=", ".join([iface_(x).title() for x in value]), translate=False)
-                    else:
-                        col_b.label(text="No permissions specified")
-                    del value
-
-                col_a.label(text="Maintainer")
-                col_b.label(text=item.maintainer, translate=False)
-
-                col_a.label(text="Version")
-                if is_outdated:
-                    col_b.label(
-                        text=iface_("{:s} ({:s} available)").format(item_local_version, item_version),
-                        translate=False,
-                    )
-                else:
-                    col_b.label(text=item_version, translate=False)
-
-                if has_remote and (item_remote is not None):
-                    col_a.label(text="Size")
-                    col_b.label(text=size_as_fmt_string(item_remote.archive_size), translate=False)
-
-                col_a.label(text="License")
-                col_b.label(text=item.license, translate=False)
-
-                if len(repos_all) > 1:
-                    col_a.label(text="Repository")
-                    col_b.label(text=repos_all[repo_index].name, translate=False)
-
-                if is_installed:
-                    col_a.label(text="Path")
-                    col_b.label(text=os.path.join(repos_all[repo_index].directory, pkg_id), translate=False)
+                # General vars.
+                repo_index=ext_ui.repo_index,
+                repo_item=params.repos_all[ext_ui.repo_index],
+                operation_in_progress=operation_in_progress,
+            )
 
     # Finally show any errors in a single panel which can be dismissed.
     display_errors.errors_curr = errors_on_draw
     if errors_on_draw:
-        display_errors.draw(layout_topmost)
-
-
-class USERPREF_PT_extensions_filter(Panel):
-    bl_label = "Extensions Filter"
-
-    bl_space_type = 'TOPBAR'  # dummy.
-    bl_region_type = 'HEADER'
-    bl_ui_units_x = 13
-
-    def draw(self, context):
-        layout = self.layout
-
-        wm = context.window_manager
-
-        col = layout.column(heading="Show Only")
-        col.use_property_split = True
-        col.prop(wm, "extension_enabled_only", text="Enabled Extensions")
-        col.prop(wm, "extension_updates_only", text="Updates Available")
-        sub = col.column()
-        sub.active = (not wm.extension_enabled_only) and (not wm.extension_updates_only)
-        sub.prop(wm, "extension_installed_only", text="Installed Extensions")
+        # Hide the errors when running an operation (typically synchronizing with remote repositories)
+        # because a common cause for an error is when the user enabled online access for the first time
+        # and no repository data is found. This makes it seem as if there is an error when the user first
+        # enables online access, only to disappear once syncing is complete.
+        # Whatever the exact cause, it's likely that syncing will resolve issues relating
+        # to accessing repositories so it's not helpful to bother the user while this runs.
+        if not operation_in_progress:
+            display_errors.draw(layout_topmost)
 
 
 class USERPREF_PT_addons_tags(Panel):
@@ -1214,11 +1543,8 @@ class USERPREF_PT_addons_tags(Panel):
     bl_region_type = 'HEADER'
     bl_ui_units_x = 13
 
-    _wm_tags_attr = "addon_tags"
-
-    def draw(self, _context):
-        # Extended by the `bl_pkg` add-on.
-        pass
+    def draw(self, context):
+        tags_panel_draw(self.layout, context, "addon_tags")
 
 
 class USERPREF_PT_extensions_tags(Panel):
@@ -1228,11 +1554,8 @@ class USERPREF_PT_extensions_tags(Panel):
     bl_region_type = 'HEADER'
     bl_ui_units_x = 13
 
-    _wm_tags_attr = "extension_tags"
-
-    def draw(self, _context):
-        # Extended by the `bl_pkg` add-on.
-        pass
+    def draw(self, context):
+        tags_panel_draw(self.layout, context, "extension_tags")
 
 
 class USERPREF_MT_addons_settings(Menu):
@@ -1255,6 +1578,9 @@ class USERPREF_MT_extensions_settings(Menu):
         layout = self.layout
 
         prefs = context.preferences
+
+        layout.operator("wm.url_open_preset", text="Visit Extensions Platform", icon='URL').type = 'EXTENSIONS'
+        layout.separator()
 
         layout.operator("extensions.repo_sync_all", icon='FILE_REFRESH')
         layout.operator("extensions.repo_refresh_all")
@@ -1404,7 +1730,7 @@ class USERPREF_MT_extensions_item(Menu):
 
         # Unlike most other value, prioritize the remote website,
         # see code comments in `extensions_panel_draw_impl`.
-        if value := ((item_remote or item_local).website):
+        if value := (item_remote or item_local).website:
             layout.operator("wm.url_open", text="Visit Website", icon='URL').url = value
         else:
             # Without this, the menu may sometimes be empty (which seems like a bug).
@@ -1439,9 +1765,6 @@ def extensions_panel_draw(panel, context):
     )
 
     from bpy.app.translations import pgettext_iface as iface_
-    from .bl_extension_ops import (
-        blender_filter_by_type_map,
-    )
 
     wm = context.window_manager
     prefs = context.preferences
@@ -1468,10 +1791,9 @@ def extensions_panel_draw(panel, context):
 
     row = layout.split(factor=0.5)
     row_a = row.row()
-    row_a.prop(wm, "extension_search", text="", icon='VIEWZOOM')
+    row_a.prop(wm, "extension_search", text="", icon='VIEWZOOM', placeholder="Search Extensions")
     row_b = row.row(align=True)
     row_b.prop(wm, "extension_type", text="")
-    row_b.popover("USERPREF_PT_extensions_filter", text="", icon='FILTER')
     row_b.popover("USERPREF_PT_extensions_tags", text="", icon='TAG')
 
     row_b.separator()
@@ -1554,18 +1876,10 @@ def extensions_panel_draw(panel, context):
     ):
         extensions_panel_draw_online_extensions_request_impl(panel, context)
 
-    # Create a set of tags marked False to simplify exclusion & avoid it altogether when all tags are enabled.
-    extension_tags_exclude = {k for (k, v) in wm.get("extension_tags", {}).items() if v is False}
-
     extensions_panel_draw_impl(
         panel,
         context,
-        wm.extension_search.casefold(),
-        blender_filter_by_type_map[wm.extension_type],
-        extension_tags_exclude,
-        wm.extension_enabled_only,
-        wm.extension_updates_only,
-        wm.extension_installed_only,
+        ExtensionUI_FilterParams.default_from_context(context),
         operation_in_progress,
         show_development,
     )
@@ -1625,16 +1939,39 @@ def tags_current(wm, tags_attr):
 
     if tags_attr == "addon_tags":
         filter_by_type = "add-on"
-        only_enabled = prefs.view.show_addons_enabled_only
+        search_casefold = wm.addon_search.casefold()
+        show_installed_enabled = True
+        show_installed_disabled = not prefs.view.show_addons_enabled_only
+        show_available = False
     else:
         filter_by_type = blender_filter_by_type_map[wm.extension_type]
-        only_enabled = wm.extension_enabled_only
-
-    # Currently only add-ons can make use of enabled by type (usefully) for tags.
-    if only_enabled and (filter_by_type == "add-on"):
-        addons_enabled = {addon.module for addon in prefs.addons}
+        search_casefold = wm.extension_search.casefold()
+        show_installed_enabled = show_installed_disabled = wm.extension_show_panel_installed
+        show_available = wm.extension_show_panel_available
 
     repos_all = extension_repos_read()
+
+    addons_enabled = None
+    active_theme_info = None
+
+    # Currently only add-ons can make use of enabled by type (usefully) for tags.
+    if filter_by_type == "add-on":
+        addons_enabled = {addon.module for addon in prefs.addons}
+    elif filter_by_type == "theme":
+        active_theme_info = pkg_repo_and_id_from_theme_path(repos_all, prefs.themes[0].filepath)
+
+    params = ExtensionUI_FilterParams(
+        search_casefold=search_casefold,
+        tags_exclude=set(),  # Tags are being generated, ignore them.
+        filter_by_type=filter_by_type,
+        addons_enabled=addons_enabled,
+        active_theme_info=active_theme_info,
+        repos_all=repos_all,
+
+        show_installed_enabled=show_installed_enabled,
+        show_installed_disabled=show_installed_disabled,
+        show_available=show_available,
+    )
 
     tags = set()
 
@@ -1649,28 +1986,12 @@ def tags_current(wm, tags_attr):
         ((None,) * len(repos_all)),
         strict=True,
     )):
-        if only_enabled:
-            if filter_by_type == "add-on":
-                repo_module_prefix = pkg_repo_module_prefix(repos_all[repo_index])
-
-        for pkg_id, (item_local, item_remote) in pkg_manifest_zip_all_items(pkg_manifest_local, pkg_manifest_remote):
-            item = item_local or item_remote
-
-            # Filter using `filter_by_type`.
-            if filter_by_type != item.type:
-                continue
-
-            # Filter using `Only Enabled`.
-            # NOTE: this is only supported by add-ons currently.
-            # This could be made to work for themes too however there is only ever one enabled theme at a time.
-            # The use case for that is weak at best. "Only Enabled" can be supported by other types as needed.
-            if only_enabled:
-                if filter_by_type == "add-on":
-                    if item_local is not None:
-                        addon_module_name = repo_module_prefix + pkg_id
-                        if addon_module_name not in addons_enabled:
-                            continue
-            if pkg_tags := item.tags:
+        for ext_ui in params.extension_ui_visible(
+                repo_index,
+                pkg_manifest_local,
+                pkg_manifest_remote,
+        ):
+            if pkg_tags := (ext_ui.item_local or ext_ui.item_remote).tags:
                 tags.update(pkg_tags)
 
     # Only for the add-ons view (extension's doesn't show legacy add-ons).
@@ -1683,7 +2004,7 @@ def tags_current(wm, tags_attr):
             is_extension = addon_utils.check_extension(module_name)
             if is_extension:
                 continue
-            if only_enabled:  # No need to check `filter_by_type` here.
+            if not show_installed_disabled:  # No need to check `filter_by_type` here.
                 if module_name not in addons_enabled:
                     continue
             bl_info = addon_utils.module_bl_info(mod)
@@ -1718,11 +2039,9 @@ def tags_refresh(wm, tags_attr):
     return list(sorted(tags_next))
 
 
-def tags_panel_draw(panel, context):
-    tags_attr = panel._wm_tags_attr
+def tags_panel_draw(layout, context, tags_attr):
     from bpy.utils import escape_identifier
     from bpy.app.translations import contexts as i18n_contexts
-    layout = panel.layout
     wm = context.window_manager
     tags_sorted = tags_refresh(wm, tags_attr)
     layout.label(text="Show Tags")
@@ -1749,7 +2068,6 @@ classes = (
     USERPREF_PT_addons_tags,
     USERPREF_MT_addons_settings,
 
-    USERPREF_PT_extensions_filter,
     USERPREF_PT_extensions_tags,
     USERPREF_MT_extensions_settings,
     USERPREF_MT_extensions_item,
@@ -1759,8 +2077,6 @@ classes = (
 def register():
     USERPREF_PT_addons.append(addons_panel_draw)
     USERPREF_PT_extensions.append(extensions_panel_draw)
-    USERPREF_PT_addons_tags.append(tags_panel_draw)
-    USERPREF_PT_extensions_tags.append(tags_panel_draw)
     USERPREF_MT_extensions_active_repo.append(extensions_repo_active_draw)
 
     for cls in classes:
@@ -1770,8 +2086,6 @@ def register():
 def unregister():
     USERPREF_PT_addons.remove(addons_panel_draw)
     USERPREF_PT_extensions.remove(extensions_panel_draw)
-    USERPREF_PT_extensions_tags.remove(tags_panel_draw)
-    USERPREF_PT_addons_tags.remove(tags_panel_draw)
     USERPREF_MT_extensions_active_repo.remove(extensions_repo_active_draw)
 
     for cls in reversed(classes):
