@@ -1232,9 +1232,13 @@ static void store_coords(const Object &object, Node &unode)
                         unode.vert_indices.as_span(),
                         unode.normal.as_mutable_span());
     if (ss.deform_modifiers_active) {
-      array_utils::gather(ss.orig_cos.as_span(),
-                          unode.vert_indices.as_span(),
-                          unode.orig_position.as_mutable_span());
+      const Mesh &mesh = *static_cast<const Mesh *>(object.data);
+      const Span<float3> orig_positions = ss.shapekey_active ? Span(static_cast<const float3 *>(
+                                                                        ss.shapekey_active->data),
+                                                                    mesh.verts_num) :
+                                                               mesh.vert_positions();
+      array_utils::gather(
+          orig_positions, unode.vert_indices.as_span(), unode.orig_position.as_mutable_span());
     }
   }
 }
@@ -2110,3 +2114,36 @@ void push_multires_mesh_end(bContext *C, const char *str)
 /** \} */
 
 }  // namespace blender::ed::sculpt_paint::undo
+
+namespace blender::ed::sculpt_paint {
+
+OrigPositionData orig_position_data_get_mesh(const Object & /*object*/, const PBVHNode &node)
+{
+  const undo::Node *unode = undo::get_node(&node, undo::Type::Position);
+  return {unode->position.as_span().take_front(unode->unique_verts_num),
+          unode->normal.as_span().take_front(unode->unique_verts_num)};
+}
+
+OrigPositionData orig_position_data_get_grids(const Object & /*object*/, const PBVHNode &node)
+{
+  const undo::Node *unode = undo::get_node(&node, undo::Type::Position);
+  return {unode->position.as_span(), unode->normal.as_span()};
+}
+
+void orig_position_data_gather_bmesh(const BMLog &bm_log,
+                                     const Set<BMVert *, 0> &verts,
+                                     const MutableSpan<float3> positions,
+                                     const MutableSpan<float3> normals)
+{
+  int i = 0;
+  for (const BMVert *vert : verts) {
+    const float *co;
+    const float *no;
+    BM_log_original_vert_data(&const_cast<BMLog &>(bm_log), const_cast<BMVert *>(vert), &co, &no);
+    positions[i] = co;
+    normals[i] = no;
+    i++;
+  }
+}
+
+}  // namespace blender::ed::sculpt_paint
