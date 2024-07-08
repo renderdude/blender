@@ -20,6 +20,8 @@
 #include "UI_interface_icons.hh"
 #include "WM_types.hh"
 
+#include "MEM_guardedalloc.h"
+
 /* Struct Declarations */
 
 struct ARegion;
@@ -571,6 +573,13 @@ using uiButHandleHoldFunc = void (*)(bContext *C, ARegion *butregion, uiBut *but
 using uiButCompleteFunc = int (*)(bContext *C, char *str, void *arg);
 
 /**
+ * Signatures of callbacks used to free or copy some 'owned' void pointer data (like e.g.
+ * #func_argN in #uiBut or #uiBlock).
+ */
+using uiButArgNFree = void (*)(void *argN);
+using uiButArgNCopy = void *(*)(const void *argN);
+
+/**
  * Function to compare the identity of two buttons over redraws, to check if they represent the
  * same data, and thus should be considered the same button over redraws.
  */
@@ -674,6 +683,11 @@ bool UI_but_is_utf8(const uiBut *but);
 bool UI_block_is_empty_ex(const uiBlock *block, bool skip_title);
 bool UI_block_is_empty(const uiBlock *block);
 bool UI_block_can_add_separator(const uiBlock *block);
+/**
+ * Return true when the block has a default button.
+ * Use this for popups to detect when pressing "Return" will run an action.
+ */
+bool UI_block_has_active_default_button(const uiBlock *block);
 
 uiList *UI_list_find_mouse_over(const ARegion *region, const wmEvent *event);
 
@@ -801,6 +815,33 @@ void UI_popup_block_ex(bContext *C,
                        uiBlockCancelFunc cancel_func,
                        void *arg,
                        wmOperator *op);
+
+/**
+ * Return true when #UI_popup_block_template_confirm and related functions are supported.
+ */
+bool UI_popup_block_template_confirm_is_supported(const uiBlock *block);
+/**
+ * Create confirm & cancel buttons in a popup using callback functions.
+ */
+void UI_popup_block_template_confirm(uiBlock *block,
+                                     bool cancel_default,
+                                     blender::FunctionRef<uiBut *()> confirm_fn,
+                                     blender::FunctionRef<uiBut *()> cancel_fn);
+/**
+ * Create confirm & cancel buttons in a popup using an operator.
+ *
+ * \param confirm_text: The text to confirm, null for default text or an empty string to hide.
+ * \param cancel_text: The text to cancel, null for default text or an empty string to hide.
+ * \param r_ptr: The pointer for operator properties, set a "confirm" button has been created.
+ */
+void UI_popup_block_template_confirm_op(uiLayout *layout,
+                                        wmOperatorType *ot,
+                                        const char *confirm_text,
+                                        const char *cancel_text,
+                                        const int icon,
+                                        bool cancel_default,
+                                        PointerRNA *r_ptr);
+
 #if 0 /* UNUSED */
 void uiPupBlockOperator(bContext *C,
                         uiBlockCreateFunc func,
@@ -1519,7 +1560,9 @@ uiBut *uiDefBlockButN(uiBlock *block,
                       int y,
                       short width,
                       short height,
-                      const char *tip);
+                      const char *tip,
+                      uiButArgNFree func_argN_free_fn = MEM_freeN,
+                      uiButArgNCopy func_argN_copy_fn = MEM_dupallocN);
 
 /**
  * Block button containing icon.
@@ -1717,11 +1760,21 @@ void UI_but_search_preview_grid_size_set(uiBut *but, int rows, int cols);
 
 void UI_block_func_handle_set(uiBlock *block, uiBlockHandleFunc func, void *arg);
 void UI_block_func_set(uiBlock *block, uiButHandleFunc func, void *arg1, void *arg2);
-void UI_block_funcN_set(uiBlock *block, uiButHandleNFunc funcN, void *argN, void *arg2);
+void UI_block_funcN_set(uiBlock *block,
+                        uiButHandleNFunc funcN,
+                        void *argN,
+                        void *arg2,
+                        uiButArgNFree func_argN_free_fn = MEM_freeN,
+                        uiButArgNCopy func_argN_copy_fn = MEM_dupallocN);
 
 void UI_but_func_rename_set(uiBut *but, uiButHandleRenameFunc func, void *arg1);
 void UI_but_func_set(uiBut *but, uiButHandleFunc func, void *arg1, void *arg2);
-void UI_but_funcN_set(uiBut *but, uiButHandleNFunc funcN, void *argN, void *arg2);
+void UI_but_funcN_set(uiBut *but,
+                      uiButHandleNFunc funcN,
+                      void *argN,
+                      void *arg2,
+                      uiButArgNFree func_argN_free_fn = MEM_freeN,
+                      uiButArgNCopy func_argN_copy_fn = MEM_dupallocN);
 
 void UI_but_func_complete_set(uiBut *but, uiButCompleteFunc func, void *arg);
 
@@ -2032,6 +2085,10 @@ void UI_init();
 void UI_init_userdef();
 void UI_reinit_font();
 void UI_exit();
+
+/* When changing UI font, update text style weights with default font weight
+ * if non-variable. Therefore fixed weight bold font will look bold. */
+void UI_update_text_styles();
 
 /* Layout
  *

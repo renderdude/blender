@@ -1682,7 +1682,7 @@ PartialWriteContext::~PartialWriteContext()
   BKE_main_destroy(this->bmain);
 };
 
-void PartialWriteContext::preempt_session_uid(ID *ctx_id, unsigned int session_uid)
+void PartialWriteContext::preempt_session_uid(ID *ctx_id, uint session_uid)
 {
   /* If there is already an existing ID in the 'matching' set with that UID, it should be the same
    * as the given ctx_id. */
@@ -1763,7 +1763,7 @@ ID *PartialWriteContext::id_add_copy(const ID *id, const bool regenerate_session
 void PartialWriteContext::make_local(ID *ctx_id, const int make_local_flags)
 {
   /* Making an ID local typically resets its session UID, here we want to keep the same value. */
-  const unsigned int ctx_id_session_uid = ctx_id->session_uid;
+  const uint ctx_id_session_uid = ctx_id->session_uid;
   BKE_main_idmap_remove_id(this->bmain.id_map, ctx_id);
   BKE_main_idmap_insert_id(matching_uid_map_, ctx_id);
 
@@ -1818,13 +1818,14 @@ ID *PartialWriteContext::id_add(
   const bool duplicate_dependencies = (options.operations & DUPLICATE_DEPENDENCIES) != 0;
   BLI_assert(clear_dependencies || add_dependencies);
   BLI_assert(!clear_dependencies || !(add_dependencies || duplicate_dependencies));
+  UNUSED_VARS_NDEBUG(add_dependencies, clear_dependencies, duplicate_dependencies);
 
   /* Do not directly add an embedded ID. Add its owner instead. */
   if (id->flag & LIB_EMBEDDED_DATA) {
     id = BKE_id_owner_get(const_cast<ID *>(id), true);
   }
 
-  /* The given ID may have already been added (either explicitely or as a dependency) before. */
+  /* The given ID may have already been added (either explicitly or as a dependency) before. */
   ID *ctx_root_id = BKE_main_idmap_lookup_uid(matching_uid_map_, id->session_uid);
   if (ctx_root_id) {
     /* If the root orig ID is already in the context, assume all of its dependencies are as well.
@@ -1891,6 +1892,7 @@ ID *PartialWriteContext::id_add(
     const bool duplicate_dependencies = (operations_final & DUPLICATE_DEPENDENCIES) != 0;
     BLI_assert(clear_dependencies || add_dependencies);
     BLI_assert(!clear_dependencies || !(add_dependencies || duplicate_dependencies));
+    UNUSED_VARS_NDEBUG(add_dependencies);
 
     if (clear_dependencies) {
       if (cb_data->cb_flag & IDWALK_CB_NEVER_NULL) {
@@ -1906,7 +1908,7 @@ ID *PartialWriteContext::id_add(
       return IDWALK_RET_NOP;
     }
     /* else if (add_dependencies) */
-    /* The given ID may have already been added (either explicitely or as a dependency) before. */
+    /* The given ID may have already been added (either explicitly or as a dependency) before. */
     ID *ctx_deps_id = nullptr;
     if (duplicate_dependencies) {
       ctx_deps_id = local_ctx_id_map.lookup(orig_deps_id);
@@ -1921,7 +1923,7 @@ ID *PartialWriteContext::id_add(
          * a case is bad practice. On the other hand, some of these pointers are present in
          * 'normal' IDs, like e.g. the parent collections ones. This implies that currently, all
          * attempt to adding a collection to a partial write context should make usage of a custom
-         * `dependencies_filter_cb` function to explicitely clear these pointers. */
+         * `dependencies_filter_cb` function to explicitly clear these pointers. */
         CLOG_ERROR(&LOG_PARTIALWRITE,
                    "First dependency to ID '%s' found through a 'loopback' usage from ID '%s', "
                    "this should never happen",

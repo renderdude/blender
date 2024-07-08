@@ -479,6 +479,8 @@ struct uiAfterFunc {
 
   uiButHandleNFunc funcN;
   void *func_argN;
+  uiButArgNFree func_argN_free_fn;
+  /* uiButArgNCopy func_argN_copy_fn is not needed currently. */
 
   uiButHandleRenameFunc rename_func;
   void *rename_arg1;
@@ -846,7 +848,9 @@ static void ui_apply_but_func(bContext *C, uiBut *but)
   after->apply_func = but->apply_func;
 
   after->funcN = but->funcN;
-  after->func_argN = (but->func_argN) ? MEM_dupallocN(but->func_argN) : nullptr;
+  after->func_argN = (but->func_argN) ? but->func_argN_copy_fn(but->func_argN) : nullptr;
+  after->func_argN_free_fn = but->func_argN_free_fn;
+  /* but->func_argN_copy_fn is not needed for #uiAfterFunc. */
 
   after->rename_func = but->rename_func;
   after->rename_arg1 = but->rename_arg1;
@@ -1058,7 +1062,7 @@ static void ui_apply_but_funcs_after(bContext *C)
       after.funcN(C, after.func_argN, after.func_arg2);
     }
     if (after.func_argN) {
-      MEM_freeN(after.func_argN);
+      after.func_argN_free_fn(after.func_argN);
     }
 
     if (after.handle_func) {
@@ -10887,13 +10891,13 @@ static int ui_handle_menu_event(bContext *C,
             }
 
             /* Accelerator keys that allow "pressing" a menu entry by pressing a single key. */
-            LISTBASE_FOREACH (uiBut *, but, &block->buttons) {
-              if (!(but->flag & UI_BUT_DISABLED) && but->menu_key == event->type) {
-                if (but->type == UI_BTYPE_BUT) {
-                  UI_but_execute(C, region, but);
+            LISTBASE_FOREACH (uiBut *, but_iter, &block->buttons) {
+              if (!(but_iter->flag & UI_BUT_DISABLED) && but_iter->menu_key == event->type) {
+                if (but_iter->type == UI_BTYPE_BUT) {
+                  UI_but_execute(C, region, but_iter);
                 }
                 else {
-                  ui_handle_button_activate_by_type(C, region, but);
+                  ui_handle_button_activate_by_type(C, region, but_iter);
                 }
                 return WM_UI_HANDLER_BREAK;
               }

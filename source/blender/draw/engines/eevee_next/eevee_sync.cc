@@ -34,13 +34,6 @@ namespace blender::eevee {
  *
  * \{ */
 
-void SyncModule::view_update()
-{
-  if (DEG_id_type_updated(inst_.depsgraph, ID_WO)) {
-    world_updated_ = true;
-  }
-}
-
 ObjectHandle &SyncModule::sync_object(const ObjectRef &ob_ref)
 {
   ObjectKey key(ob_ref.object);
@@ -56,11 +49,10 @@ ObjectHandle &SyncModule::sync_object(const ObjectRef &ob_ref)
   return handle;
 }
 
-WorldHandle SyncModule::sync_world()
+WorldHandle SyncModule::sync_world(const ::World &world)
 {
   WorldHandle handle;
-  handle.recalc = world_updated_ ? int(ID_RECALC_SHADING) : 0;
-  world_updated_ = false;
+  handle.recalc = inst_.get_recalc_flags(world);
   return handle;
 }
 
@@ -359,24 +351,42 @@ void SyncModule::sync_volume(Object *ob,
   Material &material = inst_.materials.material_get(
       ob, has_motion, material_slot - 1, MAT_GEOM_VOLUME);
 
-  /* Use bounding box tag empty spaces. */
-  gpu::Batch *geom = DRW_cache_cube_get();
+  if (!GPU_material_has_volume_output(material.volume_material.gpumat)) {
+    return;
+  }
+
+  /* Do not render the object if there is no attribute used in the volume.
+   * This mimic Cycles behavior (see #124061). */
+  ListBase attr_list = GPU_material_attributes(material.volume_material.gpumat);
+  if (BLI_listbase_is_empty(&attr_list)) {
+    return;
+  }
 
   auto drawcall_add = [&](MaterialPass &matpass, gpu::Batch *geom, ResourceHandle res_handle) {
     if (matpass.sub_pass == nullptr) {
-      return;
+      return false;
     }
     PassMain::Sub *object_pass = volume_sub_pass(
         *matpass.sub_pass, inst_.scene, ob, matpass.gpumat);
     if (object_pass != nullptr) {
       object_pass->draw(geom, res_handle);
+      return true;
     }
+    return false;
   };
 
-  inst_.manager->extract_object_attributes(res_handle, ob_ref, material.volume_material.gpumat);
+  /* Use bounding box tag empty spaces. */
+  gpu::Batch *geom = DRW_cache_cube_get();
 
-  drawcall_add(material.volume_occupancy, geom, res_handle);
-  drawcall_add(material.volume_material, geom, res_handle);
+  bool is_rendered = false;
+  is_rendered |= drawcall_add(material.volume_occupancy, geom, res_handle);
+  is_rendered |= drawcall_add(material.volume_material, geom, res_handle);
+
+  if (!is_rendered) {
+    return;
+  }
+
+  inst_.manager->extract_object_attributes(res_handle, ob_ref, material.volume_material.gpumat);
 
   inst_.volume.object_sync(ob_handle);
 }
