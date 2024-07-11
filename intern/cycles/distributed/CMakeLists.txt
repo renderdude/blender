@@ -5,6 +5,7 @@
 
 set(INC
   ..
+  mpl
 )
 
 set(SRC
@@ -16,10 +17,6 @@ set(SRC_HEADERS
 )
 
 set(LIB
-)
-
-list(APPEND INC_SYS
-  mpl
 )
 
 list(APPEND INC_SYS

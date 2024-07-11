@@ -116,7 +116,7 @@ cycles_external_libraries_append(LIB)
 
 # Common configuration.
 
-include_directories(${INC})
+include_directories(${INC} ${CMAKE_SOURCE_DIR}/intern/cycles/distributed/mpl)
 include_directories(SYSTEM ${INC_SYS})
 
 # Application build targets
@@ -178,9 +178,9 @@ if(WITH_CYCLES_STANDALONE)
   target_link_libraries(cycles PRIVATE ${LIB})
   message(MATERIALX_FOUND=${MATERIALX_FOUND})
   if (MATERIALX_FOUND)
-    message(MATERIALX_BASE_DIR=${MATERIALX_BASE_DIR})
-    add_definitions(-DMATERIALX_BASE_DIR="/Users/mbolsta/test/blender/lib/darwin/materialx_1.38.7")
-    add_definitions(-DMATERIALX_INCLUDE_DIR="/Users/mbolsta/test/blender/lib/darwin/materialx_1.38.7/include")
+    message(MATERIALX_BASE_DIR="${MATERIALX_BASE_DIR}")
+    add_definitions(-DMATERIALX_BASE_DIR="${MATERIALX_BASE_DIR}")
+    add_definitions(-DMATERIALX_INCLUDE_DIR="${MATERIALX_BASE_DIR}/include")
   endif()
 
   if(APPLE)
