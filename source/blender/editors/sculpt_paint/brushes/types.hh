@@ -41,6 +41,7 @@ void do_mask_brush(const Sculpt &sd, Object &object, Span<PBVHNode *> nodes);
 void do_multiplane_scrape_brush(const Sculpt &sd, Object &object, Span<PBVHNode *> nodes);
 void do_pinch_brush(const Sculpt &sd, Object &object, Span<PBVHNode *> nodes);
 void do_nudge_brush(const Sculpt &sd, Object &object, Span<PBVHNode *> nodes);
+void do_relax_face_sets_brush(const Sculpt &sd, Object &object, Span<PBVHNode *> nodes);
 void do_rotate_brush(const Sculpt &sd, Object &object, Span<PBVHNode *> nodes);
 void do_scrape_brush(const Sculpt &sd, Object &object, Span<PBVHNode *> nodes);
 /** Smooth positions with neighboring vertices. */
@@ -53,6 +54,7 @@ void do_smooth_mask_brush(const Sculpt &sd,
                           Object &object,
                           Span<PBVHNode *> nodes,
                           float brush_strength);
+void do_snake_hook_brush(const Sculpt &sd, Object &object, Span<PBVHNode *> nodes);
 void do_thumb_brush(const Sculpt &sd, Object &object, Span<PBVHNode *> nodes);
 void do_topology_slide_brush(const Sculpt &sd, Object &object, Span<PBVHNode *> nodes);
 

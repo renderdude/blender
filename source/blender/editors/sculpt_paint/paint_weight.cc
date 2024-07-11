@@ -1569,7 +1569,7 @@ static int wpaint_mode_toggle_exec(bContext *C, wmOperator *op)
       depsgraph = CTX_data_ensure_evaluated_depsgraph(C);
     }
     ED_object_wpaintmode_enter_ex(bmain, *depsgraph, scene, ob);
-    BKE_paint_brush_validate(&bmain, &ts.wpaint->paint);
+    BKE_paint_brushes_validate(&bmain, &ts.wpaint->paint);
   }
 
   blender::ed::object::posemode_set_for_weight_paint(C, &bmain, &ob, is_mode_set);
@@ -1844,7 +1844,7 @@ static void wpaint_stroke_done(const bContext *C, PaintStroke *stroke)
 
   WM_event_add_notifier(C, NC_OBJECT | ND_DRAW, &ob);
 
-  SCULPT_cache_free(ob.sculpt->cache);
+  MEM_delete(ob.sculpt->cache);
   ob.sculpt->cache = nullptr;
 }
 
@@ -1892,10 +1892,8 @@ static int wpaint_exec(bContext *C, wmOperator *op)
 static void wpaint_cancel(bContext *C, wmOperator *op)
 {
   Object &ob = *CTX_data_active_object(C);
-  if (ob.sculpt->cache) {
-    SCULPT_cache_free(ob.sculpt->cache);
-    ob.sculpt->cache = nullptr;
-  }
+  MEM_delete(ob.sculpt->cache);
+  ob.sculpt->cache = nullptr;
 
   paint_stroke_cancel(C, op, (PaintStroke *)op->customdata);
 }

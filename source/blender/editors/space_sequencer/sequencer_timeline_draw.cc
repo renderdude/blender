@@ -27,9 +27,6 @@
 #include "BKE_global.hh"
 #include "BKE_sound.h"
 
-#include "GPU_immediate.hh"
-#include "GPU_viewport.hh"
-
 #include "ED_anim_api.hh"
 #include "ED_markers.hh"
 #include "ED_mask.hh"
@@ -44,6 +41,7 @@
 #include "SEQ_prefetch.hh"
 #include "SEQ_relations.hh"
 #include "SEQ_render.hh"
+#include "SEQ_retiming.hh"
 #include "SEQ_select.hh"
 #include "SEQ_sequencer.hh"
 #include "SEQ_time.hh"
@@ -72,40 +70,6 @@ using namespace blender::ed::seq;
 #define MUTE_ALPHA 120
 
 constexpr float MISSING_ICON_SIZE = 12.0f;
-
-struct StripDrawContext {
-  Sequence *seq;
-  /* Strip boundary in timeline space. Content start/end is clamped by left/right handle. */
-  float content_start, content_end, bottom, top;
-  float left_handle, right_handle; /* Position in frames. */
-  float strip_content_top; /* Position in timeline space without content and text overlay. */
-  float handle_width;      /* Width of strip handle in frames. */
-  float strip_length;
-
-  bool can_draw_text_overlay;
-  bool can_draw_strip_content;
-  bool strip_is_too_small; /* Shorthand for (!can_draw_text_overlay && !can_draw_strip_content). */
-  bool is_active_strip;
-  bool is_single_image; /* Strip has single frame of content. */
-  bool show_strip_color_tag;
-  bool missing_data_block;
-  bool missing_media;
-};
-
-struct TimelineDrawContext {
-  const bContext *C;
-  ARegion *region;
-  Scene *scene;
-  SpaceSeq *sseq;
-  View2D *v2d;
-  Editing *ed;
-  ListBase *channels;
-  GPUViewport *viewport;
-  GPUFrameBuffer *framebuffer_overlay;
-  float pixelx, pixely; /* Width and height of pixel in timeline space. */
-
-  SeqQuadsBatch *quads;
-};
 
 Vector<Sequence *> sequencer_visible_strips_get(const bContext *C)
 {
@@ -157,6 +121,8 @@ static TimelineDrawContext timeline_draw_context_get(const bContext *C, SeqQuads
 
   ctx.pixely = BLI_rctf_size_y(&ctx.v2d->cur) / BLI_rcti_size_y(&ctx.v2d->mask);
   ctx.pixelx = BLI_rctf_size_x(&ctx.v2d->cur) / BLI_rcti_size_x(&ctx.v2d->mask);
+
+  ctx.retiming_selection = SEQ_retiming_selection_get(ctx.ed);
 
   ctx.quads = quads_batch;
 
@@ -910,8 +876,10 @@ static void draw_icon_centered(TimelineDrawContext &ctx,
   UI_view2d_view_ortho(ctx.v2d);
   wmOrtho2_region_pixelspace(ctx.region);
 
-  const float icon_size = 16 * UI_SCALE_FAC;
-  if (BLI_rctf_size_x(&ctx.v2d->cur) < icon_size) {
+  const float icon_size = MISSING_ICON_SIZE * UI_SCALE_FAC;
+  if (BLI_rctf_size_x(&rect) * 1.1f < icon_size * ctx.pixelx ||
+      BLI_rctf_size_y(&rect) * 1.1f < icon_size * ctx.pixely)
+  {
     UI_view2d_view_restore(ctx.C);
     return;
   }
@@ -923,10 +891,12 @@ static void draw_icon_centered(TimelineDrawContext &ctx,
   const float x_offset = (right - left - icon_size) * 0.5f;
   const float y_offset = (top - bottom - icon_size) * 0.5f;
 
+  const float inv_scale_fac = (ICON_DEFAULT_HEIGHT / MISSING_ICON_SIZE) * UI_INV_SCALE_FAC;
+
   UI_icon_draw_ex(left + x_offset,
                   bottom + y_offset,
                   icon_id,
-                  UI_INV_SCALE_FAC,
+                  inv_scale_fac,
                   1.0f,
                   0.0f,
                   color,
@@ -1251,36 +1221,21 @@ static void draw_seq_timeline_channels(TimelineDrawContext *ctx)
  * sure that visually selected are always "on top" of others. It matters
  * while selection is being dragged over other strips. */
 static void visible_strips_ordered_get(TimelineDrawContext *timeline_ctx,
-                                       Vector<StripDrawContext> &r_unselected,
-                                       Vector<StripDrawContext> &r_selected)
+                                       Vector<StripDrawContext> &r_bottom_layer,
+                                       Vector<StripDrawContext> &r_top_layer)
 {
-  Sequence *act_seq = SEQ_select_active_get(timeline_ctx->scene);
+  r_bottom_layer.clear();
+  r_top_layer.clear();
+
   Vector<Sequence *> strips = sequencer_visible_strips_get(timeline_ctx->C);
-  r_unselected.clear();
-  r_selected.clear();
 
   for (Sequence *seq : strips) {
-    /* Active will be added last. */
-    if (seq == act_seq) {
-      continue;
-    }
-
     StripDrawContext strip_ctx = strip_draw_context_get(timeline_ctx, seq);
-    if ((seq->flag & SELECT) == 0) {
-      r_unselected.append(strip_ctx);
+    if ((seq->flag & SEQ_OVERLAP) == 0) {
+      r_bottom_layer.append(strip_ctx);
     }
     else {
-      r_selected.append(strip_ctx);
-    }
-  }
-  /* Add active, if any. */
-  if (act_seq) {
-    StripDrawContext strip_ctx = strip_draw_context_get(timeline_ctx, act_seq);
-    if ((act_seq->flag & SELECT) == 0) {
-      r_unselected.append(strip_ctx);
-    }
-    else {
-      r_selected.append(strip_ctx);
+      r_top_layer.append(strip_ctx);
     }
   }
 }
@@ -1360,17 +1315,133 @@ static void draw_strips_background(TimelineDrawContext *timeline_ctx,
   GPU_blend(GPU_BLEND_ALPHA);
 }
 
+static void strip_data_missing_media_flags_set(const StripDrawContext &strip,
+                                               const TimelineDrawContext *timeline_ctx,
+                                               SeqStripDrawData &data)
+{
+  if (strip.missing_data_block || strip.missing_media) {
+    /* Do not tint title area for muted strips; we want to see gray for them. */
+    if (!SEQ_render_is_muted(timeline_ctx->channels, strip.seq)) {
+      data.flags |= GPU_SEQ_FLAG_MISSING_TITLE;
+    }
+    /* Do not tint content area for meta strips; we want to display children. */
+    if (strip.seq->type != SEQ_TYPE_META) {
+      data.flags |= GPU_SEQ_FLAG_MISSING_CONTENT;
+    }
+  }
+}
+
+static void strip_data_lock_flags_set(const StripDrawContext &strip,
+                                      const TimelineDrawContext *timeline_ctx,
+                                      SeqStripDrawData &data)
+{
+  if (SEQ_transform_is_locked(timeline_ctx->channels, strip.seq)) {
+    data.flags |= GPU_SEQ_FLAG_LOCKED;
+  }
+}
+
+static void strip_data_outline_params_set(const StripDrawContext &strip,
+                                          const TimelineDrawContext *timeline_ctx,
+                                          SeqStripDrawData &data)
+{
+  const bool active = strip.is_active_strip;
+  const bool selected = strip.seq->flag & SELECT;
+  uchar4 col{0, 0, 0, 255};
+
+  if (selected) {
+    UI_GetThemeColor3ubv(TH_SEQ_SELECTED, col);
+    data.flags |= GPU_SEQ_FLAG_SELECTED;
+  }
+  if (active) {
+    if (selected) {
+      UI_GetThemeColor3ubv(TH_SEQ_ACTIVE, col);
+    }
+    else {
+      UI_GetThemeColorShade3ubv(TH_SEQ_ACTIVE, -40, col);
+    }
+    data.flags |= GPU_SEQ_FLAG_ACTIVE;
+  }
+  if (!selected && !active) {
+    /* Color for unselected strips is a bit darker than the background. */
+    UI_GetThemeColorShade3ubv(TH_BACK, -40, col);
+  }
+
+  const eSeqOverlapMode overlap_mode = SEQ_tool_settings_overlap_mode_get(timeline_ctx->scene);
+  const bool use_overwrite = overlap_mode == SEQ_OVERLAP_OVERWRITE;
+  const bool overlaps = (strip.seq->flag & SEQ_OVERLAP) && (G.moving & G_TRANSFORM_SEQ);
+
+  /* Outline while translating strips:
+   *  - Slightly lighter.
+   *  - Red when overlapping with other strips. */
+  if (G.moving & G_TRANSFORM_SEQ) {
+    if (overlaps && !use_overwrite) {
+      col[0] = 255;
+      col[1] = col[2] = 33;
+      data.flags |= GPU_SEQ_FLAG_OVERLAP;
+    }
+    else if (selected) {
+      UI_GetColorPtrShade3ubv(col, col, 70);
+    }
+  }
+
+  data.col_outline = color_pack(col);
+}
+
+static void strip_data_highlight_flags_set(const StripDrawContext &strip,
+                                           const TimelineDrawContext *timeline_ctx,
+                                           SeqStripDrawData &data)
+{
+  const Sequence *act_seq = SEQ_select_active_get(timeline_ctx->scene);
+  const Sequence *special_preview = ED_sequencer_special_preview_get();
+  /* Highlight if strip is an input of an active strip, or if the strip is solo preview. */
+  if (act_seq != nullptr && (act_seq->flag & SELECT) != 0) {
+    if (act_seq->seq1 == strip.seq || act_seq->seq2 == strip.seq) {
+      data.flags |= GPU_SEQ_FLAG_HIGHLIGHT;
+    }
+  }
+  if (special_preview == strip.seq) {
+    data.flags |= GPU_SEQ_FLAG_HIGHLIGHT;
+  }
+}
+
+static void strip_data_handle_flags_set(const StripDrawContext &strip,
+                                        const TimelineDrawContext *timeline_ctx,
+                                        SeqStripDrawData &data)
+{
+  const Scene *scene = timeline_ctx->scene;
+  const bool selected = strip.seq->flag & SELECT;
+  const bool show_handles = (U.sequencer_editor_flag & USER_SEQ_ED_SIMPLE_TWEAKING) == 0;
+  /* Handles on left/right side. */
+  if (!SEQ_transform_is_locked(timeline_ctx->channels, strip.seq) &&
+      ED_sequencer_can_select_handle(scene, strip.seq, timeline_ctx->v2d))
+  {
+    const bool selected_l = selected &&
+                            ED_sequencer_handle_is_selected(strip.seq, SEQ_HANDLE_LEFT);
+    const bool selected_r = selected &&
+                            ED_sequencer_handle_is_selected(strip.seq, SEQ_HANDLE_RIGHT);
+    const bool show_l = show_handles || selected_l;
+    const bool show_r = show_handles || selected_r;
+    if (show_l) {
+      data.flags |= GPU_SEQ_FLAG_DRAW_LH;
+    }
+    if (show_r) {
+      data.flags |= GPU_SEQ_FLAG_DRAW_RH;
+    }
+    if (selected_l) {
+      data.flags |= GPU_SEQ_FLAG_SELECTED_LH;
+    }
+    if (selected_r) {
+      data.flags |= GPU_SEQ_FLAG_SELECTED_RH;
+    }
+  }
+}
+
 static void draw_strips_foreground(TimelineDrawContext *timeline_ctx,
                                    StripsDrawBatch &strips_batch,
                                    const Vector<StripDrawContext> &strips)
 {
   GPU_blend(GPU_BLEND_ALPHA_PREMULT);
-  const Scene *scene = timeline_ctx->scene;
-  const Sequence *act_seq = SEQ_select_active_get(scene);
-  const Sequence *special_preview = ED_sequencer_special_preview_get();
-  const bool show_handles = (U.sequencer_editor_flag & USER_SEQ_ED_SIMPLE_TWEAKING) == 0;
 
-  uchar col[4];
   for (const StripDrawContext &strip : strips) {
     SeqStripDrawData &data = strips_batch.add_strip(strip.content_start,
                                                     strip.content_end,
@@ -1382,90 +1453,13 @@ static void draw_strips_foreground(TimelineDrawContext *timeline_ctx,
                                                     strip.handle_width,
                                                     strip.is_single_image);
     data.flags |= GPU_SEQ_FLAG_BORDER;
-
-    /* Missing media state. */
-    if (strip.missing_data_block || strip.missing_media) {
-      /* Do not tint title area for muted strips; we want to see gray for them. */
-      if (!SEQ_render_is_muted(timeline_ctx->channels, strip.seq)) {
-        data.flags |= GPU_SEQ_FLAG_MISSING_TITLE;
-      }
-      /* Do not tint content area for meta strips; we want to display children. */
-      if (strip.seq->type != SEQ_TYPE_META) {
-        data.flags |= GPU_SEQ_FLAG_MISSING_CONTENT;
-      }
-    }
-
-    /* Locked state. */
-    const bool locked = SEQ_transform_is_locked(timeline_ctx->channels, strip.seq);
-    if (locked) {
-      data.flags |= GPU_SEQ_FLAG_LOCKED;
-    }
-
-    /* Border and outline. */
-    const bool selected = strip.seq->flag & SELECT;
-    const bool active = strip.is_active_strip;
-    if (selected) {
-      UI_GetThemeColor3ubv(active ? TH_SEQ_ACTIVE : TH_SEQ_SELECTED, col);
-    }
-    else {
-      /* Color for unselected strips is a bit darker than the background. */
-      UI_GetThemeColorShade3ubv(TH_BACK, -40, col);
-    }
-    col[3] = 255;
-    /* Outline while translating strips:
-     *  - Slightly lighter.
-     *  - Red when overlapping with other strips. */
-    const eSeqOverlapMode overlap_mode = SEQ_tool_settings_overlap_mode_get(timeline_ctx->scene);
-    if ((G.moving & G_TRANSFORM_SEQ) && selected && overlap_mode != SEQ_OVERLAP_OVERWRITE) {
-      if (strip.seq->flag & SEQ_OVERLAP) {
-        col[0] = 255;
-        col[1] = col[2] = 33;
-      }
-      else {
-        UI_GetColorPtrShade3ubv(col, col, 70);
-      }
-    }
-    if (selected)
-      data.flags |= GPU_SEQ_FLAG_SELECTED;
-    else if (active) {
-      /* A subtle highlight outline when active but not selected. */
-      UI_GetThemeColorShade3ubv(TH_SEQ_ACTIVE, -40, col);
-      data.flags |= GPU_SEQ_FLAG_ACTIVE;
-    }
-    data.col_outline = color_pack(col);
-
-    /* Highlight if strip is an input of an active strip, or if the strip is solo preview. */
-    if (act_seq != nullptr && (act_seq->flag & SELECT) != 0) {
-      if (act_seq->seq1 == strip.seq || act_seq->seq2 == strip.seq) {
-        data.flags |= GPU_SEQ_FLAG_HIGHLIGHT;
-      }
-    }
-    if (special_preview == strip.seq) {
-      data.flags |= GPU_SEQ_FLAG_HIGHLIGHT;
-    }
-
-    /* Handles on left/right side. */
-    if (!locked && ED_sequencer_can_select_handle(scene, strip.seq, timeline_ctx->v2d)) {
-      const bool selected_l = selected &&
-                              ED_sequencer_handle_is_selected(strip.seq, SEQ_HANDLE_LEFT);
-      const bool selected_r = selected &&
-                              ED_sequencer_handle_is_selected(strip.seq, SEQ_HANDLE_RIGHT);
-      const bool show_l = show_handles || selected_l;
-      const bool show_r = show_handles || selected_r;
-      if (show_l) {
-        data.flags |= GPU_SEQ_FLAG_DRAW_LH;
-      }
-      if (show_r) {
-        data.flags |= GPU_SEQ_FLAG_DRAW_RH;
-      }
-      if (selected_l) {
-        data.flags |= GPU_SEQ_FLAG_SELECTED_LH;
-      }
-      if (selected_r) {
-        data.flags |= GPU_SEQ_FLAG_SELECTED_RH;
-      }
-    }
+    strip_data_missing_media_flags_set(strip, timeline_ctx, data);
+    strip_data_lock_flags_set(strip, timeline_ctx, data);
+    strip_data_outline_params_set(strip, timeline_ctx, data);
+    strip_data_highlight_flags_set(strip, timeline_ctx, data);
+    strip_data_handle_flags_set(strip, timeline_ctx, data);
   }
+
   strips_batch.flush_batch();
   GPU_blend(GPU_BLEND_ALPHA);
 }
@@ -1491,7 +1485,7 @@ static void draw_seq_strips(TimelineDrawContext *timeline_ctx,
   }
   timeline_ctx->quads->draw();
 
-  /* Draw all thumbnails. */
+  /* Draw all thumbnails and retiming continuity. */
   GPU_blend(GPU_BLEND_ALPHA);
   for (const StripDrawContext &strip_ctx : strips) {
     draw_seq_strip_thumbnail(timeline_ctx->v2d,
@@ -1504,7 +1498,9 @@ static void draw_seq_strips(TimelineDrawContext *timeline_ctx,
                              timeline_ctx->pixelx,
                              timeline_ctx->pixely,
                              round_radius);
+    sequencer_retiming_draw_continuity(timeline_ctx, strip_ctx);
   }
+  timeline_ctx->quads->draw();
 
   /* Draw parts of strips above thumbnails. */
   GPU_blend(GPU_BLEND_ALPHA);
@@ -1515,7 +1511,10 @@ static void draw_seq_strips(TimelineDrawContext *timeline_ctx,
     draw_handle_transform_text(timeline_ctx, &strip_ctx, SEQ_HANDLE_LEFT);
     draw_handle_transform_text(timeline_ctx, &strip_ctx, SEQ_HANDLE_RIGHT);
     draw_seq_text_overlay(timeline_ctx, &strip_ctx);
+    sequencer_retiming_keys_draw(timeline_ctx, strip_ctx);
+    sequencer_retiming_speed_draw(timeline_ctx, strip_ctx);
   }
+
   timeline_ctx->quads->draw();
 
   draw_strips_foreground(timeline_ctx, strips_batch, strips);
@@ -1534,10 +1533,10 @@ static void draw_seq_strips(TimelineDrawContext *timeline_ctx, StripsDrawBatch &
     return;
   }
 
-  Vector<StripDrawContext> unselected, selected;
-  visible_strips_ordered_get(timeline_ctx, unselected, selected);
-  draw_seq_strips(timeline_ctx, strips_batch, unselected);
-  draw_seq_strips(timeline_ctx, strips_batch, selected);
+  Vector<StripDrawContext> bottom_layer, top_layer;
+  visible_strips_ordered_get(timeline_ctx, bottom_layer, top_layer);
+  draw_seq_strips(timeline_ctx, strips_batch, bottom_layer);
+  draw_seq_strips(timeline_ctx, strips_batch, top_layer);
 }
 
 static void draw_timeline_sfra_efra(TimelineDrawContext *ctx)
@@ -1895,7 +1894,6 @@ void draw_timeline_seq(const bContext *C, ARegion *region)
   draw_timeline_backdrop(&ctx);
   draw_timeline_sfra_efra(&ctx);
   draw_seq_strips(&ctx, strips_batch);
-  sequencer_draw_retiming(C, &quads_batch);
   draw_timeline_markers(&ctx);
   UI_view2d_view_ortho(ctx.v2d);
   ANIM_draw_previewrange(C, ctx.v2d, 1);

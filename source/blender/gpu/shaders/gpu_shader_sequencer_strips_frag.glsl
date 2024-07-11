@@ -197,6 +197,12 @@ void main()
       col = add_outline(sdf, 1.0, 2.0, col, col_outline);
     }
 
+    /* 2px outline for all overlapping strips. */
+    bool overlaps = (strip.flags & GPU_SEQ_FLAG_OVERLAP) != 0;
+    if (overlaps) {
+      col = add_outline(sdf, 1.0, 3.0, col, col_outline);
+    }
+
     /* Outer 1px outline for all strips. */
     col = add_outline(sdf, 0.0, 1.0, col, unpackUnorm4x8(context_data.col_back));
   }

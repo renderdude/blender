@@ -155,8 +155,7 @@ static bool is_face_in_active_component(const SculptSession &ss,
       vertex.i = corner_verts[faces[f].start()];
       break;
     case PBVH_GRIDS: {
-      const CCGKey *key = BKE_pbvh_get_grid_key(*ss.pbvh);
-      vertex.i = faces[f].start() * key->grid_area;
+      vertex.i = faces[f].start() * BKE_subdiv_ccg_key_top_level(*ss.subdiv_ccg).grid_area;
       break;
     }
     case PBVH_BMESH: {
@@ -446,7 +445,7 @@ static PBVHVertRef get_vert_index_for_symmetry_pass(Object &ob,
   else {
     float location[3];
     flip_v3_v3(location, SCULPT_vertex_co_get(ss, original_vertex), ePaintSymmetryFlags(symm_it));
-    symm_vertex = SCULPT_nearest_vertex_get(ob, location, FLT_MAX, false);
+    symm_vertex = nearest_vert_calc(ob, location, FLT_MAX, false);
   }
   return symm_vertex;
 }
@@ -800,17 +799,17 @@ static void update_max_face_falloff_factor(SculptSession &ss, Mesh &mesh, Cache 
 static void vert_to_face_falloff_grids(SculptSession &ss, Mesh *mesh, Cache *expand_cache)
 {
   const OffsetIndices faces = mesh->faces();
-  const CCGKey *key = BKE_pbvh_get_grid_key(*ss.pbvh);
+  const CCGKey key = BKE_subdiv_ccg_key_top_level(*ss.subdiv_ccg);
 
   for (const int i : faces.index_range()) {
     float accum = 0.0f;
     for (const int corner : faces[i]) {
-      const int grid_loop_index = corner * key->grid_area;
-      for (int g = 0; g < key->grid_area; g++) {
+      const int grid_loop_index = corner * key.grid_area;
+      for (int g = 0; g < key.grid_area; g++) {
         accum += expand_cache->vert_falloff[grid_loop_index + g];
       }
     }
-    expand_cache->face_falloff[i] = accum / (faces[i].size() * key->grid_area);
+    expand_cache->face_falloff[i] = accum / (faces[i].size() * key.grid_area);
   }
 }
 

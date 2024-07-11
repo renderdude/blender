@@ -30,6 +30,7 @@ struct FCurve;
 struct ID;
 struct Main;
 struct PointerRNA;
+struct Main;
 
 namespace blender::animrig {
 
@@ -781,6 +782,54 @@ FCurve *action_fcurve_ensure(Main *bmain,
 FCurve *action_fcurve_find(bAction *act, FCurveDescriptor fcurve_descriptor);
 
 /**
+ * Find an appropriate user of the given Action + Slot for keyframing purposes.
+ *
+ * (NOTE: although this function exists for handling situations caused by the
+ * expanded capabilities of layered actions, for convenience it also works with
+ * legacy actions. For legacy actions this simply returns `primary_id` as long
+ * as it's a user of `action`.)
+ *
+ * Usually this function shouldn't be necessary, because you'll already have an
+ * obvious ID that you're keying. But in some cases (such as the action editor
+ * where multiple slots are accessible) the active ID that would normally get
+ * keyed might have nothing to do with the slot that's actually getting keyed.
+ *
+ * This function handles such cases by attempting to find an actual user of the
+ * slot that's appropriate for keying. More specifically:
+ *
+ * - If `primary_id` is a user of the slot, `primary_id` is always returned.
+ * - If the slot has precisely one user, that user is returned.
+ * - Otherwise, nullptr is returned.
+ *
+ * In other words, the cases where a user of the slot is *not* returned are:
+ *
+ * - The slot has no users at all.
+ * - The slot has multiple users, none of which are `primary_id`, and therefore
+ *   there is no single, clear user that can be appropriately used for keying.
+ *
+ * \param primary_id: whenever this is among the users of the action + slot, it
+ * is given priority and is returned. May be null.
+ */
+ID *action_slot_get_id_for_keying(Main &bmain,
+                                  Action &action,
+                                  slot_handle_t slot_handle,
+                                  ID *primary_id);
+
+/**
+ * Make a best-effort guess as to which ID* is animated by the given slot.
+ *
+ * This is only used in rare cases; ususally the ID* for which operations are
+ * performed is known.
+ *
+ * \note This function was specifically written because the 'display name' of an
+ * F-Curve can only be determined by resolving its RNA path, and for that an ID*
+ * is necessary. It would be better to cache that name on the F-Curve itself, so
+ * that this constant resolving (for drawing, filtering by name, etc.) isn't
+ * necessary any more.
+ */
+ID *action_slot_get_id_best_guess(Main &bmain, Slot &slot, ID *primary_id);
+
+/**
  * Assert the invariants of Project Baklava phase 1.
  *
  * For an action the invariants are that it:
@@ -810,6 +859,12 @@ void assert_baklava_phase_1_invariants(const Action &action);
 void assert_baklava_phase_1_invariants(const Layer &layer);
 /** \copydoc assert_baklava_phase_1_invariants(const Action &) */
 void assert_baklava_phase_1_invariants(const Strip &strip);
+
+/**
+ * Creates a new `Action` that matches the old action but is converted to have layers.
+ * Returns a nullptr if the action is empty or already layered.
+ */
+Action *convert_to_layered_action(Main &bmain, const Action &action);
 
 }  // namespace blender::animrig
 

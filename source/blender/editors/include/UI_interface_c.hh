@@ -266,6 +266,12 @@ enum {
    * However, sometimes this behavior is not desired, so it can be disabled with this flag.
    */
   UI_BUT2_ACTIVATE_ON_INIT_NO_SELECT = 1 << 0,
+  /**
+   * Force the button as active in a semi-modal state. For example, text buttons can continuously
+   * capture text input, while leaving the remaining UI interactive. Only supported well for text
+   * buttons currently.
+   */
+  UI_BUT2_FORCE_SEMI_MODAL_ACTIVE = 1 << 1,
 };
 
 /** #uiBut.dragflag */
@@ -2155,8 +2161,13 @@ enum eUI_Item_Flag {
   UI_ITEM_R_FORCE_BLANK_DECORATE = 1 << 13,
   /* Even create the property split layout if there's no name to show there. */
   UI_ITEM_R_SPLIT_EMPTY_NAME = 1 << 14,
+  /**
+   * Only for text buttons (for now): Force the button as active in a semi-modal state (capturing
+   * text input while leaving the remaining UI interactive).
+   */
+  UI_ITEM_R_TEXT_BUT_FORCE_SEMI_MODAL_ACTIVE = 1 << 15,
 };
-ENUM_OPERATORS(eUI_Item_Flag, UI_ITEM_R_SPLIT_EMPTY_NAME)
+ENUM_OPERATORS(eUI_Item_Flag, UI_ITEM_R_TEXT_BUT_FORCE_SEMI_MODAL_ACTIVE)
 #define UI_ITEM_NONE eUI_Item_Flag(0)
 
 #define UI_HEADER_OFFSET ((void)0, 0.4f * UI_UNIT_X)
@@ -2258,6 +2269,10 @@ MenuType *UI_but_menutype_get(const uiBut *but);
  * This is a bit of a hack but best keep it in one place at least.
  */
 PanelType *UI_but_paneltype_get(const uiBut *but);
+/**
+ * This is a bit of a hack but best keep it in one place at least.
+ */
+std::optional<blender::StringRefNull> UI_but_asset_shelf_type_idname_get(const uiBut *but);
 void UI_menutype_draw(bContext *C, MenuType *mt, uiLayout *layout);
 /**
  * Used for popup panels only.
@@ -2778,8 +2793,11 @@ void uiTemplateAssetView(uiLayout *layout,
 
 namespace blender::ui {
 
-void template_asset_shelf_popover(
-    uiLayout &layout, const bContext &C, StringRefNull asset_shelf_id, StringRef name, int icon);
+void template_asset_shelf_popover(uiLayout &layout,
+                                  const bContext &C,
+                                  StringRefNull asset_shelf_id,
+                                  StringRefNull name,
+                                  int icon);
 
 }
 
@@ -3442,6 +3460,8 @@ bool UI_view_item_can_rename(const blender::ui::AbstractViewItem &item);
 void UI_view_item_begin_rename(blender::ui::AbstractViewItem &item);
 
 bool UI_view_item_supports_drag(const blender::ui::AbstractViewItem &item);
+/** If this view is displayed in a popup, don't close it when clicking to activate items. */
+bool UI_view_item_popup_keep_open(const blender::ui::AbstractViewItem &item);
 /**
  * Attempt to start dragging \a item_. This will not work if the view item doesn't
  * support dragging, i.e. if it won't create a drag-controller upon request.

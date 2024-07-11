@@ -30,6 +30,7 @@ class ActionLayersTest : public testing::Test {
   Action *action;
   Object *cube;
   Object *suzanne;
+  Object *bob;
 
   static void SetUpTestSuite()
   {
@@ -51,6 +52,7 @@ class ActionLayersTest : public testing::Test {
     action = static_cast<Action *>(BKE_id_new(bmain, ID_AC, "ACÄnimåtië"));
     cube = BKE_object_add_only_object(bmain, OB_EMPTY, "Küüübus");
     suzanne = BKE_object_add_only_object(bmain, OB_EMPTY, "OBSuzanne");
+    bob = BKE_object_add_only_object(bmain, OB_EMPTY, "OBBob");
   }
 
   void TearDown() override
@@ -568,6 +570,109 @@ TEST_F(ActionLayersTest, is_action_assignable_to)
       << "Layered Actions should be assignable to any type.";
   EXPECT_TRUE(is_action_assignable_to(action, ID_CA))
       << "Layered Actions should be assignable to any type.";
+}
+
+TEST_F(ActionLayersTest, action_slot_get_id_for_keying__empty_action)
+{
+  action->assign_id(nullptr, cube->id);
+
+  /* Double-check that the action is considered empty for the test. */
+  EXPECT_TRUE(action->is_empty());
+
+  /* A `primary_id` that uses the action should get returned. Every other case
+   * should return nullptr. */
+  EXPECT_EQ(&cube->id, action_slot_get_id_for_keying(*bmain, *action, 0, &cube->id));
+  EXPECT_EQ(nullptr, action_slot_get_id_for_keying(*bmain, *action, 0, nullptr));
+  EXPECT_EQ(nullptr, action_slot_get_id_for_keying(*bmain, *action, 0, &suzanne->id));
+}
+
+TEST_F(ActionLayersTest, action_slot_get_id_for_keying__legacy_action)
+{
+  FCurve *fcurve = action_fcurve_ensure(bmain, action, nullptr, nullptr, {"location", 0});
+  EXPECT_FALSE(fcurve == nullptr);
+
+  action->assign_id(nullptr, cube->id);
+
+  /* Double-check that the action is considered legacy for the test. */
+  EXPECT_TRUE(action->is_action_legacy());
+
+  /* A `primary_id` that uses the action should get returned. Every other case
+   * should return nullptr. */
+  EXPECT_EQ(&cube->id, action_slot_get_id_for_keying(*bmain, *action, 0, &cube->id));
+  EXPECT_EQ(nullptr, action_slot_get_id_for_keying(*bmain, *action, 0, nullptr));
+  EXPECT_EQ(nullptr, action_slot_get_id_for_keying(*bmain, *action, 0, &suzanne->id));
+}
+
+TEST_F(ActionLayersTest, action_slot_get_id_for_keying__layered_action)
+{
+  Slot &slot = action->slot_add();
+
+  /* Double-check that the action is considered layered for the test. */
+  EXPECT_TRUE(action->is_action_layered());
+
+  /* A slot with no users should never return a user. */
+  EXPECT_EQ(nullptr, action_slot_get_id_for_keying(*bmain, *action, slot.handle, nullptr));
+  EXPECT_EQ(nullptr, action_slot_get_id_for_keying(*bmain, *action, slot.handle, &cube->id));
+
+  /* A slot with precisely one user should always return that user. */
+  action->assign_id(&slot, cube->id);
+  EXPECT_EQ(&cube->id, action_slot_get_id_for_keying(*bmain, *action, slot.handle, nullptr));
+  EXPECT_EQ(&cube->id, action_slot_get_id_for_keying(*bmain, *action, slot.handle, &cube->id));
+  EXPECT_EQ(&cube->id, action_slot_get_id_for_keying(*bmain, *action, slot.handle, &suzanne->id));
+
+  /* A slot with more than one user should return the passed `primary_id` if it
+   * is among its users, and nullptr otherwise. */
+  action->assign_id(&slot, suzanne->id);
+  EXPECT_EQ(&cube->id, action_slot_get_id_for_keying(*bmain, *action, slot.handle, &cube->id));
+  EXPECT_EQ(&suzanne->id,
+            action_slot_get_id_for_keying(*bmain, *action, slot.handle, &suzanne->id));
+  EXPECT_EQ(nullptr, action_slot_get_id_for_keying(*bmain, *action, slot.handle, nullptr));
+  EXPECT_EQ(nullptr, action_slot_get_id_for_keying(*bmain, *action, slot.handle, &bob->id));
+}
+
+TEST_F(ActionLayersTest, conversion_to_layered)
+{
+  EXPECT_TRUE(action->is_empty());
+  FCurve *legacy_fcu_0 = action_fcurve_ensure(bmain, action, "Test", nullptr, {"location", 0});
+  FCurve *legacy_fcu_1 = action_fcurve_ensure(bmain, action, "Test", nullptr, {"location", 1});
+
+  KeyframeSettings settings;
+  settings.handle = HD_AUTO;
+  settings.interpolation = BEZT_IPO_BEZ;
+  settings.keyframe_type = BEZT_KEYTYPE_KEYFRAME;
+  insert_vert_fcurve(legacy_fcu_0, {0, 0}, settings, INSERTKEY_NOFLAGS);
+  insert_vert_fcurve(legacy_fcu_0, {1, 1}, settings, INSERTKEY_NOFLAGS);
+  add_fmodifier(&legacy_fcu_1->modifiers, FMODIFIER_TYPE_NOISE, legacy_fcu_1);
+
+  Action *converted = convert_to_layered_action(*bmain, *action);
+  ASSERT_TRUE(converted != action);
+  EXPECT_STREQ(converted->id.name, "ACACÄnimåtië_layered");
+  Strip *strip = converted->layer(0)->strip(0);
+  KeyframeStrip key_strip = strip->as<KeyframeStrip>();
+  ChannelBag *bag = key_strip.channelbag(0);
+  ASSERT_EQ(bag->fcurve_array_num, 2);
+  ASSERT_EQ(bag->fcurve_array[0]->totvert, 2);
+
+  ASSERT_TRUE(bag->fcurve_array[0]->modifiers.first == nullptr);
+  ASSERT_TRUE(bag->fcurve_array[1]->modifiers.first != nullptr);
+
+  Action *long_name_action = static_cast<Action *>(BKE_id_new(
+      bmain, ID_AC, "name_for_an_action_that_is_exactly_64_chars_which_is_MAX_ID_NAME"));
+  action_fcurve_ensure(bmain, long_name_action, "Long", nullptr, {"location", 0});
+  converted = convert_to_layered_action(*bmain, *long_name_action);
+  /* AC gets added automatically by Blender, the long name is shortened to make space for
+   * "_layered". */
+  EXPECT_STREQ(converted->id.name,
+               "ACname_for_an_action_that_is_exactly_64_chars_which_is_MA_layered");
+}
+
+TEST_F(ActionLayersTest, empty_to_layered)
+{
+  ASSERT_TRUE(action->is_empty());
+  Action *converted = convert_to_layered_action(*bmain, *action);
+  ASSERT_TRUE(converted != action);
+  ASSERT_TRUE(converted->is_action_layered());
+  ASSERT_FALSE(converted->is_action_legacy());
 }
 
 }  // namespace blender::animrig::tests

@@ -30,6 +30,11 @@ struct UserDef;
 struct WorkspaceConfigFileData;
 
 /**
+ * The suffix used for blendfiles managed by the asset system.
+ */
+#define BLENDER_ASSET_FILE_SUFFIX ".asset.blend"
+
+/**
  * Check whether given path ends with a blend file compatible extension
  * (`.blend`, `.ble` or `.blend.gz`).
  *
@@ -148,7 +153,6 @@ WorkspaceConfigFileData *BKE_blendfile_workspace_config_read(const char *filepat
                                                              const void *file_buf,
                                                              int file_buf_size,
                                                              ReportList *reports);
-bool BKE_blendfile_workspace_config_write(Main *bmain, const char *filepath, ReportList *reports);
 void BKE_blendfile_workspace_config_data_free(WorkspaceConfigFileData *workspace_config);
 
 namespace blender::bke::blendfile {

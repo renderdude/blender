@@ -40,6 +40,7 @@
 #include "DEG_depsgraph_build.hh"
 
 #include "ANIM_action.hh"
+#include "ANIM_animdata.hh"
 #include "ANIM_fcurve.hh"
 #include "action_runtime.hh"
 
@@ -749,6 +750,48 @@ void Slot::users_invalidate(Main &bmain)
   bmain.is_action_slot_to_id_map_dirty = true;
 }
 
+std::string Slot::name_prefix_for_idtype() const
+{
+  if (!this->has_idtype()) {
+    return slot_unbound_prefix;
+  }
+
+  char name[3] = {0};
+  *reinterpret_cast<short *>(name) = this->idtype;
+  return name;
+}
+
+StringRefNull Slot::name_without_prefix() const
+{
+  BLI_assert(StringRef(this->name).size() >= name_length_min);
+
+  /* Avoid accessing an uninitialized part of the string accidentally. */
+  if (this->name[0] == '\0' || this->name[1] == '\0') {
+    return "";
+  }
+  return this->name + 2;
+}
+
+void Slot::name_ensure_prefix()
+{
+  BLI_assert(StringRef(this->name).size() >= name_length_min);
+
+  if (StringRef(this->name).size() < 2) {
+    /* The code below would overwrite the trailing 0-byte. */
+    this->name[2] = '\0';
+  }
+
+  if (!this->has_idtype()) {
+    /* A zero idtype is not going to convert to a two-character string, so we
+     * need to explicitly assign the default prefix. */
+    this->name[0] = slot_unbound_prefix[0];
+    this->name[1] = slot_unbound_prefix[1];
+    return;
+  }
+
+  *reinterpret_cast<short *>(this->name) = this->idtype;
+}
+
 /* ----- Functions  ----------- */
 
 bool assign_action(Action &action, ID &animated_id)
@@ -841,48 +884,6 @@ std::optional<std::pair<Action *, Slot *>> get_action_slot_pair(ID &animated_id)
   }
 
   return std::make_pair(&action, slot);
-}
-
-std::string Slot::name_prefix_for_idtype() const
-{
-  if (!this->has_idtype()) {
-    return slot_unbound_prefix;
-  }
-
-  char name[3] = {0};
-  *reinterpret_cast<short *>(name) = this->idtype;
-  return name;
-}
-
-StringRefNull Slot::name_without_prefix() const
-{
-  BLI_assert(StringRef(this->name).size() >= name_length_min);
-
-  /* Avoid accessing an uninitialized part of the string accidentally. */
-  if (this->name[0] == '\0' || this->name[1] == '\0') {
-    return "";
-  }
-  return this->name + 2;
-}
-
-void Slot::name_ensure_prefix()
-{
-  BLI_assert(StringRef(this->name).size() >= name_length_min);
-
-  if (StringRef(this->name).size() < 2) {
-    /* The code below would overwrite the trailing 0-byte. */
-    this->name[2] = '\0';
-  }
-
-  if (!this->has_idtype()) {
-    /* A zero idtype is not going to convert to a two-character string, so we
-     * need to explicitly assign the default prefix. */
-    this->name[0] = slot_unbound_prefix[0];
-    this->name[1] = slot_unbound_prefix[1];
-    return;
-  }
-
-  *reinterpret_cast<short *>(this->name) = this->idtype;
 }
 
 /* ----- ActionStrip implementation ----------- */
@@ -1372,6 +1373,52 @@ FCurve *action_fcurve_ensure(Main *bmain,
   return fcu;
 }
 
+ID *action_slot_get_id_for_keying(Main &bmain,
+                                  Action &action,
+                                  const slot_handle_t slot_handle,
+                                  ID *primary_id)
+{
+  if (action.is_action_legacy()) {
+    if (primary_id && get_action(*primary_id) == &action) {
+      return primary_id;
+    }
+    return nullptr;
+  }
+
+  Slot *slot = action.slot_for_handle(slot_handle);
+  if (slot == nullptr) {
+    return nullptr;
+  }
+
+  blender::Span<ID *> users = slot->users(bmain);
+  if (users.size() == 1) {
+    /* We only do this for `users.size() == 1` and not `users.size() >= 1`
+     * because when there's more than one user it's ambiguous which user we
+     * should return, and that would be unpredictable for end users of Blender.
+     * We also expect that to be a corner case anyway.  So instead we let that
+     * case either get disambiguated by the primary ID in the case below, or
+     * return null. */
+    return users[0];
+  }
+  if (users.contains(primary_id)) {
+    return primary_id;
+  }
+
+  return nullptr;
+}
+
+ID *action_slot_get_id_best_guess(Main &bmain, Slot &slot, ID *primary_id)
+{
+  blender::Span<ID *> users = slot.users(bmain);
+  if (users.is_empty()) {
+    return 0;
+  }
+  if (users.contains(primary_id)) {
+    return primary_id;
+  }
+  return users[0];
+}
+
 void assert_baklava_phase_1_invariants(const Action &action)
 {
   if (action.is_action_legacy()) {
@@ -1401,6 +1448,40 @@ void assert_baklava_phase_1_invariants(const Strip &strip)
   BLI_assert(strip.type() == Strip::Type::Keyframe);
   BLI_assert(strip.is_infinite());
   BLI_assert(strip.frame_offset == 0.0);
+}
+
+Action *convert_to_layered_action(Main &bmain, const Action &legacy_action)
+{
+  if (!legacy_action.is_action_legacy()) {
+    return nullptr;
+  }
+
+  std::string suffix = "_layered";
+  /* In case the legacy action has a long name it is shortened to make space for the suffix. */
+  char legacy_name[MAX_ID_NAME - 10];
+  /* Offsetting the id.name to remove the ID prefix (AC) which gets added back later. */
+  STRNCPY_UTF8(legacy_name, legacy_action.id.name + 2);
+
+  const std::string layered_action_name = std::string(legacy_name) + suffix;
+  bAction *dna_action = BKE_action_add(&bmain, layered_action_name.c_str());
+
+  Action &converted_action = dna_action->wrap();
+  Slot &slot = converted_action.slot_add();
+  Layer &layer = converted_action.layer_add(legacy_action.id.name);
+  KeyframeStrip &strip = layer.strip_add<KeyframeStrip>();
+  BLI_assert(strip.channelbags_array_num == 0);
+  ChannelBag *bag = &strip.channelbag_for_slot_add(slot);
+
+  const int fcu_count = BLI_listbase_count(&legacy_action.curves);
+  bag->fcurve_array = MEM_cnew_array<FCurve *>(fcu_count, "Convert to layered action");
+  bag->fcurve_array_num = fcu_count;
+
+  int i = 0;
+  LISTBASE_FOREACH_INDEX (FCurve *, fcu, &legacy_action.curves, i) {
+    bag->fcurve_array[i] = BKE_fcurve_copy(fcu);
+  }
+
+  return &converted_action;
 }
 
 }  // namespace blender::animrig

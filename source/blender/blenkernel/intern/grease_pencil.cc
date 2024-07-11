@@ -452,9 +452,9 @@ Span<float3> Drawing::curve_plane_normals() const
         /* Check for degenerate case where the points are on a line. */
         if (math::is_zero(length)) {
           for (const int point_i : points.drop_back(1)) {
-            float3 segment_vec = math::normalize(positions[point_i] - positions[point_i + 1]);
+            float3 segment_vec = positions[point_i] - positions[point_i + 1];
             if (math::length_squared(segment_vec) != 0.0f) {
-              normal = float3(segment_vec.y, -segment_vec.x, 0.0f);
+              normal = math::normalize(float3(segment_vec.y, -segment_vec.x, 0.0f));
               break;
             }
           }
@@ -1344,6 +1344,14 @@ float4x4 Layer::local_transform() const
 {
   return math::from_loc_rot_scale<float4x4, math::EulerXYZ>(
       float3(this->translation), float3(this->rotation), float3(this->scale));
+}
+
+void Layer::set_local_transform(const float4x4 &transform)
+{
+  math::to_loc_rot_scale_safe<true>(transform,
+                                    *reinterpret_cast<float3 *>(this->translation),
+                                    *reinterpret_cast<math::EulerXYZ *>(this->rotation),
+                                    *reinterpret_cast<float3 *>(this->scale));
 }
 
 StringRefNull Layer::view_layer_name() const
@@ -2393,6 +2401,23 @@ bool GreasePencil::remove_frames(blender::bke::greasepencil::Layer &layer,
     return true;
   }
   return false;
+}
+
+void GreasePencil::add_layers_with_empty_drawings_for_eval(const int num)
+{
+  using namespace blender;
+  using namespace blender::bke::greasepencil;
+  const int old_drawings_num = this->drawing_array_num;
+  this->add_empty_drawings(num);
+  for (const int i : IndexRange(num)) {
+    const int drawing_i = old_drawings_num + i;
+    Drawing &drawing = reinterpret_cast<GreasePencilDrawing *>(this->drawing(drawing_i))->wrap();
+    Layer &layer = this->add_layer(std::to_string(i));
+    GreasePencilFrame *frame = layer.add_frame(this->runtime->eval_frame);
+    BLI_assert(frame);
+    frame->drawing_index = drawing_i;
+    drawing.add_user();
+  }
 }
 
 void GreasePencil::remove_drawings_with_no_users()
