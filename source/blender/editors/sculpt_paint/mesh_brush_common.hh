@@ -96,6 +96,24 @@ void gather_grids_normals(const SubdivCCG &subdiv_ccg,
                           MutableSpan<float3> normals);
 void gather_bmesh_normals(const Set<BMVert *, 0> &verts, MutableSpan<float3> normals);
 
+/** Gather data from an array aligned with all geometry vertices. */
+template<typename T>
+void gather_data_grids(const SubdivCCG &subdiv_ccg,
+                       Span<T> src,
+                       Span<int> grids,
+                       MutableSpan<T> node_data);
+template<typename T>
+void gather_data_vert_bmesh(Span<T> src, const Set<BMVert *, 0> &verts, MutableSpan<T> node_data);
+
+/** Scatter data from an array of the node's data to the referenced geometry vertices. */
+template<typename T>
+void scatter_data_grids(const SubdivCCG &subdiv_ccg,
+                        Span<T> node_data,
+                        Span<int> grids,
+                        MutableSpan<T> dst);
+template<typename T>
+void scatter_data_vert_bmesh(Span<T> node_data, const Set<BMVert *, 0> &verts, MutableSpan<T> dst);
+
 /**
  * Calculate initial influence factors based on vertex visibility.
  */

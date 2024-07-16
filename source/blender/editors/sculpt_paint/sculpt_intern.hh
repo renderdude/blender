@@ -848,7 +848,6 @@ float SCULPT_mask_get_at_grids_vert_index(const SubdivCCG &subdiv_ccg,
 bool SCULPT_vertex_is_occluded(SculptSession &ss, PBVHVertRef vertex, bool original);
 
 const float *SCULPT_vertex_persistent_co_get(const SculptSession &ss, PBVHVertRef vertex);
-blender::float3 SCULPT_vertex_persistent_normal_get(const SculptSession &ss, PBVHVertRef vertex);
 
 /**
  * Coordinates used for manipulating the base mesh when Grab Active Vertex is enabled.
@@ -1051,15 +1050,6 @@ PBVHVertRef nearest_vert_calc(const Object &object,
                               bool use_original);
 
 }
-
-int SCULPT_plane_point_side(const float co[3], const float plane[4]);
-int SCULPT_plane_trim(const blender::ed::sculpt_paint::StrokeCache &cache,
-                      const Brush &brush,
-                      const float val[3]);
-/**
- * Handles clipping against a mirror modifier and #SCULPT_LOCK_X/Y/Z axis flags.
- */
-void SCULPT_clip(const Sculpt &sd, const SculptSession &ss, float co[3], const float val[3]);
 
 float SCULPT_brush_plane_offset_get(const Sculpt &sd, const SculptSession &ss);
 
@@ -1565,6 +1555,9 @@ float4 neighbor_color_average(SculptSession &ss,
  */
 float3 neighbor_coords_average_interior(const SculptSession &ss, PBVHVertRef vertex);
 
+void neighbor_position_average_grids(const SubdivCCG &subdiv_ccg,
+                                     Span<int> grids,
+                                     MutableSpan<float3> new_positions);
 void neighbor_position_average_interior_grids(OffsetIndices<int> faces,
                                               Span<int> corner_verts,
                                               BitSpan boundary_verts,
@@ -1572,6 +1565,8 @@ void neighbor_position_average_interior_grids(OffsetIndices<int> faces,
                                               Span<int> grids,
                                               MutableSpan<float3> new_positions);
 
+void neighbor_position_average_bmesh(const Set<BMVert *, 0> &verts,
+                                     MutableSpan<float3> new_positions);
 void neighbor_position_average_interior_bmesh(const Set<BMVert *, 0> &verts,
                                               MutableSpan<float3> new_positions);
 
@@ -1579,8 +1574,6 @@ void neighbor_position_average_mesh(Span<float3> positions,
                                     Span<int> verts,
                                     Span<Vector<int>> vert_neighbors,
                                     MutableSpan<float3> new_positions);
-
-void enhance_details_brush(const Sculpt &sd, Object &ob, Span<PBVHNode *> nodes);
 
 /* Surface Smooth Brush. */
 
@@ -2070,19 +2063,6 @@ bool SCULPT_use_image_paint_brush(PaintModeSettings &settings, Object &ob);
 namespace blender::ed::sculpt_paint {
 
 float clay_thumb_get_stabilized_pressure(const blender::ed::sculpt_paint::StrokeCache &cache);
-
-}
-
-void SCULPT_do_layer_brush(const Sculpt &sd, Object &ob, blender::Span<PBVHNode *> nodes);
-void SCULPT_do_topology_relax_brush(const Sculpt &sd, Object &ob, blender::Span<PBVHNode *> nodes);
-
-/** \} */
-
-/* end sculpt_brush_types.cc */
-
-/* sculpt_ops.cc */
-
-namespace blender::ed::sculpt_paint {
 
 void SCULPT_OT_brush_stroke(wmOperatorType *ot);
 
