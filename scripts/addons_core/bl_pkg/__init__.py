@@ -26,7 +26,6 @@ import bpy
 from bpy.props import (
     BoolProperty,
     EnumProperty,
-    IntProperty,
     PointerProperty,
     StringProperty,
 )
@@ -295,9 +294,9 @@ def repos_to_notify():
         repos_notify.append((
             bl_extension_ops.RepoItem(
                 name=repo_item.name,
-                directory=repo_directory,
+                directory=repo_item.directory,
                 source="" if repo_item.use_remote_url else repo_item.source,
-                remote_url=remote_url,
+                remote_url=repo_item.remote_url,
                 module=repo_item.module,
                 use_cache=repo_item.use_cache,
                 access_token=repo_item.access_token if repo_item.use_access_token else "",
@@ -599,6 +598,11 @@ def register():
         bl_extension_ops,
         bl_extension_ui,
     )
+
+    # Needed, otherwise the UI gets filtered out, see: #122754.
+    from _bpy import _bl_owner_id_set as bl_owner_id_set
+    bl_owner_id_set("")
+    del bl_owner_id_set
 
     repo_cache_store_clear()
 

@@ -265,24 +265,13 @@ def addon_draw_item_expanded(
             text=domain_extract_from_url(item_doc_url),
             icon='HELP' if addon_type in {ADDON_TYPE_LEGACY_CORE, ADDON_TYPE_LEGACY_USER} else 'URL',
         ).url = item_doc_url
-    # Only add "Report a Bug" button if tracker_url is set
-    # or the add-on is bundled (use official tracker then).
-    if item_tracker_url or (addon_type == ADDON_TYPE_LEGACY_CORE):
+    # Only add "Report a Bug" button if tracker_url is set.
+    # None of the core add-ons are expected to have tracker info (glTF is the exception).
+    if item_tracker_url:
         col_a.label(text="Feedback", text_ctxt=i18n_contexts.editor_preferences)
-        if item_tracker_url:
-            col_b.split(factor=0.5).operator(
-                "wm.url_open", text="Report a Bug", icon='URL',
-            ).url = item_tracker_url
-        else:
-            addon_info = (
-                "Name: {:s} {:s}\n"
-                "Author: {:s}\n"
-            ).format(item_name, item_version, item_maintainer)
-            props = col_b.split(factor=0.5).operator(
-                "wm.url_open_preset", text="Report a Bug", icon='URL',
-            )
-            props.type = 'BUG_ADDON'
-            props.id = addon_info
+        col_b.split(factor=0.5).operator(
+            "wm.url_open", text="Report a Bug", icon='URL',
+        ).url = item_tracker_url
 
     if USE_SHOW_ADDON_TYPE_AS_TEXT:
         col_a.label(text="Type")
@@ -339,12 +328,32 @@ def addons_panel_draw_missing_with_extension_impl(
     box = layout_panel.box()
     box.label(text="Add-ons previously shipped with Blender are now available from extensions.blender.org.")
 
+    pkg_manifest_remote = {}
+
     if repo is None:
         # Most likely the user manually removed this.
         box.label(text="Blender's extension repository not found!", icon='ERROR')
     elif not repo.enabled:
         box.label(text="Blender's extension repository must be enabled to install extensions!", icon='ERROR')
         repo_index = -1
+    else:
+        # Ensure the remote data is available from which to install the extensions.
+        # If not, show a button to refresh the remote repository, see: #124850.
+        from . import repo_cache_store_ensure
+        repo_cache_store = repo_cache_store_ensure()
+        pkg_manifest_remote = repo_cache_store.refresh_remote_from_directory(directory=repo.directory, error_fn=print)
+        if pkg_manifest_remote is None:
+            row = box.row()
+            row.label(text="Blender's extension repository must be refreshed!", icon='ERROR')
+            # Ideally this would only sync one repository, but there is no operator to do this
+            # and this one corner-case doesn't justify adding a new operator.
+            rowsub = row.row()
+            rowsub.alignment = 'RIGHT'
+            rowsub.operator("extensions.repo_sync_all", text="Refresh Remote", icon='FILE_REFRESH')
+            rowsub.label(text="", icon='BLANK1')
+            pkg_manifest_remote = {}
+            del row, rowsub
+        del repo_cache_store
     del repo
 
     for addon_module_name in sorted(missing_modules):
@@ -371,11 +380,17 @@ def addons_panel_draw_missing_with_extension_impl(
             # This is enough of a corner case that it's not especially worth detecting
             # and communicating this particular state of affairs to the user.
             # Worst case, they install and it will re-install an already installed extension.
-            props = row_right.operator("extensions.package_install", text="Install")
+            rowsub = row_right.row()
+            rowsub.alignment = 'RIGHT'
+            props = rowsub.operator("extensions.package_install", text="Install")
             props.repo_index = repo_index
             props.pkg_id = addon_pkg_id
             props.do_legacy_replace = True
             del props
+
+            if addon_pkg_id not in pkg_manifest_remote:
+                rowsub.enabled = False
+            del rowsub
 
         row_right.operator("preferences.addon_disable", text="", icon="X", emboss=False).module = addon_module_name
 

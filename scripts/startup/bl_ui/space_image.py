@@ -35,7 +35,6 @@ from bl_ui.space_toolsystem_common import (
 
 from bpy.app.translations import (
     contexts as i18n_contexts,
-    pgettext_iface as iface_,
 )
 
 
@@ -1706,7 +1705,7 @@ class IMAGE_AST_brush_paint(ImageAssetShelf, AssetShelf):
 
     @classmethod
     def poll(cls, context):
-        return context.space_data and context.space_data.ui_mode == 'PAINT'
+        return context.space_data and context.space_data.mode == 'PAINT'
 
 
 classes = (
