@@ -62,6 +62,7 @@ struct Cache;
 void scale_translations(MutableSpan<float3> translations, Span<float> factors);
 void scale_translations(MutableSpan<float3> translations, float factor);
 void scale_factors(MutableSpan<float> factors, float strength);
+void scale_factors(MutableSpan<float> factors, Span<float> strengths);
 void translations_from_offset_and_factors(const float3 &offset,
                                           Span<float> factors,
                                           MutableSpan<float3> r_translations);
@@ -79,6 +80,7 @@ void translations_from_new_positions(Span<float3> new_positions,
                                      MutableSpan<float3> translations);
 
 void transform_positions(Span<float3> src, const float4x4 &transform, MutableSpan<float3> dst);
+void transform_positions(const float4x4 &transform, MutableSpan<float3> positions);
 
 /**
  * Note on the various positions arrays:
@@ -90,17 +92,6 @@ void transform_positions(Span<float3> src, const float4x4 &transform, MutableSpa
  */
 
 /** Fill the output array with all positions in the geometry referenced by the indices. */
-void gather_mesh_positions(Span<float3> vert_postions,
-                           Span<int> verts,
-                           MutableSpan<float3> positions);
-inline MutableSpan<float3> gather_mesh_positions(const Span<float3> vert_positions,
-                                                 const Span<int> verts,
-                                                 Vector<float3> &positions)
-{
-  positions.resize(verts.size());
-  gather_mesh_positions(vert_positions, verts, positions.as_mutable_span());
-  return positions;
-}
 void gather_grids_positions(const CCGKey &key,
                             const Span<CCGElem *> elems,
                             const Span<int> grids,
@@ -124,18 +115,20 @@ inline MutableSpan<float3> gather_bmesh_positions(const Set<BMVert *, 0> &verts,
 }
 
 /** Fill the output array with all normals in the grids referenced by the indices. */
-inline MutableSpan<float3> gather_mesh_normals(const Span<float3> vert_normals,
-                                               const Span<int> verts,
-                                               Vector<float3> &normals)
-{
-  return gather_mesh_positions(vert_normals, verts, normals);
-}
 void gather_grids_normals(const SubdivCCG &subdiv_ccg,
                           Span<int> grids,
                           MutableSpan<float3> normals);
 void gather_bmesh_normals(const Set<BMVert *, 0> &verts, MutableSpan<float3> normals);
 
 /** Gather data from an array aligned with all geometry vertices. */
+template<typename T> void gather_data_mesh(Span<T> src, Span<int> indices, MutableSpan<T> dst);
+template<typename T>
+MutableSpan<T> gather_data_mesh(const Span<T> src, const Span<int> indices, Vector<T> &dst)
+{
+  dst.resize(indices.size());
+  gather_data_mesh(src, indices, dst.as_mutable_span());
+  return dst;
+}
 template<typename T>
 void gather_data_grids(const SubdivCCG &subdiv_ccg,
                        Span<T> src,
@@ -145,6 +138,7 @@ template<typename T>
 void gather_data_vert_bmesh(Span<T> src, const Set<BMVert *, 0> &verts, MutableSpan<T> node_data);
 
 /** Scatter data from an array of the node's data to the referenced geometry vertices. */
+template<typename T> void scatter_data_mesh(Span<T> src, Span<int> indices, MutableSpan<T> dst);
 template<typename T>
 void scatter_data_grids(const SubdivCCG &subdiv_ccg,
                         Span<T> node_data,
@@ -361,9 +355,7 @@ void apply_translations_to_shape_keys(Object &object,
  * \todo This should be removed one the pbvh::Tree no longer stores this copy of deformed
  * positions.
  */
-void apply_translations_to_pbvh(bke::pbvh::Tree &pbvh,
-                                Span<int> verts,
-                                Span<float3> positions_orig);
+void apply_translations_to_pbvh(bke::pbvh::Tree &pbvh, Span<int> verts, Span<float3> translations);
 
 /**
  * Write the new translated positions to the original mesh, taking into account inverse

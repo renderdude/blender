@@ -36,7 +36,7 @@
 
 namespace blender::ed::sculpt_paint::auto_mask {
 
-Cache *active_cache_get(SculptSession &ss)
+const Cache *active_cache_get(const SculptSession &ss)
 {
   if (ss.cache) {
     return ss.cache->automasking.get();
@@ -793,6 +793,11 @@ static void init_face_sets_masking(const Sculpt &sd, Object &ob)
 }
 
 #define EDGE_DISTANCE_INF -1
+
+enum eBoundaryAutomaskMode {
+  AUTOMASK_INIT_BOUNDARY_EDGES = 1,
+  AUTOMASK_INIT_BOUNDARY_FACE_SETS = 2,
+};
 
 static void init_boundary_masking(Object &ob, eBoundaryAutomaskMode mode, int propagation_steps)
 {

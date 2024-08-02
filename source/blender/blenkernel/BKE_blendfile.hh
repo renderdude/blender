@@ -375,8 +375,8 @@ class PartialWriteContext : NonCopyable, NonMovable {
    *
    * \return `true` on success.
    */
-  bool write(const char *filepath, int write_flags, int remap_mode, ReportList &reports);
-  bool write(const char *filepath, ReportList &reports);
+  bool write(const char *write_filepath, int write_flags, int remap_mode, ReportList &reports);
+  bool write(const char *write_filepath, ReportList &reports);
 
   /* TODO: To allow editing an existing external blendfile:
    *   - API to load a context from a blendfile.
@@ -425,13 +425,3 @@ class PartialWriteContext : NonCopyable, NonMovable {
 };
 
 }  // namespace blender::bke::blendfile
-
-void BKE_blendfile_write_partial_tag_ID(ID *id, bool set);
-void BKE_blendfile_write_partial_begin(Main *bmain_src);
-/**
- * \param remap_mode: Choose the kind of path remapping or none #eBLO_WritePathRemap.
- * \return Success.
- */
-bool BKE_blendfile_write_partial(
-    Main *bmain_src, const char *filepath, int write_flags, int remap_mode, ReportList *reports);
-void BKE_blendfile_write_partial_end(Main *bmain_src);

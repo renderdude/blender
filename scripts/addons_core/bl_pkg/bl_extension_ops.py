@@ -56,6 +56,9 @@ rna_prop_enable_on_install = BoolProperty(
     name="Enable on Install",
     description="Enable after installing",
     default=True,
+    # This is done as "enabling" has security implications (running code after the action).
+    # Using the last value would mean an action that isn't expected to enable the extension might unintentionally do so.
+    options={'SKIP_SAVE'}
 )
 rna_prop_enable_on_install_type_map = {
     "add-on": "Enable Add-on",
@@ -1356,6 +1359,7 @@ class EXTENSIONS_OT_dummy_progress(Operator, _ExtCmdMixIn):
                 partial(
                     bl_extension_utils.dummy_progress,
                     use_idle=is_modal,
+                    python_args=bpy.app.python_args,
                 ),
             ],
             batch_job_limit=1,
@@ -1410,6 +1414,7 @@ class EXTENSIONS_OT_repo_sync(Operator, _ExtCmdMixIn):
                     access_token=repo_item.access_token,
                     timeout=prefs.system.network_timeout,
                     use_idle=is_modal,
+                    python_args=bpy.app.python_args,
                 )
             )
             repos_lock.append(repo_item.directory)
@@ -1509,6 +1514,7 @@ class EXTENSIONS_OT_repo_sync_all(Operator, _ExtCmdMixIn):
                     access_token=repo_item.access_token,
                     timeout=prefs.system.network_timeout,
                     use_idle=is_modal,
+                    python_args=bpy.app.python_args,
                 ))
                 repos_lock.append(repo_item.directory)
 
@@ -1842,18 +1848,25 @@ class EXTENSIONS_OT_package_upgrade_all(Operator, _ExtCmdMixIn):
             if pkg_manifest_local is None:
                 continue
 
+            repo_item = repos_all[repo_index]
             for pkg_id, item_remote in pkg_manifest_remote.items():
                 item_local = pkg_manifest_local.get(pkg_id)
                 if item_local is None:
                     # Not installed.
+                    continue
+                if item_remote.block:
+                    # Blocked, don't touch.
                     continue
 
                 if item_remote.version != item_local.version:
                     packages_to_upgrade[repo_index].append(pkg_id)
                     package_count += 1
 
-            if packages_to_upgrade[repo_index]:
-                handle_addons_info.append((repos_all[repo_index], list(packages_to_upgrade[repo_index])))
+            if (pkg_id_sequence_upgrade := _preferences_pkg_id_sequence_filter_enabled(
+                    repo_item,
+                    packages_to_upgrade[repo_index],
+            )):
+                handle_addons_info.append((repo_item, pkg_id_sequence_upgrade))
 
         cmd_batch = []
         for repo_index, pkg_id_sequence in enumerate(packages_to_upgrade):
@@ -1873,6 +1886,7 @@ class EXTENSIONS_OT_package_upgrade_all(Operator, _ExtCmdMixIn):
                     timeout=prefs.system.network_timeout,
                     use_cache=repo_item.use_cache,
                     use_idle=is_modal,
+                    python_args=bpy.app.python_args,
                 ))
             self._repo_directories.add(repo_item.directory)
 
@@ -1994,6 +2008,7 @@ class EXTENSIONS_OT_package_install_marked(Operator, _ExtCmdMixIn):
                     timeout=prefs.system.network_timeout,
                     use_cache=repo_item.use_cache,
                     use_idle=is_modal,
+                    python_args=bpy.app.python_args,
                 ))
 
             self._repo_directories.add(repo_item.directory)
@@ -2146,6 +2161,7 @@ class EXTENSIONS_OT_package_uninstall_marked(Operator, _ExtCmdMixIn):
                     user_directory=repo_user_directory(repo_item.module),
                     pkg_id_sequence=pkg_id_sequence,
                     use_idle=is_modal,
+                    python_args=bpy.app.python_args,
                 ))
             self._repo_directories.add(repo_item.directory)
             package_count += len(pkg_id_sequence)
@@ -2376,6 +2392,7 @@ class EXTENSIONS_OT_package_install_files(Operator, _ExtCmdMixIn):
                     files=pkg_files,
                     blender_version=bpy.app.version,
                     use_idle=is_modal,
+                    python_args=bpy.app.python_args,
                 )
             ],
             batch_job_limit=1,
@@ -2757,6 +2774,7 @@ class EXTENSIONS_OT_package_install(Operator, _ExtCmdMixIn):
                     timeout=prefs.system.network_timeout,
                     use_cache=repo_item.use_cache,
                     use_idle=is_modal,
+                    python_args=bpy.app.python_args,
                 )
             ],
             batch_job_limit=1,
@@ -3077,6 +3095,23 @@ class EXTENSIONS_OT_package_install(Operator, _ExtCmdMixIn):
             )
             return False
 
+        if item_remote.block:
+            self._draw_override = (
+                self._draw_override_errors,
+                {
+                    "errors": [
+                        (
+                            "Repository \"{:s}\" has blocked \"{:s}\"\n"
+                            "for the following reason:"
+                        ).format(repo_name, pkg_id),
+                        "  " + item_remote.block.reason,
+                        "If you wish to install the extensions anyway,\n"
+                        "manually download and install the extension from disk."
+                    ]
+                }
+            )
+            return False
+
         self._drop_variables = repo_index, repo_name, pkg_id, item_remote
 
         self.repo_index = repo_index
@@ -3096,7 +3131,15 @@ class EXTENSIONS_OT_package_install(Operator, _ExtCmdMixIn):
         icon = 'ERROR'
         for error in errors:
             if isinstance(error, str):
-                layout.label(text=error, translate=False, icon=icon)
+                # Group text split by newlines more closely.
+                # Without this, lines have too much vertical space.
+                if "\n" in error:
+                    layout_aligned = layout.column(align=True)
+                    for error in error.split("\n"):
+                        layout_aligned.label(text=error, translate=False, icon=icon)
+                        icon = 'BLANK1'
+                else:
+                    layout.label(text=error, translate=False, icon=icon)
             else:
                 error(layout)
             icon = 'BLANK1'
@@ -3189,6 +3232,7 @@ class EXTENSIONS_OT_package_uninstall(Operator, _ExtCmdMixIn):
                     user_directory=repo_user_directory(repo_item.module),
                     pkg_id_sequence=(pkg_id, ),
                     use_idle=is_modal,
+                    python_args=bpy.app.python_args,
                 ),
             ],
             batch_job_limit=1,

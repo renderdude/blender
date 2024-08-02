@@ -1010,6 +1010,19 @@ static void update_normals_faces(Tree &pbvh, Span<Node *> nodes, Mesh &mesh)
     }
   }
 
+  /* In certain cases when undoing strokes on a duplicate object, the cached data may be marked
+   * dirty before this code is run, leaving the relevant vectors empty. We force reinitialize the
+   * vectors to prevent crashes here.
+   * See #125375 for more detail. */
+  if (!pbvh.deformed_) {
+    if (mesh.runtime->face_normals_cache.is_dirty()) {
+      mesh.face_normals();
+    }
+    if (mesh.runtime->vert_normals_cache.is_dirty()) {
+      mesh.vert_normals();
+    }
+  }
+
   VectorSet<int> boundary_verts;
   threading::parallel_invoke(
       [&]() {
@@ -2677,24 +2690,6 @@ bool BKE_pbvh_is_deformed(const blender::bke::pbvh::Tree &pbvh)
   return pbvh.deformed_;
 }
 /* Proxies */
-
-PBVHColorBufferNode *BKE_pbvh_node_color_buffer_get(blender::bke::pbvh::Node *node)
-{
-  if (!node->color_buffer_.color) {
-    node->color_buffer_.color = static_cast<float(*)[4]>(
-        MEM_callocN(sizeof(float[4]) * node->unique_verts_num_, "Color buffer"));
-  }
-  return &node->color_buffer_;
-}
-
-void BKE_pbvh_node_color_buffer_free(blender::bke::pbvh::Tree &pbvh)
-{
-  blender::Vector<blender::bke::pbvh::Node *> nodes = search_gather(pbvh, {});
-
-  for (blender::bke::pbvh::Node *node : nodes) {
-    MEM_SAFE_FREE(node->color_buffer_.color);
-  }
-}
 
 void pbvh_vertex_iter_init(blender::bke::pbvh::Tree &pbvh,
                            blender::bke::pbvh::Node *node,
