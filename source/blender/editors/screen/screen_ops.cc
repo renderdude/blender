@@ -3841,8 +3841,15 @@ static AreaDockTarget area_docking_target(sAreaJoinData *jd, const wmEvent *even
   }
 
   /* Convert to local coordinates in sa2. */
-  const int x = event->xy[0] + jd->win1->posx - jd->win2->posx - jd->sa2->totrct.xmin;
-  const int y = event->xy[1] + jd->win1->posy - jd->win2->posy - jd->sa2->totrct.ymin;
+  int win1_posx = jd->win1->posx;
+  int win1_posy = jd->win1->posy;
+  int win2_posx = jd->win2->posx;
+  int win2_posy = jd->win2->posy;
+  WM_window_pixels_coords(jd->win1, &win1_posx, &win1_posy);
+  WM_window_pixels_coords(jd->win2, &win2_posx, &win2_posy);
+
+  const int x = event->xy[0] + win1_posx - win2_posx - jd->sa2->totrct.xmin;
+  const int y = event->xy[1] + win1_posy - win2_posy - jd->sa2->totrct.ymin;
 
   const float fac_x = float(x) / float(jd->sa2->winx);
   const float fac_y = float(y) / float(jd->sa2->winy);
@@ -4024,14 +4031,18 @@ static int area_join_modal(bContext *C, wmOperator *op, const wmEvent *event)
       WorkspaceStatus status(C);
       if (jd->sa1 && jd->sa1 == jd->sa2) {
         status.item(IFACE_("Select Split"), ICON_MOUSE_LMB);
-      }
-      else if (jd->dock_target == AreaDockTarget::None) {
-        status.item(IFACE_("Select Area"), ICON_MOUSE_LMB);
+        status.item(IFACE_("Cancel"), ICON_EVENT_ESC);
+        status.item_bool(IFACE_("Snap"), event->modifier & KM_CTRL, ICON_EVENT_CTRL);
       }
       else {
-        status.item(IFACE_("Select Location"), ICON_MOUSE_LMB);
+        if (jd->dock_target == AreaDockTarget::None) {
+          status.item(IFACE_("Select Area"), ICON_MOUSE_LMB);
+        }
+        else {
+          status.item(IFACE_("Select Location"), ICON_MOUSE_LMB);
+        }
+        status.item(IFACE_("Cancel"), ICON_EVENT_ESC);
       }
-      status.item(IFACE_("Cancel"), ICON_EVENT_ESC);
       break;
     }
     case LEFTMOUSE:

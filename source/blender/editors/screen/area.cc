@@ -793,7 +793,8 @@ void ED_region_search_filter_update(const ScrArea *area, ARegion *region)
 
   const char *search_filter = ED_area_region_search_filter_get(area, region);
   SET_FLAG_FROM_TEST(region->flag,
-                     region->regiontype == RGN_TYPE_WINDOW && search_filter[0] != '\0',
+                     region->regiontype == RGN_TYPE_WINDOW && search_filter &&
+                         search_filter[0] != '\0',
                      RGN_FLAG_SEARCH_FILTER_ACTIVE);
 }
 
@@ -875,13 +876,11 @@ WorkspaceStatus::WorkspaceStatus(bContext *C)
  * \{ */
 
 static constexpr float STATUS_AFTER_TEXT = 0.7f;
-static constexpr float STATUS_BEFORE_TEXT = 0.3f;
-static constexpr float STATUS_MOUSE_ICON_PAD = -0.9f;
+static constexpr float STATUS_MOUSE_ICON_PAD = -0.5f;
 
 static void ed_workspace_status_text_item(WorkSpace *workspace, std::string text)
 {
   if (!text.empty()) {
-    ed_workspace_status_space(workspace, STATUS_BEFORE_TEXT);
     ed_workspace_status_item(workspace, std::move(text), ICON_NONE);
     ed_workspace_status_space(workspace, STATUS_AFTER_TEXT);
   }

@@ -1113,13 +1113,14 @@ static void cursor_draw_point_with_symmetry(const uint gpuattr,
                                             const float radius)
 {
   const char symm = SCULPT_mesh_symmetry_xyz_get(ob);
-  float location[3], symm_rot_mat[4][4];
+  blender::float3 location;
+  float symm_rot_mat[4][4];
 
   for (int i = 0; i <= symm; i++) {
     if (i == 0 || (symm & i && (symm != 5 || i != 3) && (symm != 6 || !ELEM(i, 3, 5)))) {
 
       /* Axis Symmetry. */
-      flip_v3_v3(location, true_location, ePaintSymmetryFlags(i));
+      location = blender::ed::sculpt_paint::symmetry_flip(true_location, ePaintSymmetryFlags(i));
       cursor_draw_point_screen_space(gpuattr, region, location, ob.object_to_world().ptr(), 3);
 
       /* Tiling. */
@@ -1129,7 +1130,8 @@ static void cursor_draw_point_with_symmetry(const uint gpuattr,
       for (char raxis = 0; raxis < 3; raxis++) {
         for (int r = 1; r < sd.radial_symm[raxis]; r++) {
           float angle = 2 * M_PI * r / sd.radial_symm[int(raxis)];
-          flip_v3_v3(location, true_location, ePaintSymmetryFlags(i));
+          location = blender::ed::sculpt_paint::symmetry_flip(true_location,
+                                                              ePaintSymmetryFlags(i));
           unit_m4(symm_rot_mat);
           rotate_m4(symm_rot_mat, raxis + 'X', angle);
           mul_m4_v3(symm_rot_mat, location);
@@ -1249,7 +1251,10 @@ struct PaintCursorContext {
   /* Sculpt related data. */
   Sculpt *sd;
   SculptSession *ss;
+
+  /* Previous active vertex, used to determine if the preview is updated for the pose brush.  */
   PBVHVertRef prev_active_vertex;
+
   bool is_stroke_active;
   bool is_cursor_over_mesh;
   bool is_multires;
@@ -1406,7 +1411,7 @@ static void paint_cursor_sculpt_session_update_and_init(PaintCursorContext *pcon
 
   /* This updates the active vertex, which is needed for most of the Sculpt/Vertex Colors tools to
    * work correctly */
-  pcontext->prev_active_vertex = ss.active_vertex;
+  pcontext->prev_active_vertex = ss.active_vertex();
   if (!ups.stroke_active) {
     pcontext->is_cursor_over_mesh = SCULPT_cursor_geometry_info_update(
         C, &gi, mval_fl, (pcontext->brush->falloff_shape == PAINT_FALLOFF_SHAPE_SPHERE));
@@ -1725,7 +1730,7 @@ static void paint_cursor_preview_boundary_data_update(PaintCursorContext *pconte
   BKE_sculpt_update_object_for_edit(pcontext->depsgraph, pcontext->vc.obact, false);
 
   ss.boundary_preview = boundary::preview_data_init(
-      *pcontext->vc.obact, pcontext->brush, ss.active_vertex, pcontext->radius);
+      *pcontext->vc.obact, pcontext->brush, ss.active_vertex(), pcontext->radius);
 }
 
 static void paint_cursor_draw_3d_view_brush_cursor_inactive(PaintCursorContext *pcontext)
@@ -1752,8 +1757,7 @@ static void paint_cursor_draw_3d_view_brush_cursor_inactive(PaintCursorContext *
 
   paint_cursor_update_object_space_radius(pcontext);
 
-  const bool update_previews = pcontext->prev_active_vertex.i !=
-                               SCULPT_active_vertex_get(*pcontext->ss).i;
+  const PBVHVertRef active_vert = pcontext->ss->active_vertex();
 
   /* Setup drawing. */
   wmViewport(&pcontext->region->winrct);
@@ -1764,11 +1768,10 @@ static void paint_cursor_draw_3d_view_brush_cursor_inactive(PaintCursorContext *
 
   const float *active_vertex_co;
   if (brush.sculpt_tool == SCULPT_TOOL_GRAB && brush.flag & BRUSH_GRAB_ACTIVE_VERTEX) {
-    active_vertex_co = SCULPT_vertex_co_for_grab_active_get(
-        *pcontext->ss, SCULPT_active_vertex_get(*pcontext->ss));
+    active_vertex_co = SCULPT_vertex_co_for_grab_active_get(*pcontext->ss, active_vert);
   }
   else {
-    active_vertex_co = SCULPT_active_vertex_co_get(*pcontext->ss);
+    active_vertex_co = SCULPT_vertex_co_get(*pcontext->ss, active_vert);
   }
   if (len_v3v3(active_vertex_co, pcontext->location) < pcontext->radius) {
     immUniformColor3fvAlpha(pcontext->outline_col, pcontext->outline_alpha);
@@ -1789,6 +1792,7 @@ static void paint_cursor_draw_3d_view_brush_cursor_inactive(PaintCursorContext *
      * cursor won't be tagged to update, so always initialize the preview chain if it is
      * nullptr before drawing it. */
     SculptSession &ss = *pcontext->ss;
+    const bool update_previews = pcontext->prev_active_vertex.i != active_vert.i;
     if (update_previews || !ss.pose_ik_chain_preview) {
       BKE_sculpt_update_object_for_edit(pcontext->depsgraph, pcontext->vc.obact, false);
 

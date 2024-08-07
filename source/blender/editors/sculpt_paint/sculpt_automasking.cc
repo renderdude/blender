@@ -550,7 +550,8 @@ float factor_get(const Cache *automasking,
 
   if (!automasking->settings.topology_use_brush_limit &&
       automasking->settings.flags & BRUSH_AUTOMASKING_TOPOLOGY &&
-      SCULPT_vertex_island_get(ss, vert) != automasking->settings.initial_island_nr)
+      islands::vert_id_get(ss, BKE_pbvh_vertex_to_index(*ss.pbvh, vert)) !=
+          automasking->settings.initial_island_nr)
   {
     return 0.0f;
   }
@@ -766,7 +767,7 @@ static void topology_automasking_init(const Sculpt &sd, Object &ob)
   fdata.use_radius = ss.cache && is_constrained_by_radius(brush);
   fdata.symm = SCULPT_mesh_symmetry_xyz_get(ob);
 
-  copy_v3_v3(fdata.location, SCULPT_active_vertex_co_get(ss));
+  copy_v3_v3(fdata.location, SCULPT_vertex_co_get(ss, ss.active_vertex()));
   flood_fill::execute(ss, flood, [&](PBVHVertRef from_v, PBVHVertRef to_v, bool /*is_duplicate*/) {
     return floodfill_cb(ss, from_v, to_v, &fdata);
   });
@@ -955,9 +956,10 @@ std::unique_ptr<Cache> cache_init(const Sculpt &sd, const Brush *brush, Object &
 
   int mode = calc_effective_bits(sd, brush);
 
-  if (mode & BRUSH_AUTOMASKING_TOPOLOGY && ss.active_vertex.i != PBVH_REF_NONE) {
-    SCULPT_topology_islands_ensure(ob);
-    automasking->settings.initial_island_nr = SCULPT_vertex_island_get(ss, ss.active_vertex);
+  if (mode & BRUSH_AUTOMASKING_TOPOLOGY && ss.active_vertex().i != PBVH_REF_NONE) {
+    islands::ensure_cache(ob);
+    automasking->settings.initial_island_nr = islands::vert_id_get(
+        ss, BKE_pbvh_vertex_to_index(*ss.pbvh, ss.active_vertex()));
   }
 
   bool use_stroke_id = false;

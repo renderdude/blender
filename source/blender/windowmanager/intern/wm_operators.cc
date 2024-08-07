@@ -610,6 +610,15 @@ static const char *wm_context_member_from_ptr(const bContext *C,
               TEST_PTR_DATA_TYPE("space_data.overlay", RNA_SpaceNodeOverlay, ptr, snode);
               break;
             }
+            case SPACE_SEQ: {
+              const SpaceSeq *sseq = (SpaceSeq *)space_data;
+              TEST_PTR_DATA_TYPE(
+                  "space_data.preview_overlay", RNA_SequencerPreviewOverlay, ptr, sseq);
+              TEST_PTR_DATA_TYPE(
+                  "space_data.timeline_overlay", RNA_SequencerTimelineOverlay, ptr, sseq);
+              TEST_PTR_DATA_TYPE("space_data.cache_overlay", RNA_SequencerCacheOverlay, ptr, sseq);
+              break;
+            }
           }
         }
 
@@ -3834,10 +3843,10 @@ static int previews_id_ensure_callback(LibraryIDLinkCallbackData *cb_data)
   PreviewsIDEnsureData *data = static_cast<PreviewsIDEnsureData *>(cb_data->user_data);
   ID *id = *cb_data->id_pointer;
 
-  if (id && (id->tag & LIB_TAG_DOIT)) {
+  if (id && (id->tag & ID_TAG_DOIT)) {
     BLI_assert(ELEM(GS(id->name), ID_MA, ID_TE, ID_IM, ID_WO, ID_LA));
     previews_id_ensure(data->C, data->scene, id);
-    id->tag &= ~LIB_TAG_DOIT;
+    id->tag &= ~ID_TAG_DOIT;
   }
 
   return IDWALK_RET_NOP;
@@ -3854,10 +3863,10 @@ static int previews_ensure_exec(bContext *C, wmOperator * /*op*/)
                     nullptr};
   PreviewsIDEnsureData preview_id_data;
 
-  /* We use LIB_TAG_DOIT to check whether we have already handled a given ID or not. */
-  BKE_main_id_tag_all(bmain, LIB_TAG_DOIT, false);
+  /* We use ID_TAG_DOIT to check whether we have already handled a given ID or not. */
+  BKE_main_id_tag_all(bmain, ID_TAG_DOIT, false);
   for (int i = 0; lb[i]; i++) {
-    BKE_main_id_tag_listbase(lb[i], LIB_TAG_DOIT, true);
+    BKE_main_id_tag_listbase(lb[i], ID_TAG_DOIT, true);
   }
 
   preview_id_data.C = C;
@@ -3873,9 +3882,9 @@ static int previews_ensure_exec(bContext *C, wmOperator * /*op*/)
    * do our best for those, using current scene... */
   for (int i = 0; lb[i]; i++) {
     LISTBASE_FOREACH (ID *, id, lb[i]) {
-      if (id->tag & LIB_TAG_DOIT) {
+      if (id->tag & ID_TAG_DOIT) {
         previews_id_ensure(C, nullptr, id);
-        id->tag &= ~LIB_TAG_DOIT;
+        id->tag &= ~ID_TAG_DOIT;
       }
     }
   }

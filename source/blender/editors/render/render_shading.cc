@@ -397,7 +397,8 @@ static int material_slot_de_select(bContext *C, bool select)
       continue;
     }
 
-    short mat_nr_active = BKE_object_material_index_get(ob, mat_active);
+    const short mat_nr_active = BKE_object_material_index_get_with_hint(
+        ob, mat_active, obact ? obact->actcol - 1 : -1);
 
     if (mat_nr_active == -1) {
       continue;
@@ -2738,7 +2739,7 @@ static int paste_material_exec(bContext *C, wmOperator *op)
    * check for a property that marks this as the active material. */
   Material *ma_from = nullptr;
   LISTBASE_FOREACH (Material *, ma_iter, &temp_bmain->materials) {
-    if (ma_iter->id.flag & LIB_CLIPBOARD_MARK) {
+    if (ma_iter->id.flag & ID_FLAG_CLIPBOARD_MARK) {
       ma_from = ma_iter;
       break;
     }

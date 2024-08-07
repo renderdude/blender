@@ -222,8 +222,7 @@ enum class FilterOrientation {
 };
 
 struct Cache {
-  bool enabled_axis[3];
-  bool enabled_force_axis[3];
+  std::array<bool, 3> enabled_axis;
   int random_seed;
 
   /* Used for alternating between filter operations in filters that need to apply different ones to
@@ -284,7 +283,6 @@ struct Cache {
 
   ViewContext vc;
   float start_filter_strength;
-  bool no_orig_co;
 };
 
 }
@@ -827,12 +825,6 @@ bool SCULPT_vertex_is_occluded(SculptSession &ss, PBVHVertRef vertex, bool origi
 const float *SCULPT_vertex_co_for_grab_active_get(const SculptSession &ss, PBVHVertRef vertex);
 
 /**
- * Returns the info of the limit surface when multi-res is available,
- * otherwise it returns the current coordinate of the vertex.
- */
-blender::float3 SCULPT_vertex_limit_surface_get(const SculptSession &ss, PBVHVertRef vertex);
-
-/**
  * Returns the pointer to the coordinates that should be edited from a brush tool iterator
  * depending on the given deformation target.
  */
@@ -1046,8 +1038,8 @@ namespace blender::ed::sculpt_paint {
 void calc_brush_plane(const Brush &brush,
                       Object &ob,
                       Span<bke::pbvh::Node *> nodes,
-                      float r_area_no[3],
-                      float r_area_co[3]);
+                      float3 &r_area_no,
+                      float3 &r_area_co);
 
 std::optional<float3> calc_area_normal(const Brush &brush,
                                        Object &ob,
@@ -1100,10 +1092,10 @@ bool SCULPT_is_vertex_inside_brush_radius_symm(const float vertex[3],
                                                float radius,
                                                char symm);
 bool SCULPT_is_symmetry_iteration_valid(char i, char symm);
-void SCULPT_flip_v3_by_symm_area(float v[3],
-                                 ePaintSymmetryFlags symm,
-                                 ePaintSymmetryAreas symmarea,
-                                 const float pivot[3]);
+blender::float3 SCULPT_flip_v3_by_symm_area(const blender::float3 &vector,
+                                            ePaintSymmetryFlags symm,
+                                            ePaintSymmetryAreas symmarea,
+                                            const blender::float3 &pivot);
 void SCULPT_flip_quat_by_symm_area(float quat[4],
                                    ePaintSymmetryFlags symm,
                                    ePaintSymmetryAreas symmarea,
@@ -1148,21 +1140,6 @@ SculptBrushTestFn SCULPT_brush_test_init_with_falloff_shape(const SculptSession 
 const float *SCULPT_brush_frontface_normal_from_falloff_shape(const SculptSession &ss,
                                                               char falloff_shape);
 void SCULPT_cube_tip_init(const Sculpt &sd, const Object &ob, const Brush &brush, float mat[4][4]);
-
-/**
- * Return a multiplier for brush strength on a particular vertex.
- */
-float SCULPT_brush_strength_factor(
-    SculptSession &ss,
-    const Brush &br,
-    const float point[3],
-    float len,
-    const float vno[3],
-    const float fno[3],
-    float mask,
-    const PBVHVertRef vertex,
-    int thread_id,
-    const blender::ed::sculpt_paint::auto_mask::NodeData *automask_data);
 
 /** Sample the brush's texture value. */
 void sculpt_apply_texture(const SculptSession &ss,
@@ -1398,12 +1375,11 @@ struct NodeData {
  */
 NodeData node_begin(const Object &object, const Cache *automasking, const bke::pbvh::Node &node);
 
-/* Call before factor_get and SCULPT_brush_strength_factor. */
+/* Call before factor_get. */
 void node_update(NodeData &automask_data, const PBVHVertexIter &vd);
 void node_update(NodeData &automask_data, const BMVert &vert);
 /**
- * Call before factor_get and SCULPT_brush_strength_factor. The index is in the range of the
- * pbvh::Tree node's vertex indices.
+ * Call before factor_get. The index is in the range of the pbvh::Tree node's vertex indices.
  */
 void node_update(NodeData &automask_data, int i);
 
@@ -1475,9 +1451,9 @@ void cache_init(bContext *C,
 void register_operator_props(wmOperatorType *ot);
 
 /* Filter orientation utils. */
-float3 to_orientation_space(const filter::Cache &filter_cache, const float3 &vector);
-float3 to_object_space(const filter::Cache &filter_cache, const float3 &vector);
-float3 zero_disabled_axis_components(const filter::Cache &filter_cache, const float3 &vector);
+float3x3 to_orientation_space(const filter::Cache &filter_cache);
+float3x3 to_object_space(const filter::Cache &filter_cache);
+void zero_disabled_axis_components(const filter::Cache &filter_cache, MutableSpan<float3> vectors);
 
 }
 
@@ -1650,11 +1626,6 @@ void neighbor_color_average(OffsetIndices<int> faces,
                             bke::AttrDomain color_domain,
                             Span<Vector<int>> vert_neighbors,
                             MutableSpan<float4> smooth_colors);
-
-/**
- * Mask the mesh boundaries smoothing only the mesh surface without using auto-masking.
- */
-float3 neighbor_coords_average_interior(const SculptSession &ss, PBVHVertRef vertex);
 
 void neighbor_position_average_grids(const SubdivCCG &subdiv_ccg,
                                      Span<int> grids,
@@ -2225,20 +2196,20 @@ void ensure_valid_pivot(const Object &ob, Scene &scene);
  * \{
  * Each mesh island shell gets its own integer
  * key; these are temporary and internally limited to 8 bits.
- * Uses the `ss->topology_island_key` attribute.
  */
 
-/* Ensures vertex island keys exist and are valid. */
-void SCULPT_topology_islands_ensure(Object &ob);
+namespace blender::ed::sculpt_paint::islands {
 
-/**
- * Mark vertex island keys as invalid.
- * Call when adding or hiding geometry.
- */
-void SCULPT_topology_islands_invalidate(SculptSession &ss);
+/* Ensure vertex island keys exist and are valid. */
+void ensure_cache(Object &object);
+
+/** Mark vertex island keys as invalid. Call when adding or hiding geometry. */
+void invalidate(SculptSession &ss);
 
 /** Get vertex island key. */
-int SCULPT_vertex_island_get(const SculptSession &ss, PBVHVertRef vertex);
+int vert_id_get(const SculptSession &ss, int vert);
+
+}
 
 /** \} */
 

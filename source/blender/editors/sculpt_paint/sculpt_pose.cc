@@ -195,7 +195,9 @@ static void calc_mesh(const Sculpt &sd,
       write_translations(sd, object, positions_eval, verts, translations, positions_orig);
       break;
     case BRUSH_DEFORM_TARGET_CLOTH_SIM:
-      apply_translations(translations, verts, cache.cloth_sim->deformation_pos);
+      add_arrays(translations, orig_data.positions);
+      scatter_data_mesh(
+          translations.as_span(), verts, cache.cloth_sim->deformation_pos.as_mutable_span());
       break;
   }
 }
@@ -429,8 +431,7 @@ static bool sculpt_pose_brush_is_vertex_inside_brush_radius(const float3 &vertex
 {
   for (char i = 0; i <= symm; ++i) {
     if (SCULPT_is_symmetry_iteration_valid(i, symm)) {
-      float3 location;
-      flip_v3_v3(location, br_co, ePaintSymmetryFlags(i));
+      const float3 location = symmetry_flip(br_co, ePaintSymmetryFlags(i));
       if (math::distance(location, vertex) < radius) {
         return true;
       }
@@ -813,7 +814,7 @@ static std::unique_ptr<SculptPoseIKChain> pose_ik_chain_init_face_sets(Object &o
 
   int current_face_set = SCULPT_FACE_SET_NONE;
 
-  PBVHVertRef current_vertex = SCULPT_active_vertex_get(ss);
+  PBVHVertRef current_vertex = ss.active_vertex();
 
   for (const int i : ik_chain->segments.index_range()) {
     const bool is_first_iteration = i == 0;
@@ -869,7 +870,7 @@ static std::unique_ptr<SculptPoseIKChain> pose_ik_chain_init_face_sets(Object &o
     current_vertex = next_vertex;
   }
 
-  pose_ik_chain_origin_heads_init(*ik_chain, SCULPT_active_vertex_co_get(ss));
+  pose_ik_chain_origin_heads_init(*ik_chain, SCULPT_vertex_co_get(ss, ss.active_vertex()));
 
   return ik_chain;
 }
@@ -936,7 +937,7 @@ static std::unique_ptr<SculptPoseIKChain> pose_ik_chain_init_face_sets_fk(
 
   std::unique_ptr<SculptPoseIKChain> ik_chain = pose_ik_chain_new(1, totvert);
 
-  const PBVHVertRef active_vertex = SCULPT_active_vertex_get(ss);
+  const PBVHVertRef active_vertex = ss.active_vertex();
   int active_vertex_index = BKE_pbvh_vertex_to_index(*ss.pbvh, active_vertex);
 
   const int active_face_set = face_set::active_face_set_get(ss);
@@ -1176,11 +1177,10 @@ static void sculpt_pose_align_pivot_local_space(float r_mat[4][4],
                                                 SculptPoseIKChainSegment *segment,
                                                 const float3 &grab_location)
 {
-  float3 symm_head = segment->head;
-  float3 symm_orig = segment->orig;
-
-  SCULPT_flip_v3_by_symm_area(symm_head, symm, symm_area, grab_location);
-  SCULPT_flip_v3_by_symm_area(symm_orig, symm, symm_area, grab_location);
+  const float3 symm_head = SCULPT_flip_v3_by_symm_area(
+      segment->head, symm, symm_area, grab_location);
+  const float3 symm_orig = SCULPT_flip_v3_by_symm_area(
+      segment->orig, symm, symm_area, grab_location);
 
   float3 segment_origin_head = math::normalize(symm_head - symm_orig);
 
@@ -1224,14 +1224,13 @@ void do_pose_brush(const Sculpt &sd, Object &ob, Span<bke::pbvh::Node *> nodes)
 
       float symm_rot[4];
       copy_qt_qt(symm_rot, ik_chain.segments[i].rot);
-      float3 symm_orig = ik_chain.segments[i].orig;
-      float3 symm_initial_orig = ik_chain.segments[i].initial_orig;
 
       /* Flip the origins and rotation quats of each segment. */
       SCULPT_flip_quat_by_symm_area(symm_rot, symm, symm_area, ss.cache->orig_grab_location);
-      SCULPT_flip_v3_by_symm_area(symm_orig, symm, symm_area, ss.cache->orig_grab_location);
-      SCULPT_flip_v3_by_symm_area(
-          symm_initial_orig, symm, symm_area, ss.cache->orig_grab_location);
+      float3 symm_orig = SCULPT_flip_v3_by_symm_area(
+          ik_chain.segments[i].orig, symm, symm_area, ss.cache->orig_grab_location);
+      float3 symm_initial_orig = SCULPT_flip_v3_by_symm_area(
+          ik_chain.segments[i].initial_orig, symm, symm_area, ss.cache->orig_grab_location);
 
       float pivot_local_space[4][4];
       unit_m4(pivot_local_space);

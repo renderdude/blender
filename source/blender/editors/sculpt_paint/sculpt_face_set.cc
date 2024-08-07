@@ -887,8 +887,9 @@ static int change_visibility_exec(bContext *C, wmOperator *op)
    * navigation. */
   if (ELEM(mode, VisibilityMode::Toggle, VisibilityMode::ShowActive)) {
     UnifiedPaintSettings *ups = &CTX_data_tool_settings(C)->unified_paint_settings;
+
     float location[3];
-    copy_v3_v3(location, SCULPT_active_vertex_co_get(ss));
+    copy_v3_v3(location, SCULPT_vertex_co_get(ss, ss.active_vertex()));
     mul_m4_v3(object.object_to_world().ptr(), location);
     copy_v3_v3(ups->average_stroke_accum, location);
     ups->average_stroke_counter = 1;
@@ -900,7 +901,7 @@ static int change_visibility_exec(bContext *C, wmOperator *op)
   bke::pbvh::update_visibility(*ss.pbvh);
   BKE_sculpt_hide_poly_pointer_update(object);
 
-  SCULPT_topology_islands_invalidate(*object.sculpt);
+  islands::invalidate(*object.sculpt);
   hide::tag_update_visibility(*C);
 
   return OPERATOR_FINISHED;
