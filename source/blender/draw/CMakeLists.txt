@@ -294,15 +294,22 @@ set(SRC
   engines/overlay/overlay_next_bounds.hh
   engines/overlay/overlay_next_empty.hh
   engines/overlay/overlay_next_camera.hh
+  engines/overlay/overlay_next_facing.hh
+  engines/overlay/overlay_next_force_field.hh
+  engines/overlay/overlay_next_grease_pencil.hh
   engines/overlay/overlay_next_grid.hh
   engines/overlay/overlay_next_instance.hh
   engines/overlay/overlay_next_lattice.hh
   engines/overlay/overlay_next_light.hh
   engines/overlay/overlay_next_lightprobe.hh
+  engines/overlay/overlay_next_mesh.hh
   engines/overlay/overlay_next_metaball.hh
+  engines/overlay/overlay_next_outline.hh
   engines/overlay/overlay_next_prepass.hh
   engines/overlay/overlay_next_private.hh
+  engines/overlay/overlay_next_relation.hh
   engines/overlay/overlay_next_speaker.hh
+  engines/overlay/overlay_next_wireframe.hh
   engines/overlay/overlay_private.hh
   engines/select/select_defines.hh
   engines/select/select_engine.hh
@@ -448,6 +455,7 @@ set(GLSL_SRC
   engines/eevee_next/shaders/eevee_lightprobe_sphere_remap_comp.glsl
   engines/eevee_next/shaders/eevee_lightprobe_sphere_select_comp.glsl
   engines/eevee_next/shaders/eevee_lightprobe_sphere_sunlight_comp.glsl
+  engines/eevee_next/shaders/eevee_renderpass_clear_frag.glsl
   engines/eevee_next/shaders/eevee_renderpass_lib.glsl
   engines/eevee_next/shaders/eevee_sampling_lib.glsl
   engines/eevee_next/shaders/eevee_shadow_debug_frag.glsl
@@ -669,6 +677,11 @@ set(GLSL_SRC
   engines/overlay/shaders/overlay_edit_mesh_skin_root_vert.glsl
   engines/overlay/shaders/overlay_edit_mesh_vert.glsl
   engines/overlay/shaders/overlay_edit_mesh_vert_no_geom.glsl
+  engines/overlay/shaders/overlay_edit_mesh_lib.glsl
+  engines/overlay/shaders/overlay_edit_mesh_edge_vert.glsl
+  engines/overlay/shaders/overlay_edit_mesh_face_vert.glsl
+  engines/overlay/shaders/overlay_edit_mesh_facedot_vert.glsl
+  engines/overlay/shaders/overlay_edit_mesh_vertex_vert.glsl
   engines/overlay/shaders/overlay_edit_particle_point_vert.glsl
   engines/overlay/shaders/overlay_edit_particle_strand_vert.glsl
   engines/overlay/shaders/overlay_edit_uv_edges_frag.glsl
@@ -724,6 +737,9 @@ set(GLSL_SRC
   engines/overlay/shaders/overlay_paint_wire_vert.glsl
   engines/overlay/shaders/overlay_particle_frag.glsl
   engines/overlay/shaders/overlay_particle_vert.glsl
+  engines/overlay/shaders/overlay_particle_hair_vert.glsl
+  engines/overlay/shaders/overlay_particle_shape_vert.glsl
+  engines/overlay/shaders/overlay_particle_shape_frag.glsl
   engines/overlay/shaders/overlay_point_varying_color_frag.glsl
   engines/overlay/shaders/overlay_point_varying_color_varying_outline_aa_frag.glsl
   engines/overlay/shaders/overlay_pointcloud_only_vert.glsl

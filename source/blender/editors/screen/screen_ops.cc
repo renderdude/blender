@@ -3583,7 +3583,7 @@ static void area_join_draw_cb(const wmWindow * /*win*/, void *userdata)
   }
 }
 
-static void area_join_dock_cb(const struct wmWindow *win, void *userdata)
+static void area_join_dock_cb(const wmWindow *win, void *userdata)
 {
   const wmOperator *op = static_cast<wmOperator *>(userdata);
   sAreaJoinData *jd = static_cast<sAreaJoinData *>(op->customdata);
@@ -3845,8 +3845,8 @@ static AreaDockTarget area_docking_target(sAreaJoinData *jd, const wmEvent *even
   int win1_posy = jd->win1->posy;
   int win2_posx = jd->win2->posx;
   int win2_posy = jd->win2->posy;
-  WM_window_pixels_coords(jd->win1, &win1_posx, &win1_posy);
-  WM_window_pixels_coords(jd->win2, &win2_posx, &win2_posy);
+  WM_window_native_pixel_coords(jd->win1, &win1_posx, &win1_posy);
+  WM_window_native_pixel_coords(jd->win2, &win2_posx, &win2_posy);
 
   const int x = event->xy[0] + win1_posx - win2_posx - jd->sa2->totrct.xmin;
   const int y = event->xy[1] + win1_posy - win2_posy - jd->sa2->totrct.ymin;

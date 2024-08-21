@@ -61,7 +61,7 @@
 #include "BKE_linestyle.h"
 #include "BKE_main.hh"
 #include "BKE_modifier.hh"
-#include "BKE_packedFile.h"
+#include "BKE_packedFile.hh"
 #include "BKE_report.hh"
 #include "BKE_scene.hh"
 #include "BKE_screen.hh"
@@ -1047,6 +1047,7 @@ static void template_id_cb(bContext *C, void *arg_litem, void *arg_event)
         else {
           Main *bmain = CTX_data_main(C);
           id_single_user(C, id, &template_ui->ptr, template_ui->prop);
+          WM_event_add_notifier(C, NC_SPACE | ND_SPACE_OUTLINER, nullptr);
           DEG_relations_tag_update(bmain);
         }
         undo_push_label = "Make Single User";
@@ -6405,7 +6406,7 @@ void uiTemplateInputStatus(uiLayout *layout, bContext *C)
     if (msg) {
       uiItemL(row, "", (ICON_MOUSE_LMB + i));
       uiItemS_ex(row, -0.5f);
-      uiItemL(row, msg ? msg : "", ICON_NONE);
+      uiItemL(row, msg, ICON_NONE);
       uiItemS_ex(row, 0.7f);
     }
 

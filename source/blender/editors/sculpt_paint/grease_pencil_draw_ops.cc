@@ -532,10 +532,13 @@ struct GreasePencilFillOpData {
     const float extension_length = brush.gpencil_settings->fill_extend_fac *
                                    bke::greasepencil::LEGACY_RADIUS_CONVERSION_FACTOR;
     const bool extension_cut = brush.gpencil_settings->flag & GP_BRUSH_FILL_STROKE_COLLIDE;
+    const bool brush_invert = brush.gpencil_settings->fill_direction == BRUSH_DIR_IN;
+    /* Both operator properties and brush properties can invert. Actual invert is XOR of both. */
+    const bool combined_invert = (invert != brush_invert);
 
     return {layer,
             material_index,
-            invert,
+            combined_invert,
             precision,
             extension_mode,
             extension_length,
@@ -1198,7 +1201,7 @@ static bool grease_pencil_apply_fill(bContext &C, wmOperator &op, const wmEvent 
   constexpr const ed::greasepencil::FillToolFitMethod fit_method =
       ed::greasepencil::FillToolFitMethod::FitToView;
   /* Debug setting: keep image data blocks for inspection. */
-  constexpr const bool keep_images = true;
+  constexpr const bool keep_images = false;
 
   ARegion &region = *CTX_wm_region(&C);
   /* Perform bounds check. */

@@ -422,6 +422,37 @@ static int grease_pencil_primitive_curve_points_number(PrimitiveToolOperation &p
   return 0;
 }
 
+/* Attributes that are defined explicitly and should not be copied from original geometry. */
+static Set<std::string> skipped_attribute_ids(const PrimitiveToolOperation &ptd,
+                                              const bke::AttrDomain domain)
+{
+  switch (domain) {
+    case bke::AttrDomain::Point:
+      if (ptd.vertex_color) {
+        return {"position", "radius", "opacity", "vertex_color"};
+      }
+      else {
+        return {"position", "radius", "opacity"};
+      }
+    case bke::AttrDomain::Curve:
+      if (ptd.fill_color) {
+        return {"curve_type",
+                "material_index",
+                "cyclic",
+                "softness",
+                "start_cap",
+                "end_cap",
+                "fill_color"};
+      }
+      else {
+        return {"curve_type", "material_index", "cyclic", "softness", "start_cap", "end_cap"};
+      }
+    default:
+      return {};
+  }
+  return {};
+}
+
 static void grease_pencil_primitive_update_curves(PrimitiveToolOperation &ptd)
 {
   bke::CurvesGeometry &curves = ptd.drawing->strokes_for_write();
@@ -472,40 +503,20 @@ static void grease_pencil_primitive_update_curves(PrimitiveToolOperation &ptd)
     new_opacities[point] = opacity;
   }
 
+  /* Initialize the rest of the attributes with default values. */
+  bke::MutableAttributeAccessor attributes = curves.attributes_for_write();
+  bke::fill_attribute_range_default(attributes,
+                                    bke::AttrDomain::Point,
+                                    skipped_attribute_ids(ptd, bke::AttrDomain::Point),
+                                    curve_points);
+  bke::fill_attribute_range_default(attributes,
+                                    bke::AttrDomain::Curve,
+                                    skipped_attribute_ids(ptd, bke::AttrDomain::Curve),
+                                    curves.curves_range().take_back(1));
+
   ptd.drawing->tag_topology_changed();
   ptd.drawing->set_texture_matrices({ptd.texture_space},
                                     IndexRange::from_single(curves.curves_range().last()));
-}
-
-/* Attributes that are defined explicitly and should not be copied from original geometry. */
-static Set<std::string> skipped_attribute_ids(const PrimitiveToolOperation &ptd,
-                                              const bke::AttrDomain domain)
-{
-  switch (domain) {
-    case bke::AttrDomain::Point:
-      if (ptd.vertex_color) {
-        return {"position", "radius", "opacity", "vertex_color"};
-      }
-      else {
-        return {"position", "radius", "opacity"};
-      }
-    case bke::AttrDomain::Curve:
-      if (ptd.fill_color) {
-        return {"curve_type",
-                "material_index",
-                "cyclic",
-                "softness",
-                "start_cap",
-                "end_cap",
-                "fill_color"};
-      }
-      else {
-        return {"curve_type", "material_index", "cyclic", "softness", "start_cap", "end_cap"};
-      }
-    default:
-      return {};
-  }
-  return {};
 }
 
 static void grease_pencil_primitive_init_curves(PrimitiveToolOperation &ptd)

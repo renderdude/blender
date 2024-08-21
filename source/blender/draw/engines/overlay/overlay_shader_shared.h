@@ -18,7 +18,7 @@ typedef enum OVERLAY_GridBits OVERLAY_GridBits;
 typedef struct OVERLAY_GridData OVERLAY_GridData;
 typedef struct ThemeColorData ThemeColorData;
 typedef struct ExtraInstanceData ExtraInstanceData;
-typedef struct PointData PointData;
+typedef struct VertexData VertexData;
 #endif
 
 /* TODO(fclem): Should eventually become OVERLAY_BackgroundType.
@@ -232,11 +232,29 @@ struct ExtraInstanceData {
 };
 BLI_STATIC_ASSERT_ALIGN(ExtraInstanceData, 16)
 
-struct PointData {
+struct VertexData {
   float4 pos_;
+  /* TODO: change to color_id. Idea expressed in #125894. */
   float4 color_;
 };
-BLI_STATIC_ASSERT_ALIGN(PointData, 16)
+BLI_STATIC_ASSERT_ALIGN(VertexData, 16)
+
+/* Limited by expand_prim_len bit count. */
+#define PARTICLE_SHAPE_CIRCLE_RESOLUTION 7
+
+/* TODO(fclem): This should be a enum, but it breaks compilation on Metal for some reason. */
+#define PART_SHAPE_AXIS 1
+#define PART_SHAPE_CIRCLE 2
+#define PART_SHAPE_CROSS 3
+
+struct ParticlePointData {
+  packed_float3 position;
+  /* Can either be velocity or acceleration. */
+  float value;
+  /* Rotation encoded as quaternion. */
+  float4 rotation;
+};
+BLI_STATIC_ASSERT_ALIGN(ParticlePointData, 16)
 
 #ifndef GPU_SHADER
 #  ifdef __cplusplus

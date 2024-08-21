@@ -202,6 +202,9 @@ typedef struct ThemeUI {
   unsigned char icon_shading[4];
   /** File folders. */
   unsigned char icon_folder[4];
+  /** Auto Keying indicator. */
+  unsigned char icon_autokey[4];
+  char _pad3[4];
   /** Intensity of the border icons. >0 will render an border around themed
    * icons. */
   float icon_border_intensity;
@@ -757,7 +760,8 @@ typedef struct UserDef_Experimental {
   char use_shader_node_previews;
   char use_animation_baklava;
   char use_docking;
-  char _pad[2];
+  char enable_new_cpu_compositor;
+  char _pad[1];
   /** `makesdna` does not allow empty structs. */
 } UserDef_Experimental;
 

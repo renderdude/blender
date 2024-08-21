@@ -10,6 +10,8 @@
 
 #include "ED_view3d.hh"
 
+#include "BKE_paint.hh"
+
 #include "draw_debug.hh"
 
 #include "overlay_next_instance.hh"
@@ -67,6 +69,14 @@ void Instance::init()
   resources.globals_buf = G_draw.block_ubo;
   resources.theme_settings = G_draw.block;
   resources.weight_ramp_tx.wrap(G_draw.weight_ramp);
+  {
+    eGPUTextureUsage usage = GPU_TEXTURE_USAGE_SHADER_READ;
+    if (resources.dummy_depth_tx.ensure_2d(GPU_DEPTH24_STENCIL8, int2(1, 1), usage)) {
+      uint32_t data = 0;
+      GPU_texture_update_sub(
+          resources.dummy_depth_tx, GPU_DATA_UINT_24_8, &data, 0, 0, 0, 1, 1, 1);
+    }
+  }
 }
 
 void Instance::begin_sync()
@@ -77,17 +87,24 @@ void Instance::begin_sync()
   resources.begin_sync();
 
   background.begin_sync(resources, state);
+  outline.begin_sync(resources, state);
 
   auto begin_sync_layer = [&](OverlayLayer &layer) {
     layer.bounds.begin_sync();
     layer.cameras.begin_sync();
     layer.empties.begin_sync();
+    layer.facing.begin_sync(resources, state);
+    layer.force_fields.begin_sync();
     layer.lattices.begin_sync(resources, state);
     layer.lights.begin_sync();
     layer.light_probes.begin_sync(resources, state);
     layer.metaballs.begin_sync();
+    layer.meshes.begin_sync(resources, state, view);
+    layer.particles.begin_sync(resources, state);
     layer.prepass.begin_sync(resources, state);
+    layer.relations.begin_sync();
     layer.speakers.begin_sync();
+    layer.wireframe.begin_sync(resources, state);
   };
   begin_sync_layer(regular);
   begin_sync_layer(infront);
@@ -100,9 +117,14 @@ void Instance::begin_sync()
 void Instance::object_sync(ObjectRef &ob_ref, Manager &manager)
 {
   const bool in_edit_mode = object_is_edit_mode(ob_ref.object);
-  const bool needs_prepass = true; /* TODO */
+  const bool in_paint_mode = object_is_paint_mode(ob_ref.object);
+  const bool in_sculpt_mode = object_is_sculpt_mode(ob_ref);
+  const bool in_edit_paint_mode = object_is_edit_paint_mode(
+      ob_ref, in_edit_mode, in_paint_mode, in_sculpt_mode);
+  const bool needs_prepass = !state.xray_enabled; /* TODO */
 
-  OverlayLayer &layer = (ob_ref.object->dtx & OB_DRAW_IN_FRONT) ? infront : regular;
+  OverlayLayer &layer = (state.use_in_front && ob_ref.object->dtx & OB_DRAW_IN_FRONT) ? infront :
+                                                                                        regular;
 
   if (needs_prepass) {
     switch (ob_ref.object->type) {
@@ -119,6 +141,7 @@ void Instance::object_sync(ObjectRef &ob_ref, Manager &manager)
   if (in_edit_mode && !state.hide_overlays) {
     switch (ob_ref.object->type) {
       case OB_MESH:
+        layer.meshes.edit_object_sync(manager, ob_ref, resources);
         break;
       case OB_ARMATURE:
         break;
@@ -137,6 +160,10 @@ void Instance::object_sync(ObjectRef &ob_ref, Manager &manager)
       case OB_CURVES:
         break;
     }
+  }
+
+  if (state.is_wireframe_mode || !state.hide_overlays) {
+    layer.wireframe.object_sync(manager, ob_ref, resources, in_edit_paint_mode);
   }
 
   if (!state.hide_overlays) {
@@ -171,7 +198,15 @@ void Instance::object_sync(ObjectRef &ob_ref, Manager &manager)
         layer.speakers.object_sync(ob_ref, resources, state);
         break;
     }
+    layer.facing.object_sync(manager, ob_ref, state);
+    layer.force_fields.object_sync(ob_ref, resources, state);
     layer.bounds.object_sync(ob_ref, resources, state);
+    layer.relations.object_sync(ob_ref, resources, state);
+    layer.particles.object_sync(manager, ob_ref, resources, state);
+
+    if (object_is_selected(ob_ref) && !in_edit_paint_mode) {
+      outline.object_sync(manager, ob_ref, state);
+    }
   }
 }
 
@@ -183,9 +218,11 @@ void Instance::end_sync()
     layer.bounds.end_sync(resources, shapes, state);
     layer.cameras.end_sync(resources, shapes, state);
     layer.empties.end_sync(resources, shapes, state);
+    layer.force_fields.end_sync(resources, shapes, state);
     layer.lights.end_sync(resources, shapes, state);
     layer.light_probes.end_sync(resources, shapes, state);
     layer.metaballs.end_sync(resources, shapes, state);
+    layer.relations.end_sync(resources, state);
     layer.speakers.end_sync(resources, shapes, state);
   };
   end_sync_layer(regular);
@@ -219,6 +256,15 @@ void Instance::draw(Manager &manager)
   const DRWView *view_legacy = DRW_view_default_get();
   View view("OverlayView", view_legacy);
 
+  if (state.xray_enabled) {
+    /* For X-ray we render the scene to a separate depth buffer. */
+    resources.xray_depth_tx.acquire(render_size, GPU_DEPTH_COMPONENT24);
+    resources.depth_target_tx.wrap(resources.xray_depth_tx);
+  }
+  else {
+    resources.depth_target_tx.wrap(resources.depth_tx);
+  }
+
   /* TODO(fclem): Remove mandatory allocation. */
   if (!resources.depth_in_front_tx.is_valid()) {
     resources.depth_in_front_alloc_tx.acquire(render_size, GPU_DEPTH_COMPONENT24);
@@ -237,10 +283,10 @@ void Instance::draw(Manager &manager)
     resources.line_tx.acquire(int2(1, 1), GPU_RGBA8);
     resources.overlay_tx.acquire(int2(1, 1), GPU_SRGB8_A8);
 
-    resources.overlay_fb.ensure(GPU_ATTACHMENT_TEXTURE(resources.depth_tx));
-    resources.overlay_line_fb.ensure(GPU_ATTACHMENT_TEXTURE(resources.depth_tx));
-    resources.overlay_in_front_fb.ensure(GPU_ATTACHMENT_TEXTURE(resources.depth_tx));
-    resources.overlay_line_in_front_fb.ensure(GPU_ATTACHMENT_TEXTURE(resources.depth_tx));
+    resources.overlay_fb.ensure(GPU_ATTACHMENT_TEXTURE(resources.depth_target_tx));
+    resources.overlay_line_fb.ensure(GPU_ATTACHMENT_TEXTURE(resources.depth_target_tx));
+    resources.overlay_in_front_fb.ensure(GPU_ATTACHMENT_TEXTURE(resources.depth_target_tx));
+    resources.overlay_line_in_front_fb.ensure(GPU_ATTACHMENT_TEXTURE(resources.depth_target_tx));
   }
   else {
     eGPUTextureUsage usage = GPU_TEXTURE_USAGE_SHADER_READ | GPU_TEXTURE_USAGE_SHADER_WRITE |
@@ -248,42 +294,71 @@ void Instance::draw(Manager &manager)
     resources.line_tx.acquire(render_size, GPU_RGBA8, usage);
     resources.overlay_tx.acquire(render_size, GPU_SRGB8_A8, usage);
 
-    resources.overlay_fb.ensure(GPU_ATTACHMENT_TEXTURE(resources.depth_tx),
+    resources.overlay_fb.ensure(GPU_ATTACHMENT_TEXTURE(resources.depth_target_tx),
                                 GPU_ATTACHMENT_TEXTURE(resources.overlay_tx));
-    resources.overlay_line_fb.ensure(GPU_ATTACHMENT_TEXTURE(resources.depth_tx),
+    resources.overlay_line_fb.ensure(GPU_ATTACHMENT_TEXTURE(resources.depth_target_tx),
                                      GPU_ATTACHMENT_TEXTURE(resources.overlay_tx),
                                      GPU_ATTACHMENT_TEXTURE(resources.line_tx));
     resources.overlay_in_front_fb.ensure(GPU_ATTACHMENT_TEXTURE(resources.depth_in_front_tx),
-                                         GPU_ATTACHMENT_TEXTURE(resources.color_overlay_tx));
+                                         GPU_ATTACHMENT_TEXTURE(resources.overlay_tx));
     resources.overlay_line_in_front_fb.ensure(GPU_ATTACHMENT_TEXTURE(resources.depth_in_front_tx),
-                                              GPU_ATTACHMENT_TEXTURE(resources.color_overlay_tx),
+                                              GPU_ATTACHMENT_TEXTURE(resources.overlay_tx),
                                               GPU_ATTACHMENT_TEXTURE(resources.line_tx));
   }
 
+  resources.overlay_line_only_fb.ensure(GPU_ATTACHMENT_NONE,
+                                        GPU_ATTACHMENT_TEXTURE(resources.overlay_tx),
+                                        GPU_ATTACHMENT_TEXTURE(resources.line_tx));
   resources.overlay_color_only_fb.ensure(GPU_ATTACHMENT_NONE,
                                          GPU_ATTACHMENT_TEXTURE(resources.overlay_tx));
   resources.overlay_output_fb.ensure(GPU_ATTACHMENT_NONE,
                                      GPU_ATTACHMENT_TEXTURE(resources.color_overlay_tx));
 
-  float4 clear_color(0.0f);
   GPU_framebuffer_bind(resources.overlay_line_fb);
-  GPU_framebuffer_clear_color(resources.overlay_line_fb, clear_color);
+  float4 clear_color(0.0f);
+  if (state.xray_enabled) {
+    /* Rendering to a new depth buffer that needs to be cleared. */
+    GPU_framebuffer_clear_color_depth(resources.overlay_line_fb, clear_color, 1.0f);
+  }
+  else {
+    GPU_framebuffer_clear_color(resources.overlay_line_fb, clear_color);
+  }
 
   regular.prepass.draw(resources.overlay_line_fb, manager, view);
   infront.prepass.draw(resources.overlay_line_in_front_fb, manager, view);
 
+  outline.draw(resources, manager, view);
+
+  auto overlay_fb_draw = [&](OverlayLayer &layer, Framebuffer &framebuffer) {
+    layer.facing.draw(framebuffer, manager, view);
+  };
+
+  overlay_fb_draw(regular, resources.overlay_fb);
+
   auto draw_layer = [&](OverlayLayer &layer, Framebuffer &framebuffer) {
     layer.bounds.draw(framebuffer, manager, view);
+    layer.wireframe.draw(framebuffer, manager, view);
     layer.cameras.draw(framebuffer, manager, view);
     layer.empties.draw(framebuffer, manager, view);
+    layer.force_fields.draw(framebuffer, manager, view);
     layer.lights.draw(framebuffer, manager, view);
     layer.light_probes.draw(framebuffer, manager, view);
     layer.speakers.draw(framebuffer, manager, view);
     layer.lattices.draw(framebuffer, manager, view);
     layer.metaballs.draw(framebuffer, manager, view);
+    layer.relations.draw(framebuffer, manager, view);
+    layer.particles.draw(framebuffer, manager, view);
+    layer.meshes.draw(framebuffer, manager, view);
   };
 
   draw_layer(regular, resources.overlay_line_fb);
+
+  auto draw_layer_color_only = [&](OverlayLayer &layer, Framebuffer &framebuffer) {
+    layer.light_probes.draw_color_only(framebuffer, manager, view);
+    layer.meshes.draw_color_only(framebuffer, manager, view);
+  };
+
+  draw_layer_color_only(regular, resources.overlay_color_only_fb);
 
   grid.draw(resources, manager, view);
 
@@ -296,6 +371,7 @@ void Instance::draw(Manager &manager)
 
   resources.line_tx.release();
   resources.overlay_tx.release();
+  resources.xray_depth_tx.release();
   resources.depth_in_front_alloc_tx.release();
   resources.color_overlay_alloc_tx.release();
   resources.color_render_alloc_tx.release();
@@ -303,11 +379,62 @@ void Instance::draw(Manager &manager)
   resources.read_result();
 }
 
-bool Instance::object_is_edit_mode(const Object *ob)
+bool Instance::object_is_selected(const ObjectRef &ob_ref)
 {
-  if (DRW_object_is_in_edit_mode(ob)) {
+  return (ob_ref.object->base_flag & BASE_SELECTED);
+}
+
+bool Instance::object_is_paint_mode(const Object *object)
+{
+  if (object->type == OB_GREASE_PENCIL && (state.object_mode & OB_MODE_WEIGHT_GPENCIL_LEGACY)) {
+    return true;
+  }
+  return state.active_base && (object == state.active_base->object) &&
+         (state.object_mode & OB_MODE_ALL_PAINT);
+}
+
+bool Instance::object_is_sculpt_mode(const ObjectRef &ob_ref)
+{
+  if (state.object_mode == OB_MODE_SCULPT_CURVES) {
+    const Object *active_object = state.active_base->object;
+    const bool is_active_object = ob_ref.object == active_object;
+
+    bool is_geonode_preview = ob_ref.dupli_object && ob_ref.dupli_object->preview_base_geometry;
+    bool is_active_dupli_parent = ob_ref.dupli_parent == active_object;
+    return is_active_object || (is_active_dupli_parent && is_geonode_preview);
+  };
+
+  return false;
+}
+
+bool Instance::object_is_sculpt_mode(const Object *object)
+{
+  if (object->sculpt && (object->sculpt->mode_type == OB_MODE_SCULPT)) {
+    return object == state.active_base->object;
+  }
+  return false;
+}
+
+bool Instance::object_is_edit_paint_mode(const ObjectRef &ob_ref,
+                                         bool in_edit_mode,
+                                         bool in_paint_mode,
+                                         bool in_sculpt_mode)
+{
+  bool in_edit_paint_mode = in_edit_mode || in_paint_mode || in_sculpt_mode;
+  if (ob_ref.object->base_flag & BASE_FROM_DUPLI) {
+    /* Disable outlines for objects instanced by an object in sculpt, paint or edit mode. */
+    in_edit_paint_mode |= object_is_edit_mode(ob_ref.dupli_parent) ||
+                          object_is_sculpt_mode(ob_ref.dupli_parent) ||
+                          object_is_paint_mode(ob_ref.dupli_parent);
+  }
+  return in_edit_paint_mode;
+}
+
+bool Instance::object_is_edit_mode(const Object *object)
+{
+  if (DRW_object_is_in_edit_mode(object)) {
     /* Also check for context mode as the object mode is not 100% reliable. (see T72490) */
-    switch (ob->type) {
+    switch (object->type) {
       case OB_MESH:
         return state.ctx_mode == CTX_MODE_EDIT_MESH;
       case OB_ARMATURE:

@@ -114,7 +114,7 @@
 #include "BKE_main.hh"
 #include "BKE_main_namemap.hh"
 #include "BKE_node.hh"
-#include "BKE_packedFile.h"
+#include "BKE_packedFile.hh"
 #include "BKE_preferences.h"
 #include "BKE_report.hh"
 #include "BKE_workspace.hh"
@@ -783,7 +783,8 @@ static void writedata(WriteData *wd, int filecode, size_t len, const void *adr)
   bh.code = filecode;
   bh.old = adr;
   bh.nr = 1;
-  bh.SDNAnr = 0;
+  BLI_STATIC_ASSERT(SDNA_RAW_DATA_STRUCT_INDEX == 0, "'raw data' SDNA struct index should be 0")
+  bh.SDNAnr = SDNA_RAW_DATA_STRUCT_INDEX;
   bh.len = int(len);
 
   mywrite(wd, &bh, sizeof(BHead));

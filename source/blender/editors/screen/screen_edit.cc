@@ -683,10 +683,13 @@ static bool region_poll(const bContext *C,
 /**
  * \return true if any region polling state changed, and a screen refresh is needed.
  */
-static bool screen_regions_poll(bContext *C, const wmWindow *win, bScreen *screen)
+static bool screen_regions_poll(bContext *C, wmWindow *win, bScreen *screen)
 {
+  wmWindow *prev_win = CTX_wm_window(C);
   ScrArea *prev_area = CTX_wm_area(C);
   ARegion *prev_region = CTX_wm_region(C);
+
+  CTX_wm_window_set(C, win);
 
   bool any_changed = false;
   ED_screen_areas_iter (win, screen, area) {
@@ -715,6 +718,7 @@ static bool screen_regions_poll(bContext *C, const wmWindow *win, bScreen *scree
     }
   }
 
+  CTX_wm_window_set(C, prev_win);
   CTX_wm_area_set(C, prev_area);
   CTX_wm_region_set(C, prev_region);
 
@@ -1208,7 +1212,7 @@ static void screen_global_topbar_area_refresh(wmWindow *win, bScreen *screen)
   const short size = screen_global_header_size();
   rcti rect;
 
-  BLI_rcti_init(&rect, 0, WM_window_pixels_x(win) - 1, 0, WM_window_pixels_y(win) - 1);
+  BLI_rcti_init(&rect, 0, WM_window_native_pixel_x(win) - 1, 0, WM_window_native_pixel_y(win) - 1);
   rect.ymin = rect.ymax - size;
 
   screen_global_area_refresh(
@@ -1222,7 +1226,7 @@ static void screen_global_statusbar_area_refresh(wmWindow *win, bScreen *screen)
   const short size = (screen->flag & SCREEN_COLLAPSE_STATUSBAR) ? size_min : size_max;
   rcti rect;
 
-  BLI_rcti_init(&rect, 0, WM_window_pixels_x(win) - 1, 0, WM_window_pixels_y(win) - 1);
+  BLI_rcti_init(&rect, 0, WM_window_native_pixel_x(win) - 1, 0, WM_window_native_pixel_y(win) - 1);
   rect.ymax = rect.ymin + size_max;
 
   screen_global_area_refresh(

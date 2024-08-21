@@ -43,7 +43,7 @@
 #include "BKE_layer.hh"
 #include "BKE_lib_id.hh"
 #include "BKE_main.hh"
-#include "BKE_packedFile.h"
+#include "BKE_packedFile.hh"
 #include "BKE_report.hh"
 #include "BKE_scene.hh"
 
@@ -3242,7 +3242,7 @@ static int image_scale_exec(bContext *C, wmOperator *op)
   ED_image_undo_push_begin_with_image(op->type->name, ima, ibuf, &iuser);
 
   ibuf->userflags |= IB_DISPLAY_BUFFER_INVALID;
-  IMB_scaleImBuf(ibuf, size[0], size[1]);
+  IMB_scale(ibuf, size[0], size[1], IMBScaleFilter::Box, false);
   BKE_image_mark_dirty(ima, ibuf);
   BKE_image_release_ibuf(ima, ibuf, nullptr);
 

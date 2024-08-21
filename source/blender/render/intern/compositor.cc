@@ -158,21 +158,23 @@ class Context : public realtime_compositor::Context {
   GPUTexture *output_texture_ = nullptr;
 
   /* Viewer output texture. */
-  GPUTexture *viewer_output_texture_ = nullptr;
+  realtime_compositor::Result viewer_output_result_;
 
   /* Cached textures that the compositor took ownership of. */
   Vector<GPUTexture *> textures_;
 
  public:
   Context(const ContextInputData &input_data, TexturePool &texture_pool)
-      : realtime_compositor::Context(texture_pool), input_data_(input_data)
+      : realtime_compositor::Context(texture_pool),
+        input_data_(input_data),
+        viewer_output_result_(this->create_result(realtime_compositor::ResultType::Color))
   {
   }
 
   virtual ~Context()
   {
     GPU_TEXTURE_FREE_SAFE(output_texture_);
-    GPU_TEXTURE_FREE_SAFE(viewer_output_texture_);
+    viewer_output_result_.release();
     for (GPUTexture *texture : textures_) {
       GPU_texture_free(texture);
     }
@@ -191,6 +193,11 @@ class Context : public realtime_compositor::Context {
   const bNodeTree &get_node_tree() const override
   {
     return *input_data_.node_tree;
+  }
+
+  bool use_gpu() const override
+  {
+    return this->get_render_data().compositor_device == SCE_COMPOSITOR_DEVICE_GPU;
   }
 
   bool use_file_output() const override
@@ -248,54 +255,37 @@ class Context : public realtime_compositor::Context {
     return output_texture_;
   }
 
-  GPUTexture *get_viewer_output_texture(realtime_compositor::Domain domain,
-                                        const bool is_data) override
+  realtime_compositor::Result get_viewer_output_result(realtime_compositor::Domain domain,
+                                                       const bool is_data) override
   {
-    /* Re-create texture if the viewer size changes. */
-    const int2 size = domain.size;
-    if (viewer_output_texture_) {
-      const int current_width = GPU_texture_width(viewer_output_texture_);
-      const int current_height = GPU_texture_height(viewer_output_texture_);
+    viewer_output_result_.set_transformation(domain.transformation);
+    viewer_output_result_.meta_data.is_non_color_data = is_data;
 
-      if (current_width != size.x || current_height != size.y) {
-        GPU_TEXTURE_FREE_SAFE(viewer_output_texture_);
-        viewer_output_texture_ = nullptr;
+    if (viewer_output_result_.is_allocated()) {
+      /* If the allocated result have the same size as the requested domain, return it as is. */
+      if (domain.size == viewer_output_result_.domain().size) {
+        return viewer_output_result_;
+      }
+      else {
+        /* Otherwise, the size changed, so release its data and reset it, then we reallocate it on
+         * the new domain below. */
+        viewer_output_result_.release();
+        viewer_output_result_.reset();
       }
     }
 
-    /* TODO: just a temporary hack, needs to get stored in RenderResult,
-     * once that supports GPU buffers. */
-    if (viewer_output_texture_ == nullptr) {
-      viewer_output_texture_ = GPU_texture_create_2d(
-          "compositor_viewer_output_texture",
-          size.x,
-          size.y,
-          1,
-          get_precision() == realtime_compositor::ResultPrecision::Half ? GPU_RGBA16F :
-                                                                          GPU_RGBA32F,
-          GPU_TEXTURE_USAGE_GENERAL,
-          nullptr);
-    }
-
-    Image *image = BKE_image_ensure_viewer(G.main, IMA_TYPE_COMPOSITE, "Viewer Node");
-    const float2 translation = domain.transformation.location();
-    image->runtime.backdrop_offset[0] = translation.x;
-    image->runtime.backdrop_offset[1] = translation.y;
-
-    if (is_data) {
-      image->flag &= ~IMA_VIEW_AS_RENDER;
-    }
-    else {
-      image->flag |= IMA_VIEW_AS_RENDER;
-    }
-
-    return viewer_output_texture_;
+    viewer_output_result_.allocate_texture(domain, false);
+    return viewer_output_result_;
   }
 
   GPUTexture *get_input_texture(const Scene *scene,
                                 int view_layer_id,
                                 const char *pass_name) override
   {
+    if (!scene) {
+      return nullptr;
+    }
+
     Render *re = RE_GetSceneRender(scene);
     RenderResult *rr = nullptr;
     GPUTexture *input_texture = nullptr;
@@ -411,7 +401,7 @@ class Context : public realtime_compositor::Context {
     BKE_stamp_info_callback(
         &callback_data,
         render_result->stamp_data,
-        [](void *user_data, const char *key, char *value, int /* value_length */) {
+        [](void *user_data, const char *key, char *value, int /*value_length*/) {
           StampCallbackData *data = static_cast<StampCallbackData *>(user_data);
 
           const std::string manifest_key = bke::cryptomatte::BKE_cryptomatte_meta_data_key(
@@ -493,11 +483,21 @@ class Context : public realtime_compositor::Context {
 
   void viewer_output_to_viewer_image()
   {
-    if (!viewer_output_texture_) {
+    if (!viewer_output_result_.is_allocated()) {
       return;
     }
 
     Image *image = BKE_image_ensure_viewer(G.main, IMA_TYPE_COMPOSITE, "Viewer Node");
+    const float2 translation = viewer_output_result_.domain().transformation.location();
+    image->runtime.backdrop_offset[0] = translation.x;
+    image->runtime.backdrop_offset[1] = translation.y;
+
+    if (viewer_output_result_.meta_data.is_non_color_data) {
+      image->flag &= ~IMA_VIEW_AS_RENDER;
+    }
+    else {
+      image->flag |= IMA_VIEW_AS_RENDER;
+    }
 
     ImageUser image_user = {nullptr};
     image_user.multi_index = BKE_scene_multiview_view_id_get(input_data_.render_data,
@@ -514,8 +514,7 @@ class Context : public realtime_compositor::Context {
     void *lock;
     ImBuf *image_buffer = BKE_image_acquire_ibuf(image, &image_user, &lock);
 
-    const int2 size = int2(GPU_texture_width(viewer_output_texture_),
-                           GPU_texture_height(viewer_output_texture_));
+    const int2 size = viewer_output_result_.domain().size;
     if (image_buffer->x != size.x || image_buffer->y != size.y) {
       imb_freerectImBuf(image_buffer);
       imb_freerectfloatImBuf(image_buffer);
@@ -528,13 +527,20 @@ class Context : public realtime_compositor::Context {
     BKE_image_release_ibuf(image, image_buffer, lock);
     BLI_thread_unlock(LOCK_DRAW_IMAGE);
 
-    GPU_memory_barrier(GPU_BARRIER_TEXTURE_UPDATE);
-    float *output_buffer = (float *)GPU_texture_read(viewer_output_texture_, GPU_DATA_FLOAT, 0);
+    if (this->use_gpu()) {
+      GPU_memory_barrier(GPU_BARRIER_TEXTURE_UPDATE);
+      float *output_buffer = static_cast<float *>(
+          GPU_texture_read(viewer_output_result_, GPU_DATA_FLOAT, 0));
 
-    std::memcpy(
-        image_buffer->float_buffer.data, output_buffer, size.x * size.y * 4 * sizeof(float));
-
-    MEM_freeN(output_buffer);
+      std::memcpy(
+          image_buffer->float_buffer.data, output_buffer, size.x * size.y * 4 * sizeof(float));
+      MEM_freeN(output_buffer);
+    }
+    else {
+      std::memcpy(image_buffer->float_buffer.data,
+                  viewer_output_result_.float_texture(),
+                  size.x * size.y * 4 * sizeof(float));
+    }
 
     BKE_image_partial_update_mark_full_update(image);
     if (input_data_.node_tree->runtime->update_draw) {
@@ -562,7 +568,7 @@ class Context : public realtime_compositor::Context {
      * once, and we can't cancel work that was already submitted to the GPU. This does have a
      * performance penalty, but in practice, the improved interactivity is worth it according to
      * user feedback. */
-    if (!this->render_context()) {
+    if (this->use_gpu() && !this->render_context()) {
       GPU_finish();
     }
   }
@@ -587,45 +593,52 @@ class RealtimeCompositor {
 
   ~RealtimeCompositor()
   {
-    /* Free resources with GPU context enabled. Cleanup may happen from the
-     * main thread, and we must use the main context there. */
-    if (BLI_thread_is_main()) {
-      DRW_gpu_context_enable();
-    }
-    else {
-      DRW_render_context_enable(&render_);
+    const bool use_gpu = context_->use_gpu();
+    if (use_gpu) {
+      /* Free resources with GPU context enabled. Cleanup may happen from the
+       * main thread, and we must use the main context there. */
+      if (BLI_thread_is_main()) {
+        DRW_gpu_context_enable();
+      }
+      else {
+        DRW_render_context_enable(&render_);
+      }
     }
 
     context_.reset();
     texture_pool_.reset();
 
-    if (BLI_thread_is_main()) {
-      DRW_gpu_context_disable();
-    }
-    else {
-      DRW_render_context_disable(&render_);
+    if (use_gpu) {
+      if (BLI_thread_is_main()) {
+        DRW_gpu_context_disable();
+      }
+      else {
+        DRW_render_context_disable(&render_);
+      }
     }
   }
 
   /* Evaluate the compositor and output to the scene render result. */
   void execute(const ContextInputData &input_data)
   {
-    /* For main thread rendering in background mode, blocking rendering, or when we do not have a
-     * render system GPU context, use the DRW context directly, while for threaded rendering when
-     * we have a render system GPU context, use the render's system GPU context to avoid blocking
-     * with the global DST. */
-    void *re_system_gpu_context = RE_system_gpu_context_get(&render_);
-    if (BLI_thread_is_main() || re_system_gpu_context == nullptr) {
-      DRW_gpu_context_enable();
-    }
-    else {
+    if (context_->use_gpu()) {
+      /* For main thread rendering in background mode, blocking rendering, or when we do not have a
+       * render system GPU context, use the DRW context directly, while for threaded rendering when
+       * we have a render system GPU context, use the render's system GPU context to avoid blocking
+       * with the global DST. */
       void *re_system_gpu_context = RE_system_gpu_context_get(&render_);
-      WM_system_gpu_context_activate(re_system_gpu_context);
+      if (BLI_thread_is_main() || re_system_gpu_context == nullptr) {
+        DRW_gpu_context_enable();
+      }
+      else {
+        void *re_system_gpu_context = RE_system_gpu_context_get(&render_);
+        WM_system_gpu_context_activate(re_system_gpu_context);
 
-      void *re_blender_gpu_context = RE_blender_gpu_context_ensure(&render_);
+        void *re_blender_gpu_context = RE_blender_gpu_context_ensure(&render_);
 
-      GPU_render_begin();
-      GPU_context_active_set(static_cast<GPUContext *>(re_blender_gpu_context));
+        GPU_render_begin();
+        GPU_context_active_set(static_cast<GPUContext *>(re_blender_gpu_context));
+      }
     }
 
     context_->update_input_data(input_data);
@@ -641,14 +654,17 @@ class RealtimeCompositor {
     context_->viewer_output_to_viewer_image();
     texture_pool_->free_unused_and_reset();
 
-    if (BLI_thread_is_main() || re_system_gpu_context == nullptr) {
-      DRW_gpu_context_disable();
-    }
-    else {
-      GPU_render_end();
-      GPU_context_active_set(nullptr);
+    if (context_->use_gpu()) {
       void *re_system_gpu_context = RE_system_gpu_context_get(&render_);
-      WM_system_gpu_context_release(re_system_gpu_context);
+      if (BLI_thread_is_main() || re_system_gpu_context == nullptr) {
+        DRW_gpu_context_disable();
+      }
+      else {
+        GPU_render_end();
+        GPU_context_active_set(nullptr);
+        void *re_system_gpu_context = RE_system_gpu_context_get(&render_);
+        WM_system_gpu_context_release(re_system_gpu_context);
+      }
     }
   }
 };
@@ -662,25 +678,25 @@ void Render::compositor_execute(const Scene &scene,
                                 blender::realtime_compositor::RenderContext *render_context,
                                 blender::realtime_compositor::Profiler *profiler)
 {
-  std::unique_lock lock(gpu_compositor_mutex);
+  std::unique_lock lock(this->compositor_mutex);
 
   blender::render::ContextInputData input_data(
       scene, render_data, node_tree, view_name, render_context, profiler);
 
-  if (gpu_compositor == nullptr) {
-    gpu_compositor = new blender::render::RealtimeCompositor(*this, input_data);
+  if (this->compositor == nullptr) {
+    this->compositor = new blender::render::RealtimeCompositor(*this, input_data);
   }
 
-  gpu_compositor->execute(input_data);
+  this->compositor->execute(input_data);
 }
 
 void Render::compositor_free()
 {
-  std::unique_lock lock(gpu_compositor_mutex);
+  std::unique_lock lock(this->compositor_mutex);
 
-  if (gpu_compositor != nullptr) {
-    delete gpu_compositor;
-    gpu_compositor = nullptr;
+  if (this->compositor != nullptr) {
+    delete this->compositor;
+    this->compositor = nullptr;
   }
 }
 

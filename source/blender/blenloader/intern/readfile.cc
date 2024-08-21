@@ -84,7 +84,7 @@
 #include "BKE_modifier.hh"
 #include "BKE_node.hh" /* for tree type defines */
 #include "BKE_object.hh"
-#include "BKE_packedFile.h"
+#include "BKE_packedFile.hh"
 #include "BKE_preferences.h"
 #include "BKE_report.hh"
 #include "BKE_scene.hh"
@@ -1800,8 +1800,12 @@ static void *read_struct(FileData *fd, BHead *bh, const char *blockname, const i
     BHead *bh_orig = bh;
 #endif
 
-    /* switch is based on file dna */
-    if (bh->SDNAnr && (fd->flags & FD_FLAGS_SWITCH_ENDIAN)) {
+    /* Endianness switch is based on file DNA.
+     *
+     * NOTE: raw data (aka #SDNA_RAW_DATA_STRUCT_INDEX #SDNAnr) is not handled here, it's up to
+     * the calling code to manage this. */
+    BLI_STATIC_ASSERT(SDNA_RAW_DATA_STRUCT_INDEX == 0, "'raw data' SDNA struct index should be 0")
+    if (bh->SDNAnr > SDNA_RAW_DATA_STRUCT_INDEX && (fd->flags & FD_FLAGS_SWITCH_ENDIAN)) {
 #ifdef USE_BHEAD_READ_ON_DEMAND
       if (BHEADN_FROM_BHEAD(bh)->has_data == false) {
         bh = blo_bhead_read_full(fd, bh);
@@ -1912,7 +1916,7 @@ static void after_liblink_id_embedded_id_process(BlendLibReader *reader, ID *id)
 {
 
   /* Handle 'private IDs'. */
-  bNodeTree *nodetree = blender::bke::ntreeFromID(id);
+  bNodeTree *nodetree = blender::bke::node_tree_from_id(id);
   if (nodetree != nullptr) {
     after_liblink_id_process(reader, &nodetree->id);
 
@@ -1991,15 +1995,16 @@ static void direct_link_id_embedded_id(BlendDataReader *reader,
                                        ID *id_old)
 {
   /* Handle 'private IDs'. */
-  bNodeTree **nodetree = blender::bke::BKE_ntree_ptr_from_id(id);
+  bNodeTree **nodetree = blender::bke::node_tree_ptr_from_id(id);
   if (nodetree != nullptr && *nodetree != nullptr) {
     BLO_read_struct(reader, bNodeTree, nodetree);
     direct_link_id_common(reader,
                           current_library,
                           (ID *)*nodetree,
-                          id_old != nullptr ? (ID *)blender::bke::ntreeFromID(id_old) : nullptr,
+                          id_old != nullptr ? (ID *)blender::bke::node_tree_from_id(id_old) :
+                                              nullptr,
                           0);
-    blender::bke::ntreeBlendReadData(reader, id, *nodetree);
+    blender::bke::node_tree_blend_read_data(reader, id, *nodetree);
   }
 
   if (GS(id->name) == ID_SCE) {
@@ -2313,7 +2318,7 @@ static void direct_link_library(FileData *fd, Library *lib, Main *main)
   //  printf("direct_link_library: filepath_abs %s\n", lib->runtime.filepath_abs);
 
   BlendDataReader reader = {fd};
-  BKE_packedfile_blend_read(&reader, &lib->packedfile);
+  BKE_packedfile_blend_read(&reader, &lib->packedfile, lib->filepath);
 
   /* new main */
   newmain = BKE_main_new();
@@ -3734,7 +3739,7 @@ BlendFileData *blo_read_file_internal(FileData *fd, const char *filepath)
     /* After all data has been read and versioned, uses ID_TAG_NEW. Theoretically this should
      * not be calculated in the undo case, but it is currently needed even on undo to recalculate
      * a cache. */
-    blender::bke::ntreeUpdateAllNew(bfd->main);
+    blender::bke::node_tree_update_all_new(bfd->main);
 
     placeholders_ensure_valid(bfd->main);
 
@@ -4394,7 +4399,7 @@ static void library_link_end(Main *mainl, FileData **fd, const int flag)
   BKE_main_id_refcount_recompute(mainvar, false);
 
   /* After all data has been read and versioned, uses ID_TAG_NEW. */
-  blender::bke::ntreeUpdateAllNew(mainvar);
+  blender::bke::node_tree_update_all_new(mainvar);
 
   placeholders_ensure_valid(mainvar);
 

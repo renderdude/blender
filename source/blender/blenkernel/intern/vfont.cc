@@ -45,7 +45,7 @@
 #include "BKE_lib_id.hh"
 #include "BKE_main.hh"
 #include "BKE_object_types.hh"
-#include "BKE_packedFile.h"
+#include "BKE_packedFile.hh"
 #include "BKE_vfont.hh"
 #include "BKE_vfontdata.hh"
 
@@ -162,7 +162,7 @@ static void vfont_blend_read_data(BlendDataReader *reader, ID *id)
   VFont *vf = (VFont *)id;
   vf->data = nullptr;
   vf->temp_pf = nullptr;
-  BKE_packedfile_blend_read(reader, &vf->packedfile);
+  BKE_packedfile_blend_read(reader, &vf->packedfile, vf->filepath);
 }
 
 IDTypeInfo IDType_ID_VF = {
