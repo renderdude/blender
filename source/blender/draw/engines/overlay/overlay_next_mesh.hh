@@ -16,11 +16,17 @@
 #include "BKE_mesh_types.hh"
 #include "BKE_subdiv_modifier.hh"
 
+#include "GPU_capabilities.hh"
+
 #include "draw_cache_impl.hh"
 
 #include "overlay_next_private.hh"
 
 namespace blender::draw::overlay {
+
+constexpr int overlay_edit_text = V3D_OVERLAY_EDIT_EDGE_LEN | V3D_OVERLAY_EDIT_FACE_AREA |
+                                  V3D_OVERLAY_EDIT_FACE_ANG | V3D_OVERLAY_EDIT_EDGE_ANG |
+                                  V3D_OVERLAY_EDIT_INDICES;
 
 class Meshes {
  private:
@@ -61,9 +67,17 @@ class Meshes {
   View view_edit_vert = {"view_edit_vert"};
   float view_dist = 0.0f;
 
+  bool enabled_ = false;
+
  public:
   void begin_sync(Resources &res, const State &state, const View &view)
   {
+    enabled_ = state.space_type == SPACE_VIEW3D;
+
+    if (!enabled_) {
+      return;
+    }
+
     view_dist = state.view_dist_get(view.winmat());
     xray_enabled = state.xray_enabled;
 
@@ -99,25 +113,26 @@ class Meshes {
     {
       auto &pass = edit_mesh_prepass_ps_;
       pass.init();
-      pass.state_set(DRW_STATE_WRITE_DEPTH | DRW_STATE_DEPTH_LESS_EQUAL | face_culling |
-                     state.clipping_state);
+      pass.state_set(DRW_STATE_WRITE_DEPTH | DRW_STATE_DEPTH_LESS_EQUAL | face_culling,
+                     state.clipping_plane_count);
       pass.shader_set(res.shaders.mesh_edit_depth.get());
       pass.push_constant("retopologyOffset", retopology_offset);
     }
     {
       /* Normals */
       const bool use_screen_size = (edit_flag & V3D_OVERLAY_EDIT_CONSTANT_SCREEN_SIZE_NORMALS);
-      const bool use_hq_normals = state.scene->r.perf_flag & SCE_PERF_HQ_NORMALS;
+      const bool use_hq_normals = (state.scene->r.perf_flag & SCE_PERF_HQ_NORMALS) ||
+                                  GPU_use_hq_normals_workaround();
 
       DRWState pass_state = DRW_STATE_WRITE_DEPTH | DRW_STATE_WRITE_COLOR |
-                            DRW_STATE_DEPTH_LESS_EQUAL | state.clipping_state;
+                            DRW_STATE_DEPTH_LESS_EQUAL;
       if (state.xray_enabled) {
         pass_state |= DRW_STATE_BLEND_ALPHA;
       }
 
       auto &pass = edit_mesh_normals_ps_;
       pass.init();
-      pass.state_set(pass_state);
+      pass.state_set(pass_state, state.clipping_plane_count);
 
       auto shader_pass = [&](GPUShader *shader, const char *name) {
         auto &sub = pass.sub(name);
@@ -150,8 +165,8 @@ class Meshes {
     {
       auto &pass = edit_mesh_analysis_ps_;
       pass.init();
-      pass.state_set(DRW_STATE_WRITE_COLOR | DRW_STATE_DEPTH_LESS_EQUAL | DRW_STATE_BLEND_ALPHA |
-                     state.clipping_state);
+      pass.state_set(DRW_STATE_WRITE_COLOR | DRW_STATE_DEPTH_LESS_EQUAL | DRW_STATE_BLEND_ALPHA,
+                     state.clipping_plane_count);
       pass.shader_set(res.shaders.mesh_analysis.get());
       pass.bind_texture("weightTex", res.weight_ramp_tx);
     }
@@ -173,7 +188,8 @@ class Meshes {
       pass.init();
       /* Change first vertex convention to match blender loop structure. */
       pass.state_set(DRW_STATE_WRITE_COLOR | DRW_STATE_DEPTH_LESS_EQUAL | DRW_STATE_BLEND_ALPHA |
-                     DRW_STATE_FIRST_VERTEX_CONVENTION | state.clipping_state);
+                         DRW_STATE_FIRST_VERTEX_CONVENTION,
+                     state.clipping_plane_count);
       pass.shader_set(res.shaders.mesh_edit_edge.get());
       pass.push_constant("do_smooth_wire", do_smooth_wire);
       pass.push_constant("use_vertex_selection", select_vert);
@@ -183,15 +199,16 @@ class Meshes {
       auto &pass = edit_mesh_faces_ps_;
       pass.init();
       pass.state_set(DRW_STATE_WRITE_COLOR | DRW_STATE_DEPTH_LESS_EQUAL | DRW_STATE_BLEND_ALPHA |
-                     face_culling | state.clipping_state);
+                         face_culling,
+                     state.clipping_plane_count);
       pass.shader_set(res.shaders.mesh_edit_face.get());
       mesh_edit_common_resource_bind(pass, face_alpha);
     }
     {
       auto &pass = edit_mesh_cages_ps_;
       pass.init();
-      pass.state_set(DRW_STATE_WRITE_COLOR | DRW_STATE_DEPTH_LESS_EQUAL | DRW_STATE_BLEND_ALPHA |
-                     state.clipping_state);
+      pass.state_set(DRW_STATE_WRITE_COLOR | DRW_STATE_DEPTH_LESS_EQUAL | DRW_STATE_BLEND_ALPHA,
+                     state.clipping_plane_count);
       pass.shader_set(res.shaders.mesh_edit_face.get());
       mesh_edit_common_resource_bind(pass, face_alpha);
     }
@@ -199,7 +216,8 @@ class Meshes {
       auto &pass = edit_mesh_verts_ps_;
       pass.init();
       pass.state_set(DRW_STATE_WRITE_COLOR | DRW_STATE_DEPTH_LESS_EQUAL | DRW_STATE_BLEND_ALPHA |
-                     DRW_STATE_WRITE_DEPTH | state.clipping_state);
+                         DRW_STATE_WRITE_DEPTH,
+                     state.clipping_plane_count);
       pass.shader_set(res.shaders.mesh_edit_vert.get());
       mesh_edit_common_resource_bind(pass, backwire_opacity);
     }
@@ -207,7 +225,8 @@ class Meshes {
       auto &pass = edit_mesh_facedots_ps_;
       pass.init();
       pass.state_set(DRW_STATE_WRITE_COLOR | DRW_STATE_DEPTH_LESS_EQUAL | DRW_STATE_BLEND_ALPHA |
-                     DRW_STATE_WRITE_DEPTH | state.clipping_state);
+                         DRW_STATE_WRITE_DEPTH,
+                     state.clipping_plane_count);
       pass.shader_set(res.shaders.mesh_edit_facedot.get());
       mesh_edit_common_resource_bind(pass, backwire_opacity);
     }
@@ -215,15 +234,23 @@ class Meshes {
       auto &pass = edit_mesh_skin_roots_ps_;
       pass.init();
       pass.state_set(DRW_STATE_WRITE_COLOR | DRW_STATE_DEPTH_LESS_EQUAL | DRW_STATE_BLEND_ALPHA |
-                     DRW_STATE_WRITE_DEPTH | state.clipping_state);
+                         DRW_STATE_WRITE_DEPTH,
+                     state.clipping_plane_count);
       pass.shader_set(res.shaders.mesh_edit_skin_root.get());
       pass.push_constant("retopologyOffset", retopology_offset);
       pass.bind_ubo("globalsBlock", &res.globals_buf);
     }
   }
 
-  void edit_object_sync(Manager &manager, const ObjectRef &ob_ref, Resources & /*res*/)
+  void edit_object_sync(Manager &manager,
+                        const ObjectRef &ob_ref,
+                        const State &state,
+                        Resources & /*res*/)
   {
+    if (!enabled_) {
+      return;
+    }
+
     ResourceHandle res_handle = manager.resource_handle(ob_ref);
 
     Object *ob = ob_ref.object;
@@ -284,10 +311,17 @@ class Meshes {
       gpu::Batch *geom = DRW_mesh_batch_cache_get_edit_skin_roots(mesh);
       edit_mesh_skin_roots_ps_.draw_expand(geom, GPU_PRIM_LINES, 32, 1, res_handle);
     }
+    if (DRW_state_show_text() && (state.overlay.edit_flag & overlay_edit_text)) {
+      DRW_text_edit_mesh_measure_stats(state.region, state.v3d, ob, &state.scene->unit, state.dt);
+    }
   }
 
   void draw(Framebuffer &framebuffer, Manager &manager, View &view)
   {
+    if (!enabled_) {
+      return;
+    }
+
     GPU_debug_group_begin("Mesh Edit");
 
     GPU_framebuffer_bind(framebuffer);
@@ -316,6 +350,10 @@ class Meshes {
 
   void draw_color_only(Framebuffer &framebuffer, Manager &manager, View &view)
   {
+    if (!enabled_) {
+      return;
+    }
+
     if (!xray_enabled) {
       return;
     }

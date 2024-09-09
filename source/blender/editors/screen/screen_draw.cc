@@ -15,9 +15,13 @@
 
 #include "BKE_screen.hh"
 
+#include "BLF_api.hh"
+
 #include "BLI_listbase.h"
 #include "BLI_math_vector.hh"
 #include "BLI_rect.h"
+
+#include "BLT_translation.hh"
 
 #include "WM_api.hh"
 
@@ -219,43 +223,67 @@ void ED_screen_draw_edges(wmWindow *win)
   }
 }
 
-static void screen_draw_area_icon(rctf *rect, int icon, uchar *color, float *bg_color = nullptr)
+static void screen_draw_area_drag_tip(int x, int y, ScrArea *source, std::string hint)
 {
   if (!U.experimental.use_docking) {
     return;
   }
 
-  if (BLI_rctf_size_x(rect) < UI_SCALE_FAC * 75.0f || BLI_rctf_size_y(rect) < UI_SCALE_FAC * 60.0f)
-  {
-    return;
-  }
+  const char *area_name = IFACE_(ED_area_name(source).c_str());
+  const uiFontStyle *fstyle = UI_FSTYLE_TOOLTIP;
+  const bTheme *btheme = UI_GetTheme();
+  const uiWidgetColors *wcol = &btheme->tui.wcol_tooltip;
+  float col_fg[4], col_bg[4];
+  rgba_uchar_to_float(col_fg, wcol->text);
+  rgba_uchar_to_float(col_bg, wcol->inner);
 
-  const float center_x = BLI_rctf_cent_x(rect);
-  const float center_y = BLI_rctf_cent_y(rect);
+  float scale = fstyle->points * UI_SCALE_FAC / UI_DEFAULT_TOOLTIP_POINTS;
+  BLF_size(fstyle->uifont_id, UI_DEFAULT_TOOLTIP_POINTS * scale);
 
-  if (bg_color) {
-    const float bg_width = UI_SCALE_FAC * 50.0f;
-    const float bg_height = UI_SCALE_FAC * 40.0f;
-    const rctf bg_rect = {
-        /*xmin*/ center_x - (bg_width / 2.0f),
-        /*xmax*/ center_x + bg_width - (bg_width / 2.0f),
-        /*ymin*/ center_y - (bg_height / 2.0f),
-        /*ymax*/ center_y + bg_height - (bg_height / 2.0f),
-    };
-    UI_draw_roundbox_4fv_ex(
-        &bg_rect, bg_color, nullptr, 1.0f, nullptr, U.pixelsize, 6 * U.pixelsize);
-  }
+  const float margin = scale * 4.0f;
+  const float icon_width = (scale * ICON_DEFAULT_WIDTH / 1.4f);
+  const float icon_gap = scale * 3.0f;
+  const float line_gap = scale * 5.0f;
+  const int lheight = BLF_height_max(fstyle->uifont_id);
+  const int descent = BLF_descender(fstyle->uifont_id);
+  const float line1_len = BLF_width(fstyle->uifont_id, hint.c_str(), hint.size());
+  const float line2_len = BLF_width(fstyle->uifont_id, area_name, BLF_DRAW_STR_DUMMY_MAX);
+  const float width = margin + std::max(line1_len, line2_len + icon_width + icon_gap) + margin;
+  const float height = margin + lheight + line_gap + lheight + margin;
 
-  const float icon_size = 32.0f * UI_SCALE_FAC;
-  UI_icon_draw_ex(center_x - (icon_size / 2.0f),
-                  center_y - (icon_size / 2.0f),
-                  icon,
-                  16.0f / icon_size,
-                  float(color[3]) / 255.0f,
+  /* Position of this hint relative to the mouse position. */
+  const int left = x + int(5.0f * UI_SCALE_FAC);
+  const int top = y - int(7.0f * UI_SCALE_FAC);
+
+  rctf rect;
+  rect.xmin = left;
+  rect.xmax = left + width;
+  rect.ymax = top;
+  rect.ymin = top - height;
+  UI_draw_roundbox_corner_set(UI_CNR_ALL);
+  UI_draw_roundbox_4fv(&rect, true, wcol->roundness * U.widget_unit, col_bg);
+
+  UI_icon_draw_ex(left + margin,
+                  top - height + margin + (1.0f * scale),
+                  ED_area_icon(source),
+                  1.4f / scale,
+                  1.0f,
                   0.0f,
-                  color,
-                  false,
+                  wcol->text,
+                  true,
                   UI_NO_ICON_OVERLAY_TEXT);
+
+  BLF_size(fstyle->uifont_id, UI_DEFAULT_TOOLTIP_POINTS * scale);
+  BLF_color4fv(fstyle->uifont_id, col_fg);
+
+  BLF_position(fstyle->uifont_id, left + margin, top - margin - lheight + (2.0f * scale), 0.0f);
+  BLF_draw(fstyle->uifont_id, hint.c_str(), hint.size());
+
+  BLF_position(fstyle->uifont_id,
+               left + margin + icon_width + icon_gap,
+               top - height + margin - descent,
+               0.0f);
+  BLF_draw(fstyle->uifont_id, area_name, BLF_DRAW_STR_DUMMY_MAX);
 }
 
 static void screen_draw_area_closed(int xmin, int xmax, int ymin, int ymax)
@@ -267,7 +295,7 @@ static void screen_draw_area_closed(int xmin, int xmax, int ymin, int ymax)
   UI_draw_roundbox_4fv_ex(&rect, darken, nullptr, 1.0f, nullptr, U.pixelsize, 6 * U.pixelsize);
 }
 
-void screen_draw_join_highlight(ScrArea *sa1, ScrArea *sa2, eScreenDir dir)
+void screen_draw_join_highlight(const wmWindow *win, ScrArea *sa1, ScrArea *sa2, eScreenDir dir)
 {
   if (dir == SCREEN_DIR_NONE || !sa2) {
     /* Darken source if docking. Done here because it might be a different window. */
@@ -359,21 +387,12 @@ void screen_draw_join_highlight(ScrArea *sa1, ScrArea *sa2, eScreenDir dir)
   float inner[4] = {1.0f, 1.0f, 1.0f, 0.10f};
   UI_draw_roundbox_4fv_ex(&combined, inner, nullptr, 1.0f, outline, U.pixelsize, 6 * U.pixelsize);
 
-  /* Icon in center of intersection of combined and sa2 - the subsumed part. */
-  rctf sa2tot;
-  BLI_rctf_rcti_copy(&sa2tot, &sa2->totrct);
-  rctf sa2new;
-  BLI_rctf_isect(&combined, &sa2tot, &sa2new);
-
-  uchar icon_color[4] = {255, 255, 255, 255};
-  float bg_color[4] = {0.0f, 0.0f, 0.0f, 0.4f};
-  screen_draw_area_icon(&sa2new, ED_area_icon(sa1), icon_color, bg_color);
+  screen_draw_area_drag_tip(
+      win->eventstate->xy[0], win->eventstate->xy[1], sa1, IFACE_("Join Areas"));
 }
 
-void screen_draw_dock_preview(const wmWindow * /*win*/,
-                              ScrArea *source,
-                              ScrArea *target,
-                              AreaDockTarget dock_target)
+void screen_draw_dock_preview(
+    ScrArea *source, ScrArea *target, AreaDockTarget dock_target, float factor, int x, int y)
 {
   if (dock_target == AreaDockTarget::None) {
     return;
@@ -381,8 +400,6 @@ void screen_draw_dock_preview(const wmWindow * /*win*/,
 
   float outline[4] = {1.0f, 1.0f, 1.0f, 0.4f};
   float inner[4] = {1.0f, 1.0f, 1.0f, 0.1f};
-  float bg_color[4] = {0.0f, 0.0f, 0.0f, 0.4f};
-  uchar icon_color[4] = {255, 255, 255, 255};
   float border[4];
   UI_GetThemeColor4fv(TH_EDITOR_OUTLINE, border);
   UI_draw_roundbox_corner_set(UI_CNR_ALL);
@@ -396,28 +413,31 @@ void screen_draw_dock_preview(const wmWindow * /*win*/,
   float split;
 
   if (dock_target == AreaDockTarget::Right) {
-    split = std::min(dest.xmin + target->winx * 0.501f, dest.xmax - AREAMINX * UI_SCALE_FAC);
+    split = std::min(dest.xmin + target->winx * (1.0f - factor),
+                     dest.xmax - AREAMINX * UI_SCALE_FAC);
     dest.xmin = split + half_line_width;
     remainder.xmax = split - half_line_width;
   }
   else if (dock_target == AreaDockTarget::Left) {
-    split = std::max(dest.xmax - target->winx * 0.501f, dest.xmin + AREAMINX * UI_SCALE_FAC);
+    split = std::max(dest.xmax - target->winx * (1.0f - factor),
+                     dest.xmin + AREAMINX * UI_SCALE_FAC);
     dest.xmax = split - half_line_width;
     remainder.xmin = split + half_line_width;
   }
   else if (dock_target == AreaDockTarget::Top) {
-    split = std::min(dest.ymin + target->winy * 0.501f, dest.ymax - HEADERY * UI_SCALE_FAC);
+    split = std::min(dest.ymin + target->winy * (1.0f - factor),
+                     dest.ymax - HEADERY * UI_SCALE_FAC);
     dest.ymin = split + half_line_width;
     remainder.ymax = split - half_line_width;
   }
   else if (dock_target == AreaDockTarget::Bottom) {
-    split = std::max(dest.ymax - target->winy * 0.501f, dest.ymin + HEADERY * UI_SCALE_FAC);
+    split = std::max(dest.ymax - target->winy * (1.0f - factor),
+                     dest.ymin + HEADERY * UI_SCALE_FAC);
     dest.ymax = split - half_line_width;
     remainder.ymin = split + half_line_width;
   }
 
   UI_draw_roundbox_4fv_ex(&dest, inner, nullptr, 1.0f, outline, U.pixelsize, 6 * U.pixelsize);
-  screen_draw_area_icon(&dest, ED_area_icon(source), icon_color, bg_color);
 
   if (dock_target != AreaDockTarget::Center) {
     /* Darken the split position itself. */
@@ -431,6 +451,12 @@ void screen_draw_dock_preview(const wmWindow * /*win*/,
     }
     UI_draw_roundbox_4fv(&dest, true, 0.0f, border);
   }
+
+  screen_draw_area_drag_tip(x,
+                            y,
+                            source,
+                            dock_target == AreaDockTarget::Center ? IFACE_("Replace Area") :
+                                                                    IFACE_("Split Area"));
 }
 
 void screen_draw_split_preview(ScrArea *area, const eScreenAxis dir_axis, const float fac)
@@ -452,8 +478,8 @@ void screen_draw_split_preview(ScrArea *area, const eScreenAxis dir_axis, const 
 
   float x = (1 - fac) * rect.xmin + fac * rect.xmax;
   float y = (1 - fac) * rect.ymin + fac * rect.ymax;
-  x = std::clamp(x, rect.xmin + (AREAMINX * UI_SCALE_FAC), rect.xmax - (AREAMINX * UI_SCALE_FAC));
-  y = std::clamp(y, rect.ymin + (HEADERY * UI_SCALE_FAC), rect.ymax - (HEADERY * UI_SCALE_FAC));
+  x = std::clamp(x, rect.xmin, rect.xmax);
+  y = std::clamp(y, rect.ymin, rect.ymax);
   float half_line_width = 2.0f * U.pixelsize;
 
   /* Outlined rectangle to left/above split position. */

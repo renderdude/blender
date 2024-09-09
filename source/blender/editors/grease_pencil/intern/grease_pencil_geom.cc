@@ -209,11 +209,10 @@ int curve_merge_by_distance(const IndexRange points,
 }
 
 /* NOTE: The code here is an adapted version of #blender::geometry::point_merge_by_distance. */
-blender::bke::CurvesGeometry curves_merge_by_distance(
-    const bke::CurvesGeometry &src_curves,
-    const float merge_distance,
-    const IndexMask &selection,
-    const bke::AnonymousAttributePropagationInfo &propagation_info)
+blender::bke::CurvesGeometry curves_merge_by_distance(const bke::CurvesGeometry &src_curves,
+                                                      const float merge_distance,
+                                                      const IndexMask &selection,
+                                                      const bke::AttributeFilter &attribute_filter)
 {
   const int src_point_size = src_curves.points_num();
   if (src_point_size == 0) {
@@ -303,9 +302,8 @@ blender::bke::CurvesGeometry curves_merge_by_distance(
 
   bke::AttributeAccessor src_attributes = src_curves.attributes();
   bke::MutableAttributeAccessor dst_attributes = dst_curves.attributes_for_write();
-  src_attributes.for_all([&](const bke::AttributeIDRef &id,
-                             const bke::AttributeMetaData &meta_data) {
-    if (id.is_anonymous() && !propagation_info.propagate(id.anonymous_id())) {
+  src_attributes.for_all([&](const StringRef id, const bke::AttributeMetaData &meta_data) {
+    if (attribute_filter.allow_skip(id)) {
       return true;
     }
     if (meta_data.domain != bke::AttrDomain::Point) {
@@ -351,7 +349,7 @@ bke::CurvesGeometry curves_merge_endpoints_by_distance(
     const float4x4 &layer_to_world,
     const float merge_distance,
     const IndexMask &selection,
-    const bke::AnonymousAttributePropagationInfo &propagation_info)
+    const bke::AttributeFilter &attribute_filter)
 {
   const OffsetIndices src_points_by_curve = src_curves.points_by_curve();
   const Span<float3> src_positions = src_curves.positions();
@@ -434,7 +432,7 @@ bke::CurvesGeometry curves_merge_endpoints_by_distance(
   BLI_kdtree_2d_free(tree);
 
   return geometry::curves_merge_endpoints(
-      src_curves, connect_to_curve, flip_direction, propagation_info);
+      src_curves, connect_to_curve, flip_direction, attribute_filter);
 }
 
 /* Generate points in an counter-clockwise arc between two directions. */
@@ -494,7 +492,7 @@ static void generate_cap(const float3 &point,
                          Vector<float3> &r_perimeter,
                          Vector<int> &r_src_indices)
 {
-  const float3 normal = {tangent.y, -tangent.x, 0.0f};
+  const float3 normal = math::normalize(float3{tangent.y, -tangent.x, 0.0f});
   switch (cap_type) {
     case GP_STROKE_CAP_ROUND:
       generate_arc_from_point_to_point(point - normal * radius,
@@ -564,7 +562,7 @@ static void generate_corner(const float3 &pt_a,
 }
 
 static void generate_stroke_perimeter(const Span<float3> all_positions,
-                                      const VArray<float> all_radii,
+                                      const Span<float> all_radii,
                                       const IndexRange points,
                                       const int corner_subdivisions,
                                       const bool is_cyclic,
@@ -701,11 +699,18 @@ bke::CurvesGeometry create_curves_outline(const bke::greasepencil::Drawing &draw
   const VArray<int> src_material_index = *src_attributes.lookup_or_default(
       "material_index", bke::AttrDomain::Curve, 0);
 
-  /* Transform positions. */
+  /* Transform positions and radii. */
+  const float scale = math::average(math::to_scale(transform));
   Array<float3> transformed_positions(src_positions.size());
+  Array<float> transformed_radii(src_radii.size());
   threading::parallel_for(transformed_positions.index_range(), 4096, [&](const IndexRange range) {
     for (const int i : range) {
       transformed_positions[i] = math::transform_point(transform, src_positions[i]);
+    }
+  });
+  threading::parallel_for(transformed_radii.index_range(), 4096, [&](const IndexRange range) {
+    for (const int i : range) {
+      transformed_radii[i] = src_radii[i] * scale;
     }
   });
 
@@ -725,7 +730,7 @@ bke::CurvesGeometry create_curves_outline(const bke::greasepencil::Drawing &draw
     const IndexRange points = src_curves.points_by_curve()[curve_i];
 
     generate_stroke_perimeter(transformed_positions,
-                              src_radii,
+                              transformed_radii,
                               points,
                               corner_subdivisions,
                               is_cyclic_curve,
@@ -801,14 +806,12 @@ bke::CurvesGeometry create_curves_outline(const bke::greasepencil::Drawing &draw
 
   bke::gather_attributes(src_attributes,
                          bke::AttrDomain::Point,
-                         {},
-                         {"position", "radius"},
+                         bke::attribute_filter_from_skip_ref({"position", "radius"}),
                          dst_point_map,
                          dst_attributes);
   bke::gather_attributes(src_attributes,
                          bke::AttrDomain::Curve,
-                         {},
-                         {"cyclic", "material_index"},
+                         bke::attribute_filter_from_skip_ref({"cyclic", "material_index"}),
                          dst_curve_map,
                          dst_attributes);
 
@@ -1470,7 +1473,7 @@ void find_curve_intersections(const bke::CurvesGeometry &curves,
         hit->no[0] = result.lambda;
       };
 
-  /* Raycast in the forward direction. Ignores intersections with neighboring lines. */
+  /* Ray-cast in the forward direction. Ignores intersections with neighboring lines. */
   auto do_raycast = [&](const int index_back,
                         const int index,
                         const int index_forward,

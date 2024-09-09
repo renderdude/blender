@@ -835,25 +835,28 @@ struct KeyInsertData {
   int array_index;
 };
 
-static SingleKeyingResult insert_key_layer(Main *bmain,
-                                           Layer &layer,
-                                           const Slot &slot,
-                                           const std::string &rna_path,
-                                           const std::optional<PropertySubType> prop_subtype,
-                                           const KeyInsertData &key_data,
-                                           const KeyframeSettings &key_settings,
-                                           const eInsertKeyFlags insert_key_flags)
+static SingleKeyingResult insert_key_layer(
+    Main *bmain,
+    Layer &layer,
+    const Slot &slot,
+    const std::string &rna_path,
+    const std::optional<PropertySubType> prop_subtype,
+    const std::optional<blender::StringRefNull> channel_group,
+    const KeyInsertData &key_data,
+    const KeyframeSettings &key_settings,
+    const eInsertKeyFlags insert_key_flags)
 {
   assert_baklava_phase_1_invariants(layer);
   BLI_assert(layer.strips().size() == 1);
 
   Strip *strip = layer.strip(0);
-  return strip->as<KeyframeStrip>().keyframe_insert(bmain,
-                                                    slot,
-                                                    {rna_path, key_data.array_index, prop_subtype},
-                                                    key_data.position,
-                                                    key_settings,
-                                                    insert_key_flags);
+  return strip->as<KeyframeStrip>().keyframe_insert(
+      bmain,
+      slot,
+      {rna_path, key_data.array_index, prop_subtype, channel_group},
+      key_data.position,
+      key_settings,
+      insert_key_flags);
 }
 
 static CombinedKeyingResult insert_key_layered_action(Main *bmain,
@@ -865,12 +868,14 @@ static CombinedKeyingResult insert_key_layered_action(Main *bmain,
                                                       const eInsertKeyFlags insert_key_flags)
 {
   BLI_assert(action.is_action_layered());
-
-  Slot &slot = action.slot_ensure_for_id(*rna_pointer->owner_id);
-  const bool success = action.assign_id(&slot, *rna_pointer->owner_id);
-  UNUSED_VARS_NDEBUG(success);
+  ID &animated_id = *rna_pointer->owner_id;
   BLI_assert_msg(
-      success,
+      ELEM(get_action(animated_id), &action, nullptr),
+      "The animated ID should not be using another Action than the one passed to this function");
+
+  Slot *slot = assign_action_ensure_slot_for_keying(action, animated_id);
+  BLI_assert_msg(
+      slot,
       "The conditions that would cause this Slot assigment to fail (such as the ID not being "
       "animatible) should have been caught and handled by higher-level functions.");
 
@@ -895,7 +900,7 @@ static CombinedKeyingResult insert_key_layered_action(Main *bmain,
     if (!path_resolved) {
       std::fprintf(stderr,
                    "Failed to insert key on slot %s due to unresolved RNA path: %s\n",
-                   slot.name,
+                   slot->name,
                    rna_path.path.c_str());
       combined_result.add(SingleKeyingResult::CANNOT_RESOLVE_PATH);
       continue;
@@ -903,6 +908,10 @@ static CombinedKeyingResult insert_key_layered_action(Main *bmain,
     const std::optional<std::string> rna_path_id_to_prop = RNA_path_from_ID_to_property(&ptr,
                                                                                         prop);
     BLI_assert(rna_path_id_to_prop.has_value());
+
+    const std::optional<blender::StringRefNull> channel_group = default_channel_group_for_path(
+        &ptr, *rna_path_id_to_prop);
+
     const PropertySubType prop_subtype = RNA_property_subtype(prop);
     Vector<float> rna_values = get_keyframe_values(&ptr, prop, use_visual_keyframing);
 
@@ -916,9 +925,10 @@ static CombinedKeyingResult insert_key_layered_action(Main *bmain,
       const KeyInsertData key_data = {{scene_frame, rna_values[property_index]}, property_index};
       const SingleKeyingResult result = insert_key_layer(bmain,
                                                          *layer,
-                                                         slot,
+                                                         *slot,
                                                          *rna_path_id_to_prop,
                                                          prop_subtype,
+                                                         channel_group,
                                                          key_data,
                                                          key_settings,
                                                          insert_key_flags);

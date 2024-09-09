@@ -543,8 +543,6 @@ bool ANIM_animdata_can_have_greasepencil(const eAnimCont_Types type)
  * whether any channels will be added (but without needing them to actually get created).
  *
  * \warning This causes the calling function to return early if we're only "peeking" for channels.
- *
- * XXX: ale_statement stuff is really a hack for one special case. It shouldn't really be needed.
  */
 #define ANIMCHANNEL_NEW_CHANNEL_FULL( \
     bmain, channel_data, channel_type, owner_id, fcurve_owner_id, ale_statement) \
@@ -837,6 +835,8 @@ static bAnimListElem *make_new_animlistelem(
       break;
     }
     case ANIMTYPE_GROUP: {
+      BLI_assert_msg(GS(fcurve_owner_id->name) == ID_AC, "fcurve_owner_id should be an Action");
+
       bActionGroup *agrp = (bActionGroup *)data;
 
       ale->flag = agrp->flag;
@@ -1434,17 +1434,30 @@ static size_t animfilter_fcurves_span(bAnimContext *ac,
   return num_items;
 }
 
+/**
+ * Filters a channel group and its children.
+ *
+ * This works both for channel groups in legacy and in layered actions.
+ *
+ * Note: `slot_handle` is only used for layered actions, and is ignored for
+ * legacy actions.
+ */
 static size_t animfilter_act_group(bAnimContext *ac,
                                    ListBase *anim_data,
                                    bAction *act,
+                                   animrig::slot_handle_t slot_handle,
                                    bActionGroup *agrp,
                                    eAnimFilter_Flags filter_mode,
                                    ID *owner_id)
 {
+  BLI_assert(act != nullptr);
+  BLI_assert(agrp != nullptr);
+
   ListBase tmp_data = {nullptr, nullptr};
   size_t tmp_items = 0;
   size_t items = 0;
-  // int ofilter = filter_mode;
+
+  animrig::Action &action = act->wrap();
 
   /* if we care about the selection status of the channels,
    * but the group isn't expanded (1)...
@@ -1487,17 +1500,27 @@ static size_t animfilter_act_group(bAnimContext *ac,
       if (!(filter_mode & ANIMFILTER_CURVE_VISIBLE) || !(agrp->flag & AGRP_NOTVISIBLE)) {
         /* group must be editable for its children to be editable (if we care about this) */
         if (!(filter_mode & ANIMFILTER_FOREDIT) || EDITABLE_AGRP(agrp)) {
-          /* get first F-Curve which can be used here */
-          FCurve *first_fcu = animfilter_fcurve_next(ac,
-                                                     static_cast<FCurve *>(agrp->channels.first),
-                                                     ANIMTYPE_FCURVE,
-                                                     filter_mode,
-                                                     agrp,
-                                                     owner_id);
+          /* Filter the fcurves in this group, adding them to the temporary
+           * filter list. */
+          if (action.is_action_legacy()) {
+            /* get first F-Curve which can be used here */
+            FCurve *first_fcu = animfilter_fcurve_next(ac,
+                                                       static_cast<FCurve *>(agrp->channels.first),
+                                                       ANIMTYPE_FCURVE,
+                                                       filter_mode,
+                                                       agrp,
+                                                       owner_id);
 
-          /* filter list, starting from this F-Curve */
-          tmp_items += animfilter_fcurves(
-              ac, &tmp_data, first_fcu, ANIMTYPE_FCURVE, filter_mode, agrp, owner_id, &act->id);
+            /* filter list, starting from this F-Curve */
+            tmp_items += animfilter_fcurves(
+                ac, &tmp_data, first_fcu, ANIMTYPE_FCURVE, filter_mode, agrp, owner_id, &act->id);
+          }
+          else {
+            BLI_assert(agrp->channel_bag != nullptr);
+            Span<FCurve *> fcurves = agrp->wrap().fcurves();
+            tmp_items += animfilter_fcurves_span(
+                ac, &tmp_data, fcurves, slot_handle, filter_mode, owner_id, &act->id);
+          }
         }
       }
     }
@@ -1508,13 +1531,17 @@ static size_t animfilter_act_group(bAnimContext *ac,
   if (tmp_items) {
     /* add this group as a channel first */
     if (filter_mode & ANIMFILTER_LIST_CHANNELS) {
-      /* restore original filter mode so that this next step works ok... */
-      // filter_mode = ofilter;
-
       /* filter selection of channel specially here again,
        * since may be open and not subject to previous test */
       if (ANIMCHANNEL_SELOK(SEL_AGRP(agrp))) {
-        ANIMCHANNEL_NEW_CHANNEL(ac->bmain, agrp, ANIMTYPE_GROUP, owner_id, &act->id);
+        if (action.is_action_legacy()) {
+          ANIMCHANNEL_NEW_CHANNEL(ac->bmain, agrp, ANIMTYPE_GROUP, owner_id, &act->id);
+        }
+        else {
+          ANIMCHANNEL_NEW_CHANNEL_FULL(ac->bmain, agrp, ANIMTYPE_GROUP, owner_id, &act->id, {
+            ale->slot_handle = slot_handle;
+          });
+        }
       }
     }
 
@@ -1557,9 +1584,9 @@ static size_t animfilter_action_slot(bAnimContext *ac,
    * anyway. */
   const bool is_action_mode = (ac->spacetype == SPACE_ACTION &&
                                ac->dopesheet_mode == SACTCONT_ACTION);
-  const bool show_fcurves_only = (filter_mode & ANIMFILTER_FCURVESONLY);
+  const bool show_active_group_only = filter_mode & ANIMFILTER_ACTGROUPED;
   const bool include_summary_channels = (filter_mode & ANIMFILTER_LIST_CHANNELS);
-  const bool show_slot_channel = (is_action_mode && selection_ok_for_slot && !show_fcurves_only &&
+  const bool show_slot_channel = (is_action_mode && selection_ok_for_slot &&
                                   include_summary_channels);
   if (show_slot_channel) {
     ANIMCHANNEL_NEW_CHANNEL(ac->bmain, &slot, ANIMTYPE_ACTION_SLOT, animated_id, &action.id);
@@ -1571,9 +1598,31 @@ static size_t animfilter_action_slot(bAnimContext *ac,
   const bool visible_only = (filter_mode & ANIMFILTER_LIST_VISIBLE);
   const bool expansion_is_ok = !visible_only || !show_slot_channel || slot.is_expanded();
 
-  if (show_fcurves_only || expansion_is_ok) {
-    /* Add list elements for the F-Curves for this Slot. */
-    Span<FCurve *> fcurves = animrig::fcurves_for_action_slot(action, slot.handle);
+  animrig::ChannelBag *channel_bag = animrig::channelbag_for_action_slot(action, slot.handle);
+  if (channel_bag == nullptr) {
+    return items;
+  }
+
+  if (!expansion_is_ok) {
+    return items;
+  }
+
+  /* Add channel groups and their member channels. */
+  for (bActionGroup *group : channel_bag->channel_groups()) {
+    items += animfilter_act_group(
+        ac, anim_data, &action, slot.handle, group, filter_mode, animated_id);
+  }
+
+  /* Add ungrouped channels. */
+  if (!show_active_group_only) {
+    int first_ungrouped_fcurve_index = 0;
+    if (!channel_bag->channel_groups().is_empty()) {
+      const bActionGroup *last_group = channel_bag->channel_groups().last();
+      first_ungrouped_fcurve_index = last_group->fcurve_range_start +
+                                     last_group->fcurve_range_length;
+    }
+
+    Span<FCurve *> fcurves = channel_bag->fcurves().drop_front(first_ungrouped_fcurve_index);
     items += animfilter_fcurves_span(
         ac, anim_data, fcurves, slot.handle, filter_mode, animated_id, &action.id);
   }
@@ -1650,7 +1699,8 @@ static size_t animfilter_action(bAnimContext *ac,
         lastchan = static_cast<FCurve *>(agrp->channels.last);
       }
 
-      items += animfilter_act_group(ac, anim_data, &action, agrp, filter_mode, owner_id);
+      items += animfilter_act_group(
+          ac, anim_data, &action, animrig::Slot::unassigned, agrp, filter_mode, owner_id);
     }
 
     /* Un-grouped F-Curves (only if we're not only considering those channels in

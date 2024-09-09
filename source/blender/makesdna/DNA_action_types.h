@@ -56,6 +56,7 @@ class Action;
 class Slot;
 class SlotRuntime;
 class ChannelBag;
+class ChannelGroup;
 class KeyframeStrip;
 class Layer;
 class Strip;
@@ -677,10 +678,35 @@ typedef struct bActionGroup {
   struct bActionGroup *next, *prev;
 
   /**
+   * List of channels in this group for legacy actions.
+   *
    * NOTE: this must not be touched by standard listbase functions
    * which would clear links to other channels.
    */
   ListBase channels;
+
+  /**
+   * Span of channels in this group for layered actions.
+   *
+   * This specifies that span as a range of items in a ChannelBag's fcurve
+   * array.
+   *
+   * Note that empty groups (`fcurve_range_length == 0`) are allowed, and they
+   * still have a position in the fcurves array, as specified by
+   * `fcurve_range_start`. You can imagine these cases as a zero-width range
+   * that sits at the border between the element at `fcurve_range_start` and the
+   * element just before it.
+   */
+  int fcurve_range_start;
+  int fcurve_range_length;
+
+  /**
+   * For layered actions: the ChannelBag this group belongs to.
+   *
+   * This is needed in the keyframe drawing code, etc., to give direct access to
+   * the fcurves in this group.
+   */
+  struct ActionChannelBag *channel_bag;
 
   /** Settings for this action-group. */
   int flag;
@@ -694,6 +720,11 @@ typedef struct bActionGroup {
 
   /** Color set to use when customCol == -1. */
   ThemeWireColor cs;
+
+#ifdef __cplusplus
+  blender::animrig::ChannelGroup &wrap();
+  const blender::animrig::ChannelGroup &wrap() const;
+#endif
 } bActionGroup;
 
 /* Action Group flags */
@@ -1216,6 +1247,25 @@ typedef struct KeyframeActionStrip {
  */
 typedef struct ActionChannelBag {
   int32_t slot_handle;
+
+  /* Channel groups. These index into the `fcurve_array` below to specify group
+   * membership of the fcurves.
+   *
+   * Note that although the fcurves also have pointers back to the groups they
+   * belong to, those pointers are not the source of truth. The source of truth
+   * for membership is the information in the channel groups here.
+   *
+   * Invariants:
+   * 1. The groups are sorted by their `fcurve_range_start` field. In other
+   *    words, they are in the same order as their starting positions in the
+   *    fcurve array.
+   * 2. The grouped fcurves are tightly packed, starting at the first fcurve and
+   *    having no gaps of ungrouped fcurves between them. Ungrouped fcurves come
+   *    at the end, after all of the grouped fcurves. */
+  int group_array_num;
+  struct bActionGroup **group_array;
+
+  uint8_t _pad[4];
 
   int fcurve_array_num;
   struct FCurve **fcurve_array; /* Array of 'fcurve_array_num' FCurves. */

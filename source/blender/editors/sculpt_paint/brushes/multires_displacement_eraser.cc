@@ -50,14 +50,14 @@ static void calc_node(const Depsgraph &depsgraph,
                       Object &object,
                       const Brush &brush,
                       const float strength,
-                      bke::pbvh::Node &node,
+                      bke::pbvh::GridsNode &node,
                       LocalData &tls)
 {
   SculptSession &ss = *object.sculpt;
   const StrokeCache &cache = *ss.cache;
   SubdivCCG &subdiv_ccg = *ss.subdiv_ccg;
 
-  const Span<int> grids = bke::pbvh::node_grid_indices(node);
+  const Span<int> grids = node.grids();
   const MutableSpan positions = gather_grids_positions(subdiv_ccg, grids, tls.positions);
 
   tls.factors.resize(positions.size());
@@ -65,7 +65,7 @@ static void calc_node(const Depsgraph &depsgraph,
   fill_factor_from_hide_and_mask(subdiv_ccg, grids, factors);
   filter_region_clip_factors(ss, positions, factors);
   if (brush.flag & BRUSH_FRONTFACE) {
-    calc_front_face(cache.view_normal, subdiv_ccg, grids, factors);
+    calc_front_face(cache.view_normal_symm, subdiv_ccg, grids, factors);
   }
 
   tls.distances.resize(positions.size());
@@ -97,18 +97,19 @@ static void calc_node(const Depsgraph &depsgraph,
 void do_displacement_eraser_brush(const Depsgraph &depsgraph,
                                   const Sculpt &sd,
                                   Object &object,
-                                  Span<bke::pbvh::Node *> nodes)
+                                  const IndexMask &node_mask)
 {
   SculptSession &ss = *object.sculpt;
   const Brush &brush = *BKE_paint_brush_for_read(&sd.paint);
   const float strength = std::min(ss.cache->bstrength, 1.0f);
 
   threading::EnumerableThreadSpecific<LocalData> all_tls;
-  threading::parallel_for(nodes.index_range(), 1, [&](const IndexRange range) {
+  bke::pbvh::Tree &pbvh = *bke::object::pbvh_get(object);
+  MutableSpan<bke::pbvh::GridsNode> nodes = pbvh.nodes<bke::pbvh::GridsNode>();
+  threading::parallel_for(node_mask.index_range(), 1, [&](const IndexRange range) {
     LocalData &tls = all_tls.local();
-    for (const int i : range) {
-      calc_node(depsgraph, sd, object, brush, strength, *nodes[i], tls);
-    }
+    node_mask.slice(range).foreach_index(
+        [&](const int i) { calc_node(depsgraph, sd, object, brush, strength, nodes[i], tls); });
   });
 }
 

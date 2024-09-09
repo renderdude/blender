@@ -152,7 +152,7 @@ Instances::Instances(const Instances &other)
       reference_user_counts_(other.reference_user_counts_),
       almost_unique_ids_cache_(other.almost_unique_ids_cache_)
 {
-  CustomData_copy(&other.attributes_, &attributes_, CD_MASK_ALL, other.instances_num_);
+  CustomData_init_from(&other.attributes_, &attributes_, CD_MASK_ALL, other.instances_num_);
 }
 
 Instances::~Instances()
@@ -273,8 +273,7 @@ Span<InstanceReference> Instances::references() const
   return references_;
 }
 
-void Instances::remove(const IndexMask &mask,
-                       const AnonymousAttributePropagationInfo &propagation_info)
+void Instances::remove(const IndexMask &mask, const AttributeFilter &attribute_filter)
 {
   const std::optional<IndexRange> masked_range = mask.to_range();
   if (masked_range.has_value() && masked_range->start() == 0) {
@@ -290,8 +289,7 @@ void Instances::remove(const IndexMask &mask,
 
   gather_attributes(this->attributes(),
                     AttrDomain::Instance,
-                    propagation_info,
-                    {},
+                    attribute_filter,
                     mask,
                     new_instances.attributes_for_write());
 

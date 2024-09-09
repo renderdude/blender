@@ -68,9 +68,7 @@ DrawingPlacement::DrawingPlacement(const Scene &scene,
   }
 
   /* Account for layer transform. */
-  if (scene.toolsettings->gp_sculpt.lock_axis != GP_LOCKAXIS_VIEW &&
-      scene.toolsettings->gp_sculpt.lock_axis != GP_LOCKAXIS_CURSOR)
-  {
+  if (!ELEM(scene.toolsettings->gp_sculpt.lock_axis, GP_LOCKAXIS_VIEW, GP_LOCKAXIS_CURSOR)) {
     /* Use the transpose inverse for normal. */
     placement_normal_ = math::transform_direction(math::transpose(world_space_to_layer_space_),
                                                   placement_normal_);
@@ -154,7 +152,7 @@ DrawingPlacement::DrawingPlacement(const Scene &scene,
   }
 
   /* Account for layer transform. */
-  if (reproject_mode != ReprojectMode::View && reproject_mode != ReprojectMode::Cursor) {
+  if (!ELEM(reproject_mode, ReprojectMode::View, ReprojectMode::Cursor)) {
     /* Use the transpose inverse for normal. */
     placement_normal_ = math::transform_direction(math::transpose(world_space_to_layer_space_),
                                                   placement_normal_);
@@ -381,6 +379,9 @@ float3 DrawingPlacement::reproject(const float3 pos) const
     float lambda;
     if (isect_ray_plane_v3(ray_co, ray_no, plane, &lambda, false)) {
       proj_point = ray_co + ray_no * lambda;
+    }
+    else {
+      return pos;
     }
   }
   return math::transform_point(world_space_to_layer_space_, proj_point);
@@ -1289,13 +1290,11 @@ Array<PointTransferData> compute_topology_change(
   /* Attributes. */
   const bke::AttributeAccessor src_attributes = src.attributes();
   bke::MutableAttributeAccessor dst_attributes = dst.attributes_for_write();
-  const bke::AnonymousAttributePropagationInfo propagation_info{};
 
   /* Copy curves attributes. */
   bke::gather_attributes(src_attributes,
                          bke::AttrDomain::Curve,
-                         propagation_info,
-                         {"cyclic"},
+                         bke::attribute_filter_from_skip_ref({"cyclic"}),
                          dst_to_src_curve,
                          dst_attributes);
   if (src_cyclic.get_if_single().value_or(true)) {
@@ -1336,7 +1335,7 @@ Array<PointTransferData> compute_topology_change(
 
   /* Copy/Interpolate point attributes. */
   for (bke::AttributeTransferData &attribute : bke::retrieve_attributes_for_transfer(
-           src_attributes, dst_attributes, ATTR_DOMAIN_MASK_POINT, propagation_info))
+           src_attributes, dst_attributes, ATTR_DOMAIN_MASK_POINT))
   {
     bke::attribute_math::convert_to_static_type(attribute.dst.span.type(), [&](auto dummy) {
       using T = decltype(dummy);

@@ -759,7 +759,7 @@ void WM_operator_properties_alloc(PointerRNA **ptr, IDProperty **properties, con
   }
 
   if (*ptr == nullptr) {
-    *ptr = static_cast<PointerRNA *>(MEM_callocN(sizeof(PointerRNA), "wmOpItemPtr"));
+    *ptr = MEM_new<PointerRNA>("wmOpItemPtr");
     WM_operator_properties_create(*ptr, opstring);
   }
 
@@ -2639,7 +2639,8 @@ static void radial_control_set_initial_mouse(bContext *C, RadialControl *rc, con
   if (rc->ptr.owner_id && GS(rc->ptr.owner_id->name) == ID_BR && rc->prop == &rna_Brush_size) {
     Brush *brush = reinterpret_cast<Brush *>(rc->ptr.owner_id);
     if ((brush && brush->gpencil_settings) && (brush->ob_mode == OB_MODE_PAINT_GPENCIL_LEGACY) &&
-        (brush->gpencil_tool == GPAINT_TOOL_DRAW) && (brush->flag & BRUSH_LOCK_SIZE) != 0)
+        (brush->gpencil_brush_type == GPAINT_BRUSH_TYPE_DRAW) &&
+        (brush->flag & BRUSH_LOCK_SIZE) != 0)
     {
       const float radius_px = grease_pencil_unprojected_brush_radius_pixel_size(
           C, brush, blender::float2(event->mval));

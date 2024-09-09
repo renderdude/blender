@@ -143,8 +143,22 @@ static void rna_AnimData_dependency_update(Main *bmain, Scene *scene, PointerRNA
 
 static int rna_AnimData_action_editable(const PointerRNA *ptr, const char ** /*r_info*/)
 {
-  AnimData *adt = (AnimData *)ptr->data;
+  BLI_assert(ptr->type == &RNA_AnimData);
+  AnimData *adt = static_cast<AnimData *>(ptr->data);
+  if (!adt) {
+    return PROP_EDITABLE;
+  }
   return BKE_animdata_action_editable(adt) ? PROP_EDITABLE : PropertyFlag(0);
+}
+
+static PointerRNA rna_AnimData_action_get(PointerRNA *ptr)
+{
+  ID &animated_id = *ptr->owner_id;
+  animrig::Action *action = animrig::get_action(animated_id);
+  if (!action) {
+    return PointerRNA_NULL;
+  };
+  return RNA_id_pointer_create(&action->id);
 }
 
 static void rna_AnimData_action_set(PointerRNA *ptr, PointerRNA value, ReportList * /*reports*/)
@@ -298,20 +312,23 @@ static void rna_AnimData_action_slot_set(PointerRNA *ptr, PointerRNA value, Repo
   using animrig::Action;
   using animrig::Slot;
 
-  AnimData &adt = rna_animdata(ptr);
-  if (!adt.action) {
-    BKE_report(reports, RPT_ERROR, "Cannot set slot without an assigned Action.");
-    return;
-  }
-
   ID *animated_id = ptr->owner_id;
   BLI_assert(animated_id); /* Otherwise there is nothing to own this AnimData. */
 
+  /* A 'None' value for the slot is always valid, regardless of whether an
+   * Action was assigned or not. */
   ActionSlot *dna_slot = static_cast<ActionSlot *>(value.data);
   if (!dna_slot) {
     animrig::unassign_slot(*animated_id);
     return;
   }
+
+  AnimData &adt = rna_animdata(ptr);
+  if (!adt.action) {
+    BKE_report(reports, RPT_ERROR, "Cannot set slot without an assigned Action.");
+    return;
+  }
+  BLI_assert(BKE_animdata_from_id(animated_id) == &adt);
 
   Action &action = adt.action->wrap();
   Slot &slot = dna_slot->wrap();
@@ -974,6 +991,10 @@ bool rna_AnimaData_override_apply(Main *bmain, RNAPropertyOverrideApplyContext &
     adt_dst->action = adt_src->action;
     id_us_plus(reinterpret_cast<ID *>(adt_dst->action));
     id_us_min(reinterpret_cast<ID *>(adt_dst->tmpact));
+#  ifdef WITH_ANIM_BAKLAVA
+    adt_dst->slot_handle = adt_src->slot_handle;
+    STRNCPY(adt_dst->slot_name, adt_src->slot_name);
+#  endif
     adt_dst->tmpact = adt_src->tmpact;
     id_us_plus(reinterpret_cast<ID *>(adt_dst->tmpact));
     adt_dst->act_blendmode = adt_src->act_blendmode;
@@ -1563,10 +1584,22 @@ static void rna_def_animdata(BlenderRNA *brna)
 
   /* Active Action */
   prop = RNA_def_property(srna, "action", PROP_POINTER, PROP_NONE);
+  RNA_def_property_struct_type(prop, "Action");
   /* this flag as well as the dynamic test must be defined for this to be editable... */
   RNA_def_property_flag(prop, PROP_EDITABLE | PROP_ID_REFCOUNT);
+  RNA_def_property_override_flag(prop, PROPOVERRIDE_OVERRIDABLE_LIBRARY);
   RNA_def_property_pointer_funcs(
-      prop, nullptr, "rna_AnimData_action_set", nullptr, "rna_Action_id_poll");
+      prop,
+      /* Define a getter that is NULL-safe, so that an RNA_AnimData prop with `ptr->data = nullptr`
+       * can still be used to get the property. In that case it will always return nullptr, of
+       * course, but it won't crash Blender. */
+      "rna_AnimData_action_get",
+      /* Similarly, for the setter, the NULL-safety allows constructing the AnimData struct on
+       * assignment of this "action" property. This is possible because RNA has typed NULL
+       * pointers, and thus it knows which setter to call even when `ptr->data` is NULL. */
+      "rna_AnimData_action_set",
+      nullptr,
+      "rna_Action_id_poll");
   RNA_def_property_editable_func(prop, "rna_AnimData_action_editable");
   RNA_def_property_ui_text(prop, "Action", "Active Action for this data-block");
   RNA_def_property_update(prop, NC_ANIMATION | ND_NLA_ACTCHANGE, "rna_AnimData_dependency_update");
@@ -1644,6 +1677,9 @@ static void rna_def_animdata(BlenderRNA *brna)
   RNA_def_property_update(prop, NC_ANIMATION | ND_ANIMCHAN | NA_EDITED, nullptr);
 
 #  ifdef WITH_ANIM_BAKLAVA
+  /* This property is not necessary for the Python API (that is better off using
+   * slot references/pointers directly), but it is needed for library overrides
+   * to work. */
   prop = RNA_def_property(srna, "action_slot_handle", PROP_INT, PROP_NONE);
   RNA_def_property_int_sdna(prop, nullptr, "slot_handle");
   RNA_def_property_int_funcs(prop, nullptr, "rna_AnimData_action_slot_handle_set", nullptr);
@@ -1651,6 +1687,7 @@ static void rna_def_animdata(BlenderRNA *brna)
                            "Action Slot Handle",
                            "A number that identifies which sub-set of the Action is considered "
                            "to be for this data-block");
+  RNA_def_property_override_flag(prop, PROPOVERRIDE_OVERRIDABLE_LIBRARY);
   RNA_def_property_update(prop, NC_ANIMATION | ND_NLA_ACTCHANGE, "rna_AnimData_dependency_update");
 
   prop = RNA_def_property(srna, "action_slot_name", PROP_STRING, PROP_NONE);
@@ -1666,7 +1703,6 @@ static void rna_def_animdata(BlenderRNA *brna)
   RNA_def_property_struct_type(prop, "ActionSlot");
   RNA_def_property_flag(prop, PROP_EDITABLE);
   RNA_def_property_clear_flag(prop, PROP_ANIMATABLE);
-  RNA_def_property_override_flag(prop, PROPOVERRIDE_OVERRIDABLE_LIBRARY);
   RNA_def_property_ui_text(
       prop,
       "Action Slot",
@@ -1675,6 +1711,16 @@ static void rna_def_animdata(BlenderRNA *brna)
   RNA_def_property_pointer_funcs(
       prop, "rna_AnimData_action_slot_get", "rna_AnimData_action_slot_set", nullptr, nullptr);
   RNA_def_property_update(prop, NC_ANIMATION | ND_NLA_ACTCHANGE, "rna_AnimData_dependency_update");
+  /* `adt.action_slot` is exposed to RNA as a pointer for things like the action slot selector in
+   * the GUI. The ground truth of the assigned slot, however, is `action_slot_handle` declared
+   * above. That property is used for library override operations, and this pointer property should
+   * just be ignored.
+   *
+   * This needs PROPOVERRIDE_IGNORE; PROPOVERRIDE_NO_COMPARISON is not suitable here. This property
+   * should act as if it is an overridable property (as from the user's perspective, it is), but an
+   * override operation should not be created for it. It will be created for `action_slot_handle`,
+   * and that's enough. */
+  RNA_def_property_override_flag(prop, PROPOVERRIDE_IGNORE);
 
   prop = RNA_def_property(srna, "action_slots", PROP_COLLECTION, PROP_NONE);
   RNA_def_property_struct_type(prop, "ActionSlot");

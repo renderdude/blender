@@ -11,6 +11,7 @@
 #include "BLI_array.hh"
 #include "BLI_compiler_compat.h"
 #include "BLI_function_ref.hh"
+#include "BLI_index_mask_fwd.hh"
 #include "BLI_math_vector_types.hh"
 #include "BLI_set.hh"
 #include "BLI_span.hh"
@@ -67,11 +68,6 @@ struct PaintStroke;
 struct StrokeCache;
 }  // namespace ed::sculpt_paint
 }  // namespace blender
-
-struct CoNo {
-  float co[3];
-  float no[3];
-};
 
 /* paint_stroke.cc */
 
@@ -253,7 +249,8 @@ void PAINT_OT_weight_sample_group(wmOperatorType *ot);
 VertProjHandle *ED_vpaint_proj_handle_create(Depsgraph &depsgraph,
                                              Scene &scene,
                                              Object &ob,
-                                             CoNo **r_vcosnos);
+                                             blender::Span<blender::float3> &r_vert_positions,
+                                             blender::Span<blender::float3> &r_vert_normals);
 void ED_vpaint_proj_handle_update(Depsgraph *depsgraph,
                                   VertProjHandle *vp_handle,
                                   /* runtime vars */
@@ -487,75 +484,6 @@ enum BrushStrokeMode {
   BRUSH_STROKE_ERASE,
 };
 
-/* paint_hide.cc */
-
-namespace blender::ed::sculpt_paint::hide {
-void sync_all_from_faces(Object &object);
-void mesh_show_all(const Depsgraph &depsgraph, Object &object, Span<bke::pbvh::Node *> nodes);
-void grids_show_all(Depsgraph &depsgraph, Object &object, Span<bke::pbvh::Node *> nodes);
-void tag_update_visibility(const bContext &C);
-
-void PAINT_OT_hide_show_masked(wmOperatorType *ot);
-void PAINT_OT_hide_show_all(wmOperatorType *ot);
-void PAINT_OT_hide_show(wmOperatorType *ot);
-void PAINT_OT_hide_show_lasso_gesture(wmOperatorType *ot);
-void PAINT_OT_hide_show_line_gesture(wmOperatorType *ot);
-void PAINT_OT_hide_show_polyline_gesture(wmOperatorType *ot);
-
-void PAINT_OT_visibility_invert(wmOperatorType *ot);
-void PAINT_OT_visibility_filter(wmOperatorType *ot);
-}  // namespace blender::ed::sculpt_paint::hide
-
-/* `paint_mask.cc` */
-
-namespace blender::ed::sculpt_paint::mask {
-
-Array<float> duplicate_mask(const Object &object);
-void mix_new_masks(Span<float> new_masks, Span<float> factors, MutableSpan<float> masks);
-void clamp_mask(MutableSpan<float> masks);
-
-void gather_mask_grids(const SubdivCCG &subdiv_ccg, Span<int> grids, MutableSpan<float> r_mask);
-void gather_mask_bmesh(const BMesh &bm, const Set<BMVert *, 0> &verts, MutableSpan<float> r_mask);
-
-void scatter_mask_grids(Span<float> mask, SubdivCCG &subdiv_ccg, Span<int> grids);
-void scatter_mask_bmesh(Span<float> mask, const BMesh &bm, const Set<BMVert *, 0> &verts);
-
-void average_neighbor_mask_grids(const SubdivCCG &subdiv_ccg,
-                                 Span<int> grids,
-                                 MutableSpan<float> new_masks);
-void average_neighbor_mask_bmesh(int mask_offset,
-                                 const Set<BMVert *, 0> &verts,
-                                 MutableSpan<float> new_masks);
-
-/** Write to the mask attribute for each node, storing undo data. */
-void write_mask_mesh(const Depsgraph &depsgraph,
-                     Object &object,
-                     Span<bke::pbvh::Node *> nodes,
-                     FunctionRef<void(MutableSpan<float>, Span<int>)> write_fn);
-
-/**
- * Write to each node's mask data for visible vertices. Store undo data and mark for redraw only
- * if the data is actually changed.
- */
-void update_mask_mesh(const Depsgraph &depsgraph,
-                      Object &object,
-                      Span<bke::pbvh::Node *> nodes,
-                      FunctionRef<void(MutableSpan<float>, Span<int>)> update_fn);
-
-/** Check whether array data is the same as the stored mask for the referenced geometry. */
-bool mask_equals_array_grids(Span<CCGElem *> elems,
-                             const CCGKey &key,
-                             Span<int> grids,
-                             Span<float> values);
-bool mask_equals_array_bmesh(int mask_offset, const Set<BMVert *, 0> &verts, Span<float> values);
-
-void PAINT_OT_mask_flood_fill(wmOperatorType *ot);
-void PAINT_OT_mask_lasso_gesture(wmOperatorType *ot);
-void PAINT_OT_mask_box_gesture(wmOperatorType *ot);
-void PAINT_OT_mask_line_gesture(wmOperatorType *ot);
-void PAINT_OT_mask_polyline_gesture(wmOperatorType *ot);
-}  // namespace blender::ed::sculpt_paint::mask
-
 /* `paint_curve.cc` */
 
 void PAINTCURVE_OT_new(wmOperatorType *ot);
@@ -623,10 +551,11 @@ void init_session_data(const ToolSettings &ts, Object &ob);
 void init_session(
     Main &bmain, Depsgraph &depsgraph, Scene &scene, Object &ob, eObjectMode object_mode);
 
-Vector<bke::pbvh::Node *> pbvh_gather_generic(const Depsgraph &depsgraph,
-                                              Object &ob,
-                                              const VPaint &wp,
-                                              const Brush &brush);
+IndexMask pbvh_gather_generic(const Depsgraph &depsgraph,
+                              const Object &ob,
+                              const VPaint &wp,
+                              const Brush &brush,
+                              IndexMaskMemory &memory);
 
 void mode_enter_generic(
     Main &bmain, Depsgraph &depsgraph, Scene &scene, Object &ob, eObjectMode mode_flag);

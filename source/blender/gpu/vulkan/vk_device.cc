@@ -35,12 +35,11 @@ void VKDevice::reinit()
 
 void VKDevice::deinit()
 {
-  VK_ALLOCATION_CALLBACKS
   if (!is_initialized()) {
     return;
   }
 
-  dummy_buffer_.free();
+  dummy_buffer.free();
   samplers_.free();
 
   {
@@ -51,8 +50,8 @@ void VKDevice::deinit()
     }
     thread_data_.clear();
   }
+  pipelines.write_to_disk();
   pipelines.free_data();
-  vkDestroyPipelineCache(vk_device_, vk_pipeline_cache_, vk_allocation_callbacks);
   descriptor_set_layouts_.deinit();
   vmaDestroyAllocator(mem_allocator_);
   mem_allocator_ = VK_NULL_HANDLE;
@@ -92,9 +91,11 @@ void VKDevice::init(void *ghost_context)
   init_functions();
   init_debug_callbacks();
   init_memory_allocator();
-  init_pipeline_cache();
+  pipelines.init();
+  pipelines.read_from_disk();
 
   samplers_.init();
+  init_dummy_buffer();
 
   debug::object_label(vk_handle(), "LogicalDevice");
   debug::object_label(queue_get(), "GenericQueue");
@@ -183,24 +184,16 @@ void VKDevice::init_memory_allocator()
   vmaCreateAllocator(&info, &mem_allocator_);
 }
 
-void VKDevice::init_pipeline_cache()
+void VKDevice::init_dummy_buffer()
 {
-  VK_ALLOCATION_CALLBACKS;
-  VkPipelineCacheCreateInfo create_info = {};
-  create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
-  vkCreatePipelineCache(vk_device_, &create_info, vk_allocation_callbacks, &vk_pipeline_cache_);
-}
-
-void VKDevice::init_dummy_buffer(VKContext &context)
-{
-  if (dummy_buffer_.is_allocated()) {
-    return;
-  }
-
-  dummy_buffer_.create(sizeof(float4x4),
-                       GPU_USAGE_DEVICE_ONLY,
-                       VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
-  dummy_buffer_.clear(context, 0);
+  dummy_buffer.create(sizeof(float4x4),
+                      GPU_USAGE_DEVICE_ONLY,
+                      VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
+  debug::object_label(dummy_buffer.vk_handle(), "DummyBuffer");
+  /* Default dummy buffer. Set the 4th element to 1 to fix missing orcos. */
+  float data[16] = {
+      0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+  dummy_buffer.update(static_cast<void *>(data));
 }
 
 void VKDevice::init_glsl_patch()
@@ -355,14 +348,14 @@ VKThreadData::VKThreadData(VKDevice &device,
                            render_graph::VKResourceStateTracker &resources)
     : thread_id(thread_id), render_graph(std::move(command_buffer), resources)
 {
-  for (VKResourcePool &resource_pool : swap_chain_resources) {
+  for (VKResourcePool &resource_pool : resource_pools) {
     resource_pool.init(device);
   }
 }
 
 void VKThreadData::deinit(VKDevice &device)
 {
-  for (VKResourcePool &resource_pool : swap_chain_resources) {
+  for (VKResourcePool &resource_pool : resource_pools) {
     resource_pool.deinit(device);
   }
 }

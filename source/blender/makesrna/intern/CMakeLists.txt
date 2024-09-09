@@ -244,6 +244,7 @@ set(INC
   ../../depsgraph
   ../../draw
   ../../gpu
+  ../../functions
   ../../ikplugin
   ../../imbuf
   ../../io/usd
@@ -484,10 +485,10 @@ set(SRC
 
   ${SRC_RNA_INC}
   rna_access_internal.hh
+  rna_curves_utils.hh
   rna_internal.hh
   rna_internal_types.hh
   rna_mesh_utils.hh
-  rna_curves_utils.hh
 )
 
 set(LIB

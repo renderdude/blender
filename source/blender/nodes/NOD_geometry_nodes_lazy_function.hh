@@ -439,6 +439,7 @@ std::unique_ptr<LazyFunction> get_bake_lazy_function(
 std::unique_ptr<LazyFunction> get_menu_switch_node_lazy_function(
     const bNode &node, GeometryNodesLazyFunctionGraphInfo &lf_graph_info);
 std::unique_ptr<LazyFunction> get_menu_switch_node_socket_usage_lazy_function(const bNode &node);
+std::unique_ptr<LazyFunction> get_warning_node_lazy_function(const bNode &node);
 
 /**
  * Outputs the default value of each output socket that has not been output yet. This needs the
@@ -448,6 +449,10 @@ std::unique_ptr<LazyFunction> get_menu_switch_node_socket_usage_lazy_function(co
  */
 void set_default_remaining_node_outputs(lf::Params &params, const bNode &node);
 
+std::string make_anonymous_attribute_socket_inspection_string(const bNodeSocket &socket);
+std::string make_anonymous_attribute_socket_inspection_string(StringRef node_name,
+                                                              StringRef socket_name);
+
 struct FoundNestedNodeID {
   int id;
   bool is_in_simulation = false;
@@ -456,23 +461,6 @@ struct FoundNestedNodeID {
 
 std::optional<FoundNestedNodeID> find_nested_node_id(const GeoNodesLFUserData &user_data,
                                                      const int node_id);
-
-/**
- * An anonymous attribute created by a node.
- */
-class NodeAnonymousAttributeID : public bke::AnonymousAttributeID {
-  std::string long_name_;
-  std::string socket_name_;
-
- public:
-  NodeAnonymousAttributeID(const Object &object,
-                           const ComputeContext &compute_context,
-                           const bNode &bnode,
-                           const StringRef identifier,
-                           const StringRef name);
-
-  std::string user_name() const override;
-};
 
 /**
  * Main function that converts a #bNodeTree into a lazy-function graph. If the graph has been

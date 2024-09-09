@@ -5,12 +5,9 @@
 import math
 import pathlib
 import sys
-import unittest
 import tempfile
-from pxr import Usd
-from pxr import UsdShade
-from pxr import UsdGeom
-from pxr import Sdf
+import unittest
+from pxr import Gf, Sdf, Usd, UsdGeom, UsdShade
 
 import bpy
 
@@ -36,7 +33,6 @@ class AbstractUSDTest(unittest.TestCase):
 
 
 class USDImportTest(AbstractUSDTest):
-
     def test_import_operator(self):
         """Test running the import operator on valid and invalid files."""
 
@@ -205,6 +201,65 @@ class USDImportTest(AbstractUSDTest):
         self.assertAlmostEqual(1.400, test_cam.sensor_height, 3)
         self.assertAlmostEqual(2.281, test_cam.shift_x, 3)
         self.assertAlmostEqual(0.496, test_cam.shift_y, 3)
+
+    def test_import_materials(self):
+        """Validate UsdPreviewSurface shader graphs."""
+
+        # Use the existing materials test file to create the USD file
+        # for import. It is validated as part of the bl_usd_export test.
+        bpy.ops.wm.open_mainfile(filepath=str(self.testdir / "usd_materials_export.blend"))
+        testfile = str(self.tempdir / "temp_materials.usda")
+        res = bpy.ops.wm.usd_export(filepath=str(testfile), export_materials=True)
+        self.assertEqual({'FINISHED'}, res, f"Unable to export to {testfile}")
+
+        # Reload the empty file and import back in
+        bpy.ops.wm.open_mainfile(filepath=str(self.testdir / "empty.blend"))
+        res = bpy.ops.wm.usd_import(filepath=testfile)
+        self.assertEqual({'FINISHED'}, res, f"Unable to import USD file {testfile}")
+
+        # Most shader graph validation should occur through the Hydra render test suite. Here we
+        # will only check some high-level criteria for each expected node graph.
+
+        def assert_all_nodes_present(mat, node_list):
+            nodes = mat.node_tree.nodes
+            self.assertEqual(len(nodes), len(node_list))
+            for node in node_list:
+                self.assertTrue(nodes.find(node) >= 0, f"Could not find node '{node}' in material '{mat.name}'")
+
+        def round_vector(vector):
+            return [round(c, 5) + 0 for c in vector]
+
+        mat = bpy.data.materials["Material"]
+        assert_all_nodes_present(mat, ["Principled BSDF", "Image Texture", "UV Map", "Material Output"])
+
+        mat = bpy.data.materials["Clip_With_LessThanInvert"]
+        assert_all_nodes_present(
+            mat, ["Principled BSDF", "Image Texture", "UV Map", "Math", "Math.001", "Material Output"])
+        node = [n for n in mat.node_tree.nodes if n.type == 'MATH' and n.operation == "LESS_THAN"][0]
+        self.assertAlmostEqual(node.inputs[1].default_value, 0.2, 3)
+
+        mat = bpy.data.materials["Clip_With_Round"]
+        assert_all_nodes_present(
+            mat, ["Principled BSDF", "Image Texture", "UV Map", "Math", "Math.001", "Material Output"])
+        node = [n for n in mat.node_tree.nodes if n.type == 'MATH' and n.operation == "LESS_THAN"][0]
+        self.assertAlmostEqual(node.inputs[1].default_value, 0.5, 3)
+
+        mat = bpy.data.materials["Transforms"]
+        assert_all_nodes_present(mat, ["Principled BSDF", "Image Texture", "UV Map", "Mapping", "Material Output"])
+        node = mat.node_tree.nodes["Mapping"]
+        self.assertEqual(round_vector(node.inputs[1].default_value), [0.75, 0.75, 0])
+        self.assertEqual(round_vector(node.inputs[2].default_value), [0, 0, 3.14159])
+        self.assertEqual(round_vector(node.inputs[3].default_value), [0.5, 0.5, 1])
+
+        mat = bpy.data.materials["NormalMap"]
+        assert_all_nodes_present(mat, ["Principled BSDF", "Image Texture", "UV Map", "Normal Map", "Material Output"])
+
+        mat = bpy.data.materials["NormalMap_Scale_Bias"]
+        assert_all_nodes_present(mat, ["Principled BSDF", "Image Texture", "UV Map",
+                                       "Normal Map", "Vector Math", "Vector Math.001", "Material Output"])
+        node = mat.node_tree.nodes["Vector Math"]
+        self.assertEqual(round_vector(node.inputs[1].default_value), [2, -2, 2])
+        self.assertEqual(round_vector(node.inputs[2].default_value), [-1, 1, -1])
 
     def test_import_shader_varname_with_connection(self):
         """Test importing USD shader where uv primvar is a connection"""
@@ -919,6 +974,113 @@ class USDImportTest(AbstractUSDTest):
         for ob in blender_objects:
             self.assertTrue(len(ob.modifiers) == 1 and ob.modifiers[0].type ==
                             'MESH_SEQUENCE_CACHE', f"{ob.name} has incorrect modifiers")
+
+    def test_import_id_props(self):
+        """Test importing object and data IDProperties."""
+
+        # Create our set of ID's with all relevant IDProperty types/values that we support
+        bpy.ops.object.empty_add()
+        bpy.ops.object.light_add()
+        bpy.ops.object.camera_add()
+        bpy.ops.mesh.primitive_plane_add()
+
+        ids = [ob if ob.type == 'EMPTY' else ob.data for ob in bpy.data.objects]
+        properties = [
+            True, "string", 1, 2.0, [1, 2], [1, 2, 3], [1, 2, 3, 4], [1.0, 2.0], [1.0, 2.0, 3.0], [1.0, 2.0, 3.0, 4.0]
+        ]
+        for id in ids:
+            for i, p in enumerate(properties):
+                prop_name = "prop" + str(i)
+                id[prop_name] = p
+
+        # Export out this scene twice so we can test both the default "userProperties" namespace as
+        # well as a custom namespace
+        test_path1 = self.tempdir / "temp_idprops_userProperties_test.usda"
+        res = bpy.ops.wm.usd_export(filepath=str(test_path1), evaluation_mode="RENDER")
+        self.assertEqual({'FINISHED'}, res, f"Unable to export to {test_path1}")
+
+        custom_namespace = "customns"
+        test_path2 = self.tempdir / "temp_idprops_customns_test.usda"
+        res = bpy.ops.wm.usd_export(
+            filepath=str(test_path2),
+            custom_properties_namespace=custom_namespace,
+            evaluation_mode="RENDER")
+        self.assertEqual({'FINISHED'}, res, f"Unable to export to {test_path2}")
+
+        # Also write out another file using attribute types not natively writable by Blender
+        test_path3 = self.tempdir / "temp_idprops_extended_test.usda"
+        stage = Usd.Stage.CreateNew(str(test_path3))
+        xform = UsdGeom.Xform.Define(stage, '/empty')
+        xform.GetPrim().CreateAttribute("prop0", Sdf.ValueTypeNames.Half).Set(0.5)
+        xform.GetPrim().CreateAttribute("prop1", Sdf.ValueTypeNames.Float).Set(1.5)
+        xform.GetPrim().CreateAttribute("prop2", Sdf.ValueTypeNames.Token).Set("tokenstring")
+        xform.GetPrim().CreateAttribute("prop3", Sdf.ValueTypeNames.Asset).Set("assetstring")
+        xform.GetPrim().CreateAttribute("prop4", Sdf.ValueTypeNames.Half2).Set(Gf.Vec2h(0, 1))
+        xform.GetPrim().CreateAttribute("prop5", Sdf.ValueTypeNames.Half3).Set(Gf.Vec3h(0, 1, 2))
+        xform.GetPrim().CreateAttribute("prop6", Sdf.ValueTypeNames.Half4).Set(Gf.Vec4h(0, 1, 2, 3))
+        xform.GetPrim().CreateAttribute("prop7", Sdf.ValueTypeNames.Float2).Set(Gf.Vec2f(0, 1))
+        xform.GetPrim().CreateAttribute("prop8", Sdf.ValueTypeNames.Float3).Set(Gf.Vec3f(0, 1, 2))
+        xform.GetPrim().CreateAttribute("prop9", Sdf.ValueTypeNames.Float4).Set(Gf.Vec4f(0, 1, 2, 3))
+        stage.GetRootLayer().Save()
+
+        # Helper functions to check IDProperty validity
+        import idprop
+
+        def assert_all_props_present(properties, ns):
+            ids = [ob if ob.type == 'EMPTY' else ob.data for ob in bpy.data.objects]
+            for id in ids:
+                for i, p in enumerate(properties):
+                    prop_name = (ns + ":" if ns != "" else "") + "prop" + str(i)
+                    prop = id[prop_name]
+                    value = prop.to_list() if type(prop) is idprop.types.IDPropertyArray else prop
+                    self.assertEqual(p, value, f"Property {prop_name} is incorrect")
+
+        def assert_no_props_present(properties, ns):
+            ids = [ob if ob.type == 'EMPTY' else ob.data for ob in bpy.data.objects]
+            for id in ids:
+                for i, p in enumerate(properties):
+                    prop_name = (ns + ":" if ns != "" else "") + "prop" + str(i)
+                    self.assertTrue(id.get(prop_name) is None, f"Property {prop_name} should not be present")
+
+        # Reload the empty file and test the relevant combinations of namespaces and import modes
+
+        infile = str(test_path1)
+        bpy.ops.wm.open_mainfile(filepath=str(self.testdir / "empty.blend"))
+        res = bpy.ops.wm.usd_import(filepath=infile, attr_import_mode='USER')
+        self.assertEqual({'FINISHED'}, res, f"Unable to import USD file {infile}")
+        self.assertEqual(len(bpy.data.objects), 4)
+        assert_all_props_present(properties, "")
+
+        infile = str(test_path1)
+        bpy.ops.wm.open_mainfile(filepath=str(self.testdir / "empty.blend"))
+        res = bpy.ops.wm.usd_import(filepath=infile, attr_import_mode='NONE')
+        self.assertEqual({'FINISHED'}, res, f"Unable to import USD file {infile}")
+        self.assertEqual(len(bpy.data.objects), 4)
+        assert_no_props_present(properties, "")
+
+        infile = str(test_path2)
+        bpy.ops.wm.open_mainfile(filepath=str(self.testdir / "empty.blend"))
+        res = bpy.ops.wm.usd_import(filepath=infile, attr_import_mode='ALL')
+        self.assertEqual({'FINISHED'}, res, f"Unable to import USD file {infile}")
+        self.assertEqual(len(bpy.data.objects), 4)
+        assert_all_props_present(properties, custom_namespace)
+
+        infile = str(test_path2)
+        bpy.ops.wm.open_mainfile(filepath=str(self.testdir / "empty.blend"))
+        res = bpy.ops.wm.usd_import(filepath=infile, attr_import_mode='USER')
+        self.assertEqual({'FINISHED'}, res, f"Unable to import USD file {infile}")
+        self.assertEqual(len(bpy.data.objects), 4)
+        assert_no_props_present(properties, custom_namespace)
+
+        infile = str(test_path3)
+        bpy.ops.wm.open_mainfile(filepath=str(self.testdir / "empty.blend"))
+        res = bpy.ops.wm.usd_import(filepath=infile, attr_import_mode='ALL')
+        self.assertEqual({'FINISHED'}, res, f"Unable to import USD file {infile}")
+        self.assertEqual(len(bpy.data.objects), 1)
+        properties = [
+            0.5, 1.5, "tokenstring", "assetstring", [0, 1], [0, 1, 2], [0, 1, 2, 3], [0, 1], [0, 1, 2], [0, 1, 2, 3]
+        ]
+        assert_all_props_present(properties, "")
 
 
 def main():

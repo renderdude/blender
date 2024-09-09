@@ -48,14 +48,14 @@ static void apply_projection_mesh(const Depsgraph &depsgraph,
                                   const gesture::GestureData &gesture_data,
                                   const Span<float3> positions_eval,
                                   const Span<float3> vert_normals,
-                                  const bke::pbvh::Node &node,
+                                  const bke::pbvh::MeshNode &node,
                                   Object &object,
                                   LocalData &tls,
                                   const MutableSpan<float3> positions_orig)
 {
   Mesh &mesh = *static_cast<Mesh *>(object.data);
 
-  const Span<int> verts = bke::pbvh::node_unique_verts(node);
+  const Span<int> verts = node.verts();
   const MutableSpan positions = gather_data_mesh(positions_eval, verts, tls.positions);
   const MutableSpan normals = gather_data_mesh(vert_normals, verts, tls.normals);
 
@@ -75,7 +75,7 @@ static void apply_projection_mesh(const Depsgraph &depsgraph,
 
 static void apply_projection_grids(const Sculpt &sd,
                                    const gesture::GestureData &gesture_data,
-                                   const bke::pbvh::Node &node,
+                                   const bke::pbvh::GridsNode &node,
                                    Object &object,
                                    LocalData &tls)
 {
@@ -83,7 +83,7 @@ static void apply_projection_grids(const Sculpt &sd,
 
   SubdivCCG &subdiv_ccg = *ss.subdiv_ccg;
 
-  const Span<int> grids = bke::pbvh::node_grid_indices(node);
+  const Span<int> grids = node.grids();
   const MutableSpan positions = gather_grids_positions(subdiv_ccg, grids, tls.positions);
 
   tls.normals.resize(positions.size());
@@ -107,7 +107,7 @@ static void apply_projection_grids(const Sculpt &sd,
 
 static void apply_projection_bmesh(const Sculpt &sd,
                                    const gesture::GestureData &gesture_data,
-                                   bke::pbvh::Node &node,
+                                   bke::pbvh::BMeshNode &node,
                                    Object &object,
                                    LocalData &tls)
 {
@@ -139,57 +139,59 @@ static void gesture_apply_for_symmetry_pass(bContext &C, gesture::GestureData &g
 {
   const Depsgraph &depsgraph = *CTX_data_depsgraph_pointer(&C);
   Object &object = *gesture_data.vc.obact;
-  SculptSession &ss = *object.sculpt;
-  bke::pbvh::Tree &pbvh = *ss.pbvh;
+  bke::pbvh::Tree &pbvh = *bke::object::pbvh_get(object);
   const Sculpt &sd = *CTX_data_tool_settings(&C)->sculpt;
-  const Span<bke::pbvh::Node *> nodes = gesture_data.nodes;
+  const IndexMask &node_mask = gesture_data.node_mask;
 
   threading::EnumerableThreadSpecific<LocalData> all_tls;
   switch (gesture_data.shape_type) {
     case gesture::ShapeType::Line:
       switch (pbvh.type()) {
         case bke::pbvh::Type::Mesh: {
+          MutableSpan<bke::pbvh::MeshNode> nodes = pbvh.nodes<bke::pbvh::MeshNode>();
           Mesh &mesh = *static_cast<Mesh *>(object.data);
           const Span<float3> positions_eval = bke::pbvh::vert_positions_eval(depsgraph, object);
           const Span<float3> vert_normals = bke::pbvh::vert_normals_eval(depsgraph, object);
           MutableSpan<float3> positions_orig = mesh.vert_positions_for_write();
-          undo::push_nodes(depsgraph, object, nodes, undo::Type::Position);
-          threading::parallel_for(nodes.index_range(), 1, [&](const IndexRange range) {
+          undo::push_nodes(depsgraph, object, node_mask, undo::Type::Position);
+          threading::parallel_for(node_mask.index_range(), 1, [&](const IndexRange range) {
             LocalData &tls = all_tls.local();
-            for (const int i : range) {
+            node_mask.slice(range).foreach_index([&](const int i) {
               apply_projection_mesh(depsgraph,
                                     sd,
                                     gesture_data,
                                     positions_eval,
                                     vert_normals,
-                                    *nodes[i],
+                                    nodes[i],
                                     object,
                                     tls,
                                     positions_orig);
-              BKE_pbvh_node_mark_positions_update(*nodes[i]);
-            }
+              BKE_pbvh_node_mark_positions_update(nodes[i]);
+            });
           });
           break;
         }
         case bke::pbvh::Type::BMesh: {
-          undo::push_nodes(depsgraph, object, nodes, undo::Type::Position);
-          threading::parallel_for(nodes.index_range(), 1, [&](const IndexRange range) {
+          MutableSpan<bke::pbvh::GridsNode> nodes = pbvh.nodes<bke::pbvh::GridsNode>();
+          undo::push_nodes(depsgraph, object, node_mask, undo::Type::Position);
+          threading::parallel_for(node_mask.index_range(), 1, [&](const IndexRange range) {
             LocalData &tls = all_tls.local();
-            for (const int i : range) {
-              apply_projection_grids(sd, gesture_data, *nodes[i], object, tls);
-              BKE_pbvh_node_mark_positions_update(*nodes[i]);
-            }
+            node_mask.slice(range).foreach_index([&](const int i) {
+              apply_projection_grids(sd, gesture_data, nodes[i], object, tls);
+              BKE_pbvh_node_mark_positions_update(nodes[i]);
+            });
           });
           break;
         }
         case bke::pbvh::Type::Grids: {
-          undo::push_nodes(depsgraph, object, nodes, undo::Type::Position);
-          threading::parallel_for(nodes.index_range(), 1, [&](const IndexRange range) {
+          MutableSpan<bke::pbvh::BMeshNode> nodes = pbvh.nodes<bke::pbvh::BMeshNode>();
+          undo::push_nodes(depsgraph, object, node_mask, undo::Type::Position);
+          threading::parallel_for(node_mask.index_range(), 1, [&](const IndexRange range) {
             LocalData &tls = all_tls.local();
-            for (const int i : range) {
-              apply_projection_bmesh(sd, gesture_data, *nodes[i], object, tls);
-              BKE_pbvh_node_mark_positions_update(*nodes[i]);
-            }
+            node_mask.slice(range).foreach_index([&](const int i) {
+              apply_projection_bmesh(sd, gesture_data, nodes[i], object, tls);
+              BKE_pbvh_node_mark_positions_update(nodes[i]);
+            });
           });
           break;
         }

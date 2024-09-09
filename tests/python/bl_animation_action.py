@@ -224,6 +224,31 @@ class LegacyAPIOnLayeredActionTest(unittest.TestCase):
         # After this, there is no need to test the rest of the functions, as the
         # Action will be in the same state as in test_fcurves_on_layered_action().
 
+    def test_groups(self) -> None:
+        # Create a group by using the legacy API to create an F-Curve with group name.
+        group_name = "Object Transfoibles"
+        self.action.fcurves.new("scale", index=1, action_group=group_name)
+
+        layer = self.action.layers[0]
+        strip = layer.strips[0]
+        channelbag = strip.channelbags[0]
+
+        self.assertEqual(1, len(channelbag.groups), "The new group should be available on the channelbag")
+        self.assertEqual(group_name, channelbag.groups[0].name)
+        self.assertEqual(1, len(self.action.groups), "The new group should be available with the legacy group API")
+        self.assertEqual(group_name, self.action.groups[0].name)
+
+        # Create a group via the legacy API.
+        group = self.action.groups.new(group_name)
+        self.assertEqual("{}.001".format(group_name), group.name, "The group should have a unique name")
+        self.assertEqual(group, self.action.groups[1], "The group should be accessible via the legacy API")
+        self.assertEqual(group, channelbag.groups[1], "The group should be accessible via the channelbag")
+
+        # Remove a group via the legacy API.
+        self.action.groups.remove(group)
+        self.assertNotIn(group, self.action.groups[:], "A group should be removable via the legacy API")
+        self.assertNotIn(group, channelbag.groups[:], "A group should be removable via the legacy API")
+
 
 class TestLegacyLayered(unittest.TestCase):
     """Test boundaries between legacy & layered Actions.
@@ -252,20 +277,6 @@ class TestLegacyLayered(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             act.slots.new()
         self.assertSequenceEqual([], act.slots)
-
-    def test_layered_action(self) -> None:
-        """Test legacy operations on a layered Action"""
-
-        act = bpy.data.actions.new('LayeredAction')
-        act.layers.new("laagje")  # Add a layer to make this a non-empty legacy Action.
-        self.assertFalse(act.is_action_legacy)
-        self.assertTrue(act.is_action_layered)
-        self.assertFalse(act.is_empty)
-
-        # Adding an ActionGroup should be prevented, at least until grouping is supported.
-        with self.assertRaises(RuntimeError):
-            act.groups.new("groepie")
-        self.assertSequenceEqual([], act.groups)
 
 
 class ChannelBagsTest(unittest.TestCase):
@@ -334,6 +345,68 @@ class ChannelBagsTest(unittest.TestCase):
         self.assertEquals(4, len(channelbag.fcurves))
         channelbag.fcurves.clear()
         self.assertEquals([], channelbag.fcurves[:])
+
+    def test_channel_groups(self):
+        channelbag = self.strip.channelbags.new(self.slot)
+
+        # Create some fcurves to play with.
+        fcurve0 = channelbag.fcurves.new('location', index=0)
+        fcurve1 = channelbag.fcurves.new('location', index=1)
+        fcurve2 = channelbag.fcurves.new('location', index=2)
+        fcurve3 = channelbag.fcurves.new('scale', index=0)
+        fcurve4 = channelbag.fcurves.new('scale', index=1)
+        fcurve5 = channelbag.fcurves.new('scale', index=2)
+
+        self.assertEquals([], channelbag.groups[:])
+
+        # Create some channel groups.
+        group0 = channelbag.groups.new('group0')
+        group1 = channelbag.groups.new('group1')
+        self.assertEquals([group0, group1], channelbag.groups[:])
+        self.assertEquals([], group0.channels[:])
+        self.assertEquals([], group1.channels[:])
+
+        # Assign some fcurves to the channel groups. Intentionally not in order
+        # so we can test that the fcurves get moved around properly.
+        fcurve5.group = group1
+        fcurve3.group = group1
+        fcurve2.group = group0
+        fcurve4.group = group0
+        self.assertEquals([fcurve2, fcurve4], group0.channels[:])
+        self.assertEquals([fcurve5, fcurve3], group1.channels[:])
+        self.assertEquals([fcurve2, fcurve4, fcurve5, fcurve3, fcurve0, fcurve1], channelbag.fcurves[:])
+
+        # Weird case to be consistent with the legacy API: assigning None to an
+        # fcurve's group does *not* unassign it from its group. This is stupid,
+        # and we should change it at some point.  But it's how the legacy API
+        # already works (presumably an oversight), so sticking to that for now.
+        fcurve3.group = None
+        self.assertEquals(group1, fcurve3.group)
+        self.assertEquals([fcurve2, fcurve4], group0.channels[:])
+        self.assertEquals([fcurve5, fcurve3], group1.channels[:])
+        self.assertEquals([fcurve2, fcurve4, fcurve5, fcurve3, fcurve0, fcurve1], channelbag.fcurves[:])
+
+        # Removing a group.
+        channelbag.groups.remove(group0)
+        self.assertEquals([group1], channelbag.groups[:])
+        self.assertEquals([fcurve5, fcurve3], group1.channels[:])
+        self.assertEquals([fcurve5, fcurve3, fcurve2, fcurve4, fcurve0, fcurve1], channelbag.fcurves[:])
+
+        # Attempting to remove a channel group that belongs to a different
+        # channel bag should fail.
+        other_slot = self.action.slots.new()
+        other_cbag = self.strip.channelbags.new(other_slot)
+        other_group = other_cbag.groups.new('group1')
+        with self.assertRaises(RuntimeError):
+            channelbag.groups.remove(other_group)
+
+        # Another weird case that we reproduce from the legacy API: attempting
+        # to assign a group to an fcurve that doesn't belong to the same channel
+        # bag should silently fail (just does a printf to stdout).
+        fcurve0.group = other_group
+        self.assertEquals([group1], channelbag.groups[:])
+        self.assertEquals([fcurve5, fcurve3], group1.channels[:])
+        self.assertEquals([fcurve5, fcurve3, fcurve2, fcurve4, fcurve0, fcurve1], channelbag.fcurves[:])
 
 
 class DataPathTest(unittest.TestCase):

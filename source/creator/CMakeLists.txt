@@ -348,7 +348,7 @@ else()
       ${CMAKE_SOURCE_DIR}/release/windows/icons/winblender.rc
     )
     if(NOT WITH_WINDOWS_EXTERNAL_MANIFEST)
-      list(APPEND SRC
+      target_sources(blender-launcher PRIVATE
         ${CMAKE_BINARY_DIR}/blender.exe.manifest
       )
     endif()
@@ -961,13 +961,37 @@ file(REMOVE ${CMAKE_BINARY_DIR}/bin/lib/libglapi.so.0.0.0)\n
       endif()
       unset(_target_LIB)
     endif()
+
+    if(WITH_INSTALL_PORTABLE)
+      # The script uses the version of Python installed with Blender,
+      # so it must only be inside installed if `WITH_PYTHON AND WITH_PYTHON_INSTALL`
+      # are active.
+      get_filename_component(PYTHON_EXECUTABLE_NAME_ONLY ${PYTHON_EXECUTABLE} NAME)
+      configure_file(
+        ${CMAKE_SOURCE_DIR}/release/freedesktop/scripts/blender-system-info.sh.in
+        ${CMAKE_BINARY_DIR}/release/freedesktop/scripts/blender-system-info.sh
+        @ONLY
+      )
+      unset(PYTHON_EXECUTABLE_NAME_ONLY)
+      install(
+        PROGRAMS ${CMAKE_BINARY_DIR}/release/freedesktop/scripts/blender-system-info.sh
+        DESTINATION "."
+      )
+    endif()
   endif()
 
   if(WITH_DRACO)
-    install(
-      PROGRAMS $<TARGET_FILE:extern_draco>
-      DESTINATION ${TARGETDIR_VER}/python/lib/python${PYTHON_VERSION}/site-packages
-    )
+    if(WITH_PYTHON_MODULE)
+      install(
+        PROGRAMS $<TARGET_FILE:extern_draco>
+        DESTINATION ${CMAKE_BINARY_DIR}/bin/bpy/lib
+      )
+    else()
+      install(
+        PROGRAMS $<TARGET_FILE:extern_draco>
+        DESTINATION ${TARGETDIR_VER}/python/lib/python${PYTHON_VERSION}/site-packages
+      )
+    endif()
   endif()
 elseif(WIN32)
   if(WITH_WINDOWS_EXTERNAL_MANIFEST)
@@ -1471,6 +1495,27 @@ elseif(WIN32)
 
 
   if(NOT WITH_PYTHON_MODULE)
+    get_filename_component(PYTHON_EXECUTABLE_NAME_ONLY ${PYTHON_EXECUTABLE} NAME)
+    # Configure then generate file. Note that this copies the literal generator
+    # for the Python executable name. So the file needs to be generated afterwards
+    # to get the correct name.
+    configure_file(
+      ${CMAKE_SOURCE_DIR}/release/windows/batch/blender_system_info.cmd.in
+      ${CMAKE_BINARY_DIR}/release/windows/batch/blender_system_info.with_vars.cmd.in
+      @ONLY
+    )
+    unset(PYTHON_EXECUTABLE_NAME_ONLY)
+    # Replace Python executable generator with actual executable name.
+    file(GENERATE
+      OUTPUT ${CMAKE_BINARY_DIR}/release/windows/batch/blender_system_info_$<CONFIG>.cmd
+      INPUT ${CMAKE_BINARY_DIR}/release/windows/batch/blender_system_info.with_vars.cmd.in
+    )
+    install(
+      FILES
+      ${CMAKE_BINARY_DIR}/release/windows/batch/blender_system_info_$<CONFIG>.cmd
+      DESTINATION ${TARGETDIR_EXE}
+      RENAME blender_system_info.cmd
+    )
     install(
       FILES
         ${CMAKE_SOURCE_DIR}/release/windows/batch/blender_debug_gpu.cmd
@@ -1491,10 +1536,17 @@ elseif(WIN32)
   endif()
 
   if(WITH_DRACO)
-    install(
-      PROGRAMS $<TARGET_FILE:extern_draco>
-      DESTINATION ${TARGETDIR_VER}/python/lib/site-packages
-    )
+    if(WITH_PYTHON_MODULE)
+      install(
+        PROGRAMS $<TARGET_FILE:extern_draco>
+        DESTINATION ${CMAKE_BINARY_DIR}/bin/bpy/lib
+      )
+    else()
+      install(
+        PROGRAMS $<TARGET_FILE:extern_draco>
+        DESTINATION ${TARGETDIR_VER}/python/lib/python${PYTHON_VERSION}/site-packages
+      )
+    endif()
   endif()
 
   if(WITH_PYTHON_MODULE AND TARGETDIR_BPY)
@@ -1613,11 +1665,32 @@ elseif(APPLE)
     )
   endif()
 
-  if(WITH_DRACO)
-    install(
-      PROGRAMS $<TARGET_FILE:extern_draco>
-      DESTINATION ${TARGETDIR_VER}/python/lib/python${PYTHON_VERSION}/site-packages
+  if(NOT WITH_PYTHON_MODULE AND WITH_PYTHON AND WITH_PYTHON_INSTALL)
+    get_filename_component(PYTHON_EXECUTABLE_NAME_ONLY ${PYTHON_EXECUTABLE} NAME)
+    configure_file(
+      ${CMAKE_SOURCE_DIR}/release/darwin/scripts/blender-system-info.sh.in
+      ${CMAKE_BINARY_DIR}/release/darwin/scripts/blender-system-info.sh
+      @ONLY
     )
+    unset(PYTHON_EXECUTABLE_NAME_ONLY)
+    install(
+      PROGRAMS ${CMAKE_BINARY_DIR}/release/darwin/scripts/blender-system-info.sh
+      DESTINATION "./Blender.app/Contents/Resources"
+    )
+  endif()
+
+  if(WITH_DRACO)
+    if(WITH_PYTHON_MODULE)
+      install(
+        PROGRAMS $<TARGET_FILE:extern_draco>
+        DESTINATION ${CMAKE_BINARY_DIR}/bin/bpy/lib
+      )
+    else()
+      install(
+        PROGRAMS $<TARGET_FILE:extern_draco>
+        DESTINATION ${TARGETDIR_VER}/python/lib/python${PYTHON_VERSION}/site-packages
+      )
+    endif()
   endif()
 endif()
 

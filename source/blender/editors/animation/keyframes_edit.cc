@@ -154,12 +154,25 @@ static short agrp_keyframes_loop(KeyframeEditData *ked,
     return 0;
   }
 
-  /* only iterate over the F-Curves that are in this group */
-  LISTBASE_FOREACH (FCurve *, fcu, &agrp->channels) {
-    if (fcu->grp == agrp) {
-      if (ANIM_fcurve_keyframes_loop(ked, fcu, key_ok, key_cb, fcu_cb)) {
-        return 1;
+  /* Legacy actions. */
+  if (agrp->wrap().is_legacy()) {
+    LISTBASE_FOREACH (FCurve *, fcu, &agrp->channels) {
+      if (fcu->grp == agrp) {
+        if (ANIM_fcurve_keyframes_loop(ked, fcu, key_ok, key_cb, fcu_cb)) {
+          return 1;
+        }
       }
+    }
+    return 0;
+  }
+
+  /* Layered actions. */
+  animrig::ChannelBag &channel_bag = agrp->channel_bag->wrap();
+  Span<FCurve *> fcurves = channel_bag.fcurves().slice(agrp->fcurve_range_start,
+                                                       agrp->fcurve_range_length);
+  for (FCurve *fcurve : fcurves) {
+    if (ANIM_fcurve_keyframes_loop(ked, fcurve, key_ok, key_cb, fcu_cb)) {
+      return 1;
     }
   }
 
@@ -1630,7 +1643,7 @@ static short select_bezier_invert(KeyframeEditData * /*ked*/, BezTriple *bezt)
   return 0;
 }
 
-KeyframeEditFunc ANIM_editkeyframes_select(short selectmode)
+KeyframeEditFunc ANIM_editkeyframes_select(const eEditKeyframes_Select selectmode)
 {
   switch (selectmode) {
     case SELECT_ADD: /* add */

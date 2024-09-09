@@ -24,16 +24,24 @@ class Particles {
   PassMain::Sub *shape_ps_ = nullptr;
   PassMain::Sub *hair_ps_ = nullptr;
 
+  bool enabled_ = false;
+
  public:
   void begin_sync(Resources &res, const State &state)
   {
+    enabled_ = state.space_type == SPACE_VIEW3D;
+
+    if (!enabled_) {
+      return;
+    }
+
     const bool is_transform = (G.moving & G_TRANSFORM_OBJ) != 0;
 
     {
       auto &pass = particle_ps_;
       pass.init();
-      pass.state_set(DRW_STATE_WRITE_COLOR | DRW_STATE_WRITE_DEPTH | DRW_STATE_DEPTH_LESS_EQUAL |
-                     state.clipping_state);
+      pass.state_set(DRW_STATE_WRITE_COLOR | DRW_STATE_WRITE_DEPTH | DRW_STATE_DEPTH_LESS_EQUAL,
+                     state.clipping_plane_count);
       res.select_bind(pass);
       {
         auto &sub = pass.sub("Dots");
@@ -62,7 +70,7 @@ class Particles {
 
   /* Particle data are stored in world space. If an object is instanced, the associated particle
    * systems need to be offset appropriately. */
-  float4x4 particle_dupli_matrix_get(const ObjectRef &ob_ref)
+  static float4x4 dupli_matrix_get(const ObjectRef &ob_ref)
   {
     float4x4 dupli_mat = float4x4::identity();
 
@@ -84,6 +92,10 @@ class Particles {
 
   void object_sync(Manager &manager, const ObjectRef &ob_ref, Resources &res, const State &state)
   {
+    if (!enabled_) {
+      return;
+    }
+
     Object *ob = ob_ref.object;
 
     ResourceHandle handle = {0};
@@ -94,7 +106,7 @@ class Particles {
       }
 
       if (handle.raw == 0u) {
-        handle = manager.resource_handle_for_psys(ob_ref, particle_dupli_matrix_get(ob_ref));
+        handle = manager.resource_handle_for_psys(ob_ref, dupli_matrix_get(ob_ref));
       }
 
       const ParticleSettings *part = psys->part;
@@ -162,6 +174,10 @@ class Particles {
 
   void draw(Framebuffer &framebuffer, Manager &manager, View &view)
   {
+    if (!enabled_) {
+      return;
+    }
+
     GPU_framebuffer_bind(framebuffer);
     manager.submit(particle_ps_, view);
   }

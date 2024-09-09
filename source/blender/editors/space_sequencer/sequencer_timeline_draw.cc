@@ -36,9 +36,12 @@
 
 #include "GPU_matrix.hh"
 
+#include "IMB_imbuf.hh"
+
 #include "RNA_prototypes.hh"
 
 #include "SEQ_channels.hh"
+#include "SEQ_connect.hh"
 #include "SEQ_effects.hh"
 #include "SEQ_prefetch.hh"
 #include "SEQ_relations.hh"
@@ -46,6 +49,7 @@
 #include "SEQ_retiming.hh"
 #include "SEQ_select.hh"
 #include "SEQ_sequencer.hh"
+#include "SEQ_thumbnail_cache.hh"
 #include "SEQ_time.hh"
 #include "SEQ_transform.hh"
 #include "SEQ_utils.hh"
@@ -71,7 +75,7 @@ using namespace blender::ed::seq;
 
 #define MUTE_ALPHA 120
 
-constexpr float MISSING_ICON_SIZE = 12.0f;
+constexpr float ICON_SIZE = 12.0f;
 
 Vector<Sequence *> sequencer_visible_strips_get(const bContext *C)
 {
@@ -225,6 +229,7 @@ static StripDrawContext strip_draw_context_get(TimelineDrawContext *ctx, Sequenc
   /* Determine if strip (or contents of meta strip) has missing data/media. */
   strip_ctx.missing_data_block = !SEQ_sequence_has_valid_data(seq);
   strip_ctx.missing_media = media_presence_is_missing(scene, seq);
+  strip_ctx.is_connected = SEQ_is_strip_connected(seq);
   if (seq->type == SEQ_TYPE_META) {
     const ListBase *seqbase = &seq->seqbase;
     LISTBASE_FOREACH (const Sequence *, sub, seqbase) {
@@ -888,7 +893,7 @@ static void draw_icon_centered(TimelineDrawContext &ctx,
   UI_view2d_view_ortho(ctx.v2d);
   wmOrtho2_region_pixelspace(ctx.region);
 
-  const float icon_size = MISSING_ICON_SIZE * UI_SCALE_FAC;
+  const float icon_size = ICON_SIZE * UI_SCALE_FAC;
   if (BLI_rctf_size_x(&rect) * 1.1f < icon_size * ctx.pixelx ||
       BLI_rctf_size_y(&rect) * 1.1f < icon_size * ctx.pixely)
   {
@@ -903,7 +908,7 @@ static void draw_icon_centered(TimelineDrawContext &ctx,
   const float x_offset = (right - left - icon_size) * 0.5f;
   const float y_offset = (top - bottom - icon_size) * 0.5f;
 
-  const float inv_scale_fac = (ICON_DEFAULT_HEIGHT / MISSING_ICON_SIZE) * UI_INV_SCALE_FAC;
+  const float inv_scale_fac = (ICON_DEFAULT_HEIGHT / ICON_SIZE) * UI_INV_SCALE_FAC;
 
   UI_icon_draw_ex(left + x_offset,
                   bottom + y_offset,
@@ -922,12 +927,13 @@ static void draw_icon_centered(TimelineDrawContext &ctx,
 static void draw_strip_icons(TimelineDrawContext *timeline_ctx,
                              const Vector<StripDrawContext> &strips)
 {
-  const float icon_size_x = MISSING_ICON_SIZE * timeline_ctx->pixelx * UI_SCALE_FAC;
+  const float icon_size_x = ICON_SIZE * timeline_ctx->pixelx * UI_SCALE_FAC;
 
   for (const StripDrawContext &strip : strips) {
     const bool missing_data = strip.missing_data_block;
     const bool missing_media = strip.missing_media;
-    if (!missing_data && !missing_media) {
+    const bool is_connected = strip.is_connected;
+    if (!missing_data && !missing_media && !is_connected) {
       continue;
     }
 
@@ -951,6 +957,11 @@ static void draw_strip_icons(TimelineDrawContext *timeline_ctx,
       if (missing_media) {
         rect.xmax = min_ff(strip.right_handle - strip.handle_width, rect.xmin + icon_size_x);
         draw_icon_centered(*timeline_ctx, rect, ICON_ERROR, col);
+        rect.xmin = rect.xmax;
+      }
+      if (is_connected) {
+        rect.xmax = min_ff(strip.right_handle - strip.handle_width, rect.xmin + icon_size_x);
+        draw_icon_centered(*timeline_ctx, rect, ICON_LINKED, col);
       }
     }
 
@@ -1006,12 +1017,17 @@ static void draw_seq_text_overlay(TimelineDrawContext *timeline_ctx,
   rect.ymin = !strip_ctx->can_draw_strip_content ? strip_ctx->bottom :
                                                    strip_ctx->strip_content_top;
   rect.xmin = max_ff(rect.xmin, timeline_ctx->v2d->cur.xmin + text_margin);
+  int num_icons = 0;
   if (strip_ctx->missing_data_block) {
-    rect.xmin += MISSING_ICON_SIZE * timeline_ctx->pixelx * UI_SCALE_FAC;
+    num_icons++;
   }
   if (strip_ctx->missing_media) {
-    rect.xmin += MISSING_ICON_SIZE * timeline_ctx->pixelx * UI_SCALE_FAC;
+    num_icons++;
   }
+  if (strip_ctx->is_connected) {
+    num_icons++;
+  }
+  rect.xmin += num_icons * ICON_SIZE * timeline_ctx->pixelx * UI_SCALE_FAC;
   rect.xmin = min_ff(rect.xmin, timeline_ctx->v2d->cur.xmax);
 
   CLAMP(rect.xmax, timeline_ctx->v2d->cur.xmin + text_margin, timeline_ctx->v2d->cur.xmax);
@@ -1505,9 +1521,9 @@ static void draw_seq_strips(TimelineDrawContext *timeline_ctx,
   UI_view2d_view_ortho(timeline_ctx->v2d);
 
   /* Draw parts of strips below thumbnails. */
-  GPU_blend(GPU_BLEND_ALPHA);
   draw_strips_background(timeline_ctx, strips_batch, strips);
 
+  GPU_blend(GPU_BLEND_ALPHA);
   const float round_radius = calc_strip_round_radius(timeline_ctx->pixely);
   for (const StripDrawContext &strip_ctx : strips) {
     draw_strip_offsets(timeline_ctx, &strip_ctx);
@@ -1515,20 +1531,8 @@ static void draw_seq_strips(TimelineDrawContext *timeline_ctx,
   }
   timeline_ctx->quads->draw();
 
-  /* Draw all thumbnails and retiming continuity. */
-  GPU_blend(GPU_BLEND_ALPHA);
-  for (const StripDrawContext &strip_ctx : strips) {
-    draw_seq_strip_thumbnail(timeline_ctx->v2d,
-                             timeline_ctx->C,
-                             timeline_ctx->scene,
-                             strip_ctx.seq,
-                             strip_ctx.bottom,
-                             strip_ctx.strip_content_top,
-                             strip_ctx.top,
-                             timeline_ctx->pixelx,
-                             timeline_ctx->pixely,
-                             round_radius);
-  }
+  /* Draw thumbnails. */
+  draw_strip_thumbnails(timeline_ctx, strips_batch, strips);
   /* Draw retiming continuity ranges. */
   draw_retiming_continuity_ranges(timeline_ctx, strips);
 
@@ -1562,6 +1566,16 @@ static void draw_seq_strips(TimelineDrawContext *timeline_ctx, StripsDrawBatch &
   if (timeline_ctx->ed == nullptr) {
     return;
   }
+
+  /* Discard thumbnail requests that are far enough from viewing area:
+   * by +- 30 frames and +-2 channels outside of current view. */
+  rctf rect = timeline_ctx->v2d->cur;
+  rect.xmin -= 30;
+  rect.xmax += 30;
+  rect.ymin -= 2;
+  rect.ymax += 2;
+  seq::thumbnail_cache_discard_requests_outside(timeline_ctx->scene, rect);
+  seq::thumbnail_cache_maintain_capacity(timeline_ctx->scene);
 
   Vector<StripDrawContext> bottom_layer, top_layer;
   visible_strips_ordered_get(timeline_ctx, bottom_layer, top_layer);
@@ -1951,8 +1965,10 @@ void draw_timeline_seq_display(const bContext *C, ARegion *region)
 
   ED_time_scrub_draw_current_frame(region, scene, !(sseq->flag & SEQ_DRAWFRAMES));
 
-  const ListBase *seqbase = SEQ_active_seqbase_get(SEQ_editing_get(scene));
-  SEQ_timeline_boundbox(scene, seqbase, &v2d->tot);
-  const rcti scroller_mask = ED_time_scrub_clamp_scroller_mask(v2d->mask);
-  UI_view2d_scrollers_draw(v2d, &scroller_mask);
+  if (region->winy > HEADERY * UI_SCALE_FAC) {
+    const ListBase *seqbase = SEQ_active_seqbase_get(SEQ_editing_get(scene));
+    SEQ_timeline_boundbox(scene, seqbase, &v2d->tot);
+    const rcti scroller_mask = ED_time_scrub_clamp_scroller_mask(v2d->mask);
+    UI_view2d_scrollers_draw(v2d, &scroller_mask);
+  }
 }

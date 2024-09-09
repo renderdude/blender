@@ -48,6 +48,7 @@ set(SRC
   intern/array_utils.cc
   intern/astar.c
   intern/atomic_disjoint_set.cc
+  intern/bit_bool_conversion.cc
   intern/bit_ref.cc
   intern/bit_span.cc
   intern/bitmap.c
@@ -188,10 +189,12 @@ set(SRC
   BLI_astar.h
   BLI_atomic_disjoint_set.hh
   BLI_binary_search.hh
+  BLI_bit_bool_conversion.hh
   BLI_bit_group_vector.hh
   BLI_bit_ref.hh
   BLI_bit_span.hh
   BLI_bit_span_ops.hh
+  BLI_bit_span_to_index_ranges.hh
   BLI_bit_vector.hh
   BLI_bitmap.h
   BLI_bitmap_draw_2d.h
@@ -199,8 +202,8 @@ set(SRC
   BLI_bounds.hh
   BLI_bounds_types.hh
   BLI_boxpack_2d.h
-  BLI_build_config.h
   BLI_buffer.h
+  BLI_build_config.h
   BLI_cache_mutex.hh
   BLI_color.hh
   BLI_color_mix.hh
@@ -208,6 +211,7 @@ set(SRC
   BLI_compiler_compat.h
   BLI_compiler_typecheck.h
   BLI_compute_context.hh
+  BLI_concurrent_map.hh
   BLI_console.h
   BLI_convexhull_2d.h
   BLI_cpp_type.hh
@@ -263,6 +267,8 @@ set(SRC
   BLI_index_mask_expression.hh
   BLI_index_mask_fwd.hh
   BLI_index_range.hh
+  BLI_index_ranges_builder.hh
+  BLI_index_ranges_builder_fwd.hh
   BLI_inplace_priority_queue.hh
   BLI_iterator.h
   BLI_jitter_2d.h
@@ -322,6 +328,7 @@ set(SRC
   BLI_memiter.h
   BLI_memory_cache.hh
   BLI_memory_counter.hh
+  BLI_memory_counter_fwd.hh
   BLI_memory_utils.h
   BLI_memory_utils.hh
   BLI_mempool.h
@@ -480,6 +487,7 @@ endif()
 if(APPLE)
   list(APPEND SRC
     intern/storage_apple.mm
+    intern/fileops_apple.mm
   )
 endif()
 
@@ -515,9 +523,9 @@ if(WITH_GTESTS)
     tests/BLI_bit_ref_test.cc
     tests/BLI_bit_span_test.cc
     tests/BLI_bit_vector_test.cc
-    tests/BLI_build_config_test.cc
     tests/BLI_bitmap_test.cc
     tests/BLI_bounds_test.cc
+    tests/BLI_build_config_test.cc
     tests/BLI_color_test.cc
     tests/BLI_convexhull_2d_test.cc
     tests/BLI_cpp_type_test.cc
@@ -538,6 +546,7 @@ if(WITH_GTESTS)
     tests/BLI_index_mask_expression_test.cc
     tests/BLI_index_mask_test.cc
     tests/BLI_index_range_test.cc
+    tests/BLI_index_ranges_builder_test.cc
     tests/BLI_inplace_priority_queue_test.cc
     tests/BLI_kdopbvh_test.cc
     tests/BLI_kdtree_test.cc

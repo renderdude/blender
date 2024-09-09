@@ -61,6 +61,7 @@ DefNode(ShaderNode,     SH_NODE_ATTRIBUTE,          def_sh_attribute,       "ATT
 DefNode(ShaderNode,     SH_NODE_AMBIENT_OCCLUSION,  def_sh_ambient_occlusion,"AMBIENT_OCCLUSION", AmbientOcclusion, "Ambient Occlusion", "Compute how much the hemisphere above the shading point is occluded, for example to add weathering effects to corners.\nNote: For Cycles, this may slow down renders significantly")
 DefNode(ShaderNode,     SH_NODE_BACKGROUND,         0,                      "BACKGROUND",         Background,       "Background",        "Add background light emission.\nNote: This node should only be used for the world surface output")
 DefNode(ShaderNode,     SH_NODE_HOLDOUT,            0,                      "HOLDOUT",            Holdout,          "Holdout",           "Create a \"hole\" in the image with zero alpha transparency, which is useful for compositing.\nNote: the holdout shader can only create alpha when transparency is enabled in the film settings")
+DefNode(ShaderNode,     SH_NODE_BSDF_METALLIC,        def_metallic,             "BSDF_METALLIC",        BsdfMetallic,  "Metallic BSDF",       "Metallic reflection with microfacet distribution, and metallic fresnel")
 DefNode(ShaderNode,     SH_NODE_BSDF_DIFFUSE,       0,                      "BSDF_DIFFUSE",       BsdfDiffuse,      "Diffuse BSDF",      "Lambertian and Oren-Nayar diffuse reflection")
 DefNode(ShaderNode,     SH_NODE_BSDF_PRINCIPLED,    def_principled,         "BSDF_PRINCIPLED",    BsdfPrincipled,   "Principled BSDF",   "Physically-based, easy-to-use shader for rendering surface materials, based on the OpenPBR model")
 DefNode(ShaderNode,     SH_NODE_BSDF_GLOSSY,        def_glossy,             "BSDF_GLOSSY",        BsdfAnisotropic,  "Glossy BSDF",       "Reflection with microfacet distribution, used for materials such as metal or mirrors")
@@ -276,6 +277,7 @@ DefNode(FunctionNode, FN_NODE_COMBINE_TRANSFORM, 0, "COMBINE_TRANSFORM", Combine
 DefNode(FunctionNode, FN_NODE_COMPARE, 0, "COMPARE", Compare, "Compare", "")
 DefNode(FunctionNode, FN_NODE_EULER_TO_ROTATION, 0, "EULER_TO_ROTATION", EulerToRotation, "Euler to Rotation", "")
 DefNode(FunctionNode, FN_NODE_FLOAT_TO_INT, def_float_to_int, "FLOAT_TO_INT", FloatToInt, "Float to Integer", "")
+DefNode(FunctionNode, FN_NODE_HASH_VALUE, 0, "HASH_VALUE", HashValue, "Hash Value", "")
 DefNode(FunctionNode, FN_NODE_INPUT_BOOL, def_fn_input_bool, "INPUT_BOOL", InputBool, "Boolean", "")
 DefNode(FunctionNode, FN_NODE_INPUT_COLOR, def_fn_input_color, "INPUT_COLOR", InputColor, "Color", "")
 DefNode(FunctionNode, FN_NODE_INPUT_INT, def_fn_input_int, "INPUT_INT", InputInt, "Integer", "")
@@ -500,6 +502,7 @@ DefNode(GeometryNode, GEO_NODE_UV_UNWRAP, 0, "UV_UNWRAP", UVUnwrap, "UV Unwrap",
 DefNode(GeometryNode, GEO_NODE_VIEWER, 0, "VIEWER", Viewer, "Viewer", "Display the input data in the Spreadsheet Editor")
 DefNode(GeometryNode, GEO_NODE_VOLUME_CUBE, 0, "VOLUME_CUBE", VolumeCube, "Volume Cube", "Generate a dense volume with a field that controls the density at each grid voxel based on its position")
 DefNode(GeometryNode, GEO_NODE_VOLUME_TO_MESH, 0, "VOLUME_TO_MESH", VolumeToMesh, "Volume to Mesh", "Generate a mesh on the \"surface\" of a volume")
+DefNode(GeometryNode, GEO_NODE_WARNING, 0, "WARNING", Warning, "Warning", "Create custom warnings in node groups")
 
 /* undefine macros */
 #undef DefNode

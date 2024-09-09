@@ -316,20 +316,16 @@ static void transform_active_color(bContext *C,
 
   undo::push_begin(obact, op);
 
-  bke::pbvh::Tree &pbvh = *obact.sculpt->pbvh;
-  const Mesh &mesh = *static_cast<const Mesh *>(obact.data);
-  /* The sculpt undo system needs pbvh::Tree node corner indices for corner domain color
-   * attributes. */
-  BKE_pbvh_ensure_node_face_corners(pbvh, mesh.corner_tris());
+  bke::pbvh::Tree &pbvh = *bke::object::pbvh_get(obact);
 
-  Vector<bke::pbvh::Node *> nodes = bke::pbvh::search_gather(pbvh, {});
-  undo::push_nodes(depsgraph, obact, nodes, undo::Type::Color);
+  IndexMaskMemory memory;
+  const IndexMask node_mask = bke::pbvh::all_leaf_nodes(pbvh, memory);
+  undo::push_nodes(depsgraph, obact, node_mask, undo::Type::Color);
 
   transform_active_color_data(*BKE_mesh_from_object(&obact), transform_fn);
 
-  for (bke::pbvh::Node *node : nodes) {
-    BKE_pbvh_node_mark_update_color(*node);
-  }
+  MutableSpan<bke::pbvh::MeshNode> nodes = pbvh.nodes<bke::pbvh::MeshNode>();
+  node_mask.foreach_index([&](const int i) { BKE_pbvh_node_mark_update_color(nodes[i]); });
 
   undo::push_end(obact);
   WM_event_add_notifier(C, NC_OBJECT | ND_DRAW, &obact);

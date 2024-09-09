@@ -69,6 +69,7 @@
 #include "BKE_node_runtime.hh"
 #include "BKE_paint.hh"
 #include "BKE_scene.hh"
+#include "BKE_screen.hh"
 #include "BKE_tracking.h"
 
 #include "IMB_imbuf_enums.h"
@@ -2803,6 +2804,26 @@ static void fix_built_in_curve_attribute_defaults(Main *bmain)
   }
 }
 
+static void add_bevel_modifier_attribute_name_defaults(Main &bmain)
+{
+  LISTBASE_FOREACH (Object *, ob, &bmain.objects) {
+    if (ob->type != OB_MESH) {
+      continue;
+    }
+    LISTBASE_FOREACH (ModifierData *, md, &ob->modifiers) {
+      if (md->type == eModifierType_Bevel) {
+        BevelModifierData *bmd = reinterpret_cast<BevelModifierData *>(md);
+        if (bmd->vertex_weight_name[0] == '\0') {
+          STRNCPY(bmd->vertex_weight_name, "bevel_weight_vert");
+        }
+        if (bmd->edge_weight_name[0] == '\0') {
+          STRNCPY(bmd->edge_weight_name, "bevel_weight_edge");
+        }
+      }
+    }
+  }
+}
+
 void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
 {
   if (!MAIN_VERSION_FILE_ATLEAST(bmain, 400, 1)) {
@@ -4566,6 +4587,41 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
       }
     }
     FOREACH_NODETREE_END;
+  }
+
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 403, 20)) {
+    LISTBASE_FOREACH (bScreen *, screen, &bmain->screens) {
+      LISTBASE_FOREACH (ScrArea *, area, &screen->areabase) {
+        LISTBASE_FOREACH (SpaceLink *, sl, &area->spacedata) {
+          if (sl->spacetype == SPACE_SEQ) {
+            ARegion *region = BKE_area_find_region_type(area, RGN_TYPE_TOOLS);
+            if (region != nullptr) {
+              region->flag &= ~RGN_FLAG_HIDDEN;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 403, 21)) {
+    LISTBASE_FOREACH (bScreen *, screen, &bmain->screens) {
+      LISTBASE_FOREACH (ScrArea *, area, &screen->areabase) {
+        LISTBASE_FOREACH (SpaceLink *, sl, &area->spacedata) {
+          if (sl->spacetype == SPACE_CLIP) {
+            ARegion *region = BKE_area_find_region_type(area, RGN_TYPE_WINDOW);
+            if (region != nullptr) {
+              View2D *v2d = &region->v2d;
+              v2d->flag &= ~V2D_VIEWSYNC_SCREEN_TIME;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 403, 22)) {
+    add_bevel_modifier_attribute_name_defaults(*bmain);
   }
 
   /**

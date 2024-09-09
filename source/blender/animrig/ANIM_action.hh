@@ -200,24 +200,13 @@ class Action : public ::bAction {
   Slot &slot_add_for_id(const ID &animated_id);
 
   /**
-   * Ensure that an appropriate Slot exists for the given ID.
+   * Remove a slot, and ALL animation data that belongs to it.
    *
-   * If a suitable Slot can be found, that Slot is returned.  Otherwise,
-   * one is created.
+   * After this call, the reference is no longer valid as the slot will have been freed.
    *
-   * This is essentially a wrapper for `find_suitable_slot_for()` and
-   * `slot_add_for_id()`, and follows their semantics. Notably, like both of
-   * those methods, this Action does not need to already be assigned to the ID.
-   * And like `find_suitable_slot_for()`, if this Action *is* already
-   * assigned to the ID with a valid Slot, that Slot is returned.
-   *
-   * Note that this assigns neither this Action nor the Slot to the ID. This
-   * merely ensures that an appropriate Slot exists.
-   *
-   * \see `Action::find_suitable_slot_for()`
-   * \see `Action::slot_add_for_id()`
+   * \return true when the layer was found & removed, false if it wasn't found.
    */
-  Slot &slot_ensure_for_id(const ID &animated_id);
+  bool slot_remove(Slot &slot_to_remove);
 
   /**
    * Set the active Slot, ensuring only one Slot is flagged as the Active one.
@@ -240,7 +229,12 @@ class Action : public ::bAction {
    */
   Slot *slot_active_get();
 
-  /** Assign this Action to the ID.
+  /**
+   * Assign this Action + Slot to the ID.
+   *
+   * If another Action is already assigned to this ID, the caller should unassign the ID from its
+   * existing Action first, or use the top-level function `assign_action(action, ID)` to do things
+   * all in one go.
    *
    * \param slot: The slot this ID should be animated by, may be nullptr if it is to be
    * assigned later. In that case, the ID will not actually receive any animation.
@@ -290,6 +284,9 @@ class Action : public ::bAction {
  protected:
   /** Return the layer's index, or -1 if not found in this Action. */
   int64_t find_layer_index(const Layer &layer) const;
+
+  /** Return the slot's index, or -1 if not found in this Action. */
+  int64_t find_slot_index(const Slot &slot) const;
 
  private:
   Slot &slot_allocate();
@@ -383,6 +380,13 @@ class Strip : public ::ActionStrip {
    * (negative for frame_start, positive for frame_end) are supported.
    */
   void resize(float frame_start, float frame_end);
+
+  /**
+   * Remove all data belonging to the given slot.
+   *
+   * This is typically only called from Layer::slot_data_remove().
+   */
+  void slot_data_remove(slot_handle_t slot_handle);
 };
 static_assert(sizeof(Strip) == sizeof(::ActionStrip),
               "DNA struct and its C++ wrapper must have the same size");
@@ -469,6 +473,13 @@ class Layer : public ::ActionLayer {
    * \return true when the strip was found & removed, false if it wasn't found.
    */
   bool strip_remove(Strip &strip);
+
+  /**
+   * Remove all data belonging to the given slot.
+   *
+   * This is typically only called from Action::slot_remove().
+   */
+  void slot_data_remove(slot_handle_t slot_handle);
 
  protected:
   /** Return the strip's index, or -1 if not found in this layer. */
@@ -674,6 +685,13 @@ class KeyframeStrip : public ::KeyframeActionStrip {
    */
   bool channelbag_remove(ChannelBag &channelbag_to_remove);
 
+  /**
+   * Remove all strip data for the given slot.
+   *
+   * Typically only called from Strip::slot_data_remove().
+   */
+  void slot_data_remove(slot_handle_t slot_handle);
+
   /** Return the channelbag's index, or -1 if there is none for this slot handle. */
   int64_t find_channelbag_index(const ChannelBag &channelbag) const;
 
@@ -741,6 +759,9 @@ class ChannelBag : public ::ActionChannelBag {
   /**
    * Remove an F-Curve from the ChannelBag.
    *
+   * Additionally, if the fcurve was the last fcurve in a channel group, that
+   * channel group is also deleted.
+   *
    * After this call, if the F-Curve was found, the reference will no longer be
    * valid, as the curve will have been freed.
    *
@@ -749,9 +770,116 @@ class ChannelBag : public ::ActionChannelBag {
   bool fcurve_remove(FCurve &fcurve_to_remove);
 
   /**
+   * Move the given fcurve to position `to_fcurve_index` in the fcurve array.
+   *
+   * Note: this can indirectly alter channel group memberships, because the
+   * channel groups don't change what ranges in the fcurve array they cover.
+   *
+   * `fcurve` must belong to this channel bag, and `to_fcurve_index` must be a
+   * valid index in the fcurve array.
+   */
+  void fcurve_move(FCurve &fcurve, int to_fcurve_index);
+
+  /**
    * Remove all F-Curves from this ChannelBag.
    */
   void fcurves_clear();
+
+  /* Channel group access. */
+  blender::Span<const bActionGroup *> channel_groups() const;
+  blender::MutableSpan<bActionGroup *> channel_groups();
+  const bActionGroup *channel_group(int64_t index) const;
+  bActionGroup *channel_group(int64_t index);
+
+  /**
+   * Find the first bActionGroup (channel group) with the given name.
+   *
+   * Note that channel groups with the same name are allowed, and this simply
+   * returns the first match.
+   *
+   * If no matching group is found, `nullptr` is returned.
+   */
+  const bActionGroup *channel_group_find(StringRef name) const;
+  bActionGroup *channel_group_find(StringRef name);
+
+  /**
+   * Find the channel group that contains the fcurve at `fcurve_array_index` as
+   * a member.
+   *
+   * \return The index of the channel group if found, or -1 if no such group is
+   * found.
+   */
+  int channel_group_containing_index(int fcurve_array_index);
+
+  /**
+   * Create a new empty channel group with the given name.
+   *
+   * The new group is added to the end of the channel group array of the
+   * ChannelBag.
+   *
+   * This function ensures the group has a unique name, and thus the name of the
+   * created group may differ from the `name` parameter.
+   *
+   * \return A reference to the new channel group.
+   */
+  bActionGroup &channel_group_create(StringRefNull name);
+
+  /**
+   * Find a channel group with the given name, or if none exists create one.
+   *
+   * If a new group is created, it's added to the end of the channel group array
+   * of the ChannelBag.
+   *
+   * \return A reference to the channel group.
+   */
+  bActionGroup &channel_group_ensure(StringRefNull name);
+
+  /**
+   * Remove the given channel group from the channel bag.
+   *
+   * Any fcurves that were part of this group will me moved to just after all
+   * grouped fcurves.
+   *
+   * \return true when the channel group was found & removed, false if it wasn't
+   * found.
+   */
+  bool channel_group_remove(bActionGroup &group);
+
+  /**
+   * Move the given channel group's to position `to_group_index` among the
+   * channel groups.
+   *
+   * The fcurves in the channel group are moved with it, so that membership
+   * doesn't change.
+   *
+   * `group` must belong to this channel bag, and `to_group_index` must be a
+   * valid index in the channel group array.
+   */
+  void channel_group_move(bActionGroup &group, int to_group_index);
+
+  /**
+   * Assigns the given FCurve to the given channel group.
+   *
+   * Fails if either doesn't belong to this channel bag, but otherwise always
+   * succeeds.
+   *
+   * \return True on success, false on failure.
+   */
+  bool fcurve_assign_to_channel_group(FCurve &fcurve, bActionGroup &group);
+
+  /**
+   * Removes the the given FCurve from the channel group it's in, if any.
+   *
+   * As part of removing `fcurve` from its group, `fcurve` is moved to the end
+   * of the fcurve array. However, if `fcurve` is already ungrouped then this
+   * method is a no-op.
+   *
+   * Fails if the fcurve doesn't belong to this channel bag, but otherwise
+   * always succeeds.
+   *
+   * \return True on success, false on failure.
+   */
+  bool fcurve_ungroup(FCurve &fcurve);
 
  protected:
   /**
@@ -767,8 +895,101 @@ class ChannelBag : public ::ActionChannelBag {
    * responsibility of the caller.
    */
   FCurve &fcurve_create(Main *bmain, FCurveDescriptor fcurve_descriptor);
+
+ private:
+  /**
+   * Remove the channel group at `channel_group_index` from the channel group
+   * array.
+   *
+   * This is a low-level function that *only* manipulates the channel group
+   * array in the most basic way. It literally just removes the given item from
+   * the array and frees it, just like `erase()` on `std::vector`.
+   *
+   * It specifically does *not* maintain any of the semantic invariants of the
+   * group array or its relationship to the fcurves.
+   *
+   * `restore_channel_group_invariants()` should be called at some point after
+   * this to restore the semantic invariants.
+   *
+   * \see `restore_channel_group_invariants()`
+   */
+  void channel_group_remove_raw(int channel_group_index);
+
+  /**
+   * Restore invariants related to channel groups.
+   *
+   * This restores critical invariants and should be called (at some point) any
+   * time that groups are explicitly modified or that group membership of
+   * fcurves might change implicitly (e.g. due to moving/adding/removing
+   * fcurves).
+   *
+   * The specific invariants restored by this method are:
+   * 1. All grouped fcurves should come before all non-grouped fcurves.
+   * 2. All fcurves should point back to the group they belong to (if any) via
+   *    their `grp` pointer.
+   *
+   * This function assumes that the fcurves are already in the correct group
+   * order (so the first N belong to the first group, which is also of length N,
+   * etc.). The groups are then updated so their starting index matches this.
+   * Then the fcurves' `grp` pointer is updated, so that any changes in group
+   * membership is correctly reflected.
+   *
+   * For example, if the mapping of groups to fcurves looks like this (g* are
+   * the groups, dots indicate ungrouped areas, and f* are the fcurves, so e.g.
+   * group g0 currently contains f1 and f2, but ought to contain f0 and f1):
+   *
+   * ```
+   * |..| g0  |..|g1|.....| g2  |..|
+   * |f0|f1|f2|f3|f4|f5|f6|f7|f8|f9|
+   * ```
+   *
+   * Then after calling this function they will look like this:
+   *
+   * ```
+   * | g0  |g1| g2  |..............|
+   * |f0|f1|f2|f3|f4|f5|f6|f7|f8|f9|
+   * ```
+   *
+   * Note that this specifically does *not* move the fcurves, but rather moves
+   * the groups *over* the fcurves, changing membership.
+   *
+   * The `grp` pointers in the fcurves are then updated to reflect their new
+   * group membership, using the groups as the source of truth.
+   */
+  void restore_channel_group_invariants();
 };
+
 static_assert(sizeof(ChannelBag) == sizeof(::ActionChannelBag),
+              "DNA struct and its C++ wrapper must have the same size");
+
+/**
+ * A group of channels within a ChannelBag.
+ *
+ * This does *not* own the fcurves--the ChannelBag does. This just groups
+ * fcurves for organizational purposes, e.g. for use in the channel list in the
+ * animation editors.
+ *
+ * Usage of this wrapper typically indicates that the group is part of a layered
+ * action. However, the underlying `bActionGroup` struct is also used by legacy
+ * actions.
+ */
+class ChannelGroup : public ::bActionGroup {
+ public:
+  /**
+   * Determine whether this channel group is from a legacy action or a layered action.
+   *
+   * \return True if it's from a legacy action, false if it's from a layered action.
+   */
+  bool is_legacy() const;
+
+  /**
+   * Get the fcurves in this channel group.
+   */
+  Span<FCurve *> fcurves();
+  Span<const FCurve *> fcurves() const;
+};
+
+static_assert(sizeof(ChannelGroup) == sizeof(::bActionGroup),
               "DNA struct and its C++ wrapper must have the same size");
 
 /**
@@ -789,6 +1010,24 @@ static_assert(sizeof(ChannelBag) == sizeof(::ActionChannelBag),
  * will still return `true` as the Action was successfully assigned.
  */
 bool assign_action(Action &action, ID &animated_id);
+
+/**
+ * Assign the Action, ensuring that a Slot is also assigned.
+ *
+ * If this Action happens to already be assigned, and a Slot is assigned too, that Slot is
+ * returned. Otherwise a new Slot is created + assigned.
+ *
+ * \returns the assigned slot if the assignment was successful, or `nullptr` otherwise.
+ * The only reason the assignment can fail is when the given ID is of an animatable type.
+ *
+ * \note Contrary to `assign_action()` this skips the search by slot name when the Action is
+ * already assigned. It should be possible for an animator to un-assign a slot, then create a new
+ * slot by inserting a new key. This shouldn't auto-assign the old slot (by name) and _then_ insert
+ * the key.
+ *
+ * \see assign_action()
+ */
+Slot *assign_action_ensure_slot_for_keying(Action &action, ID &animated_id);
 
 /**
  * Return whether the given Action can be assigned to the ID.
@@ -832,6 +1071,10 @@ Action *get_action(ID &animated_id);
  */
 std::optional<std::pair<Action *, Slot *>> get_action_slot_pair(ID &animated_id);
 
+const animrig::ChannelBag *channelbag_for_action_slot(const Action &action,
+                                                      slot_handle_t slot_handle);
+animrig::ChannelBag *channelbag_for_action_slot(Action &action, slot_handle_t slot_handle);
+
 /**
  * Return the F-Curves for this specific slot handle.
  *
@@ -860,22 +1103,24 @@ Vector<const FCurve *> fcurves_all(const Action &action);
 Vector<FCurve *> fcurves_all(Action &action);
 
 /**
- * Get (or add relevant data to be able to do so) an F-Curve from the given
- * Action. This assumes that all the destinations are valid.
+ * Find or create an F-Curve on the given action that matches the given fcurve
+ * descriptor.
  *
- * NOTE: this function is primarily intended for use with legacy actions, but
- * for reasons of expedience it now also works with layered actions under the
+ * This function is primarily intended for use with legacy actions, but for
+ * reasons of expedience it now also works with layered actions under the
  * following limited circumstances: `ptr` must be non-null and must have an
- * `owner_id` that already uses `act`. Otherwise this function will return
- * nullptr for layered actions. See the comments in the implementation for more
- * details.
+ * `owner_id` that already uses `act`. See the comments in the implementation
+ * for more details.
  *
  * \note This function also ensures that dependency graph relationships are
  * rebuilt. This is necessary when adding a new F-Curve, as a
  * previously-unanimated depsgraph component may become animated now.
  *
  * \param ptr: RNA pointer for the struct the fcurve is being looked up/created
- * for. For legacy actions this is optional and may be null.
+ * for. For legacy actions this is optional and may be null, but if provided is
+ * used to do things like set the fcurve color properly. For layered actions
+ * this parameter is required, and is used to create and assign an appropriate
+ * slot if needed when creating the fcurve.
  *
  * \param fcurve_descriptor: description of the fcurve to lookup/create. Note
  * that this is *not* relative to `ptr` (e.g. if `ptr` is not an ID). It should
@@ -998,6 +1243,15 @@ void action_deselect_keys(Action &action);
 }  // namespace blender::animrig
 
 /* Wrap functions for the DNA structs. */
+
+inline blender::animrig::ChannelGroup &bActionGroup::wrap()
+{
+  return *reinterpret_cast<blender::animrig::ChannelGroup *>(this);
+}
+inline const blender::animrig::ChannelGroup &bActionGroup::wrap() const
+{
+  return *reinterpret_cast<const blender::animrig::ChannelGroup *>(this);
+}
 
 inline blender::animrig::Action &bAction::wrap()
 {
