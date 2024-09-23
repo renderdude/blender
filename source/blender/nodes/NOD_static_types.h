@@ -23,7 +23,7 @@ DefNode(Node,           NODE_FRAME,              def_frame,              "FRAME"
 DefNode(Node,           NODE_GROUP,              def_group,              "GROUP",          Group,            "Group",             "")
 DefNode(Node,           NODE_GROUP_INPUT,        def_group_input,        "GROUP_INPUT",    GroupInput,       "Group Input",       "Expose connected data from inside a node group as inputs to its interface")
 DefNode(Node,           NODE_GROUP_OUTPUT,       def_group_output,       "GROUP_OUTPUT",   GroupOutput,      "Group Output",      "Output data from inside of a node group")
-DefNode(Node,           NODE_REROUTE,            0,                      "REROUTE",        Reroute,          "Reroute",           "A single-socket organization tool that supports one input and multiple outputs")
+DefNode(Node,           NODE_REROUTE,            def_reroute,            "REROUTE",        Reroute,          "Reroute",           "A single-socket organization tool that supports one input and multiple outputs")
 
 DefNode(ShaderNode,     SH_NODE_RGB,             0,                      "RGB",            RGB,              "RGB",               "A color picker")
 DefNode(ShaderNode,     SH_NODE_VALUE,           0,                      "VALUE",          Value,            "Value",             "Input numerical values to other nodes in the tree")
@@ -285,6 +285,7 @@ DefNode(FunctionNode, FN_NODE_INPUT_ROTATION, def_fn_input_rotation, "INPUT_ROTA
 DefNode(FunctionNode, FN_NODE_INPUT_SPECIAL_CHARACTERS, 0, "INPUT_SPECIAL_CHARACTERS", InputSpecialCharacters, "Special Characters", "")
 DefNode(FunctionNode, FN_NODE_INPUT_STRING, def_fn_input_string, "INPUT_STRING", InputString, "String", "")
 DefNode(FunctionNode, FN_NODE_INPUT_VECTOR, def_fn_input_vector, "INPUT_VECTOR", InputVector, "Vector", "")
+DefNode(FunctionNode, FN_NODE_INTEGER_MATH, 0, "INTEGER_MATH", IntegerMath, "Integer Math", "")
 DefNode(FunctionNode, FN_NODE_INVERT_MATRIX, 0, "INVERT_MATRIX", InvertMatrix, "Invert Matrix", "")
 DefNode(FunctionNode, FN_NODE_INVERT_ROTATION, 0, "INVERT_ROTATION", InvertRotation, "Invert Rotation", "")
 DefNode(FunctionNode, FN_NODE_MATRIX_MULTIPLY, 0, "MATRIX_MULTIPLY", MatrixMultiply, "Multiply Matrices", "")
