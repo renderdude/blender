@@ -555,7 +555,16 @@ so it should look something like: -b tcp://*:5555",
   bool device_available = false;
   if (!devices.empty()) {
     options.session_params.device = devices.front();
+    options.session_params.denoise_device = options.session_params.device;
     device_available = true;
+    // Find a suitable denoise device
+    foreach (DeviceType type, types) {
+      if (type != device_type) {
+        vector<DeviceInfo> compute_devices = Device::available_devices(DEVICE_MASK(type));
+        options.session_params.denoise_device = compute_devices.front();
+        break;
+      }
+    }
   }
 
   /* handle invalid configurations */
