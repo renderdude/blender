@@ -1862,7 +1862,7 @@ void Ri::Sphere(float radius,
   std::vector<int> body;
   int point_index = 0;
   int n_slices = 25;
-  int n_stacks = 25;
+  int n_stacks = 24;
 
   // Create top vertices
   float phi = start_phi;
@@ -1968,7 +1968,7 @@ void Ri::Sphere(float radius,
   }
 
   // add quads per stack / slice
-  for (int j = 0; j < n_stacks - 1; j++) {
+  for (int j = 0; j < n_stacks - 2; j++) {
     int j0 = j * n_slices;
     int j1 = (j + 1) * n_slices;
     for (int i = 0; i < n_slices; i++) {
@@ -1993,7 +1993,7 @@ void Ri::Sphere(float radius,
     }
   }
 
-  for (int j = 0; j < n_stacks - 1; j++) {
+  for (int j = 0; j < n_stacks - 2; j++) {
     int j0 = j * (n_slices + 1);
     int j1 = (j + 1) * (n_slices + 1);
     for (int i = 0; i < n_slices; i++) {
