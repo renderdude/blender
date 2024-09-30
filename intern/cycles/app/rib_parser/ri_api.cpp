@@ -1,4 +1,3 @@
-#include "util/defines.h"
 #include <cmath>
 #include <fcntl.h>
 #include <sstream>
@@ -37,6 +36,7 @@ namespace bfs = boost::filesystem;
 #include "util/math.h"
 #include "util/projection.h"
 #include "util/transform.h"
+#include "util/vector.h"
 
 #include "exporters/curves.h"
 #include "exporters/geometry.h"
@@ -1627,15 +1627,18 @@ void Ri::PointsPolygons(std::vector<int> n_vertices,
   }
 
   bool has_varying_normals = false;
+  bool has_uvs = false;
   for (auto &p : params) {
-    if (p->type == Parameter_Type::Normal) {
-      if (p->storage == Container_Type::FaceVarying || p->storage == Container_Type::Varying ||
-          p->storage == Container_Type::Vertex)
-      {
-        has_varying_normals = true;
+      if (p->type == Parameter_Type::Normal) {
+          if (p->storage == Container_Type::FaceVarying || p->storage == Container_Type::Varying ||
+              p->storage == Container_Type::Vertex)
+          {
+              has_varying_normals = true;
+          }
       }
-      break;
-    }
+      else if (p->type == Parameter_Type::Point2 && (p->name == "st" || p->name == "uv")) {
+        has_uvs = true;
+      }
   }
 
   if (has_varying_normals) {
@@ -1643,6 +1646,26 @@ void Ri::PointsPolygons(std::vector<int> n_vertices,
     param->add_bool(true);
     params.push_back(param);
   }
+
+  if (!has_uvs) {
+    param = new Parsed_Parameter(Parameter_Type::Point2, "uv", loc);
+    param->storage = Container_Type::FaceVarying;
+    param->elem_per_item = 2;
+    std::vector<float> tc = {0, 0, 1, 0, 1, 1, 0, 1};
+    for (int i = 0; i < 2*vertices.size(); i++) {
+      param->add_float(0);
+    }
+    vector<float>& tex_coords = param->floats();
+    int index = 0;
+    for (auto i = 0; i < n_vertices.size(); i++) {
+      for (auto j = 0; j < n_vertices[i]; j++) {
+        tex_coords[index++] = tc[2*j];
+        tex_coords[index++] = tc[2*j+1];
+      }
+    }
+    params.push_back(param);
+  }
+
   Shape("mesh", params, loc);
 }
 
