@@ -4711,6 +4711,11 @@ def km_grease_pencil_edit_mode(params):
         ("grease_pencil.cyclical_set", {"type": 'C', "value": 'PRESS',
          "alt": True}, {"properties": [("type", "TOGGLE")]}),
 
+        # Join selection
+        ("grease_pencil.join_selection", {"type": 'J', "value": 'PRESS', "ctrl": True}, None),
+        ("grease_pencil.join_selection", {"type": 'J', "value": 'PRESS', "shift": True, "ctrl": True},
+         {"properties": [("type", 'JOINCOPY')]}),
+
         ("grease_pencil.duplicate_move", {"type": 'D', "value": 'PRESS', "shift": True}, None),
 
         # Extrude and move selected points
@@ -4777,6 +4782,13 @@ def km_grease_pencil_sculpt_mode(params):
          "ctrl": True}, {"properties": [("mode", 'INVERT')]}),
         ("grease_pencil.sculpt_paint", {"type": 'LEFTMOUSE', "value": 'PRESS',
          "shift": True}, {"properties": [("mode", 'SMOOTH')]}),
+        # Selection mode
+        ("wm.context_toggle", {"type": 'ONE', "value": 'PRESS'},
+         {"properties": [("data_path", 'scene.tool_settings.use_gpencil_select_mask_point')]}),
+        ("wm.context_toggle", {"type": 'TWO', "value": 'PRESS'},
+         {"properties": [("data_path", 'scene.tool_settings.use_gpencil_select_mask_stroke')]}),
+        ("wm.context_toggle", {"type": 'THREE', "value": 'PRESS'},
+         {"properties": [("data_path", 'scene.tool_settings.use_gpencil_select_mask_segment')]}),
         *_template_paint_radial_control("gpencil_sculpt_paint"),
         op_asset_shelf_popup(
             "VIEW3D_AST_brush_gpencil_sculpt",
@@ -4863,6 +4875,13 @@ def km_grease_pencil_vertex_paint(params):
          {"properties": [("scalar", 0.9)]}),
         ("brush.scale_size", {"type": 'RIGHT_BRACKET', "value": 'PRESS', "repeat": True},
          {"properties": [("scalar", 1.0 / 0.9)]}),
+        # Selection mode
+        ("wm.context_toggle", {"type": 'ONE', "value": 'PRESS'},
+         {"properties": [("data_path", 'scene.tool_settings.use_gpencil_vertex_select_mask_point')]}),
+        ("wm.context_toggle", {"type": 'TWO', "value": 'PRESS'},
+         {"properties": [("data_path", 'scene.tool_settings.use_gpencil_vertex_select_mask_stroke')]}),
+        ("wm.context_toggle", {"type": 'THREE', "value": 'PRESS'},
+         {"properties": [("data_path", 'scene.tool_settings.use_gpencil_vertex_select_mask_segment')]}),
         # Radial controls
         *_template_paint_radial_control("gpencil_vertex_paint"),
         # Context menu
@@ -5788,34 +5807,34 @@ def km_sculpt(params):
         # Brushes
         ("brush.asset_activate", {"type": 'V', "value": 'PRESS'},
          {"properties": [("asset_library_type", 'ESSENTIALS'),
-                         ("relative_asset_identifier", "brushes/essentials_brushes.blend/Brush/Draw")]}),
+                         ("relative_asset_identifier", "brushes/essentials_brushes-mesh_sculpt.blend/Brush/Draw")]}),
         ("brush.asset_activate", {"type": 'S', "value": 'PRESS'},
          {"properties": [("asset_library_type", 'ESSENTIALS'),
-                         ("relative_asset_identifier", "brushes/essentials_brushes.blend/Brush/Smooth")]}),
+                         ("relative_asset_identifier", "brushes/essentials_brushes-mesh_sculpt.blend/Brush/Smooth")]}),
         ("brush.asset_activate", {"type": 'P', "value": 'PRESS'},
          {"properties": [("asset_library_type", 'ESSENTIALS'),
-                         ("relative_asset_identifier", "brushes/essentials_brushes.blend/Brush/Pinch/Magnify")]}),
+                         ("relative_asset_identifier", "brushes/essentials_brushes-mesh_sculpt.blend/Brush/Pinch/Magnify")]}),
         ("brush.asset_activate", {"type": 'I', "value": 'PRESS'},
          {"properties": [("asset_library_type", 'ESSENTIALS'),
-                         ("relative_asset_identifier", "brushes/essentials_brushes.blend/Brush/Inflate/Deflate")]}),
+                         ("relative_asset_identifier", "brushes/essentials_brushes-mesh_sculpt.blend/Brush/Inflate/Deflate")]}),
         ("brush.asset_activate", {"type": 'G', "value": 'PRESS'},
          {"properties": [("asset_library_type", 'ESSENTIALS'),
-                         ("relative_asset_identifier", "brushes/essentials_brushes.blend/Brush/Grab")]}),
+                         ("relative_asset_identifier", "brushes/essentials_brushes-mesh_sculpt.blend/Brush/Grab")]}),
         ("brush.asset_activate", {"type": 'T', "value": 'PRESS', "shift": True},
          {"properties": [("asset_library_type", 'ESSENTIALS'),
-                         ("relative_asset_identifier", "brushes/essentials_brushes.blend/Brush/Scrape/Fill")]}),
+                         ("relative_asset_identifier", "brushes/essentials_brushes-mesh_sculpt.blend/Brush/Scrape/Fill")]}),
         ("brush.asset_activate", {"type": 'C', "value": 'PRESS'},
          {"properties": [("asset_library_type", 'ESSENTIALS'),
-                         ("relative_asset_identifier", "brushes/essentials_brushes.blend/Brush/Clay Strips")]}),
+                         ("relative_asset_identifier", "brushes/essentials_brushes-mesh_sculpt.blend/Brush/Clay Strips")]}),
         ("brush.asset_activate", {"type": 'C', "value": 'PRESS', "shift": True},
          {"properties": [("asset_library_type", 'ESSENTIALS'),
-                         ("relative_asset_identifier", "brushes/essentials_brushes.blend/Brush/Crease")]}),
+                         ("relative_asset_identifier", "brushes/essentials_brushes-mesh_sculpt.blend/Brush/Crease")]}),
         ("brush.asset_activate", {"type": 'K', "value": 'PRESS'},
          {"properties": [("asset_library_type", 'ESSENTIALS'),
-                         ("relative_asset_identifier", "brushes/essentials_brushes.blend/Brush/Snake Hook")]}),
+                         ("relative_asset_identifier", "brushes/essentials_brushes-mesh_sculpt.blend/Brush/Snake Hook")]}),
         ("brush.asset_activate", {"type": 'M', "value": 'PRESS'},
          {"properties": [("asset_library_type", 'ESSENTIALS'),
-                         ("relative_asset_identifier", "brushes/essentials_brushes.blend/Brush/Mask")]}),
+                         ("relative_asset_identifier", "brushes/essentials_brushes-mesh_sculpt.blend/Brush/Mask")]}),
         op_asset_shelf_popup(
             "VIEW3D_AST_brush_sculpt",
             {"type": 'SPACE', "value": 'PRESS', "shift": True}
@@ -8897,6 +8916,19 @@ def km_3d_view_tool_sculpt_gpencil_select_lasso(params):
         {"items": _template_items_tool_select_actions("gpencil.select_lasso", **params.tool_tweak_event)},
     )
 
+# ------------------------------------------------------------------------------
+# Grease Pencil: Texture Gradient Tool
+
+
+def km_3d_view_tool_edit_grease_pencil_texture_gradient(params):
+    return (
+        "3D View Tool: Edit Grease Pencil, Gradient",
+        {"space_type": 'VIEW_3D', "region_type": 'WINDOW'},
+        {"items": [
+            ("grease_pencil.texture_gradient", params.tool_maybe_tweak_event, None),
+        ]},
+    )
+
 
 # ------------------------------------------------------------------------------
 # Tool System (Sequencer, Generic)
@@ -9382,6 +9414,7 @@ def generate_keymaps(params=None):
         *(km_sequencer_editor_tool_generic_select_box_preview(params, fallback=fallback)
           for fallback in (False, True)),
         km_3d_view_tool_paint_grease_pencil_trim(params),
+        km_3d_view_tool_edit_grease_pencil_texture_gradient(params),
         km_sequencer_editor_tool_generic_cursor(params),
         km_sequencer_editor_tool_blade(params),
         km_sequencer_editor_tool_sample(params),

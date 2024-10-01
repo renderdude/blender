@@ -342,9 +342,9 @@ class DOPESHEET_HT_editor_buttons:
             case 'ACTION':
                 return context.object
             case 'SHAPEKEY':
-                return context.object.data and getattr(context.object.data, 'shape_keys', None)
+                return getattr(context.object.data, "shape_keys", None)
             case _:
-                print("Dope Sheet mode '{}' not expected to have an Action selector".format(st.mode))
+                print("Dope Sheet mode '{:s}' not expected to have an Action selector".format(st.mode))
                 return context.object
 
 
@@ -401,6 +401,10 @@ class DOPESHEET_MT_editor_menus(Menu):
             layout.menu("DOPESHEET_MT_key")
         else:
             layout.menu("DOPESHEET_MT_gpencil_key")
+
+        if st.mode in {'ACTION', 'SHAPEKEY'} and st.action is not None:
+            if context.preferences.experimental.use_animation_baklava:
+                layout.menu("DOPESHEET_MT_action")
 
 
 class DOPESHEET_MT_view(Menu):
@@ -581,6 +585,18 @@ class DOPESHEET_MT_channel(Menu):
         layout.operator("anim.channels_view_selected")
 
 
+class DOPESHEET_MT_action(Menu):
+    bl_label = "Action"
+
+    def draw(self, context):
+        layout = self.layout
+        layout.operator("anim.merge_animation")
+        layout.operator("anim.separate_slots")
+
+        layout.separator()
+        layout.operator("anim.slot_channels_move_to_new_action")
+
+
 class DOPESHEET_MT_key(Menu):
     bl_label = "Key"
 
@@ -698,7 +714,21 @@ class DOPESHEET_PT_action_slot(Panel):
         action = context.active_action
         slot = action.slots.active
 
-        layout.prop(slot, "name_display", text="Name", icon_value=slot.idtype_icon)
+        layout.prop(slot, "name_display", text="Name")
+
+        # Draw the ID type of the slot.
+        try:
+            enum_items = slot.bl_rna.properties['id_root'].enum_items
+            idtype_label = enum_items[slot.id_root].name
+        except (KeyError, IndexError, AttributeError) as ex:
+            idtype_label = str(ex)
+
+        split = layout.split(factor=0.4)
+        split.alignment = 'RIGHT'
+        split.label(text="Type")
+        split.alignment = 'LEFT'
+
+        split.label(text=idtype_label, icon_value=slot.id_root_icon)
 
 
 #######################################
@@ -1030,6 +1060,7 @@ classes = (
     DOPESHEET_MT_select,
     DOPESHEET_MT_marker,
     DOPESHEET_MT_channel,
+    DOPESHEET_MT_action,
     DOPESHEET_MT_key,
     DOPESHEET_MT_key_transform,
     DOPESHEET_MT_gpencil_channel,

@@ -222,7 +222,7 @@ static const EnumPropertyItem rna_enum_preferences_extension_repo_source_type_it
 
 #  include "BLF_api.hh"
 
-#  include "BLI_path_util.h"
+#  include "BLI_path_utils.hh"
 
 #  include "MEM_CacheLimiterC-Api.h"
 #  include "MEM_guardedalloc.h"
@@ -1464,7 +1464,7 @@ static int rna_preference_gpu_preferred_device_get(PointerRNA *ptr)
         gpu_device.vendor_id == preferences->gpu_preferred_vendor_id &&
         gpu_device.device_id == preferences->gpu_preferred_device_id)
     {
-      /* Offset by one as first item in the list is always autodetection. */
+      /* Offset by one as first item in the list is always auto-detection. */
       return index;
     }
     index += 1;
@@ -1950,11 +1950,24 @@ static void rna_def_userdef_theme_ui(BlenderRNA *brna)
       prop, "Widget Emboss", "Color of the 1px shadow line underlying widgets");
   RNA_def_property_update(prop, 0, "rna_userdef_theme_update");
 
+  prop = RNA_def_property(srna, "editor_border", PROP_FLOAT, PROP_COLOR_GAMMA);
+  RNA_def_property_float_sdna(prop, nullptr, "editor_border");
+  RNA_def_property_array(prop, 3);
+  RNA_def_property_ui_text(prop, "Editor Border", "Color of the border between editors");
+  RNA_def_property_update(prop, 0, "rna_userdef_theme_update");
+
   prop = RNA_def_property(srna, "editor_outline", PROP_FLOAT, PROP_COLOR_GAMMA);
   RNA_def_property_float_sdna(prop, nullptr, "editor_outline");
-  RNA_def_property_array(prop, 3);
+  RNA_def_property_array(prop, 4);
   RNA_def_property_ui_text(
-      prop, "Editor Outline", "Color of the outline of the editors and their round corners");
+      prop, "Editor Outline", "Color of the outline of each editor, except the active one");
+  RNA_def_property_update(prop, 0, "rna_userdef_theme_update");
+
+  prop = RNA_def_property(srna, "editor_outline_active", PROP_FLOAT, PROP_COLOR_GAMMA);
+  RNA_def_property_float_sdna(prop, nullptr, "editor_outline_active");
+  RNA_def_property_array(prop, 4);
+  RNA_def_property_ui_text(
+      prop, "Active Editor Outline", "Color of the outline of the active editor");
   RNA_def_property_update(prop, 0, "rna_userdef_theme_update");
 
   prop = RNA_def_property(srna, "widget_text_cursor", PROP_FLOAT, PROP_COLOR_GAMMA);
@@ -3476,6 +3489,12 @@ static void rna_def_userdef_theme_space_node(BlenderRNA *brna)
   RNA_def_property_float_sdna(prop, nullptr, "node_zone_repeat");
   RNA_def_property_array(prop, 4);
   RNA_def_property_ui_text(prop, "Repeat Zone", "");
+  RNA_def_property_update(prop, 0, "rna_userdef_theme_update");
+
+  prop = RNA_def_property(srna, "foreach_geometry_element_zone", PROP_FLOAT, PROP_COLOR_GAMMA);
+  RNA_def_property_float_sdna(prop, nullptr, "node_zone_foreach_geometry_element");
+  RNA_def_property_array(prop, 4);
+  RNA_def_property_ui_text(prop, "For Each Geometry Element Zone", "");
   RNA_def_property_update(prop, 0, "rna_userdef_theme_update");
 }
 
@@ -7570,12 +7589,6 @@ static void rna_def_userdef_experimental(BlenderRNA *brna)
       prop,
       "Multi-Slot Actions",
       "The new 'layered' Action can contain the animation for multiple data-blocks at once");
-  RNA_def_property_update(prop, 0, "rna_userdef_update");
-
-  prop = RNA_def_property(srna, "use_docking", PROP_BOOLEAN, PROP_NONE);
-  RNA_def_property_ui_text(prop,
-                           "Interactive Editor Docking",
-                           "Move editor areas to new locations, including between windows");
   RNA_def_property_update(prop, 0, "rna_userdef_update");
 }
 
