@@ -7589,6 +7589,12 @@ static void rna_def_userdef_experimental(BlenderRNA *brna)
       prop,
       "Multi-Slot Actions",
       "The new 'layered' Action can contain the animation for multiple data-blocks at once");
+#  ifndef WITH_ANIM_BAKLAVA
+  /* Only allow setting this to 'true' when actually built with Baklava. Some of the Baklava code
+   * is not guarded with `WITH_ANIM_BAKLAVA`, but rather assumes that this flag is always 'false'
+   * then. */
+  RNA_def_property_clear_flag(prop, PROP_EDITABLE);
+#  endif
   RNA_def_property_update(prop, 0, "rna_userdef_update");
 }
 
