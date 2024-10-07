@@ -1447,6 +1447,20 @@ ActionSlotAssignmentResult assign_action_and_slot(Action *action,
   return assign_action_slot(slot_to_assign, animated_id);
 }
 
+ActionSlotAssignmentResult assign_tmpaction_and_slot_handle(bAction *action,
+                                                            const slot_handle_t slot_handle,
+                                                            const OwnedAnimData owned_adt)
+{
+  if (!assign_tmpaction(action, owned_adt)) {
+    return ActionSlotAssignmentResult::MissingAction;
+  }
+  return generic_assign_action_slot_handle(slot_handle,
+                                           owned_adt.owner_id,
+                                           owned_adt.adt.tmpact,
+                                           owned_adt.adt.tmp_slot_handle,
+                                           owned_adt.adt.tmp_slot_name);
+}
+
 /* TODO: rename to get_action(). */
 Action *get_action(ID &animated_id)
 {
@@ -2342,6 +2356,20 @@ Vector<FCurve *> fcurves_in_action_slot_filtered(bAction *act,
   return found;
 }
 
+Vector<FCurve *> fcurves_in_span_filtered(Span<FCurve *> fcurves,
+                                          FunctionRef<bool(const FCurve &fcurve)> predicate)
+{
+  Vector<FCurve *> found;
+
+  for (FCurve *fcurve : fcurves) {
+    if (predicate(*fcurve)) {
+      found.append(fcurve);
+    }
+  }
+
+  return found;
+}
+
 Vector<FCurve *> fcurves_in_listbase_filtered(ListBase /* FCurve * */ fcurves,
                                               FunctionRef<bool(const FCurve &fcurve)> predicate)
 {
@@ -2472,22 +2500,11 @@ FCurve *action_fcurve_ensure(Main *bmain,
 
 bool action_fcurve_remove(Action &action, FCurve &fcu)
 {
-  BLI_assert(action.is_action_layered());
-
-  for (Layer *layer : action.layers()) {
-    for (Strip *strip : layer->strips()) {
-      if (!(strip->type() == Strip::Type::Keyframe)) {
-        continue;
-      }
-      StripKeyframeData &strip_data = strip->data<StripKeyframeData>(action);
-      for (ChannelBag *bag : strip_data.channelbags()) {
-        const bool removed = bag->fcurve_remove(fcu);
-        if (removed) {
-          return true;
-        }
-      }
-    }
+  if (action_fcurve_detach(action, fcu)) {
+    BKE_fcurve_free(&fcu);
+    return true;
   }
+
   return false;
 }
 
