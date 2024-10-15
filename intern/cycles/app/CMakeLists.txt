@@ -82,9 +82,9 @@ else()
   list(APPEND LIB bf_intern_sky)
 endif()
 
-if(WITH_CYCLES_STANDALONE)
+if(WITH_MATERIALX)
   list(APPEND INC_SYS ${MATERIALX_INCLUDE_DIRS})
-  list(APPEND LIB ${MATERIALX_LIBRARIES} double-conversion::double-conversion)
+  list(APPEND LIB MaterialXCore MaterialXGenOsl double-conversion::double-conversion)
 endif()
 
 if(WITH_CYCLES_STANDALONE AND WITH_CYCLES_STANDALONE_GUI)
@@ -176,8 +176,7 @@ if(WITH_CYCLES_STANDALONE)
   unset(SRC)
 
   target_link_libraries(cycles PRIVATE ${LIB})
-  message(MATERIALX_FOUND=${MATERIALX_FOUND})
-  if (MATERIALX_FOUND)
+  if (WITH_MATERIALX)
     message(MATERIALX_BASE_DIR="${MATERIALX_BASE_DIR}")
     add_definitions(-DMATERIALX_BASE_DIR="${MATERIALX_BASE_DIR}")
     add_definitions(-DMATERIALX_INCLUDE_DIR="${MATERIALX_BASE_DIR}/include")
@@ -190,8 +189,8 @@ if(WITH_CYCLES_STANDALONE)
     endif()
   set_target_properties(cycles PROPERTIES
     XCODE_GENERATE_SCHEME TRUE
-    XCODE_SCHEME_WORKING_DIRECTORY "/Users/mbolsta"
-    XCODE_SCHEME_ARGUMENTS "--display-type tev;--display-server 127.0.0.1:14158;--shadingsys osl;--samples 16;--tile-size 64;--threads 0;/Users/mbolsta/osl_test.ris1.0001.rib"
+    XCODE_SCHEME_WORKING_DIRECTORY "/Users/mbolsta/Test_Scenes/Houdini"
+    XCODE_SCHEME_ARGUMENTS "--display-type tev;--display-server 127.0.0.1:14158;--shadingsys osl;--samples 16;--tile-size 64;--threads 0;osl_test.ris1.0001.rib"
   )
   endif()
 
@@ -214,6 +213,43 @@ if(WITH_CYCLES_STANDALONE)
   add_test(
     NAME cycles_version
     COMMAND ${CMAKE_INSTALL_PREFIX}/$<TARGET_FILE_NAME:cycles> --version)
+
+  # Copy materialx shaders if necessary
+  file(
+      GENERATE 
+          OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/fix_shaders_for_materialx.cmake"
+          CONTENT 
+              "if (NOT EXISTS \"$<TARGET_FILE_DIR:cycles>/shader\")
+                  execute_process(
+                       COMMAND \"${CMAKE_COMMAND}\" -E create_symlink
+                           \"${CMAKE_BINARY_DIR}/intern/cycles/kernel/osl/shaders\"
+                           \"$<TARGET_FILE_DIR:cycles>/shader\"
+                  )
+                  execute_process(
+                       COMMAND \"${CMAKE_COMMAND}\" -E copy_directory
+                           \"${PROJECT_SOURCE_DIR}/lib/macos_arm64/materialx/libraries/stdlib/genosl/include/\"
+                           \"$<TARGET_FILE_DIR:cycles>/shader\"
+                  )
+                  execute_process(
+                       COMMAND \"${CMAKE_COMMAND}\" -E copy
+                           \"${PROJECT_SOURCE_DIR}/intern/cycles/kernel/osl/shaders/stdcycles.h\"
+                           \"$<TARGET_FILE_DIR:cycles>/shader\"
+                  )
+                  execute_process(
+                       COMMAND \"${CMAKE_COMMAND}\" -E copy
+                           \"${PROJECT_SOURCE_DIR}/lib/macos_arm64/osl/share/OSL/shaders/stdosl.h\"
+                           \"$<TARGET_FILE_DIR:cycles>/shader\"
+                  )
+              endif()"
+  )
+
+  add_custom_command(TARGET cycles POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" -P "fix_shaders_for_materialx.cmake"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+    DEPENDS $<TARGET_FILE:cycles>
+    VERBATIM ON
+  )
+
 endif()
 
 if(WITH_CYCLES_PRECOMPUTE)
