@@ -53,7 +53,8 @@ CCL_NAMESPACE_BEGIN
 
 static bfs::path search_directory;
 
-float3 spherical_to_direction(float theta, float phi)
+// Similar to util/projection.h with phi/theta reversed to match renderman specification
+float3 ri_spherical_to_direction(float theta, float phi)
 {
   float sin_phi = sinf(phi);
   return make_float3(sin_phi * cosf(theta), cosf(phi), sin_phi * sinf(theta));
@@ -1891,7 +1892,7 @@ void Ri::Sphere(float radius,
   float phi = start_phi;
   for (int j = 0; j < n_slices; ++j) {
     float theta = thetamax * float(j) / float(n_slices);
-    float3 dir = spherical_to_direction(-theta, phi);
+    float3 dir = ri_spherical_to_direction(-theta, phi);
     norms.push_back(dir.x);
     norms.push_back(dir.y);
     norms.push_back(dir.z);
@@ -1908,7 +1909,7 @@ void Ri::Sphere(float radius,
     float phi = start_phi + delta_phi * float(i + 1) / float(n_stacks);
     for (int j = 0; j < n_slices; ++j) {
       float theta = thetamax * float(j) / float(n_slices);
-      float3 dir = spherical_to_direction(-theta, phi);
+      float3 dir = ri_spherical_to_direction(-theta, phi);
       norms.push_back(dir.x);
       norms.push_back(dir.y);
       norms.push_back(dir.z);
@@ -1925,7 +1926,7 @@ void Ri::Sphere(float radius,
   phi = end_phi;
   for (int j = 0; j < n_slices; ++j) {
     float theta = thetamax * float(j) / float(n_slices);
-    float3 dir = spherical_to_direction(-theta, phi);
+    float3 dir = ri_spherical_to_direction(-theta, phi);
     norms.push_back(dir.x);
     norms.push_back(dir.y);
     norms.push_back(dir.z);
