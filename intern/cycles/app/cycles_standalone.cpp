@@ -146,6 +146,12 @@ static void session_init()
   options.output_pass = "combined";
   options.session = new Session(options.session_params, options.scene_params);
 
+#ifdef WITH_CYCLES_DISTRIBUTED
+  if (!options.bind_to.empty() || !options.connect_to.empty()) {
+    options.session->distributed = new Distributed(options.bind_to, options.connect_to);
+  }
+#endif
+
 #ifdef WITH_CYCLES_STANDALONE_GUI
   if (!options.session_params.background) {
     if (options.display_type == "gl")

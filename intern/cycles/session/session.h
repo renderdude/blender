@@ -16,7 +16,10 @@
 #include "util/stats.h"
 #include "util/thread.h"
 #include "util/unique_ptr.h"
-#include "util/vector.h"
+
+#ifdef WITH_CYCLES_DISTRIBUTED
+#include "distributed/distributed.h"
+#endif
 
 CCL_NAMESPACE_BEGIN
 
@@ -115,7 +118,9 @@ class Session {
   SessionParams params;
   Stats stats;
   Profiler profiler;
-
+#ifdef WITH_CYCLES_DISTRIBUTED
+  Distributed* distributed;
+#endif
   /* Callback is invoked by tile manager whenever on-dist tiles storage file is closed after
    * writing. Allows an engine integration to keep track of those files without worry about
    * transferring the information when it needs to re-create session during rendering. */
