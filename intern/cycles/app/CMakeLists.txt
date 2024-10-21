@@ -219,26 +219,26 @@ if(WITH_CYCLES_STANDALONE)
       GENERATE 
           OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/fix_shaders_for_materialx.cmake"
           CONTENT 
-              "if (NOT EXISTS \"$<TARGET_FILE_DIR:cycles>/shader\")
+              "if (NOT EXISTS \"${CMAKE_BINARY_DIR}/shader\")
                   execute_process(
                        COMMAND \"${CMAKE_COMMAND}\" -E create_symlink
                            \"${CMAKE_BINARY_DIR}/intern/cycles/kernel/osl/shaders\"
-                           \"$<TARGET_FILE_DIR:cycles>/shader\"
+                           \"${CMAKE_BINARY_DIR}/shader\"
                   )
                   execute_process(
                        COMMAND \"${CMAKE_COMMAND}\" -E copy_directory
                            \"${PROJECT_SOURCE_DIR}/lib/macos_arm64/materialx/libraries/stdlib/genosl/include/\"
-                           \"$<TARGET_FILE_DIR:cycles>/shader\"
+                           \"${CMAKE_BINARY_DIR}/shader\"
                   )
                   execute_process(
                        COMMAND \"${CMAKE_COMMAND}\" -E copy
                            \"${PROJECT_SOURCE_DIR}/intern/cycles/kernel/osl/shaders/stdcycles.h\"
-                           \"$<TARGET_FILE_DIR:cycles>/shader\"
+                           \"${CMAKE_BINARY_DIR}/shader\"
                   )
                   execute_process(
                        COMMAND \"${CMAKE_COMMAND}\" -E copy
                            \"${PROJECT_SOURCE_DIR}/lib/macos_arm64/osl/share/OSL/shaders/stdosl.h\"
-                           \"$<TARGET_FILE_DIR:cycles>/shader\"
+                           \"${CMAKE_BINARY_DIR}/shader\"
                   )
               endif()"
   )

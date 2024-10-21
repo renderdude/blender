@@ -42,6 +42,8 @@
 #  include "opengl/window.h"
 #endif
 
+#include <OpenImageIO/sysutil.h>
+
 #ifdef WITH_CYCLES_DISTRIBUTED
 # include "distributed/distributed.h"
 #endif
@@ -143,6 +145,8 @@ static void scene_init()
 
 static void session_init()
 {
+  std::string base_path = path_dirname(path_dirname(Sysutil::this_program_path()));
+  setenv("CYCLES_SHADER_PATH", path_join(base_path, "shader").c_str(), 0);
   options.output_pass = "combined";
   options.session = new Session(options.session_params, options.scene_params);
 
