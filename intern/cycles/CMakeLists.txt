@@ -210,6 +210,15 @@ include_directories(
 
 if(WITH_CYCLES_DISTRIBUTED)
   add_definitions(-DWITH_CYCLES_DISTRIBUTED)
+    include_directories(
+      ../../extern/mpl
+    )
+  include_directories(
+    SYSTEM
+    ${MPI_C_INCLUDE_DIRS}
+    ${cppzmq_INCLUDE_DIR}
+    ${ZeroMQ_INCLUDE_DIR}
+  )
 endif()
 
 if(WITH_CYCLES_DEBUG)
