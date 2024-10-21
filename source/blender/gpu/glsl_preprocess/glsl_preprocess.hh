@@ -63,34 +63,37 @@ class Preprocessor {
   std::string process(std::string str,
                       const std::string &filename,
                       bool do_linting,
+                      bool do_parse_function,
                       bool do_string_mutation,
-                      bool do_include_mutation,
+                      bool do_include_parsing,
                       bool do_small_type_linting,
                       report_callback report_error)
   {
     str = remove_comments(str, report_error);
     threadgroup_variables_parsing(str);
     parse_builtins(str);
-    if (true) {
+    if (do_parse_function) {
       parse_library_functions(str);
     }
-    if (do_include_mutation) {
-      preprocessor_parse(str);
-      str = preprocessor_directive_mutation(str);
+    if (do_include_parsing) {
+      include_parse(str);
     }
+    str = preprocessor_directive_mutation(str);
     if (do_string_mutation) {
       static_strings_parsing(str);
       str = static_strings_mutation(str);
       str = printf_processing(str, report_error);
-      str = remove_quotes(str);
+      quote_linting(str, report_error);
     }
     if (do_linting) {
+      global_scope_constant_linting(str, report_error);
       matrix_constructor_linting(str, report_error);
       array_constructor_linting(str, report_error);
     }
     if (do_small_type_linting) {
       small_type_linting(str, report_error);
     }
+    str = remove_quotes(str);
     str = enum_macro_injection(str);
     str = argument_decorator_macro_injection(str);
     str = array_constructor_macro_injection(str);
@@ -103,7 +106,7 @@ class Preprocessor {
   std::string process(const std::string &str)
   {
     auto no_err_report = [](std::smatch, const char *) {};
-    return process(str, "", false, false, false, false, no_err_report);
+    return process(str, "", false, false, false, false, false, no_err_report);
   }
 
  private:
@@ -166,7 +169,7 @@ class Preprocessor {
       }
     }
     /* Remove trailing white space as they make the subsequent regex much slower. */
-    std::regex regex("(\\ )*?\\n");
+    std::regex regex(R"((\ )*?\n)");
     return std::regex_replace(out_str, regex, "\n");
   }
 
@@ -175,7 +178,7 @@ class Preprocessor {
     return std::regex_replace(str, std::regex(R"(["'])"), " ");
   }
 
-  void preprocessor_parse(const std::string &str)
+  void include_parse(const std::string &str)
   {
     /* Parse include directive before removing them. */
     std::regex regex(R"(#\s*include\s*\"(\w+\.\w+)\")");
@@ -211,7 +214,7 @@ class Preprocessor {
 
   void threadgroup_variables_parsing(const std::string &str)
   {
-    std::regex regex("shared\\s+(\\w+)\\s+(\\w+)([^;]*);");
+    std::regex regex(R"(shared\s+(\w+)\s+(\w+)([^;]*);)");
     regex_global_search(str, regex, [&](const std::smatch &match) {
       shared_vars_.push_back({match[1].str(), match[2].str(), match[3].str()});
     });
@@ -327,14 +330,14 @@ class Preprocessor {
     /* Example: `pri$$1(2@ b)$` > `{int c_ = print_header(1, 2); c_ = print_data(c_, b); }` */
     {
       std::regex regex(R"(pri\$\$?(\d{1,2})\()");
-      out_str = std::regex_replace(out_str, regex, "{int c_ = print_header($1, ");
+      out_str = std::regex_replace(out_str, regex, "{uint c_ = print_header($1u, ");
     }
     {
-      std::regex regex("\\@");
+      std::regex regex(R"(\@)");
       out_str = std::regex_replace(out_str, regex, "); c_ = print_data(c_,");
     }
     {
-      std::regex regex("\\$");
+      std::regex regex(R"(\$)");
       out_str = std::regex_replace(out_str, regex, "; }");
     }
     return out_str;
@@ -342,10 +345,18 @@ class Preprocessor {
 
   void static_strings_parsing(const std::string &str)
   {
-    /* Matches any character inside a pair of unescaped quote. */
+    /* Matches any character inside a pair of un-escaped quote. */
     std::regex regex(R"("(?:[^"])*")");
     regex_global_search(
         str, regex, [&](const std::smatch &match) { static_strings_.insert(match[0].str()); });
+  }
+
+  /* String hash are outputted inside GLSL and needs to fit 32 bits. */
+  static uint64_t hash_string(const std::string &str)
+  {
+    uint64_t hash_64 = hash(str);
+    uint32_t hash_32 = uint32_t(hash_64 ^ (hash_64 >> 32));
+    return hash_32;
   }
 
   std::string static_strings_mutation(std::string str)
@@ -354,11 +365,9 @@ class Preprocessor {
     for (const std::string &str_var : static_strings_) {
       std::regex escape_regex(R"([\\\.\^\$\+\(\)\[\]\{\}\|\?\*])");
       std::string str_regex = std::regex_replace(str_var, escape_regex, "\\$&");
-      uint64_t hash_64 = hash(str_var);
-      uint32_t hash_32 = uint32_t(hash_64 ^ (hash_64 >> 32));
 
       std::regex regex(str_regex);
-      str = std::regex_replace(str, regex, std::to_string(hash_32) + 'u');
+      str = std::regex_replace(str, regex, std::to_string(hash_string(str_var)) + 'u');
     }
     return str;
   }
@@ -370,7 +379,8 @@ class Preprocessor {
     }
     std::stringstream suffix;
     for (const std::string &str_var : static_strings_) {
-      suffix << "// " << hash("string") << " " << hash(str_var) << " " << str_var << "\n";
+      std::string no_quote = str_var.substr(1, str_var.size() - 2);
+      suffix << "// " << hash("string") << " " << hash_string(str_var) << " " << no_quote << "\n";
     }
     return suffix.str();
   }
@@ -425,23 +435,22 @@ class Preprocessor {
   std::string argument_decorator_macro_injection(const std::string &str)
   {
     /* Example: `out float var[2]` > `out float _out_sta var _out_end[2]` */
-    std::regex regex("(out|inout|in|shared)\\s+(\\w+)\\s+(\\w+)");
+    std::regex regex(R"((out|inout|in|shared)\s+(\w+)\s+(\w+))");
     return std::regex_replace(str, regex, "$1 $2 _$1_sta $3 _$1_end");
   }
 
   std::string array_constructor_macro_injection(const std::string &str)
   {
     /* Example: `= float[2](0.0, 0.0)` > `= ARRAY_T(float) ARRAY_V(0.0, 0.0)` */
-    std::regex regex("=\\s*(\\w+)\\s*\\[[^\\]]*\\]\\s*\\(");
+    std::regex regex(R"(=\s*(\w+)\s*\[[^\]]*\]\s*\()");
     return std::regex_replace(str, regex, "= ARRAY_T($1) ARRAY_V(");
   }
 
   /* TODO(fclem): Too many false positive and false negative to be applied to python shaders. */
-  template<typename ReportErrorF>
-  void matrix_constructor_linting(const std::string &str, const ReportErrorF &report_error)
+  void matrix_constructor_linting(const std::string &str, report_callback report_error)
   {
     /* Example: `mat4(other_mat)`. */
-    std::regex regex("\\s+(mat(\\d|\\dx\\d)|float\\dx\\d)\\([^,\\s\\d]+\\)");
+    std::regex regex(R"(\s+(mat(\d|\dx\d)|float\dx\d)\([^,\s\d]+\))");
     regex_global_search(str, regex, [&](const std::smatch &match) {
       /* This only catches some invalid usage. For the rest, the CI will catch them. */
       const char *msg =
@@ -451,10 +460,37 @@ class Preprocessor {
     });
   }
 
+  /* Assume formatted source with our code style. Cannot be applied to python shaders. */
+  template<typename ReportErrorF>
+  void global_scope_constant_linting(std::string str, const ReportErrorF &report_error)
+  {
+    /* Example: `const uint global_var = 1u;`. Matches if not indented (i.e. inside a scope). */
+    std::regex regex(R"(const \w+ \w+ =)");
+    regex_global_search(str, regex, [&](const std::smatch &match) {
+      /* Positive look-behind is not supported in #std::regex. Do it manually. */
+      if (match.prefix().str().back() == '\n') {
+        const char *msg =
+            "Global scope constant expression found. These get allocated per-thread in MSL. "
+            "Use Macro's or uniforms instead.";
+        report_error(match, msg);
+      }
+    });
+  }
+
+  void quote_linting(const std::string &str, report_callback report_error)
+  {
+    std::regex regex(R"(["'])");
+    regex_global_search(str, regex, [&](const std::smatch &match) {
+      /* This only catches some invalid usage. For the rest, the CI will catch them. */
+      const char *msg = "Quotes are forbidden in GLSL.";
+      report_error(match, msg);
+    });
+  }
+
   template<typename ReportErrorF>
   void array_constructor_linting(const std::string &str, const ReportErrorF &report_error)
   {
-    std::regex regex("=\\s*(\\w+)\\s*\\[[^\\]]*\\]\\s*\\(");
+    std::regex regex(R"(=\s*(\w+)\s*\[[^\]]*\]\s*\()");
     regex_global_search(str, regex, [&](const std::smatch &match) {
       /* This only catches some invalid usage. For the rest, the CI will catch them. */
       const char *msg =
@@ -564,20 +600,21 @@ class Preprocessor {
 
   std::string line_directive_prefix(const std::string &filepath)
   {
+    std::string filename = std::regex_replace(filepath, std::regex(R"((?:.*)\/(.*))"), "$1");
+
     std::stringstream suffix;
     suffix << "#line 1 ";
 #ifdef __APPLE__
-    /* For now, only Metal supports filname in line directive.
+    /* For now, only Metal supports filename in line directive.
      * There is no way to know the actual backend, so we assume Apple uses Metal. */
     /* TODO(fclem): We could make it work using a macro to choose between the filename and the hash
      * at runtime. i.e.: `FILENAME_MACRO(12546546541, 'filename.glsl')` This should work for both
      * MSL and GLSL. */
-    std::string filename = std::regex_replace(filepath, std::regex(R"((?:.*)\/(.*))"), "$1");
     if (!filename.empty()) {
       suffix << "\"" << filename << "\"";
     }
 #else
-    uint64_t hash_value = hash(filepath);
+    uint64_t hash_value = hash(filename);
     /* Fold the value so it fits the GLSL spec. */
     hash_value = (hash_value ^ (hash_value >> 32)) & (~uint64_t(0) >> 33);
     suffix << std::to_string(uint64_t(hash_value));

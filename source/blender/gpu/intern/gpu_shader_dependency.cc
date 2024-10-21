@@ -290,7 +290,7 @@ struct GPUSource {
 
     StringRef hash = pop_token(line);
     StringRef string = line;
-    add_format(uint32_t(std::stol(hash)), string);
+    add_format(uint32_t(std::stoul(hash)), string);
   }
 
   void parse_function(StringRef line, GPUFunctionDictionnary *g_functions)
@@ -378,7 +378,8 @@ struct GPUSource {
     for (auto dependency_name : dependencies_names) {
       GPUSource *dependency_source = dict.lookup_default(dependency_name, nullptr);
       if (dependency_source == nullptr) {
-        print_error(source, 0, "Dependency not found");
+        std::string error = std::string("Dependency not found : ") + dependency_name;
+        print_error(source, 0, error.c_str());
         return 1;
       }
 

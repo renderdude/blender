@@ -31,7 +31,7 @@ int main(int argc, char **argv)
   }
 
   /* Open the output file for writing */
-  std::ofstream output_file(output_file_name);
+  std::ofstream output_file(output_file_name, std::ofstream::out | std::ofstream::binary);
   if (!output_file) {
     std::cerr << "Error: Could not open output file " << output_file_name << std::endl;
     input_file.close();
@@ -78,10 +78,14 @@ int main(int argc, char **argv)
 
     error++;
   };
-
-  const bool is_info = std::string(output_file_name).find("info.hh") != std::string::npos;
-  const bool is_glsl = std::string(output_file_name).find(".glsl") != std::string::npos;
-  const bool is_shared = std::string(output_file_name).find("shared.h") != std::string::npos;
+  std::string filename(output_file_name);
+  const bool is_info = filename.find("info.hh") != std::string::npos;
+  const bool is_glsl = filename.find(".glsl") != std::string::npos;
+  const bool is_shared = filename.find("shared.h") != std::string::npos;
+  const bool is_library = is_glsl &&
+                          (filename.find("gpu_shader_material_") != std::string::npos ||
+                           filename.find("gpu_shader_common_") != std::string::npos ||
+                           filename.find("gpu_shader_compositor_") != std::string::npos);
 
   if (is_info) {
     std::cerr << "File " << output_file_name
@@ -92,7 +96,7 @@ int main(int argc, char **argv)
   blender::gpu::shader::Preprocessor processor;
 
   output_file << processor.process(
-      buffer.str(), input_file_name, true, is_glsl, is_glsl, is_shared, report_error);
+      buffer.str(), input_file_name, true, is_library, is_glsl, is_glsl, is_shared, report_error);
 
   input_file.close();
   output_file.close();
