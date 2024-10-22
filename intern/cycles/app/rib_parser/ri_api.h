@@ -1,10 +1,7 @@
 #ifndef RI_API_H
 #define RI_API_H
 
-#include <functional>
 #include <map>
-#include <memory>
-#include <optional>
 #include <set>
 #include <string>
 #include <string_view>
@@ -20,7 +17,6 @@
 #include "session/buffers.h"
 #include "util/projection.h"
 #include "util/span.h"
-#include "util/transform.h"
 
 CCL_NAMESPACE_BEGIN
 using Point3f = float[3];
@@ -77,7 +73,7 @@ class Ri {
   void Color(float r, float g, float b, File_Loc loc);
   void Cone(
       float height, float radius, float thetamax, Parsed_Parameter_Vector params, File_Loc loc);
-  void ConcatTransform(float transform[16], File_Loc loc);
+  void ConcatTransform(const float transform[16], File_Loc loc);
   void CoordinateSystem(std::string const &name, File_Loc loc);
   void CoordSysTransform(std::string const &name, File_Loc loc);
   void CropWindow(float xmin, float xmax, float ymin, float ymax, File_Loc loc);

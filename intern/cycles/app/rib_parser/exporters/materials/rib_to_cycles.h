@@ -1,18 +1,12 @@
 #ifndef RIB_TO_CYCLES_H
 #define RIB_TO_CYCLES_H
 
-#include "app/rib_parser/exporters/node_util.h"
 #include "app/rib_parser/param_dict.h"
 #include "app/rib_parser/parsed_parameter.h"
-#include "graph/node_type.h"
 #include "scene/osl.h"
 #include "scene/scene.h"
 #include "scene/shader_graph.h"
 #include "scene/shader_nodes.h"
-#include "util/log.h"
-#include "util/path.h"
-#include "util/string.h"
-#include "util/task.h"
 #include "util/vector.h"
 #include <functional>
 #include <string>
@@ -28,7 +22,7 @@ class RIBtoCyclesMapping {
       std::vector<std::string> nodeType,
       ParamMap paramMap,
       std::function<void(std::vector<ShaderNode *>)> remapFunc =
-          [](std::vector<ShaderNode *> nodes) {})
+          [](std::vector<ShaderNode *>) {})
       : _nodeType(nodeType), _paramMap(std::move(paramMap)), _remapFunc(remapFunc)
   {
   }
@@ -52,7 +46,7 @@ class RIBtoCyclesMapping {
     return it != _paramMap.end() ? it->second.string() : name;
   }
 
-  virtual void update_parameters(Parameter_Dictionary const &params,
+  virtual void update_parameters(Parameter_Dictionary const &parameters,
                                  vector<Parsed_Parameter const *> &connections);
 
   virtual void add_to_graph()
@@ -63,7 +57,7 @@ class RIBtoCyclesMapping {
 
   virtual bool create_shader_node(std::string const &shader, std::string const &path);
 
-  virtual ShaderNode *node(std::string name)
+  virtual ShaderNode *node([[maybe_unused]] std::string name)
   {
     return _nodes.back();
   }
@@ -85,7 +79,7 @@ class RIBtoMultiNodeCycles : public RIBtoCyclesMapping {
       ParamMap paramMap,
       ParamMap connectionMap,
       std::function<void(std::vector<ShaderNode *>)> remapFunc =
-          [](std::vector<ShaderNode *> nodes) {})
+          [](std::vector<ShaderNode *>) {})
       : RIBtoCyclesMapping(nodeType, paramMap, remapFunc), _connectionMap(connectionMap)
   {
   }
@@ -100,7 +94,7 @@ class RIBtoMultiNodeCycles : public RIBtoCyclesMapping {
 
   bool create_shader_node(std::string const &shader, std::string const &path) override;
 
-  void update_parameters(Parameter_Dictionary const &params,
+  void update_parameters(Parameter_Dictionary const &parameters,
                          vector<Parsed_Parameter const *> &connections) override;
 
   ShaderNode *node(std::string name) override
@@ -118,7 +112,7 @@ class PxrNormalMaptoCycles : public RIBtoCyclesMapping {
  public:
   using RIBtoCyclesMapping::RIBtoCyclesMapping;
 
-  void update_parameters(Parameter_Dictionary const &params,
+  void update_parameters(Parameter_Dictionary const &parameters,
                          vector<Parsed_Parameter const *> &connections) override;
 
  private:
@@ -129,7 +123,7 @@ class PxrRamptoCycles : public RIBtoCyclesMapping {
  public:
   using RIBtoCyclesMapping::RIBtoCyclesMapping;
 
-  void update_parameters(Parameter_Dictionary const &params,
+  void update_parameters(Parameter_Dictionary const &parameters,
                          vector<Parsed_Parameter const *> &connections) override;
 
  private:
@@ -154,7 +148,7 @@ class PxrSurfacetoPrincipled : public RIBtoCyclesMapping {
  public:
   using RIBtoCyclesMapping::RIBtoCyclesMapping;
 
-  void update_parameters(Parameter_Dictionary const &params,
+  void update_parameters(Parameter_Dictionary const &parameters,
                          vector<Parsed_Parameter const *> &connections) override;
 
  private:
@@ -165,7 +159,7 @@ class PxrDisneytoPrincipled : public RIBtoCyclesMapping {
  public:
   using RIBtoCyclesMapping::RIBtoCyclesMapping;
 
-  void update_parameters(Parameter_Dictionary const &params,
+  void update_parameters(Parameter_Dictionary const &parameters,
                          vector<Parsed_Parameter const *> &connections) override;
 
  private:
@@ -176,7 +170,7 @@ class PxrDisneyBsdftoPrincipled : public RIBtoCyclesMapping {
  public:
   using RIBtoCyclesMapping::RIBtoCyclesMapping;
 
-  void update_parameters(Parameter_Dictionary const &params,
+  void update_parameters(Parameter_Dictionary const &parameters,
                          vector<Parsed_Parameter const *> &connections) override;
 
  private:
@@ -187,7 +181,7 @@ class PxrMarschnerHairtoPrincipled : public RIBtoCyclesMapping {
  public:
   using RIBtoCyclesMapping::RIBtoCyclesMapping;
 
-  void update_parameters(Parameter_Dictionary const &params,
+  void update_parameters(Parameter_Dictionary const &parameters,
                          vector<Parsed_Parameter const *> &connections) override;
 
  private:

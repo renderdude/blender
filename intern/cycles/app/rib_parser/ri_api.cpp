@@ -6,10 +6,8 @@
 #include <algorithm>
 #include <array>
 #include <cstring>
-#include <fstream>
 #include <functional>
 #include <iostream>
-#include <memory>
 #include <random>
 #include <string>
 #include <sys/sysctl.h>
@@ -176,7 +174,7 @@ void Ri::export_to_cycles()
       for (ShaderNode *node : scene->default_background->graph->nodes) {
         if (node->is_a(BackgroundNode::get_node_type())) {
           BackgroundNode *bgNode = static_cast<BackgroundNode *>(node);
-          bgNode->set_color((scene->lights.size() == 0) ? make_float3(0.5f) : zero_float3());
+          bgNode->set_color((scene->lights.empty()) ? make_float3(0.5f) : zero_float3());
         }
       }
     }
@@ -575,7 +573,7 @@ void Ri::Color([[maybe_unused]] float r,
   std::cout << "Color is unimplemented" << std::endl;
 }
 
-void Ri::ConcatTransform([[maybe_unused]] float transform[16], [[maybe_unused]] File_Loc loc)
+void Ri::ConcatTransform([[maybe_unused]] const float transform[16], [[maybe_unused]] File_Loc loc)
 {
   graphics_state.for_active_transforms([=](auto t) {
     ProjectionTransform projection = *(ProjectionTransform *)&transform[0];
@@ -1074,7 +1072,7 @@ void Ri::Hyperboloid([[maybe_unused]] Point3f point1,
 
 void Ri::Identity([[maybe_unused]] File_Loc loc)
 {
-  graphics_state.for_active_transforms([](auto t) { return projection_identity(); });
+  graphics_state.for_active_transforms([]([[maybe_unused]] auto t) { return projection_identity(); });
 }
 
 void Ri::IfBegin([[maybe_unused]] const std::string &condition, [[maybe_unused]] File_Loc loc)

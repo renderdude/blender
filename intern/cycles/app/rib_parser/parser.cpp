@@ -1,9 +1,4 @@
-#include "app/cycles_xml.h"
 #include "app/rib_parser/parsed_parameter.h"
-#include "scene/camera.h"
-#include "scene/scene.h"
-#include "util/projection.h"
-#include "util/transform.h"
 #include <_types/_uint8_t.h>
 
 #ifdef HAVE_MMAP
@@ -16,21 +11,16 @@
 #include <chrono>
 #include <cstdlib>
 #include <fcntl.h>
-#include <fstream>
 #include <functional>
 #include <iostream>
 #include <memory>
-#include <sstream>
 #include <string>
-#include <sys/stat.h>
 #include <utility>
 #include <vector>
 
 #include <boost/filesystem.hpp>
 #include <double-conversion/double-conversion.h>
 namespace bfs = boost::filesystem;
-
-#include "util/log.h"
 
 #include "error.h"
 #include "parser.h"
@@ -42,8 +32,9 @@ static bfs::path search_directory;
 void set_search_directory(std::string filename)
 {
   bfs::path path(filename);
-  if (!bfs::is_directory(path))
+  if (!bfs::is_directory(path)) {
     path = path.parent_path();
+  }
   search_directory = path;
 }
 
@@ -58,7 +49,7 @@ std::string Token::to_string() const
 }
 
 // Tokenizer Implementation
-static char decode_escaped(int ch, const File_Loc &loc)
+static char decode_escaped(int ch, [[maybe_unused]] const File_Loc &loc)
 {
   switch (ch) {
     case EOF:
@@ -94,12 +85,14 @@ std::string read_file_contents(std::string filename)
   return std::string((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
 #else
   int fd = open(filename.c_str(), O_RDONLY);
-  if (fd == -1)
+  if (fd == -1) {
     exit(-1);
+  }
 
   struct stat stat;
-  if (fstat(fd, &stat) != 0)
+  if (fstat(fd, &stat) != 0) {
     exit(-1);
+  }
 
   std::string contents(stat.st_size, '\0');
   off_t chunk = 0;
@@ -107,8 +100,9 @@ std::string read_file_contents(std::string filename)
   while (chunk < stat.st_size) {
     size_t readnow;
     readnow = read(fd, &contents[chunk], 1073741824);
-    if (readnow < 0)
+    if (readnow < 0) {
       exit(-1);
+    }
 
     chunk = chunk + readnow;
   }
@@ -132,8 +126,9 @@ std::unique_ptr<Tokenizer> Tokenizer::create_from_file(
     // Handle stdin by slurping everything into a string.
     std::string str;
     int ch;
-    while ((ch = getchar()) != EOF)
+    while ((ch = getchar()) != EOF) {
       str.push_back((char)ch);
+    }
     return std::make_unique<Tokenizer>(std::move(str), "<stdin>", std::move(error_callback));
   }
 
@@ -164,11 +159,12 @@ std::unique_ptr<Tokenizer> Tokenizer::create_from_file(
   }
 
   void *ptr = mmap(nullptr, len, PROT_READ, MAP_PRIVATE | MAP_NORESERVE, fd, 0);
-  if (ptr == MAP_FAILED)
+  if (ptr == MAP_FAILED) {
 
     if (close(fd) != 0) {
       return nullptr;
     }
+  }
 
   return std::make_unique<Tokenizer>(ptr, len, filename, std::move(error_callback));
 #elif defined(IS_WINDOWS)
@@ -254,9 +250,11 @@ Tokenizer::Tokenizer(void *ptr,
 Tokenizer::~Tokenizer()
 {
 #ifdef HAVE_MMAP
-  if (unmapPtr && unmapLength > 0)
-    if (munmap(unmapPtr, unmapLength) != 0)
+  if (unmapPtr && unmapLength > 0) {
+    if (munmap(unmapPtr, unmapLength) != 0) {
       std::cerr << "Error with mumap" << std::endl;
+    }
+  }
 #elif defined(IS_WINDOWS)
   if (unmapPtr && UnmapViewOfFile(unmapPtr) == 0)
     error_callback(string_printf("UnmapViewOfFile: %s", error_string()).c_str(), nullptr);
@@ -267,11 +265,12 @@ void Tokenizer::check_utf(const void *ptr, int len) const
 {
   const unsigned char *c = (const unsigned char *)ptr;
   // https://en.wikipedia.org/wiki/Byte_order_mark
-  if (len >= 2 && ((c[0] == 0xfe && c[1] == 0xff) || (c[0] == 0xff && c[1] == 0xfe)))
+  if (len >= 2 && ((c[0] == 0xfe && c[1] == 0xff) || (c[0] == 0xff && c[1] == 0xfe))) {
     error_callback(
         "File is encoded with UTF-16, which is not currently "
         "supported by pbrt (https://github.com/mmp/pbrt-v4/issues/136).",
         &loc);
+  }
 }
 
 std::optional<Token> Tokenizer::Next()
@@ -281,9 +280,10 @@ std::optional<Token> Tokenizer::Next()
     File_Loc startLoc = loc;
 
     int ch = get_char();
-    if (ch == EOF)
+    if (ch == EOF) {
       return {};
-    else if (ch == ' ' || ch == '\n' || ch == '\t' || ch == '\r') {
+    }
+    if (ch == ' ' || ch == '\n' || ch == '\t' || ch == '\r') {
       // nothing
     }
     else if (ch == '"') {
@@ -294,11 +294,11 @@ std::optional<Token> Tokenizer::Next()
           error_callback("premature EOF", &startLoc);
           return {};
         }
-        else if (ch == '\n') {
+        if (ch == '\n') {
           error_callback("unterminated string", &startLoc);
           return {};
         }
-        else if (ch == '\\') {
+        if (ch == '\\') {
           haveEscaped = true;
           // Grab the next character
           if ((ch = get_char()) == EOF) {
@@ -308,21 +308,21 @@ std::optional<Token> Tokenizer::Next()
         }
       }
 
-      if (!haveEscaped)
+      if (!haveEscaped) {
         return Token({tokenStart, size_t(pos - tokenStart)}, startLoc);
-      else {
-        sEscaped.clear();
-        for (const char *p = tokenStart; p < pos; ++p) {
-          if (*p != '\\')
-            sEscaped.push_back(*p);
-          else {
-            ++p;
-            // CHECK_LT( p, pos );
-            sEscaped.push_back(decode_escaped(*p, startLoc));
-          }
-        }
-        return Token({sEscaped.data(), sEscaped.size()}, startLoc);
       }
+      sEscaped.clear();
+      for (const char *p = tokenStart; p < pos; ++p) {
+        if (*p != '\\') {
+          sEscaped.push_back(*p);
+        }
+        else {
+          ++p;
+          // CHECK_LT( p, pos );
+          sEscaped.push_back(decode_escaped(*p, startLoc));
+        }
+      }
+      return Token({sEscaped.data(), sEscaped.size()}, startLoc);
     }
     else if (ch == '[' || ch == ']') {
       return Token({tokenStart, size_t(1)}, startLoc);
@@ -343,7 +343,8 @@ std::optional<Token> Tokenizer::Next()
       // space, opening quote, or bracket.
       while ((ch = get_char()) != EOF) {
         if (ch == ' ' || ch == '\n' || ch == '\t' || ch == '\r' || ch == '"' || ch == '[' ||
-            ch == ']') {
+            ch == ']')
+        {
           unget_char();
           break;
         }
@@ -358,24 +359,28 @@ static int parse_int(const Token &t)
   bool negate = t.token[0] == '-';
 
   int index = 0;
-  if (t.token[0] == '+' || t.token[0] == '-')
+  if (t.token[0] == '+' || t.token[0] == '-') {
     ++index;
+  }
 
   int64_t value = 0;
   while (index < t.token.size()) {
-    if (!(t.token[index] >= '0' && t.token[index] <= '9'))
+    if (!(t.token[index] >= '0' && t.token[index] <= '9')) {
       exit(-1);
+    }
     // error_exit( &t.loc, "\"%c\": expected a number", t.token[ index ] );
     value = 10 * value + (t.token[index] - '0');
     ++index;
 
-    if (value > std::numeric_limits<int>::max())
+    if (value > std::numeric_limits<int>::max()) {
       exit(-1);
-    // error_exit(
-    //    &t.loc,
-    //    "Numeric value too large to represent as a 32-bit integer." );
-    else if (value < std::numeric_limits<int>::lowest())
+      // error_exit(
+      //    &t.loc,
+      //    "Numeric value too large to represent as a 32-bit integer." );
+    }
+    else if (value < std::numeric_limits<int>::lowest()) {
       std::cout << "Numeric value %d too low to represent as a 32-bit integer." << std::endl;
+    }
   }
 
   return negate ? -value : value;
@@ -385,8 +390,9 @@ static double parse_float(const Token &t)
 {
   // Fast path for a single digit
   if (t.token.size() == 1) {
-    if (!(t.token[0] >= '0' && t.token[0] <= '9'))
+    if (!(t.token[0] >= '0' && t.token[0] <= '9')) {
       exit(-1);
+    }
     // error_exit( &t.loc, "\"%c\": expected a number", t.token[ 0 ] );
     return t.token[0] - '0';
   }
@@ -408,9 +414,11 @@ static double parse_float(const Token &t)
 
   // Can we just use strtol?
   auto isInteger = [](std::string_view str) {
-    for (char ch : str)
-      if (!(ch >= '0' && ch <= '9'))
+    for (char ch : str) {
+      if (!(ch >= '0' && ch <= '9')) {
         return false;
+      }
+    }
     return true;
   };
 
@@ -421,13 +429,16 @@ static double parse_float(const Token &t)
     val = double(strtol(bufp, &endptr, 10));
     length = endptr - bufp;
   }
-  else if (sizeof(float) == sizeof(float))
+  else if (sizeof(float) == sizeof(float)) {
     val = (double)floatParser.StringToFloat(bufp, t.token.size(), &length);
-  else
+  }
+  else {
     val = floatParser.StringToDouble(bufp, t.token.size(), &length);
+  }
 
-  if (length == 0)
+  if (length == 0) {
     exit(-1);
+  }
   // error_exit( &t.loc, "%s: expected a number",
   //            to_string_from_view( t.token ) );
 
@@ -441,8 +452,9 @@ inline bool is_quoted_string(std::string_view str)
 
 static std::string_view dequote_string(const Token &t)
 {
-  if (!is_quoted_string(t.token))
+  if (!is_quoted_string(t.token)) {
     exit(-1);
+  }
   // error_exit( &t.loc, "\"%s\": expected quoted string",
   //            to_string_from_view( t.token ) );
 
@@ -465,8 +477,9 @@ static Parsed_Parameter_Vector parse_parameters(
 
   while (true) {
     std::optional<Token> t = nextToken(TokenOptional);
-    if (!t.has_value())
+    if (!t.has_value()) {
       return parameterVector;
+    }
 
     if (!is_quoted_string(t->token)) {
       ungetToken(*t);
@@ -478,14 +491,16 @@ static Parsed_Parameter_Vector parse_parameters(
     std::string_view decl = dequote_string(*t);
 
     auto skipSpace = [&decl](std::string_view::const_iterator iter) {
-      while (iter != decl.end() && (*iter == ' ' || *iter == '\t'))
+      while (iter != decl.end() && (*iter == ' ' || *iter == '\t')) {
         ++iter;
+      }
       return iter;
     };
     // Skip to the next whitespace character (or the end of the string).
     auto skipToSpace = [&decl](std::string_view::const_iterator iter) {
-      while (iter != decl.end() && *iter != ' ' && *iter != '\t')
+      while (iter != decl.end() && *iter != ' ' && *iter != '\t') {
         ++iter;
+      }
       return iter;
     };
 
@@ -551,17 +566,22 @@ static Parsed_Parameter_Vector parse_parameters(
     }
 
     // Now assign the type
-    if (type_guess == "bool")
+    if (type_guess == "bool") {
       param->type = Parameter_Type::Boolean;
-    else if (type_guess == "bxdf")
+    }
+    else if (type_guess == "bxdf") {
       param->type = Parameter_Type::Bxdf;
+    }
     else if (type_guess == "float") {
-      if (param->elem_per_item == 2)
+      if (param->elem_per_item == 2) {
         param->type = Parameter_Type::Point2;
-      else if (param->elem_per_item == 3)
+      }
+      else if (param->elem_per_item == 3) {
         param->type = Parameter_Type::Point3;
-      else
+      }
+      else {
         param->type = Parameter_Type::Real;
+      }
     }
     else if (type_guess == "point") {
       param->type = Parameter_Type::Point3;
@@ -575,18 +595,24 @@ static Parsed_Parameter_Vector parse_parameters(
       param->type = Parameter_Type::Point2;
       param->elem_per_item = 2;
     }
-    else if (type_guess == "color")
+    else if (type_guess == "color") {
       param->type = Parameter_Type::Color;
-    else if (type_guess == "string")
+    }
+    else if (type_guess == "string") {
       param->type = Parameter_Type::String;
-    else if (type_guess == "texture")
+    }
+    else if (type_guess == "texture") {
       param->type = Parameter_Type::Texture;
-    else if (type_guess == "int")
+    }
+    else if (type_guess == "int") {
       param->type = Parameter_Type::Integer;
-    else if (type_guess == "vector")
+    }
+    else if (type_guess == "vector") {
       param->type = Parameter_Type::Real;
-    else
+    }
+    else {
       std::cout << "Missed input type of " << type_guess << std::endl;
+    }
 
     auto nameBegin = skipSpace(typeEnd);
     if (nameBegin == decl.end()) {
@@ -600,8 +626,9 @@ static Parsed_Parameter_Vector parse_parameters(
 
     enum ValType { Unknown, String, Bool, Float, Int } valType = Unknown;
 
-    if (param->type == Parameter_Type::Integer)
+    if (param->type == Parameter_Type::Integer) {
       valType = Int;
+    }
 
     auto addVal = [&](const Token &t) {
       if (is_quoted_string(t.token)) {
@@ -619,8 +646,9 @@ static Parsed_Parameter_Vector parse_parameters(
             error_callback(t, "expected Boolean value");
         }
 
-        if (!param->has_strings())
+        if (!param->has_strings()) {
           param->payload = vector<std::string>();
+        }
         param->add_string(dequote_string(t));
       }
       else if (t.token[0] == 't' && t.token == "true") {
@@ -638,8 +666,9 @@ static Parsed_Parameter_Vector parse_parameters(
             break;
         }
 
-        if (!param->has_bools())
+        if (!param->has_bools()) {
           param->payload = vector<uint8_t>();
+        }
         param->add_bool(true);
       }
       else if (t.token[0] == 'f' && t.token == "false") {
@@ -657,8 +686,9 @@ static Parsed_Parameter_Vector parse_parameters(
             break;
         }
 
-        if (!param->has_bools())
+        if (!param->has_bools()) {
           param->payload = vector<uint8_t>();
+        }
         param->add_bool(false);
       }
       else {
@@ -677,13 +707,15 @@ static Parsed_Parameter_Vector parse_parameters(
         }
 
         if (valType == Int) {
-          if (!param->has_ints())
+          if (!param->has_ints()) {
             param->payload = vector<int>();
+          }
           param->add_int(parse_int(t));
         }
         else {
-          if (!param->has_floats())
+          if (!param->has_floats()) {
             param->payload = vector<float>();
+          }
           param->add_float(parse_float(t));
         }
       }
@@ -694,8 +726,9 @@ static Parsed_Parameter_Vector parse_parameters(
     if (val.token == "[") {
       while (true) {
         val = *nextToken(TokenRequired);
-        if (val.token == "]")
+        if (val.token == "]") {
           break;
+        }
         addVal(val);
       }
     }
@@ -732,8 +765,9 @@ void parse(Ri *target, std::unique_ptr<Tokenizer> t)
   // at which point it switches to the next file (if any).
   std::function<std::optional<Token>(int)> nextToken;
   nextToken = [&](int flags) -> std::optional<Token> {
-    if (ungetToken.has_value())
+    if (ungetToken.has_value()) {
       return std::exchange(ungetToken, {});
+    }
 
     if (fileStack.empty()) {
       if ((flags & TokenRequired) != 0) {
@@ -753,14 +787,13 @@ void parse(Ri *target, std::unique_ptr<Tokenizer> t)
       fileStack.pop_back();
       return nextToken(flags);
     }
-    else if (tok->token[0] == '#') {
+    if (tok->token[0] == '#') {
       // Swallow comments, unless --format or --toply was given, in
       // which case they're printed to stdout.
       return nextToken(flags);
     }
-    else
-      // Regular token; success.
-      return tok;
+    // Regular token; success.
+    return tok;
   };
 
   auto unget = [&](Token t) {
@@ -821,13 +854,15 @@ void parse(Ri *target, std::unique_ptr<Tokenizer> t)
     if (val.token == "[") {
       while (true) {
         val = *nextToken(TokenRequired);
-        if (val.token == "]")
+        if (val.token == "]") {
           break;
+        }
         vals.push_back(parse_float(val));
       }
     }
-    else
+    else {
       syntax_error(val);
+    }
   };
 
   auto parse_array_of_int = [&](std::vector<int> &vals) {
@@ -836,13 +871,15 @@ void parse(Ri *target, std::unique_ptr<Tokenizer> t)
     if (val.token == "[") {
       while (true) {
         val = *nextToken(TokenRequired);
-        if (val.token == "]")
+        if (val.token == "]") {
           break;
+        }
         vals.push_back((int)(parse_int(val)));
       }
     }
-    else
+    else {
       syntax_error(val);
+    }
   };
 
   auto parse_array_of_string = [&](std::vector<std::string> &vals) {
@@ -851,37 +888,46 @@ void parse(Ri *target, std::unique_ptr<Tokenizer> t)
     if (val.token == "[") {
       while (true) {
         val = *nextToken(TokenRequired);
-        if (val.token == "]")
+        if (val.token == "]") {
           break;
+        }
         vals.push_back(to_string_from_view(dequote_string(val)));
       }
     }
-    else
+    else {
       syntax_error(val);
+    }
   };
 
   std::optional<Token> tok;
 
   while (true) {
     tok = nextToken(TokenOptional);
-    if (!tok.has_value())
+    if (!tok.has_value()) {
       break;
+    }
 
     switch (tok->token[0]) {
       case 'A':
-        if (tok->token == "AttributeBegin")
+        if (tok->token == "AttributeBegin") {
           target->AttributeBegin(tok->loc);
-        else if (tok->token == "AttributeEnd")
+        }
+        else if (tok->token == "AttributeEnd") {
           target->AttributeEnd(tok->loc);
-        else if (tok->token == "Attribute")
+        }
+        else if (tok->token == "Attribute") {
           basic_param_list_entrypoint(&Ri::Attribute, tok->loc);
-        else if (tok->token == "AreaLightSource")
+        }
+        else if (tok->token == "AreaLightSource") {
           basic_param_list_entrypoint(&Ri::AreaLightSource, tok->loc);
-        // Ri API
-        else if (tok->token == "Atmosphere")
+          // Ri API
+        }
+        else if (tok->token == "Atmosphere") {
           basic_param_list_entrypoint(&Ri::Atmosphere, tok->loc);
-        else
+        }
+        else {
           syntax_error(*tok);
+        }
         break;
 
       // Ri API
@@ -903,35 +949,45 @@ void parse(Ri *target, std::unique_ptr<Tokenizer> t)
           bool bracketed = false;
           std::optional<Token> second = nextToken(TokenOptional);
           if (second.has_value()) {
-            if (second->token == "[")
+            if (second->token == "[") {
               bracketed = true;
-            else
+            }
+            else {
               syntax_error(*tok);
+            }
           }
 
           float m[6];
-          for (int i = 0; i < 6; ++i)
+          for (int i = 0; i < 6; ++i) {
             m[i] = parse_float(*nextToken(TokenRequired));
-          if (bracketed)
-            if (nextToken(TokenRequired)->token != "]")
+          }
+          if (bracketed) {
+            if (nextToken(TokenRequired)->token != "]") {
               syntax_error(*tok);
+            }
+          }
           target->Bound(m, tok->loc);
         }
-        else if (tok->token == "Bxdf")
+        else if (tok->token == "Bxdf") {
           two_string_param_list_entrypoint(&Ri::Bxdf, tok->loc);
-        else
+        }
+        else {
           syntax_error(*tok);
+        }
         break;
 
       case 'C':
         if (tok->token == "ConcatTransform") {
-          if (nextToken(TokenRequired)->token != "[")
+          if (nextToken(TokenRequired)->token != "[") {
             syntax_error(*tok);
+          }
           float m[16];
-          for (int i = 0; i < 16; ++i)
+          for (int i = 0; i < 16; ++i) {
             m[i] = parse_float(*nextToken(TokenRequired));
-          if (nextToken(TokenRequired)->token != "]")
+          }
+          if (nextToken(TokenRequired)->token != "]") {
             syntax_error(*tok);
+          }
           target->ConcatTransform(m, tok->loc);
         }
         else if (tok->token == "CoordinateSystem") {
@@ -942,44 +998,53 @@ void parse(Ri *target, std::unique_ptr<Tokenizer> t)
           std::string_view n = dequote_string(*nextToken(TokenRequired));
           target->CoordSysTransform(to_string_from_view(n), tok->loc);
         }
-        else if (tok->token == "Camera")
+        else if (tok->token == "Camera") {
           basic_param_list_entrypoint(&Ri::camera, tok->loc);
-        // Ri API
+          // Ri API
+        }
         else if (tok->token == "Clipping") {
           float m[2];
-          for (int i = 0; i < 2; ++i)
+          for (int i = 0; i < 2; ++i) {
             m[i] = parse_float(*nextToken(TokenRequired));
+          }
           target->Clipping(m[0], m[1], tok->loc);
         }
         else if (tok->token == "ClippingPlane") {
           float m[6];
-          for (int i = 0; i < 6; ++i)
+          for (int i = 0; i < 6; ++i) {
             m[i] = parse_float(*nextToken(TokenRequired));
+          }
           target->ClippingPlane(m[0], m[1], m[2], m[3], m[4], m[5], tok->loc);
         }
         else if (tok->token == "Color") {
           float m[3];
-          for (int i = 0; i < 3; ++i)
+          for (int i = 0; i < 3; ++i) {
             m[i] = parse_float(*nextToken(TokenRequired));
+          }
           target->Color(m[0], m[1], m[2], tok->loc);
         }
         else if (tok->token == "Cone") {
           bool bracketed = false;
           std::optional<Token> second = nextToken(TokenOptional);
           if (second.has_value()) {
-            if (second->token == "[")
+            if (second->token == "[") {
               bracketed = true;
-            else
+            }
+            else {
               unget(*second);
+            }
           }
 
           float m[3];
-          for (int i = 0; i < 3; ++i)
+          for (int i = 0; i < 3; ++i) {
             m[i] = parse_float(*nextToken(TokenRequired));
+          }
 
-          if (bracketed)
-            if (nextToken(TokenRequired)->token != "]")
+          if (bracketed) {
+            if (nextToken(TokenRequired)->token != "]") {
               syntax_error(*tok);
+            }
+          }
           Parsed_Parameter_Vector params = parse_parameters(
               nextToken, unget, [&](const Token &t, const char *msg) {
                 std::string token = to_string_from_view(t.token);
@@ -990,8 +1055,9 @@ void parse(Ri *target, std::unique_ptr<Tokenizer> t)
         }
         else if (tok->token == "CropWindow") {
           float m[4];
-          for (int i = 0; i < 4; ++i)
+          for (int i = 0; i < 4; ++i) {
             m[i] = parse_float(*nextToken(TokenRequired));
+          }
           target->CropWindow(m[0], m[1], m[2], m[3], tok->loc);
         }
         else if (tok->token == "Curves") {
@@ -1018,19 +1084,24 @@ void parse(Ri *target, std::unique_ptr<Tokenizer> t)
           std::optional<Token> second = nextToken(TokenOptional);
 
           if (second.has_value()) {
-            if (second->token == "[")
+            if (second->token == "[") {
               bracketed = true;
-            else
+            }
+            else {
               unget(*second);
+            }
           }
 
           float m[4];
-          for (int i = 0; i < 4; ++i)
+          for (int i = 0; i < 4; ++i) {
             m[i] = parse_float(*nextToken(TokenRequired));
+          }
 
-          if (bracketed)
-            if (nextToken(TokenRequired)->token != "]")
+          if (bracketed) {
+            if (nextToken(TokenRequired)->token != "]") {
               syntax_error(*tok);
+            }
+          }
           Parsed_Parameter_Vector params = parse_parameters(
               nextToken, unget, [&](const Token &t, const char *msg) {
                 std::string token = to_string_from_view(t.token);
@@ -1039,8 +1110,9 @@ void parse(Ri *target, std::unique_ptr<Tokenizer> t)
               });
           target->Cylinder(m[0], m[1], m[2], m[3], std::move(params), tok->loc);
         }
-        else
+        else {
           syntax_error(*tok);
+        }
         break;
 
       // RI API
@@ -1052,52 +1124,64 @@ void parse(Ri *target, std::unique_ptr<Tokenizer> t)
         }
         else if (tok->token == "DepthOfField") {
           float m[3];
-          for (int i = 0; i < 3; ++i)
+          for (int i = 0; i < 3; ++i) {
             m[i] = parse_float(*nextToken(TokenRequired));
+          }
           target->DepthOfField(m[0], m[1], m[2], tok->loc);
         }
         else if (tok->token == "Detail") {
           float m[6];
-          for (int i = 0; i < 6; ++i)
+          for (int i = 0; i < 6; ++i) {
             m[i] = parse_float(*nextToken(TokenRequired));
+          }
           target->Detail(m, tok->loc);
         }
         else if (tok->token == "DetailRange") {
           bool bracketed = false;
           std::optional<Token> second = nextToken(TokenOptional);
           if (second.has_value()) {
-            if (second->token == "[")
+            if (second->token == "[") {
               bracketed = true;
-            else
+            }
+            else {
               syntax_error(*tok);
+            }
           }
 
           float m[4];
-          for (int i = 0; i < 4; ++i)
+          for (int i = 0; i < 4; ++i) {
             m[i] = parse_float(*nextToken(TokenRequired));
+          }
 
-          if (bracketed)
-            if (nextToken(TokenRequired)->token != "]")
+          if (bracketed) {
+            if (nextToken(TokenRequired)->token != "]") {
               syntax_error(*tok);
+            }
+          }
           target->DetailRange(m[0], m[1], m[2], m[3], tok->loc);
         }
         else if (tok->token == "Disk") {
           bool bracketed = false;
           std::optional<Token> second = nextToken(TokenOptional);
           if (second.has_value()) {
-            if (second->token == "[")
+            if (second->token == "[") {
               bracketed = true;
-            else
+            }
+            else {
               syntax_error(*tok);
+            }
           }
 
           float m[3];
-          for (int i = 0; i < 3; ++i)
+          for (int i = 0; i < 3; ++i) {
             m[i] = parse_float(*nextToken(TokenRequired));
+          }
 
-          if (bracketed)
-            if (nextToken(TokenRequired)->token != "]")
+          if (bracketed) {
+            if (nextToken(TokenRequired)->token != "]") {
               syntax_error(*tok);
+            }
+          }
           Parsed_Parameter_Vector params = parse_parameters(
               nextToken, unget, [&](const Token &t, const char *msg) {
                 std::string token = to_string_from_view(t.token);
@@ -1106,8 +1190,9 @@ void parse(Ri *target, std::unique_ptr<Tokenizer> t)
               });
           target->Disk(m[0], m[1], m[2], std::move(params), tok->loc);
         }
-        else if (tok->token == "Displace")
+        else if (tok->token == "Displace") {
           two_string_param_list_entrypoint(&Ri::Displacement, tok->loc);
+        }
         else if (tok->token == "Display") {
           std::string_view name = dequote_string(*nextToken(TokenRequired));
           std::string_view type = dequote_string(*nextToken(TokenRequired));
@@ -1146,50 +1231,60 @@ void parse(Ri *target, std::unique_ptr<Tokenizer> t)
           target->DisplayFilter(
               to_string_from_view(name), to_string_from_view(type), std::move(params), tok->loc);
         }
-        else
+        else {
           syntax_error(*tok);
+        }
         break;
 
       // RI API
       case 'E':
-        if (tok->token == "Else")
+        if (tok->token == "Else") {
           target->Else(tok->loc);
+        }
         else if (tok->token == "ElseIf") {
           std::string_view expression = dequote_string(*nextToken(TokenRequired));
           target->ElseIf(to_string_from_view(expression), tok->loc);
         }
-        else if (tok->token == "End")
+        else if (tok->token == "End") {
           target->End(tok->loc);
+        }
         else if (tok->token == "Exposure") {
           float m[2];
-          for (int i = 0; i < 2; ++i)
+          for (int i = 0; i < 2; ++i) {
             m[i] = parse_float(*nextToken(TokenRequired));
+          }
 
           target->Exposure(m[0], m[1], tok->loc);
         }
         else if (tok->token == "Exterior") {
           basic_param_list_entrypoint(&Ri::Atmosphere, tok->loc);
         }
-        else
+        else {
           syntax_error(*tok);
+        }
         break;
 
       case 'F':
         if (tok->token == "Format") {
           int m[3];
-          for (int i = 0; i < 3; ++i)
+          for (int i = 0; i < 3; ++i) {
             m[i] = (int)parse_float(*nextToken(TokenRequired));
+          }
 
           target->Format(m[0], m[1], m[2], tok->loc);
         }
-        else if (tok->token == "FrameAspectRatio")
+        else if (tok->token == "FrameAspectRatio") {
           target->FrameAspectRatio(parse_float(*nextToken(TokenRequired)), tok->loc);
-        else if (tok->token == "FrameBegin")
+        }
+        else if (tok->token == "FrameBegin") {
           target->FrameBegin((int)(parse_float(*nextToken(TokenRequired))), tok->loc);
-        else if (tok->token == "FrameEnd")
+        }
+        else if (tok->token == "FrameEnd") {
           target->FrameEnd(tok->loc);
-        else
+        }
+        else {
           syntax_error(*tok);
+        }
         break;
 
       // RI API
@@ -1212,10 +1307,12 @@ void parse(Ri *target, std::unique_ptr<Tokenizer> t)
 
           target->GeometricApproximation(to_string_from_view(type), m, tok->loc);
         }
-        else if (tok->token == "Geometry")
+        else if (tok->token == "Geometry") {
           basic_param_list_entrypoint(&Ri::Geometry, tok->loc);
-        else
+        }
+        else {
           syntax_error(*tok);
+        }
         break;
 
       // RI API
@@ -1264,16 +1361,19 @@ void parse(Ri *target, std::unique_ptr<Tokenizer> t)
         }
         else if (tok->token == "Hyperboloid") {
         }
-        else
+        else {
           syntax_error(*tok);
+        }
         break;
 
       case 'I':
-        if (tok->token == "Integrator")
+        if (tok->token == "Integrator") {
           two_string_param_list_entrypoint(&Ri::Integrator, tok->loc);
-        else if (tok->token == "Identity")
+        }
+        else if (tok->token == "Identity") {
           target->Identity(tok->loc);
-        // RI API
+          // RI API
+        }
         else if (tok->token == "IfBegin") {
         }
         else if (tok->token == "IfEnd") {
@@ -1282,18 +1382,22 @@ void parse(Ri *target, std::unique_ptr<Tokenizer> t)
         }
         else if (tok->token == "Imager") {
         }
-        else
+        else {
           syntax_error(*tok);
+        }
         break;
 
       case 'L':
-        if (tok->token == "LightSource")
+        if (tok->token == "LightSource") {
           basic_param_list_entrypoint(&Ri::LightSource, tok->loc);
-        // RI API
-        else if (tok->token == "Light")
+          // RI API
+        }
+        else if (tok->token == "Light") {
           two_string_param_list_entrypoint(&Ri::Light, tok->loc);
-        else
+        }
+        else {
           syntax_error(*tok);
+        }
         break;
 
       case 'M':
@@ -1313,15 +1417,17 @@ void parse(Ri *target, std::unique_ptr<Tokenizer> t)
         }
         else if (tok->token == "MotionEnd") {
         }
-        else
+        else {
           syntax_error(*tok);
+        }
         break;
 
       case 'N':
         if (tok->token == "NuPatch") {
         }
-        else
+        else {
           syntax_error(*tok);
+        }
         break;
 
       case 'O':
@@ -1329,8 +1435,9 @@ void parse(Ri *target, std::unique_ptr<Tokenizer> t)
           std::string_view n = dequote_string(*nextToken(TokenRequired));
           target->ObjectBegin(to_string_from_view(n), tok->loc);
         }
-        else if (tok->token == "ObjectEnd")
+        else if (tok->token == "ObjectEnd") {
           target->ObjectEnd(tok->loc);
+        }
         else if (tok->token == "ObjectInstance") {
           std::string_view n = dequote_string(*nextToken(TokenRequired));
           target->ObjectInstance(to_string_from_view(n), tok->loc);
@@ -1350,14 +1457,16 @@ void parse(Ri *target, std::unique_ptr<Tokenizer> t)
         }
         else if (tok->token == "Orientation") {
         }
-        else
+        else {
           syntax_error(*tok);
+        }
         break;
 
       case 'P':
-        if (tok->token == "PixelFilter")
+        if (tok->token == "PixelFilter") {
           basic_param_list_entrypoint(&Ri::PixelFilter, tok->loc);
-        // RI API
+          // RI API
+        }
         else if (tok->token == "Paraboloid") {
         }
         else if (tok->token == "Patch") {
@@ -1417,27 +1526,32 @@ void parse(Ri *target, std::unique_ptr<Tokenizer> t)
         }
         else if (tok->token == "Procedural2") {
         }
-        else if (tok->token == "Projection")
+        else if (tok->token == "Projection") {
           basic_param_list_entrypoint(&Ri::Projection, tok->loc);
-        else
+        }
+        else {
           syntax_error(*tok);
+        }
         break;
 
       // RI API
       case 'Q':
         if (tok->token == "Quantize") {
         }
-        else
+        else {
           syntax_error(*tok);
+        }
         break;
 
       case 'R':
-        if (tok->token == "ReverseOrientation")
+        if (tok->token == "ReverseOrientation") {
           target->ReverseOrientation(tok->loc);
+        }
         else if (tok->token == "Rotate") {
           float v[4];
-          for (int i = 0; i < 4; ++i)
+          for (int i = 0; i < 4; ++i) {
             v[i] = parse_float(*nextToken(TokenRequired));
+          }
           target->Rotate(v[0], v[1], v[2], v[3], tok->loc);
         }
         // RI API
@@ -1451,15 +1565,17 @@ void parse(Ri *target, std::unique_ptr<Tokenizer> t)
         }
         else if (tok->token == "ResourceEnd") {
         }
-        else
+        else {
           syntax_error(*tok);
+        }
         break;
 
       case 'S':
         if (tok->token == "Scale") {
           float v[3];
-          for (int i = 0; i < 3; ++i)
+          for (int i = 0; i < 3; ++i) {
             v[i] = parse_float(*nextToken(TokenRequired));
+          }
           target->Scale(v[0], v[1], v[2], tok->loc);
         }
         // RI API
@@ -1490,19 +1606,24 @@ void parse(Ri *target, std::unique_ptr<Tokenizer> t)
           std::optional<Token> second = nextToken(TokenOptional);
 
           if (second.has_value()) {
-            if (second->token == "[")
+            if (second->token == "[") {
               bracketed = true;
-            else
+            }
+            else {
               unget(*second);
+            }
           }
 
           float m[4];
-          for (int i = 0; i < 4; ++i)
+          for (int i = 0; i < 4; ++i) {
             m[i] = parse_float(*nextToken(TokenRequired));
+          }
 
-          if (bracketed)
-            if (nextToken(TokenRequired)->token != "]")
+          if (bracketed) {
+            if (nextToken(TokenRequired)->token != "]") {
               syntax_error(*tok);
+            }
+          }
           Parsed_Parameter_Vector params = parse_parameters(
               nextToken, unget, [&](const Token &t, const char *msg) {
                 std::string token = to_string_from_view(t.token);
@@ -1554,8 +1675,9 @@ void parse(Ri *target, std::unique_ptr<Tokenizer> t)
         }
         else if (tok->token == "System") {
         }
-        else
+        else {
           syntax_error(*tok);
+        }
         break;
 
       case 'T':
@@ -1568,19 +1690,23 @@ void parse(Ri *target, std::unique_ptr<Tokenizer> t)
           target->TransformEnd(tok->loc);
         }
         else if (tok->token == "Transform") {
-          if (nextToken(TokenRequired)->token != "[")
+          if (nextToken(TokenRequired)->token != "[") {
             syntax_error(*tok);
+          }
           float m[16];
-          for (int i = 0; i < 16; ++i)
+          for (int i = 0; i < 16; ++i) {
             m[i] = parse_float(*nextToken(TokenRequired));
-          if (nextToken(TokenRequired)->token != "]")
+          }
+          if (nextToken(TokenRequired)->token != "]") {
             syntax_error(*tok);
+          }
           target->transform(m, tok->loc);
         }
         else if (tok->token == "Translate") {
           float v[3];
-          for (int i = 0; i < 3; ++i)
+          for (int i = 0; i < 3; ++i) {
             v[i] = parse_float(*nextToken(TokenRequired));
+          }
           target->Translate(v[0], v[1], v[2], tok->loc);
         }
         else if (tok->token == "Texture") {
@@ -1610,26 +1736,31 @@ void parse(Ri *target, std::unique_ptr<Tokenizer> t)
         }
         else if (tok->token == "TrimCurve") {
         }
-        else
+        else {
           syntax_error(*tok);
+        }
         break;
 
       // RI API
       case 'v':
         if (tok->token == "version") {
-          float version = parse_float(*nextToken(TokenRequired));
+          [[maybe_unused]] float version = parse_float(*nextToken(TokenRequired));
         }
-        else
+        else {
           syntax_error(*tok);
+        }
         break;
 
       case 'W':
-        if (tok->token == "WorldBegin")
+        if (tok->token == "WorldBegin") {
           target->WorldBegin(tok->loc);
-        else if (tok->token == "WorldEnd")
+        }
+        else if (tok->token == "WorldEnd") {
           target->WorldEnd(tok->loc);
-        else
+        }
+        else {
           syntax_error(*tok);
+        }
         break;
 
       default:
@@ -1651,18 +1782,21 @@ void parse_files(Ri *target, std::vector<std::string> filenames)
   if (filenames.empty()) {
     // Parse target from standard input
     std::unique_ptr<Tokenizer> t = Tokenizer::create_from_file("-", tok_error);
-    if (t)
+    if (t) {
       parse(target, std::move(t));
+    }
   }
   else {
     // Parse target from input files
     for (const std::string &fn : filenames) {
-      if (fn != "-")
+      if (fn != "-") {
         set_search_directory(fn);
+      }
 
       std::unique_ptr<Tokenizer> t = Tokenizer::create_from_file(fn, tok_error);
-      if (t)
+      if (t) {
         parse(target, std::move(t));
+      }
       else {
         std::cerr << fn << ": No such file" << std::endl;
         exit(-1);
@@ -1690,8 +1824,9 @@ void parse_string(Ri *target, std::string str)
     exit(-1);
   };
   std::unique_ptr<Tokenizer> t = Tokenizer::create_from_string(std::move(str), tok_error);
-  if (!t)
+  if (!t) {
     return;
+  }
   parse(target, std::move(t));
 
   target->end_of_files();

@@ -11,7 +11,6 @@
 #include "session/buffers.h"
 #include "session/session.h"
 
-#include "util/args.h"
 #include "util/foreach.h"
 #include "util/function.h"
 #include "util/image.h"
@@ -19,8 +18,6 @@
 #include "util/path.h"
 #include "util/progress.h"
 #include "util/string.h"
-#include "util/time.h"
-#include "util/transform.h"
 #include "util/unique_ptr.h"
 #include "util/version.h"
 
@@ -31,9 +28,9 @@
 #include "cycles_standalone.h"
 
 #include "app/cycles_xml.h"
+#include "app/oiio_output_driver.h"
 #include "app/rib_parser/parser.h"
 #include "app/rib_parser/ri_api.h"
-#include "app/oiio_output_driver.h"
 
 #include "tev/display_driver.h"
 
@@ -42,10 +39,11 @@
 #  include "opengl/window.h"
 #endif
 
+#include <OpenImageIO/argparse.h>
 #include <OpenImageIO/sysutil.h>
 
 #ifdef WITH_CYCLES_DISTRIBUTED
-# include "distributed/distributed.h"
+#  include "distributed/distributed.h"
 #endif
 
 CCL_NAMESPACE_BEGIN
@@ -110,12 +108,15 @@ static void scene_init()
     ri_api.add_default_search_paths(path_dirname(options.filepath));
     filenames.push_back(options.filepath);
     parse_files(&ri_api, filenames);
-    ri_api.CropWindow(options.crop_window[0], options.crop_window[1], options.crop_window[2], options.crop_window[3], File_Loc());
+    ri_api.CropWindow(options.crop_window[0],
+                      options.crop_window[1],
+                      options.crop_window[2],
+                      options.crop_window[3],
+                      File_Loc());
     ri_api.export_to_cycles();
     rib_mode = true;
   }
-  else
-  {
+  else {
 #ifdef WITH_USD
     HD_CYCLES_NS::HdCyclesFileReader::read(options.session, options.filepath.c_str());
 #else
@@ -135,12 +136,14 @@ static void scene_init()
   }
 
   /* Calculate Viewplane */
-  if (!rib_mode)
-  options.scene->camera->compute_auto_viewplane();
-  
+  if (!rib_mode) {
+    options.scene->camera->compute_auto_viewplane();
+  }
+
   session_buffer_params();
-  if (rib_mode)
+  if (rib_mode) {
     ri_api.adjust_buffer_parameters(options.buffer_params);
+  }
 }
 
 static void session_init()
@@ -159,8 +162,8 @@ static void session_init()
 #ifdef WITH_CYCLES_STANDALONE_GUI
   if (!options.session_params.background) {
     if (options.display_type == "gl")
-    options.session->set_display_driver(make_unique<OpenGLDisplayDriver>(
-        window_opengl_context_enable, window_opengl_context_disable));
+      options.session->set_display_driver(make_unique<OpenGLDisplayDriver>(
+          window_opengl_context_enable, window_opengl_context_disable));
   }
 #endif
 
@@ -170,10 +173,12 @@ static void session_init()
   }
 
   if (options.session_params.background) {
-    if (options.display_type == "tev")
+    if (options.display_type == "tev") {
       options.session->set_display_driver(make_unique<TEVDisplayDriver>(options.display_server));
-    else if (!options.quiet)
-    options.session->progress.set_update_callback(function_bind(&session_print_status));
+    }
+    else if (!options.quiet) {
+      options.session->progress.set_update_callback(function_bind(&session_print_status));
+    }
   }
 #ifdef WITH_CYCLES_STANDALONE_GUI
   else if (options.display_type == "gl")
@@ -397,14 +402,14 @@ static void options_parse(int argc, const char **argv)
   options.session_params.tile_size = 0;
 
   /* device names */
-  string device_names = "";
+  string device_names;
   string devicename = "CPU";
   bool list = false;
 
   /* List devices for which support is compiled in. */
   vector<DeviceType> types = Device::available_types();
   foreach (DeviceType type, types) {
-    if (device_names != "") {
+    if (!device_names.empty()) {
       device_names += ", ";
     }
 
@@ -438,7 +443,8 @@ static void options_parse(int argc, const char **argv)
 so it should look something like: -b tcp://*:5555",
              "--connect %s",
              &options.connect_to,
-             "The port to connect to. This is ZeroMQ syntax so it should look something like: -c tcp://localhost:5555",
+             "The port to connect to. This is ZeroMQ syntax so it should look something like: -c "
+             "tcp://localhost:5555",
 #endif
              "--display-type %s",
              &options.display_type,
@@ -543,14 +549,14 @@ so it should look something like: -b tcp://*:5555",
 #ifndef WITH_CYCLES_STANDALONE_GUI
   options.session_params.background = true;
 #else
-  if (options.display_type != "" && options.display_type != "gl" &&
-      options.display_type != "tev") {
+  if (options.display_type != "" && options.display_type != "gl" && options.display_type != "tev")
+  {
     std::cerr << "Found \"" << options.display_type << "\" for display type. "
               << "Only \"gl\" or \"tev\" are excepted. Turning off display output" << std::endl;
     options.display_type = "";
   }
   if (options.display_type == "" || options.display_type == "tev")
-  options.session_params.background = true;
+    options.session_params.background = true;
 
 #endif
 
@@ -598,7 +604,7 @@ so it should look something like: -b tcp://*:5555",
     fprintf(stderr, "Invalid number of samples: %d\n", options.session_params.samples);
     exit(EXIT_FAILURE);
   }
-  else if (options.filepath == "") {
+  else if (options.filepath.empty()) {
     fprintf(stderr, "No file path specified\n");
     exit(EXIT_FAILURE);
   }
@@ -622,19 +628,19 @@ int main(int argc, const char **argv)
 #if defined(WITH_CYCLES_STANDALONE_GUI)
   else {
     if (options.display_type == "gl") {
-    string title = "Cycles: " + path_filename(options.filepath);
+      string title = "Cycles: " + path_filename(options.filepath);
 
-    /* init/exit are callback so they run while GL is initialized */
-    window_main_loop(title.c_str(),
-                     options.width,
-                     options.height,
-                     session_init,
-                     session_exit,
-                     resize,
-                     display,
-                     keyboard,
-                     motion);
-  }
+      /* init/exit are callback so they run while GL is initialized */
+      window_main_loop(title.c_str(),
+                       options.width,
+                       options.height,
+                       session_init,
+                       session_exit,
+                       resize,
+                       display,
+                       keyboard,
+                       motion);
+    }
   }
 #endif
 

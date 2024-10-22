@@ -2,22 +2,13 @@
 #define PARSER_H
 
 #include <functional>
-#include <map>
 #include <memory>
 #include <optional>
-#include <set>
 #include <string>
 #include <string_view>
-#include <unordered_map>
 
 #include "error.h"
-#include "param_dict.h"
-#include "parsed_parameter.h"
 #include "ri_api.h"
-#include "scene_entities.h"
-
-#include "util/span.h"
-#include "util/transform.h"
 
 CCL_NAMESPACE_BEGIN
 using Point3f = float[3];
@@ -30,9 +21,7 @@ void parse_string(Ri *target, std::string str);
 // Token Definition
 struct Token {
   Token() = default;
-  Token(std::string_view token, File_Loc loc) : token(token), loc(loc)
-  {
-  }
+  Token(std::string_view token, File_Loc loc) : token(token), loc(loc) {}
   std::string to_string() const;
   std::string_view token;
   File_Loc loc;
@@ -70,24 +59,27 @@ class Tokenizer {
   // Tokenizer Private Methods
   int get_char()
   {
-    if (pos == end)
+    if (pos == end) {
       return EOF;
+    }
     int ch = *pos++;
     if (ch == '\n') {
       ++loc.line;
       loc.column = 0;
     }
-    else
+    else {
       ++loc.column;
+    }
     return ch;
   }
   void unget_char()
   {
     --pos;
-    if (*pos == '\n')
+    if (*pos == '\n') {
       // Don't worry about the column; we'll be going to the start of
       // the next line again shortly...
       --loc.line;
+    }
   }
 
   // Tokenizer Private Members

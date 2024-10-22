@@ -1,10 +1,12 @@
 #include "app/rib_parser/exporters/materials/rib_to_cycles.h"
 #include "app/rib_parser/error.h"
 #include "app/rib_parser/exporters/materials/shader_defaults.h"
+#include "app/rib_parser/exporters/node_util.h"
 #include "app/rib_parser/parsed_parameter.h"
 #include "scene/shader_graph.h"
 #include "scene/shader_nodes.h"
 #include "util/color.h"
+#include "util/path.h"
 #include <OpenImageIO/ustring.h>
 
 CCL_NAMESPACE_BEGIN
@@ -231,7 +233,6 @@ void PxrNormalMaptoCycles::update_parameters(Parameter_Dictionary const &paramet
   // Now handle the funny one-offs that require remapping
   Parsed_Parameter updated_param;
   Parsed_Parameter *param;
-  const SocketType *input;
 
   updated_param.payload = vector<float>();
   param = _parameters["inputRGB"];
@@ -287,7 +288,7 @@ void PxrRamptoCycles::update_parameters(Parameter_Dictionary const &parameters,
 
   param = _parameters["colorRamp"];
   if (param) {
-    int num_knots = param->ints()[0];
+    // int num_knots = param->ints()[0];
     auto knots = _parameters["colorRamp_Knots"]->floats();
     auto colors = _parameters["colorRamp_Colors"]->floats();
     Parsed_Parameter *interp = _parameters["colorRamp_Interpolation"];
@@ -362,7 +363,7 @@ bool PxrImageNormalMaptoCycles::create_shader_node(std::string const &shader,
         itn->set_colorspace(ustring("Non-Color"));
       }
       else if (node->is_a(NormalMapNode::node_type)) {
-        NormalMapNode *itn = (NormalMapNode *)node;
+        // NormalMapNode *itn = (NormalMapNode *)node;
       }
     }
     else {
