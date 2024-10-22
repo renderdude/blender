@@ -5310,17 +5310,17 @@ namespace mpl {
     return inter_communicator{comm};
   }
 
-    inter_communicator communicator::accept(std::string portname, class info info, int root) const {
-      MPI_Comm comm;
-      MPI_Comm_accept(portname.c_str(), info.info_, root, comm_, &comm);
-      return inter_communicator{comm};
-    }
+  inline inter_communicator communicator::accept(std::string portname, class info info, int root) const {
+    MPI_Comm comm;
+    MPI_Comm_accept(portname.c_str(), info.info_, root, comm_, &comm);
+    return inter_communicator{comm};
+  }
 
-    inter_communicator communicator::connect(std::string portname, class info info, int root) const {
-      MPI_Comm comm;
-      MPI_Comm_connect(portname.c_str(), info.info_, root, comm_, &comm);
-      return inter_communicator{comm};
-    }
+  inline inter_communicator communicator::connect(std::string portname, class info info, int root) const {
+    MPI_Comm comm;
+    MPI_Comm_connect(portname.c_str(), info.info_, root, comm_, &comm);
+    return inter_communicator{comm};
+  }
 
   //--------------------------------------------------------------------
 
