@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <sstream>
 #include <string>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -150,12 +149,12 @@ class Camera_Transform {
     return projection_inverse(_world_from_render);
   }
 
-  ProjectionTransform camera_from_render(float time = 0.f) const
+  ProjectionTransform camera_from_render([[maybe_unused]] float time = 0.f) const
   {
     return projection_inverse(_render_from_camera);
   }
 
-  ProjectionTransform camera_from_world(float time = 0.f) const
+  ProjectionTransform camera_from_world([[maybe_unused]]float time = 0.f) const
   {
     return projection_inverse(_world_from_render * _render_from_camera);
   }

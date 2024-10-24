@@ -148,7 +148,7 @@ CCL_NAMESPACE_BEGIN
       vector< Return_Type > lookup_array( const std::string& name,
                                                Parameter_Type type,
                                                int nPerItem,
-                                               G getValues, C convert ) const;
+                                               G get_values, C convert ) const;
 
       void remove( const std::string& name, Parameter_Type typeName );
       void check_parameter_types();

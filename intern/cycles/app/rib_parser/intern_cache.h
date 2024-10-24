@@ -13,9 +13,7 @@ template<typename T, typename Hash = std::hash<T>> class Intern_Cache {
  public:
   /// @name Initialization
   ///@{
-  Intern_Cache() : _hash_table(256)
-  {
-  }
+  Intern_Cache() : _hash_table(256) {}
 
   ///@}
 
@@ -36,29 +34,30 @@ template<typename T, typename Hash = std::hash<T>> class Intern_Cache {
         size_t offset = Hash()(item) % _hash_table.size();
         int step = 1;
         while (true) {
-          if (!_hash_table[offset])
+          if (!_hash_table[offset]) {
             // fine--it's definitely not there
             break;
-          else if (*_hash_table[offset] == item) {
+          }
+          if (*_hash_table[offset] == item) {
             // Another thread inserted it
             const T *ret = _hash_table[offset];
             _mutex.unlock();
             return ret;
           }
-          else {
-            // collision
-            offset += step;
-            ++step;
-            offset %= _hash_table.size();
-          }
+          // collision
+          offset += step;
+          ++step;
+          offset %= _hash_table.size();
         }
 
         // Grow the hash table if needed
         if (4 * _num_entries > _hash_table.size()) {
           std::vector<const T *> newHash(2 * _hash_table.size());
-          for (const T *ptr : _hash_table)
-            if (ptr)
+          for (const T *ptr : _hash_table) {
+            if (ptr) {
               Insert(ptr, &newHash);
+            }
+          }
 
           _hash_table.swap(newHash);
         }
@@ -70,18 +69,16 @@ template<typename T, typename Hash = std::hash<T>> class Intern_Cache {
         _mutex.unlock();
         return newPtr;
       }
-      else if (*_hash_table[offset] == item) {
+      if (*_hash_table[offset] == item) {
         // Return pointer for found _item_ in hash table
         const T *ret = _hash_table[offset];
         _mutex.unlock_shared();
         return ret;
       }
-      else {
-        // Advance _offset_ after hash table collision
-        offset += step;
-        ++step;
-        offset %= _hash_table.size();
-      }
+      // Advance _offset_ after hash table collision
+      offset += step;
+      ++step;
+      offset %= _hash_table.size();
     }
   }
 

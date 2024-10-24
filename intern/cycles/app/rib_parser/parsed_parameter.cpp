@@ -73,20 +73,30 @@ std::string Parsed_Parameter::to_string() const
     case Parameter_Type::Texture:
       ss << "string";
       break;
+    case Parameter_Type::Unknown:
+      break;
   }
   ss << " " << name << "\" [ ";
-  if (std::holds_alternative<vector<uint8_t>>(payload))
-    for (bool b : bools())
+  if (std::holds_alternative<vector<uint8_t>>(payload)) {
+    for (bool b : bools()) {
       ss << (b ? "true " : "false ");
-  else if (std::holds_alternative<vector<float>>(payload))
-    for (float d : floats())
+    }
+  }
+  else if (std::holds_alternative<vector<float>>(payload)) {
+    for (float d : floats()) {
       ss << d << " ";
-  else if (std::holds_alternative<vector<int>>(payload))
-    for (int i : ints())
+    }
+  }
+  else if (std::holds_alternative<vector<int>>(payload)) {
+    for (int i : ints()) {
       ss << i << " ";
-  else if (std::holds_alternative<vector<std::string>>(payload))
-    for (const auto &s : strings())
+    }
+  }
+  else if (std::holds_alternative<vector<std::string>>(payload)) {
+    for (const auto &s : strings()) {
       ss << "\"" << s << "\" ";
+    }
+  }
   ss << "] ";
 
   return ss.str();

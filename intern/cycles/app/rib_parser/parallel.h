@@ -1,13 +1,11 @@
 #ifndef PARALLEL_H
 #define PARALLEL_H
 
-#include <atomic>
-#include <chrono>
+#include <boost/optional/optional.hpp>
 #include <condition_variable>
 #include <cstdint>
 #include <functional>
-#include <future>
-#include <initializer_list>
+#include <glog/logging.h>
 #include <mutex>
 #include <shared_mutex>
 #include <sstream>
@@ -15,10 +13,6 @@
 #include <thread>
 #include <type_traits>
 #include <vector>
-
-#include "boost/optional.hpp"
-
-#include "util/log.h"
 
 CCL_NAMESPACE_BEGIN
 
@@ -31,12 +25,8 @@ int running_threads();
 
 template<typename T> class Thread_Local {
  public:
-  Thread_Local() : _hash_table(4 * running_threads()), _create([]() { return T(); })
-  {
-  }
-  Thread_Local(std::function<T(void)> &&c) : _hash_table(4 * running_threads()), _create(c)
-  {
-  }
+  Thread_Local() : _hash_table(4 * running_threads()), _create([]() { return T(); }) {}
+  Thread_Local(std::function<T(void)> &&c) : _hash_table(4 * running_threads()), _create(c) {}
 
   T &get();
 
@@ -72,7 +62,7 @@ template<typename T> inline T &Thread_Local<T>::get()
       _mutex.unlock_shared();
       return threadLocal;
     }
-    else if (!_hash_table[hash]) {
+    if (!_hash_table[hash]) {
       _mutex.unlock_shared();
 
       // Get reader-writer lock before calling the callback so that the user
@@ -86,11 +76,13 @@ template<typename T> inline T &Thread_Local<T>::get()
         while (true) {
           hash += step;
           ++step;
-          if (hash >= _hash_table.size())
+          if (hash >= _hash_table.size()) {
             hash %= _hash_table.size();
+          }
 
-          if (!_hash_table[hash])
+          if (!_hash_table[hash]) {
             break;
+          }
         }
       }
 
@@ -102,8 +94,9 @@ template<typename T> inline T &Thread_Local<T>::get()
 
     hash += step;
     ++step;
-    if (hash >= _hash_table.size())
+    if (hash >= _hash_table.size()) {
       hash %= _hash_table.size();
+    }
   }
 }
 
@@ -111,8 +104,9 @@ template<typename T> template<typename F> inline void Thread_Local<T>::for_all(F
 {
   _mutex.lock();
   for (auto &entry : _hash_table) {
-    if (entry)
+    if (entry) {
       func(entry->value);
+    }
   }
   _mutex.unlock();
 }
@@ -120,9 +114,7 @@ template<typename T> template<typename F> inline void Thread_Local<T>::for_all(F
 // Barrier Definition
 class Barrier {
  public:
-  explicit Barrier(int n) : _num_to_block(n), _num_to_exit(n)
-  {
-  }
+  explicit Barrier(int n) : _num_to_block(n), _num_to_exit(n) {}
 
   Barrier(const Barrier &) = delete;
   Barrier &operator=(const Barrier &) = delete;
@@ -143,8 +135,9 @@ void parallel_for(int64_t start, int64_t end, std::function<void(int64_t, int64_
 inline void parallel_for(int64_t start, int64_t end, std::function<void(int64_t)> func)
 {
   parallel_for(start, end, [&func](int64_t start, int64_t end) {
-    for (int64_t i = start; i < end; ++i)
+    for (int64_t i = start; i < end; ++i) {
       func(i);
+    }
   });
 }
 
@@ -231,9 +224,7 @@ bool do_parallel_work();
 
 template<typename T> class Async_Job : public Parallel_Job {
  public:
-  Async_Job(std::function<T(void)> w) : func(std::move(w))
-  {
-  }
+  Async_Job(std::function<T(void)> w) : func(std::move(w)) {}
 
   bool have_work() const
   {
@@ -270,8 +261,9 @@ template<typename T> class Async_Job : public Parallel_Job {
   {
     {
       std::lock_guard<std::mutex> lock(_mutex);
-      if (_result)
+      if (_result) {
         return _result;
+      }
     }
 
     extMutex->unlock();
@@ -282,11 +274,12 @@ template<typename T> class Async_Job : public Parallel_Job {
 
   void wait()
   {
-    while (!is_ready() && do_parallel_work())
-      ;
+    while (!is_ready() && do_parallel_work()) {
+    }
     std::unique_lock<std::mutex> lock(_mutex);
-    if (!_result.has_value())
+    if (!_result.has_value()) {
       _cv.wait(lock, [this]() { return _result.has_value(); });
+    }
   }
 
   void do_work()
@@ -325,10 +318,12 @@ template<typename F, typename... Args> inline auto run_async(F func, Args &&...a
 
   // Enqueue _job_ or run it immediately
   std::unique_lock<std::mutex> lock;
-  if (running_threads() == 1)
+  if (running_threads() == 1) {
     job->do_work();
-  else
+  }
+  else {
     lock = Parallel_Job::thread_pool->add_to_job_list(job);
+  }
   return job;
 }
 

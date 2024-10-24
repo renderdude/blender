@@ -1,11 +1,8 @@
-#include <iterator>
-#include <list>
 #include <sstream>
 #include <thread>
 #include <vector>
 
 #include "parallel.h"
-#include "util/log.h"
 
 CCL_NAMESPACE_BEGIN
 
@@ -20,8 +17,9 @@ bool Barrier::block()
   if (_num_to_block > 0) {
     _cv.wait(lock, [this]() { return _num_to_block == 0; });
   }
-  else
+  else {
     _cv.notify_all();
+  }
 
   return --_num_to_exit == 0;
 }
@@ -31,8 +29,9 @@ Thread_Pool *Parallel_Job::thread_pool;
 // Thread_Pool Method Definitions
 Thread_Pool::Thread_Pool(int nThreads)
 {
-  for (int i = 0; i < nThreads - 1; ++i)
+  for (int i = 0; i < nThreads - 1; ++i) {
     threads.push_back(std::thread(&Thread_Pool::worker, this));
+  }
 }
 
 void Thread_Pool::worker()
@@ -40,8 +39,9 @@ void Thread_Pool::worker()
   VLOG(1) << "Started execution in worker thread";
 
   std::unique_lock<std::mutex> lock(mutex);
-  while (!shutdownThreads)
+  while (!shutdownThreads) {
     work_or_wait(&lock, false);
+  }
 
   VLOG(1) << "Exiting worker thread";
 }
@@ -50,8 +50,9 @@ std::unique_lock<std::mutex> Thread_Pool::add_to_job_list(Parallel_Job *job)
 {
   std::unique_lock<std::mutex> lock(mutex);
   // Add _job_ to head of _jobList_
-  if (jobList)
+  if (jobList) {
     jobList->prev = job;
+  }
   job->next = jobList;
   jobList = job;
 
@@ -69,8 +70,9 @@ void Thread_Pool::work_or_wait(std::unique_lock<std::mutex> *lock, bool is_enque
   }
 
   Parallel_Job *job = jobList;
-  while (job && !job->have_work())
+  while (job && !job->have_work()) {
     job = job->next;
+  }
   if (job) {
     // Execute work for _job_
     job->active_workers++;
@@ -79,12 +81,14 @@ void Thread_Pool::work_or_wait(std::unique_lock<std::mutex> *lock, bool is_enque
     DCHECK(!lock->owns_lock());
     lock->lock();
     job->active_workers--;
-    if (job->finished())
+    if (job->finished()) {
       job_list_condition.notify_all();
+    }
   }
-  else
+  else {
     // Wait for new work to arrive or the job to finish
     job_list_condition.wait(*lock);
+  }
 }
 
 bool Thread_Pool::work_or_return()
@@ -92,10 +96,12 @@ bool Thread_Pool::work_or_return()
   std::unique_lock<std::mutex> lock(mutex);
 
   Parallel_Job *job = jobList;
-  while (job && !job->have_work())
+  while (job && !job->have_work()) {
     job = job->next;
-  if (!job)
+  }
+  if (!job) {
     return false;
+  }
 
   // Execute work for _job_
   job->active_workers++;
@@ -103,8 +109,9 @@ bool Thread_Pool::work_or_return()
   DCHECK(!lock.owns_lock());
   lock.lock();
   job->active_workers--;
-  if (job->finished())
+  if (job->finished()) {
     job_list_condition.notify_all();
+  }
 
   return true;
 }
@@ -113,14 +120,16 @@ void Thread_Pool::remove_from_job_list(Parallel_Job *job)
 {
   DCHECK(!job->removed);
 
-  if (job->prev)
+  if (job->prev) {
     job->prev->next = job->next;
+  }
   else {
     DCHECK(jobList == job);
     jobList = job->next;
   }
-  if (job->next)
+  if (job->next) {
     job->next->prev = job->prev;
+  }
 
   job->removed = true;
 }
@@ -131,8 +140,9 @@ void Thread_Pool::for_each_thread(std::function<void(void)> func)
 
   parallel_for(0, threads.size() + 1, [barrier, &func](int64_t) {
     func();
-    if (barrier->block())
+    if (barrier->block()) {
       delete barrier;
+    }
   });
 }
 
@@ -151,8 +161,9 @@ void Thread_Pool::reenable()
 
 Thread_Pool::~Thread_Pool()
 {
-  if (threads.empty())
+  if (threads.empty()) {
     return;
+  }
 
   {
     std::lock_guard<std::mutex> lock(mutex);
@@ -160,8 +171,9 @@ Thread_Pool::~Thread_Pool()
     job_list_condition.notify_all();
   }
 
-  for (std::thread &thread : threads)
+  for (std::thread &thread : threads) {
     thread.join();
+  }
 }
 
 std::string Thread_Pool::to_string() const
@@ -180,8 +192,9 @@ std::string Thread_Pool::to_string() const
     s += "] ";
     mutex.unlock();
   }
-  else
+  else {
     s += "(job list mutex locked) ";
+  }
   return s + "]";
 }
 
@@ -239,8 +252,9 @@ void Parallel_For_Loop_1D::run_step(std::unique_lock<std::mutex> *lock)
   _next_index = indexEnd;
 
   // Remove job from list if all work has been started
-  if (!have_work())
+  if (!have_work()) {
     thread_pool->remove_from_job_list(this);
+  }
 
   // Release lock and execute loop iterations in _[index_start, indexEnd)_
   lock->unlock();
@@ -251,8 +265,9 @@ void Parallel_For_Loop_1D::run_step(std::unique_lock<std::mutex> *lock)
 void parallel_for(int64_t start, int64_t end, std::function<void(int64_t, int64_t)> func)
 {
   CHECK(Parallel_Job::thread_pool);
-  if (start == end)
+  if (start == end) {
     return;
+  }
 
   // Compute chunk size for parallel loop
   int64_t chunk_size = std::max<int64_t>(1, (end - start) / (8 * running_threads()));
@@ -262,8 +277,9 @@ void parallel_for(int64_t start, int64_t end, std::function<void(int64_t, int64_
   std::unique_lock<std::mutex> lock = Parallel_Job::thread_pool->add_to_job_list(&loop);
 
   // Help out with parallel loop iterations in the current thread
-  while (!loop.finished())
+  while (!loop.finished()) {
     Parallel_Job::thread_pool->work_or_wait(&lock, true);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -281,8 +297,9 @@ int running_threads()
 void parallel_init(int nThreads)
 {
   CHECK(!Parallel_Job::thread_pool);
-  if (nThreads <= 0)
+  if (nThreads <= 0) {
     nThreads = available_cores();
+  }
   Parallel_Job::thread_pool = new Thread_Pool(nThreads);
 }
 
@@ -294,8 +311,9 @@ void parallel_cleanup()
 
 void for_each_thread(std::function<void(void)> func)
 {
-  if (Parallel_Job::thread_pool)
+  if (Parallel_Job::thread_pool) {
     Parallel_Job::thread_pool->for_each_thread(std::move(func));
+  }
 }
 
 void disable_thread_pool()
