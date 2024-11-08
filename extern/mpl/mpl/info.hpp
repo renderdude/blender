@@ -214,6 +214,10 @@ namespace mpl {
       MPI_Publish_name(name.c_str(), info_.info_, portname_.c_str());
     }
 
+    void unpublish_name(std::string name) {
+      MPI_Unpublish_name(name.c_str(), info_.info_, portname_.c_str());
+    }
+
     void lookup_name(std::string name) {
       char portname[MPI_MAX_PORT_NAME + 1];
       MPI_Lookup_name(name.c_str(), info_.info_, portname);

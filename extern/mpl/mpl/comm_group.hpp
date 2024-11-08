@@ -535,6 +535,19 @@ namespace mpl {
         MPI_Abort(comm_, err);
       }
 
+      // This function waits for all decoupled MPI activities on the communicator to
+      // complete internally, deallocates the communicator object, and sets the
+      // handle to MPI_COMM_NULL. It is a collective operation.
+      void disconnect() {
+        if (is_valid()) {
+          int result_1;
+          MPI_Comm_compare(comm_, MPI_COMM_WORLD, &result_1);
+          int result_2;
+          MPI_Comm_compare(comm_, MPI_COMM_SELF, &result_2);
+          if (result_1 != MPI_IDENT and result_2 != MPI_IDENT)
+            MPI_Comm_disconnect(&comm_);
+        }
+      }
       // === point to point ==============================================
 
       // === standard send ===
