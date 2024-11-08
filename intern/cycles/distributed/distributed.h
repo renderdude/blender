@@ -1,8 +1,7 @@
 #ifndef DISTRIBUTED_H
 #define DISTRIBUTED_H
 
-#include <iostream>
-#include <random>
+#include <string>
 #include <unistd.h>
 
 #include "mpl/mpl.hpp"
@@ -17,7 +16,7 @@ class Distributed {
 public:
   /// @name Initialization
   ///@{
-  Distributed(std::string bind_to, std::string connect_to);
+  Distributed(bool reverse_connect);
   ///@}
 
   /// @name Duplication

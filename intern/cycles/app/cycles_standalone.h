@@ -26,8 +26,9 @@ struct Options {
   std::vector<float> crop_window = {0., 1., 0., 1.};
   bool crop_window_set = false;
 #ifdef WITH_CYCLES_DISTRIBUTED
-  string connect_to;
-  string bind_to;
+  bool reverse_connect = false;
+  bool is_distributed = false;
+  string directory;
 #endif
 } options;
 

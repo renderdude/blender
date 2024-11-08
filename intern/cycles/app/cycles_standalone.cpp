@@ -154,8 +154,8 @@ static void session_init()
   options.session = new Session(options.session_params, options.scene_params);
 
 #ifdef WITH_CYCLES_DISTRIBUTED
-  if (!options.bind_to.empty() || !options.connect_to.empty()) {
-    options.session->distributed = new Distributed(options.bind_to, options.connect_to);
+  if (options.is_distributed) {
+    options.session->distributed = new Distributed(options.reverse_connect);
   }
 #endif
 
@@ -437,14 +437,17 @@ static void options_parse(int argc, const char **argv)
              "Shading system to use: svm, osl",
 #endif
 #ifdef WITH_CYCLES_DISTRIBUTED
-             "--bind %s",
-             &options.bind_to,
-             "The port to bind to. This is ZeroMQ syntax \
-so it should look something like: -b tcp://*:5555",
-             "--connect %s",
-             &options.connect_to,
-             "The port to connect to. This is ZeroMQ syntax so it should look something like: -c "
-             "tcp://localhost:5555",
+             "--distributed",
+             &options.is_distributed,
+             "Run in distributed mode",
+             "--reverse_connect",
+             &options.reverse_connect,
+             "This options means that this instance is the rendering side, and should \
+             estabilish a connection back to the data server ",
+             "--directory",
+             &options.directory,
+             "If the file to be rendered is not found on the server, look here for it, \
+             or, write it in this location if the first time",
 #endif
              "--display-type %s",
              &options.display_type,
