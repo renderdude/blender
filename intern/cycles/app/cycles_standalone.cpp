@@ -2,6 +2,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0 */
 
+#include <filesystem>
 #include <stdio.h>
 
 #include "device/device.h"
@@ -148,8 +149,21 @@ static void scene_init()
 
 static void session_init()
 {
+  namespace fs = std::filesystem;
+
+  const char* cycles_shader_path = getenv("CYCLES_SHADER_PATH");
   std::string base_path = path_dirname(path_dirname(Sysutil::this_program_path()));
-  setenv("CYCLES_SHADER_PATH", path_join(base_path, "shader").c_str(), 0);
+  std::string shader_path = path_join(base_path, "shader");
+  // XCode is one-level deeper
+  if (!fs::is_directory(shader_path)) {
+    base_path = path_dirname(base_path);
+    shader_path = path_join(base_path, "shader");
+    assert(fs::is_directory(shader_path));
+  }
+  if(cycles_shader_path) {
+    shader_path = std::string(cycles_shader_path) + ":" + shader_path;
+  }
+  setenv("CYCLES_SHADER_PATH", shader_path.c_str(), 0);
   options.output_pass = "combined";
   options.session = new Session(options.session_params, options.scene_params);
 
