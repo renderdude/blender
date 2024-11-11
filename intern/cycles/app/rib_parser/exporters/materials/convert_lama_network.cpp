@@ -313,8 +313,10 @@ void LamaNetwork::find_parameters()
             _internal_references[shader_type->strings()[2]].push_back(pp);
           }
           // Now yank parameters that need rescaling
-          if (tokens[1] == "out_specularWeight") {
-            _rescaled_parameters[shader_type->strings()[2]].push_back(pp);
+          if (tokens.size() > 1) {
+            if (tokens[1] == "out_specularWeight") {
+              _rescaled_parameters[shader_type->strings()[2]].push_back(pp);
+            }
           }
         }
       }
@@ -861,11 +863,12 @@ void LamaNetwork::generate_mtlx_definition()
     }
 
     // And the common ones
-    for (auto ref : _common_ext_refs)
+    for (auto ref : _common_ext_refs) {
       for (auto *pp : ref.second) {
         pp->name = remapped_name("common", pp, pp->name);
         params.push_back(pp);
       }
+    }
 
     // And those from the LamaSurface node
     param = new Parsed_Parameter(Parameter_Type::String, "__materialid", loc);
