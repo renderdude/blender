@@ -804,7 +804,7 @@ void LamaNetwork::generate_mtlx_definition()
   // Simplify extternal refs to just the common ones
   for (auto it = _common_ext_refs.begin(); it != _common_ext_refs.end();) {
     std::sort(it->second.begin(), it->second.end(), [](Parsed_Parameter *a, Parsed_Parameter *b) {
-      return a->strings()[0] == b->strings()[0];
+      return a->strings()[0] < b->strings()[0];
     });
     auto itt = std::unique(
         it->second.begin(), it->second.end(), [](Parsed_Parameter *a, Parsed_Parameter *b) {
