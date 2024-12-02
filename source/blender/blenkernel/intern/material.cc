@@ -55,7 +55,7 @@
 #include "BKE_grease_pencil.hh"
 #include "BKE_icons.h"
 #include "BKE_idtype.hh"
-#include "BKE_image.h"
+#include "BKE_image.hh"
 #include "BKE_lib_id.hh"
 #include "BKE_lib_query.hh"
 #include "BKE_main.hh"
@@ -204,15 +204,10 @@ static void material_blend_write(BlendWriter *writer, ID *id, const void *id_add
 
   /* nodetree is integral part of material, no libdata */
   if (ma->nodetree) {
-    BLO_Write_IDBuffer *temp_embedded_id_buffer = BLO_write_allocate_id_buffer();
-    BLO_write_init_id_buffer_from_id(
-        temp_embedded_id_buffer, &ma->nodetree->id, BLO_write_is_undo(writer));
-    BLO_write_struct_at_address(
-        writer, bNodeTree, ma->nodetree, BLO_write_get_id_buffer_temp_id(temp_embedded_id_buffer));
+    BLO_Write_IDBuffer temp_embedded_id_buffer{ma->nodetree->id, writer};
+    BLO_write_struct_at_address(writer, bNodeTree, ma->nodetree, temp_embedded_id_buffer.get());
     blender::bke::node_tree_blend_write(
-        writer,
-        reinterpret_cast<bNodeTree *>(BLO_write_get_id_buffer_temp_id(temp_embedded_id_buffer)));
-    BLO_write_destroy_id_buffer(&temp_embedded_id_buffer);
+        writer, reinterpret_cast<bNodeTree *>(temp_embedded_id_buffer.get()));
   }
 
   BKE_previewimg_blend_write(writer, ma->preview);
@@ -1782,18 +1777,9 @@ void ramp_blend(int type, float r_col[3], const float fac, const float col[3])
       r_col[2] = min_ff(r_col[2], col[2]) * fac + r_col[2] * facm;
       break;
     case MA_RAMP_LIGHT:
-      tmp = fac * col[0];
-      if (tmp > r_col[0]) {
-        r_col[0] = tmp;
-      }
-      tmp = fac * col[1];
-      if (tmp > r_col[1]) {
-        r_col[1] = tmp;
-      }
-      tmp = fac * col[2];
-      if (tmp > r_col[2]) {
-        r_col[2] = tmp;
-      }
+      r_col[0] = max_ff(r_col[0], col[0]) * fac + r_col[0] * facm;
+      r_col[1] = max_ff(r_col[1], col[1]) * fac + r_col[1] * facm;
+      r_col[2] = max_ff(r_col[2], col[2]) * fac + r_col[2] * facm;
       break;
     case MA_RAMP_DODGE:
       if (r_col[0] != 0.0f) {

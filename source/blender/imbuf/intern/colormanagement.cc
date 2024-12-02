@@ -41,7 +41,7 @@
 #include "BKE_colortools.hh"
 #include "BKE_context.hh"
 #include "BKE_global.hh"
-#include "BKE_image_format.h"
+#include "BKE_image_format.hh"
 #include "BKE_main.hh"
 
 #include "GPU_capabilities.hh"
@@ -1148,6 +1148,7 @@ void colormanage_imbuf_make_linear(ImBuf *ibuf, const char *from_colorspace)
                                   from_colorspace,
                                   to_colorspace,
                                   predivide);
+    ibuf->float_buffer.colorspace = nullptr;
   }
 }
 

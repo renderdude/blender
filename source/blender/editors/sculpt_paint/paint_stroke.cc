@@ -28,7 +28,7 @@
 #include "BKE_colortools.hh"
 #include "BKE_context.hh"
 #include "BKE_curve.hh"
-#include "BKE_image.h"
+#include "BKE_image.hh"
 #include "BKE_paint.hh"
 
 #include "WM_api.hh"
@@ -132,6 +132,11 @@ static void paint_draw_smooth_cursor(bContext *C, const int x, const int y, void
   const Paint *paint = BKE_paint_get_active_from_context(C);
   const Brush *brush = BKE_paint_brush_for_read(paint);
   PaintStroke *stroke = static_cast<PaintStroke *>(customdata);
+  const PaintMode mode = BKE_paintmode_get_active_from_context(C);
+
+  if ((mode == PaintMode::GPencil) && (paint->flags & PAINT_SHOW_BRUSH) == 0) {
+    return;
+  }
 
   if (stroke && brush) {
     GPU_line_smooth(true);
@@ -1648,7 +1653,7 @@ int paint_stroke_modal(bContext *C, wmOperator *op, const wmEvent *event, PaintS
 int paint_stroke_exec(bContext *C, wmOperator *op, PaintStroke *stroke)
 {
   /* only when executed for the first time */
-  if (stroke->stroke_started == 0) {
+  if (!stroke->stroke_started) {
     PointerRNA firstpoint;
     PropertyRNA *strokeprop = RNA_struct_find_property(op->ptr, "stroke");
 
@@ -1666,7 +1671,7 @@ int paint_stroke_exec(bContext *C, wmOperator *op, PaintStroke *stroke)
     RNA_END;
   }
 
-  const bool ok = stroke->stroke_started != 0;
+  const bool ok = stroke->stroke_started;
 
   stroke_done(C, op, stroke);
 

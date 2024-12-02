@@ -82,11 +82,14 @@ class LayerNodeDropTarget : public TreeViewItemDropTarget {
 
     switch (drag_info.drop_location) {
       case DropLocation::Into:
-        return fmt::format(TIP_("Move {} {} into {}"), node_type, drag_name, drop_name);
+        return fmt::format(
+            fmt::runtime(TIP_("Move {} {} into {}")), node_type, drag_name, drop_name);
       case DropLocation::Before:
-        return fmt::format(TIP_("Move {} {} above {}"), node_type, drag_name, drop_name);
+        return fmt::format(
+            fmt::runtime(TIP_("Move {} {} above {}")), node_type, drag_name, drop_name);
       case DropLocation::After:
-        return fmt::format(TIP_("Move {} {} below {}"), node_type, drag_name, drop_name);
+        return fmt::format(
+            fmt::runtime(TIP_("Move {} {} below {}")), node_type, drag_name, drop_name);
       default:
         BLI_assert_unreachable();
         break;
@@ -329,6 +332,35 @@ class LayerGroupViewItem : public AbstractTreeViewItem {
     this->label_ = group_.name();
   }
 
+  std::optional<bool> should_be_collapsed() const override
+  {
+    const bool is_collapsed = !group_.is_expanded();
+    return is_collapsed;
+  }
+
+  bool set_collapsed(const bool collapsed) override
+  {
+    if (!AbstractTreeViewItem::set_collapsed(collapsed)) {
+      return false;
+    }
+    group_.set_expanded(!collapsed);
+    return true;
+  }
+
+  void on_collapse_change(bContext &C, const bool is_collapsed) override
+  {
+    const bool is_expanded = !is_collapsed;
+
+    /* Let RNA handle the property change. This makes sure all the notifiers and DEG
+     * update calls are properly called. */
+    PointerRNA group_ptr = RNA_pointer_create(
+        &grease_pencil_.id, &RNA_GreasePencilLayerGroup, &group_);
+    PropertyRNA *prop = RNA_struct_find_property(&group_ptr, "is_expanded");
+
+    RNA_property_boolean_set(&group_ptr, prop, is_expanded);
+    RNA_property_update(&C, &group_ptr, prop);
+  }
+
   void build_row(uiLayout &row) override
   {
     build_layer_group_name(row);
@@ -475,7 +507,6 @@ void LayerTreeView::build_tree_node_recursive(TreeViewOrItem &parent, TreeNode &
   else if (node.is_group()) {
     LayerGroupViewItem &group_item = parent.add_tree_item<LayerGroupViewItem>(this->grease_pencil_,
                                                                               node.as_group());
-    group_item.uncollapse_by_default();
     LISTBASE_FOREACH_BACKWARD (GreasePencilLayerTreeNode *, node_, &node.as_group().children) {
       build_tree_node_recursive(group_item, node_->wrap());
     }
@@ -513,5 +544,5 @@ void uiTemplateGreasePencilLayerTree(uiLayout *layout, bContext *C)
   tree_view->set_context_menu_title("Grease Pencil Layer");
   tree_view->set_default_rows(6);
 
-  ui::TreeViewBuilder::build_tree_view(*tree_view, *layout);
+  ui::TreeViewBuilder::build_tree_view(*C, *tree_view, *layout);
 }

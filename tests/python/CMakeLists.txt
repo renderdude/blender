@@ -287,6 +287,14 @@ add_blender_test(
   --run-all-tests
 )
 
+add_blender_test(
+  object_conversion
+  ${TEST_SRC_DIR}/modeling/object_conversion.blend
+  --python ${TEST_PYTHON_DIR}/object_conversion.py
+  --
+  --run-all-tests
+)
+
 # ------------------------------------------------------------------------------
 # MODIFIERS TESTS
 add_blender_test(
@@ -1113,6 +1121,7 @@ else()
     transform
     blend_modes_byte
     blend_modes_float
+    ffmpeg
   )
 
   foreach(render_test ${render_tests})
@@ -1166,3 +1175,16 @@ add_subdirectory(collada)
 
 # TODO: disabled for now after collection unification
 # add_subdirectory(view_layer)
+
+# ------------------------------------------------------------------------------
+# Linux Release sainty checks
+
+if(WITH_LINUX_OFFICIAL_RELEASE_TESTS)
+  get_filename_component(release_root_folder ${TEST_BLENDER_EXE} DIRECTORY)
+  add_python_test(
+    linux_release_sanity_checks
+    ${CMAKE_SOURCE_DIR}/tools/check_blender_release/check_release.py
+    -- ${release_root_folder}
+  )
+  unset(release_root_folder)
+endif()

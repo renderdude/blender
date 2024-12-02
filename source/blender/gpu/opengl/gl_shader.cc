@@ -598,12 +598,15 @@ std::string GLShader::resources_declare(const ShaderCreateInfo &info) const
     print_resource_alias(ss, res);
   }
   ss << "\n/* Push Constants. */\n";
+  int location = 0;
   for (const ShaderCreateInfo::PushConst &uniform : info.push_constants_) {
+    ss << "layout( location = " << location << ") ";
     ss << "uniform " << to_string(uniform.type) << " " << uniform.name;
     if (uniform.array_size > 0) {
       ss << "[" << uniform.array_size << "]";
     }
     ss << ";\n";
+    location += std::max(1, uniform.array_size);
   }
 #if 0 /* #95278: This is not be enough to prevent some compilers think it is recursive. */
   for (const ShaderCreateInfo::PushConst &uniform : info.push_constants_) {
@@ -957,12 +960,6 @@ std::string GLShader::workaround_geometry_shader_source_create(
 
   ss << "void main()\n";
   ss << "{\n";
-  if (do_layer_workaround) {
-    ss << "  gl_Layer = gpu_Layer[0];\n";
-  }
-  if (do_viewport_workaround) {
-    ss << "  gl_ViewportIndex = gpu_ViewportIndex[0];\n";
-  }
   if (do_barycentric_workaround) {
     ss << "  gpu_pos[0] = gl_in[0].gl_Position;\n";
     ss << "  gpu_pos[1] = gl_in[1].gl_Position;\n";
@@ -980,6 +977,12 @@ std::string GLShader::workaround_geometry_shader_source_create(
       ss << " vec3(" << int(i == 0) << ", " << int(i == 1) << ", " << int(i == 2) << ");\n";
     }
     ss << "  gl_Position = gl_in[" << i << "].gl_Position;\n";
+    if (do_layer_workaround) {
+      ss << "  gl_Layer = gpu_Layer[" << i << "];\n";
+    }
+    if (do_viewport_workaround) {
+      ss << "  gl_ViewportIndex = gpu_ViewportIndex[" << i << "];\n";
+    }
     ss << "  EmitVertex();\n";
   }
   ss << "}\n";

@@ -800,7 +800,7 @@ static int curves_set_selection_domain_exec(bContext *C, wmOperator *op)
 
     CurvesGeometry &curves = curves_id->geometry.wrap();
     bke::MutableAttributeAccessor attributes = curves.attributes_for_write();
-    if (curves.points_num() == 0) {
+    if (curves.is_empty()) {
       continue;
     }
 
@@ -1364,7 +1364,7 @@ static int exec(bContext *C, wmOperator * /*op*/)
                             [&](const int i) { cyclic.span[i] = !cyclic.span[i]; });
     cyclic.finish();
 
-    if (!cyclic.span.as_span().contains(true)) {
+    if (!cyclic.span.contains(true)) {
       attributes.remove("cyclic");
     }
 
