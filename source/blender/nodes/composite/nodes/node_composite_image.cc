@@ -787,12 +787,12 @@ class RenderLayerOperation : public NodeOperation {
     /* Special case for alpha output. */
     if (pass.type() == ResultType::Color && result.type() == ResultType::Float) {
       parallel_for(result.domain().size, [&](const int2 texel) {
-        result.store_pixel(texel, float4(pass.load_pixel(texel + lower_bound).w));
+        result.store_pixel(texel, pass.load_pixel<float4>(texel + lower_bound).w);
       });
     }
     else {
       parallel_for(result.domain().size, [&](const int2 texel) {
-        result.store_pixel(texel, pass.load_pixel(texel + lower_bound));
+        result.store_pixel_generic_type(texel, pass.load_pixel_generic_type(texel + lower_bound));
       });
     }
   }
@@ -820,8 +820,10 @@ void register_node_type_cmp_rlayers()
   ntype.realtime_compositor_unsupported_message = N_(
       "Render passes not supported in the Viewport compositor");
   ntype.flag |= NODE_PREVIEW;
-  blender::bke::node_type_storage(
-      &ntype, nullptr, file_ns::node_composit_free_rlayers, file_ns::node_composit_copy_rlayers);
+  blender::bke::node_type_storage(&ntype,
+                                  std::nullopt,
+                                  file_ns::node_composit_free_rlayers,
+                                  file_ns::node_composit_copy_rlayers);
   ntype.updatefunc = file_ns::cmp_node_rlayers_update;
   ntype.initfunc = node_cmp_rlayers_outputs;
   blender::bke::node_type_size_preset(&ntype, blender::bke::eNodeSizePreset::Large);

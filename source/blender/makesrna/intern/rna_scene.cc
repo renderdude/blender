@@ -4008,6 +4008,7 @@ static void rna_def_tool_settings(BlenderRNA *brna)
   RNA_def_property_ui_text(
       prop, "Auto Keying", "Automatic keyframe insertion for objects, bones and masks");
   RNA_def_property_ui_icon(prop, ICON_RECORD_OFF, 1);
+  RNA_def_property_update(prop, NC_SPACE | ND_SPACE_TIME, nullptr);
 
   prop = RNA_def_property(srna, "auto_keying_mode", PROP_ENUM, PROP_NONE);
   RNA_def_property_enum_bitflag_sdna(prop, nullptr, "autokey_mode");
@@ -8641,7 +8642,9 @@ void RNA_def_scene(BlenderRNA *brna)
   RNA_def_property_clear_flag(prop, PROP_ANIMATABLE);
   RNA_def_property_boolean_sdna(prop, nullptr, "r.flag", SCER_SHOW_SUBFRAME);
   RNA_def_property_ui_text(
-      prop, "Show Subframe", "Show current scene subframe and allow set it using interface tools");
+      prop,
+      "Show Subframe",
+      "Display and allow setting fractional frame values for the current frame");
   RNA_def_property_update(prop, NC_SCENE | ND_FRAME, "rna_Scene_show_subframe_update");
 
   /* Timeline / Time Navigation settings */

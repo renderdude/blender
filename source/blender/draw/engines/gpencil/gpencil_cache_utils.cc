@@ -50,7 +50,7 @@ GPENCIL_tObject *gpencil_object_cache_add(GPENCIL_PrivateData *pd,
   tgp_ob->layers.first = tgp_ob->layers.last = nullptr;
   tgp_ob->vfx.first = tgp_ob->vfx.last = nullptr;
   tgp_ob->camera_z = dot_v3v3(pd->camera_z_axis, ob->object_to_world().location());
-  tgp_ob->is_drawmode3d = is_stroke_order_3d || pd->draw_depth_only;
+  tgp_ob->is_drawmode3d = is_stroke_order_3d;
   tgp_ob->object_scale = mat4_to_scale(ob->object_to_world().ptr());
 
   /* Check if any material with holdout flag enabled. */
@@ -82,7 +82,7 @@ GPENCIL_tObject *gpencil_object_cache_add(GPENCIL_PrivateData *pd,
   rescale_m4(mat, size);
   /* BBox space to World. */
   mul_m4_m4m4(mat, ob->object_to_world().ptr(), mat);
-  if (DRW_view_is_persp_get(nullptr)) {
+  if (blender::draw::View::default_get().is_persp()) {
     /* BBox center to camera vector. */
     sub_v3_v3v3(tgp_ob->plane_normal, pd->camera_pos, mat[3]);
   }
