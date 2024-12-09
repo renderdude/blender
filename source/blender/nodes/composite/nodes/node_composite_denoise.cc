@@ -71,8 +71,8 @@ static void node_composit_buts_denoise(uiLayout *layout, bContext * /*C*/, Point
 #endif
 
   uiItemL(layout, IFACE_("Prefilter:"), ICON_NONE);
-  uiItemR(layout, ptr, "prefilter", UI_ITEM_R_SPLIT_EMPTY_NAME, nullptr, ICON_NONE);
-  uiItemR(layout, ptr, "use_hdr", UI_ITEM_R_SPLIT_EMPTY_NAME, nullptr, ICON_NONE);
+  uiItemR(layout, ptr, "prefilter", UI_ITEM_R_SPLIT_EMPTY_NAME, std::nullopt, ICON_NONE);
+  uiItemR(layout, ptr, "use_hdr", UI_ITEM_R_SPLIT_EMPTY_NAME, std::nullopt, ICON_NONE);
 }
 
 using namespace blender::realtime_compositor;
@@ -106,6 +106,7 @@ class DenoiseOperation : public NodeOperation {
 
 #ifdef WITH_OPENIMAGEDENOISE
     oidn::DeviceRef device = oidn::newDevice(oidn::DeviceType::CPU);
+    device.set("setAffinity", false);
     device.commit();
 
     const int width = input_image.domain().size.x;

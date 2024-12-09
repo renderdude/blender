@@ -14,6 +14,8 @@
 /* Define macros in `DNA_genfile.h`. */
 #define DNA_GENFILE_VERSIONING_MACROS
 
+#include "DNA_action_defaults.h"
+#include "DNA_action_types.h"
 #include "DNA_anim_types.h"
 #include "DNA_brush_types.h"
 #include "DNA_camera_types.h"
@@ -121,6 +123,10 @@ static void convert_action_in_place(blender::animrig::Action &action)
    * so we don't depend on esoteric behavior in `slot_add()`. */
   const int16_t idtype = action.idroot;
   action.idroot = 0;
+
+  /* Initialize the Action's last_slot_handle field to its default value, before
+   * we create a new slot. */
+  action.last_slot_handle = DNA_DEFAULT_ACTION_LAST_SLOT_HANDLE;
 
   Slot &slot = action.slot_add();
   slot.idtype = idtype;
@@ -5179,7 +5185,7 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
     }
   }
 
-  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 404, 9)) {
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 404, 10)) {
     LISTBASE_FOREACH (bAction *, dna_action, &bmain->actions) {
       blender::animrig::Action &action = dna_action->wrap();
       blender::animrig::foreach_fcurve_in_action(
@@ -5198,6 +5204,18 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
       }
     }
     FOREACH_MAIN_ID_END;
+  }
+
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 404, 11)) {
+    /* #update_paint_modes_for_brush_assets() didn't handle image editor tools for some time. 4.3
+     * files saved during that period could have invalid tool references stored. */
+    LISTBASE_FOREACH (WorkSpace *, workspace, &bmain->workspaces) {
+      LISTBASE_FOREACH (bToolRef *, tref, &workspace->tools) {
+        if (tref->space_type == SPACE_IMAGE && tref->mode == SI_MODE_PAINT) {
+          STRNCPY(tref->idname, "builtin.brush");
+        }
+      }
+    }
   }
 
   /* Always run this versioning; meshes are written with the legacy format which always needs to
