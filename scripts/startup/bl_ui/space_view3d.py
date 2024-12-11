@@ -558,13 +558,14 @@ class _draw_tool_settings_context_mode:
         )
 
         if brush.curves_sculpt_tool not in {'ADD', 'DELETE'}:
+            use_strength_pressure = brush.curves_sculpt_tool not in {'SLIDE'}
             UnifiedPaintPanel.prop_unified(
                 layout,
                 context,
                 brush,
                 "strength",
                 unified_name="use_unified_strength",
-                pressure_name="use_pressure_strength",
+                pressure_name="use_pressure_strength" if use_strength_pressure else None,
                 header=True,
             )
 
@@ -6675,7 +6676,8 @@ class VIEW3D_PT_shading_options(Panel):
         if shading.type == 'SOLID':
             col = layout.column()
             if shading.light in {'STUDIO', 'MATCAP'}:
-                col.active = shading.selected_studio_light.has_specular_highlight_pass
+                studio_light = shading.selected_studio_light
+                col.active = (studio_light is not None) and studio_light.has_specular_highlight_pass
                 col.prop(shading, "show_specular_highlight", text="Specular Lighting")
 
 

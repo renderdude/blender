@@ -44,6 +44,8 @@ class Shader {
  public:
   /** Uniform & attribute locations for shader. */
   ShaderInterface *interface = nullptr;
+  /** Bit-set indicating the frame-buffer color attachments that this shader writes to. */
+  uint16_t fragment_output_bits = 0;
 
   /**
    * Specialization constants as a Struct-of-Arrays. Allow simpler comparison and reset.

@@ -3150,7 +3150,7 @@ void uiTemplateCollectionExporters(uiLayout *layout, bContext *C)
   uiItemIntO(col, "", ICON_REMOVE, "COLLECTION_OT_exporter_remove", "index", index);
 
   col = uiLayoutColumn(layout, true);
-  uiItemO(col, nullptr, ICON_EXPORT, "COLLECTION_OT_export_all");
+  uiItemO(col, std::nullopt, ICON_EXPORT, "COLLECTION_OT_export_all");
   uiLayoutSetEnabled(col, !BLI_listbase_is_empty(exporters));
 
   /* Draw the active exporter. */
@@ -7064,6 +7064,10 @@ bool uiTemplateEventFromKeymapItem(uiLayout *layout,
   if (icon != 0) {
     for (int j = 0; j < ARRAY_SIZE(icon_mod) && icon_mod[j]; j++) {
       uiItemL(layout, "", icon_mod[j]);
+      const float offset = ui_event_icon_offset(icon_mod[j]);
+      if (offset != 0.0f) {
+        uiItemS_ex(layout, offset);
+      }
     }
 
     /* Icon and text separately is closer together with aligned layout. */
