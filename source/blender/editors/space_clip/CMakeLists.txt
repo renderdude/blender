@@ -4,11 +4,11 @@
 
 set(INC
   ../include
-  ../../blenkernel
   ../../blenloader
   ../../blentranslation
   ../../gpu
   ../../imbuf
+  ../../imbuf/movie
   ../../makesrna
   ../../windowmanager
 
@@ -46,7 +46,7 @@ set(SRC
 
 set(LIB
   PRIVATE bf::blenfont
-  bf_blenkernel
+  PRIVATE bf::blenkernel
   PRIVATE bf::blenlib
   PRIVATE bf::depsgraph
   PRIVATE bf::dna

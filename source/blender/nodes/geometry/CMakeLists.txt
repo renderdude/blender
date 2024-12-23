@@ -8,14 +8,13 @@ set(INC
   include
   ../intern
   ../../editors/include
-  ../../blenkernel
   ../../blenloader
   ../../blentranslation
-  ../../bmesh
   ../../functions
   ../../geometry
   ../../gpu
   ../../imbuf
+  ../../imbuf/movie
   ../../makesrna
   ../../modifiers
   ../../render
@@ -247,8 +246,9 @@ set(SRC
 )
 
 set(LIB
+  PRIVATE bf::blenkernel
   PRIVATE bf::blenlib
-  bf_bmesh
+  PRIVATE bf::bmesh
   PRIVATE bf::depsgraph
   PRIVATE bf::dna
   bf_functions

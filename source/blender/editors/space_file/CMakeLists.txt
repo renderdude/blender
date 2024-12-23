@@ -6,11 +6,11 @@ set(INC
   ../asset
   ../include
   ../../asset_system
-  ../../blenkernel
   ../../blenloader
   ../../blentranslation
   ../../gpu
   ../../imbuf
+  ../../imbuf/movie
   ../../makesrna
   ../../render
   ../../windowmanager
@@ -45,7 +45,7 @@ set(SRC
 
 set(LIB
   PRIVATE bf::blenfont
-  bf_blenkernel
+  PRIVATE bf::blenkernel
   PRIVATE bf::blenlib
   PRIVATE bf::dna
   PRIVATE bf::intern::guardedalloc
@@ -55,6 +55,9 @@ set(LIB
 
 if(WIN32)
   add_definitions(-DNOMINMAX)
+  list(APPEND LIB
+    PRIVATE bf::intern::utfconv
+  )
 endif()
 
 if(WITH_HEADLESS)

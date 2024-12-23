@@ -1,10 +1,10 @@
 
 msgid ""
 msgstr ""
-"Project-Id-Version: Blender 4.4.0 Alpha (b'cfa63bfefa5b')\n"
+"Project-Id-Version: Blender 4.4.0 Alpha (b'159424053bc2')\n"
 "Report-Msgid-Bugs-To: Ivan Paulos Tomé <ivan.paulos.tome@yandex.com>\n"
-"POT-Creation-Date: 2024-12-09 09:50+0000\n"
-"PO-Revision-Date: 2024-12-02 16:27+0000\n"
+"POT-Creation-Date: 2024-12-23 13:35+0000\n"
+"PO-Revision-Date: 2024-12-19 22:56+0000\n"
 "Last-Translator: Duarte Ramos <duarte.framos@gmail.com>\n"
 "Language-Team: Portuguese <https://translate.blender.org/projects/blender-ui/ui/pt/>\n"
 "Language: pt\n"
@@ -96,6 +96,10 @@ msgstr "Colecção de grupos de curvas-F"
 
 msgid "Animation Channels for Slots"
 msgstr "Compartimentos de Canais de Animação"
+
+
+msgid "For each action slot, a list of animation channels that are meant for that slot"
+msgstr "Para cada compartimento de acções, uma lista de canais de animação destinados para esse compartimento"
 
 
 msgid "Action F-Curves"
@@ -282,36 +286,80 @@ msgid "Collection of action groups"
 msgstr "Colecção de grupos de ação."
 
 
+msgid "Action Layer"
+msgstr "Camada de Acção"
+
+
 msgid "Influence"
 msgstr "Influência"
+
+
+msgid "How much of this layer is used when blending into the lower layers"
+msgstr "Que quantidade desta camada é usada ao misturar com as camadas inferiores"
 
 
 msgid "Mix Mode"
 msgstr "Modo de mistura"
 
 
+msgid "How animation of this layer is blended into the lower layers"
+msgstr "Como animação desta camada é misturada com as camadas inferiores"
+
+
 msgid "Replace"
 msgstr "Substituir"
+
+
+msgid "Channels in this layer override the same channels from underlying layers"
+msgstr "Canais nesta camada substituem os mesmos canais das camadas inferiores"
 
 
 msgid "Offset"
 msgstr "Deslocamento"
 
 
+msgid "Channels in this layer are added to underlying layers as sequential operations"
+msgstr "Canais nesta camada são adicionados às camadas inferiores como operações sequenciais"
+
+
 msgid "Add"
 msgstr "Adicionar"
+
+
+msgid "Channels in this layer are added to underlying layers on a per-channel basis"
+msgstr "Canais nesta camada são adicionados às camadas inferiores por canal"
 
 
 msgid "Subtract"
 msgstr "Subtrair"
 
 
+msgid "Channels in this layer are subtracted to underlying layers on a per-channel basis"
+msgstr "Canais nesta camada são subtraídos às camadas inferiores por canal"
+
+
 msgid "Multiply"
 msgstr "Multiplicar"
 
 
+msgid "Channels in this layer are multiplied with underlying layers on a per-channel basis"
+msgstr "Canais nesta camada são multiplicados às camadas inferiores por canal"
+
+
 msgid "Strips"
 msgstr "Faixas"
+
+
+msgid "The list of strips that are on this animation layer"
+msgstr "A lista de faixas que estão nesta camada de animação"
+
+
+msgid "Action Layers"
+msgstr "Camadas de Acção"
+
+
+msgid "Collection of animation layers"
+msgstr "Colecção de camadas de animação"
 
 
 msgid "Action Pose Markers"
@@ -338,13 +386,41 @@ msgid "Index of active pose marker"
 msgstr "Índice do marcador de pose activo"
 
 
+msgid "Action slot"
+msgstr "Compartimento de acção"
+
+
+msgid "Identifier for a set of channels in this Action, that can be used by a data-block to specify what it gets animated by"
+msgstr "Identificador para um conjunto de canais nesta Acção, que podem ser usados por um bloco-de-dados para especificar pelo que vai ser animado"
+
+
 msgid "Active"
 msgstr "Ativo(a)"
+
+
+msgid "Whether this is the active slot, can be set by assigning to action.slots.active"
+msgstr "Se é este o compartimento activo, pode ser definido ao atribuir a action.slots.active"
+
+
+msgid "Slot Handle"
+msgstr "Identificador do Compartimento"
+
+
+msgid ""
+"Number specific to this Slot, unique within the Action.\n"
+"This is used, for example, on a ActionKeyframeStrip to look up the ActionChannelbag for this Slot"
+msgstr ""
+"Número específico deste compartimento, único dentro da Acção.\n"
+"Usado, por exemplo, numa ActionKeyframeStrip para procurar o ActionChannelbag deste Compartimento"
 
 
 msgctxt "ID"
 msgid "ID Root Type"
 msgstr "Tipo de identificador raiz"
+
+
+msgid "Type of data-block that can be animated by this slot"
+msgstr "Tipo de bloco-de-dados que pode ser animado por este compartimento"
 
 
 msgctxt "ID"
@@ -551,12 +627,72 @@ msgid "Not yet specified. When this slot is first assigned to a data-block, this
 msgstr "Não especificado. Quando o compartimento é atribuído pela primeira vez a um bloco-de-dados, este valor será definido como o tipo desse bloco-de-dados"
 
 
+msgid "Slot Identifier"
+msgstr "Identificador do compartimento"
+
+
+msgid "Used when connecting an Action to a data-block, to find the correct slot handle. This is the display name, prefixed by two characters determined by the slot's ID type"
+msgstr "Usado quando conectando uma Acção a um bloco-de-dados, para encontrar o identificador de compartimento certo. É este o nome de exibição, com o prefixo de dois caracteres determinado pelo tipo de ID do compartimento."
+
+
+msgid "Slot Display Name"
+msgstr "Nome de Exibição do Compartimento"
+
+
+msgid "Name of the slot, for display in the user interface. This name combined with the slot's data-block type is unique within its Action"
+msgstr "Nome do compartimento, para exibição no interface do utilizador. Este nome combinado com o tipo de bloco de dados do compartimento é único dentro da sua Acção"
+
+
+msgid "Selection state of the slot"
+msgstr "Estado de selecção do compartimento"
+
+
 msgid "Show Expanded"
 msgstr "Mostrar expandida"
 
 
+msgid "Expanded state of the slot"
+msgstr "Estando de expansão do compartimento"
+
+
+msgid "Action Slots"
+msgstr "Compartimentos de Acção"
+
+
+msgid "Collection of action slots"
+msgstr "Colecção de compartimentos de Acção"
+
+
+msgid "Active Slot"
+msgstr "Compartimento Activo"
+
+
+msgid "Active slot for this action"
+msgstr "Compartimento activo para esta acção"
+
+
+msgid "Action Strip"
+msgstr "Faixa de Acção"
+
+
 msgid "Keyframe"
 msgstr "Fotograma Chave"
+
+
+msgid "Strip with a set of F-Curves for each action slot"
+msgstr "Faixa com um conjunto de Curvas-F para cada compartimento de acção"
+
+
+msgid "Keyframe Animation Strip"
+msgstr "Inserir Fotograma na Faixa de Animação"
+
+
+msgid "Action Strips"
+msgstr "Faixas de Acção"
+
+
+msgid "Collection of animation strips"
+msgstr "Colecção de animações de acção"
 
 
 msgid "Add-on"
@@ -931,6 +1067,30 @@ msgid "Amount the Active Action contributes to the result of the NLA stack"
 msgstr "O quanto a acção activa contribui para o resultado da pilha de animação não linear."
 
 
+msgid "Action Slot"
+msgstr "Compartimento de Acção"
+
+
+msgid "The slot identifies which sub-set of the Action is considered to be for this data-block, and its name is used to find the right slot when assigning an Action"
+msgstr "O compartimento identifica que sub conjunto da Acção se considera ser para este bloco-de-dados, e o sue nome é usado para encontrar o compartimento certo ao atribuir a acção"
+
+
+msgid "Action Slot Handle"
+msgstr "Identificador do Compartimento de Acção"
+
+
+msgid "A number that identifies which sub-set of the Action is considered to be for this data-block"
+msgstr "Um número que identifica que sub conjunto da Acção se considera ser para este bloco-de-dados"
+
+
+msgid "Slots"
+msgstr "Compartimentos"
+
+
+msgid "The list of slots in this animation data-block"
+msgstr "A lista de compartimentos neste bloco-de-dados de animação"
+
+
 msgid "Tweak Mode Action Storage"
 msgstr "Armazenamento da acção durante ajuste"
 
@@ -945,6 +1105,14 @@ msgstr "Controladores"
 
 msgid "The Drivers/Expressions for this data-block"
 msgstr "Os controladores e expressões matemáticas para este bloco-de-dados."
+
+
+msgid "Last Action Slot Identifier"
+msgstr "Identificador do Último Compartimento de Acção"
+
+
+msgid "The identifier of the most recently assigned action slot. The slot identifies which sub-set of the Action is considered to be for this data-block, and its identifier is used to find the right slot when assigning an Action."
+msgstr "O identificador do compartimento mais recentemente atribuído. O compartimento identifica que sub conjunto da Acção é considerado pertencer a este bloco-de-dados, e o seu identificador é usado para encontrar o compartimento ao atribuir uma Acção."
 
 
 msgid "NLA Tracks"
@@ -1836,6 +2004,14 @@ msgid "Smaller integer with a range from -128 to 127"
 msgstr "Inteiro menor no intervalo entre -128 a 127"
 
 
+msgid "2D 16-Bit Integer Vector"
+msgstr "Vector Inteiro 2D 16-Bit"
+
+
+msgid "16-bit signed integer vector"
+msgstr "Vector de inteiros de 16-bits com sinal"
+
+
 msgid "2D Integer Vector"
 msgstr "Vector 2D Inteiro"
 
@@ -2030,6 +2206,10 @@ msgstr "Atributo de Quaternião"
 
 msgid "Geometry attribute that stores rotation"
 msgstr "Atributo de geometria que armazena rotação"
+
+
+msgid "2D 16-Bit Integer Vector Attribute"
+msgstr "Atributo Vector 2D de Inteiros de 16Bits"
 
 
 msgid "String Attribute"
@@ -2962,6 +3142,10 @@ msgstr "Colecção de anotações"
 
 msgid "Main Grease Pencils"
 msgstr "Lápis de cera principais"
+
+
+msgid "Collection of Grease Pencils"
+msgstr "Colecção de Grease Pencils"
 
 
 msgid "Main Hair Curves"
@@ -4958,6 +5142,10 @@ msgid "Grease Pencil Brush Settings"
 msgstr "Definições de Pincéis do Grease Pencil"
 
 
+msgid "Settings for Grease Pencil brush"
+msgstr "Definições para pincel Grease Pencil"
+
+
 msgid "Active Smooth"
 msgstr "Suavização Activa"
 
@@ -5421,6 +5609,10 @@ msgstr "Não mostrar cor de preenchimento enquanto desenhar traços"
 
 msgid "Factor of Simplify using adaptive algorithm"
 msgstr "Factor do Simplificar usando algoritmo adaptativo"
+
+
+msgid "Threshold in screen space used for the simplify algorithm. Points within this threshold are treated as if they were in a straight line."
+msgstr "Limite em unidades de ecrã usado pelo algoritmo simplificar. Pontos dentro deste limite são tratados como se fossem uma linha recta."
 
 
 msgid "Active Layer"
@@ -7794,6 +7986,18 @@ msgid "The constraining action"
 msgstr "A acção de restrição."
 
 
+msgid "The slot identifies which sub-set of the Action is considered to be for this strip, and its name is used to find the right slot when assigning another Action"
+msgstr "O compartimento identifica que sub conjunto da Acção se considera ser para esta faixa, e o seu nome é usado para encontrar o compartimento certo ao atribuir outra Acção"
+
+
+msgid "A number that identifies which sub-set of the Action is considered to be for this Action Constraint"
+msgstr "Um número que identifica que sub conjunto da Acção se considera ser para esta Restrição de Acção"
+
+
+msgid "The list of action slots suitable for this NLA strip"
+msgstr "A lista de compartimentos de acção adequados para esta faixa NLA"
+
+
 msgid "Evaluation Time"
 msgstr "Tempo de avaliação"
 
@@ -7808,6 +8012,10 @@ msgstr "Último fotograma da acção para usar."
 
 msgid "First frame of the Action to use"
 msgstr "Primeiro fotograma da acção para usar."
+
+
+msgid "The identifier of the most recently assigned action slot. The slot identifies which sub-set of the Action is considered to be for this constraint, and its identifier is used to find the right slot when assigning an Action."
+msgstr "O identificador do compartimento mais recentemente atribuído. O compartimento identifica que sub conjunto da acção se considera ser para esta restrição, e o identificador é usado para encontrar o compartimento certo ao atribuir uma Acção."
 
 
 msgid "Maximum"
@@ -10733,6 +10941,14 @@ msgid "Only include channels relating to selected objects and data"
 msgstr "Inclui somente os canais que são relacionados aos dados e objectos seleccionados."
 
 
+msgid "Only Show Slot of Active Object"
+msgstr "Mostrar Apenas o Compartimento do Objecto Activo"
+
+
+msgid "Only show the slot of the active Object. Otherwise show all the Action's Slots"
+msgstr "Mostrar apenas o compartimento do objecto activo. Caso contrário mostrar todos os compartimentos da acção."
+
+
 msgid "Display Particle"
 msgstr "Mostrar partículas"
 
@@ -12367,6 +12583,10 @@ msgid "H.264"
 msgstr "H.264"
 
 
+msgid "H.265 / HEVC"
+msgstr "H.265 / HEVC"
+
+
 msgid "WebM / VP9"
 msgstr "WebM / VP9"
 
@@ -13000,6 +13220,10 @@ msgid "Lacunarity"
 msgstr "Frequência das lacunas"
 
 
+msgid "Gap between successive frequencies. Depth needs to be greater than 0 for this to have an effect"
+msgstr "Intervalo entre frequências sucessivas. Profundidade deve ser maior que 0 para que este valor tenha efeito."
+
+
 msgid "Time offset for the noise effect"
 msgstr "Deslocamento de tempo para o efeito de ruído."
 
@@ -13016,12 +13240,24 @@ msgid "Roughness"
 msgstr "Rugosidade"
 
 
+msgid "Amount of high frequency detail. Depth needs to be greater than 0 for this to have an effect"
+msgstr "Quantidade de detalhe de alta frequência. Profundidade deve ser maior que 0 para que este valor tenha efeito"
+
+
 msgid "Scaling (in time) of the noise"
 msgstr "Escala (em tempo) do ruído."
 
 
 msgid "Amplitude of the noise - the amount that it modifies the underlying curve"
 msgstr "Amplitude do ruído - a quantia que ele modifica a curva subjacente."
+
+
+msgid "Legacy Noise"
+msgstr "Ruído de Legado"
+
+
+msgid "Use the legacy way of generating noise. Has the issue that it can produce values outside of -1/1"
+msgstr "Usar a forma de legado de gerar ruído. Tema desvantagem de poder gerar valores fora do intervalo -1/1."
 
 
 msgid "Stepped Interpolation F-Modifier"
@@ -13604,6 +13840,10 @@ msgid "Show Font data-blocks"
 msgstr "Mostrar Data-Blocks de Fontes"
 
 
+msgid "Show Grease Pencil data-blocks"
+msgstr "Mostrar Blocos-de-Dados de Grease Pencil"
+
+
 msgid "Show Image data-blocks"
 msgstr "Mostrar Data-Blocks de Imagem"
 
@@ -14104,6 +14344,14 @@ msgid "Sort files by size"
 msgstr "Ordena a lista de ficheiros por tamanho."
 
 
+msgid "Asset Catalog"
+msgstr "Catálogo de Recursos"
+
+
+msgid "Sort the asset list so that assets in the same catalog are kept together. Within a single catalog, assets are ordered by name. The catalogs are in order of the flattened catalog hierarchy."
+msgstr "Ordenar a lista de recursos de forma que recursos no mesmo catálogo apareçam juntos. Dentro de um único catálogo, os recursos são ordenados por nome. Os catálogos são mostrados por ordem expandida da hierarquia de catálogos."
+
+
 msgid "Title"
 msgstr "Título"
 
@@ -14386,6 +14634,30 @@ msgstr "Velocidade da reação de combustão (valores mais altos resultam em cha
 
 msgid "Select the file format to be used for caching volumetric data"
 msgstr "Selecionar o formato de ficheiros a usar para armazenar dados volumétricos"
+
+
+msgid "Uni Cache"
+msgstr "Aramazenamento Uni"
+
+
+msgid "Uni file format (.uni)"
+msgstr "Formato de ficheiro Uni (.uni)"
+
+
+msgid "OpenVDB"
+msgstr "OpenVDB"
+
+
+msgid "OpenVDB file format (.vdb)"
+msgstr "Formato de ficheiro OpenVDB (.vdb)"
+
+
+msgid "Raw Cache"
+msgstr "Armazenamento Raw"
+
+
+msgid "Raw file format (.raw)"
+msgstr "Formato de ficheiro Raw (.raw)"
 
 
 msgid "Cache directory"
@@ -15307,6 +15579,14 @@ msgstr "Domínio adaptativo"
 
 msgid "Adapt simulation resolution and size to fluid"
 msgstr "Adaptar resolução de simulação e tamanho ao fluido."
+
+
+msgid "Adaptive Time Steps"
+msgstr "Passos Temporais Adaptativos"
+
+
+msgid "Automatically decide when to perform multiple simulation steps per frame"
+msgstr "Decidir automaticamente quando efectuar múltiplos passos por fotograma"
 
 
 msgid "Bubble"
@@ -17458,6 +17738,10 @@ msgid "Set layer group visibility"
 msgstr "Definir visibilidade de grupos de camada"
 
 
+msgid "The layer groups is expanded in the UI"
+msgstr "O grupo de camadas está expandido no interface do utilizador"
+
+
 msgid "Protect group from further editing and/or frame changes"
 msgstr "Proteger grupo de edições e/ou alterações nos fotogramas futuras"
 
@@ -17500,6 +17784,10 @@ msgstr "Nome da camada máscara"
 
 msgid "Grease Pencil Mask Layers"
 msgstr "Máscaras de Camadas de Grease Pencil"
+
+
+msgid "Collection of Grease Pencil masking layers"
+msgstr "Colecção de camadas máscara de Grease Pencil"
 
 
 msgid "Active Layer Mask Index"
@@ -17865,8 +18153,36 @@ msgid "Type of ID block that action can be used on - DO NOT CHANGE UNLESS YOU KN
 msgstr "Tipo de identificador de bloco em que a acção pode ser usada - NÃO ALTERE A MENOS QUE SAIBA O QUE ESTÁ FAZENDO."
 
 
+msgid "Is Layered Action"
+msgstr "É Acção em Camadas"
+
+
+msgid "Return whether this is a layered Action. An empty Action considered as both a 'layered' and a 'layered' Action."
+msgstr "Informa se esta é uma acção com camadas. Uma acção vazia é considerada tanto 'em camadas' como uma 'Acção em camadas'."
+
+
+msgid "Is Legacy Action"
+msgstr "É Acção de Legado"
+
+
+msgid "Return whether this is a legacy Action. Legacy Actions have no layers or slots. An empty Action considered as both a 'legacy' and a 'layered' Action."
+msgstr "Informa se é uma Acção de legado. Acções de legado não têm camadas nem compartimentos. Uma Acção vazia é considerada tanto 'de legado' como Acção em camadas."
+
+
+msgid "Is Empty"
+msgstr "É Vazio"
+
+
+msgid "False when there is any Layer, Slot, or legacy F-Curve"
+msgstr "Falso se houver alguma Camada, Compartimento ou Curva-F de legado"
+
+
 msgid "Layers"
 msgstr "Camadas"
+
+
+msgid "The list of layers that make up this Action"
+msgstr "Lista de camadas que compõe esta Acção"
 
 
 msgid "Pose Markers"
@@ -21408,10 +21724,6 @@ msgstr "Caixa de texto Activa"
 
 msgid "Horizontal Alignment"
 msgstr "Alinhamento Horizontal"
-
-
-msgid "Text horizontal alignment from the object center"
-msgstr "Alinhamento horizontal do texto a partir do centro do objecto"
 
 
 msgid "Align text to the left"
@@ -43404,14 +43716,6 @@ msgid "Static Type"
 msgstr "Tipo estático"
 
 
-msgid "Node type (deprecated, use with care)"
-msgstr "Tipo de nó (função obsoleta, usar com cautela)."
-
-
-msgid "Custom Node"
-msgstr "Nós personalizados"
-
-
 msgid "Custom color of the node body"
 msgstr "Cor personalizada do corpo do nó."
 
@@ -43466,10 +43770,6 @@ msgstr "Mostrar textura"
 
 msgid "Display node in viewport textured shading mode"
 msgstr "Mostrar nó no modo de sombreamento texturado da janela de visualização"
-
-
-msgid "Node type (deprecated, use bl_static_type or bl_idname for the actual identifier string)"
-msgstr "Tipo de nó (obsoleto, use bl_static_type ou bl_idname para a variável texto de identificação actual)."
 
 
 msgid "Use custom color for the node"
@@ -52323,61 +52623,6 @@ msgid "Collection of object effects"
 msgstr "Colecção de efeitos de objecto"
 
 
-msgctxt "Operator"
-msgid "Add Material Variant"
-msgstr "Adicionar Variante de Material"
-
-
-msgctxt "Operator"
-msgid "Remove Variant"
-msgstr "Remover Variante"
-
-
-msgctxt "Operator"
-msgid "Display Variant"
-msgstr "Mostrar Variante"
-
-
-msgctxt "Operator"
-msgid "Assign To Variant"
-msgstr "Atribuir a Variante"
-
-
-msgctxt "Operator"
-msgid "Reset to Original"
-msgstr "Repor Original"
-
-
-msgctxt "Operator"
-msgid "Assign as Original"
-msgstr "Atribuir como Original"
-
-
-msgctxt "Operator"
-msgid "Add new Slot"
-msgstr "Adicionar Novo Compartimento"
-
-
-msgctxt "Operator"
-msgid "Assign Material To Variant"
-msgstr "Atribuir material à Variante"
-
-
-msgctxt "Operator"
-msgid "Remove a variant Slot"
-msgstr "Remover Compartimento de Variante"
-
-
-msgctxt "Operator"
-msgid "Apply glTF animation"
-msgstr "Aplicar animação glTF"
-
-
-msgctxt "Operator"
-msgid "Operator"
-msgstr "Operador"
-
-
 msgid "Mark actions with no F-Curves for deletion after save and reload of file preserving \"action libraries\""
 msgstr "Marca acções sem Curvas-F para eliminação após guardar e recarregar ficheiro, preservando as \"bibliotecas de acção\"."
 
@@ -54678,10 +54923,6 @@ msgstr "Actualizar repositório de trabalho i18n (ficheiros po)"
 msgctxt "Operator"
 msgid "Update I18n Work Repository"
 msgstr "Actualizar Repositório de Trabalho i18n"
-
-
-msgid "Add an entry to the list"
-msgstr "Adicionar uma entrada à lista"
 
 
 msgid "Align the UV island's rotation"
@@ -61678,15 +61919,6 @@ msgstr "Início da lista"
 
 msgid "Bottom of the list"
 msgstr "Fim da lista"
-
-
-msgctxt "Operator"
-msgid "Cancel File Load"
-msgstr "Cancelar carregamento de ficheiro"
-
-
-msgid "Cancel loading of selected file"
-msgstr "Cancela o carregamento de um ficheiro seleccionado."
 
 
 msgctxt "Operator"
@@ -68874,11 +69106,6 @@ msgid "Add to Palette"
 msgstr "Adicionar para a paleta"
 
 
-msgctxt "Operator"
-msgid "Texture Paint Toggle"
-msgstr "Alternar para pintura de textura"
-
-
 msgid "Toggle texture paint mode in 3D view"
 msgstr "Alterna para a pintura de textura na janela de visualização 3D."
 
@@ -71425,6 +71652,11 @@ msgid "Swap Inputs"
 msgstr "Trocar entradas"
 
 
+msgctxt "Operator"
+msgid "Deselect All"
+msgstr "Deseleccionar Tudo"
+
+
 msgid "Unmute (un)selected strips"
 msgstr "Torna não mudas as faixas (de)seleccionadas."
 
@@ -72502,6 +72734,10 @@ msgstr "Redefinir ao valor padrão"
 
 msgid "Reset this property's value to its default value"
 msgstr "Redefine este valor de propriedade ao seu valor padrão."
+
+
+msgid "Add an entry to the list"
+msgstr "Adicionar uma entrada à lista"
 
 
 msgid "Clear the property and use default or generated value in operators"
@@ -86009,6 +86245,26 @@ msgid "Shader Editor Add-ons"
 msgstr "Adições do Editor de Sombreadores"
 
 
+msgctxt "Operator"
+msgid "Display Variant"
+msgstr "Mostrar Variante"
+
+
+msgctxt "Operator"
+msgid "Assign To Variant"
+msgstr "Atribuir a Variante"
+
+
+msgctxt "Operator"
+msgid "Assign as Original"
+msgstr "Atribuir como Original"
+
+
+msgctxt "Operator"
+msgid "Add Material Variant"
+msgstr "Adicionar Variante de Material"
+
+
 msgid "Description:"
 msgstr "Descrição:"
 
@@ -86094,11 +86350,6 @@ msgstr "Definições de Iniciação"
 msgctxt "Operator"
 msgid "Reset Settings"
 msgstr "Report Definições"
-
-
-msgctxt "Operator"
-msgid "Deselect All"
-msgstr "Deseleccionar Tudo"
 
 
 msgctxt "Operator"
@@ -88604,42 +88855,6 @@ msgstr "Pelo menos 8 rastreadores comuns em ambos os fotogramas chave são neces
 
 msgid "Blender is compiled without motion tracking library"
 msgstr "Blender está compilado sem suporte a biblioteca de captura de movimentos."
-
-
-msgid "Error writing frame"
-msgstr "Erro ao escrever fotograma"
-
-
-msgid "No valid formats found"
-msgstr "Nenhum formato válido encontrado."
-
-
-msgid "Render width has to be 720 pixels for DV!"
-msgstr "Largura da renderização deve ser de 720 pixeis para DV !"
-
-
-msgid "Render height has to be 480 pixels for DV-NTSC!"
-msgstr "Altura da renderização deve ser de 480 pixeis para DV-NTSC !"
-
-
-msgid "Render height has to be 576 pixels for DV-PAL!"
-msgstr "Altura da renderização dele ser de 576 pixeis para DV-PAL !"
-
-
-msgid "Error initializing video stream"
-msgstr "Erro ao inicializar o fluxo de vídeo."
-
-
-msgid "Error initializing audio stream"
-msgstr "Erro ao inicializar o fluxo de áudio."
-
-
-msgid "Could not open file for writing"
-msgstr "Não é possível abrir o ficheiro para escrita."
-
-
-msgid "Could not initialize streams, probably unsupported codec combination"
-msgstr "Não é possível inicializar fluxos, provavelmente uma combinação de codificador não suportada."
 
 
 msgid "unknown error reading file"
@@ -92336,6 +92551,42 @@ msgid "Freestyle: Stroke rendering"
 msgstr "Freestyle: Renderização de traços..."
 
 
+msgid "Error writing frame"
+msgstr "Erro ao escrever fotograma"
+
+
+msgid "No valid formats found"
+msgstr "Nenhum formato válido encontrado."
+
+
+msgid "Render width has to be 720 pixels for DV!"
+msgstr "Largura da renderização deve ser de 720 pixeis para DV !"
+
+
+msgid "Render height has to be 480 pixels for DV-NTSC!"
+msgstr "Altura da renderização deve ser de 480 pixeis para DV-NTSC !"
+
+
+msgid "Render height has to be 576 pixels for DV-PAL!"
+msgstr "Altura da renderização dele ser de 576 pixeis para DV-PAL !"
+
+
+msgid "Error initializing video stream"
+msgstr "Erro ao inicializar o fluxo de vídeo."
+
+
+msgid "Error initializing audio stream"
+msgstr "Erro ao inicializar o fluxo de áudio."
+
+
+msgid "Could not open file for writing"
+msgstr "Não é possível abrir o ficheiro para escrita."
+
+
+msgid "Could not initialize streams, probably unsupported codec combination"
+msgstr "Não é possível inicializar fluxos, provavelmente uma combinação de codificador não suportada."
+
+
 msgid "Unhandled Gprim type: %s (%s)"
 msgstr "Tipo de Gprim não processado: %s (%s)"
 
@@ -93211,11 +93462,6 @@ msgstr "Balanço de cor"
 
 
 msgctxt "Sequence"
-msgid "White Balance"
-msgstr "Balanço dos tons brancos"
-
-
-msgctxt "Sequence"
 msgid "Curves"
 msgstr "Curvas"
 
@@ -93223,6 +93469,11 @@ msgstr "Curvas"
 msgctxt "Sequence"
 msgid "Hue Correct"
 msgstr "Correção de matiz"
+
+
+msgctxt "Sequence"
+msgid "White Balance"
+msgstr "Balanço dos tons brancos"
 
 
 msgctxt "Sequence"
@@ -93433,10 +93684,6 @@ msgstr "Uma das adições ou script está a usar OpenGL e não funcionará corre
 
 msgid "Pose Library"
 msgstr "Biblioteca de poses"
-
-
-msgid "All Add-ons"
-msgstr "Todas as Adições"
 
 
 msgid "All Add-ons Installed by User"

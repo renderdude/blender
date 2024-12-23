@@ -1,9 +1,9 @@
 
 msgid ""
 msgstr ""
-"Project-Id-Version: Blender 4.4.0 Alpha (b'cfa63bfefa5b')\n"
+"Project-Id-Version: Blender 4.4.0 Alpha (b'159424053bc2')\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-09 09:50+0000\n"
+"POT-Creation-Date: 2024-12-23 13:35+0000\n"
 "PO-Revision-Date: 2024-10-16 00:56+0000\n"
 "Last-Translator: Leevi Oksanen <laavi.oksanen@gmail.com>\n"
 "Language-Team: Finnish <https://translate.blender.org/projects/blender-ui/ui/fi/>\n"
@@ -5726,6 +5726,14 @@ msgid "3D vector"
 msgstr "3D-vektori"
 
 
+msgid "OpenVDB"
+msgstr "OpenVDB"
+
+
+msgid "Raw Cache"
+msgstr "Raaka välimuisti"
+
+
 msgid "End"
 msgstr "Loppu"
 
@@ -8049,10 +8057,6 @@ msgstr "Mukautettu väli"
 
 msgid "Sound Clip"
 msgstr "Ääniklippi"
-
-
-msgid "Custom Node"
-msgstr "Mukautettu noodi"
 
 
 msgid "Show Options"
@@ -14102,14 +14106,6 @@ msgid "Undefined Type"
 msgstr "Määrittelemätön tyyppi"
 
 
-msgid "Error writing frame"
-msgstr "Virhe kirjoittaessa kehystä"
-
-
-msgid "No valid formats found"
-msgstr "Päteviä formaatteja ei löytynyt"
-
-
 msgid "Sculpting"
 msgstr "Veistäminen"
 
@@ -15637,6 +15633,14 @@ msgid "Pack Islands"
 msgstr "Pakkaa UV-saaret"
 
 
+msgid "Error writing frame"
+msgstr "Virhe kirjoittaessa kehystä"
+
+
+msgid "No valid formats found"
+msgstr "Päteviä formaatteja ei löytynyt"
+
+
 msgid "Could not open SVG"
 msgstr "SVG-tiedostoa ei kyetty avaamaan"
 
@@ -15647,14 +15651,6 @@ msgstr "Suhde"
 
 msgid "Binary Object"
 msgstr "Binääriobjekti"
-
-
-msgid "OpenVDB"
-msgstr "OpenVDB"
-
-
-msgid "Raw Cache"
-msgstr "Raaka välimuisti"
 
 
 msgid "X Velocity"
@@ -15696,18 +15692,6 @@ msgstr "Muuta"
 
 msgid "Unknown socket type"
 msgstr "Tuntematon pistoketyyppi"
-
-
-msgid "CustomGroup"
-msgstr "Mukautettu ryhmä"
-
-
-msgid "Custom Group Node"
-msgstr "Mukautettu ryhmänoodi"
-
-
-msgid "UNDEFINED"
-msgstr "MÄÄRITTELEMÄTÖN"
 
 
 msgctxt "NodeTree"
@@ -17222,11 +17206,6 @@ msgstr "Väritasapaino"
 
 
 msgctxt "Sequence"
-msgid "White Balance"
-msgstr "Valkotasapaino"
-
-
-msgctxt "Sequence"
 msgid "Curves"
 msgstr "Käyrät"
 
@@ -17239,6 +17218,11 @@ msgstr "Sävykorjaus"
 msgctxt "Sequence"
 msgid "Brightness/Contrast"
 msgstr "Kirkkaus/Kontrasti"
+
+
+msgctxt "Sequence"
+msgid "White Balance"
+msgstr "Valkotasapaino"
 
 
 msgctxt "Sequence"
@@ -17836,10 +17820,6 @@ msgstr "Tuo SVG-käyrinä"
 
 msgid "UV Layout"
 msgstr "UV-asetelma"
-
-
-msgid "All Add-ons"
-msgstr "Kaikki lisäosat"
 
 
 msgid "All Add-ons Installed by User"

@@ -55,7 +55,6 @@ struct bNodeSocket;
 struct bNodeStack;
 struct bNodeTree;
 struct bNodeTreeExec;
-struct bNodeTreeType;
 struct uiLayout;
 
 namespace blender {
@@ -77,11 +76,11 @@ namespace inverse_eval {
 class InverseEvalParams;
 }  // namespace inverse_eval
 }  // namespace nodes
-namespace realtime_compositor {
+namespace compositor {
 class Context;
 class NodeOperation;
 class ShaderNode;
-}  // namespace realtime_compositor
+}  // namespace compositor
 }  // namespace blender
 
 namespace blender::bke {
@@ -133,10 +132,11 @@ using NodeGatherSocketLinkOperationsFunction =
 using NodeGatherAddOperationsFunction =
     void (*)(blender::nodes::GatherAddNodeSearchParams &params);
 
-using NodeGetCompositorOperationFunction = blender::realtime_compositor::NodeOperation
-    *(*)(blender::realtime_compositor::Context &context, blender::nodes::DNode node);
+using NodeGetCompositorOperationFunction =
+    blender::compositor::NodeOperation *(*)(blender::compositor::Context &context,
+                                            blender::nodes::DNode node);
 using NodeGetCompositorShaderNodeFunction =
-    blender::realtime_compositor::ShaderNode *(*)(blender::nodes::DNode node);
+    blender::compositor::ShaderNode *(*)(blender::nodes::DNode node);
 using NodeExtraInfoFunction = void (*)(blender::nodes::NodeExtraInfoParams &params);
 using NodeInverseElemEvalFunction =
     void (*)(blender::nodes::value_elem::InverseElemEvalParams &params);
@@ -327,10 +327,10 @@ struct bNodeType {
    * responsibility of the caller. */
   NodeGetCompositorShaderNodeFunction get_compositor_shader_node;
 
-  /* A message to display in the node header for unsupported realtime compositor nodes. The message
+  /* A message to display in the node header for unsupported compositor nodes. The message
    * is assumed to be static and thus require no memory handling. This field is to be removed when
    * all nodes are supported. */
-  const char *realtime_compositor_unsupported_message;
+  const char *compositor_unsupported_message;
 
   /* Build a multi-function for this node. */
   NodeMultiFunctionBuildFunction build_multi_function;
@@ -482,6 +482,14 @@ struct bNodeTreeType {
   /* Check if the socket type is valid for this tree type. */
   bool (*valid_socket_type)(bNodeTreeType *ntreetype, bNodeSocketType *socket_type);
 
+  /**
+   * If true, then some UI elements related to building node groups will be hidden.
+   * This can be used by Python-defined custom node tree types.
+   *
+   * This is a uint8_t instead of bool to avoid compiler warnings in generated RNA code.
+   */
+  uint8_t no_group_interface;
+
   /* RNA integration */
   ExtensionRNA rna_ext;
 };
@@ -492,27 +500,12 @@ struct bNodeTreeType {
 /** \name Generic API, Trees
  * \{ */
 
-bNodeTreeType *node_tree_type_find(StringRefNull idname);
+bNodeTreeType *node_tree_type_find(StringRef idname);
 void node_tree_type_add(bNodeTreeType *nt);
 void node_tree_type_free_link(const bNodeTreeType *nt);
 bool node_tree_is_registered(const bNodeTree *ntree);
-GHashIterator *node_tree_type_get_iterator();
 
-/* Helper macros for iterating over tree types. */
-#define NODE_TREE_TYPES_BEGIN(ntype) \
-  { \
-    GHashIterator *__node_tree_type_iter__ = blender::bke::node_tree_type_get_iterator(); \
-    for (; !BLI_ghashIterator_done(__node_tree_type_iter__); \
-         BLI_ghashIterator_step(__node_tree_type_iter__)) \
-    { \
-      blender::bke::bNodeTreeType *ntype = (blender::bke::bNodeTreeType *) \
-          BLI_ghashIterator_getValue(__node_tree_type_iter__);
-
-#define NODE_TREE_TYPES_END \
-  } \
-  BLI_ghashIterator_free(__node_tree_type_iter__); \
-  } \
-  (void)0
+Span<bNodeTreeType *> node_tree_types_get();
 
 /**
  * Try to initialize all type-info in a node tree.
@@ -589,54 +582,25 @@ void node_tree_blend_write(BlendWriter *writer, bNodeTree *ntree);
 /** \name Generic API, Nodes
  * \{ */
 
-bNodeType *node_type_find(StringRefNull idname);
+bNodeType *node_type_find(StringRef idname);
 StringRefNull node_type_find_alias(StringRefNull idname);
 void node_register_type(bNodeType *ntype);
 void node_unregister_type(bNodeType *ntype);
-void node_register_alias(bNodeType *nt, StringRefNull alias);
-GHashIterator *node_type_get_iterator();
+void node_register_alias(bNodeType *nt, StringRef alias);
 
-/* Helper macros for iterating over node types. */
-#define NODE_TYPES_BEGIN(ntype) \
-  { \
-    GHashIterator *__node_type_iter__ = blender::bke::node_type_get_iterator(); \
-    for (; !BLI_ghashIterator_done(__node_type_iter__); \
-         BLI_ghashIterator_step(__node_type_iter__)) { \
-      blender::bke::bNodeType *ntype = (blender::bke::bNodeType *)BLI_ghashIterator_getValue( \
-          __node_type_iter__);
+Span<bNodeType *> node_types_get();
 
-#define NODE_TYPES_END \
-  } \
-  BLI_ghashIterator_free(__node_type_iter__); \
-  } \
-  ((void)0)
-
-bNodeSocketType *node_socket_type_find(StringRefNull idname);
+bNodeSocketType *node_socket_type_find(StringRef idname);
 void node_register_socket_type(bNodeSocketType *stype);
 void node_unregister_socket_type(bNodeSocketType *stype);
 bool node_socket_is_registered(const bNodeSocket *sock);
-GHashIterator *node_socket_type_get_iterator();
 StringRefNull node_socket_type_label(const bNodeSocketType *stype);
 
 std::optional<StringRefNull> node_static_socket_type(int type, int subtype);
 std::optional<StringRefNull> node_static_socket_interface_type_new(int type, int subtype);
 std::optional<StringRefNull> node_static_socket_label(int type, int subtype);
 
-/* Helper macros for iterating over node types. */
-#define NODE_SOCKET_TYPES_BEGIN(stype) \
-  { \
-    GHashIterator *__node_socket_type_iter__ = blender::bke::node_socket_type_get_iterator(); \
-    for (; !BLI_ghashIterator_done(__node_socket_type_iter__); \
-         BLI_ghashIterator_step(__node_socket_type_iter__)) \
-    { \
-      blender::bke::bNodeSocketType *stype = (blender::bke::bNodeSocketType *) \
-          BLI_ghashIterator_getValue(__node_socket_type_iter__);
-
-#define NODE_SOCKET_TYPES_END \
-  } \
-  BLI_ghashIterator_free(__node_socket_type_iter__); \
-  } \
-  ((void)0)
+Span<bNodeSocketType *> node_socket_types_get();
 
 bNodeSocket *node_find_socket(bNode *node, eNodeSocketInOut in_out, StringRef identifier);
 const bNodeSocket *node_find_socket(const bNode *node,
@@ -696,18 +660,27 @@ void node_attach_node(bNodeTree *ntree, bNode *node, bNode *parent);
 void node_detach_node(bNodeTree *ntree, bNode *node);
 
 /**
- * Finds a node based on given socket and returns true on success.
+ * Finds a node based on given socket, returning null in the case where the socket is not part of
+ * the node tree.
  */
-bool node_find_node_try(bNodeTree *ntree, bNodeSocket *sock, bNode **r_node, int *r_sockindex);
+bNode *node_find_node_try(bNodeTree &ntree, bNodeSocket &socket);
 
 /**
- * Same as #node_find_node_try but expects that the socket definitely is in the node tree.
+ * Find the node that contains the given socket. This uses the node topology cache, meaning
+ * subsequent access after changing the node tree will be more expensive, but amortized over time,
+ * the cost is constant.
  */
-void node_find_node(bNodeTree *ntree, bNodeSocket *sock, bNode **r_node, int *r_sockindex);
+bNode &node_find_node(bNodeTree &ntree, bNodeSocket &socket);
+const bNode &node_find_node(const bNodeTree &ntree, const bNodeSocket &socket);
+
 /**
  * Finds a node based on its name.
  */
 bNode *node_find_node_by_name(bNodeTree *ntree, StringRefNull name);
+
+/** Try to find an input item with the given identifier in the entire node interface tree. */
+const bNodeTreeInterfaceSocket *node_find_interface_input_by_identifier(const bNodeTree &ntree,
+                                                                        StringRef identifier);
 
 bool node_is_parent_and_child(const bNode *parent, const bNode *child);
 
@@ -1556,10 +1529,6 @@ void node_link_set_mute(bNodeTree *ntree, bNodeLink *link, const bool muted);
 bool node_link_is_selected(const bNodeLink *link);
 
 void node_internal_relink(bNodeTree *ntree, bNode *node);
-
-float2 node_to_view(const bNode *node, float2 loc);
-
-float2 node_from_view(const bNode *node, float2 view_loc);
 
 void node_position_relative(bNode *from_node,
                             const bNode *to_node,

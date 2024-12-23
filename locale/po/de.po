@@ -1,9 +1,9 @@
 
 msgid ""
 msgstr ""
-"Project-Id-Version: Blender 4.4.0 Alpha (b'cfa63bfefa5b')\n"
+"Project-Id-Version: Blender 4.4.0 Alpha (b'159424053bc2')\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-09 09:50+0000\n"
+"POT-Creation-Date: 2024-12-23 13:35+0000\n"
 "PO-Revision-Date: 2024-12-08 20:56+0000\n"
 "Last-Translator: Thomas Radeke <rahdick@gmx.de>\n"
 "Language-Team: German <https://translate.blender.org/projects/blender-ui/ui/de/>\n"
@@ -29976,11 +29976,6 @@ msgstr "Richtung, um das aktive Lesezeichen in Richtung"
 
 
 msgctxt "Operator"
-msgid "Cancel File Load"
-msgstr "Laden der Datei abbrechen"
-
-
-msgctxt "Operator"
 msgid "Delete Selected Files"
 msgstr "Ausgewählte Datei löschen"
 
@@ -34118,11 +34113,6 @@ msgid "Maintain parent child relationships"
 msgstr "Eltern-Kind-Beziehungen beibehalten"
 
 
-msgctxt "Operator"
-msgid "Toggle Edit Mode"
-msgstr "Bearbeitungsmodus umschalten"
-
-
 msgid "Toggle object's edit mode"
 msgstr "Bearbeitungsmodus eines Objekts umschalten"
 
@@ -35826,11 +35816,6 @@ msgstr "Projektionsbild"
 
 msgid "Use the mouse to sample a color in the image"
 msgstr "Maus benützen, um eine Farbe im Bild abzutasten"
-
-
-msgctxt "Operator"
-msgid "Texture Paint Toggle"
-msgstr "Texturmalerei"
 
 
 msgid "Highlight Angle"
@@ -37736,6 +37721,11 @@ msgstr "Sequenzer"
 msgctxt "Operator"
 msgid "Swap Inputs"
 msgstr "Eingänge vertauschen"
+
+
+msgctxt "Operator"
+msgid "Deselect All"
+msgstr "Alles abwählen"
 
 
 msgctxt "Operator"
@@ -51017,11 +51007,6 @@ msgstr "Einstellungen zurücksetzen"
 
 
 msgctxt "Operator"
-msgid "Deselect All"
-msgstr "Alles abwählen"
-
-
-msgctxt "Operator"
 msgid "Statistics"
 msgstr "Statiken"
 
@@ -56158,38 +56143,6 @@ msgid "Could not write volume: %s"
 msgstr "Masse konnte nicht geschrieben werden: %s"
 
 
-msgid "Error writing frame"
-msgstr "Einzelbild Schreibfehler"
-
-
-msgid "No valid formats found"
-msgstr "Keine gültiges Format gefunden"
-
-
-msgid "Render width has to be 720 pixels for DV!"
-msgstr "Renderbreite sollte für DV 720 Pixel sein!"
-
-
-msgid "Render height has to be 480 pixels for DV-NTSC!"
-msgstr "Renderhöhe sollte für DV-NTSC 480 Pixel sein!"
-
-
-msgid "Render height has to be 576 pixels for DV-PAL!"
-msgstr "Renderhöhe sollte für DV-PAL 576 Pixel sein!"
-
-
-msgid "Error initializing video stream"
-msgstr "Fehler beim Initialisieren des Videostreams"
-
-
-msgid "Error initializing audio stream"
-msgstr "Fehler beim Initialisieren des Audiostreams"
-
-
-msgid "Could not open file for writing"
-msgstr "Datei kann nicht zum Schreiben geöffnet werden"
-
-
 msgid "unknown error reading file"
 msgstr "Unbekannter Dateilesefehler"
 
@@ -59413,6 +59366,38 @@ msgid "UV Vertex"
 msgstr "UV Knoten"
 
 
+msgid "Error writing frame"
+msgstr "Einzelbild Schreibfehler"
+
+
+msgid "No valid formats found"
+msgstr "Keine gültiges Format gefunden"
+
+
+msgid "Render width has to be 720 pixels for DV!"
+msgstr "Renderbreite sollte für DV 720 Pixel sein!"
+
+
+msgid "Render height has to be 480 pixels for DV-NTSC!"
+msgstr "Renderhöhe sollte für DV-NTSC 480 Pixel sein!"
+
+
+msgid "Render height has to be 576 pixels for DV-PAL!"
+msgstr "Renderhöhe sollte für DV-PAL 576 Pixel sein!"
+
+
+msgid "Error initializing video stream"
+msgstr "Fehler beim Initialisieren des Videostreams"
+
+
+msgid "Error initializing audio stream"
+msgstr "Fehler beim Initialisieren des Audiostreams"
+
+
+msgid "Could not open file for writing"
+msgstr "Datei kann nicht zum Schreiben geöffnet werden"
+
+
 msgid "Keying set path could not be added"
 msgstr "Setztasterpfad konnte nicht hinzugefügt werden"
 
@@ -60756,10 +60741,6 @@ msgstr "Entfernte Ebene"
 
 msgid "Pose Library"
 msgstr "Posen-Bibliothek"
-
-
-msgid "All Add-ons"
-msgstr "Alle Add-Ons"
 
 
 msgid "All Add-ons Installed by User"

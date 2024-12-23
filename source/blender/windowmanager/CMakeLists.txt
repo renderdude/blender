@@ -7,7 +7,6 @@ set(INC
   gizmo
   gizmo/intern
   ../asset_system
-  ../blenkernel
   ../blenloader
   ../blentranslation
   ../compositor
@@ -15,12 +14,12 @@ set(INC
   ../draw
   ../gpu
   ../imbuf
+  ../imbuf/movie
   ../makesrna
   ../nodes
   ../render
   ../sequencer
   ../../../intern/memutil
-  ../bmesh
 
   # RNA_prototypes.hh
   ${CMAKE_BINARY_DIR}/source/blender/makesrna
@@ -97,7 +96,9 @@ set(SRC
 
 set(LIB
   PRIVATE bf::blenfont
+  PRIVATE bf::blenkernel
   PRIVATE bf::blenlib
+  PRIVATE bf::bmesh
   PRIVATE bf::depsgraph
   PRIVATE bf::dna
   bf_editor_screen
@@ -108,6 +109,7 @@ set(LIB
   PRIVATE bf::animrig
   bf_sequencer
   bf_intern_ghost
+  bf_compositor
 )
 
 if(WIN32)
@@ -179,13 +181,6 @@ endif()
 
 if(WITH_INPUT_IME)
   add_definitions(-DWITH_INPUT_IME)
-endif()
-
-if(WITH_COMPOSITOR_CPU)
-  list(APPEND LIB
-    bf_compositor
-  )
-  add_definitions(-DWITH_COMPOSITOR_CPU)
 endif()
 
 if(WITH_XR_OPENXR)

@@ -1,9 +1,9 @@
 
 msgid ""
 msgstr ""
-"Project-Id-Version: Blender 4.4.0 Alpha (b'cfa63bfefa5b')\n"
+"Project-Id-Version: Blender 4.4.0 Alpha (b'159424053bc2')\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-09 09:50+0000\n"
+"POT-Creation-Date: 2024-12-23 13:35+0000\n"
 "PO-Revision-Date: 2024-03-13 11:04+0000\n"
 "Last-Translator: Bartosz <gang65@poczta.onet.pl>\n"
 "Language-Team: Ukrainian <https://translate.blender.org/projects/blender-ui/ui/uk/>\n"
@@ -34280,14 +34280,6 @@ msgid "Static Type"
 msgstr "Статичний тип"
 
 
-msgid "Node type (deprecated, use with care)"
-msgstr "Тип вузла (не рекомендовано, користуватись обережно)"
-
-
-msgid "Custom Node"
-msgstr "Власний вузол"
-
-
 msgid "Custom color of the node body"
 msgstr "Власний колір тіла вузла"
 
@@ -34338,10 +34330,6 @@ msgstr "Показати Передогляд"
 
 msgid "Show Texture"
 msgstr "Показ Текстур"
-
-
-msgid "Node type (deprecated, use bl_static_type or bl_idname for the actual identifier string)"
-msgstr "Тип вузла (застаріло; використовуйте bl_static_type або bl_idname, щоб отримати актуальний ідентифікатор)"
 
 
 msgid "Use custom color for the node"
@@ -44601,15 +44589,6 @@ msgstr "Кінець списку"
 
 
 msgctxt "Operator"
-msgid "Cancel File Load"
-msgstr "Скасувати завантаження файлу"
-
-
-msgid "Cancel loading of selected file"
-msgstr "Скасувати завантаження вибраного файлу"
-
-
-msgctxt "Operator"
 msgid "Delete Selected Files"
 msgstr "Видалити вибрані файли"
 
@@ -51790,11 +51769,6 @@ msgid "Maintain parent child relationships"
 msgstr "Зберегти зв'язки предок-нащадок"
 
 
-msgctxt "Operator"
-msgid "Toggle Edit Mode"
-msgstr "Перемкнути Режим Редагування"
-
-
 msgid "Toggle object's edit mode"
 msgstr "Перемкнути режим редагування об'єкта"
 
@@ -54940,11 +54914,6 @@ msgstr "Вибірка виводу кольору показу"
 
 msgid "Add to Palette"
 msgstr "Додати у палітру"
-
-
-msgctxt "Operator"
-msgid "Texture Paint Toggle"
-msgstr "Перемкнути малювання текстури"
 
 
 msgid "Toggle texture paint mode in 3D view"
@@ -58858,6 +58827,11 @@ msgstr "Обміняти 2 смужки у відеоряднику"
 msgctxt "Operator"
 msgid "Swap Inputs"
 msgstr "Обміняти вводи"
+
+
+msgctxt "Operator"
+msgid "Deselect All"
+msgstr "Зневибрати Все"
 
 
 msgctxt "Operator"
@@ -80586,11 +80560,6 @@ msgstr "Скинути Устави"
 
 
 msgctxt "Operator"
-msgid "Deselect All"
-msgstr "Зневибрати Все"
-
-
-msgctxt "Operator"
 msgid "Statistics"
 msgstr "Статистика"
 
@@ -86628,42 +86597,6 @@ msgid "Original Mode"
 msgstr "Оригінальний Режим"
 
 
-msgid "Error writing frame"
-msgstr "Помилка запису кадру"
-
-
-msgid "No valid formats found"
-msgstr "Правильні формати не знайдено."
-
-
-msgid "Render width has to be 720 pixels for DV!"
-msgstr "Для DV ширина рендера має бути 720 пікселів!"
-
-
-msgid "Render height has to be 480 pixels for DV-NTSC!"
-msgstr "Для DV-NTSC висота рендера має бути 480 пікселів!"
-
-
-msgid "Render height has to be 576 pixels for DV-PAL!"
-msgstr "Для DV-PAL висота рендера має бути 576 пікселів!"
-
-
-msgid "Error initializing video stream"
-msgstr "Помилка ініціалізації відеопотоку"
-
-
-msgid "Error initializing audio stream"
-msgstr "Помилка ініціалізації звукового потоку"
-
-
-msgid "Could not open file for writing"
-msgstr "Неможливо відкрити файл для запису"
-
-
-msgid "Could not initialize streams, probably unsupported codec combination"
-msgstr "Неможливо ініціалізувати потоки; можливо, непідтримувана комбінація кодеків"
-
-
 msgid "ID %s is in local database while being linked from library %s!"
 msgstr "Ідентифікатор %s є у локальній базі даних і водночас пов'язаний з бібліотеки %s!"
 
@@ -91895,6 +91828,42 @@ msgid "Freestyle: Stroke rendering"
 msgstr "Freestyle: Рендеринг штриха"
 
 
+msgid "Error writing frame"
+msgstr "Помилка запису кадру"
+
+
+msgid "No valid formats found"
+msgstr "Правильні формати не знайдено."
+
+
+msgid "Render width has to be 720 pixels for DV!"
+msgstr "Для DV ширина рендера має бути 720 пікселів!"
+
+
+msgid "Render height has to be 480 pixels for DV-NTSC!"
+msgstr "Для DV-NTSC висота рендера має бути 480 пікселів!"
+
+
+msgid "Render height has to be 576 pixels for DV-PAL!"
+msgstr "Для DV-PAL висота рендера має бути 576 пікселів!"
+
+
+msgid "Error initializing video stream"
+msgstr "Помилка ініціалізації відеопотоку"
+
+
+msgid "Error initializing audio stream"
+msgstr "Помилка ініціалізації звукового потоку"
+
+
+msgid "Could not open file for writing"
+msgstr "Неможливо відкрити файл для запису"
+
+
+msgid "Could not initialize streams, probably unsupported codec combination"
+msgstr "Неможливо ініціалізувати потоки; можливо, непідтримувана комбінація кодеків"
+
+
 msgid "Index out of range"
 msgstr "Індекс за межами діапазону"
 
@@ -93260,11 +93229,6 @@ msgstr "Колірний баланс"
 
 
 msgctxt "Sequence"
-msgid "White Balance"
-msgstr "Баланс білого"
-
-
-msgctxt "Sequence"
 msgid "Curves"
 msgstr "Криві"
 
@@ -93272,6 +93236,11 @@ msgstr "Криві"
 msgctxt "Sequence"
 msgid "Hue Correct"
 msgstr "Корекція відтінку"
+
+
+msgctxt "Sequence"
+msgid "White Balance"
+msgstr "Баланс білого"
 
 
 msgctxt "Sequence"
@@ -93577,10 +93546,6 @@ msgstr "Для режиму 3D-стерео вікно має бути повн�
 
 msgid "Pose Library"
 msgstr "Бібліотека поз"
-
-
-msgid "All Add-ons"
-msgstr "Всі додатки"
 
 
 msgid "All Add-ons Installed by User"

@@ -1,9 +1,9 @@
 
 msgid ""
 msgstr ""
-"Project-Id-Version: Blender 4.4.0 Alpha (b'cfa63bfefa5b')\n"
+"Project-Id-Version: Blender 4.4.0 Alpha (b'159424053bc2')\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-09 09:50+0000\n"
+"POT-Creation-Date: 2024-12-23 13:35+0000\n"
 "PO-Revision-Date: 2024-04-29 13:36+0000\n"
 "Last-Translator: Zdeněk Doležal <Griperis@outlook.cz>\n"
 "Language-Team: Czech <https://translate.blender.org/projects/blender-ui/ui/cs/>\n"
@@ -16637,10 +16637,6 @@ msgid "Node in a node tree"
 msgstr "Kompoziční uzly"
 
 
-msgid "Custom Node"
-msgstr "Vlastní Uzel"
-
-
 msgid "Custom color of the node body"
 msgstr "Vlastní barva těla uzlu"
 
@@ -22086,15 +22082,6 @@ msgstr "Přesunout Záložku"
 
 
 msgctxt "Operator"
-msgid "Cancel File Load"
-msgstr "Zrušit animaci"
-
-
-msgid "Cancel loading of selected file"
-msgstr "Odstranit označené"
-
-
-msgctxt "Operator"
 msgid "Delete Selected Files"
 msgstr "Odstranit Vybrané Soubory"
 
@@ -25620,11 +25607,6 @@ msgstr "Typ: Animace"
 
 
 msgctxt "Operator"
-msgid "Toggle Edit Mode"
-msgstr "Přepnout Editační Režim"
-
-
-msgctxt "Operator"
 msgid "Add Effector"
 msgstr "Efekt"
 
@@ -27192,11 +27174,6 @@ msgstr "Zobrazit nastaveni hran"
 
 msgid "Add to Palette"
 msgstr "Přidat do palety"
-
-
-msgctxt "Operator"
-msgid "Texture Paint Toggle"
-msgstr "Kresba na texturu"
 
 
 msgid "Change selection for all vertices"
@@ -28967,6 +28944,11 @@ msgstr "Jméno skriptu"
 msgctxt "Operator"
 msgid "Swap Inputs"
 msgstr "Vstupy"
+
+
+msgctxt "Operator"
+msgid "Deselect All"
+msgstr "O(d)značit vše"
 
 
 msgctxt "Operator"
@@ -38646,11 +38628,6 @@ msgstr "Uložit uživatelské nastavení"
 
 
 msgctxt "Operator"
-msgid "Deselect All"
-msgstr "O(d)značit vše"
-
-
-msgctxt "Operator"
 msgid "Statistics"
 msgstr "Statistika"
 
@@ -41890,18 +41867,6 @@ msgid "Original Mode"
 msgstr "Původní Režim"
 
 
-msgid "Error writing frame"
-msgstr "Inkrementální"
-
-
-msgid "No valid formats found"
-msgstr "Orientace manipulátorů (Klávesová zkratka: Alt Space)"
-
-
-msgid "Could not open file for writing"
-msgstr "Nelze otevřít soubor pro psaní"
-
-
 msgid "ID %s not found in library %s anymore!"
 msgstr "ID %s se v knihovně %s už nenašlo!"
 
@@ -44181,6 +44146,18 @@ msgstr "vlastní"
 
 msgid "UV Vertex"
 msgstr "Vrchol"
+
+
+msgid "Error writing frame"
+msgstr "Inkrementální"
+
+
+msgid "No valid formats found"
+msgstr "Orientace manipulátorů (Klávesová zkratka: Alt Space)"
+
+
+msgid "Could not open file for writing"
+msgstr "Nelze otevřít soubor pro psaní"
 
 
 msgid "Keying set path could not be added"

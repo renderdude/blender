@@ -4,7 +4,6 @@
 
 set(INC
   ..
-  ../../blenkernel
   ../../blenloader
   ../../blentranslation
   ../../editors/include
@@ -120,6 +119,7 @@ set(SRC
 )
 
 set(LIB
+  PRIVATE bf::blenkernel
   PRIVATE bf::blenlib
   PRIVATE bf::depsgraph
   PRIVATE bf::dna
@@ -194,10 +194,6 @@ endif()
 
 if(WITH_CODEC_SNDFILE)
   add_definitions(-DWITH_SNDFILE)
-endif()
-
-if(WITH_COMPOSITOR_CPU)
-  add_definitions(-DWITH_COMPOSITOR_CPU)
 endif()
 
 if(WITH_CYCLES)

@@ -6,15 +6,15 @@
 set(INC
   .
   intern
-  ../blenkernel
   ../blentranslation
-  ../compositor/realtime_compositor
-  ../compositor/realtime_compositor/cached_resources
+  ../compositor
+  ../compositor/cached_resources
   ../draw
   ../draw/intern
   ../gpu
   ../gpu/intern
   ../imbuf
+  ../imbuf/movie
   ../makesrna
   ../nodes
   ../sequencer
@@ -60,12 +60,13 @@ set(SRC
 )
 
 set(LIB
+  PRIVATE bf::blenkernel
   PRIVATE bf::blenlib
   PRIVATE bf::depsgraph
   PRIVATE bf::dna
   PRIVATE bf::extern::fmtlib
   PRIVATE bf::intern::guardedalloc
-  bf_realtime_compositor
+  bf_compositor
   PRIVATE bf::intern::atomic
 )
 

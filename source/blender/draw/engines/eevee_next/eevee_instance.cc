@@ -72,27 +72,29 @@ void Instance::init(const int2 &output_res,
     return;
   }
 
-  if (assign_if_different(debug_mode, (eDebugMode)G.debug_value)) {
-    sampling.reset();
-  }
-  if (output_res != film.display_extent_get()) {
-    sampling.reset();
-  }
-  if (output_rect) {
-    int2 offset = int2(output_rect->xmin, output_rect->ymin);
-    int2 extent = int2(BLI_rcti_size_x(output_rect), BLI_rcti_size_y(output_rect));
-    if (offset != film.get_data().offset || extent != film.get_data().extent) {
+  if (is_viewport()) {
+    if (assign_if_different(debug_mode, (eDebugMode)G.debug_value)) {
       sampling.reset();
     }
-  }
-  if (assign_if_different(overlays_enabled_, v3d && !(v3d->flag2 & V3D_HIDE_OVERLAYS))) {
-    sampling.reset();
-  }
-  if (is_painting()) {
-    sampling.reset();
-  }
-  if (is_navigating() && scene->eevee.flag & SCE_EEVEE_SHADOW_JITTERED_VIEWPORT) {
-    sampling.reset();
+    if (output_res != film.display_extent_get()) {
+      sampling.reset();
+    }
+    if (output_rect) {
+      int2 offset = int2(output_rect->xmin, output_rect->ymin);
+      int2 extent = int2(BLI_rcti_size_x(output_rect), BLI_rcti_size_y(output_rect));
+      if (offset != film.get_data().offset || extent != film.get_data().extent) {
+        sampling.reset();
+      }
+    }
+    if (assign_if_different(overlays_enabled_, v3d && !(v3d->flag2 & V3D_HIDE_OVERLAYS))) {
+      sampling.reset();
+    }
+    if (is_painting()) {
+      sampling.reset();
+    }
+    if (is_navigating() && scene->eevee.flag & SCE_EEVEE_SHADOW_JITTERED_VIEWPORT) {
+      sampling.reset();
+    }
   }
 
   sampling.init(scene);
@@ -175,7 +177,9 @@ void Instance::update_eval_members()
 
 void Instance::view_update()
 {
-  sampling.reset();
+  if (is_viewport()) {
+    sampling.reset();
+  }
 }
 
 /** \} */
@@ -398,6 +402,12 @@ void Instance::render_sample()
   /* Motion blur may need to do re-sync after a certain number of sample. */
   if (!is_viewport() && sampling.do_render_sync()) {
     render_sync();
+    while (materials.queued_shaders_count > 0) {
+      /* Leave some time for shaders to compile. */
+      BLI_time_sleep_ms(50);
+      /** WORKAROUND: Re-sync to check if all shaders are already compiled. */
+      render_sync();
+    }
   }
 
   DebugScope debug_scope(debug_scope_render_sample, "EEVEE.render_sample");
@@ -493,14 +503,6 @@ void Instance::render_frame(RenderEngine *engine, RenderLayer *render_layer, con
 {
   /* TODO: Break on RE_engine_test_break(engine) */
   while (!sampling.finished()) {
-    if (materials.queued_shaders_count > 0) {
-      /* Leave some time for shaders to compile. */
-      BLI_time_sleep_ms(50);
-      /** WORKAROUND: Re-sync to check if all shaders are already compiled. */
-      this->render_sync();
-      continue;
-    }
-
     this->render_sample();
 
     if ((sampling.sample_index() == 1) || ((sampling.sample_index() % 25) == 0) ||
@@ -699,15 +701,14 @@ void Instance::light_bake_irradiance(
 
   volume_probes.bake.init(probe);
 
-  custom_pipeline_wrapper([&]() { this->render_sync(); });
-  while (materials.queued_shaders_count > 0) {
-    /* Leave some time for shaders to compile. */
-    BLI_time_sleep_ms(50);
-    /** WORKAROUND: Re-sync to check if all shaders are already compiled. */
-    custom_pipeline_wrapper([&]() { this->render_sync(); });
-  }
-
   custom_pipeline_wrapper([&]() {
+    this->render_sync();
+    while (materials.queued_shaders_count > 0) {
+      /* Leave some time for shaders to compile. */
+      BLI_time_sleep_ms(50);
+      /** WORKAROUND: Re-sync to check if all shaders are already compiled. */
+      this->render_sync();
+    }
     /* Sampling module needs to be initialized to computing lighting. */
     sampling.init(probe);
     sampling.step();

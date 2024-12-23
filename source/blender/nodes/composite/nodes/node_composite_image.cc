@@ -440,7 +440,7 @@ static void node_composit_copy_image(bNodeTree * /*dst_ntree*/,
   }
 }
 
-using namespace blender::realtime_compositor;
+using namespace blender::compositor;
 
 class ImageOperation : public NodeOperation {
  public:
@@ -510,6 +510,7 @@ void register_node_type_cmp_image()
   static blender::bke::bNodeType ntype;
 
   cmp_node_type_base(&ntype, CMP_NODE_IMAGE, "Image", NODE_CLASS_INPUT);
+  ntype.enum_name_legacy = "IMAGE";
   ntype.initfunc = file_ns::node_composit_init_image;
   blender::bke::node_type_storage(
       &ntype, "ImageUser", file_ns::node_composit_free_image, file_ns::node_composit_copy_image);
@@ -659,7 +660,7 @@ static void node_composit_buts_viewlayers(uiLayout *layout, bContext *C, Pointer
   RNA_string_set(&op_ptr, "scene", scene_name);
 }
 
-using namespace blender::realtime_compositor;
+using namespace blender::compositor;
 
 class RenderLayerOperation : public NodeOperation {
  public:
@@ -694,10 +695,10 @@ class RenderLayerOperation : public NodeOperation {
         continue;
       }
 
-      this->context().populate_meta_data_for_pass(
-          scene, view_layer, output->identifier, result.meta_data);
+      const char *pass_name = this->get_pass_name(output->identifier);
+      this->context().populate_meta_data_for_pass(scene, view_layer, pass_name, result.meta_data);
 
-      const Result pass = this->context().get_pass(scene, view_layer, output->identifier);
+      const Result pass = this->context().get_pass(scene, view_layer, pass_name);
       this->execute_pass(pass, result);
     }
   }
@@ -796,6 +797,13 @@ class RenderLayerOperation : public NodeOperation {
       });
     }
   }
+
+  /* Get the name of the pass corresponding to the output with the given identifier. */
+  const char *get_pass_name(StringRef identifier)
+  {
+    DOutputSocket output = this->node().output_by_identifier(identifier);
+    return static_cast<NodeImageLayer *>(output->storage)->pass_name;
+  }
 };
 
 static NodeOperation *get_compositor_operation(Context &context, DNode node)
@@ -812,12 +820,13 @@ void register_node_type_cmp_rlayers()
   static blender::bke::bNodeType ntype;
 
   cmp_node_type_base(&ntype, CMP_NODE_R_LAYERS, "Render Layers", NODE_CLASS_INPUT);
+  ntype.enum_name_legacy = "R_LAYERS";
   blender::bke::node_type_socket_templates(&ntype, nullptr, cmp_node_rlayers_out);
   ntype.draw_buttons = file_ns::node_composit_buts_viewlayers;
   ntype.initfunc_api = file_ns::node_composit_init_rlayers;
   ntype.poll = file_ns::node_composit_poll_rlayers;
   ntype.get_compositor_operation = file_ns::get_compositor_operation;
-  ntype.realtime_compositor_unsupported_message = N_(
+  ntype.compositor_unsupported_message = N_(
       "Render passes not supported in the Viewport compositor");
   ntype.flag |= NODE_PREVIEW;
   blender::bke::node_type_storage(&ntype,

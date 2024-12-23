@@ -1,9 +1,9 @@
 
 msgid ""
 msgstr ""
-"Project-Id-Version: Blender 4.4.0 Alpha (b'cfa63bfefa5b')\n"
+"Project-Id-Version: Blender 4.4.0 Alpha (b'159424053bc2')\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-09 09:50+0000\n"
+"POT-Creation-Date: 2024-12-23 13:35+0000\n"
 "PO-Revision-Date: 2012-09-07 22:32+0100\n"
 "Last-Translator: Nikola Radovanovic <cobisimo@gmail.com>\n"
 "Language-Team: Nikola Radovanovic\n"
@@ -10738,10 +10738,6 @@ msgid "Static Type"
 msgstr "Statička vrsta"
 
 
-msgid "Node type (deprecated, use with care)"
-msgstr "Vrsta čvora (zastarelo, koristite pažljivo)"
-
-
 msgid "Outputs"
 msgstr "Izlazi"
 
@@ -14192,15 +14188,6 @@ msgstr "Ukloni obeleživač"
 
 
 msgctxt "Operator"
-msgid "Cancel File Load"
-msgstr "Prekini učitavanje slike"
-
-
-msgid "Cancel loading of selected file"
-msgstr "Prekini učitavanje izabrane datoteke"
-
-
-msgctxt "Operator"
 msgid "Delete Selected Files"
 msgstr "Izbriši izabrane datoteke"
 
@@ -17376,11 +17363,6 @@ msgid "Project Image"
 msgstr "Projektuj sliku"
 
 
-msgctxt "Operator"
-msgid "Texture Paint Toggle"
-msgstr "Bojenje teksture"
-
-
 msgid "Blur Iterations"
 msgstr "Iteracija zamućenja"
 
@@ -18507,6 +18489,11 @@ msgstr "Zamenjuje 2 trake sekvencera"
 msgctxt "Operator"
 msgid "Swap Inputs"
 msgstr "Zameni ulaz"
+
+
+msgctxt "Operator"
+msgid "Deselect All"
+msgstr "Poništi ceo izabor"
 
 
 msgid "Zoom preview to fit in the area"
@@ -23827,11 +23814,6 @@ msgstr "Zapamti korisničke postavke"
 
 
 msgctxt "Operator"
-msgid "Deselect All"
-msgstr "Poništi ceo izabor"
-
-
-msgctxt "Operator"
 msgid "Statistics"
 msgstr "Statistika"
 
@@ -25119,14 +25101,6 @@ msgid "Plane Track"
 msgstr "Praćenje ploče"
 
 
-msgid "Error writing frame"
-msgstr "Greška pri upisu kadra"
-
-
-msgid "No valid formats found"
-msgstr "Nije pronađen ispravan format"
-
-
 msgid "unknown error reading file"
 msgstr "nepoznata grešaka prilikom čitanja datoteke"
 
@@ -26295,6 +26269,14 @@ msgstr "Prepiši %s"
 
 msgid "UV Vertex"
 msgstr "UV teme"
+
+
+msgid "Error writing frame"
+msgstr "Greška pri upisu kadra"
+
+
+msgid "No valid formats found"
+msgstr "Nije pronađen ispravan format"
 
 
 msgid "Index out of range"

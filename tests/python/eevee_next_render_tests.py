@@ -32,7 +32,24 @@ BLOCKLIST = [
     # Blocked due to point cloud volume differences between platforms (to be fixed).
     "points_volume.blend",
     # Blocked due to GBuffer encoding of small IOR difference between platforms (to be fixed).
-    "principled_thinfilm_transmission.blend",
+    "principled_bsdf_thinfilm_transmission.blend",
+    "ray_offset.blend",
+    # Blocked due to difference in border texel handling between platforms (to be fixed).
+    "render_passes_thinfilm_color.blend",
+]
+
+BLOCKLIST_METAL = [
+    # Blocked due to difference in tangent space calculation (to be fixed).
+    "tangent_no_uv.blend",
+    # Blocked due to difference in volume lightprobe bakes (to be fixed).
+    "clamp_.*.blend",
+    "shadow_all_max_bounces.blend",
+    "light_link_exclude.blend",
+    "light_link_instanced_receiver.blend",
+    # Blocked due to difference in screen space tracing (to be fixed).
+    "sss_reflection_clamp.blend",
+    # Blocked due to difference in volume rendering (to be fixed).
+    "principled_bsdf_interior.blend",
 ]
 
 
@@ -100,8 +117,11 @@ def setup():
                 if mat_slot.material:
                     mat_slot.material.thickness_mode = 'SPHERE'
 
+        if bpy.data.objects.get('Volume_Probe_Baked') is not None:
+            # Some file already have pre existing probe setup with baked data.
+            pass
         # Does not work in edit mode
-        if bpy.context.mode == 'OBJECT':
+        elif bpy.context.mode == 'OBJECT':
             # Simple probe setup
             bpy.ops.object.lightprobe_add(type='SPHERE', location=(0.0, 0.1, 1.0))
             cubemap = bpy.context.selected_objects[0]
@@ -205,7 +225,11 @@ def main():
     if gpu_device_type == "AMD":
         reference_override_dir = "eevee_next_renders/amd"
 
-    report = EEVEEReport("Eevee Next", args.outdir, args.oiiotool, device=args.gpu_backend, blocklist=BLOCKLIST)
+    blocklist = BLOCKLIST
+    if args.gpu_backend == "metal":
+        blocklist += BLOCKLIST_METAL
+
+    report = EEVEEReport("Eevee Next", args.outdir, args.oiiotool, device=args.gpu_backend, blocklist=blocklist)
     if args.gpu_backend == "vulkan":
         report.set_compare_engine('eevee_next', 'opengl')
     else:
@@ -221,6 +245,9 @@ def main():
         report.set_fail_threshold(0.2)
     elif test_dir_name.startswith('image'):
         report.set_fail_threshold(0.051)
+    elif test_dir_name.startswith('displacement'):
+        # metal shadow and wireframe difference. To be fixed.
+        report.set_fail_threshold(0.07)
 
     # Noise pattern changes depending on platform. Mostly caused by transparency.
     # TODO(fclem): See if we can just increase number of samples per file.
@@ -236,6 +263,9 @@ def main():
     elif test_dir_name.startswith('pointcloud'):
         # points transparent
         report.set_fail_threshold(0.06)
+    elif test_dir_name.startswith('light_linking'):
+        # Noise difference in transparent material
+        report.set_fail_threshold(0.05)
 
     ok = report.run(args.testdir, args.blender, get_arguments, batch=args.batch, fail_silently=args.fail_silently)
     sys.exit(not ok)

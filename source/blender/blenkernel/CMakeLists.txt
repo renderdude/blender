@@ -3,11 +3,10 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 set(INC
-  .
+  PUBLIC .
   ../asset_system
   ../blenloader
   ../blentranslation
-  ../bmesh
   ../draw
   ../functions
   ../gpu
@@ -311,6 +310,7 @@ set(SRC
   intern/undo_system.cc
   intern/unit.cc
   intern/vfont.cc
+  intern/vfont_curve.cc
   intern/vfontdata_freetype.cc
   intern/viewer_path.cc
   intern/volume.cc
@@ -321,7 +321,6 @@ set(SRC
   intern/wm_runtime.cc
   intern/workspace.cc
   intern/world.cc
-  intern/writemovie.cc
 
   BKE_action.hh
   BKE_addon.h
@@ -534,7 +533,6 @@ set(SRC
   BKE_wm_runtime.hh
   BKE_workspace.hh
   BKE_world.h
-  BKE_writemovie.hh
 
   nla_private.h
   particle_private.h
@@ -564,7 +562,7 @@ set(LIB
   PRIVATE bf::blenlib
   bf_blenloader
   bf_blentranslation
-  bf_bmesh
+  PRIVATE bf::bmesh
   PRIVATE bf::depsgraph
   PRIVATE bf::dna
   bf_draw
@@ -573,6 +571,7 @@ set(LIB
   bf_gpu
   bf_ikplugin
   bf_imbuf
+  bf::imbuf_movie
   PRIVATE bf::intern::clog
   bf_intern_ghost
   PRIVATE bf::intern::guardedalloc
@@ -653,19 +652,6 @@ if(WITH_IMAGE_WEBP)
 endif()
 
 if(WITH_CODEC_FFMPEG)
-  list(APPEND SRC
-    intern/writeffmpeg.cc
-    BKE_writeffmpeg.hh
-  )
-  list(APPEND INC
-    ../../../intern/ffmpeg
-  )
-  list(APPEND INC_SYS
-    ${FFMPEG_INCLUDE_DIRS}
-  )
-  list(APPEND LIB
-    ${FFMPEG_LIBRARIES}
-  )
   add_definitions(-DWITH_FFMPEG)
 endif()
 
@@ -820,6 +806,7 @@ endif()
 # endif()
 
 blender_add_lib(bf_blenkernel "${SRC}" "${INC}" "${INC_SYS}" "${LIB}")
+add_library(bf::blenkernel ALIAS bf_blenkernel)
 
 # RNA_prototypes.hh
 add_dependencies(bf_blenkernel bf_rna)

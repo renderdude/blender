@@ -1,9 +1,9 @@
 
 msgid ""
 msgstr ""
-"Project-Id-Version: Blender 4.4.0 Alpha (b'cfa63bfefa5b')\n"
+"Project-Id-Version: Blender 4.4.0 Alpha (b'159424053bc2')\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-09 09:50+0000\n"
+"POT-Creation-Date: 2024-12-23 13:35+0000\n"
 "PO-Revision-Date: 2024-11-17 07:56+0000\n"
 "Last-Translator: Satoshi Yamasaki <yamyam@yo.rim.or.jp>\n"
 "Language-Team: Japanese <https://translate.blender.org/projects/blender-ui/ui/ja/>\n"
@@ -14537,6 +14537,30 @@ msgid "Select the file format to be used for caching volumetric data"
 msgstr "ボリューメトリックデータのキャッシュに使用するファイルフォーマットの選択"
 
 
+msgid "Uni Cache"
+msgstr "Uniキャッシュ"
+
+
+msgid "Uni file format (.uni)"
+msgstr "Uni ファイルフォーマット（.uni）"
+
+
+msgid "OpenVDB"
+msgstr "OpenVDB"
+
+
+msgid "OpenVDB file format (.vdb)"
+msgstr "OpenVDB ファイルフォーマット（.vdb）"
+
+
+msgid "Raw Cache"
+msgstr "Rawキャッシュ"
+
+
+msgid "Raw file format (.raw)"
+msgstr "Raw ファイルフォーマット（.raw）"
+
+
 msgid "Cache directory"
 msgstr "キャッシュディレクトリ"
 
@@ -17698,6 +17722,38 @@ msgstr "グリースペンシルレイヤーグループ"
 
 msgid "Group of Grease Pencil layers"
 msgstr "グリースペンシルレイヤーのグループ"
+
+
+msgid "Color tag 1"
+msgstr "カラータグ1"
+
+
+msgid "Color tag 2"
+msgstr "カラータグ2"
+
+
+msgid "Color tag 3"
+msgstr "カラータグ3"
+
+
+msgid "Color tag 4"
+msgstr "カラータグ4"
+
+
+msgid "Color tag 5"
+msgstr "カラータグ5"
+
+
+msgid "Color tag 6"
+msgstr "カラータグ6"
+
+
+msgid "Color tag 7"
+msgstr "カラータグ7"
+
+
+msgid "Color tag 8"
+msgstr "カラータグ8"
 
 
 msgid "Set layer group visibility"
@@ -21728,10 +21784,6 @@ msgstr "アクティブテキストボックス"
 
 msgid "Horizontal Alignment"
 msgstr "行揃え"
-
-
-msgid "Text horizontal alignment from the object center"
-msgstr "オブジェクト中央からのテキストの水平の整列方法"
 
 
 msgid "Align text to the left"
@@ -43935,14 +43987,6 @@ msgid "Static Type"
 msgstr "静的タイプ"
 
 
-msgid "Node type (deprecated, use with care)"
-msgstr "ノードタイプ（廃止予定．注意して使用）"
-
-
-msgid "Custom Node"
-msgstr "カスタムノード"
-
-
 msgid "Custom color of the node body"
 msgstr "ノード本体のカスタムカラーセット"
 
@@ -43997,10 +44041,6 @@ msgstr "テクスチャを表示"
 
 msgid "Display node in viewport textured shading mode"
 msgstr "ビューポートでノードをテクスチャシェーディングモードで表示します"
-
-
-msgid "Node type (deprecated, use bl_static_type or bl_idname for the actual identifier string)"
-msgstr "ノードタイプ（廃止予定．実際の識別子文字列には bl_static_type または bl_idname を使用してください）"
 
 
 msgid "Use custom color for the node"
@@ -52969,61 +53009,6 @@ msgid "Collection of object effects"
 msgstr "オブジェクトエフェクトの集合"
 
 
-msgctxt "Operator"
-msgid "Add Material Variant"
-msgstr "マテリアルバリアントを追加"
-
-
-msgctxt "Operator"
-msgid "Remove Variant"
-msgstr "バリアントを削除"
-
-
-msgctxt "Operator"
-msgid "Display Variant"
-msgstr "バリアントを表示"
-
-
-msgctxt "Operator"
-msgid "Assign To Variant"
-msgstr "バリアントに割り当て"
-
-
-msgctxt "Operator"
-msgid "Reset to Original"
-msgstr "オリジナルにリセット"
-
-
-msgctxt "Operator"
-msgid "Assign as Original"
-msgstr "オリジナルとして割り当て"
-
-
-msgctxt "Operator"
-msgid "Add new Slot"
-msgstr "新規スロットを追加"
-
-
-msgctxt "Operator"
-msgid "Assign Material To Variant"
-msgstr "マテリアルをバリアントに割り当て"
-
-
-msgctxt "Operator"
-msgid "Remove a variant Slot"
-msgstr "バリアントスロットを削除"
-
-
-msgctxt "Operator"
-msgid "Apply glTF animation"
-msgstr "glTFアニメーションを適用"
-
-
-msgctxt "Operator"
-msgid "Operator"
-msgstr "オペレーター"
-
-
 msgid "Mark actions with no F-Curves for deletion after save and reload of file preserving \"action libraries\""
 msgstr ""
 "F カーブのないアクションをマークし\n"
@@ -55358,10 +55343,6 @@ msgstr "i18n ワーキングリポジトリ（po ファイル）を更新しま�
 msgctxt "Operator"
 msgid "Update I18n Work Repository"
 msgstr "I18nワークレポジトリを更新"
-
-
-msgid "Add an entry to the list"
-msgstr "リストにエントリを追加します"
 
 
 msgid "Align the UV island's rotation"
@@ -62857,15 +62838,6 @@ msgstr "リストの最後"
 
 
 msgctxt "Operator"
-msgid "Cancel File Load"
-msgstr "ファイル読み込みを中止"
-
-
-msgid "Cancel loading of selected file"
-msgstr "選択したファイルの読み込みを中止します"
-
-
-msgctxt "Operator"
 msgid "Delete Selected Files"
 msgstr "選択したファイルを削除"
 
@@ -65481,38 +65453,6 @@ msgstr "レイヤーグループアイコンを変更します"
 
 msgid "Set Default icon"
 msgstr "デフォルトアイコンを設定"
-
-
-msgid "Color tag 1"
-msgstr "カラータグ1"
-
-
-msgid "Color tag 2"
-msgstr "カラータグ2"
-
-
-msgid "Color tag 3"
-msgstr "カラータグ3"
-
-
-msgid "Color tag 4"
-msgstr "カラータグ4"
-
-
-msgid "Color tag 5"
-msgstr "カラータグ5"
-
-
-msgid "Color tag 6"
-msgstr "カラータグ6"
-
-
-msgid "Color tag 7"
-msgstr "カラータグ7"
-
-
-msgid "Color tag 8"
-msgstr "カラータグ8"
 
 
 msgctxt "Operator"
@@ -73466,11 +73406,6 @@ msgid "Maintain parent child relationships"
 msgstr "親子関係を維持します"
 
 
-msgctxt "Operator"
-msgid "Toggle Edit Mode"
-msgstr "編集モードに切り替え"
-
-
 msgid "Toggle object's edit mode"
 msgstr "オブジェクトの編集モードに切り替えます"
 
@@ -77630,11 +77565,6 @@ msgstr "出力表示色からサンプリングします"
 
 msgid "Add to Palette"
 msgstr "パレットに追加"
-
-
-msgctxt "Operator"
-msgid "Texture Paint Toggle"
-msgstr "テクスチャペイントの切り替え"
 
 
 msgid "Toggle texture paint mode in 3D view"
@@ -82976,6 +82906,11 @@ msgstr "エフェクトストリップの二つの入力を交換します"
 
 
 msgctxt "Operator"
+msgid "Deselect All"
+msgstr "すべて選択解除"
+
+
+msgctxt "Operator"
 msgid "Unlock Strips"
 msgstr "ストリップをロック解除"
 
@@ -84602,6 +84537,10 @@ msgstr "デフォルトに戻す"
 
 msgid "Reset this property's value to its default value"
 msgstr "このプロパティを初期値にリセットします"
+
+
+msgid "Add an entry to the list"
+msgstr "リストにエントリを追加します"
 
 
 msgctxt "Operator"
@@ -93983,22 +93922,8 @@ msgid "Experimental features"
 msgstr "実験的機能"
 
 
-msgid "CPU Compositor"
-msgstr "CPU コンポジター"
-
-
-msgid "Enable the new CPU compositor"
-msgstr "CPU コンポジターを有効にします"
-
-
 msgid "No Override Auto Resync"
 msgstr "オーバーライド自動再同期なし"
-
-
-msgid "Disable library overrides automatic resync detection and process on file load (can be useful to help fixing broken files)"
-msgstr ""
-"ファイル読み込み時にライブラリオーバーライドの自動再同期の探知と\n"
-"処理を無効にします（壊れたファイルの修正に役立つかもしれません）"
 
 
 msgid "Asset Debug Info"
@@ -100403,14 +100328,6 @@ msgstr "3Dシーンをマルチサンプルしたモーションブラーを使�
 
 msgid "Use multiple views in the scene"
 msgstr "このシーンでマルチビューを使用します"
-
-
-msgid "Use New CPU Compositor"
-msgstr "新CPUコンポジターを使用"
-
-
-msgid "Use the new CPU compositor implementation"
-msgstr "新しい CPU コンポジターの実装を使用します"
 
 
 msgid "Overwrite existing files while rendering"
@@ -113570,24 +113487,6 @@ msgid "Action when 'Space' is pressed"
 msgstr "[スペース]キーが押された時のアクション"
 
 
-msgid "Toggle animation playback ('Shift-Space' for Tools)"
-msgstr "アニメーション再生切り替え（[Shift]＋[スペース]でツール表示）"
-
-
-msgid ""
-"Open the popup tool-bar\n"
-"When 'Space' is held and used as a modifier:\n"
-"• Pressing the tools binding key switches to it immediately.\n"
-"• Dragging the cursor over a tool and releasing activates it (like a pie menu).\n"
-"For Play use 'Shift-Space'"
-msgstr ""
-"ポップアップツールバーを開きます．\n"
-"[スペース]押しながらの時は特殊キーとして使用されます:\n"
-"• ツールにバインドされたキーを押すとそのツールに切り替え\n"
-"• ツール上でカーソルをドラッグ＆リリースするとそのツールを有効化（パイメニューと同じ）\n"
-"再生は[Shift]＋[スペース]です"
-
-
 msgid "Search"
 msgstr "検索"
 
@@ -117360,8 +117259,28 @@ msgstr "アクションフィルター"
 
 
 msgctxt "Operator"
+msgid "Display Variant"
+msgstr "バリアントを表示"
+
+
+msgctxt "Operator"
+msgid "Assign To Variant"
+msgstr "バリアントに割り当て"
+
+
+msgctxt "Operator"
 msgid "Reset To Original"
 msgstr "オリジナルに再設定"
+
+
+msgctxt "Operator"
+msgid "Assign as Original"
+msgstr "オリジナルとして割り当て"
+
+
+msgctxt "Operator"
+msgid "Add Material Variant"
+msgstr "マテリアルバリアントを追加"
 
 
 msgid "No glTF Animation"
@@ -118396,11 +118315,6 @@ msgstr "設定を初期化"
 msgctxt "Operator"
 msgid "Reset Settings"
 msgstr "設定をリセット"
-
-
-msgctxt "Operator"
-msgid "Deselect All"
-msgstr "すべて選択解除"
 
 
 msgctxt "Operator"
@@ -122756,11 +122670,6 @@ msgstr "フレームから削除"
 
 
 msgctxt "Operator"
-msgid "Insert Into Group"
-msgstr "グループに挿入"
-
-
-msgctxt "Operator"
 msgid "Mute"
 msgstr "ミュート"
 
@@ -122787,10 +122696,6 @@ msgstr "投影 X"
 msgctxt "Operator"
 msgid "Fit"
 msgstr "フィット"
-
-
-msgid "Experimental CPU Implementation"
-msgstr "実験的CPU実装"
 
 
 msgid "Node Editor Overlays"
@@ -122839,6 +122744,11 @@ msgstr "リンクし直し"
 
 
 msgctxt "Operator"
+msgid "Insert Into Group"
+msgstr "グループに挿入"
+
+
+msgctxt "Operator"
 msgid "Node Preview"
 msgstr "ノードプレビュー"
 
@@ -122856,11 +122766,6 @@ msgstr "検索..."
 msgctxt "Operator"
 msgid "Link to Viewer"
 msgstr "ビューアーにリンク"
-
-
-msgctxt "Operator"
-msgid "Exit Group"
-msgstr "グループ退出"
 
 
 msgctxt "Operator"
@@ -122888,6 +122793,11 @@ msgstr "背景をズームイン"
 msgctxt "Operator"
 msgid "Backdrop Zoom Out"
 msgstr "背景をズームアウト"
+
+
+msgctxt "Operator"
+msgid "Exit Group"
+msgstr "グループ退出"
 
 
 msgid "Closed by Default"
@@ -127003,18 +126913,6 @@ msgid "Saved \"%s\""
 msgstr "「%s」を保存"
 
 
-msgid "Unable to create builtin attribute in edit mode"
-msgstr "編集モード中はビルトイン属性を作成できません"
-
-
-msgid "Domain unsupported for \"id\" attribute"
-msgstr "「id」属性で未対応のドメインです"
-
-
-msgid "Type unsupported for \"id\" attribute"
-msgstr "「id」属性で未対応のタイプです"
-
-
 msgid "Attribute name cannot be empty"
 msgstr "属性名は空にできません"
 
@@ -128195,50 +128093,6 @@ msgid "worlds"
 msgstr "ワールド"
 
 
-msgid "Error writing frame"
-msgstr "フレーム保存エラー"
-
-
-msgid "No valid formats found"
-msgstr "有効なフォーマットがありません"
-
-
-msgid "Can't allocate FFmpeg format context"
-msgstr "FFmpeg フォーマットコンテクストが割り当てできません"
-
-
-msgid "Render width has to be 720 pixels for DV!"
-msgstr "DV用では幅が720ピクセルでないといけません！"
-
-
-msgid "Render height has to be 480 pixels for DV-NTSC!"
-msgstr "DV-NTSC用では高さが480ピクセルでないといけません！"
-
-
-msgid "Render height has to be 576 pixels for DV-PAL!"
-msgstr "DV-PAL用では高さが576ピクセルでないといけません！"
-
-
-msgid "FFmpeg only supports 48khz / stereo audio for DV!"
-msgstr "FFmpeg は48kHz/ステレオ音声の DV のみ対応しています！"
-
-
-msgid "Error initializing video stream"
-msgstr "ビデオストリーム初期化エラー"
-
-
-msgid "Error initializing audio stream"
-msgstr "オーディオストリーム初期化エラー"
-
-
-msgid "Could not open file for writing"
-msgstr "保存用のファイルが開けませんでした"
-
-
-msgid "Could not initialize streams, probably unsupported codec combination"
-msgstr "ストリーム初期化失敗，未対応のコーデック組み合わせによると思われます"
-
-
 msgid "Library database with null library data-block pointer!"
 msgstr "ライブラリデータブロックが NULL ポインタのライブラリデータベースです！"
 
@@ -128493,14 +128347,6 @@ msgstr "辺リングがつながっていません"
 
 msgid "color_index is invalid"
 msgstr "無効な color_index です"
-
-
-msgid "Compositing | Initializing execution"
-msgstr "コンポジティング | 実行の初期化"
-
-
-msgid "Compositing | Operation %i-%li"
-msgstr "コンポジティング | 処理 %i-%li"
 
 
 msgid "Compositor node tree has cyclic links!"
@@ -137679,6 +137525,50 @@ msgid "Freestyle: Stroke rendering"
 msgstr "Freestyle: ストロークレンダリング"
 
 
+msgid "Error writing frame"
+msgstr "フレーム保存エラー"
+
+
+msgid "No valid formats found"
+msgstr "有効なフォーマットがありません"
+
+
+msgid "Can't allocate FFmpeg format context"
+msgstr "FFmpeg フォーマットコンテクストが割り当てできません"
+
+
+msgid "Render width has to be 720 pixels for DV!"
+msgstr "DV用では幅が720ピクセルでないといけません！"
+
+
+msgid "Render height has to be 480 pixels for DV-NTSC!"
+msgstr "DV-NTSC用では高さが480ピクセルでないといけません！"
+
+
+msgid "Render height has to be 576 pixels for DV-PAL!"
+msgstr "DV-PAL用では高さが576ピクセルでないといけません！"
+
+
+msgid "FFmpeg only supports 48khz / stereo audio for DV!"
+msgstr "FFmpeg は48kHz/ステレオ音声の DV のみ対応しています！"
+
+
+msgid "Error initializing video stream"
+msgstr "ビデオストリーム初期化エラー"
+
+
+msgid "Error initializing audio stream"
+msgstr "オーディオストリーム初期化エラー"
+
+
+msgid "Could not open file for writing"
+msgstr "保存用のファイルが開けませんでした"
+
+
+msgid "Could not initialize streams, probably unsupported codec combination"
+msgstr "ストリーム初期化失敗，未対応のコーデック組み合わせによると思われます"
+
+
 msgid "Alembic Export: Unable to find collection '%s'"
 msgstr "Alembic Export: コレクション「%s」が見つかりません"
 
@@ -138681,30 +138571,6 @@ msgid "Object file format (.obj)"
 msgstr "オブジェクトファイルフォーマット（.obj）"
 
 
-msgid "Uni Cache"
-msgstr "Uniキャッシュ"
-
-
-msgid "Uni file format (.uni)"
-msgstr "Uni ファイルフォーマット（.uni）"
-
-
-msgid "OpenVDB"
-msgstr "OpenVDB"
-
-
-msgid "OpenVDB file format (.vdb)"
-msgstr "OpenVDB ファイルフォーマット（.vdb）"
-
-
-msgid "Raw Cache"
-msgstr "Rawキャッシュ"
-
-
-msgid "Raw file format (.raw)"
-msgstr "Raw ファイルフォーマット（.raw）"
-
-
 msgid "Uni file format"
 msgstr "Uni ファイルフォーマット"
 
@@ -139076,18 +138942,6 @@ msgstr "パネルが作成できません"
 
 msgid "Unable to copy item"
 msgstr "アイテムがコピーできません"
-
-
-msgid "CustomGroup"
-msgstr "カスタムグループ"
-
-
-msgid "Custom Group Node"
-msgstr "カスタムグループノード"
-
-
-msgid "UNDEFINED"
-msgstr "未定義"
 
 
 msgctxt "NodeTree"
@@ -144492,11 +144346,6 @@ msgstr "カラーバランス"
 
 
 msgctxt "Sequence"
-msgid "White Balance"
-msgstr "ホワイトバランス"
-
-
-msgctxt "Sequence"
 msgid "Curves"
 msgstr "カーブ"
 
@@ -144509,6 +144358,11 @@ msgstr "色相補正"
 msgctxt "Sequence"
 msgid "Brightness/Contrast"
 msgstr "輝度/コントラスト"
+
+
+msgctxt "Sequence"
+msgid "White Balance"
+msgstr "ホワイトバランス"
 
 
 msgctxt "Sequence"
@@ -145769,10 +145623,6 @@ msgstr "VR シーン調査"
 
 msgid "View the viewport with virtual reality glasses (head-mounted displays)"
 msgstr "ビューポートを VR グラス（ヘッドマウントディスプレイ）で見ます"
-
-
-msgid "All Add-ons"
-msgstr "全アドオン"
 
 
 msgid "All Add-ons Installed by User"

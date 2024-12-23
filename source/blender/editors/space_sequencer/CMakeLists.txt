@@ -4,12 +4,12 @@
 
 set(INC
   ../include
-  ../../blenkernel
   ../../blenloader
   ../../blentranslation
   ../../draw
   ../../gpu
   ../../imbuf
+  ../../imbuf/movie
   ../../makesrna
   ../../sequencer
   ../../windowmanager
@@ -40,6 +40,7 @@ set(SRC
   sequencer_scopes.cc
   sequencer_select.cc
   sequencer_strips_batch.cc
+  sequencer_text_edit.cc
   sequencer_thumbnails.cc
   sequencer_timeline_draw.cc
   sequencer_view.cc
@@ -53,6 +54,7 @@ set(SRC
 
 set(LIB
   PRIVATE bf::blenfont
+  PRIVATE bf::blenkernel
   PRIVATE bf::blenlib
   PRIVATE bf::depsgraph
   PRIVATE bf::dna

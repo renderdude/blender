@@ -64,8 +64,8 @@ namespace blender::ed::space_node {
 
 static void position_node_based_on_mouse(bNode &node, const float2 &location)
 {
-  node.locx = location.x - NODE_DY * 1.5f / UI_SCALE_FAC;
-  node.locy = location.y + NODE_DY * 0.5f / UI_SCALE_FAC;
+  node.location[0] = location.x - NODE_DY * 1.5f / UI_SCALE_FAC;
+  node.location[1] = location.y + NODE_DY * 0.5f / UI_SCALE_FAC;
 }
 
 bNode *add_node(const bContext &C, const StringRef idname, const float2 &location)
@@ -210,13 +210,13 @@ static int add_reroute_exec(bContext *C, wmOperator *op)
     const float2 insert_point = std::accumulate(
                                     cuts.values().begin(), cuts.values().end(), float2(0)) /
                                 cuts.size();
-    reroute->locx = insert_point.x / UI_SCALE_FAC;
-    reroute->locy = insert_point.y / UI_SCALE_FAC;
+    reroute->location[0] = insert_point.x / UI_SCALE_FAC;
+    reroute->location[1] = insert_point.y / UI_SCALE_FAC;
 
     /* Attach the reroute node to frame nodes behind it. */
     for (const int i : frame_nodes.index_range()) {
       bNode *frame_node = frame_nodes.last(i);
-      if (BLI_rctf_isect_pt_v(&frame_node->runtime->totr, insert_point)) {
+      if (BLI_rctf_isect_pt_v(&frame_node->runtime->draw_bounds, insert_point)) {
         bke::node_attach_node(&ntree, reroute, frame_node);
         break;
       }
@@ -718,8 +718,9 @@ static int node_add_file_modal(bContext *C, wmOperator *op, const wmEvent *event
   float stack_offset = 0.0f;
 
   for (bNode *node : data->nodes) {
-    node->locy -= stack_offset;
-    stack_offset += (node->runtime->totr.ymax - node->runtime->totr.ymin) * delta_factor;
+    node->location[1] -= stack_offset;
+    stack_offset += (node->runtime->draw_bounds.ymax - node->runtime->draw_bounds.ymin) *
+                    delta_factor;
     redraw = true;
   }
 

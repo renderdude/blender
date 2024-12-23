@@ -77,6 +77,16 @@ using namespace blender::bke;
 static CLG_LogRef LOG = {"bke.liboverride"};
 static CLG_LogRef LOG_RESYNC = {"bke.liboverride_resync"};
 
+namespace blender::bke::liboverride {
+
+bool is_auto_resync_enabled()
+{
+  return !USER_EXPERIMENTAL_TEST(&U, no_override_auto_resync) &&
+         (G.fileflags & G_LIBOVERRIDE_NO_AUTO_RESYNC) == 0;
+}
+
+}  // namespace blender::bke::liboverride
+
 static void lib_override_library_property_copy(IDOverrideLibraryProperty *op_dst,
                                                IDOverrideLibraryProperty *op_src);
 static void lib_override_library_property_operation_copy(
@@ -3817,13 +3827,16 @@ void BKE_lib_override_library_delete(Main *bmain, ID *id_root)
 
 void BKE_lib_override_library_make_local(Main *bmain, ID *id)
 {
-  if (!ID_IS_OVERRIDE_LIBRARY(id)) {
-    return;
-  }
   if (ID_IS_OVERRIDE_LIBRARY_VIRTUAL(id)) {
     /* We should never directly 'make local' virtual overrides (aka shape keys). */
     BLI_assert_unreachable();
     id->flag &= ~ID_FLAG_EMBEDDED_DATA_LIB_OVERRIDE;
+    return;
+  }
+  /* Cannot use `ID_IS_OVERRIDE_LIBRARY` here, as we may call this function on some already
+   * partially processed liboverrides (e.g. from the #PartialWriteContext code), where the linked
+   * reference pointer has already been set to null. */
+  if (!id->override_library) {
     return;
   }
 
@@ -4359,6 +4372,7 @@ void BKE_lib_override_library_validate(Main *bmain, ID *id, ReportList *reports)
    * properly 'liboverride embedded' IDs, like root node-trees, or shape-keys. */
   if (!override_library_is_valid(*liboverride_id, *liboverride, reports)) {
     BKE_lib_override_library_make_local(nullptr, liboverride_id);
+    return;
   }
 
   override_library_properties_validate(*liboverride_id, *liboverride, reports);

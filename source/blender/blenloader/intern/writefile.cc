@@ -1226,6 +1226,8 @@ BLO_Write_IDBuffer::BLO_Write_IDBuffer(ID &id, const bool is_undo)
    * when we need to re-read the ID into its original address, this is currently cleared in
    * #direct_link_id_common in `readfile.cc` anyway. */
   temp_id->py_instance = nullptr;
+  /* Clear runtime data struct. */
+  memset(&temp_id->runtime, 0, sizeof(temp_id->runtime));
 
   DrawDataList *drawdata = DRW_drawdatalist_from_id(temp_id);
   if (drawdata) {
@@ -1244,7 +1246,7 @@ static int write_id_direct_linked_data_process_cb(LibraryIDLinkCallbackData *cb_
 {
   ID *self_id = cb_data->self_id;
   ID *id = *cb_data->id_pointer;
-  const int cb_flag = cb_data->cb_flag;
+  const LibraryForeachIDCallbackFlag cb_flag = cb_data->cb_flag;
 
   if (id == nullptr || !ID_IS_LINKED(id)) {
     return IDWALK_RET_NOP;

@@ -287,10 +287,10 @@ struct NodeTreeRelations {
     return group_node_users_->lookup(ntree);
   }
 
-  ID *get_owner_id(bNodeTree *ntree)
+  ID &get_owner_id(bNodeTree *ntree)
   {
     BLI_assert(owner_ids_.has_value());
-    return owner_ids_->lookup_default(ntree, &ntree->id);
+    return *owner_ids_->lookup_default(ntree, &ntree->id);
   }
 };
 
@@ -396,12 +396,12 @@ class NodeTreeMainUpdater {
 
       if (params_) {
         relations_.ensure_owner_ids();
-        ID *id = relations_.get_owner_id(ntree);
+        ID &owner_id = relations_.get_owner_id(ntree);
         if (params_->tree_changed_fn) {
-          params_->tree_changed_fn(id, ntree, params_->user_data);
+          params_->tree_changed_fn(*ntree, owner_id);
         }
         if (params_->tree_output_changed_fn && result.output_changed) {
-          params_->tree_output_changed_fn(id, ntree, params_->user_data);
+          params_->tree_output_changed_fn(*ntree, owner_id);
         }
       }
     }
@@ -722,6 +722,9 @@ class NodeTreeMainUpdater {
       /* Internal links should always map corresponding input and output sockets. */
       return &node.input_by_identifier(output_socket->identifier);
     }
+    if (node.type == GEO_NODE_CAPTURE_ATTRIBUTE) {
+      return &node.input_socket(output_socket->index());
+    }
     for (const bNodeSocket *input_socket : node.input_sockets()) {
       if (!input_socket->is_available()) {
         continue;
@@ -847,12 +850,13 @@ class NodeTreeMainUpdater {
     /* Automatically tag a bake item as attribute when the input is a field. The flag should not be
      * removed automatically even when the field input is disconnected because the baked data may
      * still contain attribute data instead of a single value. */
+    const Span<bke::FieldSocketState> field_states = ntree.runtime->field_states;
     for (bNode *node : ntree.nodes_by_type("GeometryNodeBake")) {
       NodeGeometryBake &storage = *static_cast<NodeGeometryBake *>(node->storage);
       for (const int i : IndexRange(storage.items_num)) {
         const bNodeSocket &socket = node->input_socket(i);
         NodeGeometryBakeItem &item = storage.items[i];
-        if (socket.runtime->field_state == FieldSocketState::IsField) {
+        if (field_states[socket.index_in_tree()] == FieldSocketState::IsField) {
           item.flag |= GEO_NODE_BAKE_ITEM_IS_ATTRIBUTE;
         }
       }
@@ -862,8 +866,19 @@ class NodeTreeMainUpdater {
   void update_socket_shapes(bNodeTree &ntree)
   {
     ntree.ensure_topology_cache();
+    const Span<bke::FieldSocketState> field_states = ntree.runtime->field_states;
     for (bNodeSocket *socket : ntree.all_sockets()) {
-      socket->display_shape = this->get_socket_shape(*socket);
+      switch (field_states[socket->index_in_tree()]) {
+        case bke::FieldSocketState::RequiresSingle:
+          socket->display_shape = SOCK_DISPLAY_SHAPE_CIRCLE;
+          break;
+        case bke::FieldSocketState::CanBeField:
+          socket->display_shape = SOCK_DISPLAY_SHAPE_DIAMOND_DOT;
+          break;
+        case bke::FieldSocketState::IsField:
+          socket->display_shape = SOCK_DISPLAY_SHAPE_DIAMOND;
+          break;
+      }
     }
   }
 
@@ -881,21 +896,6 @@ class NodeTreeMainUpdater {
       ntree.runtime->geometry_nodes_eval_dependencies =
           std::make_unique<nodes::GeometryNodesEvalDependencies>(std::move(new_deps));
     }
-  }
-
-  int get_socket_shape(const bNodeSocket &socket)
-  {
-    if (socket.runtime->field_state) {
-      switch (*socket.runtime->field_state) {
-        case bke::FieldSocketState::RequiresSingle:
-          return SOCK_DISPLAY_SHAPE_CIRCLE;
-        case bke::FieldSocketState::CanBeField:
-          return SOCK_DISPLAY_SHAPE_DIAMOND_DOT;
-        case bke::FieldSocketState::IsField:
-          return SOCK_DISPLAY_SHAPE_DIAMOND;
-      }
-    }
-    return socket.display_shape;
   }
 
   bool propagate_enum_definitions(bNodeTree &ntree)
@@ -1199,8 +1199,9 @@ class NodeTreeMainUpdater {
         continue;
       }
       if (ntree.type == NTREE_GEOMETRY) {
-        if (link->fromsock->runtime->field_state == FieldSocketState::IsField &&
-            link->tosock->runtime->field_state != FieldSocketState::IsField)
+        const Span<FieldSocketState> field_states = ntree.runtime->field_states;
+        if (field_states[link->fromsock->index_in_tree()] == FieldSocketState::IsField &&
+            field_states[link->tosock->index_in_tree()] != FieldSocketState::IsField)
         {
           link->flag &= ~NODE_LINK_VALID;
           ntree.runtime->link_errors_by_target_node.add(

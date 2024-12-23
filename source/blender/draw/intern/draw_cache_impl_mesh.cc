@@ -568,7 +568,7 @@ static bool mesh_batch_cache_valid(Object &object, Mesh &mesh)
     return false;
   }
 
-  if (cache->mat_len != mesh_render_mat_len_get(object, mesh)) {
+  if (cache->mat_len != BKE_object_material_count_with_fallback_eval(&object)) {
     return false;
   }
 
@@ -594,7 +594,7 @@ static void mesh_batch_cache_init(Object &object, Mesh &mesh)
     // cache->vert_len = mesh_render_verts_len_get(mesh);
   }
 
-  cache->mat_len = mesh_render_mat_len_get(object, mesh);
+  cache->mat_len = BKE_object_material_count_with_fallback_eval(&object);
   cache->surface_per_mat = Array<gpu::Batch *>(cache->mat_len, nullptr);
   cache->tris_per_mat = Array<gpu::IndexBuf *>(cache->mat_len, nullptr);
 
@@ -1029,11 +1029,6 @@ gpu::Batch *DRW_mesh_batch_cache_get_surface_sculpt(Object &object, Mesh &mesh)
 
   mesh_batch_cache_request_surface_batches(cache);
   return cache.batch.surface;
-}
-
-int DRW_mesh_material_count_get(const Object &object, const Mesh &mesh)
-{
-  return mesh_render_mat_len_get(object, mesh);
 }
 
 gpu::Batch *DRW_mesh_batch_cache_get_sculpt_overlays(Mesh &mesh)
@@ -1797,50 +1792,50 @@ void DRW_mesh_batch_cache_create_requested(TaskGraph &task_graph,
   assert_deps_valid(MBC_EDIT_SELECTION_VERTS,
                     {BUFFER_INDEX(ibo.points), BUFFER_INDEX(vbo.pos), BUFFER_INDEX(vbo.vert_idx)});
   if (DRW_batch_requested(cache.batch.edit_selection_verts, GPU_PRIM_POINTS)) {
-    if (edit_mapping_valid) {
+    if (is_editmode && !edit_mapping_valid) {
+      init_empty_dummy_batch(*cache.batch.edit_selection_verts);
+    }
+    else {
       DRW_ibo_request(cache.batch.edit_selection_verts, &mbuflist->ibo.points);
       DRW_vbo_request(cache.batch.edit_selection_verts, &mbuflist->vbo.pos);
       DRW_vbo_request(cache.batch.edit_selection_verts, &mbuflist->vbo.vert_idx);
-    }
-    else {
-      init_empty_dummy_batch(*cache.batch.edit_selection_verts);
     }
   }
   assert_deps_valid(MBC_EDIT_SELECTION_EDGES,
                     {BUFFER_INDEX(ibo.lines), BUFFER_INDEX(vbo.pos), BUFFER_INDEX(vbo.edge_idx)});
   if (DRW_batch_requested(cache.batch.edit_selection_edges, GPU_PRIM_LINES)) {
-    if (edit_mapping_valid) {
+    if (is_editmode && !edit_mapping_valid) {
+      init_empty_dummy_batch(*cache.batch.edit_selection_edges);
+    }
+    else {
       DRW_ibo_request(cache.batch.edit_selection_edges, &mbuflist->ibo.lines);
       DRW_vbo_request(cache.batch.edit_selection_edges, &mbuflist->vbo.pos);
       DRW_vbo_request(cache.batch.edit_selection_edges, &mbuflist->vbo.edge_idx);
-    }
-    else {
-      init_empty_dummy_batch(*cache.batch.edit_selection_edges);
     }
   }
   assert_deps_valid(MBC_EDIT_SELECTION_FACES,
                     {BUFFER_INDEX(ibo.tris), BUFFER_INDEX(vbo.pos), BUFFER_INDEX(vbo.face_idx)});
   if (DRW_batch_requested(cache.batch.edit_selection_faces, GPU_PRIM_TRIS)) {
-    if (edit_mapping_valid) {
+    if (is_editmode && !edit_mapping_valid) {
+      init_empty_dummy_batch(*cache.batch.edit_selection_faces);
+    }
+    else {
       DRW_ibo_request(cache.batch.edit_selection_faces, &mbuflist->ibo.tris);
       DRW_vbo_request(cache.batch.edit_selection_faces, &mbuflist->vbo.pos);
       DRW_vbo_request(cache.batch.edit_selection_faces, &mbuflist->vbo.face_idx);
-    }
-    else {
-      init_empty_dummy_batch(*cache.batch.edit_selection_faces);
     }
   }
   assert_deps_valid(
       MBC_EDIT_SELECTION_FACEDOTS,
       {BUFFER_INDEX(ibo.fdots), BUFFER_INDEX(vbo.fdots_pos), BUFFER_INDEX(vbo.fdot_idx)});
   if (DRW_batch_requested(cache.batch.edit_selection_fdots, GPU_PRIM_POINTS)) {
-    if (edit_mapping_valid) {
+    if (is_editmode && !edit_mapping_valid) {
+      init_empty_dummy_batch(*cache.batch.edit_selection_fdots);
+    }
+    else {
       DRW_ibo_request(cache.batch.edit_selection_fdots, &mbuflist->ibo.fdots);
       DRW_vbo_request(cache.batch.edit_selection_fdots, &mbuflist->vbo.fdots_pos);
       DRW_vbo_request(cache.batch.edit_selection_fdots, &mbuflist->vbo.fdot_idx);
-    }
-    else {
-      init_empty_dummy_batch(*cache.batch.edit_selection_fdots);
     }
   }
 

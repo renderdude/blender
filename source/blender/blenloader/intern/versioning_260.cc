@@ -67,11 +67,9 @@
 #include "SEQ_modifier.hh"
 #include "SEQ_utils.hh"
 
-#ifdef WITH_FFMPEG
-#  include "BKE_writeffmpeg.hh"
-#endif
+#include "IMB_imbuf_enums.h"
 
-#include "IMB_imbuf.hh" /* for proxy / time-code versioning stuff. */
+#include "MOV_enums.hh"
 
 #include "NOD_common.h"
 #include "NOD_composite.hh"
@@ -996,13 +994,13 @@ static void do_versions_nodetree_customnodes(bNodeTree *ntree, int /*is_group*/)
 
 static bool seq_colorbalance_update_cb(Sequence *seq, void * /*user_data*/)
 {
-  Strip *strip = seq->strip;
+  StripData *data = seq->data;
 
-  if (strip && strip->color_balance) {
+  if (data && data->color_balance) {
     SequenceModifierData *smd = SEQ_modifier_new(seq, nullptr, seqModifierType_ColorBalance);
     ColorBalanceModifierData *cbmd = (ColorBalanceModifierData *)smd;
 
-    cbmd->color_balance = *strip->color_balance;
+    cbmd->color_balance = *data->color_balance;
 
     /* multiplication with color balance used is handled differently,
      * so we need to move multiplication to modifier so files would be
@@ -1011,8 +1009,8 @@ static bool seq_colorbalance_update_cb(Sequence *seq, void * /*user_data*/)
     cbmd->color_multiply = seq->mul;
     seq->mul = 1.0f;
 
-    MEM_freeN(strip->color_balance);
-    strip->color_balance = nullptr;
+    MEM_freeN(data->color_balance);
+    data->color_balance = nullptr;
   }
   return true;
 }
@@ -2313,10 +2311,10 @@ void blo_do_versions_260(FileData *fd, Library * /*lib*/, Main *bmain)
             num_inputs++;
 
             if (link->tonode) {
-              if (input_locx > link->tonode->locx - offsetx) {
-                input_locx = link->tonode->locx - offsetx;
+              if (input_locx > link->tonode->locx_legacy - offsetx) {
+                input_locx = link->tonode->locx_legacy - offsetx;
               }
-              input_locy += link->tonode->locy;
+              input_locy += link->tonode->locy_legacy;
             }
           }
           else {
@@ -2332,10 +2330,10 @@ void blo_do_versions_260(FileData *fd, Library * /*lib*/, Main *bmain)
             num_outputs++;
 
             if (link->fromnode) {
-              if (output_locx < link->fromnode->locx + offsetx) {
-                output_locx = link->fromnode->locx + offsetx;
+              if (output_locx < link->fromnode->locx_legacy + offsetx) {
+                output_locx = link->fromnode->locx_legacy + offsetx;
               }
-              output_locy += link->fromnode->locy;
+              output_locy += link->fromnode->locy_legacy;
             }
           }
           else {
@@ -2350,13 +2348,13 @@ void blo_do_versions_260(FileData *fd, Library * /*lib*/, Main *bmain)
 
       if (num_inputs > 0) {
         input_locy /= num_inputs;
-        input_node->locx = input_locx;
-        input_node->locy = input_locy;
+        input_node->locx_legacy = input_locx;
+        input_node->locy_legacy = input_locy;
       }
       if (num_outputs > 0) {
         output_locy /= num_outputs;
-        output_node->locx = output_locx;
-        output_node->locy = output_locy;
+        output_node->locx_legacy = output_locx;
+        output_node->locy_legacy = output_locy;
       }
     }
     FOREACH_NODETREE_END;
@@ -2754,12 +2752,10 @@ void blo_do_versions_260(FileData *fd, Library * /*lib*/, Main *bmain)
         scene->toolsettings->snap_node_mode = 8;      /* SCE_SNAP_TO_GRID */
       }
 
-#ifdef WITH_FFMPEG
       /* Update for removed "sound-only" option in FFMPEG export settings. */
       if (scene->r.ffcodecdata.type >= FFMPEG_INVALID) {
         scene->r.ffcodecdata.type = FFMPEG_AVI;
       }
-#endif
     }
   }
 

@@ -468,7 +468,7 @@ static void scene_free_data(ID *id)
 static void scene_foreach_rigidbodyworldSceneLooper(RigidBodyWorld * /*rbw*/,
                                                     ID **id_pointer,
                                                     void *user_data,
-                                                    int cb_flag)
+                                                    const LibraryForeachIDCallbackFlag cb_flag)
 {
   LibraryForeachIDData *data = (LibraryForeachIDData *)user_data;
   BKE_LIB_FOREACHID_PROCESS_FUNCTION_CALL(
@@ -787,7 +787,8 @@ static void scene_foreach_layer_collection(LibraryForeachIDData *data,
     if ((data_flags & IDWALK_NO_ORIG_POINTERS_ACCESS) == 0 && lc->collection != nullptr) {
       BLI_assert(is_master == ((lc->collection->id.flag & ID_FLAG_EMBEDDED_DATA) != 0));
     }
-    const int cb_flag = is_master ? IDWALK_CB_EMBEDDED_NOT_OWNING : IDWALK_CB_NOP;
+    const LibraryForeachIDCallbackFlag cb_flag = is_master ? IDWALK_CB_EMBEDDED_NOT_OWNING :
+                                                             IDWALK_CB_NOP;
     BKE_LIB_FOREACHID_PROCESS_IDSUPER(data, lc->collection, cb_flag | IDWALK_CB_DIRECT_WEAK_LINK);
     scene_foreach_layer_collection(data, &lc->layer_collections, false);
   }
@@ -944,13 +945,13 @@ static void scene_foreach_id(ID *id, LibraryForeachIDData *data)
 static bool seq_foreach_path_callback(Sequence *seq, void *user_data)
 {
   if (SEQ_HAS_PATH(seq)) {
-    StripElem *se = seq->strip->stripdata;
+    StripElem *se = seq->data->stripdata;
     BPathForeachPathData *bpath_data = (BPathForeachPathData *)user_data;
 
     if (ELEM(seq->type, SEQ_TYPE_MOVIE, SEQ_TYPE_SOUND_RAM) && se) {
       BKE_bpath_foreach_path_dirfile_fixed_process(bpath_data,
-                                                   seq->strip->dirpath,
-                                                   sizeof(seq->strip->dirpath),
+                                                   seq->data->dirpath,
+                                                   sizeof(seq->data->dirpath),
                                                    se->filename,
                                                    sizeof(se->filename));
     }
@@ -966,8 +967,8 @@ static bool seq_foreach_path_callback(Sequence *seq, void *user_data)
 
       for (i = 0; i < len; i++, se++) {
         BKE_bpath_foreach_path_dirfile_fixed_process(bpath_data,
-                                                     seq->strip->dirpath,
-                                                     sizeof(seq->strip->dirpath),
+                                                     seq->data->dirpath,
+                                                     sizeof(seq->data->dirpath),
                                                      se->filename,
                                                      sizeof(se->filename));
       }
@@ -975,7 +976,7 @@ static bool seq_foreach_path_callback(Sequence *seq, void *user_data)
     else {
       /* simple case */
       BKE_bpath_foreach_path_fixed_process(
-          bpath_data, seq->strip->dirpath, sizeof(seq->strip->dirpath));
+          bpath_data, seq->data->dirpath, sizeof(seq->data->dirpath));
     }
   }
   return true;
