@@ -8,7 +8,7 @@
 CCL_NAMESPACE_BEGIN
 
 Distributed::Distributed(bool reverse_connect)
-    : comm_world{mpl::environment::comm_world()}, is_distributed(false)
+    : comm_world{mpl::environment::comm_world()}, is_render_server(reverse_connect)
 {
   char hostname[256];
   if (gethostname(hostname, 256)) {
@@ -28,17 +28,15 @@ Distributed::Distributed(bool reverse_connect)
   int size = comm_world.size();
   int rank = comm_world.rank();
 
-  mpl::inter_communicator *inter_comm;
-
   if (rank == 0) {
-    if (reverse_connect) {
+    if (is_render_server) {
       mpl::port port;
       port.lookup_name("papillon");
       std::cout << host_string.str() << ": connecting" << std::endl;
-      inter_comm = new mpl::inter_communicator(comm_world.connect(port.name(), mpl::info(), 0));
+      _inter_comm = new mpl::inter_communicator(comm_world.connect(port.name(), mpl::info(), 0));
       // Setup the new intercomm with the 'client' having the high-process numbers
-      inter_comm->barrier();
-      inter_comm_world = mpl::communicator(*inter_comm, mpl::communicator::order_high);
+      _inter_comm->barrier();
+      inter_comm_world = mpl::communicator(*_inter_comm, mpl::communicator::order_high);
       std::cerr << "Client-side ";
     }
     else {  // Server side
@@ -53,11 +51,11 @@ Distributed::Distributed(bool reverse_connect)
       port.publish_name("papillon");
       // Wait for the client to connect
       std::cerr << host_string.str() << ": Waiting for connection." << std::endl;
-      inter_comm = new mpl::inter_communicator(comm_world.accept(port.name(), mpl::info(), 0));
+      _inter_comm = new mpl::inter_communicator(comm_world.accept(port.name(), mpl::info(), 0));
       std::cerr << "Client connected." << std::endl;
       // The server has rank 0 in the inter-comm
-      inter_comm->barrier();
-      inter_comm_world = mpl::communicator(*inter_comm, mpl::communicator::order_low);
+      _inter_comm->barrier();
+      inter_comm_world = mpl::communicator(*_inter_comm, mpl::communicator::order_low);
       port.unpublish_name("papillon");
 
       std::cerr << "Server-side ";

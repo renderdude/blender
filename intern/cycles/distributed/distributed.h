@@ -48,7 +48,7 @@ public:
   ///@}
   /// @name Status report
   ///@{
-  bool is_distributed;
+  bool is_render_server;
   ///@}
   /// @name Status setting
   ///@{
@@ -87,6 +87,7 @@ public:
 
 protected:
   ///@{
+  mpl::inter_communicator *_inter_comm;
   ///@}
 
 private:
