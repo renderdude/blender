@@ -16,6 +16,9 @@ class Scene;
 
 // Scene Parsing Declarations
 void parse_files(Ri *target, std::vector<std::string> filenames);
+#ifdef WITH_CYCLES_DISTRIBUTED
+void parse_for_distributed(Ri *target, std::vector<std::string> filenames);
+#endif
 void parse_string(Ri *target, std::string str);
 
 // Token Definition

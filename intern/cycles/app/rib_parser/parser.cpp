@@ -1,4 +1,5 @@
 #include "app/rib_parser/parsed_parameter.h"
+#include "distributed/distributed.h"
 #include <_types/_uint8_t.h>
 
 #ifdef HAVE_MMAP
@@ -1816,6 +1817,17 @@ void parse_files(Ri *target, std::vector<std::string> filenames)
   std::cout << "Time taken by parsing: " << dt.count() / 1000.0 << " seconds" << std::endl;
   // exit(1);
 }
+
+#ifdef WITH_CYCLES_DISTRIBUTED
+void parse_for_distributed(Ri *target, std::vector<std::string> filenames)
+{
+  auto options = target->Option("Ri");
+  auto *opt_param = options["distributed"];
+  if (opt_param != nullptr) {
+    Distributed* distributed = static_cast<Distributed*>(opt_param->pointers()[0]);
+  }
+}
+#endif
 
 void parse_string(Ri *target, std::string str)
 {

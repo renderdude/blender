@@ -115,7 +115,11 @@ static void scene_init()
     std::vector<std::string> filenames;
     ri_api.add_default_search_paths(path_dirname(options.filepath));
     filenames.push_back(options.filepath);
+#ifdef WITH_CYCLES_DISTRIBUTED
+    parse_for_distributed(&ri_api, filenames);
+#else
     parse_files(&ri_api, filenames);
+#endif
     ri_api.CropWindow(options.crop_window[0],
                       options.crop_window[1],
                       options.crop_window[2],
@@ -158,7 +162,7 @@ static void session_init()
 {
   namespace fs = std::filesystem;
 
-  const char* cycles_shader_path = getenv("CYCLES_SHADER_PATH");
+  const char *cycles_shader_path = getenv("CYCLES_SHADER_PATH");
   std::string base_path = path_dirname(path_dirname(Sysutil::this_program_path()));
   std::string shader_path = path_join(base_path, "shader");
   // XCode is one-level deeper
@@ -167,7 +171,7 @@ static void session_init()
     shader_path = path_join(base_path, "shader");
     assert(fs::is_directory(shader_path));
   }
-  if(cycles_shader_path) {
+  if (cycles_shader_path) {
     shader_path = std::string(cycles_shader_path) + ":" + shader_path;
   }
   setenv("CYCLES_SHADER_PATH", shader_path.c_str(), 0);
