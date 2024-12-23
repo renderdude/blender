@@ -49,6 +49,8 @@
 
 CCL_NAMESPACE_BEGIN
 
+Options options;
+
 static void session_print(const string &str)
 {
   /* print with carriage return to overwrite previous */
@@ -97,7 +99,12 @@ static void scene_init()
 {
   bool rib_mode = false;
   options.scene = options.session->scene;
+#ifdef WITH_CYCLES_DISTRIBUTED
+  // Placeholder
+  Ri ri_api(options);
+#else
   Ri ri_api(options.session);
+#endif
 
   /* Read XML or USD */
   if (string_endswith(string_to_lower(options.filepath), ".xml")) {

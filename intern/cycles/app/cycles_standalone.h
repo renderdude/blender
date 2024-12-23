@@ -30,7 +30,7 @@ struct Options {
   bool is_distributed = false;
   string directory;
 #endif
-} options;
+};
 
 CCL_NAMESPACE_END
 

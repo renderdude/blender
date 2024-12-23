@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "app/cycles_standalone.h"
 #include "error.h"
 #include "intern_cache.h"
 #include "param_dict.h"
@@ -27,7 +28,7 @@ std::vector<std::string> split_string(std::string_view str, char ch);
 // Parser Definition
 class Ri {
  public:
-  Ri(Session *session) : session(session) {}
+  Ri(Options& options);
   ~Ri() = default;
   // Ri Interface
 
@@ -50,6 +51,9 @@ class Ri {
     return _display_name;
   }
 
+  auto Option(std::string name) {
+    return _rib_state.options[name];
+  }
   /*****************************************************************
    ****            Begin RenderMan Definitions                  ****
    *****************************************************************/

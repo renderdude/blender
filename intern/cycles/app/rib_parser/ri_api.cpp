@@ -108,6 +108,23 @@ auto generate_random_alphanumeric_string(std::size_t len = 8) -> std::string
   return result;
 }
 
+Ri::Ri(Options &options) : session(options.session)
+{
+#ifdef WITH_CYCLES_DISTRIBUTED
+  if (options.is_distributed) {
+    Parsed_Parameter_Vector params;
+    Parsed_Parameter *param;
+
+    param = new Parsed_Parameter(Parameter_Type::String, "class", File_Loc());
+    param->payload = vector<void *>();
+    param->add_pointer(options.session->distributed);
+    params.push_back(param);
+
+    Option("distributed", params, File_Loc());
+  }
+#endif
+}
+
 void Ri::adjust_buffer_parameters(BufferParams *buffer)
 {
   Camera_Scene_Entity &camera = _camera[film.camera_name];
@@ -1072,7 +1089,8 @@ void Ri::Hyperboloid([[maybe_unused]] Point3f point1,
 
 void Ri::Identity([[maybe_unused]] File_Loc loc)
 {
-  graphics_state.for_active_transforms([]([[maybe_unused]] auto t) { return projection_identity(); });
+  graphics_state.for_active_transforms(
+      []([[maybe_unused]] auto t) { return projection_identity(); });
 }
 
 void Ri::IfBegin([[maybe_unused]] const std::string &condition, [[maybe_unused]] File_Loc loc)
@@ -1628,16 +1646,16 @@ void Ri::PointsPolygons(std::vector<int> n_vertices,
   bool has_varying_normals = false;
   bool has_uvs = false;
   for (auto &p : params) {
-      if (p->type == Parameter_Type::Normal) {
-          if (p->storage == Container_Type::FaceVarying || p->storage == Container_Type::Varying ||
-              p->storage == Container_Type::Vertex)
-          {
-              has_varying_normals = true;
-          }
+    if (p->type == Parameter_Type::Normal) {
+      if (p->storage == Container_Type::FaceVarying || p->storage == Container_Type::Varying ||
+          p->storage == Container_Type::Vertex)
+      {
+        has_varying_normals = true;
       }
-      else if (p->type == Parameter_Type::Point2 && (p->name == "st" || p->name == "uv")) {
-        has_uvs = true;
-      }
+    }
+    else if (p->type == Parameter_Type::Point2 && (p->name == "st" || p->name == "uv")) {
+      has_uvs = true;
+    }
   }
 
   if (has_varying_normals) {
@@ -1651,15 +1669,15 @@ void Ri::PointsPolygons(std::vector<int> n_vertices,
     param->storage = Container_Type::FaceVarying;
     param->elem_per_item = 2;
     std::vector<float> tc = {0, 0, 1, 0, 1, 1, 0, 1};
-    for (int i = 0; i < 2*vertices.size(); i++) {
+    for (int i = 0; i < 2 * vertices.size(); i++) {
       param->add_float(0);
     }
-    vector<float>& tex_coords = param->floats();
+    vector<float> &tex_coords = param->floats();
     int index = 0;
     for (auto i = 0; i < n_vertices.size(); i++) {
       for (auto j = 0; j < n_vertices[i]; j++) {
-        tex_coords[index++] = tc[2*j];
-        tex_coords[index++] = tc[2*j+1];
+        tex_coords[index++] = tc[2 * j];
+        tex_coords[index++] = tc[2 * j + 1];
       }
     }
     params.push_back(param);
