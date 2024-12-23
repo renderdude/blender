@@ -41,6 +41,12 @@ void Parsed_Parameter::add_int(int i)
   ints().push_back(i);
 }
 
+void Parsed_Parameter::add_pointer(void* v)
+{
+  assert(has_pointerss());
+  pointers().push_back(v);
+}
+
 void Parsed_Parameter::add_string(std::string_view str)
 {
   // assert(has_strings());
@@ -73,6 +79,9 @@ std::string Parsed_Parameter::to_string() const
     case Parameter_Type::Texture:
       ss << "string";
       break;
+    case Parameter_Type::Pointer:
+      ss << "pointer";
+      break;
     case Parameter_Type::Unknown:
       break;
   }
@@ -94,6 +103,11 @@ std::string Parsed_Parameter::to_string() const
   }
   else if (std::holds_alternative<vector<std::string>>(payload)) {
     for (const auto &s : strings()) {
+      ss << "\"" << s << "\" ";
+    }
+  }
+  else if (std::holds_alternative<vector<void*>>(payload)) {
+    for (const auto &s : pointers()) {
       ss << "\"" << s << "\" ";
     }
   }

@@ -22,6 +22,7 @@ enum class Parameter_Type {
   Integer,
   Normal,
   Parameter,
+  Pointer,
   Point2,
   Point3,
   Real,
@@ -33,7 +34,7 @@ enum class Parameter_Type {
 };
 
 using Payload_Type =
-    std::variant<vector<uint8_t>, vector<float>, vector<int>, vector<std::string>>;
+    std::variant<vector<uint8_t>, vector<float>, vector<int>, vector<std::string>, vector<void *>>;
 
 class Parsed_Parameter {
  public:
@@ -65,6 +66,9 @@ class Parsed_Parameter {
       case Parameter_Type::String:
       case Parameter_Type::Texture:
         payload = vector<std::string>();
+        break;
+      case Parameter_Type::Pointer:
+        payload = vector<void *>();
         break;
       case Parameter_Type::Unknown:
         break;
@@ -107,6 +111,14 @@ class Parsed_Parameter {
   {
     return std::get<vector<uint8_t>>(payload);
   }
+  vector<void*> const &pointers() const
+  {
+    return std::get<vector<void*>>(payload);
+  }
+  vector<void*> &pointers()
+  {
+    return std::get<vector<void*>>(payload);
+  }
 
   Parameter_Type type = Parameter_Type::Unknown;
   std::string name;
@@ -145,6 +157,10 @@ class Parsed_Parameter {
   {
     return std::holds_alternative<vector<std::string>>(payload);
   }
+  bool has_pointerss() const
+  {
+    return std::holds_alternative<vector<void*>>(payload);
+  }
   ///@}
   /// @name Conversion
   ///@{
@@ -156,6 +172,7 @@ class Parsed_Parameter {
   void add_int(int i);
   void add_string(std::string_view str);
   void add_bool(bool v);
+  void add_pointer(void* v);
   ///@}
 };  // end of class Parsed_Parameter
 
