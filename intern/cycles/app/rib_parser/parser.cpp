@@ -1821,10 +1821,12 @@ void parse_files(Ri *target, std::vector<std::string> filenames)
 #ifdef WITH_CYCLES_DISTRIBUTED
 void parse_for_distributed(Ri *target, std::vector<std::string> filenames)
 {
-  auto options = target->Option("Ri");
-  auto *opt_param = options["distributed"];
+  auto options = target->Option("distributed");
+  auto *opt_param = options["class"];
   if (opt_param != nullptr) {
     Distributed* distributed = static_cast<Distributed*>(opt_param->pointers()[0]);
+    if (distributed->is_render_server)
+      std::cout << "Render Server: " << distributed->inter_comm_world.rank() << std::endl;
   }
 }
 #endif
