@@ -4,10 +4,6 @@
 
 set(INC
   PUBLIC .
-  ../blentranslation
-  ../gpu
-  ../imbuf
-  ../makesrna
 )
 
 set(INC_SYS
@@ -30,10 +26,13 @@ set(SRC
 set(LIB
   PRIVATE bf::blenkernel
   PRIVATE bf::blenlib
+  PRIVATE bf::blentranslation
   PRIVATE bf::dna
-  bf_gpu
+  PRIVATE bf::gpu
+  PRIVATE bf::imbuf
   PRIVATE bf::intern::guardedalloc
   ${FREETYPE_LIBRARIES} ${BROTLI_LIBRARIES}
+  PRIVATE bf::rna
 )
 
 if(WIN32)

@@ -5217,7 +5217,7 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
         continue;
       }
       LISTBASE_FOREACH_MUTABLE (bNode *, node, &ntree->nodes) {
-        if (node->type == CMP_NODE_VIEWER || node->type == CMP_NODE_COMPOSITE) {
+        if (ELEM(node->type, CMP_NODE_VIEWER, CMP_NODE_COMPOSITE)) {
           node->flag &= ~NODE_PREVIEW;
         }
       }
@@ -5385,6 +5385,23 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
       }
     }
     FOREACH_NODETREE_END;
+  }
+
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 404, 17)) {
+    if (!DNA_struct_member_exists(
+            fd->filesdna, "RenderData", "RenderSettings", "compositor_denoise_preview_quality"))
+    {
+      LISTBASE_FOREACH (Scene *, scene, &bmain->scenes) {
+        scene->r.compositor_denoise_preview_quality = SCE_COMPOSITOR_DENOISE_BALANCED;
+      }
+    }
+    if (!DNA_struct_member_exists(
+            fd->filesdna, "RenderData", "RenderSettings", "compositor_denoise_final_quality"))
+    {
+      LISTBASE_FOREACH (Scene *, scene, &bmain->scenes) {
+        scene->r.compositor_denoise_final_quality = SCE_COMPOSITOR_DENOISE_HIGH;
+      }
+    }
   }
 
   /* Always run this versioning; meshes are written with the legacy format which always needs to

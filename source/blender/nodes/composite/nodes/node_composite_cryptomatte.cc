@@ -80,9 +80,13 @@ static blender::bke::cryptomatte::CryptomatteSessionPtr cryptomatte_init_from_no
   }
   BLI_assert(GS(image->id.name) == ID_IM);
 
-  NodeCryptomatte *node_cryptomatte = static_cast<NodeCryptomatte *>(node.storage);
-  ImageUser *iuser = &node_cryptomatte->iuser;
-  ImBuf *ibuf = BKE_image_acquire_ibuf(image, iuser, nullptr);
+  /* Construct an image user to retrieve the first image in the sequence, since the frame number
+   * might correspond to a non-existing image. We explicitly do not support the case where the
+   * image sequence has a changing structure. */
+  ImageUser image_user = {};
+  image_user.framenr = BKE_image_sequence_guess_offset(image);
+
+  ImBuf *ibuf = BKE_image_acquire_ibuf(image, &image_user, nullptr);
   RenderResult *render_result = image->rr;
   if (render_result) {
     session = blender::bke::cryptomatte::CryptomatteSessionPtr(
@@ -983,9 +987,15 @@ class LegacyCryptoMatteOperation : public BaseCryptoMatteOperation {
   Vector<Result> get_layers() override
   {
     Vector<Result> layers;
-    /* Add all textures of all inputs except the first input, which is the input image. */
+    /* Add all valid results of all inputs except the first input, which is the input image. */
     for (const bNodeSocket *socket : bnode().input_sockets().drop_front(1)) {
-      layers.append(get_input(socket->identifier));
+      const Result input = get_input(socket->identifier);
+      if (input.is_single_value()) {
+        /* If this Cryptomatte layer is not valid, because it is not an image, then all later
+         * Cryptomatte layers can't be used even if they were valid. */
+        break;
+      }
+      layers.append(input);
     }
     return layers;
   }

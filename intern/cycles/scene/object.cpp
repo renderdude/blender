@@ -95,6 +95,8 @@ NODE_DEFINE(Object)
   SOCKET_BOOLEAN(is_caustics_caster, "Cast Shadow Caustics", false);
   SOCKET_BOOLEAN(is_caustics_receiver, "Receive Shadow Caustics", false);
 
+  SOCKET_BOOLEAN(is_bake_target, "Bake Target", false);
+
   SOCKET_NODE(particle_system, "Particle System", ParticleSystem::get_node_type());
   SOCKET_INT(particle_index, "Particle Index", 0);
 
@@ -512,8 +514,7 @@ void ObjectManager::device_update_object_transform(UpdateObjectTransformState *s
 
   if (geom->is_mesh() || geom->is_pointcloud()) {
     /* TODO: why only mesh? */
-    Mesh *mesh = static_cast<Mesh *>(geom);
-    if (mesh->attributes.find(ATTR_STD_MOTION_VERTEX_POSITION)) {
+    if (geom->attributes.find(ATTR_STD_MOTION_VERTEX_POSITION)) {
       flag |= SD_OBJECT_HAS_VERTEX_MOTION;
     }
   }

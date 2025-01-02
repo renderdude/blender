@@ -6,19 +6,9 @@ set(INC
   .
   intern
   intern/lineart
-  ../blenloader
-  ../blentranslation
   ../editors/include
-  ../functions
-  ../geometry
-  ../makesrna
-  ../nodes
-  ../render
-  ../windowmanager
   ../../../intern/eigen
 
-  # RNA_prototypes.hh
-  ${CMAKE_BINARY_DIR}/source/blender/makesrna
 )
 
 set(INC_SYS
@@ -141,11 +131,19 @@ set(LIB
   PRIVATE bf::blenfont
   PRIVATE bf::blenkernel
   PRIVATE bf::blenlib
+  PRIVATE bf::blenloader
+  PRIVATE bf::blentranslation
   PRIVATE bf::bmesh
   PRIVATE bf::depsgraph
   PUBLIC bf::dna
+  PRIVATE bf::functions
+  PRIVATE bf::geometry
   PRIVATE bf::intern::guardedalloc
   PRIVATE bf::extern::fmtlib
+  PRIVATE bf::nodes
+  PRIVATE bf::render
+  PRIVATE bf::rna
+  PRIVATE bf::windowmanager
 )
 
 if(WITH_ALEMBIC)
@@ -243,6 +241,3 @@ endif()
 # So we can have special tricks in modifier system.
 
 blender_add_lib(bf_modifiers "${SRC}" "${INC}" "${INC_SYS}" "${LIB}")
-
-# RNA_prototypes.hh
-add_dependencies(bf_modifiers bf_rna)

@@ -8,9 +8,6 @@ set(INC
   importer
   intern
   ../common
-  ../../geometry
-  ../../makesrna
-  ../../windowmanager
 )
 
 set(INC_SYS
@@ -53,10 +50,13 @@ set(LIB
   PRIVATE bf::bmesh
   PRIVATE bf::depsgraph
   PRIVATE bf::dna
+  PRIVATE bf::geometry
   PRIVATE bf::intern::clog
   PRIVATE bf::intern::guardedalloc
   bf_io_common
   PRIVATE bf::extern::fmtlib
+  PRIVATE bf::rna
+  PRIVATE bf::windowmanager
 )
 
 blender_add_lib(bf_io_ply "${SRC}" "${INC}" "${INC_SYS}" "${LIB}")

@@ -5,11 +5,7 @@
 set(INC
   .
   ../common
-  ../../blenloader
-  ../../blentranslation
   ../../editors/include
-  ../../makesrna
-  ../../windowmanager
   ../../../../intern/utfconv
 )
 
@@ -84,6 +80,8 @@ set(SRC
 set(LIB
   PRIVATE bf::blenkernel
   PRIVATE bf::blenlib
+  PRIVATE bf::blenloader
+  PRIVATE bf::blentranslation
   PRIVATE bf::bmesh
   PRIVATE bf::depsgraph
   PRIVATE bf::dna
@@ -93,6 +91,8 @@ set(LIB
 
   ${ALEMBIC_LIBRARIES}
   ${OPENEXR_LIBRARIES}
+  PRIVATE bf::rna
+  PRIVATE bf::windowmanager
 )
 
 if(WITH_BOOST)

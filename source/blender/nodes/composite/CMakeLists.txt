@@ -7,20 +7,11 @@ set(INC
   ..
   ../intern
   ../../editors/include
-  ../../blentranslation
-  ../../functions
-  ../../gpu
-  ../../imbuf
-  ../../makesrna
-  ../../render
-  ../../windowmanager
   ../../compositor
   ../../compositor/algorithms
   ../../compositor/cached_resources
   ../../compositor/utilities
 
-  # RNA_prototypes.hh
-  ${CMAKE_BINARY_DIR}/source/blender/makesrna
 )
 
 set(INC_SYS
@@ -128,12 +119,18 @@ set(SRC
 set(LIB
   PRIVATE bf::blenkernel
   PRIVATE bf::blenlib
+  PRIVATE bf::blentranslation
   PRIVATE bf::depsgraph
   PRIVATE bf::dna
-  bf_functions
+  PRIVATE bf::functions
+  PRIVATE bf::gpu
+  PRIVATE bf::imbuf
   PRIVATE bf::intern::guardedalloc
   PRIVATE bf::extern::fmtlib
   bf_compositor
+  PRIVATE bf::render
+  PRIVATE bf::rna
+  PRIVATE bf::windowmanager
 )
 
 if(WITH_OPENCOLORIO)
@@ -171,6 +168,3 @@ endif()
 blender_add_lib(bf_nodes_composite "${SRC}" "${INC}" "${INC_SYS}" "${LIB}")
 
 blender_set_target_unity_build(bf_nodes_composite 10)
-
-# RNA_prototypes.hh
-add_dependencies(bf_nodes_composite bf_rna)

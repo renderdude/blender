@@ -4054,7 +4054,7 @@ static BHead *find_bhead_from_idname(FileData *fd, const char *idname)
   }
 #ifdef USE_GHASH_BHEAD
   char id_name_old[MAX_ID_NAME];
-  BLI_strncpy(id_name_old, idname, sizeof(id_name_old));
+  STRNCPY(id_name_old, idname);
   *reinterpret_cast<short *>(id_name_old) = id_code_old;
   return static_cast<BHead *>(BLI_ghash_lookup(fd->bhead_idname_hash, id_name_old));
 #else
@@ -5017,6 +5017,16 @@ void BLO_read_int8_array(BlendDataReader *reader, const int64_t array_size, int8
 {
   *ptr_p = reinterpret_cast<int8_t *>(
       BLO_read_struct_array_with_size(reader, *((void **)ptr_p), sizeof(int8_t) * array_size));
+}
+
+void BLO_read_int16_array(BlendDataReader *reader, const int64_t array_size, int16_t **ptr_p)
+{
+  *ptr_p = reinterpret_cast<int16_t *>(
+      BLO_read_struct_array_with_size(reader, *((void **)ptr_p), sizeof(int16_t) * array_size));
+
+  if (*ptr_p && BLO_read_requires_endian_switch(reader)) {
+    BLI_endian_switch_int16_array(*ptr_p, array_size);
+  }
 }
 
 void BLO_read_int32_array(BlendDataReader *reader, const int64_t array_size, int32_t **ptr_p)

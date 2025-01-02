@@ -9,8 +9,6 @@ set(INC
   intern
   ../common
   ../../editors/include
-  ../../makesrna
-  ../../windowmanager
 )
 
 set(INC_SYS
@@ -47,6 +45,8 @@ set(LIB
   PRIVATE bf::intern::guardedalloc
   bf_io_common
   PRIVATE bf::extern::fmtlib
+  PRIVATE bf::rna
+  PRIVATE bf::windowmanager
 )
 
 blender_add_lib(bf_io_stl "${SRC}" "${INC}" "${INC_SYS}" "${LIB}")

@@ -44,17 +44,9 @@ endif()
 set(INC
   .
   ../common
-  ../../blenloader
-  ../../blentranslation
   ../../editors/include
-  ../../imbuf
-  ../../makesrna
-  ../../nodes
   ../../python/intern
-  ../../windowmanager
   ../../../../intern/utfconv
-  # RNA_prototypes.hh
-  ${CMAKE_BINARY_DIR}/source/blender/makesrna
 )
 
 set(INC_SYS
@@ -195,15 +187,20 @@ endif()
 set(LIB
   PRIVATE bf::blenkernel
   PRIVATE bf::blenlib
+  PRIVATE bf::blenloader
+  PRIVATE bf::blentranslation
   PRIVATE bf::bmesh
   PRIVATE bf::depsgraph
   PRIVATE bf::dna
   PRIVATE bf::animrig
-  bf_imbuf
+  PRIVATE bf::imbuf
   PRIVATE bf::intern::clog
   PRIVATE bf::intern::guardedalloc
   bf_io_common
   PRIVATE bf::extern::fmtlib
+  PRIVATE bf::nodes
+  PRIVATE bf::rna
+  PRIVATE bf::windowmanager
 )
 
 list(APPEND LIB
@@ -234,8 +231,6 @@ endif()
 
 blender_add_lib(bf_io_usd "${SRC}" "${INC}" "${INC_SYS}" "${LIB}")
 
-# RNA_prototypes.hh
-add_dependencies(bf_io_usd bf_rna)
 
 if(COMMAND target_precompile_headers)
   target_precompile_headers(bf_io_usd PRIVATE intern/usd_precomp.hh)

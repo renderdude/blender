@@ -5,14 +5,7 @@
 set(INC
   PUBLIC .
   ../animrig
-  ../draw
-  ../functions
-  ../makesrna
   ../modifiers
-  ../sequencer
-  ../windowmanager
-  # RNA_prototypes.hh
-  ${CMAKE_BINARY_DIR}/source/blender/makesrna
 )
 
 set(INC_SYS
@@ -154,8 +147,13 @@ set(LIB
   PRIVATE bf::blenlib
   PRIVATE bf::bmesh
   PRIVATE bf::dna
+  PRIVATE bf::draw
+  PRIVATE bf::functions
   PRIVATE bf::intern::atomic
   PRIVATE bf::intern::guardedalloc
+  PRIVATE bf::rna
+  PRIVATE bf::sequencer
+  PRIVATE bf::windowmanager
 )
 
 if(WITH_PYTHON)
@@ -168,8 +166,6 @@ endif()
 blender_add_lib(bf_depsgraph "${SRC}" "${INC}" "${INC_SYS}" "${LIB}")
 add_library(bf::depsgraph ALIAS bf_depsgraph)
 
-# RNA_prototypes.hh
-add_dependencies(bf_depsgraph bf_rna)
 
 if(WITH_GTESTS)
   set(TEST_INC

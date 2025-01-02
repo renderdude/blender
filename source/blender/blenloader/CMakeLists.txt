@@ -3,21 +3,9 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 set(INC
-  .
-  ../blentranslation
-  ../draw
+  PUBLIC .
   ../editors/include
-  ../gpu
-  ../imbuf
-  ../imbuf/movie
-  ../makesrna
-  ../nodes
-  ../render
-  ../sequencer
-  ../windowmanager
 
-  # RNA_prototypes.hh
-  ${CMAKE_BINARY_DIR}/source/blender/makesrna
 )
 
 set(INC_SYS
@@ -60,13 +48,23 @@ set(LIB
   PRIVATE bf::animrig
   PRIVATE bf::blenkernel
   PRIVATE bf::blenlib
+  PRIVATE bf::blentranslation
   PRIVATE bf::bmesh
   PRIVATE bf::depsgraph
   PRIVATE bf::dna
+  PRIVATE bf::draw
+  PRIVATE bf::gpu
+  PRIVATE bf::imbuf
+  PRIVATE bf::imbuf::movie
   PRIVATE bf::intern::clog
   PRIVATE bf::intern::guardedalloc
   PRIVATE bf::extern::fmtlib
   PRIVATE bf::intern::memutil
+  PRIVATE bf::nodes
+  PRIVATE bf::render
+  PRIVATE bf::rna
+  PRIVATE bf::sequencer
+  PRIVATE bf::windowmanager
 )
 
 if(WITH_BUILDINFO)
@@ -89,9 +87,8 @@ if(WIN32)
 endif()
 
 blender_add_lib(bf_blenloader "${SRC}" "${INC}" "${INC_SYS}" "${LIB}")
+add_library(bf::blenloader ALIAS bf_blenloader)
 
-# RNA_prototypes.hh
-add_dependencies(bf_blenloader bf_rna)
 
 if(WITH_GTESTS)
   # Utility functions for test also used by other tests.

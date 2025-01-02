@@ -4,10 +4,6 @@
 
 set(INC
   ../include
-  ../../blentranslation
-  ../../gpu
-  ../../makesrna
-  ../../windowmanager
 )
 
 set(INC_SYS
@@ -30,10 +26,14 @@ set(SRC
 set(LIB
   PRIVATE bf::blenkernel
   PRIVATE bf::blenlib
+  PRIVATE bf::blentranslation
   PRIVATE bf::depsgraph
   PRIVATE bf::dna
+  PRIVATE bf::gpu
   PRIVATE bf::intern::guardedalloc
   PRIVATE bf::animrig
+  PRIVATE bf::rna
+  PRIVATE bf::windowmanager
 )
 
 

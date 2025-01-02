@@ -8,23 +8,11 @@ set(INC
   include
   ../intern
   ../../editors/include
-  ../../blenloader
-  ../../blentranslation
-  ../../functions
-  ../../geometry
-  ../../gpu
-  ../../imbuf
-  ../../imbuf/movie
-  ../../makesrna
   ../../modifiers
-  ../../render
-  ../../windowmanager
   ../../io/common
   ../../io/ply
   ../../io/stl
   ../../io/wavefront_obj
-  # RNA_prototypes.hh
-  ${CMAKE_BINARY_DIR}/source/blender/makesrna
 )
 
 set(INC_SYS
@@ -248,16 +236,24 @@ set(SRC
 set(LIB
   PRIVATE bf::blenkernel
   PRIVATE bf::blenlib
+  PRIVATE bf::blenloader
+  PRIVATE bf::blentranslation
   PRIVATE bf::bmesh
   PRIVATE bf::depsgraph
   PRIVATE bf::dna
-  bf_functions
-  bf_geometry
+  PRIVATE bf::functions
+  PRIVATE bf::geometry
+  PRIVATE bf::gpu
+  PRIVATE bf::imbuf
+  PRIVATE bf::imbuf::movie
   PRIVATE bf::intern::guardedalloc
   bf_nodes
   PRIVATE bf::intern::atomic
   PRIVATE bf::extern::fmtlib
   PRIVATE bf::extern::xxhash
+  PRIVATE bf::render
+  PRIVATE bf::rna
+  PRIVATE bf::windowmanager
 )
 
 if(WITH_IO_STL)
@@ -355,6 +351,3 @@ blender_add_lib(bf_nodes_geometry "${SRC}" "${INC}" "${INC_SYS}" "${LIB}")
 target_link_libraries(bf_nodes_geometry_generated bf_nodes_geometry)
 
 blender_set_target_unity_build(bf_nodes_geometry 10)
-
-# RNA_prototypes.hh
-add_dependencies(bf_nodes_geometry bf_rna)

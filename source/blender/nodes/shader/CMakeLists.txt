@@ -6,17 +6,8 @@ set(INC
   .
   ..
   ../intern
-  ../../blentranslation
   ../../editors/include
-  ../../functions
-  ../../gpu
-  ../../imbuf
-  ../../makesrna
-  ../../render
-  ../../windowmanager
   ../../../../intern/sky/include
-  # RNA_prototypes.hh
-  ${CMAKE_BINARY_DIR}/source/blender/makesrna
 )
 
 set(INC_SYS
@@ -130,13 +121,19 @@ set(SRC
 set(LIB
   PRIVATE bf::blenkernel
   PRIVATE bf::blenlib
+  PRIVATE bf::blentranslation
   PRIVATE bf::depsgraph
   PRIVATE bf::dna
-  bf_functions
+  PRIVATE bf::functions
+  PRIVATE bf::gpu
+  PRIVATE bf::imbuf
   PRIVATE bf::intern::clog
   PRIVATE bf::intern::guardedalloc
   bf_intern_sky
   bf_nodes
+  PRIVATE bf::render
+  PRIVATE bf::rna
+  PRIVATE bf::windowmanager
 )
 
 if(WITH_MATERIALX)
@@ -181,6 +178,3 @@ endif()
 blender_add_lib(bf_nodes_shader "${SRC}" "${INC}" "${INC_SYS}" "${LIB}")
 
 blender_set_target_unity_build(bf_nodes_shader 10)
-
-# RNA_prototypes.hh
-add_dependencies(bf_nodes_shader bf_rna)

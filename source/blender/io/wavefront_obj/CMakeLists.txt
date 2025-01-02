@@ -9,9 +9,6 @@ set(INC
   ../common
   ../../bmesh/intern
   ../../editors/include
-  ../../makesrna
-  ../../nodes
-  ../../windowmanager
 )
 
 set(INC_SYS
@@ -60,6 +57,9 @@ set(LIB
   PRIVATE bf::intern::guardedalloc
   bf_io_common
   PRIVATE bf::extern::fmtlib
+  PRIVATE bf::nodes
+  PRIVATE bf::rna
+  PRIVATE bf::windowmanager
 )
 
 blender_add_lib(bf_io_wavefront_obj "${SRC}" "${INC}" "${INC_SYS}" "${LIB}")
@@ -70,8 +70,6 @@ if(WITH_GTESTS)
     tests/obj_import_string_utils_tests.cc
     tests/obj_importer_tests.cc
     tests/obj_mtl_parser_tests.cc
-
-    tests/obj_exporter_tests.hh
   )
 
   set(TEST_INC

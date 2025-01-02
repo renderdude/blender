@@ -4,13 +4,7 @@
 
 set(INC
   ../blender/editors/include
-  ../blender/gpu
-  ../blender/imbuf
-  ../blender/imbuf/movie
   ../blender/io/usd
-  ../blender/makesrna
-  ../blender/render
-  ../blender/windowmanager
 )
 
 set(LIB
@@ -19,9 +13,14 @@ set(LIB
   PRIVATE bf::bmesh
   PRIVATE bf::depsgraph
   PRIVATE bf::dna
+  PRIVATE bf::gpu
+  PRIVATE bf::imbuf
+  PRIVATE bf::imbuf::movie
   PRIVATE bf::intern::clog
   PRIVATE bf::intern::guardedalloc
-  bf_windowmanager
+  PRIVATE bf::render
+  PRIVATE bf::rna
+  PRIVATE bf::windowmanager
 )
 
 if(HAVE_FEENABLEEXCEPT)
