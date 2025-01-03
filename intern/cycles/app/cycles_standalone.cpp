@@ -446,7 +446,7 @@ static void options_parse(int argc, const char **argv)
 
   /* parse options */
   ArgParse ap;
-  bool help = false, profile = false, debug = false, version = false;
+  bool help = false, profile = false, debug = false, version = false, wait = false;
   int verbosity = 1;
 
   ap.options("Usage: cycles [options] file.xml",
@@ -527,6 +527,9 @@ static void options_parse(int argc, const char **argv)
              "--help",
              &help,
              "Print help message",
+             "--wait",
+             &wait,
+             "Sit in a loop waiting for a debugger to attach",
              "--version",
              &version,
              "Print version number",
@@ -536,6 +539,17 @@ static void options_parse(int argc, const char **argv)
     fprintf(stderr, "%s\n", ap.geterror().c_str());
     ap.usage();
     exit(EXIT_FAILURE);
+  }
+
+  if (wait) {
+    volatile int i = 0;
+    char hostname[256];
+    gethostname(hostname, sizeof(hostname));
+    printf("PID %d on %s ready for attach\n", getpid(), hostname);
+    fflush(stdout);
+    while (0 == i) {
+      sleep(5);
+    }
   }
 
   if (debug) {
@@ -560,7 +574,14 @@ static void options_parse(int argc, const char **argv)
     printf("%s\n", CYCLES_VERSION_STRING);
     exit(EXIT_SUCCESS);
   }
-  else if (help || options.filepath == "") {
+#ifdef WITH_CYCLES_DISTRIBUTED
+  else if (help || 
+           (!options.is_distributed && options.filepath.empty()) ||
+           (options.is_distributed && !options.reverse_connect && options.filepath.empty())
+           ) {
+#else
+  else if (help || options.filepath.empty()) {
+#endif
     ap.usage();
     exit(EXIT_SUCCESS);
   }
@@ -632,7 +653,13 @@ static void options_parse(int argc, const char **argv)
     fprintf(stderr, "Invalid number of samples: %d\n", options.session_params.samples);
     exit(EXIT_FAILURE);
   }
+#ifdef WITH_CYCLES_DISTRIBUTED
+  else if ((!options.is_distributed && options.filepath.empty()) ||
+           (options.is_distributed && !options.reverse_connect && options.filepath.empty())
+           ) {
+#else
   else if (options.filepath.empty()) {
+#endif
     fprintf(stderr, "No file path specified\n");
     exit(EXIT_FAILURE);
   }
