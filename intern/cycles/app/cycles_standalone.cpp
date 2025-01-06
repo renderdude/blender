@@ -95,12 +95,47 @@ static void session_buffer_params()
   options.buffer_params->full_height = options.height;
 }
 
+#ifdef WITH_CYCLES_DISTRIBUTED
+static void distributed_scene_init()
+{
+  options.scene = options.session->scene;
+  Ri ri_api(options);
+
+    session_buffer_params();
+    ri_api.add_default_search_paths(options.directory);
+
+    parse_for_distributed(&ri_api, std::vector<std::string>());
+
+    ri_api.CropWindow(options.crop_window[0],
+                      options.crop_window[1],
+                      options.crop_window[2],
+                      options.crop_window[3],
+                      File_Loc());
+    ri_api.export_to_cycles();
+
+  /* Camera width/height override? */
+  if (!(options.width == 0 || options.height == 0)) {
+    options.scene->camera->set_full_width(options.width);
+    options.scene->camera->set_full_height(options.height);
+  }
+  else {
+    options.width = options.scene->camera->get_full_width();
+    options.height = options.scene->camera->get_full_height();
+  }
+
+  /* Calculate Viewplane */
+  options.scene->camera->compute_auto_viewplane();
+
+  session_buffer_params();
+  ri_api.adjust_buffer_parameters(options.buffer_params);
+}
+#endif
+
 static void scene_init()
 {
   bool rib_mode = false;
   options.scene = options.session->scene;
 #ifdef WITH_CYCLES_DISTRIBUTED
-  // Placeholder
   Ri ri_api(options);
 #else
   Ri ri_api(options.session);
@@ -210,8 +245,17 @@ static void session_init()
     options.session->progress.set_update_callback(function_bind(&window_redraw));
 #endif
 
-  /* load scene */
+    /* load scene */
+#ifdef WITH_CYCLES_DISTRIBUTED
+  if (options.is_distributed && options.reverse_connect) {
+    distributed_scene_init();
+  }
+  else {
+    scene_init();
+  }
+#else
   scene_init();
+#endif
 
   /* add pass for output. */
   Pass *pass = options.scene->create_node<Pass>();
@@ -575,10 +619,9 @@ static void options_parse(int argc, const char **argv)
     exit(EXIT_SUCCESS);
   }
 #ifdef WITH_CYCLES_DISTRIBUTED
-  else if (help || 
-           (!options.is_distributed && options.filepath.empty()) ||
-           (options.is_distributed && !options.reverse_connect && options.filepath.empty())
-           ) {
+  else if (help || (!options.is_distributed && options.filepath.empty()) ||
+           (options.is_distributed && !options.reverse_connect && options.filepath.empty()))
+  {
 #else
   else if (help || options.filepath.empty()) {
 #endif
@@ -655,8 +698,8 @@ static void options_parse(int argc, const char **argv)
   }
 #ifdef WITH_CYCLES_DISTRIBUTED
   else if ((!options.is_distributed && options.filepath.empty()) ||
-           (options.is_distributed && !options.reverse_connect && options.filepath.empty())
-           ) {
+           (options.is_distributed && !options.reverse_connect && options.filepath.empty()))
+  {
 #else
   else if (options.filepath.empty()) {
 #endif

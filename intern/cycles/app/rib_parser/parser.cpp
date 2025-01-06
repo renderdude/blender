@@ -1,5 +1,6 @@
 #include "app/rib_parser/parsed_parameter.h"
 #include "distributed/distributed.h"
+#include "mpl/mpl.hpp"
 #include <_types/_uint8_t.h>
 
 #ifdef HAVE_MMAP
@@ -1824,9 +1825,25 @@ void parse_for_distributed(Ri *target, std::vector<std::string> filenames)
   auto options = target->Option("distributed");
   auto *opt_param = options["class"];
   if (opt_param != nullptr) {
-    Distributed* distributed = static_cast<Distributed*>(opt_param->pointers()[0]);
-    if (distributed->is_render_server)
+    Distributed *distributed = static_cast<Distributed *>(opt_param->pointers()[0]);
+    if (distributed->is_render_server) {
       std::cout << "Render Server: " << distributed->inter_comm_world.rank() << std::endl;
+      size_t num_files;
+      distributed->inter_comm_world.recv(num_files, 0);
+      std::cout << "Receiving " << num_files << " files\n";
+      for (int i = 0; i < num_files; i++) {
+        std::string file_name;
+        distributed->inter_comm_world.recv(file_name, 0);
+        std::cout << "  " << i << " - " << file_name << std::endl;
+      }
+    }
+    else {
+      // How many files are we sending
+      distributed->inter_comm_world.send(filenames.size(), 1);
+      for (auto f: filenames) {
+        distributed->inter_comm_world.send(f, 1);
+      }
+    }
   }
 }
 #endif

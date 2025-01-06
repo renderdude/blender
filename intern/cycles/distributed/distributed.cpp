@@ -37,7 +37,6 @@ Distributed::Distributed(bool reverse_connect)
       // Setup the new intercomm with the 'client' having the high-process numbers
       _inter_comm->barrier();
       inter_comm_world = mpl::communicator(*_inter_comm, mpl::communicator::order_high);
-      std::cerr << "Client-side ";
     }
     else {  // Server side
       mpl::info info;
@@ -58,7 +57,6 @@ Distributed::Distributed(bool reverse_connect)
       inter_comm_world = mpl::communicator(*_inter_comm, mpl::communicator::order_low);
       port.unpublish_name("papillon");
 
-      std::cerr << "Server-side ";
     }
 
     // MPI takes over from here on out
