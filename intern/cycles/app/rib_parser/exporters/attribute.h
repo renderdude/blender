@@ -1,6 +1,3 @@
-#ifndef ATTRIBUTE_H
-#define ATTRIBUTE_H
-
 #pragma once
 
 #include "scene/attribute.h"
@@ -15,5 +12,3 @@ void apply_primvars(AttributeSet &attributes,
                    AttributeStandard std);
 
 CCL_NAMESPACE_END
-
-#endif // ATTRIBUTE_H

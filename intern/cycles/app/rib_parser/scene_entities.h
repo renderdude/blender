@@ -1,5 +1,4 @@
-#ifndef SCENE_ENTITIES_H
-#define SCENE_ENTITIES_H
+#pragma once
 
 #include <algorithm>
 #include <sstream>
@@ -467,5 +466,3 @@ struct Instance_Scene_Entity {
 };
 
 CCL_NAMESPACE_END
-
-#endif  // SCENE_ENTITIES_H

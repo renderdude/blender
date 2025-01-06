@@ -1,5 +1,4 @@
-#ifndef RIB_TO_CYCLES_H
-#define RIB_TO_CYCLES_H
+#pragma once
 
 #include "app/rib_parser/param_dict.h"
 #include "app/rib_parser/parsed_parameter.h"
@@ -189,5 +188,3 @@ class PxrMarschnerHairtoPrincipled : public RIBtoCyclesMapping {
 };
 
 CCL_NAMESPACE_END
-
-#endif  // RIB_TO_CYCLES_H

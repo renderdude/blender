@@ -1,6 +1,4 @@
-
-#ifndef __EXPORTERS_MATERIALS_H__
-#define __EXPORTERS_MATERIALS_H__
+#pragma once
 
 #include "app/rib_parser/exporters/materials/convert_lama_network.h"
 #include "app/rib_parser/param_dict.h"
@@ -46,4 +44,3 @@ class RIBCyclesMaterials {
 };
 
 CCL_NAMESPACE_END
-#endif  //__EXPORTERS_MATERIALS_H__

@@ -1,5 +1,4 @@
-#ifndef CYCLES_STANDALONE_H
-#define CYCLES_STANDALONE_H
+#pragma once
 
 #include <vector>
 
@@ -33,5 +32,3 @@ struct Options {
 };
 
 CCL_NAMESPACE_END
-
-#endif // CYCLES_STANDALONE_H

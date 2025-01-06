@@ -1,5 +1,4 @@
-#ifndef CONVERT_LAMA_NETWORK_H
-#define CONVERT_LAMA_NETWORK_H
+#pragma once
 
 #include "app/rib_parser/param_dict.h"
 #include "app/rib_parser/parsed_parameter.h"
@@ -96,5 +95,3 @@ class LamaNetwork {
 };
 
 CCL_NAMESPACE_END
-
-#endif  // CONVERT_LAMA_NETWORK_H

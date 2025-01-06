@@ -1,5 +1,4 @@
-#ifndef ERROR_H
-#define ERROR_H
+#pragma once
 
 #include <sstream>
 #include <string>
@@ -47,5 +46,3 @@ inline void error_exit(const File_Loc *loc, std::string message)
 }
 
 CCL_NAMESPACE_END
-
-#endif  // ERROR_H

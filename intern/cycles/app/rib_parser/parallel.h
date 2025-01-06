@@ -1,5 +1,4 @@
-#ifndef PARALLEL_H
-#define PARALLEL_H
+#pragma once
 
 #include <boost/optional/optional.hpp>
 #include <condition_variable>
@@ -328,5 +327,3 @@ template<typename F, typename... Args> inline auto run_async(F func, Args &&...a
 }
 
 CCL_NAMESPACE_END
-
-#endif  // PARALLEL_H

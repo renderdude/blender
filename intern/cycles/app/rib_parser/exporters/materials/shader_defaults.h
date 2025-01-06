@@ -1,5 +1,4 @@
-#ifndef SHADER_DEFAULTS_H
-#define SHADER_DEFAULTS_H
+#pragma once
 
 #include "graph/node_type.h"
 #include "scene/shader_graph.h"
@@ -85,5 +84,3 @@ ShaderNode *create_shader(std::string const &shader, const NodeType *node_type)
 }
 
 CCL_NAMESPACE_END
-
-#endif  // SHADER_DEFAULTS_H

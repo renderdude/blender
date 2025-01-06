@@ -1,5 +1,4 @@
-#ifndef DISTRIBUTED_H
-#define DISTRIBUTED_H
+#pragma once
 
 #include <string>
 #include <unistd.h>
@@ -95,5 +94,3 @@ private:
 
 }; // end of class Distributed
 CCL_NAMESPACE_END
-
-#endif // DISTRIBUTED_H

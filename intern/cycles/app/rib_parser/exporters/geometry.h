@@ -1,6 +1,4 @@
-
-#ifndef __EXPORTERS_GEOMETRY_H__
-#define __EXPORTERS_GEOMETRY_H__
+#pragma once
 
 #include "app/rib_parser/parsed_parameter.h"
 #include "bvh/build.h"
@@ -65,4 +63,3 @@ class RIBCyclesMesh {
 };
 
 CCL_NAMESPACE_END
-#endif  //__EXPORTERS_GEOMETRY_H__

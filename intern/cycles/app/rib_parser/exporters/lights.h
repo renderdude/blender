@@ -1,6 +1,4 @@
-
-#ifndef __EXPORTERS_LIGHTS_H__
-#define __EXPORTERS_LIGHTS_H__
+#pragma once
 
 #include "scene/scene.h"
 
@@ -13,4 +11,3 @@ void export_lights(Scene *scene,
                    Instance_Definition_Scene_Entity *inst_def);
 
 CCL_NAMESPACE_END
-#endif  //__EXPORTERS_LIGHTS_H__

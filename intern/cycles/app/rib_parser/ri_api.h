@@ -1,5 +1,4 @@
-#ifndef RI_API_H
-#define RI_API_H
+#pragma once
 
 #include <map>
 #include <set>
@@ -454,5 +453,3 @@ class Ri {
   }
 
 CCL_NAMESPACE_END
-
-#endif  // RI_API_H

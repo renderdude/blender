@@ -1,5 +1,4 @@
-#ifndef PARAM_DICT_H
-#define PARAM_DICT_H
+#pragma once
 
 #include <map>
 #include <unordered_map>
@@ -161,5 +160,3 @@ CCL_NAMESPACE_BEGIN
    };  // end of class Parameter_Dictionary
 
 CCL_NAMESPACE_END
-
-#endif  // PARAM_DICT_H

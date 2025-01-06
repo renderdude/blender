@@ -1,5 +1,4 @@
-#ifndef INTERN_CACHE_H
-#define INTERN_CACHE_H
+#pragma once
 
 #include <functional>
 #include <shared_mutex>
@@ -124,5 +123,3 @@ template<typename T, typename Hash = std::hash<T>> class Intern_Cache {
 };  // end of class Intern_Cache
 
 CCL_NAMESPACE_END
-
-#endif  // INTERN_CACHE_H

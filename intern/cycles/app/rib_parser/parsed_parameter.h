@@ -1,5 +1,4 @@
-#ifndef PARSED_PARAMETER_H
-#define PARSED_PARAMETER_H
+#pragma once
 
 #include <string>
 #include <string_view>
@@ -179,5 +178,3 @@ class Parsed_Parameter {
 using Parsed_Parameter_Vector = vector<Parsed_Parameter *>;
 
 CCL_NAMESPACE_END
-
-#endif  // PARSED_PARAMETER_H

@@ -1,5 +1,4 @@
-#ifndef PARSER_H
-#define PARSER_H
+#pragma once
 
 #include <functional>
 #include <memory>
@@ -116,5 +115,3 @@ class Tokenizer {
 };
 
 CCL_NAMESPACE_END
-
-#endif  // PARSER_H

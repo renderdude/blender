@@ -1,5 +1,4 @@
-#ifndef __EXPORTERS_CURVES_H__
-#define __EXPORTERS_CURVES_H__
+#pragma once
 
 #include "app/rib_parser/parsed_parameter.h"
 #include "bvh/build.h"
@@ -49,4 +48,3 @@ class RIBCyclesCurves {
 };
 
 CCL_NAMESPACE_END
-#endif  //__EXPORTERS_CURVES_H__
