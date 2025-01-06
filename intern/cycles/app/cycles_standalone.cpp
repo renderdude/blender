@@ -12,13 +12,15 @@
 #include "session/buffers.h"
 #include "session/session.h"
 
+#include "util/args.h"
 #include "util/foreach.h"
-#include "util/function.h"
 #include "util/image.h"
 #include "util/log.h"
 #include "util/path.h"
 #include "util/progress.h"
 #include "util/string.h"
+#include "util/time.h"
+#include "util/transform.h"
 #include "util/unique_ptr.h"
 #include "util/version.h"
 
@@ -101,17 +103,17 @@ static void distributed_scene_init()
   options.scene = options.session->scene;
   Ri ri_api(options);
 
-    session_buffer_params();
-    ri_api.add_default_search_paths(options.directory);
+  session_buffer_params();
+  ri_api.add_default_search_paths(options.directory);
 
-    parse_for_distributed(&ri_api, std::vector<std::string>());
+  parse_for_distributed(&ri_api, std::vector<std::string>());
 
-    ri_api.CropWindow(options.crop_window[0],
-                      options.crop_window[1],
-                      options.crop_window[2],
-                      options.crop_window[3],
-                      File_Loc());
-    ri_api.export_to_cycles();
+  ri_api.CropWindow(options.crop_window[0],
+                    options.crop_window[1],
+                    options.crop_window[2],
+                    options.crop_window[3],
+                    File_Loc());
+  ri_api.export_to_cycles();
 
   /* Camera width/height override? */
   if (!(options.width == 0 || options.height == 0)) {
@@ -237,15 +239,16 @@ static void session_init()
       options.session->set_display_driver(make_unique<TEVDisplayDriver>(options.display_server));
     }
     else if (!options.quiet) {
-      options.session->progress.set_update_callback(function_bind(&session_print_status));
+      options.session->progress.set_update_callback([] { session_print_status(); });
     }
   }
 #ifdef WITH_CYCLES_STANDALONE_GUI
-  else if (options.display_type == "gl")
-    options.session->progress.set_update_callback(function_bind(&window_redraw));
+  else if (options.display_type == "gl") {
+    options.session->progress.set_update_callback([] { window_redraw(); });
+  }
 #endif
 
-    /* load scene */
+  /* load scene */
 #ifdef WITH_CYCLES_DISTRIBUTED
   if (options.is_distributed && options.reverse_connect) {
     distributed_scene_init();
@@ -279,7 +282,7 @@ static void session_exit()
   }
 }
 
-#if defined(WITH_CYCLES_STANDALONE_GUI)
+#ifdef WITH_CYCLES_STANDALONE_GUI
 static void display_info(Progress &progress)
 {
   static double latency = 0.0;

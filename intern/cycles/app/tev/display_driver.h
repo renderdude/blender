@@ -22,7 +22,6 @@
 
 #include "session/display_driver.h"
 
-#include "util/function.h"
 #include "util/unique_ptr.h"
 
 CCL_NAMESPACE_BEGIN
