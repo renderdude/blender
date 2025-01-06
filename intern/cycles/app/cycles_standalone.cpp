@@ -273,7 +273,7 @@ static void session_exit()
 {
   if (options.session) {
     delete options.session;
-    options.session = NULL;
+    options.session = nullptr;
   }
 
   if (options.session_params.background && !options.quiet) {
@@ -468,7 +468,7 @@ static void options_parse(int argc, const char **argv)
   options.width = 0;
   options.height = 0;
   options.filepath = "";
-  options.session = NULL;
+  options.session = nullptr;
   options.quiet = false;
   options.session_params.use_auto_tile = false;
   options.session_params.tile_size = 0;
@@ -580,7 +580,7 @@ static void options_parse(int argc, const char **argv)
              "--version",
              &version,
              "Print version number",
-             NULL);
+             nullptr);
 
   if (ap.parse(argc, argv) < 0) {
     fprintf(stderr, "%s\n", ap.geterror().c_str());
