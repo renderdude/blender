@@ -1,8 +1,3 @@
-#include "app/rib_parser/parsed_parameter.h"
-#include "distributed/distributed.h"
-#include "mpl/mpl.hpp"
-#include <_types/_uint8_t.h>
-
 #ifdef HAVE_MMAP
 #  include <sys/mman.h>
 #  include <sys/stat.h>
@@ -23,6 +18,13 @@
 #include <boost/filesystem.hpp>
 #include <double-conversion/double-conversion.h>
 namespace bfs = boost::filesystem;
+
+#include "app/rib_parser/parsed_parameter.h"
+#ifdef WITH_CYCLES_DISTRIBUTED
+#include "distributed/distributed.h"
+#include "mpl/mpl.hpp"
+#endif
+#include <_types/_uint8_t.h>
 
 #include "error.h"
 #include "parser.h"
@@ -1840,7 +1842,7 @@ void parse_for_distributed(Ri *target, std::vector<std::string> filenames)
     else {
       // How many files are we sending
       distributed->inter_comm_world.send(filenames.size(), 1);
-      for (auto f: filenames) {
+      for (auto f : filenames) {
         distributed->inter_comm_world.send(f, 1);
       }
     }

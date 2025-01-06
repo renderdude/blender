@@ -137,11 +137,7 @@ static void scene_init()
 {
   bool rib_mode = false;
   options.scene = options.session->scene;
-#ifdef WITH_CYCLES_DISTRIBUTED
   Ri ri_api(options);
-#else
-  Ri ri_api(options.session);
-#endif
 
   /* Read XML or USD */
   if (string_endswith(string_to_lower(options.filepath), ".xml")) {
