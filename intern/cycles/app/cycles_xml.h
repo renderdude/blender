@@ -2,8 +2,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0 */
 
-#ifndef __CYCLES_XML_H__
-#define __CYCLES_XML_H__
+#pragma once
 
 #include <string>
 
@@ -19,5 +18,3 @@ void xml_read_string(Scene *scene, std::string xml_desc);
 #define DEG2RADF(_deg) ((_deg) * (float)(M_PI / 180.0))
 
 CCL_NAMESPACE_END
-
-#endif /* __CYCLES_XML_H__ */
