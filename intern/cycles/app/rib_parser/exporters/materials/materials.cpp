@@ -444,7 +444,6 @@ void RIBCyclesMaterials::populate_shader_graph(Vector_Dictionary shader_graph)
           continue;
         }
 
-        mapping->add_to_graph();
         _nodes.emplace(handle, mapping);
         connections[handle].push_back(pp);
       }
@@ -705,19 +704,6 @@ void RIBCyclesMaterials::add_default_renderman_inputs(Shader *shader)
         }
       }
     }
-  }
-
-  if (!found_geom && connected_geom) {
-    graph->add(geom);
-  }
-  if (!found_texco && connected_texco) {
-    graph->add(texco);
-  }
-  if (sep_uv) {
-    graph->add(sep_uv);
-  }
-  if (sep_xyz) {
-    graph->add(sep_xyz);
   }
 }
 

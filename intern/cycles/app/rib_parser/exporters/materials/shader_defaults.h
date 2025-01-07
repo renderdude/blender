@@ -66,9 +66,9 @@ void fill_as_diffuse(DiffuseBsdfNode *node)
   node->set_color(make_float3(0.5, 0.5, 0.5));
 }
 
-ShaderNode *create_shader(std::string const &shader, const NodeType *node_type)
+ShaderNode *create_shader(ShaderGraph* graph, std::string const &shader, const NodeType *node_type)
 {
-  ShaderNode *node = static_cast<ShaderNode *>(node_type->create(node_type));
+  ShaderNode *node = graph->create_node(node_type);
 
   if (shader == "PxrSurface") {
     fill_as_pxrsurface((PrincipledBsdfNode *)node);

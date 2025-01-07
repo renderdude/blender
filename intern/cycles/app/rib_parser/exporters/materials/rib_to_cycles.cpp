@@ -22,7 +22,7 @@ bool create_shader_node(std::string const &nodeType,
   bool check_if_osl = false;
   bool result = true;
   if (const NodeType *node_type = NodeType::find(ustring(nodeType))) {
-    *node = create_shader(shader, node_type);
+    *node = create_shader(graph, shader, node_type);
   }
   else {
     check_if_osl = true;
@@ -525,9 +525,7 @@ void PxrSurfacetoPrincipled::update_parameters(Parameter_Dictionary const &param
     if (_parameters.find("diffuseColor") != _parameters.end()) {
       param = _parameters["diffuseColor"];
       color_hsv_node = _graph->create_node<HSVNode>();
-      _graph->add(color_hsv_node);
       color_mix_node = _graph->create_node<MixColorNode>();
-      _graph->add(color_mix_node);
       ShaderInput *mix_input = color_mix_node->input(ustring("A"));
       ShaderOutput *hsv_output = color_hsv_node->output(ustring("Color"));
       _graph->connect(hsv_output, mix_input);
@@ -576,9 +574,7 @@ void PxrSurfacetoPrincipled::update_parameters(Parameter_Dictionary const &param
       }
       if (has_subsurface) {
         ShaderNode *hsv_node = _graph->create_node<HSVNode>();
-        _graph->add(hsv_node);
         ShaderNode *mix_node = _graph->create_node<MixColorNode>();
-        _graph->add(mix_node);
         ShaderInput *b_input = mix_node->input(ustring("B"));
         ShaderOutput *output = hsv_node->output(ustring("Color"));
         _graph->connect(output, b_input);
@@ -642,9 +638,7 @@ void PxrSurfacetoPrincipled::update_parameters(Parameter_Dictionary const &param
           set_node_value(_nodes.back(), *input, &updated_param);
 
           color_hsv_node = _graph->create_node<HSVNode>();
-          _graph->add(color_hsv_node);
           color_mix_node = _graph->create_node<MixColorNode>();
-          _graph->add(color_mix_node);
           ShaderInput *mix_input = color_mix_node->input(ustring("A"));
           ShaderOutput *hsv_output = color_hsv_node->output(ustring("Color"));
           _graph->connect(hsv_output, mix_input);

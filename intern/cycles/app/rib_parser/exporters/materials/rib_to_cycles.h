@@ -48,12 +48,6 @@ class RIBtoCyclesMapping {
   virtual void update_parameters(Parameter_Dictionary const &parameters,
                                  vector<Parsed_Parameter const *> &connections);
 
-  virtual void add_to_graph()
-  {
-    _nodes.back()->set_owner(_graph);
-    _graph->add(_nodes.back());
-  }
-
   virtual bool create_shader_node(std::string const &shader, std::string const &path);
 
   virtual ShaderNode *node([[maybe_unused]] std::string name)
@@ -81,14 +75,6 @@ class RIBtoMultiNodeCycles : public RIBtoCyclesMapping {
           [](std::vector<ShaderNode *>) {})
       : RIBtoCyclesMapping(nodeType, paramMap, remapFunc), _connectionMap(connectionMap)
   {
-  }
-
-  void add_to_graph() override
-  {
-    for (auto *node : _nodes) {
-      node->set_owner(_graph);
-      _graph->add(node);
-    }
   }
 
   bool create_shader_node(std::string const &shader, std::string const &path) override;
