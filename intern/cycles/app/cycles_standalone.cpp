@@ -136,9 +136,7 @@ static void distributed_scene_init()
 
 static void scene_init()
 {
-  bool rib_mode = false;
-  options.scene = options.session->scene;
-  Ri ri_api(options);
+  options.scene = options.session->scene.get();
 
   /* Read XML or USD */
   if (string_endswith(string_to_lower(options.filepath), ".xml")) {
@@ -210,7 +208,7 @@ static void session_init()
   }
   setenv("CYCLES_SHADER_PATH", shader_path.c_str(), 0);
   options.output_pass = "combined";
-  options.session = new Session(options.session_params, options.scene_params);
+  options.session = make_unique<Session>(options.session_params, options.scene_params);
 
 #ifdef WITH_CYCLES_DISTRIBUTED
   if (options.is_distributed) {
@@ -269,8 +267,7 @@ static void session_init()
 static void session_exit()
 {
   if (options.session) {
-    delete options.session;
-    options.session = nullptr;
+    options.session.reset();
   }
 
   if (options.session_params.background && !options.quiet) {

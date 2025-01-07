@@ -331,7 +331,7 @@ void ImageTextureNode::cull_tiles(Scene *scene, ShaderGraph *graph)
   for (Geometry *geom : scene->geometry) {
     for (Node *node : geom->get_used_shaders()) {
       Shader *shader = static_cast<Shader *>(node);
-      if (shader->graph == graph) {
+      if (shader->graph.get() == graph) {
         geom->get_uv_tiles(attribute, used_tiles);
       }
     }
@@ -369,7 +369,7 @@ void ImageTextureNode::compile(SVMCompiler &compiler)
 
   if (handle.empty()) {
     cull_tiles(compiler.scene, compiler.current_graph);
-    ImageManager *image_manager = compiler.scene->image_manager;
+    ImageManager *image_manager = compiler.scene->image_manager.get();
     handle = image_manager->add_image(filename.string(), image_params(), tiles);
   }
 
@@ -450,7 +450,7 @@ void ImageTextureNode::compile(OSLCompiler &compiler)
   tex_mapping.compile(compiler);
 
   if (handle.empty()) {
-    ImageManager *image_manager = compiler.scene->image_manager;
+    ImageManager *image_manager = compiler.scene->image_manager.get();
     handle = image_manager->add_image(filename.string(), image_params());
   }
 
@@ -583,7 +583,7 @@ void EnvironmentTextureNode::compile(SVMCompiler &compiler)
   ShaderOutput *alpha_out = output("Alpha");
 
   if (handle.empty()) {
-    ImageManager *image_manager = compiler.scene->image_manager;
+    ImageManager *image_manager = compiler.scene->image_manager.get();
     handle = image_manager->add_image(filename.string(), image_params());
   }
 
@@ -612,7 +612,7 @@ void EnvironmentTextureNode::compile(SVMCompiler &compiler)
 void EnvironmentTextureNode::compile(OSLCompiler &compiler)
 {
   if (handle.empty()) {
-    ImageManager *image_manager = compiler.scene->image_manager;
+    ImageManager *image_manager = compiler.scene->image_manager.get();
     handle = image_manager->add_image(filename.string(), image_params());
   }
 
@@ -951,16 +951,16 @@ void SkyTextureNode::compile(SVMCompiler &compiler)
                                    air_density,
                                    dust_density);
     /* precomputed texture image parameters */
-    ImageManager *image_manager = compiler.scene->image_manager;
+    ImageManager *image_manager = compiler.scene->image_manager.get();
     ImageParams impar;
     impar.interpolation = INTERPOLATION_LINEAR;
     impar.extension = EXTENSION_EXTEND;
 
     /* precompute sky texture */
     if (handle.empty()) {
-      SkyLoader *loader = new SkyLoader(
+      unique_ptr<SkyLoader> loader = make_unique<SkyLoader>(
           sun_elevation, clamped_altitude, air_density, dust_density, ozone_density);
-      handle = image_manager->add_image(loader, impar);
+      handle = image_manager->add_image(std::move(loader), impar);
     }
   }
   else {
@@ -1050,16 +1050,16 @@ void SkyTextureNode::compile(OSLCompiler &compiler)
                                    air_density,
                                    dust_density);
     /* precomputed texture image parameters */
-    ImageManager *image_manager = compiler.scene->image_manager;
+    ImageManager *image_manager = compiler.scene->image_manager.get();
     ImageParams impar;
     impar.interpolation = INTERPOLATION_LINEAR;
     impar.extension = EXTENSION_EXTEND;
 
     /* precompute sky texture */
     if (handle.empty()) {
-      SkyLoader *loader = new SkyLoader(
+      unique_ptr<SkyLoader> loader = make_unique<SkyLoader>(
           sun_elevation, clamped_altitude, air_density, dust_density, ozone_density);
-      handle = image_manager->add_image(loader, impar);
+      handle = image_manager->add_image(std::move(loader), impar);
     }
   }
   else {
@@ -1488,7 +1488,7 @@ void IESLightNode::get_slot()
 
 void IESLightNode::compile(SVMCompiler &compiler)
 {
-  light_manager = compiler.scene->light_manager;
+  light_manager = compiler.scene->light_manager.get();
   get_slot();
 
   ShaderInput *strength_in = input("Strength");
@@ -1510,7 +1510,7 @@ void IESLightNode::compile(SVMCompiler &compiler)
 
 void IESLightNode::compile(OSLCompiler &compiler)
 {
-  light_manager = compiler.scene->light_manager;
+  light_manager = compiler.scene->light_manager.get();
   get_slot();
 
   tex_mapping.compile(compiler);
@@ -1952,7 +1952,7 @@ void PointDensityTextureNode::compile(SVMCompiler &compiler)
   }
 
   if (handle.empty()) {
-    ImageManager *image_manager = compiler.scene->image_manager;
+    ImageManager *image_manager = compiler.scene->image_manager.get();
     handle = image_manager->add_image(filename.string(), image_params());
   }
 
@@ -2003,7 +2003,7 @@ void PointDensityTextureNode::compile(OSLCompiler &compiler)
   }
 
   if (handle.empty()) {
-    ImageManager *image_manager = compiler.scene->image_manager;
+    ImageManager *image_manager = compiler.scene->image_manager.get();
     handle = image_manager->add_image(filename.string(), image_params());
   }
 
