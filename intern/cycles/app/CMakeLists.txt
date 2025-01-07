@@ -204,7 +204,7 @@ if(WITH_CYCLES_STANDALONE)
   set_target_properties(cycles PROPERTIES
     XCODE_GENERATE_SCHEME TRUE
     XCODE_SCHEME_WORKING_DIRECTORY "/Users/mbolsta/Test_Scenes/Houdini"
-    XCODE_SCHEME_ARGUMENTS "--display-type tev;--display-server 127.0.0.1:14158;--shadingsys osl;--samples 16;--tile-size 64;--threads 0;osl_test.ris1.0001.rib"
+    XCODE_SCHEME_ARGUMENTS "--display-type tev;--display-server 127.0.0.1:14158;--shadingsys osl;--samples 16;--tile-size 64;--threads 0;osl_test_26.2.prman1.0001.rib"
   )
   endif()
 
