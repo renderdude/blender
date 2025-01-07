@@ -13,7 +13,6 @@
 #include "session/session.h"
 
 #include "util/args.h"
-#include "util/foreach.h"
 #include "util/log.h"
 #include "util/path.h"
 #include "util/progress.h"
@@ -487,7 +486,7 @@ static void options_parse(int argc, const char **argv)
 
   /* List devices for which support is compiled in. */
   vector<DeviceType> types = Device::available_types();
-  foreach (DeviceType type, types) {
+  for (DeviceType type : types) {
     if (!device_names.empty()) {
       device_names += ", ";
     }
@@ -615,7 +614,7 @@ static void options_parse(int argc, const char **argv)
     vector<DeviceInfo> devices = Device::available_devices();
     printf("Devices:\n");
 
-    foreach (DeviceInfo &info, devices) {
+    for (DeviceInfo &info : devices) {
       printf("    %-10s%s%s\n",
              Device::string_from_type(info.type).c_str(),
              info.description.c_str(),
