@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0 */
 
 #include <filesystem>
-#include <stdio.h>
+#include <cstdio>
 
 #include "device/device.h"
 #include "scene/camera.h"
@@ -14,13 +14,14 @@
 
 #include "util/args.h"
 #include "util/foreach.h"
-#include "util/image.h"
 #include "util/log.h"
 #include "util/path.h"
 #include "util/progress.h"
 #include "util/string.h"
-#include "util/time.h"
-#include "util/transform.h"
+#ifdef WITH_CYCLES_STANDALONE_GUI
+#  include "util/time.h"
+#  include "util/transform.h"
+#endif
 #include "util/unique_ptr.h"
 #include "util/version.h"
 
@@ -84,7 +85,7 @@ static void session_print_status()
   }
 
   /* print status */
-  status = string_printf("Progress %05.2f   %s", (double)progress * 100, status.c_str());
+  status = string_printf("Progress %05.2f   %s", progress * 100, status.c_str());
   session_print(status);
 }
 
@@ -182,7 +183,7 @@ static void scene_init()
 
   /* Calculate Viewplane */
   if (!rib_mode) {
-    options.scene->camera->compute_auto_viewplane();
+  options.scene->camera->compute_auto_viewplane();
   }
 
   session_buffer_params();
@@ -220,8 +221,8 @@ static void session_init()
 #ifdef WITH_CYCLES_STANDALONE_GUI
   if (!options.session_params.background) {
     if (options.display_type == "gl")
-      options.session->set_display_driver(make_unique<OpenGLDisplayDriver>(
-          window_opengl_context_enable, window_opengl_context_disable));
+    options.session->set_display_driver(make_unique<OpenGLDisplayDriver>(
+        window_opengl_context_enable, window_opengl_context_disable));
   }
 #endif
 
@@ -235,8 +236,8 @@ static void session_init()
       options.session->set_display_driver(make_unique<TEVDisplayDriver>(options.display_server));
     }
     else if (!options.quiet) {
-      options.session->progress.set_update_callback([] { session_print_status(); });
-    }
+    options.session->progress.set_update_callback([] { session_print_status(); });
+  }
   }
 #ifdef WITH_CYCLES_STANDALONE_GUI
   else if (options.display_type == "gl") {
@@ -250,7 +251,7 @@ static void session_init()
     distributed_scene_init();
   }
   else {
-    scene_init();
+  scene_init();
   }
 #else
   scene_init();
@@ -296,8 +297,9 @@ static void display_info(Progress &progress)
   progress.get_status(status, substatus);
   double progress_val = progress.get_progress();
 
-  if (substatus != "")
+  if (!substatus.empty()) {
     status += ": " + substatus;
+  }
 
   interactive = options.interactive ? "On" : "Off";
 
@@ -311,14 +313,15 @@ static void display_info(Progress &progress)
       status.c_str(),
       total_time,
       latency,
-      (double)progress_val * 100,
+      progress_val * 100,
       sample_time,
       interactive.c_str());
 
   window_display_info(str.c_str());
 
-  if (options.show_help)
+  if (options.show_help) {
     window_display_help();
+  }
 }
 
 static void display()
@@ -377,40 +380,48 @@ static void resize(int width, int height)
 static void keyboard(unsigned char key)
 {
   /* Toggle help */
-  if (key == 'h')
+  if (key == 'h') {
     options.show_help = !(options.show_help);
 
   /* Reset */
-  else if (key == 'r')
-    options.session->reset(options.session_params, *options.buffer_params);
+  }
+  else if (key == 'r') {
+    options.session->reset(options.session_params, *options.buffer_params());
 
   /* Cancel */
-  else if (key == 27)  // escape
+  }
+  else if (key == 27) {  // escape
     options.session->progress.set_cancel("Canceled");
 
   /* Pause */
+  }
   else if (key == 'p') {
     options.pause = !options.pause;
     options.session->set_pause(options.pause);
   }
 
   /* Interactive Mode */
-  else if (key == 'i')
+  else if (key == 'i') {
     options.interactive = !(options.interactive);
 
   /* Navigation */
+  }
   else if (options.interactive && (key == 'w' || key == 'a' || key == 's' || key == 'd')) {
     Transform matrix = options.session->scene->camera->get_matrix();
     float3 translate;
 
-    if (key == 'w')
+    if (key == 'w') {
       translate = make_float3(0.0f, 0.0f, 0.1f);
-    else if (key == 's')
+    }
+    else if (key == 's') {
       translate = make_float3(0.0f, 0.0f, -0.1f);
-    else if (key == 'a')
+    }
+    else if (key == 'a') {
       translate = make_float3(-0.1f, 0.0f, 0.0f);
-    else if (key == 'd')
+    }
+    else if (key == 'd') {
       translate = make_float3(0.1f, 0.0f, 0.0f);
+    }
 
     matrix = matrix * transform_translate(translate);
 
@@ -725,19 +736,19 @@ int main(int argc, const char **argv)
 #if defined(WITH_CYCLES_STANDALONE_GUI)
   else {
     if (options.display_type == "gl") {
-      string title = "Cycles: " + path_filename(options.filepath);
+    string title = "Cycles: " + path_filename(options.filepath);
 
-      /* init/exit are callback so they run while GL is initialized */
-      window_main_loop(title.c_str(),
-                       options.width,
-                       options.height,
-                       session_init,
-                       session_exit,
-                       resize,
-                       display,
-                       keyboard,
-                       motion);
-    }
+    /* init/exit are callback so they run while GL is initialized */
+    window_main_loop(title.c_str(),
+                     options.width,
+                     options.height,
+                     session_init,
+                     session_exit,
+                     resize,
+                     display,
+                     keyboard,
+                     motion);
+  }
   }
 #endif
 
