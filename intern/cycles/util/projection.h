@@ -80,7 +80,7 @@ struct ProjectionTransform {
   {
   }
 #endif
-}
+};
 
 struct ProjectionTransformHasher{
   size_t operator()(const ProjectionTransform& pt) const noexcept {

@@ -1,4 +1,5 @@
 #include "parsed_parameter.h"
+#include <cassert>
 #include <sstream>
 
 CCL_NAMESPACE_BEGIN
