@@ -412,7 +412,7 @@ void RIBCyclesMaterials::populate_shader_graph(Vector_Dictionary shader_graph)
   std::map<std::string, vector<Parsed_Parameter const *>> connections;
   vector<vector<Parsed_Parameter *>> terminals;
 
-  auto *graph = new ShaderGraph();
+  unique_ptr<ShaderGraph> graph = make_unique<ShaderGraph>();
   Parameter_Dictionary hair_color_params;
 
   for (auto &params : lama_shader_graph.second) {
@@ -438,7 +438,7 @@ void RIBCyclesMaterials::populate_shader_graph(Vector_Dictionary shader_graph)
           pv = params.get_parameter_vector();
         }
         mapping = sRIBtoCycles->find(shader_name, pv);
-        mapping->set(graph, _scene, &_nodes);
+        mapping->set(graph.get(), _scene, &_nodes);
 
         if (!mapping->create_shader_node(shader_name, shader_path)) {
           continue;
@@ -476,7 +476,7 @@ void RIBCyclesMaterials::populate_shader_graph(Vector_Dictionary shader_graph)
             continue;
           }
 
-          update_connections(nodeIt->second, graph, it->second);
+          update_connections(nodeIt->second, graph.get(), it->second);
         }
       }
     }
@@ -549,7 +549,7 @@ void RIBCyclesMaterials::populate_shader_graph(Vector_Dictionary shader_graph)
     graph->connect(output, input);
   }
 
-  _shader->set_graph(graph);
+  _shader->set_graph(std::move(graph));
 }
 
 void RIBCyclesMaterials::add_default_renderman_inputs(Shader *shader)
@@ -561,7 +561,7 @@ void RIBCyclesMaterials::add_default_renderman_inputs(Shader *shader)
   bool found_geom = false, found_texco = false;
   bool connected_geom = false, connected_texco = false;
 
-  auto *graph = shader->graph;
+  auto *graph = shader->graph.get();
   // First check if ShaderGraph::simplify added a geometry or texture coordinate node
   for (ShaderNode *node : graph->nodes) {
     if (node->is_a(GeometryNode::node_type)) {

@@ -108,7 +108,7 @@ auto generate_random_alphanumeric_string(std::size_t len = 8) -> std::string
   return result;
 }
 
-Ri::Ri(Options &options) : session(options.session)
+Ri::Ri(Options &options) : session(options.session.get())
 {
 #ifdef WITH_CYCLES_DISTRIBUTED
   if (options.is_distributed) {
@@ -147,22 +147,22 @@ void Ri::export_to_cycles()
 
   export_options(filter, film, _camera[film.camera_name], sampler);
   for (auto shader : osl_shader_group) {
-    RIBCyclesMaterials material(session->scene, shader);
+    RIBCyclesMaterials material(session->scene.get(), shader);
     material.export_materials();
   }
   for (auto &inst : instance_uses) {
     auto *inst_def = instance_definitions[inst.first];
     if (!inst_def->lights.empty()) {
-      export_lights(session->scene, inst.second, inst_def);
+      export_lights(session->scene.get(), inst.second, inst_def);
     }
     else if (!inst_def->shapes.empty()) {
       if (inst_def->shapes[0].name == "curve") {
-        RIBCyclesCurves curve(session->scene, inst.second, inst_def);
+        RIBCyclesCurves curve(session->scene.get(), inst.second, inst_def);
         curve.export_curves();
         scene_bounds.grow(curve.bounds());
       }
       else {
-        RIBCyclesMesh mesh(session->scene, inst.second, inst_def);
+        RIBCyclesMesh mesh(session->scene.get(), inst.second, inst_def);
         mesh.export_geometry();
         scene_bounds.grow(mesh.bounds());
       }
@@ -170,7 +170,7 @@ void Ri::export_to_cycles()
   }
 
   // Lifted from hydra/session.cpp
-  Scene *const scene = session->scene;
+  Scene *const scene = session->scene.get();
 
   // Update background depending on presence of a background light
   if (scene->light_manager->need_update()) {
@@ -288,7 +288,7 @@ void Ri::export_options([[maybe_unused]] Scene_Entity &filter,
   cam->set_viewplane_top(screen_window[3]);
 
   cam->need_flags_update = true;
-  cam->update(session->scene);
+  cam->update(session->scene.get());
   *session->scene->dicing_camera = *session->scene->camera;
 }
 

@@ -167,7 +167,7 @@ Light *initialize(Scene *scene,
 
 void populate_shader_graph(Light_Scene_Entity &light_inst, Light *light, bool initializing)
 {
-  auto graph = new ShaderGraph();
+  unique_ptr<ShaderGraph> graph = make_unique<ShaderGraph>();
   ShaderNode *outputNode = nullptr;
 
   if (light_inst.light_type == "PxrDomeLight") {
@@ -303,7 +303,7 @@ void populate_shader_graph(Light_Scene_Entity &light_inst, Light *light, bool in
   }
 
   Shader *const shader = light->get_shader();
-  shader->set_graph(graph);
+  shader->set_graph(std::move(graph));
   shader->tag_update((Scene *)light->get_owner());
 
   shader->has_surface_spatial_varying = hasSpatialVarying;

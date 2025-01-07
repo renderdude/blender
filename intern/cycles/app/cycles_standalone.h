@@ -9,7 +9,7 @@
 CCL_NAMESPACE_BEGIN
 
 struct Options {
-  Session *session;
+  unique_ptr<Session> session;
   Scene *scene;
   BufferParams* buffer_params;
   string filepath;

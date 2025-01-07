@@ -136,7 +136,9 @@ static void distributed_scene_init()
 
 static void scene_init()
 {
+  bool rib_mode = false;
   options.scene = options.session->scene.get();
+  Ri ri_api(options);
 
   /* Read XML or USD */
   if (string_endswith(string_to_lower(options.filepath), ".xml")) {
@@ -162,7 +164,7 @@ static void scene_init()
   }
   else {
 #ifdef WITH_USD
-    HD_CYCLES_NS::HdCyclesFileReader::read(options.session, options.filepath.c_str());
+    HD_CYCLES_NS::HdCyclesFileReader::read(options.session.get(), options.filepath.c_str());
 #else
     fprintf(stderr, "Unknown file type: %s\n", options.filepath.c_str());
     exit(EXIT_FAILURE);
