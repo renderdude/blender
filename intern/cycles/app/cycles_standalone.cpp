@@ -2,8 +2,8 @@
  *
  * SPDX-License-Identifier: Apache-2.0 */
 
-#include <filesystem>
 #include <cstdio>
+#include <filesystem>
 
 #include "device/device.h"
 #include "scene/camera.h"
@@ -183,7 +183,7 @@ static void scene_init()
 
   /* Calculate Viewplane */
   if (!rib_mode) {
-  options.scene->camera->compute_auto_viewplane();
+    options.scene->camera->compute_auto_viewplane();
   }
 
   session_buffer_params();
@@ -221,8 +221,8 @@ static void session_init()
 #ifdef WITH_CYCLES_STANDALONE_GUI
   if (!options.session_params.background) {
     if (options.display_type == "gl")
-    options.session->set_display_driver(make_unique<OpenGLDisplayDriver>(
-        window_opengl_context_enable, window_opengl_context_disable));
+      options.session->set_display_driver(make_unique<OpenGLDisplayDriver>(
+          window_opengl_context_enable, window_opengl_context_disable));
   }
 #endif
 
@@ -236,8 +236,8 @@ static void session_init()
       options.session->set_display_driver(make_unique<TEVDisplayDriver>(options.display_server));
     }
     else if (!options.quiet) {
-    options.session->progress.set_update_callback([] { session_print_status(); });
-  }
+      options.session->progress.set_update_callback([] { session_print_status(); });
+    }
   }
 #ifdef WITH_CYCLES_STANDALONE_GUI
   else if (options.display_type == "gl") {
@@ -251,7 +251,7 @@ static void session_init()
     distributed_scene_init();
   }
   else {
-  scene_init();
+    scene_init();
   }
 #else
   scene_init();
@@ -383,17 +383,17 @@ static void keyboard(unsigned char key)
   if (key == 'h') {
     options.show_help = !(options.show_help);
 
-  /* Reset */
+    /* Reset */
   }
   else if (key == 'r') {
     options.session->reset(options.session_params, *options.buffer_params());
 
-  /* Cancel */
+    /* Cancel */
   }
   else if (key == 27) {  // escape
     options.session->progress.set_cancel("Canceled");
 
-  /* Pause */
+    /* Pause */
   }
   else if (key == 'p') {
     options.pause = !options.pause;
@@ -404,7 +404,7 @@ static void keyboard(unsigned char key)
   else if (key == 'i') {
     options.interactive = !(options.interactive);
 
-  /* Navigation */
+    /* Navigation */
   }
   else if (options.interactive && (key == 'w' || key == 'a' || key == 's' || key == 'd')) {
     Transform matrix = options.session->scene->camera->get_matrix();
@@ -559,7 +559,7 @@ static void options_parse(int argc, const char **argv)
              &options.session_params.tile_size,
              "Tile size in pixels",
              "--crop-window %f %f %f %f",
-             &options.crop_window[0],
+             options.crop_window.data(),
              &options.crop_window[1],
              &options.crop_window[2],
              &options.crop_window[3],
@@ -736,19 +736,19 @@ int main(int argc, const char **argv)
 #if defined(WITH_CYCLES_STANDALONE_GUI)
   else {
     if (options.display_type == "gl") {
-    string title = "Cycles: " + path_filename(options.filepath);
+      string title = "Cycles: " + path_filename(options.filepath);
 
-    /* init/exit are callback so they run while GL is initialized */
-    window_main_loop(title.c_str(),
-                     options.width,
-                     options.height,
-                     session_init,
-                     session_exit,
-                     resize,
-                     display,
-                     keyboard,
-                     motion);
-  }
+      /* init/exit are callback so they run while GL is initialized */
+      window_main_loop(title.c_str(),
+                       options.width,
+                       options.height,
+                       session_init,
+                       session_exit,
+                       resize,
+                       display,
+                       keyboard,
+                       motion);
+    }
   }
 #endif
 
