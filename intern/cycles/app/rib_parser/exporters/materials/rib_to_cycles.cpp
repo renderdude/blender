@@ -329,7 +329,7 @@ void PxrRamptoCycles::update_parameters(Parameter_Dictionary const &parameters,
         continue;  // Duplicate Knot point and we've strided over it
       }
       while (index < 256 && eval_pt < upper_bound) {
-        float3 result = lerp(left, right, eval_pt);
+        float3 result = OIIO::lerp(left, right, eval_pt);
         out_color.add_float(result[0]);
         out_color.add_float(result[1]);
         out_color.add_float(result[2]);

@@ -70,7 +70,7 @@ void export_lights(Scene *scene,
       light->set_cast_shadow(true);
 
       if (light_inst.light_type == "PxrDistantLight") {
-        light->set_angle(radians(light_inst.parameters.get_one_float("angle", 0.526f)));
+        light->set_angle(OIIO::radians(light_inst.parameters.get_one_float("angle", 0.526f)));
       }
       else if (light_inst.light_type == "PxrDiskLight") {
         const float size = light_inst.parameters.get_one_float("size", 1.f) * 2.0f;
@@ -98,7 +98,7 @@ void export_lights(Scene *scene,
         const float shapingConeAngle = light_inst.parameters.get_one_float("shapingConeAngle",
                                                                            -1.f);
         if (shapingConeAngle > 0) {
-          light->set_spot_angle(radians(shapingConeAngle * 2.0f));
+          light->set_spot_angle(OIIO::radians(shapingConeAngle * 2.0f));
           shaping = true;
         }
 

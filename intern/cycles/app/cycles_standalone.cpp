@@ -196,7 +196,7 @@ static void session_init()
   namespace fs = std::filesystem;
 
   const char *cycles_shader_path = getenv("CYCLES_SHADER_PATH");
-  std::string base_path = path_dirname(path_dirname(Sysutil::this_program_path()));
+  std::string base_path = path_dirname(path_dirname(OIIO::Sysutil::this_program_path()));
   std::string shader_path = path_join(base_path, "shader");
   // XCode is one-level deeper
   if (!fs::is_directory(shader_path)) {
