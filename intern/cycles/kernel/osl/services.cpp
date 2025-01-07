@@ -46,13 +46,13 @@ CCL_NAMESPACE_BEGIN
 static void copy_matrix(OSL::Matrix44 &m, const Transform &tfm)
 {
   ProjectionTransform t = projection_transpose(ProjectionTransform(tfm));
-  memcpy((void *)&m, &t, sizeof(m));
+  memcpy((float *)&m, (const float *)&t, sizeof(m));
 }
 
 static void copy_matrix(OSL::Matrix44 &m, const ProjectionTransform &tfm)
 {
   ProjectionTransform t = projection_transpose(tfm);
-  memcpy((void *)&m, &t, sizeof(m));
+  memcpy((float *)&m, (const float *)&t, sizeof(m));
 }
 
 /* static ustrings */
@@ -460,19 +460,6 @@ static bool set_attribute_float2(float2 f[3], TypeDesc type, bool derivatives, v
   return false;
 }
 
-#if 0
-static bool set_attribute_float2(float2 f, TypeDesc type, bool derivatives, void *val)
-{
-  float2 fv[3];
-
-  fv[0] = f;
-  fv[1] = make_float2(0.0f, 0.0f);
-  fv[2] = make_float2(0.0f, 0.0f);
-
-  return set_attribute_float2(fv, type, derivatives, val);
-}
-#endif
-
 static bool set_attribute_float3(float3 f[3], TypeDesc type, bool derivatives, void *val)
 {
   if (type == TypeFloatArray4) {
@@ -597,19 +584,6 @@ static bool set_attribute_float4(float4 f[3], TypeDesc type, bool derivatives, v
   }
   return false;
 }
-
-#if 0
-static bool set_attribute_float4(float4 f, TypeDesc type, bool derivatives, void *val)
-{
-  float4 fv[3];
-
-  fv[0] = f;
-  fv[1] = zero_float4();
-  fv[2] = zero_float4();
-
-  return set_attribute_float4(fv, type, derivatives, val);
-}
-#endif
 
 static bool set_attribute_float(const float f[3], TypeDesc type, bool derivatives, void *val)
 {
@@ -769,7 +743,9 @@ static bool get_object_attribute(const KernelGlobalsCPU *kg,
     else
 #endif
     {
-      memset(fval, 0, sizeof(fval));
+      fval[0] = zero_float3();
+      fval[1] = zero_float3();
+      fval[2] = zero_float3();
       fval[0] = primitive_surface_attribute_float3(
           kg, sd, desc, (derivatives) ? &fval[1] : nullptr, (derivatives) ? &fval[2] : nullptr);
     }
@@ -807,7 +783,9 @@ static bool get_object_attribute(const KernelGlobalsCPU *kg,
     float4 fval[3];
 #ifdef __VOLUME__
     if (primitive_is_volume_attribute(sd, desc)) {
-      memset(fval, 0, sizeof(fval));
+      fval[0] = zero_float4();
+      fval[1] = zero_float4();
+      fval[2] = zero_float4();
       fval[0] = primitive_volume_attribute_float4(kg, sd, desc);
     }
     else

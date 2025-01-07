@@ -613,6 +613,8 @@ static void xml_read_mesh(const XMLReadState &state, xml_node node)
       Attribute *attr = mesh->subd_attributes.add(ATTR_STD_UV);
       float3 *fdata = attr->data_float3();
 
+      /* TODO: Implement various face-varying interpolation modes and make it
+       * a property of Mesh. */
 #if 0
       if (subdivide_uvs) {
         attr->flags |= ATTR_SUBDIVIDED;
@@ -640,8 +642,7 @@ static void xml_read_mesh(const XMLReadState &state, xml_node node)
    * coordinates as generated coordinates if requested */
   if (mesh->need_attribute(state.scene, ATTR_STD_GENERATED)) {
     Attribute *attr = mesh->attributes.add(ATTR_STD_GENERATED);
-    memcpy(
-        attr->data_float3(), mesh->get_verts().data(), sizeof(float3) * mesh->get_verts().size());
+    std::copy_n(mesh->get_verts().data(), mesh->get_verts().size(), attr->data_float3());
   }
 }
 

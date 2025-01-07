@@ -4,6 +4,7 @@
 
 #ifdef WITH_METAL
 
+#  include <algorithm>
 #  include <chrono>
 #  include <thread>
 #  include <vector>
@@ -211,7 +212,7 @@ bool BVHMetal::build_BLAS_mesh(Progress &progress,
         if (step != center_step) {
           verts = motion_keys->data_float3() + (step > center_step ? step - 1 : step) * num_verts;
         }
-        memcpy(dest_data + num_verts * step, verts, num_verts * sizeof(float3));
+        std::copy_n(verts, num_verts, dest_data + num_verts * step);
       }
       if (storage_mode == MTLResourceStorageModeManaged) {
         [posBuf didModifyRange:NSMakeRange(0, posBuf.length)];
@@ -789,13 +790,6 @@ bool BVHMetal::build_BLAS_pointcloud(Progress &progress,
     if (storage_mode == MTLResourceStorageModeManaged) {
       [aabbBuf didModifyRange:NSMakeRange(0, aabbBuf.length)];
     }
-
-#  if 0
-    for (size_t i=0; i<num_aabbs && i < 400; i++) {
-      MTLAxisAlignedBoundingBox& bb = aabb_data[i];
-      printf("  %d:   %.1f,%.1f,%.1f -- %.1f,%.1f,%.1f\n", int(i), bb.min.x, bb.min.y, bb.min.z, bb.max.x, bb.max.y, bb.max.z);
-    }
-#  endif
 
     MTLAccelerationStructureGeometryDescriptor *geomDesc;
     if (motion_blur) {
