@@ -44,9 +44,7 @@
 #include "BKE_workspace.hh"
 
 #include "RNA_access.hh"
-#include "RNA_define.hh"
 #include "RNA_enum_types.hh"
-#include "RNA_prototypes.hh"
 
 #include "WM_api.hh"
 #include "WM_types.hh"
@@ -54,7 +52,6 @@
 #include "wm_draw.hh"
 #include "wm_event_system.hh"
 #include "wm_files.hh"
-#include "wm_platform_support.hh"
 #include "wm_window.hh"
 #include "wm_window_private.hh"
 #ifdef WITH_XR_OPENXR
@@ -74,15 +71,9 @@
 #include "UI_interface_icons.hh"
 
 #include "BLF_api.hh"
-#include "GPU_batch.hh"
-#include "GPU_batch_presets.hh"
 #include "GPU_context.hh"
 #include "GPU_framebuffer.hh"
-#include "GPU_immediate.hh"
 #include "GPU_init_exit.hh"
-#include "GPU_platform.hh"
-#include "GPU_state.hh"
-#include "GPU_texture.hh"
 
 #include "UI_resources.hh"
 
@@ -1470,14 +1461,14 @@ static bool ghost_event_proc(GHOST_EventHandle ghost_event, GHOST_TUserDataPtr C
 
       wm_window_make_drawable(wm, win);
 
-      /* Window might be focused by mouse click in configuration of window manager
+      /* NOTE(@sergey): Window might be focused by mouse click in configuration of window manager
        * when focus is not following mouse
        * click could have been done on a button and depending on window manager settings
        * click would be passed to blender or not, but in any case button under cursor
        * should be activated, so at max next click on button without moving mouse
        * would trigger its handle function
        * currently it seems to be common practice to generate new event for, but probably
-       * we'll need utility function for this? (sergey)
+       * we'll need utility function for this?
        */
       wmEvent event;
       wm_event_init_from_window(win, &event);

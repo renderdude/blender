@@ -5485,7 +5485,7 @@ static void ui_numedit_set_active(uiBut *but)
   if ((but->flag & UI_SELECT) == 0) {
     if ((but->drawflag & UI_BUT_HOVER_LEFT) || (but->drawflag & UI_BUT_HOVER_RIGHT)) {
       if (data->changed_cursor) {
-        data->window->tag_cursor_refresh = true;
+        ED_region_cursor_set(data->window, data->area, data->region);
         data->changed_cursor = false;
       }
     }
@@ -8925,7 +8925,7 @@ static void button_activate_exit(
 #endif
 
   if (data->changed_cursor) {
-    win->tag_cursor_refresh = true;
+    ED_region_cursor_set(data->window, data->area, data->region);
   }
 
   /* redraw and refresh (for popups) */
@@ -11965,6 +11965,7 @@ static int ui_handler_region_menu(bContext *C, const wmEvent *event, void * /*us
         ELEM(but->type, UI_BTYPE_PULLDOWN, UI_BTYPE_POPOVER, UI_BTYPE_MENU) &&
         (but_other = ui_but_find_mouse_over(region, event)) && (but != but_other) &&
         ELEM(but_other->type, UI_BTYPE_PULLDOWN, UI_BTYPE_POPOVER, UI_BTYPE_MENU) &&
+        !but_other->menu_no_hover_open &&
         /* Hover-opening menu's doesn't work well for buttons over one another
          * along the same axis the menu is opening on (see #71719). */
         (((data->menu->direction & (UI_DIR_LEFT | UI_DIR_RIGHT)) &&

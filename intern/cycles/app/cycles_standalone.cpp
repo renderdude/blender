@@ -183,7 +183,7 @@ static void scene_init()
 
   /* Calculate Viewplane */
   if (!rib_mode) {
-  options.scene->camera->compute_auto_viewplane();
+    options.scene->camera->compute_auto_viewplane();
   }
 
   session_buffer_params();
@@ -221,8 +221,8 @@ static void session_init()
 #ifdef WITH_CYCLES_STANDALONE_GUI
   if (!options.session_params.background) {
     if (options.display_type == "gl")
-    options.session->set_display_driver(make_unique<OpenGLDisplayDriver>(
-        window_opengl_context_enable, window_opengl_context_disable));
+      options.session->set_display_driver(make_unique<OpenGLDisplayDriver>(
+          window_opengl_context_enable, window_opengl_context_disable));
   }
 #endif
 
@@ -236,8 +236,8 @@ static void session_init()
       options.session->set_display_driver(make_unique<TEVDisplayDriver>(options.display_server));
     }
     else if (!options.quiet) {
-    options.session->progress.set_update_callback([] { session_print_status(); });
-  }
+      options.session->progress.set_update_callback([] { session_print_status(); });
+    }
   }
 #ifdef WITH_CYCLES_STANDALONE_GUI
   else if (options.display_type == "gl") {
@@ -246,16 +246,7 @@ static void session_init()
 #endif
 
   /* load scene */
-#ifdef WITH_CYCLES_DISTRIBUTED
-  if (options.is_distributed && options.reverse_connect) {
-    distributed_scene_init();
-  }
-  else {
   scene_init();
-  }
-#else
-  scene_init();
-#endif
 
   /* add pass for output. */
   Pass *pass = options.scene->create_node<Pass>();
@@ -463,13 +454,24 @@ static void keyboard(unsigned char key)
 }
 #endif
 
-static int files_parse(const int argc, const char *argv[])
+static void parse_float(OIIO::cspan<const char *> argv, int count, float *f)
 {
-  if (argc > 0) {
-    options.filepath = argv[0];
+  assert(argv.size() == count + 1);
+  for (auto i = 0; i < count; i++) {
+    f[i] = atof(argv[i + 1]);
   }
+}
 
-  return 0;
+static void parse_int(OIIO::cspan<const char *> argv, int *i)
+{
+  assert(argv.size() == 2);
+  *i = atoi(argv[1]);
+}
+
+static void parse_string(OIIO::cspan<const char *> argv, std::string *s)
+{
+  assert(argv.size() == 2);
+  *s = argv[1];
 }
 
 static void options_parse(const int argc, const char **argv)
@@ -509,95 +511,70 @@ static void options_parse(const int argc, const char **argv)
   bool wait = false;
   int verbosity = 1;
 
-  ap.options("Usage: cycles [options] file.xml",
-             "%*",
-             files_parse,
-             "",
-             "--device %s",
-             &devicename,
-             ("Devices to use: " + device_names).c_str(),
+  ap.usage("cycles [options] file.xml");
+  ap.arg("filename").hidden().action([&](auto argv) { options.filepath = argv[0]; });
+  ap.arg("--device %s:DEVICE").help("Devices to use: " + device_names).action([&](auto argv) {
+    parse_string(argv, &devicename);
+  });
 #ifdef WITH_OSL
-             "--shadingsys %s",
-             &ssname,
-             "Shading system to use: svm, osl",
+  ap.arg("--shadingsys %s:SHADINGSYSTEM")
+      .help("Shading system to use: svm, osl")
+      .action([&](auto argv) { parse_string(argv, &ssname); });
 #endif
 #ifdef WITH_CYCLES_DISTRIBUTED
-             "--distributed",
-             &options.is_distributed,
-             "Run in distributed mode",
-             "--reverse_connect",
-             &options.reverse_connect,
-             "This options means that this instance is the rendering side, and should \
-             estabilish a connection back to the data server ",
-             "--directory",
-             &options.directory,
-             "If the file to be rendered is not found on the server, look here for it, \
-             or, write it in this location if the first time",
+  ap.arg("--distributed", &options.is_distributed).help("Run in distributed mode");
+  ap.arg("--reverse_connect", &options.reverse_connect)
+      .help(
+          "This options means that this instance is the rendering side, and should \
+             estabilish a connection back to the data server ");
+  ap.arg("--directory", &options.directory)
+      .help(
+          "If the file to be rendered is not found on the server, look here for it, \
+           or, write it in this location if the first time");
 #endif
-             "--display-type %s",
-             &options.display_type,
-             "Display type to use: gl, tev",
-             "--display-server %s",
-             &options.display_server,
-             "For tev display, host:port of the tev application",
-             "--background",
-             &options.session_params.background,
-             "Render in background, without user interface",
-             "--quiet",
-             &options.quiet,
-             "In background mode, don't print progress messages",
-             "--samples %d",
-             &options.session_params.samples,
-             "Number of samples to render",
-             "--output %s",
-             &options.output_filepath,
-             "File path to write output image",
-             "--threads %d",
-             &options.session_params.threads,
-             "CPU Rendering Threads",
-             "--width  %d",
-             &options.width,
-             "Window width in pixel",
-             "--height %d",
-             &options.height,
-             "Window height in pixel",
-             "--tile-size %d",
-             &options.session_params.tile_size,
-             "Tile size in pixels",
-             "--crop-window %f %f %f %f",
-             options.crop_window.data(),
-             &options.crop_window[1],
-             &options.crop_window[2],
-             &options.crop_window[3],
-             "Tile size in pixels",
-             "--list-devices",
-             &list,
-             "List information about all available devices",
-             "--profile",
-             &profile,
-             "Enable profile logging",
+  ap.arg("--display-type %s", &options.display_type).help("Display type to use: gl, tev");
+  ap.arg("--display-server %s", &options.display_server)
+      .help("For tev display, host:port of the tev application");
+  ap.arg("--background", &options.session_params.background)
+      .help("Render in background, without user interface");
+  ap.arg("--quiet", &options.quiet).help("In background mode, don't print progress messages");
+  ap.arg("--samples %d:SAMPLES").help("Number of samples to render").action([&](auto argv) {
+    parse_int(argv, &options.session_params.samples);
+  });
+  ap.arg("--output %s:OUTPUT").help("File path to write output image").action([&](auto argv) {
+    parse_string(argv, &options.output_filepath);
+  });
+  ap.arg("--threads %d:THREADS").help("CPU Rendering Threads").action([&](auto argv) {
+    parse_int(argv, &options.session_params.threads);
+  });
+  ap.arg("--width %d:WIDTH").help("Image width in pixelx").action([&](auto argv) {
+    parse_int(argv, &options.width);
+  });
+  ap.arg("--height %d:HEIGHT").help("Image height in pixel").action([&](auto argv) {
+    parse_int(argv, &options.height);
+  });
+  ap.arg("--tile-size %d:TILE_SIZE").help("Tile size in pixels").action([&](auto argv) {
+    parse_int(argv, &options.session_params.tile_size);
+  });
+  ap.arg("--crop-window %f %f %f %f:CROP_WINDOW")
+      .help("Tile size in pixels")
+      .action([&](auto argv) { parse_float(argv, 4, options.crop_window.data()); });
+  ap.arg("--list-devices", &list).help("List information about all available devices");
+  ap.arg("--profile", &profile).help("Enable profile logging");
 #ifdef WITH_CYCLES_LOGGING
-             "--debug",
-             &debug,
-             "Enable debug logging",
-             "--verbose %d",
-             &verbosity,
-             "Set verbosity of the logger",
+  ap.arg("--debug", &debug).help("Enable debug logging");
+  ap.arg("--verbose %d:VERBOSE").help("Set verbosity of the logger").action([&](auto argv) {
+    parse_int(argv, &verbosity);
+  });
 #endif
-             "--help",
-             &help,
-             "Print help message",
-             "--wait",
-             &wait,
-             "Sit in a loop waiting for a debugger to attach",
-             "--version",
-             &version,
-             "Print version number",
-             nullptr);
+  ap.arg("--help", &help).help("Print help message");
+  ap.arg("--wait", &wait).help("Sit in a loop waiting for a debugger to attach");
 
-  if (ap.parse(argc, argv) < 0) {
+  ap.arg("--version", &version).help("Print version number");
+
+  if (ap.parse_args(argc, argv) < 0) {
     fprintf(stderr, "%s\n", ap.geterror().c_str());
-    ap.usage();
+    ap.print_help();
     exit(EXIT_FAILURE);
   }
 
@@ -641,7 +618,7 @@ static void options_parse(const int argc, const char **argv)
 #else
   else if (help || options.filepath.empty()) {
 #endif
-    ap.usage();
+    ap.print_help();
     exit(EXIT_SUCCESS);
   }
 
@@ -682,7 +659,7 @@ static void options_parse(const int argc, const char **argv)
     options.session_params.denoise_device = options.session_params.device;
     device_available = true;
     // Find a suitable denoise device
-    for (DeviceType type: types) {
+    for (DeviceType type : types) {
       if (type != device_type) {
         vector<DeviceInfo> compute_devices = Device::available_devices(DEVICE_MASK(type));
         options.session_params.denoise_device = compute_devices.front();
@@ -742,19 +719,19 @@ int main(const int argc, const char **argv)
 #if defined(WITH_CYCLES_STANDALONE_GUI)
   else {
     if (options.display_type == "gl") {
-    string title = "Cycles: " + path_filename(options.filepath);
+      string title = "Cycles: " + path_filename(options.filepath);
 
-    /* init/exit are callback so they run while GL is initialized */
-    window_main_loop(title.c_str(),
-                     options.width,
-                     options.height,
-                     session_init,
-                     session_exit,
-                     resize,
-                     display,
-                     keyboard,
-                     motion);
-  }
+      /* init/exit are callback so they run while GL is initialized */
+      window_main_loop(title.c_str(),
+                       options.width,
+                       options.height,
+                       session_init,
+                       session_exit,
+                       resize,
+                       display,
+                       keyboard,
+                       motion);
+    }
   }
 #endif
 

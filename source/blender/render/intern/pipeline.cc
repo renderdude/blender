@@ -1446,8 +1446,8 @@ bool RE_seq_render_active(Scene *scene, RenderData *rd)
     return false;
   }
 
-  LISTBASE_FOREACH (Sequence *, seq, &ed->seqbase) {
-    if (seq->type != SEQ_TYPE_SOUND_RAM && !SEQ_render_is_muted(&ed->channels, seq)) {
+  LISTBASE_FOREACH (Strip *, seq, &ed->seqbase) {
+    if (seq->type != STRIP_TYPE_SOUND_RAM && !SEQ_render_is_muted(&ed->channels, seq)) {
       return true;
     }
   }
@@ -1705,8 +1705,8 @@ static int check_valid_camera(Scene *scene, Object *camera_override, ReportList 
 
   if (RE_seq_render_active(scene, &scene->r)) {
     if (scene->ed) {
-      LISTBASE_FOREACH (Sequence *, seq, &scene->ed->seqbase) {
-        if ((seq->type == SEQ_TYPE_SCENE) && ((seq->flag & SEQ_SCENE_STRIPS) == 0) &&
+      LISTBASE_FOREACH (Strip *, seq, &scene->ed->seqbase) {
+        if ((seq->type == STRIP_TYPE_SCENE) && ((seq->flag & SEQ_SCENE_STRIPS) == 0) &&
             (seq->scene != nullptr))
         {
           if (!seq->scene_camera) {

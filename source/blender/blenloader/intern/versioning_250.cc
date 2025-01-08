@@ -616,36 +616,36 @@ static void do_versions_socket_default_value_259(bNodeSocket *sock)
   }
 }
 
-static bool seq_sound_proxy_update_cb(Sequence *seq, void * /*user_data*/)
+static bool strip_sound_proxy_update_cb(Strip *strip, void * /*user_data*/)
 {
-#define SEQ_USE_PROXY_CUSTOM_DIR (1 << 19)
-#define SEQ_USE_PROXY_CUSTOM_FILE (1 << 21)
+#define STRIP_USE_PROXY_CUSTOM_DIR (1 << 19)
+#define STRIP_USE_PROXY_CUSTOM_FILE (1 << 21)
   /* don't know, if anybody used that this way, but just in case, upgrade to new way... */
-  if ((seq->flag & SEQ_USE_PROXY_CUSTOM_FILE) && !(seq->flag & SEQ_USE_PROXY_CUSTOM_DIR)) {
-    SNPRINTF(seq->data->proxy->dirpath, "%s" SEP_STR "BL_proxy", seq->data->dirpath);
+  if ((strip->flag & STRIP_USE_PROXY_CUSTOM_FILE) && !(strip->flag & STRIP_USE_PROXY_CUSTOM_DIR)) {
+    SNPRINTF(strip->data->proxy->dirpath, "%s" SEP_STR "BL_proxy", strip->data->dirpath);
   }
-#undef SEQ_USE_PROXY_CUSTOM_DIR
-#undef SEQ_USE_PROXY_CUSTOM_FILE
+#undef STRIP_USE_PROXY_CUSTOM_DIR
+#undef STRIP_USE_PROXY_CUSTOM_FILE
   return true;
 }
 
-static bool seq_set_volume_cb(Sequence *seq, void * /*user_data*/)
+static bool strip_set_volume_cb(Strip *strip, void * /*user_data*/)
 {
-  seq->volume = 1.0f;
+  strip->volume = 1.0f;
   return true;
 }
 
-static bool seq_set_sat_cb(Sequence *seq, void * /*user_data*/)
+static bool strip_set_sat_cb(Strip *strip, void * /*user_data*/)
 {
-  if (seq->sat == 0.0f) {
-    seq->sat = 1.0f;
+  if (strip->sat == 0.0f) {
+    strip->sat = 1.0f;
   }
   return true;
 }
 
-static bool seq_set_pitch_cb(Sequence *seq, void * /*user_data*/)
+static bool strip_set_pitch_cb(Strip *strip, void * /*user_data*/)
 {
-  seq->pitch = 1.0f;
+  strip->pitch = 1.0f;
   return true;
 }
 
@@ -668,7 +668,7 @@ void blo_do_versions_250(FileData *fd, Library * /*lib*/, Main *bmain)
 
     LISTBASE_FOREACH (Scene *, scene, &bmain->scenes) {
       if (scene->ed) {
-        SEQ_for_each_callback(&scene->ed->seqbase, seq_sound_proxy_update_cb, bmain);
+        SEQ_for_each_callback(&scene->ed->seqbase, strip_sound_proxy_update_cb, bmain);
       }
     }
 
@@ -1339,7 +1339,7 @@ void blo_do_versions_250(FileData *fd, Library * /*lib*/, Main *bmain)
         sce->r.ffcodecdata.audio_codec = 0x0; /* `CODEC_ID_NONE` */
       }
       if (sce->ed) {
-        SEQ_for_each_callback(&sce->ed->seqbase, seq_set_volume_cb, nullptr);
+        SEQ_for_each_callback(&sce->ed->seqbase, strip_set_volume_cb, nullptr);
       }
     }
 
@@ -1574,7 +1574,7 @@ void blo_do_versions_250(FileData *fd, Library * /*lib*/, Main *bmain)
 
     LISTBASE_FOREACH (Scene *, scene, &bmain->scenes) {
       if (scene->ed) {
-        SEQ_for_each_callback(&scene->ed->seqbase, seq_set_sat_cb, nullptr);
+        SEQ_for_each_callback(&scene->ed->seqbase, strip_set_sat_cb, nullptr);
       }
     }
 
@@ -2005,7 +2005,7 @@ void blo_do_versions_250(FileData *fd, Library * /*lib*/, Main *bmain)
       scene->r.ffcodecdata.audio_channels = 2;
       scene->audio.volume = 1.0f;
       if (scene->ed) {
-        SEQ_for_each_callback(&scene->ed->seqbase, seq_set_pitch_cb, nullptr);
+        SEQ_for_each_callback(&scene->ed->seqbase, strip_set_pitch_cb, nullptr);
       }
     }
 

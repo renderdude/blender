@@ -1406,7 +1406,7 @@ class SEQUENCER_PT_color_tag_picker(SequencerColorTagPicker, Panel):
         row = layout.row(align=True)
         row.operator("sequencer.strip_color_tag_set", icon='X').color = 'NONE'
         for i in range(1, 10):
-            icon = 'SEQUENCE_COLOR_{:02d}'.format(i)
+            icon = 'STRIP_COLOR_{:02d}'.format(i)
             row.operator("sequencer.strip_color_tag_set", icon=icon).color = 'COLOR_{:02d}'.format(i)
 
 
@@ -2967,7 +2967,7 @@ class SEQUENCER_PT_custom_props(SequencerButtonsPanel, PropertyPanel, Panel):
         'BLENDER_WORKBENCH',
     }
     _context_path = "active_sequence_strip"
-    _property_type = (bpy.types.Sequence,)
+    _property_type = (bpy.types.Strip,)
     bl_category = "Strip"
 
 

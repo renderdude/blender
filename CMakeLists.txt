@@ -100,6 +100,11 @@ if(POLICY CMP0119)
   cmake_policy(SET CMP0119 NEW)
 endif()
 
+# Install DESTINATION paths are normalized.
+if(POLICY CMP0177)
+  cmake_policy(SET CMP0177 NEW)
+endif()
+
 # -----------------------------------------------------------------------------
 # Load Blender's Local Macros
 
@@ -893,7 +898,7 @@ mark_as_advanced(WITH_SYSTEM_PYTHON_TESTS)
 # which may differ from the OS default python version.
 # And it would set that global 'python3 exec path' CMake value for all CMake scripts, which could have
 # unexpected and dangerous side effects.
-# So this has to be set explicitely for all builders.
+# So this has to be set explicitly for all builders.
 set(TEST_SYSTEM_PYTHON_EXE "" CACHE PATH "Python executable used to run 'system python' tests")
 mark_as_advanced(TEST_SYSTEM_PYTHON_EXE)
 
@@ -2544,11 +2549,10 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Visual Studio has all standards it supports available by default
 # Clang on windows copies this behavior and does not support these switches
-if(
-  CMAKE_COMPILER_IS_GNUCC OR
-  (CMAKE_C_COMPILER_ID MATCHES "Clang" AND (NOT MSVC)) OR
-  (CMAKE_C_COMPILER_ID STREQUAL "Intel")
-)
+if(CMAKE_COMPILER_IS_GNUCC OR
+   (CMAKE_C_COMPILER_ID MATCHES "Clang" AND (NOT MSVC)) OR
+   (CMAKE_C_COMPILER_ID STREQUAL "Intel"))
+
   # Use C11 + GNU extensions, works with GCC, Clang, ICC
   string(APPEND CMAKE_C_FLAGS " -std=gnu11")
 endif()

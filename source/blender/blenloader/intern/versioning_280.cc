@@ -614,8 +614,8 @@ static void do_version_constraints_copy_rotation_mix_mode(ListBase *lb)
 
 static void do_versions_seq_alloc_transform_and_crop(ListBase *seqbase)
 {
-  LISTBASE_FOREACH (Sequence *, seq, seqbase) {
-    if (ELEM(seq->type, SEQ_TYPE_SOUND_RAM, SEQ_TYPE_SOUND_HD) == 0) {
+  LISTBASE_FOREACH (Strip *, seq, seqbase) {
+    if (ELEM(seq->type, STRIP_TYPE_SOUND_RAM, STRIP_TYPE_SOUND_HD) == 0) {
       if (seq->data->transform == nullptr) {
         seq->data->transform = static_cast<StripTransform *>(
             MEM_callocN(sizeof(StripTransform), "StripTransform"));
@@ -767,7 +767,7 @@ static void do_version_curvemapping_walker(Main *bmain, void (*callback)(CurveMa
     }
 
     if (scene->ed != nullptr) {
-      LISTBASE_FOREACH (Sequence *, seq, &scene->ed->seqbase) {
+      LISTBASE_FOREACH (Strip *, seq, &scene->ed->seqbase) {
         LISTBASE_FOREACH (SequenceModifierData *, smd, &seq->modifiers) {
           const SequenceModifierTypeInfo *smti = SEQ_modifier_type_info_get(smd->type);
 
@@ -2995,7 +2995,7 @@ void do_versions_after_linking_280(FileData *fd, Main *bmain)
  * (see #55668, involving Meta strips). */
 static void do_versions_seq_unique_name_all_strips(Scene *sce, ListBase *seqbasep)
 {
-  LISTBASE_FOREACH (Sequence *, seq, seqbasep) {
+  LISTBASE_FOREACH (Strip *, seq, seqbasep) {
     SEQ_sequence_base_unique_name_recursive(sce, &sce->ed->seqbase, seq);
     if (seq->seqbase.first != nullptr) {
       do_versions_seq_unique_name_all_strips(sce, &seq->seqbase);
@@ -3009,11 +3009,11 @@ static void do_versions_seq_set_cache_defaults(Editing *ed)
   ed->recycle_max_cost = 10.0f;
 }
 
-static bool seq_update_flags_cb(Sequence *seq, void * /*user_data*/)
+static bool strip_update_flags_cb(Strip *strip, void * /*user_data*/)
 {
-  seq->flag &= ~((1 << 6) | (1 << 18) | (1 << 19) | (1 << 21));
-  if (seq->type == SEQ_TYPE_SPEED) {
-    SpeedControlVars *s = (SpeedControlVars *)seq->effectdata;
+  strip->flag &= ~((1 << 6) | (1 << 18) | (1 << 19) | (1 << 21));
+  if (strip->type == STRIP_TYPE_SPEED) {
+    SpeedControlVars *s = (SpeedControlVars *)strip->effectdata;
     s->flags &= ~(SEQ_SPEED_UNUSED_1);
   }
   return true;
@@ -4647,7 +4647,7 @@ void blo_do_versions_280(FileData *fd, Library * /*lib*/, Main *bmain)
       }
 
       if (scene->ed) {
-        SEQ_for_each_callback(&scene->ed->seqbase, seq_update_flags_cb, nullptr);
+        SEQ_for_each_callback(&scene->ed->seqbase, strip_update_flags_cb, nullptr);
       }
     }
 
