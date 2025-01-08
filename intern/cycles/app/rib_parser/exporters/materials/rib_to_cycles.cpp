@@ -480,7 +480,7 @@ void PxrSurfacetoPrincipled::update_parameters(Parameter_Dictionary const &param
     updated_param.payload = vector<float>();
     updated_param.type = Parameter_Type::Real;
     updated_param.add_float(param->floats()[0]);
-    input = find_socket("transmission", _nodes.back());
+    input = find_socket("transmission_weight", _nodes.back());
     set_node_value(_nodes.back(), *input, &updated_param);
 
     param = _parameters["glassRoughness"];
@@ -500,7 +500,7 @@ void PxrSurfacetoPrincipled::update_parameters(Parameter_Dictionary const &param
     updated_param.floats().clear();
     updated_param.type = Parameter_Type::Real;
     updated_param.add_float(0.);
-    input = find_socket("specular", _nodes.back());
+    input = find_socket("specular_ior_level", _nodes.back());
     set_node_value(_nodes.back(), *input, &updated_param);
 
     updated_param.floats().clear();

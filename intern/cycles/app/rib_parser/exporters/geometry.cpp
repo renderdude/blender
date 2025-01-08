@@ -907,7 +907,7 @@ Shape_Scene_Entity RIBCyclesMesh::reduce_geometry_by_faceset(Shape_Scene_Entity 
         int index_offset = 0, face_index = 0;
         for (size_t i = 0; i < nvertices.size(); i++) {
           int num_elems = nvertices[i] * pp->elem_per_item;
-          if (i == faceset[face_index]) {
+          if (face_index < faceset.size() && i == faceset[face_index]) {
             if (pp->has_floats() && pp->floats().size() > index_offset)
               for (size_t j = 0; j < num_elems; j++)
                 floats.push_back(pp->floats()[index_offset + j]);
