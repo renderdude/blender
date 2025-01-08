@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include "util/texture.h"
 #include <atomic>
 #include <chrono>
 #include <iostream>
@@ -24,7 +23,6 @@
 #include <sstream>
 #include <string>
 #include <thread>
-#include <utility>
 
 #ifdef IS_WINDOWS
 #  ifndef NOMINMAX
@@ -37,10 +35,10 @@ using socket_t = SOCKET;
 #else
 using socket_t = int;
 #  include <arpa/inet.h>
-#  include <errno.h>
+#  include <cerrno>
+#  include <csignal>
 #  include <netdb.h>
 #  include <netinet/in.h>
-#  include <signal.h>
 #  include <sys/socket.h>
 #  include <sys/time.h>
 #  include <unistd.h>
@@ -103,7 +101,6 @@ class IPC_Channel {
   void connect();
   void disconnect();
 
-  int numFailures = 0;
   std::string address, port;
   socket_t socketFd = INVALID_SOCKET;
 };
@@ -146,8 +143,9 @@ void IPC_Channel::connect()
   hints.ai_family = PF_UNSPEC;
   hints.ai_socktype = SOCK_STREAM;
   int err = getaddrinfo(address.c_str(), port.c_str(), &hints, &addrinfo);
-  if (err)
+  if (err) {
     LOG(ERROR) << gai_strerror(err);
+  }
 
   socketFd = INVALID_SOCKET;
   for (struct addrinfo *ptr = addrinfo; ptr; ptr = ptr->ai_next) {
@@ -172,10 +170,12 @@ void IPC_Channel::connect()
 #else
       int err = errno;
 #endif
-      if (err == SocketError::ConnRefused)
+      if (err == SocketError::ConnRefused) {
         LOG(INFO) << "Connection refused. Will try again...";
-      else
+      }
+      else {
         LOG(INFO) << "connect() failed";
+      }
 
       close_socket(socketFd);
       socketFd = INVALID_SOCKET;
@@ -186,14 +186,16 @@ void IPC_Channel::connect()
   }
 
   freeaddrinfo(addrinfo);
-  if (socketFd != INVALID_SOCKET)
+  if (socketFd != INVALID_SOCKET) {
     LOG(INFO) << "connected to display server";
+  }
 }
 
 IPC_Channel::~IPC_Channel()
 {
-  if (connected())
+  if (connected()) {
     disconnect();
+  }
 
   if (--num_active_channels == 0) {
 #ifdef IS_WINDOWS
@@ -214,8 +216,9 @@ bool IPC_Channel::send(p_std::span<const uint8_t> message)
 {
   if (!connected()) {
     connect();
-    if (!connected())
+    if (!connected()) {
       return false;
+    }
   }
 
   // Start with the length of the message.
@@ -224,8 +227,9 @@ bool IPC_Channel::send(p_std::span<const uint8_t> message)
   *startPtr = message.size();
 
   int bytesSent = ::send(socketFd, (const char *)message.data(), message.size(), 0 /* flags */);
-  if (bytesSent == message.size())
+  if (bytesSent == message.size()) {
     return true;
+  }
 
   LOG(ERROR) << "send to display server failed";
   disconnect();
@@ -243,8 +247,9 @@ enum Display_Directive : uint8_t {
 
 void serialize(uint8_t **ptr, const std::string &s)
 {
-  for (size_t i = 0; i < s.size(); ++i, *ptr += 1)
+  for (size_t i = 0; i < s.size(); ++i, *ptr += 1) {
     **ptr = s[i];
+  }
   **ptr = '\0';
   *ptr += 1;
 }
@@ -329,8 +334,9 @@ Display_Item::Display_Item(
   int nTiles = ((resolution.x + tileSize.x - 1) / tileSize.x) *
                ((resolution.y + tileSize.y - 1) / tileSize.y);
 
-  for (const std::string &channelName : channel_names)
-    channel_buffers.push_back(Image_Channel_Buffer(channelName, nTiles, tileSize, title));
+  for (const std::string &channelName : channel_names) {
+    channel_buffers.emplace_back(channelName, nTiles, tileSize, title);
+  }
 }
 
 Display_Item::Image_Channel_Buffer::Image_Channel_Buffer(const std::string &channelName,
@@ -382,18 +388,22 @@ bool Display_Item::Image_Channel_Buffer::send_if_changed(IPC_Channel &ipc_channe
                                                          int2 tileSize)
 {
   int excess = setCount - tileSize.x * tileSize.y;
-  if (excess > 0)
+  if (excess > 0) {
     memset(
         buffer.data() + channelValuesOffset + setCount * sizeof(float), 0, excess * sizeof(float));
+  }
 
   uint64_t hash = util_murmur_hash3(
       buffer.data() + channelValuesOffset, tileSize.x * tileSize.y * sizeof(float), 0);
-  if (hash == tileHashes[tileIndex])
+  if (hash == tileHashes[tileIndex]) {
     return true;
+  }
 
   if (!ipc_channel.send(
           p_std::make_span(buffer.data(), channelValuesOffset + setCount * sizeof(float))))
+  {
     return false;
+  }
 
   tileHashes[tileIndex] = hash;
   return true;
@@ -402,9 +412,10 @@ bool Display_Item::Image_Channel_Buffer::send_if_changed(IPC_Channel &ipc_channe
 bool Display_Item::Display(IPC_Channel &ipc_channel)
 {
   if (!openedImage) {
-    if (!send_open_image(ipc_channel))
+    if (!send_open_image(ipc_channel)) {
       // maybe next time
       return false;
+    }
     openedImage = true;
   }
 
@@ -424,46 +435,52 @@ bool Display_Item::Display(IPC_Channel &ipc_channel)
       int height = std::min(y + tileSize.y, resolution.y) - y;
       int width = std::min(x + tileSize.x, resolution.x) - x;
 
-      for (int c = 0; c < channel_buffers.size(); ++c)
+      for (int c = 0; c < channel_buffers.size(); ++c) {
         channel_buffers[c].set_tile_bounds(
             x, (param.first.full_size.y - tileSize.y) - y, width, height);
+      }
 
       int4 b = make_int4(0, 0, width, height);
       get_tile_values(b, param, p_std::make_span(display_values));
 
-      int tileIndex = (y / tileSize.y) * ((resolution.x + tileSize.x - 1) / tileSize.x) + (x / tileSize.x);
+      int tileIndex = (y / tileSize.y) * ((resolution.x + tileSize.x - 1) / tileSize.x) +
+                      (x / tileSize.x);
 
       // send the RGB buffers only if they're different than
       // the last version sent.
-      for (int c = 0; c < channel_buffers.size(); ++c)
+      for (int c = 0; c < channel_buffers.size(); ++c) {
         if (!channel_buffers[c].send_if_changed(ipc_channel, tileIndex, tileSize)) {
           // Welp. Stop for now...
           openedImage = false;
           return false;
         }
+      }
     }
     else {
       int tileIndex = 0;
-      for (int y = 0; y < resolution.y; y += tileSize.y)
+      for (int y = 0; y < resolution.y; y += tileSize.y) {
         for (int x = 0; x < resolution.x; x += tileSize.x, ++tileIndex) {
           int height = std::min(y + tileSize.y, resolution.y) - y;
           int width = std::min(x + tileSize.x, resolution.x) - x;
 
-          for (int c = 0; c < channel_buffers.size(); ++c)
+          for (int c = 0; c < channel_buffers.size(); ++c) {
             channel_buffers[c].set_tile_bounds(x, y, width, height);
+          }
 
           int4 b = make_int4(x, y, x + width, y + height);
           get_tile_values(b, param, p_std::make_span(display_values));
 
           // send the RGB buffers only if they're different than
           // the last version sent.
-          for (int c = 0; c < channel_buffers.size(); ++c)
+          for (int c = 0; c < channel_buffers.size(); ++c) {
             if (!channel_buffers[c].send_if_changed(ipc_channel, tileIndex, tileSize)) {
               // Welp. Stop for now...
               openedImage = false;
               return false;
             }
+          }
         }
+      }
     }
 
     params.pop();
@@ -488,8 +505,9 @@ bool Display_Item::send_open_image(IPC_Channel &ipc_channel)
   serialize(&ptr, resolution.x);
   serialize(&ptr, resolution.y);
   serialize(&ptr, nChannels);
-  for (int c = 0; c < nChannels; ++c)
+  for (int c = 0; c < nChannels; ++c) {
     serialize(&ptr, channel_names[c]);
+  }
 
   return ipc_channel.send(p_std::make_span(buffer, ptr - buffer));
 }
@@ -510,8 +528,9 @@ static void update_dynamic_items()
     std::this_thread::sleep_for(std::chrono::milliseconds(wait_time));
 
     std::lock_guard<std::mutex> lock(mutex);
-    for (auto *item : dynamicItems)
+    for (auto *item : dynamicItems) {
       item->Display(*channel);
+    }
 
     if (!channel->connected()) {
       retries++;
@@ -522,14 +541,16 @@ static void update_dynamic_items()
         }
       }
     }
-    else if (wait_time > 250)
+    else if (wait_time > 250) {
       wait_time = 250;
+    }
   }
 
   // One last time to get the last bits
   std::lock_guard<std::mutex> lock(mutex);
-  for (auto *item : dynamicItems)
+  for (auto *item : dynamicItems) {
     item->Display(*channel);
+  }
 
   dynamicItems.clear();
   delete channel;
@@ -554,9 +575,7 @@ TEVDisplayDriver::~TEVDisplayDriver()
  * Update procedure.
  */
 
-void TEVDisplayDriver::update()
-{
-}
+void TEVDisplayDriver::update() {}
 
 void TEVDisplayDriver::next_tile_begin()
 {
@@ -579,8 +598,9 @@ bool TEVDisplayDriver::update_begin(const Params &params, int texture_width, int
     texture_.pixels.resize(texture_.full_width * texture_.full_height);
 
     int2 tile_size = make_int2(128, 128);
-    if (params.size.x != params.full_size.x || params.size.y != params.full_size.y)
+    if (params.size.x != params.full_size.x || params.size.y != params.full_size.y) {
       tile_size = params.size;
+    }
 
     bool reuse_image = _current_item != nullptr;
     _current_item = new Display_Item(
@@ -603,8 +623,9 @@ bool TEVDisplayDriver::update_begin(const Params &params, int texture_width, int
               int xx = x / x_stride;
               int offset = origin - yy * texture.width + xx;
               float4 val = half4_to_float4_image(texture.pixels[offset]);
-              for (int j = 0; j < 3; ++j)
+              for (int j = 0; j < 3; ++j) {
                 display_value[j][index] = val[j];
+              }
               ++index;
             }
           }
@@ -660,9 +681,7 @@ half4 *TEVDisplayDriver::map_texture_buffer()
   return mapped_rgba_pixels;
 }
 
-void TEVDisplayDriver::unmap_texture_buffer()
-{
-}
+void TEVDisplayDriver::unmap_texture_buffer() {}
 
 /* --------------------------------------------------------------------
  * Drawing.
@@ -673,7 +692,7 @@ void TEVDisplayDriver::clear()
   texture_.need_clear = true;
 }
 
-void TEVDisplayDriver::draw(const Params &params)
+void TEVDisplayDriver::draw([[maybe_unused]] const Params &params)
 {
   /* See do_update_begin() for why no locking is required here. */
   if (texture_.need_clear) {

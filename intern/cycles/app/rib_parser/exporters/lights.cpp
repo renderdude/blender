@@ -117,8 +117,9 @@ void export_lights(Scene *scene,
 
       populate_shader_graph(light_inst, light);
 
-      if (light->is_modified())
+      if (light->is_modified()) {
         light->tag_update(scene);
+}
     }
   }
 }

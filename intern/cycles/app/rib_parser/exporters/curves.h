@@ -1,6 +1,5 @@
 #pragma once
 
-#include "app/rib_parser/parsed_parameter.h"
 #include "bvh/build.h"
 #include "scene/scene.h"
 
@@ -8,7 +7,6 @@
 #include "util/boundbox.h"
 #include <string>
 #include <unordered_map>
-#include <vector>
 
 CCL_NAMESPACE_BEGIN
 

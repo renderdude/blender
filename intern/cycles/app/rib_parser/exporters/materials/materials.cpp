@@ -1,7 +1,6 @@
 #include "app/rib_parser/exporters/materials/materials.h"
 #include "app/rib_parser/exporters/materials/convert_lama_network.h"
 #include "app/rib_parser/exporters/materials/rib_to_cycles.h"
-#include "app/rib_parser/exporters/node_util.h"
 #include "app/rib_parser/param_dict.h"
 #include "app/rib_parser/parsed_parameter.h"
 #include "graph/node_type.h"
@@ -9,7 +8,6 @@
 #include "scene/scene.h"
 #include "scene/shader_graph.h"
 #include "scene/shader_nodes.h"
-#include "util/log.h"
 #include "util/path.h"
 #include "util/string.h"
 #include "util/task.h"
@@ -467,7 +465,7 @@ void RIBCyclesMaterials::populate_shader_graph(Vector_Dictionary shader_graph)
     // but only entries with 2 or more nodes really have a connection
     if (it->second.size() > 1) {
       for (auto pp = it->second.begin(); pp != it->second.end(); ++pp) {
-        if (!(*pp)->name.compare("shader_type")) {
+        if (!((*pp)->name == "shader_type")) {
           shader_name = (*pp)->strings()[2];
           const auto nodeIt = _nodes.find(shader_name);
           if (nodeIt == _nodes.end()) {
@@ -484,7 +482,7 @@ void RIBCyclesMaterials::populate_shader_graph(Vector_Dictionary shader_graph)
   // Finally connect the terminals to the graph output (Surface, Volume, Displacement)
   for (const auto &terminal_entry : terminals) {
     for (auto *pp : terminal_entry) {
-      if (!pp->name.compare("shader_type")) {
+      if (!(pp->name == "shader_type")) {
         shader_type = pp->strings()[0];
         shader_name = pp->strings()[1];
         handle = pp->strings()[2];
@@ -557,19 +555,15 @@ void RIBCyclesMaterials::add_default_renderman_inputs(Shader *shader)
   ShaderNode *texco = nullptr;
   ShaderNode *sep_xyz = nullptr;
   ShaderNode *sep_uv = nullptr;
-  bool found_geom = false, found_texco = false;
-  bool connected_geom = false, connected_texco = false;
 
   auto *graph = shader->graph.get();
   // First check if ShaderGraph::simplify added a geometry or texture coordinate node
   for (ShaderNode *node : graph->nodes) {
     if (node->is_a(GeometryNode::node_type)) {
       geom = node;
-      found_geom = true;
     }
     else if (node->is_a(TextureCoordinateNode::node_type)) {
       texco = node;
-      found_texco = true;
     }
   }
 
@@ -589,7 +583,6 @@ void RIBCyclesMaterials::add_default_renderman_inputs(Shader *shader)
     for (ShaderNode *node : graph->nodes) {
       if (node->is_a(link.first)) {
         graph->connect(link.second.first, node->input(link.second.second.c_str()));
-        connected_texco = true;
       }
     }
   }
@@ -632,7 +625,6 @@ void RIBCyclesMaterials::add_default_renderman_inputs(Shader *shader)
             if (!sep_uv) {
               sep_uv = graph->create_node<SeparateXYZNode>();
               graph->connect(texco->output("UV"), sep_uv->input("Vector"));
-              connected_texco = true;
             }
 
             graph->connect(sep_uv->output("X"), input);
@@ -641,7 +633,6 @@ void RIBCyclesMaterials::add_default_renderman_inputs(Shader *shader)
             if (!sep_uv) {
               sep_uv = graph->create_node<SeparateXYZNode>();
               graph->connect(texco->output("UV"), sep_uv->input("Vector"));
-              connected_texco = true;
             }
 
             graph->connect(sep_uv->output("Y"), input);
@@ -649,7 +640,6 @@ void RIBCyclesMaterials::add_default_renderman_inputs(Shader *shader)
           else if (has_st) {
             if (!input->name().compare("st") || !input->name().compare("ST")) {
               graph->connect(texco->output("UV"), input);
-              connected_texco = true;
             }
           }
           else if (has_u && has_v) {
@@ -657,7 +647,6 @@ void RIBCyclesMaterials::add_default_renderman_inputs(Shader *shader)
               if (!sep_uv) {
                 sep_uv = graph->create_node<SeparateXYZNode>();
                 graph->connect(texco->output("UV"), sep_uv->input("Vector"));
-                connected_texco = true;
               }
 
               graph->connect(sep_uv->output("X"), input);
@@ -667,7 +656,6 @@ void RIBCyclesMaterials::add_default_renderman_inputs(Shader *shader)
             if (!sep_uv) {
               sep_uv = graph->create_node<SeparateXYZNode>();
               graph->connect(texco->output("UV"), sep_uv->input("Vector"));
-              connected_texco = true;
             }
 
             graph->connect(sep_uv->output("Y"), input);
@@ -678,7 +666,6 @@ void RIBCyclesMaterials::add_default_renderman_inputs(Shader *shader)
             if (!sep_xyz) {
               sep_xyz = graph->create_node<SeparateXYZNode>();
               graph->connect(geom->output("Position"), sep_xyz->input("Vector"));
-              connected_geom = true;
             }
 
             graph->connect(sep_xyz->output("X"), input);
@@ -687,7 +674,6 @@ void RIBCyclesMaterials::add_default_renderman_inputs(Shader *shader)
             if (!sep_xyz) {
               sep_xyz = graph->create_node<SeparateXYZNode>();
               graph->connect(geom->output("Position"), sep_xyz->input("Vector"));
-              connected_geom = true;
             }
 
             graph->connect(sep_xyz->output("Y"), input);
@@ -696,7 +682,6 @@ void RIBCyclesMaterials::add_default_renderman_inputs(Shader *shader)
             if (!sep_xyz) {
               sep_xyz = graph->create_node<SeparateXYZNode>();
               graph->connect(geom->output("Position"), sep_xyz->input("Vector"));
-              connected_geom = true;
             }
 
             graph->connect(sep_xyz->output("Z"), input);

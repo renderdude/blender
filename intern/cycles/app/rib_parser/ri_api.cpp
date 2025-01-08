@@ -31,7 +31,6 @@ namespace bfs = boost::filesystem;
 #include "scene/shader_nodes.h"
 #include "session/session.h"
 #include "util/log.h"
-#include "util/math.h"
 #include "util/projection.h"
 #include "util/transform.h"
 #include "util/vector.h"
@@ -2177,8 +2176,15 @@ void Ri::Texture([[maybe_unused]] const std::string &name,
   std::cout << "Texture is unimplemented." << std::endl;
 }
 
-void Ri::TextureCoordinates(
-    float s1, float t1, float s2, float t2, float s3, float t3, float s4, float t4, File_Loc loc)
+void Ri::TextureCoordinates([[maybe_unused]] float s1,
+                            [[maybe_unused]] float t1,
+                            [[maybe_unused]] float s2,
+                            [[maybe_unused]] float t2,
+                            [[maybe_unused]] float s3,
+                            [[maybe_unused]] float t3,
+                            [[maybe_unused]] float s4,
+                            [[maybe_unused]] float t4,
+                            [[maybe_unused]] File_Loc loc)
 {
   std::cout << "TextureCoordinates is unimplemented" << std::endl;
 }

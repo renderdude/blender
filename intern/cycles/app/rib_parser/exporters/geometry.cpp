@@ -1,4 +1,3 @@
-#include "app/rib_parser/error.h"
 #include "app/rib_parser/parsed_parameter.h"
 #include "app/rib_parser/scene_entities.h"
 #include "kernel/types.h"
@@ -27,7 +26,7 @@ CCL_NAMESPACE_BEGIN
 
 template<bool is_subd> struct MikkMeshWrapper {
   MikkMeshWrapper(const char *layer_name, const Mesh *mesh, float3 *tangent, float *tangent_sign)
-      : mesh(mesh), texface(nullptr), orco(nullptr), tangent(tangent), tangent_sign(tangent_sign)
+      : mesh(mesh), tangent(tangent), tangent_sign(tangent_sign)
   {
     const AttributeSet &attributes = is_subd ? mesh->subd_attributes : mesh->attributes;
 
@@ -97,14 +96,12 @@ template<bool is_subd> struct MikkMeshWrapper {
       float2 tfuv = texface[corner_index];
       return mikk::float3(tfuv.x, tfuv.y, 1.0f);
     }
-    else if (orco != NULL) {
+    if (orco != NULL) {
       const int vertex_index = VertexIndex(face_num, vert_num);
       const float2 uv = map_to_sphere((orco[vertex_index] + orco_loc) * inv_orco_size);
       return mikk::float3(uv.x, uv.y, 1.0f);
     }
-    else {
-      return mikk::float3(0.0f, 0.0f, 1.0f);
-    }
+    return mikk::float3(0.0f, 0.0f, 1.0f);
   }
 
   mikk::float3 GetNormal(const int face_num, const int vert_num)
@@ -127,7 +124,7 @@ template<bool is_subd> struct MikkMeshWrapper {
       }
       else {
         const Mesh::Triangle tri = mesh->get_triangle(face_num);
-        vN = tri.compute_normal(&mesh->get_verts()[0]);
+        vN = tri.compute_normal(mesh->get_verts().data());
       }
     }
     return mikk::float3(vN.x, vN.y, vN.z);
@@ -165,7 +162,7 @@ static void mikk_compute_tangents(const char *layer_name, Mesh *mesh, bool need_
   float3 *tangent = attr->data_float3();
 
   /* Create bitangent sign attribute. */
-  float *tangent_sign = NULL;
+  float *tangent_sign = nullptr;
   if (need_sign) {
     Attribute *attr_sign;
     ustring name_sign = ustring((string(layer_name) + ".tangent_sign").c_str());
@@ -196,8 +193,9 @@ void RIBCyclesMesh::export_geometry()
     int nfaces = _shape.parameters.get_int_array("nfaces")[0];
     // Check if we're using the entire set of prims for shading
     auto &param = shade_pp->second;
-    if (param[0]->elem_per_item < nfaces)
+    if (param[0]->elem_per_item < nfaces) {
       _shape = reduce_geometry_by_faceset(_shape, param[0]->ints());
+    }
   }
 
   if (_inst_def->shapes.size() > 1) {
@@ -211,15 +209,16 @@ void RIBCyclesMesh::export_geometry()
 
   for (size_t i = 0; i < _inst_v.size(); ++i) {
     std::string material_id = _inst_v[i].material_name;
-    if (_instanced_geom.find(material_id) != _instanced_geom.end())
+    if (_instanced_geom.find(material_id) != _instanced_geom.end()) {
       _geom = _instanced_geom[material_id];
+    }
     else {
       initialize(material_id);
 
       array<Node *> usedShaders(1);
       usedShaders[0] = _scene->default_surface;
 
-      for (auto shader : _scene->shaders) {
+      for (auto *shader : _scene->shaders) {
         if (!shader->name.compare(material_id)) {
           usedShaders[0] = shader;
           break;
@@ -258,7 +257,7 @@ void RIBCyclesMesh::export_geometry()
     if (i == 0) {
       std::string instance_id = _inst_v[0].parameters.at("identifier").get_one_string("name", "");
       // Make sure the first object attribute is the instanceId
-      assert(_instances[0]->attributes.size() >= 1 &&
+      assert(!_instances[0]->attributes.empty() &&
              _instances[0]->attributes.front().name() == instance_id);
 
       if (_inst_v.size() > 1) {
@@ -357,9 +356,11 @@ void RIBCyclesMesh::separate_face_varying_normals()
 
     // Extract the parameters associated with the points
     vector<Parsed_Parameter *> varying_primvars;
-    for (auto pp : _shape.parameters.get_parameter_vector())
-      if (pp->storage == Container_Type::Varying || pp->storage == Container_Type::Vertex)
+    for (auto *pp : _shape.parameters.get_parameter_vector()) {
+      if (pp->storage == Container_Type::Varying || pp->storage == Container_Type::Vertex) {
         varying_primvars.push_back(pp);
+      }
+    }
 
     vector<int> vertIndx = _shape.parameters.get_int_array("vertices");
     const vector<int> vertCounts = _shape.parameters.get_int_array("nvertices");
@@ -369,29 +370,33 @@ void RIBCyclesMesh::separate_face_varying_normals()
       for (int j = 0; j < vertCounts[i]; j++) {
         int v0 = vertIndx[index_offset + j];
         float3 N = normals[index_offset + j];
-        if (normal_map[v0].size() == 0)
+        if (normal_map[v0].empty()) {
           normal_map[v0].push_back(N);
+        }
         else {
           bool separate_face = false;
           for (auto &n : normal_map[v0]) {
             if (std::fabs(dot(n, N)) < 0.26) {  // angle > 75 degrees
               separate_face = true;
-              for (auto vp : varying_primvars) {
+              for (auto *vp : varying_primvars) {
                 if (vp->type == Parameter_Type::Real || vp->type == Parameter_Type::Point2 ||
                     vp->type == Parameter_Type::Point3)
                 {
-                  for (int i = 0; i < vp->elem_per_item; i++)
+                  for (int i = 0; i < vp->elem_per_item; i++) {
                     vp->floats().push_back(vp->floats()[v0 * vp->elem_per_item + i]);
+                  }
                 }
-                else
+                else {
                   std::cerr << "Missed primvar type for " << vp->name << std::endl;
+                }
               }
               vertIndx[index_offset + j] = points->floats().size() / 3 - 1;
               break;
             }
           }
-          if (!separate_face)
+          if (!separate_face) {
             normal_map[v0].push_back(N);
+          }
         }
       }
 
@@ -468,8 +473,9 @@ void RIBCyclesMesh::populate_normals()
     }
 
     // Now normalize
-    for (size_t i = 0; i < _geom->get_verts().size(); ++i)
+    for (size_t i = 0; i < _geom->get_verts().size(); ++i) {
       N[i] = normalize(N[i]);
+    }
   }
   else if (interpolation == Container_Type::Vertex || interpolation == Container_Type::Varying) {
     float3 *const N = _geom->attributes.add(ATTR_STD_VERTEX_NORMAL)->data_float3();
@@ -494,8 +500,9 @@ void RIBCyclesMesh::populate_normals()
     }
 
     // Now normalize
-    for (size_t i = 0; i < _geom->get_verts().size(); ++i)
+    for (size_t i = 0; i < _geom->get_verts().size(); ++i) {
       N[i] = normalize(N[i]);
+    }
   }
 }
 
@@ -516,7 +523,7 @@ void RIBCyclesMesh::populate_primvars()
 
   Parsed_Parameter_Vector const &paramv = _shape.parameters.get_parameter_vector();
 
-  for (const auto param : paramv) {
+  for (auto *const param : paramv) {
     // Skip special primvars that are handled separately
     if (param->name == "P" || param->name == "N" || param->name == "nfaces" ||
         param->name == "nvertices" || param->name == "vertices")
@@ -531,7 +538,7 @@ void RIBCyclesMesh::populate_primvars()
       create_uv_map(param);
       continue;
     }
-    else if (param->storage == Container_Type::Vertex) {
+    if (param->storage == Container_Type::Vertex) {
       if (param->name == "color") {
         std = ATTR_STD_VERTEX_COLOR;
       }
@@ -615,12 +622,15 @@ void RIBCyclesMesh::create_uv_map(Parsed_Parameter *param)
     bool need_sign = (_geom->need_attribute(_scene, sign_name) ||
                       _geom->need_attribute(_scene, sign_std));
     Parsed_Parameter const *param = _shape.parameters.get_parameter("N");
-    bool need_normals = (param == nullptr || param->storage == Container_Type::FaceVarying) && subdivision;
-    if (need_normals)
+    bool need_normals = (param == nullptr || param->storage == Container_Type::FaceVarying) &&
+                        subdivision;
+    if (need_normals) {
       _geom->add_vertex_normals();
+    }
     mikk_compute_tangents("uv", _geom, need_sign);
-    if (need_normals)
+    if (need_normals) {
       _geom->attributes.remove(ATTR_STD_VERTEX_NORMAL);
+    }
   }
 }
 
@@ -753,7 +763,7 @@ void RIBCyclesMesh::populate_topology()
   }
 }
 
-void RIBCyclesMesh::populate_shader_graph(bool initializing) {}
+void RIBCyclesMesh::populate_shader_graph([[maybe_unused]] bool initializing) {}
 
 void RIBCyclesMesh::compute_triangle_indices(const vector<int> &vertices,
                                              const vector<int> &nvertices,
@@ -810,14 +820,17 @@ Parsed_Parameter *RIBCyclesMesh::compute_triangulated_face_varying_primvar(
   for (size_t i = 0; i < nvertices.size(); i++) {
     for (int j = 0; j < nvertices[i] - 2; j++) {
       int ind = index_offset;
-      for (int k = 0; k < elem_per_item; ++k)
+      for (int k = 0; k < elem_per_item; ++k) {
         result->floats().push_back(param->floats()[elem_per_item * ind + k]);
+      }
       ind = index_offset + j + 1;
-      for (int k = 0; k < elem_per_item; ++k)
+      for (int k = 0; k < elem_per_item; ++k) {
         result->floats().push_back(param->floats()[elem_per_item * ind + k]);
+      }
       ind = index_offset + j + 2;
-      for (int k = 0; k < elem_per_item; ++k)
+      for (int k = 0; k < elem_per_item; ++k) {
         result->floats().push_back(param->floats()[elem_per_item * ind + k]);
+      }
     }
 
     index_offset += nvertices[i];
@@ -837,15 +850,18 @@ Shape_Scene_Entity RIBCyclesMesh::reduce_geometry_by_faceset(Shape_Scene_Entity 
   // Step 1: Extract the vertices that are in the faceset
   int index_offset = 0, face_index = 0;
   for (size_t i = 0; i < nvertices.size(); i++) {
-    if (i < faceset[face_index])
+    if (i < faceset[face_index]) {
       index_offset += nvertices[i];
+    }
     else {
-      for (size_t j = 0; j < nvertices[i]; j++)
+      for (size_t j = 0; j < nvertices[i]; j++) {
         new_vertices.push_back(vertIndx[index_offset + j]);
+      }
       index_offset += nvertices[i];
       face_index++;
-      if (face_index >= faceset.size())
+      if (face_index >= faceset.size()) {
         break;
+      }
     }
   }
   // Step 2: Copy over the points remapping the indices
@@ -870,14 +886,18 @@ Shape_Scene_Entity RIBCyclesMesh::reduce_geometry_by_faceset(Shape_Scene_Entity 
       case Container_Type::Reference:
       case Container_Type::Uniform: {
         // Simply copy into the temporaries to make step 4 simpler
-        if (pp->has_floats())
+        if (pp->has_floats()) {
           floats = pp->floats();
-        if (pp->has_ints())
+        }
+        if (pp->has_ints()) {
           ints = pp->ints();
-        if (pp->has_strings())
+        }
+        if (pp->has_strings()) {
           strings = pp->strings();
-        if (pp->has_bools())
+        }
+        if (pp->has_bools()) {
           bools = pp->bools();
+        }
         break;
       }
       case Container_Type::Varying:
@@ -886,18 +906,26 @@ Shape_Scene_Entity RIBCyclesMesh::reduce_geometry_by_faceset(Shape_Scene_Entity 
         for (size_t i = 0; i <= unique_vertices.back(); i++) {
           if (i == unique_vertices[vert_index]) {
             int index = i * pp->elem_per_item;
-            if (pp->has_floats() && pp->floats().size() > index)
-              for (size_t j = 0; j < pp->elem_per_item; j++)
+            if (pp->has_floats() && pp->floats().size() > index) {
+              for (size_t j = 0; j < pp->elem_per_item; j++) {
                 floats.push_back(pp->floats()[index + j]);
-            if (pp->has_ints() && pp->ints().size() > index)
-              for (size_t j = 0; j < pp->elem_per_item; j++)
+              }
+            }
+            if (pp->has_ints() && pp->ints().size() > index) {
+              for (size_t j = 0; j < pp->elem_per_item; j++) {
                 ints.push_back(pp->ints()[index + j]);
-            if (pp->has_strings() && pp->strings().size() > index)
-              for (size_t j = 0; j < pp->elem_per_item; j++)
+              }
+            }
+            if (pp->has_strings() && pp->strings().size() > index) {
+              for (size_t j = 0; j < pp->elem_per_item; j++) {
                 strings.push_back(pp->strings()[index + j]);
-            if (pp->has_bools() && pp->bools().size() > index)
-              for (size_t j = 0; j < pp->elem_per_item; j++)
+              }
+            }
+            if (pp->has_bools() && pp->bools().size() > index) {
+              for (size_t j = 0; j < pp->elem_per_item; j++) {
                 bools.push_back(pp->bools()[index + j]);
+              }
+            }
             vert_index++;
           }
         }
@@ -908,18 +936,26 @@ Shape_Scene_Entity RIBCyclesMesh::reduce_geometry_by_faceset(Shape_Scene_Entity 
         for (size_t i = 0; i < nvertices.size(); i++) {
           int num_elems = nvertices[i] * pp->elem_per_item;
           if (face_index < faceset.size() && i == faceset[face_index]) {
-            if (pp->has_floats() && pp->floats().size() > index_offset)
-              for (size_t j = 0; j < num_elems; j++)
+            if (pp->has_floats() && pp->floats().size() > index_offset) {
+              for (size_t j = 0; j < num_elems; j++) {
                 floats.push_back(pp->floats()[index_offset + j]);
-            if (pp->has_ints() && pp->ints().size() > index_offset)
-              for (size_t j = 0; j < num_elems; j++)
+              }
+            }
+            if (pp->has_ints() && pp->ints().size() > index_offset) {
+              for (size_t j = 0; j < num_elems; j++) {
                 ints.push_back(pp->ints()[index_offset + j]);
-            if (pp->has_strings() && pp->strings().size() > index_offset)
-              for (size_t j = 0; j < num_elems; j++)
+              }
+            }
+            if (pp->has_strings() && pp->strings().size() > index_offset) {
+              for (size_t j = 0; j < num_elems; j++) {
                 strings.push_back(pp->strings()[index_offset + j]);
-            if (pp->has_bools() && pp->bools().size() > index_offset)
-              for (size_t j = 0; j < num_elems; j++)
+              }
+            }
+            if (pp->has_bools() && pp->bools().size() > index_offset) {
+              for (size_t j = 0; j < num_elems; j++) {
                 bools.push_back(pp->bools()[index_offset + j]);
+              }
+            }
             face_index++;
           }
           index_offset += num_elems;
@@ -929,28 +965,34 @@ Shape_Scene_Entity RIBCyclesMesh::reduce_geometry_by_faceset(Shape_Scene_Entity 
     }
 
     // Step 4: Swap in the subsetted parameters
-    if (pp->has_floats())
+    if (pp->has_floats()) {
       pp->floats() = floats;
-    if (pp->has_ints())
+    }
+    if (pp->has_ints()) {
       pp->ints() = ints;
-    if (pp->has_strings())
+    }
+    if (pp->has_strings()) {
       pp->strings() = strings;
-    if (pp->has_bools())
+    }
+    if (pp->has_bools()) {
       pp->bools() = bools;
+    }
   }
 
   // Step 5: Fix remaining parameters not fixed in the loop above
-  auto pp = new_shape.parameters.get_parameter("nfaces");
+  auto *pp = new_shape.parameters.get_parameter("nfaces");
   pp->ints()[0] = faceset.size();
   pp = new_shape.parameters.get_parameter("nvertices");
   vector<int> ints;
-  for (int idx = 0; idx < faceset.size(); idx++)
+  for (int idx = 0; idx < faceset.size(); idx++) {
     ints.push_back(nvertices[faceset[idx]]);
+  }
   pp->ints() = ints;
   pp = new_shape.parameters.get_parameter("vertices");
   ints.clear();
-  for (int idx = 0; idx < new_vertices.size(); idx++)
+  for (int idx = 0; idx < new_vertices.size(); idx++) {
     ints.push_back(index_map[new_vertices[idx]]);
+  }
   pp->ints() = ints;
 
   return new_shape;
@@ -988,7 +1030,7 @@ void RIBCyclesMesh::normalize_emission(Object *instance)
 
   for (auto &[key, value] : totarea) {
     Shader *shader = static_cast<Shader *>(mesh->get_used_shaders()[key]);
-    for (auto node : shader->graph->nodes) {
+    for (auto *node : shader->graph->nodes) {
       if (node->is_a(PrincipledBsdfNode::node_type)) {
         PrincipledBsdfNode *bsdf = (PrincipledBsdfNode *)node;
         float strength = bsdf->get_emission_strength();

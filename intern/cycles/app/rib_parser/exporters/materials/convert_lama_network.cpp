@@ -193,29 +193,28 @@ std::string lama_type(Parsed_Parameter *pp)
   if (pp->type == Parameter_Type::Color) {
     return "color3";
   }
-  else if (pp->type == Parameter_Type::Normal) {
+  if (pp->type == Parameter_Type::Normal) {
     return "vector3";
   }
-  else if (pp->type == Parameter_Type::Bxdf) {
+  if (pp->type == Parameter_Type::Bxdf) {
     return "BSDF";
   }
-  else if (pp->type == Parameter_Type::Integer) {
+  if (pp->type == Parameter_Type::Integer) {
     return "integer";
   }
-  else if (pp->type == Parameter_Type::String) {
+  if (pp->type == Parameter_Type::String) {
     return "string";
   }
-  else {
-    if (pp->elem_per_item == 1) {
-      return "float";
-    }
-    if (pp->elem_per_item == 3) {
-      return "vector3";
-    }
-    if (pp->elem_per_item == 4) {
-      return "vector4";
-    }
+  if (pp->elem_per_item == 1) {
+    return "float";
   }
+  if (pp->elem_per_item == 3) {
+    return "vector3";
+  }
+  if (pp->elem_per_item == 4) {
+    return "vector4";
+  }
+
   return "";
 }
 
@@ -224,20 +223,19 @@ std::string lama_default(Parsed_Parameter *pp)
   if (pp->type == Parameter_Type::Color) {
     return "0 0 0";
   }
-  else if (pp->type == Parameter_Type::Normal) {
+  if (pp->type == Parameter_Type::Normal) {
     return "0 0 0";
   }
-  else {
-    if (pp->elem_per_item == 1) {
-      return "0";
-    }
-    if (pp->elem_per_item == 3) {
-      return "0 0 0";
-    }
-    if (pp->elem_per_item == 4) {
-      return "0 0 0 0";
-    }
+  if (pp->elem_per_item == 1) {
+    return "0";
   }
+  if (pp->elem_per_item == 3) {
+    return "0 0 0";
+  }
+  if (pp->elem_per_item == 4) {
+    return "0 0 0 0";
+  }
+
   return "";
 }
 

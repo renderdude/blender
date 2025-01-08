@@ -225,12 +225,12 @@ template<typename T> class Async_Job : public Parallel_Job {
  public:
   Async_Job(std::function<T(void)> w) : func(std::move(w)) {}
 
-  bool have_work() const
+  bool have_work() const override
   {
     return !started;
   }
 
-  void run_step(std::unique_lock<std::mutex> *lock)
+  void run_step(std::unique_lock<std::mutex> *lock) override
   {
     thread_pool->remove_from_job_list(this);
     started = true;
@@ -290,7 +290,7 @@ template<typename T> class Async_Job : public Parallel_Job {
     _cv.notify_all();
   }
 
-  std::string to_string() const
+  std::string to_string() const override
   {
     return string_printf("[ Async_Job started: %s ]", started);
   }

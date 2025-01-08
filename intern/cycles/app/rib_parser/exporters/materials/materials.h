@@ -1,15 +1,12 @@
 #pragma once
 
-#include "app/rib_parser/exporters/materials/convert_lama_network.h"
 #include "app/rib_parser/param_dict.h"
 #include "app/rib_parser/parsed_parameter.h"
 #include "scene/scene.h"
 #include "scene/shader.h"
 #include "scene/shader_graph.h"
 
-#include "app/rib_parser/scene_entities.h"
 #include "util/vector.h"
-#include <vector>
 
 CCL_NAMESPACE_BEGIN
 
@@ -20,9 +17,7 @@ class RIBCyclesMaterials {
   {
   }
 
-  ~RIBCyclesMaterials()
-  {
-  }
+  ~RIBCyclesMaterials() = default;
 
   void export_materials();
 

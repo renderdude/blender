@@ -30,7 +30,7 @@ Thread_Pool *Parallel_Job::thread_pool;
 Thread_Pool::Thread_Pool(int nThreads)
 {
   for (int i = 0; i < nThreads - 1; ++i) {
-    threads.push_back(std::thread(&Thread_Pool::worker, this));
+    threads.emplace_back(&Thread_Pool::worker, this);
   }
 }
 
@@ -220,14 +220,14 @@ class Parallel_For_Loop_1D : public Parallel_Job {
   {
   }
 
-  bool have_work() const
+  bool have_work() const override
   {
     return _next_index < _end_index;
   }
 
-  void run_step(std::unique_lock<std::mutex> *lock);
+  void run_step(std::unique_lock<std::mutex> *lock) override;
 
-  std::string to_string() const
+  std::string to_string() const override
   {
     std::stringstream ss;
     ss << "[ Parallel_For_Loop_1D next_index: " << _next_index;

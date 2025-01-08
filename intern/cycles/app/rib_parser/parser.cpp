@@ -305,7 +305,8 @@ std::optional<Token> Tokenizer::Next()
         if (ch == '\\') {
           haveEscaped = true;
           // Grab the next character
-          if ((ch = get_char()) == EOF) {
+          ch = get_char();
+          if (ch == EOF) {
             error_callback("premature EOF", &startLoc);
             return {};
           }

@@ -8,7 +8,6 @@
 #include "util/boundbox.h"
 #include <string>
 #include <unordered_map>
-#include <vector>
 
 CCL_NAMESPACE_BEGIN
 
