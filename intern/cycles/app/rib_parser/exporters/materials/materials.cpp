@@ -465,7 +465,7 @@ void RIBCyclesMaterials::populate_shader_graph(Vector_Dictionary shader_graph)
     // but only entries with 2 or more nodes really have a connection
     if (it->second.size() > 1) {
       for (auto pp = it->second.begin(); pp != it->second.end(); ++pp) {
-        if (!((*pp)->name == "shader_type")) {
+        if ((*pp)->name == "shader_type") {
           shader_name = (*pp)->strings()[2];
           const auto nodeIt = _nodes.find(shader_name);
           if (nodeIt == _nodes.end()) {
@@ -482,7 +482,7 @@ void RIBCyclesMaterials::populate_shader_graph(Vector_Dictionary shader_graph)
   // Finally connect the terminals to the graph output (Surface, Volume, Displacement)
   for (const auto &terminal_entry : terminals) {
     for (auto *pp : terminal_entry) {
-      if (!(pp->name == "shader_type")) {
+      if (pp->name == "shader_type") {
         shader_type = pp->strings()[0];
         shader_name = pp->strings()[1];
         handle = pp->strings()[2];
