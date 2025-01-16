@@ -666,13 +666,19 @@ void LamaNetwork::color_to_float(std::string name, std::string param_name) {
   }
 }
 
-void LamaNetwork::color_to_vector(std::string name, std::string param_name) {
+void LamaNetwork::to_vector(std::string name, std::string param_name) {
   auto it = _constants.find(name);
   if (it != _constants.end()) {
     for (auto *pp : it->second) {
       if (pp->name == param_name) {
-        pp->type = Parameter_Type::Vector3;
-        pp->elem_per_item = 3;
+        if (pp->floats().size() == 2) {
+          pp->type = Parameter_Type::Vector2;
+          pp->elem_per_item = 2;
+        }
+        else if (pp->floats().size() == 3) {
+          pp->type = Parameter_Type::Vector3;
+          pp->elem_per_item = 3;
+        }
         break;
       }
     }
@@ -691,8 +697,9 @@ void LamaNetwork::match_renderman_definitions()
       // RenderMan artistic frensel mode is 0, MaterialX it's 1
       flip_int(shader_type->strings()[2], "fresnelMode", params, 1);
       // In RenderMan 'IOR', 'extinction' are colors, in MaterialX their vectors
-      color_to_vector(shader_type->strings()[2], "IOR");
-      color_to_vector(shader_type->strings()[2], "extinction");
+      to_vector(shader_type->strings()[2], "IOR");
+      to_vector(shader_type->strings()[2], "extinction");
+      to_vector(shader_type->strings()[2], "anisotropyDirection");
     }
     else if (shader_type->strings()[1] == "LamaDielectric") {
       // RenderMan artistic frensel mode is 0, MaterialX it's 1

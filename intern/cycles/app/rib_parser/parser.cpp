@@ -716,14 +716,12 @@ static Parsed_Parameter_Vector parse_parameters(
             param->payload = vector<int>();
           }
           param->add_int(parse_int(t));
-          param->elem_per_item = param->ints().size();
         }
         else {
           if (!param->has_floats()) {
             param->payload = vector<float>();
           }
           param->add_float(parse_float(t));
-          param->elem_per_item = param->floats().size();
         }
       }
     };

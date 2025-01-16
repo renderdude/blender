@@ -36,7 +36,7 @@ class LamaNetwork {
   // RenderMan to MaterialX helper routines
   void flip_int(std::string name, std::string param_name, Parameter_Dictionary &params, int value);
   void color_to_float(std::string name, std::string param_name);
-  void color_to_vector(std::string name, std::string param_name);
+  void to_vector(std::string name, std::string param_name);
 
   std::string remapped_name(std::string node_name, Parsed_Parameter *param, std::string def_name)
   {
