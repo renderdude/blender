@@ -104,6 +104,7 @@ CCL_NAMESPACE_BEGIN
       void remove_texture( const std::string& );
       void remove_spectrum( const std::string& );
       void remove_bxdf( const std::string& );
+      void remove(Parsed_Parameter* param );
       ///@}
       /// @name Conversion
       ///@{

@@ -2,6 +2,7 @@
 
 #include "app/rib_parser/param_dict.h"
 #include "app/rib_parser/parsed_parameter.h"
+#include <set>
 #include <utility>
 
 CCL_NAMESPACE_BEGIN
@@ -32,6 +33,11 @@ class LamaNetwork {
   std::string rescale_parameters();
   void adjust_connections();
 
+  // RenderMan to MaterialX helper routines
+  void flip_int(std::string name, std::string param_name, Parameter_Dictionary &params, int value);
+  void color_to_float(std::string name, std::string param_name);
+  void color_to_vector(std::string name, std::string param_name);
+
   std::string remapped_name(std::string node_name, Parsed_Parameter *param, std::string def_name)
   {
     bool found = false;
@@ -61,7 +67,7 @@ class LamaNetwork {
   {
     bool found = false;
     if (_remapped_params.find(node_name) != _remapped_params.end()) {
-      auto& remap = _remapped_params[node_name];
+      auto &remap = _remapped_params[node_name];
       if (remap.find(param) != remap.end()) {
         remap[param] = new_name;
         found = true;
@@ -71,7 +77,7 @@ class LamaNetwork {
     // Check "common" if not found
     if (!found) {
       if (_remapped_params.find("common") != _remapped_params.end()) {
-        auto& remap = _remapped_params["common"];
+        auto &remap = _remapped_params["common"];
         if (remap.find(param) != remap.end()) {
           remap[param] = new_name;
           found = true;
@@ -92,6 +98,7 @@ class LamaNetwork {
   std::map<std::string, Parameter_Dictionary> _handle_to_params;
   std::map<std::string, std::map<Parsed_Parameter *, std::string>> _remapped_params;
   std::map<std::string, std::pair<std::string, bool>> _handle_to_lama;
+  std::map<std::string, std::set<std::string>> _prman_lama_params;
 };
 
 CCL_NAMESPACE_END

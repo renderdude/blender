@@ -4,9 +4,11 @@
 #include "app/rib_parser/param_dict.h"
 #include "app/rib_parser/parsed_parameter.h"
 
+#include "util/math_float3.h"
 #include "util/path.h"
 #include "util/string.h"
 #include "util/thread.h"
+#include "util/vector.h"
 
 #include <MaterialXCore/Document.h>
 
@@ -44,6 +46,8 @@ static std::string L1 = "  ";
 static std::string L2 = "    ";
 static std::string L3 = "      ";
 static std::string L4 = "        ";
+
+static mx::DocumentPtr _stdlib;
 
 LamaNetwork::LamaNetwork(Vector_Dictionary &shader_graph)
 {
@@ -574,6 +578,105 @@ void LamaNetwork::map_renderman_to_mtlx()
       }
     }
   }
+
+  for (auto &params : _shader_graph.second) {
+    auto *shader_type = params.get_parameter("shader_type");
+    if (shader_type->strings()[1].substr(0, 4) == "Lama") {
+      if (_prman_lama_params.find(shader_type->strings()[1]) == _prman_lama_params.end()) {
+        std::set<std::string> lama_params(
+            {"shader_type", "material1", "material2", "materialFront"});
+        std::string lama_class = shader_type->strings()[1];
+        std::transform(lama_class.begin(),
+                       lama_class.end(),
+                       lama_class.begin(),
+                       [](unsigned char c) { return std::tolower(c); });
+        lama_class.insert(4, 1, '_');
+        for (auto nd : _stdlib->getNodeDefs()) {
+          if (nd->getName().substr(3) == lama_class) {
+            for (auto port : nd->getActiveInputs()) {
+              lama_params.insert(port->getName());
+            }
+            break;
+          }
+        }
+        _prman_lama_params[shader_type->strings()[1]] = lama_params;
+      }
+      auto plp = _prman_lama_params[shader_type->strings()[1]];
+      std::vector<Parsed_Parameter *> removals;
+      for (const auto &pp : params.get_parameter_vector()) {
+        if (plp.find(pp->name) == plp.end()) {
+          removals.push_back(pp);
+        }
+      }
+      for (auto *pp : removals) {
+        params.remove(pp);
+      }
+    }
+  }
+}
+
+void LamaNetwork::flip_int(std::string name,
+                           std::string param_name,
+                           Parameter_Dictionary &params,
+                           int value)
+{
+  auto it = _constants.find(name);
+  if (it == _constants.end()) {
+    // No entry in _constants, so create a new one
+    Parsed_Parameter *param = new Parsed_Parameter(
+        Parameter_Type::Integer, param_name, File_Loc());
+    // RenderMan artistic frensel mode is 0, MaterialX it's 1
+    param->add_int(value);
+    params.push_back(param);
+    _constants[name].push_back(param);
+  }
+  else {
+    bool found = false;
+    for (auto *pp : it->second) {
+      if (pp->name == param_name) {
+        pp->ints()[0] = !pp->ints()[0];
+        found = true;
+        break;
+      }
+    }
+    // No entry, so add one
+    if (!found) {
+      Parsed_Parameter *param = new Parsed_Parameter(
+          Parameter_Type::Integer, param_name, File_Loc());
+      param->add_int(value);
+      params.push_back(param);
+      it->second.push_back(param);
+    }
+  }
+}
+
+void LamaNetwork::color_to_float(std::string name, std::string param_name) {
+  auto it = _constants.find(name);
+  if (it != _constants.end()) {
+    for (auto *pp : it->second) {
+      if (pp->name == param_name) {
+        float ave_illum = average(fabs(make_float3(pp->floats()[0], pp->floats()[1], pp->floats()[2])));
+        pp->type = Parameter_Type::Real;
+        pp->elem_per_item = 1;
+        pp->floats().clear();
+        pp->add_float(ave_illum);
+        break;
+      }
+    }
+  }
+}
+
+void LamaNetwork::color_to_vector(std::string name, std::string param_name) {
+  auto it = _constants.find(name);
+  if (it != _constants.end()) {
+    for (auto *pp : it->second) {
+      if (pp->name == param_name) {
+        pp->type = Parameter_Type::Vector3;
+        pp->elem_per_item = 3;
+        break;
+      }
+    }
+  }
 }
 
 void LamaNetwork::match_renderman_definitions()
@@ -585,66 +688,15 @@ void LamaNetwork::match_renderman_definitions()
     auto *shader_type = params.get_parameter("shader_type");
     // LamaConductor
     if (shader_type->strings()[1] == "LamaConductor") {
-      auto it = _constants.find(shader_type->strings()[2]);
-      if (it == _constants.end()) {
-        // No entry in _constants, so create a new one
-        Parsed_Parameter *param = new Parsed_Parameter(
-            Parameter_Type::Integer, "fresnelMode", File_Loc());
-        // RenderMan artistic frensel mode is 0, MaterialX it's 1
-        param->add_int(1);
-        params.push_back(param);
-        _constants[shader_type->strings()[2]].push_back(param);
-      }
-      else {
-        bool found = false;
-        for (auto *pp : it->second) {
-          if (pp->name == "fresnelMode") {
-            pp->ints()[0] = !pp->ints()[0];
-            found = true;
-            break;
-          }
-        }
-        // No entry, so add one
-        if (!found) {
-          Parsed_Parameter *param = new Parsed_Parameter(
-              Parameter_Type::Integer, "fresnelMode", File_Loc());
-          // RenderMan artistic frensel mode is 0, MaterialX it's 1
-          param->add_int(1);
-          params.push_back(param);
-          it->second.push_back(param);
-        }
-      }
+      // RenderMan artistic frensel mode is 0, MaterialX it's 1
+      flip_int(shader_type->strings()[2], "fresnelMode", params, 1);
+      // In RenderMan 'IOR', 'extinction' are colors, in MaterialX their vectors
+      color_to_vector(shader_type->strings()[2], "IOR");
+      color_to_vector(shader_type->strings()[2], "extinction");
     }
     else if (shader_type->strings()[1] == "LamaDielectric") {
-      auto it = _constants.find(shader_type->strings()[2]);
-      if (it == _constants.end()) {
-        // No entry in _constants, so create a new one
-        Parsed_Parameter *param = new Parsed_Parameter(
-            Parameter_Type::Integer, "fresnelMode", File_Loc());
-        // RenderMan artistic frensel mode is 0, MaterialX it's 1
-        param->add_int(1);
-        params.push_back(param);
-        _constants[shader_type->strings()[2]].push_back(param);
-      }
-      else {
-        bool found = false;
-        for (auto *pp : it->second) {
-          if (pp->name == "fresnelMode") {
-            pp->ints()[0] = !pp->ints()[0];
-            found = true;
-            break;
-          }
-        }
-        // No entry, so add one
-        if (!found) {
-          Parsed_Parameter *param = new Parsed_Parameter(
-              Parameter_Type::Integer, "fresnelMode", File_Loc());
-          // RenderMan artistic frensel mode is 0, MaterialX it's 1
-          param->add_int(1);
-          params.push_back(param);
-          it->second.push_back(param);
-        }
-      }
+      // RenderMan artistic frensel mode is 0, MaterialX it's 1
+      flip_int(shader_type->strings()[2], "fresnelMode", params, 1);
     }
   }
 }
@@ -684,26 +736,27 @@ std::string LamaNetwork::generate_nodegraph()
   for (auto it = _constants.begin(); it != _constants.end(); it++) {
     for (auto *pp : it->second) {
       std::string value_t = lama_type(pp);
-      if (value_t != "string") {
-        def += L2 + "<constant name=\"" + it->first + "_" + pp->name + "\" type=\"" + value_t +
-               "\">\n";
-        def += L3 + "<input name=\"value\" type=\"" + value_t + "\" value=\"";
-        std::stringstream ss;
-        if (pp->has_ints()) {
-          for (auto f : pp->ints()) {
-            ss << f << ", ";
-          }
+      def += L2 + "<constant name=\"" + it->first + "_" + pp->name + "\" type=\"" + value_t +
+             "\">\n";
+      def += L3 + "<input name=\"value\" type=\"" + value_t + "\" value=\"";
+      std::stringstream ss;
+      if (pp->has_ints()) {
+        for (auto f : pp->ints()) {
+          ss << f << ", ";
         }
-        else {
-          for (auto f : pp->floats()) {
-            ss << f << ", ";
-          }
-        }
-        std::string sss = ss.str();
-        sss.erase(sss.size() - 2, 2);
-        def += sss + "\" />\n";
-        def += L2 + "</constant>\n";
       }
+      else if (pp->has_floats()) {
+        for (auto f : pp->floats()) {
+          ss << f << ", ";
+        }
+      }
+      else if (pp->has_strings()) {
+        ss << pp->strings()[0] << ", ";
+      }
+      std::string sss = ss.str();
+      sss.erase(sss.size() - 2, 2);
+      def += sss + "\" />\n";
+      def += L2 + "</constant>\n";
     }
   }
   node_graph += def;
@@ -794,12 +847,20 @@ void LamaNetwork::generate_mtlx_definition()
 {
   _lama_shader_graph.first = _shader_graph.first;
 
+  std::string mx_base_dir = MATERIALX_BASE_DIR;
+
+  _stdlib = mx::createDocument();
+  mx::FileSearchPath search_path;
+  search_path.append(mx::FilePath(mx_base_dir));
+  mx::loadLibraries({"libraries"}, search_path, _stdlib);
+
   map_renderman_to_mtlx();
   split_nodegraph();
   remove_external_nodes();
   find_common_references();
   find_parameters();
   remap_parameters();
+  match_renderman_definitions();
 
   // Simplify extternal refs to just the common ones
   for (auto it = _common_ext_refs.begin(); it != _common_ext_refs.end();) {
@@ -828,7 +889,6 @@ void LamaNetwork::generate_mtlx_definition()
   surface_shader += inputs;
   surface_shader += L1 + "</Inputs>\n";
 
-  match_renderman_definitions();
   std::string node_graph = generate_nodegraph();
 
   // Put it all together

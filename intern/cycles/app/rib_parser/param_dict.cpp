@@ -2,6 +2,7 @@
 
 #include <sstream>
 
+#include "app/rib_parser/parsed_parameter.h"
 #include "util/log.h"
 
 CCL_NAMESPACE_BEGIN
@@ -486,6 +487,16 @@ void Parameter_Dictionary::remove(const std::string &name, Parameter_Type typeNa
 {
   for (auto iter = params.begin(); iter != params.end(); ++iter) {
     if ((*iter)->name == name && (*iter)->type == typeName) {
+      params.erase(iter);
+      return;
+    }
+  }
+}
+
+void Parameter_Dictionary::remove(Parsed_Parameter* param)
+{
+  for (auto iter = params.begin(); iter != params.end(); ++iter) {
+    if (*iter == param) {
       params.erase(iter);
       return;
     }
