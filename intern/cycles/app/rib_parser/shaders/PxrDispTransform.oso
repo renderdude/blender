@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
-# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrDispTransform.osl/obj/PxrDispTransform.oso
+# Compiled by oslc 1.13.0.@PROJECT_VERSION_TWEAK@"dev"
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxSonoma_x86-64_clang15_external_release/osl/PxrDispTransform.osl/obj/PxrDispTransform.oso
 shader PxrDispTransform	%meta{int,rfm_nodeid,1053340} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/displace"} %meta{string,rfh_classification,"Pattern/Displace"} %meta{string,help,"Transforms the displacement values."} 
 param	int	dispType	1		%meta{string,widget,"mapper"} %meta{string,help,"Specify the displacement value type.  If it is a float procedural, pick Scalar.<br>If it is vector procedural, pick Generic Vector.  If the vector displacement<br>map is extracted using Mudbox or Zbrush, pick Mudbox Vector or Zbrush Vector<br>respectively.<br><br>dispType (int)"} %meta{string,options,"Scalar:1|Generic Vector:2|Mudbox Vector:3|ZBrush Vector:4"} %meta{int,connectable,0} %meta{string,label,"Displacement Type"}  %read{12,174} %write{2147483647,-1}
 param	float	dispScalar	0		%meta{string,widget,"default"} %meta{string,help,"Connect a scalar displacement texture or value.<br><br>dispScalar (float)"} %meta{string,label,"Scalar Displacement"}  %read{14,14} %write{2147483647,-1}
@@ -17,7 +17,7 @@ param	string	dispDirectionSpace	"object"		%meta{string,widget,"default"} %meta{s
 oparam	vector	resultXYZ	0 0 0		%meta{string,help,"resultXYZ (vector)"}  %read{34,179} %write{15,179}
 oparam	float	resultF	0		%meta{string,help,"resultF (float)"}  %read{27,177} %write{14,176}
 global	normal	N	%read{0,0} %write{2147483647,-1}
-local	matrix	___326_scaleMatrix	%read{171,171} %write{170,170}
+local	matrix	___346_scaleMatrix	%read{171,171} %write{170,170}
 local	normal	Nn	%read{108,152} %write{0,0}
 local	vector	Tn	%read{107,117} %write{1,1}
 local	float	unitScale	%read{92,128} %write{2,89}
@@ -487,10 +487,10 @@ code ___main___
 	functioncall	$const21 174 	%line{415} %argrw{"r"}
 # PxrDispTransform.osl:59
 #     matrix scaleMatrix = matrix (fromSpace, toSpace);
-	matrix		___326_scaleMatrix dispScaleSpace $const6 	%line{59} %argrw{"wrr"}
+	matrix		___346_scaleMatrix dispScaleSpace $const6 	%line{59} %argrw{"wrr"}
 # PxrDispTransform.osl:60
 #     return pow(abs(determinant(scaleMatrix)), 0.333333333);
-	determinant	$tmp83 ___326_scaleMatrix 	%line{60} %argrw{"wr"}
+	determinant	$tmp83 ___346_scaleMatrix 	%line{60} %argrw{"wr"}
 	abs		$tmp82 $tmp83 	%argrw{"wr"}
 	pow		spaceScaleFactor $tmp82 $const22 	%argrw{"wrr"}
 # PxrDispTransform.osl:417

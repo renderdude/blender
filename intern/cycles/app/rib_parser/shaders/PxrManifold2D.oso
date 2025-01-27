@@ -1,9 +1,9 @@
 OpenShadingLanguage 1.00
-# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrManifold2D.osl/obj/PxrManifold2D.oso
+# Compiled by oslc 1.13.0.@PROJECT_VERSION_TWEAK@"dev"
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxSonoma_x86-64_clang15_external_release/osl/PxrManifold2D.osl/obj/PxrManifold2D.oso
 shader PxrManifold2D	%meta{int,rfm_nodeid,1053422} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/manifold"} %meta{string,rfh_classification,"Pattern/Manifold"} %meta{string,help,"An OSL manifold for 2D coordinates."} 
 param	int	enableTransforms	1		%meta{string,page,"Transform"} %meta{int,page_open,1} %meta{string,widget,"checkBox"} %meta{int,connectable,0} %meta{string,help,"If off, all transform parameters are ignored"}  %read{178,178} %write{2147483647,-1}
-param	vector	center	0 0 0		%meta{string,page,"Transform"} %meta{int,connectable,0} %meta{string,label,"Center"} %meta{string,help,"Transformations are centered here"}  %read{189,216} %write{2147483647,-1} %derivs
+param	vector	center	0 0 0		%meta{string,page,"Transform"} %meta{int,connectable,0} %meta{string,label,"Center"} %meta{string,help,"Transformations are centered here"}  %read{189,215} %write{2147483647,-1} %derivs
 param	float	angle	0		%meta{string,page,"Transform"} %meta{float,min,-360} %meta{float,max,360} %meta{string,label,"Angle"} %meta{string,help,"Rotation angle around origin"} %meta{string,slider,"True"} %meta{float,slidermin,-180} %meta{float,slidermax,180}  %read{146,146} %write{2147483647,-1} %derivs
 param	float	scaleS	1		%meta{string,page,"Transform"} %meta{string,label,"Frequency S"} %meta{string,help,"Frequency of feature in S"} %meta{string,slider,"True"} %meta{float,slidermin,0} %meta{float,slidermax,10}  %read{147,147} %write{2147483647,-1} %derivs
 param	float	scaleT	1		%meta{string,page,"Transform"} %meta{string,label,"Frequency T"} %meta{string,help,"Frequency of feature in T"} %meta{string,slider,"True"} %meta{float,slidermin,0} %meta{float,slidermax,10}  %read{148,148} %write{2147483647,-1} %derivs
@@ -11,8 +11,8 @@ param	float	offsetS	0		%meta{string,page,"Transform"} %meta{string,label,"Offset
 param	float	offsetT	0		%meta{string,page,"Transform"} %meta{string,label,"Offset T"} %meta{string,help,"Offset from origin in T"} %meta{string,slider,"True"} %meta{float,slidermin,-1} %meta{float,slidermax,1}  %read{150,150} %write{2147483647,-1} %derivs
 param	int	invertS	0		%meta{string,page,"Transform"} %meta{string,widget,"checkBox"} %meta{int,connectable,0} %meta{string,label,"Invert S"} %meta{string,help,"Flip along S"}  %read{151,151} %write{2147483647,-1}
 param	int	invertT	1		%meta{string,page,"Transform"} %meta{string,widget,"checkBox"} %meta{int,connectable,0} %meta{string,label,"Invert T"} %meta{string,help,"Flip along T"}  %read{179,179} %write{2147483647,-1}
-param	float	warp	0		%meta{string,widget,"default"} %meta{string,label,"Warp"} %meta{string,help,"Connect a noise or texture to warp the domain."}  %read{262,264} %write{2147483647,-1} %derivs
-param	float	warpAmount	1		%meta{string,widget,"default"} %meta{int,slider,1} %meta{float,slidermin,0} %meta{float,slidermax,1} %meta{string,label,"Warp Amount"} %meta{string,help,"Connect a noise or texture to warp the domain."}  %read{266,266} %write{2147483647,-1} %derivs
+param	float	warp	0		%meta{string,widget,"default"} %meta{string,label,"Warp"} %meta{string,help,"Connect a noise or texture to warp the domain."}  %read{261,263} %write{2147483647,-1} %derivs
+param	float	warpAmount	1		%meta{string,widget,"default"} %meta{int,slider,1} %meta{float,slidermin,0} %meta{float,slidermax,1} %meta{string,label,"Warp Amount"} %meta{string,help,"Connect a noise or texture to warp the domain."}  %read{265,265} %write{2147483647,-1} %derivs
 param	int	randomize	0		%meta{string,widget,"checkBox"} %meta{string,label,"Randomize"} %meta{string,help,"Enable manifold randomization."} %meta{int,connectable,0} %meta{string,page,"Randomize"} %meta{int,page_open,0}  %read{22,22} %write{2147483647,-1}
 param	int	source	0		%meta{string,widget,"mapper"} %meta{string,options,"Identifier ID:0|Identifier Name:1|Primvar:2|Attribute:3"} %meta{string,help,"The source of the variation. For user attributes,<br>type user:myattribute.<br><br>varySource (int) "} %meta{int,connectable,0} %meta{string,label,"Vary Source"} %meta{string,page,"Randomize"}  %read{25,60} %write{2147483647,-1}
 param	string	varName	""		%meta{string,widget,"default"} %meta{string,help,"If varySource is 1 or 2, the name of the primvar or user<br>attribute.<br><br>varName (string) "} %meta{int,connectable,0} %meta{string,label,"Variable Name"} %meta{string,page,"Randomize"}  %read{48,70} %write{2147483647,-1} %derivs
@@ -31,9 +31,9 @@ param	int	enableRScaleT	0		%meta{string,widget,"checkBox"} %meta{string,label,"E
 param	float	rScaleTMin	0		%meta{string,widget,"default"} %meta{string,label,"Frequency T Min"} %meta{float,slidermin,-1} %meta{float,slidermax,1} %meta{string,page,"Randomize.Frequency"} %meta{int,page_open,1} %meta{string,conditionalVisPath,"../enableRScaleT"} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisValue,"1"}  %read{134,144} %write{2147483647,-1} %derivs
 param	float	rScaleTMax	0		%meta{string,widget,"default"} %meta{string,label,"Frequency T Max"} %meta{float,slidermin,-1} %meta{float,slidermax,1} %meta{string,page,"Randomize.Frequency"} %meta{int,page_open,1} %meta{string,conditionalVisPath,"../enableRScaleT"} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisValue,"1"}  %read{134,142} %write{2147483647,-1} %derivs
 param	int	calcRadius	0		%meta{string,page,"Advanced"} %meta{string,widget,"checkBox"} %meta{int,connectable,0} %meta{string,help,"Calculate radius the hard way from derivatives to get around renderer bug in the radius calculation."}  %read{2147483647,-1} %write{2147483647,-1}
-param	int	enableJacobianFilter	0		%meta{string,page,"Advanced"} %meta{int,connectable,0} %meta{string,widget,"checkBox"} %meta{string,help,"Enables calculating a filter radiusbased on the Jacobian in screen space. This should create a filter that is less dependend on the parameterization of the geometry."}  %read{222,222} %write{2147483647,-1}
-param	float	jacobianRadiusMult	1		%meta{string,page,"Advanced"} %meta{int,connectable,0} %meta{string,help,"Multiplies the radius calculated based on the Jacobian in screen space."}  %read{256,256} %write{2147483647,-1}
-param	int	__rfk_inDisplacement	0		%meta{string,page,"Advanced"} %meta{string,widget,"null"} %meta{int,connectable,0} %meta{string,help,"Rfk sets this to 1 in displacements. Leave as 0."}  %read{220,220} %write{2147483647,-1}
+param	int	enableJacobianFilter	0		%meta{string,page,"Advanced"} %meta{int,connectable,0} %meta{string,widget,"checkBox"} %meta{string,help,"Enables calculating a filter radiusbased on the Jacobian in screen space. This should create a filter that is less dependend on the parameterization of the geometry."}  %read{221,221} %write{2147483647,-1}
+param	float	jacobianRadiusMult	1		%meta{string,page,"Advanced"} %meta{int,connectable,0} %meta{string,help,"Multiplies the radius calculated based on the Jacobian in screen space."}  %read{255,255} %write{2147483647,-1}
+param	int	__rfk_inDisplacement	0		%meta{string,page,"Advanced"} %meta{string,widget,"null"} %meta{int,connectable,0} %meta{string,help,"Rfk sets this to 1 in displacements. Leave as 0."}  %read{219,219} %write{2147483647,-1}
 param	int	verbosity	0		%meta{string,widget,"mapper"} %meta{string,options,"Silent:0|Warnings:1|Info:2"} %meta{string,page,"Advanced"} %meta{string,help,"Diagnostic output levels for scene debugging.<br><br>verbosity (int)"} %meta{int,connectable,0} %meta{string,label,"Verbosity"}  %read{28,66} %write{2147483647,-1}
 param	string	name_uvSet	""		%meta{string,page,""} %meta{string,widget,"default"} %meta{string,label,"uvSet"} %meta{int,connectable,0} %meta{string,help,"Default is st"} %meta{string,widget,"uvChannelInput"}  %read{157,169} %write{2147483647,-1} %derivs
 param	vector	default_uvSet	0 0 0		%meta{string,page,""} %meta{int,connectable,0} %meta{string,widget,"null"}  %read{2147483647,-1} %write{2147483647,-1}
@@ -42,53 +42,53 @@ param	float	t	0		%meta{int,lockgeom,0} %meta{string,widget,"null"} %meta{int,con
 param	string	primvarS	""		%meta{int,lockgeom,0} %meta{string,widget,"null"} %meta{int,connectable,0}  %read{2,14} %write{2147483647,-1} %derivs
 param	string	primvarT	""		%meta{int,lockgeom,0} %meta{string,widget,"null"} %meta{int,connectable,0}  %read{5,10} %write{2147483647,-1} %derivs
 oparam	struct Manifold	result			%read{2147483647,-1} %write{2147483647,-1} %struct{"Manifold"} %structfields{Q,QN,Qradius} %structfieldtypes{"pnf"} %structnfields{3}
-oparam	point	result.Q	0 0 0		%read{174,270} %write{173,268} %mystruct{result} %mystructfield{0} %derivs
+oparam	point	result.Q	0 0 0		%read{174,269} %write{173,267} %mystruct{result} %mystructfield{0} %derivs
 oparam	normal	result.QN	0 0 1		%read{2147483647,-1} %write{177,177} %mystruct{result} %mystructfield{1}
-oparam	float	result.Qradius	0		%read{257,261} %write{176,258} %mystruct{result} %mystructfield{2}
-oparam	float	resultS	0		%read{2147483647,-1} %write{259,269}
-oparam	float	resultT	0		%read{2147483647,-1} %write{260,270}
-oparam	float	resultRadius	0		%read{2147483647,-1} %write{261,261}
-global	point	P	%read{225,225} %write{2147483647,-1} %derivs
-local	point	___405_Pr	%read{226,227} %write{225,225} %derivs
-local	float	___405_x	%read{228,229} %write{226,226} %derivs
-local	float	___405_y	%read{230,231} %write{227,227} %derivs
-local	float	___405_dxdu	%read{232,244} %write{228,228}
-local	float	___405_dxdv	%read{233,240} %write{229,229}
-local	float	___405_dydu	%read{233,242} %write{230,230}
-local	float	___405_dydv	%read{232,239} %write{231,231}
-local	float	___405_det	%read{236,238} %write{234,234}
-local	float	___405_detinv	%read{239,244} %write{235,238}
-local	float	___405_dudx	%read{247,247} %write{239,239}
-local	float	___405_dudy	%read{250,250} %write{241,241}
-local	float	___405_dvdx	%read{248,248} %write{243,243}
-local	float	___405_dvdy	%read{251,251} %write{244,244}
-local	vector	___405_dQdu	%read{247,250} %write{245,245}
-local	vector	___405_dQdv	%read{248,251} %write{246,246}
-local	vector	___405_dQdx	%read{253,253} %write{249,249}
-local	vector	___405_dQdy	%read{253,253} %write{252,252}
-local	float[2]	___407_inUvSet	%read{171,172} %write{165,169} %derivs
-local	int	___407_readUvSetSuccessfully	%read{170,218} %write{156,169}
-local	float	___414_cosAng	%read{204,211} %write{202,202} %derivs
-local	float	___414_sinAng	%read{206,209} %write{202,202} %derivs
-local	point	___414_Q	%read{203,213} %write{198,198} %derivs
-local	float	___655_fseed	%read{30,80} %write{24,79} %derivs
-local	string	___659_idname	%read{43,43} %write{41,42} %derivs
-local	float	___655_instanceId	%read{74,74} %write{71,72} %derivs
+oparam	float	result.Qradius	0		%read{256,260} %write{176,257} %mystruct{result} %mystructfield{2}
+oparam	float	resultS	0		%read{2147483647,-1} %write{258,268}
+oparam	float	resultT	0		%read{2147483647,-1} %write{259,269}
+oparam	float	resultRadius	0		%read{2147483647,-1} %write{260,260}
+global	point	P	%read{224,224} %write{2147483647,-1} %derivs
+local	point	___425_Pr	%read{225,226} %write{224,224} %derivs
+local	float	___425_x	%read{227,228} %write{225,225} %derivs
+local	float	___425_y	%read{229,230} %write{226,226} %derivs
+local	float	___425_dxdu	%read{231,243} %write{227,227}
+local	float	___425_dxdv	%read{232,239} %write{228,228}
+local	float	___425_dydu	%read{232,241} %write{229,229}
+local	float	___425_dydv	%read{231,238} %write{230,230}
+local	float	___425_det	%read{235,237} %write{233,233}
+local	float	___425_detinv	%read{238,243} %write{234,237}
+local	float	___425_dudx	%read{246,246} %write{238,238}
+local	float	___425_dudy	%read{249,249} %write{240,240}
+local	float	___425_dvdx	%read{247,247} %write{242,242}
+local	float	___425_dvdy	%read{250,250} %write{243,243}
+local	vector	___425_dQdu	%read{246,249} %write{244,244}
+local	vector	___425_dQdv	%read{247,250} %write{245,245}
+local	vector	___425_dQdx	%read{252,252} %write{248,248}
+local	vector	___425_dQdy	%read{252,252} %write{251,251}
+local	float[2]	___427_inUvSet	%read{171,172} %write{165,169} %derivs
+local	int	___427_readUvSetSuccessfully	%read{170,217} %write{156,169}
+local	float	___434_cosAng	%read{203,210} %write{201,201} %derivs
+local	float	___434_sinAng	%read{205,208} %write{201,201} %derivs
+local	point	___434_Q	%read{202,212} %write{198,198} %derivs
+local	float	___675_fseed	%read{30,80} %write{24,79} %derivs
+local	string	___679_idname	%read{43,43} %write{41,42} %derivs
+local	float	___675_instanceId	%read{74,74} %write{71,72} %derivs
 local	float	ss	%read{153,154} %write{0,15} %derivs
 local	float	tt	%read{166,166} %write{1,16} %derivs
-local	float[2]	___677_val	%read{15,16} %write{13,14} %derivs
+local	float[2]	___697_val	%read{15,16} %write{13,14} %derivs
 local	float	rA	%read{146,146} %write{17,105} %derivs
 local	float	rOS	%read{149,149} %write{18,113} %derivs
 local	float	rOT	%read{150,150} %write{19,121} %derivs
 local	float	rFS	%read{145,147} %write{20,132} %derivs
 local	float	rFT	%read{148,148} %write{21,145} %derivs
-local	float	___678_fseed	%read{83,96} %write{81,86} %derivs
-local	float	___678_prob	%read{92,92} %write{90,91}
-local	color	___679_rnd	%read{101,138} %write{97,97} %derivs
+local	float	___698_fseed	%read{83,96} %write{81,86} %derivs
+local	float	___698_prob	%read{92,92} %write{90,91}
+local	color	___699_rnd	%read{101,138} %write{97,97} %derivs
 const	string	$const1	""		%read{2,157} %write{2147483647,-1}
 temp	int	$tmp1	%read{3,3} %write{2,2}
 temp	int	$tmp2	%read{4,8} %write{3,7}
-const	int	$const2	0		%read{3,269} %write{2147483647,-1}
+const	int	$const2	0		%read{3,268} %write{2147483647,-1}
 temp	int	$tmp3	%read{6,6} %write{5,5}
 temp	int	$tmp4	%read{7,7} %write{6,6}
 temp	int	$tmp5	%read{2147483647,-1} %write{9,9}
@@ -97,8 +97,8 @@ temp	int	$tmp6	%read{2147483647,-1} %write{10,10}
 temp	int	$tmp7	%read{12,12} %write{11,11}
 const	float[2]	$const4	0 0 		%read{13,13} %write{2147483647,-1}
 temp	int	$tmp8	%read{2147483647,-1} %write{14,14}
-const	int	$const5	1		%read{16,270} %write{2147483647,-1}
-const	float	$const6	0		%read{17,258} %write{2147483647,-1}
+const	int	$const5	1		%read{16,269} %write{2147483647,-1}
+const	float	$const6	0		%read{17,257} %write{2147483647,-1}
 temp	float	$tmp9	%read{81,81} %write{80,80} %derivs
 const	string	$const7	"getRandomFloat"		%read{23,23} %write{2147483647,-1}
 temp	int	$tmp10	%read{26,26} %write{25,25}
@@ -119,7 +119,7 @@ const	string	$const12	"identifier:name"		%read{42,42} %write{2147483647,-1}
 temp	int	$tmp20	%read{44,44} %write{43,43} %derivs
 const	int	$const13	65536		%read{44,44} %write{2147483647,-1}
 temp	int	$tmp21	%read{45,45} %write{44,44} %derivs
-const	int	$const14	2		%read{46,213} %write{2147483647,-1}
+const	int	$const14	2		%read{46,212} %write{2147483647,-1}
 temp	int	$tmp22	%read{47,47} %write{46,46}
 temp	int	$tmp23	%read{49,49} %write{48,48}
 temp	int	$tmp24	%read{50,50} %write{49,49}
@@ -152,7 +152,7 @@ temp	int	$tmp43	%read{88,88} %write{87,87}
 const	string	$const23	"cell"		%read{90,97} %write{2147483647,-1}
 const	float	$const24	173		%read{89,89} %write{2147483647,-1}
 temp	float	$tmp44	%read{90,90} %write{89,89}
-const	float	$const25	1		%read{91,265} %write{2147483647,-1}
+const	float	$const25	1		%read{91,264} %write{2147483647,-1}
 temp	int	$tmp45	%read{93,93} %write{92,92}
 temp	color	$tmp46	%read{97,97} %write{96,96} %derivs
 const	float	$const26	7		%read{94,94} %write{2147483647,-1}
@@ -186,7 +186,7 @@ temp	float	$tmp71	%read{140,140} %write{139,139} %derivs
 temp	float	$tmp72	%read{143,143} %write{140,140} %derivs
 temp	float	$tmp73	%read{143,143} %write{142,142} %derivs
 temp	float	$tmp74	%read{144,144} %write{143,143} %derivs
-temp	float	$tmp75	%read{196,201} %write{146,146} %derivs
+temp	float	$tmp75	%read{196,200} %write{146,146} %derivs
 temp	float	$tmp76	%read{191,191} %write{147,147} %derivs
 temp	float	$tmp77	%read{191,191} %write{148,148} %derivs
 temp	float	$tmp78	%read{193,193} %write{149,149} %derivs
@@ -215,44 +215,42 @@ temp	vector	$tmp96	%read{192,192} %write{191,191} %derivs
 temp	vector	$tmp97	%read{194,194} %write{192,192} %derivs
 temp	point	$tmp98	%read{194,194} %write{193,193} %derivs
 temp	int	$tmp99	%read{197,197} %write{196,196}
-temp	float	$tmp100	%read{202,202} %write{201,201} %derivs
+temp	float	$tmp100	%read{201,201} %write{200,200} %derivs
 const	string	$const33	"radians"		%read{199,199} %write{2147483647,-1}
-const	float	$const34	3.14159274		%read{200,200} %write{2147483647,-1}
-const	float	$const35	180		%read{200,200} %write{2147483647,-1}
-temp	float	$tmp101	%read{201,201} %write{200,200} %derivs
-temp	float	$tmp102	%read{204,204} %write{203,203} %derivs
-temp	float	$tmp103	%read{207,207} %write{204,204} %derivs
+const	float	$const34	0.0174532924		%read{200,200} %write{2147483647,-1}
+temp	float	$tmp101	%read{203,203} %write{202,202} %derivs
+temp	float	$tmp102	%read{206,206} %write{203,203} %derivs
+temp	float	$tmp103	%read{205,205} %write{204,204} %derivs
 temp	float	$tmp104	%read{206,206} %write{205,205} %derivs
-temp	float	$tmp105	%read{207,207} %write{206,206} %derivs
-temp	float	$tmp106	%read{214,214} %write{207,207} %derivs
-temp	float	$tmp107	%read{209,209} %write{208,208} %derivs
-temp	float	$tmp108	%read{212,212} %write{209,209} %derivs
+temp	float	$tmp105	%read{213,213} %write{206,206} %derivs
+temp	float	$tmp106	%read{208,208} %write{207,207} %derivs
+temp	float	$tmp107	%read{211,211} %write{208,208} %derivs
+temp	float	$tmp108	%read{210,210} %write{209,209} %derivs
 temp	float	$tmp109	%read{211,211} %write{210,210} %derivs
-temp	float	$tmp110	%read{212,212} %write{211,211} %derivs
-temp	float	$tmp111	%read{214,214} %write{212,212} %derivs
-temp	float	$tmp112	%read{214,214} %write{213,213} %derivs
-const	string	$const36	"Manifold_CalcRadius"		%read{219,219} %write{2147483647,-1}
-temp	int	$tmp113	%read{223,223} %write{222,222}
-const	string	$const37	"raster"		%read{225,225} %write{2147483647,-1}
-const	string	$const38	"transform"		%read{224,224} %write{2147483647,-1}
-const	string	$const39	"common"		%read{225,225} %write{2147483647,-1}
-temp	float	$tmp114	%read{234,234} %write{232,232}
-temp	float	$tmp115	%read{234,234} %write{233,233}
-temp	int	$tmp116	%read{237,237} %write{236,236}
-temp	float	$tmp117	%read{241,241} %write{240,240}
-temp	float	$tmp118	%read{243,243} %write{242,242}
-temp	vector	$tmp119	%read{249,249} %write{247,247}
-temp	vector	$tmp120	%read{249,249} %write{248,248}
-temp	vector	$tmp121	%read{252,252} %write{250,250}
-temp	vector	$tmp122	%read{252,252} %write{251,251}
-temp	float	$tmp123	%read{256,256} %write{255,255}
-temp	float	$tmp124	%read{255,255} %write{254,254}
-temp	vector	$tmp125	%read{254,254} %write{253,253}
-temp	int	$tmp126	%read{263,263} %write{262,262}
-const	float	$const40	2		%read{264,264} %write{2147483647,-1}
+temp	float	$tmp110	%read{213,213} %write{211,211} %derivs
+temp	float	$tmp111	%read{213,213} %write{212,212} %derivs
+const	string	$const35	"Manifold_CalcRadius"		%read{218,218} %write{2147483647,-1}
+temp	int	$tmp112	%read{222,222} %write{221,221}
+const	string	$const36	"raster"		%read{224,224} %write{2147483647,-1}
+const	string	$const37	"transform"		%read{223,223} %write{2147483647,-1}
+const	string	$const38	"common"		%read{224,224} %write{2147483647,-1}
+temp	float	$tmp113	%read{233,233} %write{231,231}
+temp	float	$tmp114	%read{233,233} %write{232,232}
+temp	int	$tmp115	%read{236,236} %write{235,235}
+temp	float	$tmp116	%read{240,240} %write{239,239}
+temp	float	$tmp117	%read{242,242} %write{241,241}
+temp	vector	$tmp118	%read{248,248} %write{246,246}
+temp	vector	$tmp119	%read{248,248} %write{247,247}
+temp	vector	$tmp120	%read{251,251} %write{249,249}
+temp	vector	$tmp121	%read{251,251} %write{250,250}
+temp	float	$tmp122	%read{255,255} %write{254,254}
+temp	float	$tmp123	%read{254,254} %write{253,253}
+temp	vector	$tmp124	%read{253,253} %write{252,252}
+temp	int	$tmp125	%read{262,262} %write{261,261}
+const	float	$const39	2		%read{263,263} %write{2147483647,-1}
+temp	float	$tmp126	%read{264,264} %write{263,263} %derivs
 temp	float	$tmp127	%read{265,265} %write{264,264} %derivs
 temp	float	$tmp128	%read{266,266} %write{265,265} %derivs
-temp	float	$tmp129	%read{267,267} %write{266,266} %derivs
 code ___main___
 # PxrManifold2D.osl:346
 #     float ss = s, tt = t;
@@ -279,16 +277,16 @@ code ___main___
 	if		$tmp7 17 17 	%argrw{"r"}
 # PxrManifold2D.osl:354
 #         float val[2] = {0, 0};
-	assign		___677_val $const4 	%line{354} %argrw{"wr"}
+	assign		___697_val $const4 	%line{354} %argrw{"wr"}
 # PxrManifold2D.osl:355
 #         getattribute("primvar", primvarS, val);
-	getattribute	$tmp8 $const3 primvarS ___677_val 	%line{355} %argrw{"wrrw"}
+	getattribute	$tmp8 $const3 primvarS ___697_val 	%line{355} %argrw{"wrrw"}
 # PxrManifold2D.osl:356
 #         ss = val[0];
-	aref		ss ___677_val $const2 	%line{356} %argrw{"wrr"}
+	aref		ss ___697_val $const2 	%line{356} %argrw{"wrr"}
 # PxrManifold2D.osl:357
 #         tt = val[1];
-	aref		tt ___677_val $const5 	%line{357} %argrw{"wrr"}
+	aref		tt ___697_val $const5 	%line{357} %argrw{"wrr"}
 # PxrManifold2D.osl:360
 #     float rA = 0.0, rOS = 0.0, rOT = 0.0, rFS = 0.0, rFT = 0.0;
 	assign		rA $const6 	%line{360} %argrw{"wr"}
@@ -304,21 +302,21 @@ code ___main___
 	functioncall	$const7 81 	%line{364} %argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h:175
 #     float fseed = defaultVal;
-	assign		___655_fseed $const6 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h"} %line{175} %argrw{"wr"}
+	assign		___675_fseed $const6 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h"} %line{175} %argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h:177
 #     if (source == k_IdentifierId)
 	eq		$tmp10 source $const2 	%line{177} %argrw{"wrr"}
 	if		$tmp10 31 71 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h:182
 #         getattribute("builtin", "id", fseed);
-	getattribute	$tmp11 $const8 $const9 ___655_fseed 	%line{182} %argrw{"wrrw"}
+	getattribute	$tmp11 $const8 $const9 ___675_fseed 	%line{182} %argrw{"wrrw"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h:183
 #         if (verbosity > k_Warnings)
 	gt		$tmp12 verbosity $const5 	%line{183} %argrw{"wrr"}
 	if		$tmp12 31 31 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h:185
 #             printf("[getRandomFloat] id: %f", fseed);
-	printf		$const10 ___655_fseed 	%line{185} %argrw{"rr"}
+	printf		$const10 ___675_fseed 	%line{185} %argrw{"rr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h:188
 #     else if (source == k_IdentifierName)
 	eq		$tmp13 source $const5 	%line{188} %argrw{"wrr"}
@@ -328,23 +326,23 @@ code ___main___
 	eq		$tmp14 $const2 $const2 	%line{191} %argrw{"wrr"}
 	neq		$tmp15 $tmp14 $const2 	%argrw{"wrr"}
 	if		$tmp15 36 40 	%argrw{"r"}
-	getattribute	$tmp16 $const11 ___655_fseed 	%argrw{"wrw"}
+	getattribute	$tmp16 $const11 ___675_fseed 	%argrw{"wrw"}
 	eq		$tmp17 $tmp16 $const2 	%argrw{"wrr"}
 	neq		$tmp18 $tmp17 $const2 	%argrw{"wrr"}
 	assign		$tmp15 $tmp18 	%argrw{"wr"}
 	if		$tmp15 46 46 	%argrw{"r"}
-	assign		___659_idname $const1 	%argrw{"wr"}
-	getattribute	$tmp19 $const12 ___659_idname 	%argrw{"wrw"}
-	hash		$tmp20 ___659_idname 	%argrw{"wr"}
+	assign		___679_idname $const1 	%argrw{"wr"}
+	getattribute	$tmp19 $const12 ___679_idname 	%argrw{"wrw"}
+	hash		$tmp20 ___679_idname 	%argrw{"wr"}
 	mod		$tmp21 $tmp20 $const13 	%argrw{"wrr"}
-	assign		___655_fseed $tmp21 	%argrw{"wr"}
+	assign		___675_fseed $tmp21 	%argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h:193
 #     else if (source == k_Primvar)
 	eq		$tmp22 source $const14 	%line{193} %argrw{"wrr"}
 	if		$tmp22 60 71 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h:195
 #         if (!getattribute("primvar", varName, fseed) && verbosity > k_Silent)
-	getattribute	$tmp23 $const3 varName ___655_fseed 	%line{195} %argrw{"wrrw"}
+	getattribute	$tmp23 $const3 varName ___675_fseed 	%line{195} %argrw{"wrrw"}
 	eq		$tmp24 $tmp23 $const2 	%argrw{"wrr"}
 	neq		$tmp25 $tmp24 $const2 	%argrw{"wrr"}
 	if		$tmp25 55 55 	%argrw{"r"}
@@ -360,15 +358,15 @@ code ___main___
 	if		scaleNormalizedPrimvar 60 60 	%line{200} %argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h:201
 #             fseed = (fseed - 0.5) * 65535.0;
-	sub		$tmp28 ___655_fseed $const16 	%line{201} %argrw{"wrr"}
-	mul		___655_fseed $tmp28 $const17 	%argrw{"wrr"}
+	sub		$tmp28 ___675_fseed $const16 	%line{201} %argrw{"wrr"}
+	mul		___675_fseed $tmp28 $const17 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h:203
 #     else if (source == k_Attribute)
 	eq		$tmp29 source $const18 	%line{203} %argrw{"wrr"}
 	if		$tmp29 71 71 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h:205
 #         if (!getattribute(varName, fseed) && verbosity > k_Silent)
-	getattribute	$tmp30 varName ___655_fseed 	%line{205} %argrw{"wrw"}
+	getattribute	$tmp30 varName ___675_fseed 	%line{205} %argrw{"wrw"}
 	eq		$tmp31 $tmp30 $const2 	%argrw{"wrr"}
 	neq		$tmp32 $tmp31 $const2 	%argrw{"wrr"}
 	if		$tmp32 69 69 	%argrw{"r"}
@@ -381,53 +379,53 @@ code ___main___
 	warning		$const19 varName 	%line{207} %argrw{"rr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h:213
 #     float instanceId = 0;
-	assign		___655_instanceId $const2 	%line{213} %argrw{"wr"}
+	assign		___675_instanceId $const2 	%line{213} %argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h:214
 #     if (getattribute("user:procprimid", instanceId))
-	getattribute	$tmp35 $const20 ___655_instanceId 	%line{214} %argrw{"wrw"}
+	getattribute	$tmp35 $const20 ___675_instanceId 	%line{214} %argrw{"wrw"}
 	if		$tmp35 80 80 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h:216
 #         fseed = mod(fseed + instanceId, 65535);
-	add		$tmp36 ___655_fseed ___655_instanceId 	%line{216} %argrw{"wrr"}
+	add		$tmp36 ___675_fseed ___675_instanceId 	%line{216} %argrw{"wrr"}
 	functioncall	$const22 80 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:154
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:132
 # float  mod (float  a, float  b) { return a - b*floor(a/b); }
-	div		$tmp38 $tmp36 $const17 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{154} %argrw{"wrr"}
+	div		$tmp38 $tmp36 $const17 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{132} %argrw{"wrr"}
 	floor		$tmp37 $tmp38 	%argrw{"wr"}
 	mul		$tmp39 $const17 $tmp37 	%argrw{"wrr"}
-	sub		___655_fseed $tmp36 $tmp39 	%argrw{"wrr"}
+	sub		___675_fseed $tmp36 $tmp39 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h:218
 #     return fseed;
-	assign		$tmp9 ___655_fseed 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h"} %line{218} %argrw{"wr"}
+	assign		$tmp9 ___675_fseed 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h"} %line{218} %argrw{"wr"}
 # PxrManifold2D.osl:365
 #                                      NEVER_MATCH_CPP, verbosity) + seed;
-	add		___678_fseed $tmp9 seed 	%filename{"PxrManifold2D.osl"} %line{365} %argrw{"wrr"}
+	add		___698_fseed $tmp9 seed 	%filename{"PxrManifold2D.osl"} %line{365} %argrw{"wrr"}
 # PxrManifold2D.osl:366
 #         fseed = mod(fseed, 65535);
 	functioncall	$const22 87 	%line{366} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:154
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:132
 # float  mod (float  a, float  b) { return a - b*floor(a/b); }
-	div		$tmp41 ___678_fseed $const17 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{154} %argrw{"wrr"}
+	div		$tmp41 ___698_fseed $const17 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{132} %argrw{"wrr"}
 	floor		$tmp40 $tmp41 	%argrw{"wr"}
 	mul		$tmp42 $const17 $tmp40 	%argrw{"wrr"}
-	sub		___678_fseed ___678_fseed $tmp42 	%argrw{"wrr"}
+	sub		___698_fseed ___698_fseed $tmp42 	%argrw{"wrr"}
 # PxrManifold2D.osl:367
 #         float prob = probability ? noise("cell", fseed + 173.0) : 1.0;
 	neq		$tmp43 probability $const6 	%filename{"PxrManifold2D.osl"} %line{367} %argrw{"wrr"}
 	if		$tmp43 91 92 	%argrw{"r"}
-	add		$tmp44 ___678_fseed $const24 	%argrw{"wrr"}
-	noise		___678_prob $const23 $tmp44 	%argrw{"wrr"}
-	assign		___678_prob $const25 	%argrw{"wr"}
+	add		$tmp44 ___698_fseed $const24 	%argrw{"wrr"}
+	noise		___698_prob $const23 $tmp44 	%argrw{"wrr"}
+	assign		___698_prob $const25 	%argrw{"wr"}
 # PxrManifold2D.osl:368
 #         if (prob <= probability)
-	le		$tmp45 ___678_prob probability 	%line{368} %argrw{"wrr"}
+	le		$tmp45 ___698_prob probability 	%line{368} %argrw{"wrr"}
 	if		$tmp45 146 146 	%argrw{"r"}
 # PxrManifold2D.osl:370
 #             color rnd = noise("cell", color(fseed, fseed + 7.0, fseed + 13.0));
-	add		$tmp47 ___678_fseed $const26 	%line{370} %argrw{"wrr"}
-	add		$tmp48 ___678_fseed $const27 	%argrw{"wrr"}
-	color		$tmp46 ___678_fseed $tmp47 $tmp48 	%argrw{"wrrr"}
-	noise		___679_rnd $const23 $tmp46 	%argrw{"wrr"}
+	add		$tmp47 ___698_fseed $const26 	%line{370} %argrw{"wrr"}
+	add		$tmp48 ___698_fseed $const27 	%argrw{"wrr"}
+	color		$tmp46 ___698_fseed $tmp47 $tmp48 	%argrw{"wrrr"}
+	noise		___699_rnd $const23 $tmp46 	%argrw{"wrr"}
 # PxrManifold2D.osl:371
 #             rA = rAngleMin == rAngleMax
 	eq		$tmp49 rAngleMin rAngleMax 	%line{371} %argrw{"wrr"}
@@ -437,7 +435,7 @@ code ___main___
 	assign		rA rAngleMin 	%argrw{"wr"}
 # PxrManifold2D.osl:373
 #                     : compress(rnd[0], rAngleMin, rAngleMax);
-	compref		$tmp50 ___679_rnd $const2 	%line{373} %argrw{"wrr"}
+	compref		$tmp50 ___699_rnd $const2 	%line{373} %argrw{"wrr"}
 	functioncall	$const28 106 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:158
 #     return (hi - lo) * x + lo;
@@ -453,7 +451,7 @@ code ___main___
 	assign		rOS rOffsetSMin 	%argrw{"wr"}
 # PxrManifold2D.osl:376
 #                     : compress(rnd[1], rOffsetSMin, rOffsetSMax);
-	compref		$tmp54 ___679_rnd $const5 	%line{376} %argrw{"wrr"}
+	compref		$tmp54 ___699_rnd $const5 	%line{376} %argrw{"wrr"}
 	functioncall	$const28 114 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:158
 #     return (hi - lo) * x + lo;
@@ -469,7 +467,7 @@ code ___main___
 	assign		rOT rOffsetTMin 	%argrw{"wr"}
 # PxrManifold2D.osl:379
 #                     : compress(rnd[2], rOffsetTMin, rOffsetTMax);
-	compref		$tmp58 ___679_rnd $const14 	%line{379} %argrw{"wrr"}
+	compref		$tmp58 ___699_rnd $const14 	%line{379} %argrw{"wrr"}
 	functioncall	$const28 122 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:158
 #     return (hi - lo) * x + lo;
@@ -485,8 +483,8 @@ code ___main___
 	assign		rFS rScaleSMin 	%argrw{"wr"}
 # PxrManifold2D.osl:382
 #                     : compress((rnd[0] + rnd[1]) * 0.5, rScaleSMin, rScaleSMax);
-	compref		$tmp62 ___679_rnd $const2 	%line{382} %argrw{"wrr"}
-	compref		$tmp63 ___679_rnd $const5 	%argrw{"wrr"}
+	compref		$tmp62 ___699_rnd $const2 	%line{382} %argrw{"wrr"}
+	compref		$tmp63 ___699_rnd $const5 	%argrw{"wrr"}
 	add		$tmp64 $tmp62 $tmp63 	%argrw{"wrr"}
 	mul		$tmp65 $tmp64 $const16 	%argrw{"wrr"}
 	functioncall	$const28 133 	%argrw{"r"}
@@ -505,8 +503,8 @@ code ___main___
 	assign		rFT rScaleTMin 	%argrw{"wr"}
 # PxrManifold2D.osl:386
 #                     : compress((rnd[1] + rnd[2]) * 0.5, rScaleTMin, rScaleTMax)
-	compref		$tmp69 ___679_rnd $const5 	%line{386} %argrw{"wrr"}
-	compref		$tmp70 ___679_rnd $const14 	%argrw{"wrr"}
+	compref		$tmp69 ___699_rnd $const5 	%line{386} %argrw{"wrr"}
+	compref		$tmp70 ___699_rnd $const14 	%argrw{"wrr"}
 	add		$tmp71 $tmp69 $tmp70 	%argrw{"wrr"}
 	mul		$tmp72 $tmp71 $const16 	%argrw{"wrr"}
 	functioncall	$const28 145 	%argrw{"r"}
@@ -541,10 +539,10 @@ code ___main___
 	assign		$tmp80 ss 	%argrw{"wr"}
 # PxrManifold2D.osl:391
 #     makeStManifold(
-	functioncall	$const29 262 	%line{391} %argrw{"r"}
+	functioncall	$const29 261 	%line{391} %argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:330
 #     int readUvSetSuccessfully = 0;
-	assign		___407_readUvSetSuccessfully $const2 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{330} %argrw{"wr"}
+	assign		___427_readUvSetSuccessfully $const2 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{330} %argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:334
 #     if (name_uvSet == "" || name_uvSet == "st") {
 	eq		$tmp82 name_uvSet $const1 	%line{334} %argrw{"wrr"}
@@ -556,29 +554,29 @@ code ___main___
 	if		$tmp83 167 170 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:336
 #         readUvSetSuccessfully = 1;
-	assign		___407_readUvSetSuccessfully $const5 	%line{336} %argrw{"wr"}
+	assign		___427_readUvSetSuccessfully $const5 	%line{336} %argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:337
 #         inUvSet[0] = s;
-	aassign		___407_inUvSet $const2 $tmp80 	%line{337} %argrw{"wrr"}
+	aassign		___427_inUvSet $const2 $tmp80 	%line{337} %argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:338
 #         inUvSet[1] = t;
-	aassign		___407_inUvSet $const5 tt 	%line{338} %argrw{"wrr"}
+	aassign		___427_inUvSet $const5 tt 	%line{338} %argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:341
 #         inUvSet[0] = 0.0;
-	aassign		___407_inUvSet $const2 $const6 	%line{341} %argrw{"wrr"}
+	aassign		___427_inUvSet $const2 $const6 	%line{341} %argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:342
 #         inUvSet[1] = 0.0;
-	aassign		___407_inUvSet $const5 $const6 	%line{342} %argrw{"wrr"}
+	aassign		___427_inUvSet $const5 $const6 	%line{342} %argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:344
 #         readUvSetSuccessfully = getattribute(name_uvSet, inUvSet);
-	getattribute	___407_readUvSetSuccessfully name_uvSet ___407_inUvSet 	%line{344} %argrw{"wrw"}
+	getattribute	___427_readUvSetSuccessfully name_uvSet ___427_inUvSet 	%line{344} %argrw{"wrw"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:347
 #     if (readUvSetSuccessfully) {
-	if		___407_readUvSetSuccessfully 175 177 	%line{347} %argrw{"r"}
+	if		___427_readUvSetSuccessfully 175 177 	%line{347} %argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:348
 #         resultManifold.Q = point(inUvSet[0], inUvSet[1], 0.0);
-	aref		$tmp86 ___407_inUvSet $const2 	%line{348} %argrw{"wrr"}
-	aref		$tmp87 ___407_inUvSet $const5 	%argrw{"wrr"}
+	aref		$tmp86 ___427_inUvSet $const2 	%line{348} %argrw{"wrr"}
+	aref		$tmp87 ___427_inUvSet $const5 	%argrw{"wrr"}
 	point		result.Q $tmp86 $tmp87 $const6 	%argrw{"wrrr"}
 	assign		result.Q result.Q 	%argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:351
@@ -592,7 +590,7 @@ code ___main___
 	assign		result.QN $const32 	%line{356} %argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:358
 #     if (enableTransforms) {
-	if		enableTransforms 218 218 	%line{358} %argrw{"r"}
+	if		enableTransforms 217 217 	%line{358} %argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:359
 #         if (invertT) {
 	if		invertT 189 189 	%line{359} %argrw{"r"}
@@ -629,40 +627,39 @@ code ___main___
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:371
 #         if (angle != 0.0) {
 	neq		$tmp99 $tmp75 $const6 	%line{371} %argrw{"wrr"}
-	if		$tmp99 216 216 	%argrw{"r"}
+	if		$tmp99 215 215 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:373
 #             point Q = resultManifold.Q;
-	assign		___414_Q result.Q 	%line{373} %argrw{"wr"}
+	assign		___434_Q result.Q 	%line{373} %argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:374
 #             sincos(radians(angle), sinAng, cosAng);
-	functioncall	$const33 202 	%line{374} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:88
+	functioncall	$const33 201 	%line{374} %argrw{"r"}
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:65
 # float  radians (float x)  { return x*(M_PI/180.0); }
-	div		$tmp101 $const34 $const35 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{88} %argrw{"wrr"}
-	mul		$tmp100 $tmp75 $tmp101 	%argrw{"wrr"}
+	mul		$tmp100 $tmp75 $const34 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{65} %argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:374
 #             sincos(radians(angle), sinAng, cosAng);
-	sincos		$tmp100 ___414_sinAng ___414_cosAng 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{374} %argrw{"rww"}
+	sincos		$tmp100 ___434_sinAng ___434_cosAng 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{374} %argrw{"rww"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:375
 #             resultManifold.Q = point(cosAng * Q[0] - sinAng * Q[1],
-	compref		$tmp102 ___414_Q $const2 	%line{375} %argrw{"wrr"}
-	mul		$tmp103 ___414_cosAng $tmp102 	%argrw{"wrr"}
-	compref		$tmp104 ___414_Q $const5 	%argrw{"wrr"}
-	mul		$tmp105 ___414_sinAng $tmp104 	%argrw{"wrr"}
-	sub		$tmp106 $tmp103 $tmp105 	%argrw{"wrr"}
+	compref		$tmp101 ___434_Q $const2 	%line{375} %argrw{"wrr"}
+	mul		$tmp102 ___434_cosAng $tmp101 	%argrw{"wrr"}
+	compref		$tmp103 ___434_Q $const5 	%argrw{"wrr"}
+	mul		$tmp104 ___434_sinAng $tmp103 	%argrw{"wrr"}
+	sub		$tmp105 $tmp102 $tmp104 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:376
 #                                      sinAng * Q[0] + cosAng * Q[1],
-	compref		$tmp107 ___414_Q $const2 	%line{376} %argrw{"wrr"}
-	mul		$tmp108 ___414_sinAng $tmp107 	%argrw{"wrr"}
-	compref		$tmp109 ___414_Q $const5 	%argrw{"wrr"}
-	mul		$tmp110 ___414_cosAng $tmp109 	%argrw{"wrr"}
-	add		$tmp111 $tmp108 $tmp110 	%argrw{"wrr"}
+	compref		$tmp106 ___434_Q $const2 	%line{376} %argrw{"wrr"}
+	mul		$tmp107 ___434_sinAng $tmp106 	%argrw{"wrr"}
+	compref		$tmp108 ___434_Q $const5 	%argrw{"wrr"}
+	mul		$tmp109 ___434_cosAng $tmp108 	%argrw{"wrr"}
+	add		$tmp110 $tmp107 $tmp109 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:377
 #                                      Q[2]);
-	compref		$tmp112 ___414_Q $const14 	%line{377} %argrw{"wrr"}
+	compref		$tmp111 ___434_Q $const14 	%line{377} %argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:375
 #             resultManifold.Q = point(cosAng * Q[0] - sinAng * Q[1],
-	point		result.Q $tmp106 $tmp111 $tmp112 	%line{375} %argrw{"wrrr"}
+	point		result.Q $tmp105 $tmp110 $tmp111 	%line{375} %argrw{"wrrr"}
 	assign		result.Q result.Q 	%argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:380
 #         resultManifold.Q += center;
@@ -670,93 +667,93 @@ code ___main___
 	assign		result.Q result.Q 	%argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:383
 #     if (readUvSetSuccessfully) {
-	if		___407_readUvSetSuccessfully 259 259 	%line{383} %argrw{"r"}
+	if		___427_readUvSetSuccessfully 258 258 	%line{383} %argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:385
 #         MANIFOLD_CALC_RADIUS(resultManifold);
-	functioncall	$const36 259 	%line{385} %argrw{"r"}
+	functioncall	$const35 258 	%line{385} %argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:268
 #     if (inDisplacement) {
-	if		__rfk_inDisplacement 222 259 	%line{268} %argrw{"r"}
+	if		__rfk_inDisplacement 221 258 	%line{268} %argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:270
 #         manifold.Qradius = 0.0;
 	assign		result.Qradius $const6 	%line{270} %argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:271
 #     } else if (enableJacobianFilter != 0) {
-	neq		$tmp113 enableJacobianFilter $const2 	%line{271} %argrw{"wrr"}
-	if		$tmp113 258 259 	%argrw{"r"}
+	neq		$tmp112 enableJacobianFilter $const2 	%line{271} %argrw{"wrr"}
+	if		$tmp112 257 258 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:274
 #         point Pr = transform("raster", P);
-	functioncall	$const38 226 	%line{274} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:285
+	functioncall	$const37 225 	%line{274} %argrw{"r"}
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:263
 # point  transform (string to, point p)  { return transform("common",to,p); }
-	transform	___405_Pr $const39 $const37 P 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{285} %argrw{"wrrr"}
+	transform	___425_Pr $const38 $const36 P 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{263} %argrw{"wrrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:275
 #         float x = Pr[0];
-	compref		___405_x ___405_Pr $const2 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{275} %argrw{"wrr"}
+	compref		___425_x ___425_Pr $const2 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{275} %argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:276
 #         float y = Pr[1];
-	compref		___405_y ___405_Pr $const5 	%line{276} %argrw{"wrr"}
+	compref		___425_y ___425_Pr $const5 	%line{276} %argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:278
 #         float dxdu = Dx(x);
-	Dx		___405_dxdu ___405_x 	%line{278} %argrw{"wr"} %argderivs{1}
+	Dx		___425_dxdu ___425_x 	%line{278} %argrw{"wr"} %argderivs{1}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:279
 #         float dxdv = Dy(x);
-	Dy		___405_dxdv ___405_x 	%line{279} %argrw{"wr"} %argderivs{1}
+	Dy		___425_dxdv ___425_x 	%line{279} %argrw{"wr"} %argderivs{1}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:280
 #         float dydu = Dx(y);
-	Dx		___405_dydu ___405_y 	%line{280} %argrw{"wr"} %argderivs{1}
+	Dx		___425_dydu ___425_y 	%line{280} %argrw{"wr"} %argderivs{1}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:281
 #         float dydv = Dy(y);
-	Dy		___405_dydv ___405_y 	%line{281} %argrw{"wr"} %argderivs{1}
+	Dy		___425_dydv ___425_y 	%line{281} %argrw{"wr"} %argderivs{1}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:283
 #         float det = dxdu*dydv - dxdv*dydu;
-	mul		$tmp114 ___405_dxdu ___405_dydv 	%line{283} %argrw{"wrr"}
-	mul		$tmp115 ___405_dxdv ___405_dydu 	%argrw{"wrr"}
-	sub		___405_det $tmp114 $tmp115 	%argrw{"wrr"}
+	mul		$tmp113 ___425_dxdu ___425_dydv 	%line{283} %argrw{"wrr"}
+	mul		$tmp114 ___425_dxdv ___425_dydu 	%argrw{"wrr"}
+	sub		___425_det $tmp113 $tmp114 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:284
 #         float detinv = 1.0;
-	assign		___405_detinv $const25 	%line{284} %argrw{"wr"}
+	assign		___425_detinv $const25 	%line{284} %argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:285
 #         if (det != 0.0) detinv = 1.0/det;
-	neq		$tmp116 ___405_det $const6 	%line{285} %argrw{"wrr"}
-	if		$tmp116 239 239 	%argrw{"r"}
-	div		___405_detinv $const25 ___405_det 	%argrw{"wrr"}
+	neq		$tmp115 ___425_det $const6 	%line{285} %argrw{"wrr"}
+	if		$tmp115 238 238 	%argrw{"r"}
+	div		___425_detinv $const25 ___425_det 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:286
 #         float dudx = dydv*detinv;
-	mul		___405_dudx ___405_dydv ___405_detinv 	%line{286} %argrw{"wrr"}
+	mul		___425_dudx ___425_dydv ___425_detinv 	%line{286} %argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:287
 #         float dudy = -dxdv*detinv;
-	neg		$tmp117 ___405_dxdv 	%line{287} %argrw{"wr"}
-	mul		___405_dudy $tmp117 ___405_detinv 	%argrw{"wrr"}
+	neg		$tmp116 ___425_dxdv 	%line{287} %argrw{"wr"}
+	mul		___425_dudy $tmp116 ___425_detinv 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:288
 #         float dvdx = -dydu*detinv;
-	neg		$tmp118 ___405_dydu 	%line{288} %argrw{"wr"}
-	mul		___405_dvdx $tmp118 ___405_detinv 	%argrw{"wrr"}
+	neg		$tmp117 ___425_dydu 	%line{288} %argrw{"wr"}
+	mul		___425_dvdx $tmp117 ___425_detinv 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:289
 #         float dvdy = dxdu*detinv;
-	mul		___405_dvdy ___405_dxdu ___405_detinv 	%line{289} %argrw{"wrr"}
+	mul		___425_dvdy ___425_dxdu ___425_detinv 	%line{289} %argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:291
 #         vector dQdu = Dx(manifold.Q);
-	Dx		___405_dQdu result.Q 	%line{291} %argrw{"wr"} %argderivs{1}
+	Dx		___425_dQdu result.Q 	%line{291} %argrw{"wr"} %argderivs{1}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:292
 #         vector dQdv = Dy(manifold.Q);
-	Dy		___405_dQdv result.Q 	%line{292} %argrw{"wr"} %argderivs{1}
+	Dy		___425_dQdv result.Q 	%line{292} %argrw{"wr"} %argderivs{1}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:294
 #         vector dQdx = dQdu*dudx + dQdv*dvdx;
-	mul		$tmp119 ___405_dQdu ___405_dudx 	%line{294} %argrw{"wrr"}
-	mul		$tmp120 ___405_dQdv ___405_dvdx 	%argrw{"wrr"}
-	add		___405_dQdx $tmp119 $tmp120 	%argrw{"wrr"}
+	mul		$tmp118 ___425_dQdu ___425_dudx 	%line{294} %argrw{"wrr"}
+	mul		$tmp119 ___425_dQdv ___425_dvdx 	%argrw{"wrr"}
+	add		___425_dQdx $tmp118 $tmp119 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:295
 #         vector dQdy = dQdu*dudy + dQdv*dvdy;
-	mul		$tmp121 ___405_dQdu ___405_dudy 	%line{295} %argrw{"wrr"}
-	mul		$tmp122 ___405_dQdv ___405_dvdy 	%argrw{"wrr"}
-	add		___405_dQdy $tmp121 $tmp122 	%argrw{"wrr"}
+	mul		$tmp120 ___425_dQdu ___425_dudy 	%line{295} %argrw{"wrr"}
+	mul		$tmp121 ___425_dQdv ___425_dvdy 	%argrw{"wrr"}
+	add		___425_dQdy $tmp120 $tmp121 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:296
 #         manifold.Qradius = jacobianRadiusMult * sqrt(length(cross(dQdx, dQdy)));
-	cross		$tmp125 ___405_dQdx ___405_dQdy 	%line{296} %argrw{"wrr"}
-	length		$tmp124 $tmp125 	%argrw{"wr"}
-	sqrt		$tmp123 $tmp124 	%argrw{"wr"}
-	mul		result.Qradius jacobianRadiusMult $tmp123 	%argrw{"wrr"}
+	cross		$tmp124 ___425_dQdx ___425_dQdy 	%line{296} %argrw{"wrr"}
+	length		$tmp123 $tmp124 	%argrw{"wr"}
+	sqrt		$tmp122 $tmp123 	%argrw{"wr"}
+	mul		result.Qradius jacobianRadiusMult $tmp122 	%argrw{"wrr"}
 	assign		result.Qradius result.Qradius 	%argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:299
 #         manifold.Qradius = 0.0;
@@ -772,14 +769,14 @@ code ___main___
 	assign		resultRadius result.Qradius 	%line{390} %argrw{"wr"}
 # PxrManifold2D.osl:415
 #     if (isconnected(warp))
-	isconnected	$tmp126 warp 	%filename{"PxrManifold2D.osl"} %line{415} %argrw{"wr"}
-	if		$tmp126 271 271 	%argrw{"r"}
+	isconnected	$tmp125 warp 	%filename{"PxrManifold2D.osl"} %line{415} %argrw{"wr"}
+	if		$tmp125 270 270 	%argrw{"r"}
 # PxrManifold2D.osl:418
 #         result.Q += (2.0 * warp - 1.0) * warpAmount;
-	mul		$tmp127 $const40 warp 	%line{418} %argrw{"wrr"}
-	sub		$tmp128 $tmp127 $const25 	%argrw{"wrr"}
-	mul		$tmp129 $tmp128 warpAmount 	%argrw{"wrr"}
-	add		result.Q result.Q $tmp129 	%argrw{"wrr"}
+	mul		$tmp126 $const39 warp 	%line{418} %argrw{"wrr"}
+	sub		$tmp127 $tmp126 $const25 	%argrw{"wrr"}
+	mul		$tmp128 $tmp127 warpAmount 	%argrw{"wrr"}
+	add		result.Q result.Q $tmp128 	%argrw{"wrr"}
 	assign		result.Q result.Q 	%argrw{"wr"}
 # PxrManifold2D.osl:419
 #         resultS = result.Q[0];

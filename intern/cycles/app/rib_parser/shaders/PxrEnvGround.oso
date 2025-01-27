@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
-# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrEnvGround.osl/obj/PxrEnvGround.oso
+# Compiled by oslc 1.13.0.@PROJECT_VERSION_TWEAK@"dev"
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxSonoma_x86-64_clang15_external_release/osl/PxrEnvGround.osl/obj/PxrEnvGround.oso
 shader PxrEnvGround	%meta{int,rfm_nodeid,1233482} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/texture"} %meta{string,rfh_classification,"Pattern/Texture"} %meta{string,help,"Project an environment map onto a flat ground plane, for quick look-dev turntables."} 
 param	string	filename	""		%meta{string,widget,"assetIdInput"} %meta{string,options,"texture"} %meta{int,connectable,0} %meta{string,label,"Filename"}  %read{47,47} %write{2147483647,-1} %derivs
 param	float	envRadius	10		%meta{string,label,"Environment Radius"} %meta{float,min,0} %meta{float,slidermax,10}  %read{3,3} %write{2147483647,-1} %derivs
@@ -13,9 +13,9 @@ oparam	float	resultPresence	1		%read{48,48} %write{52,52}
 oparam	vector	resultNG	0 0 0		%read{53,53} %write{67,67}
 global	point	P	%read{1,58} %write{2147483647,-1} %derivs
 global	normal	N	%read{57,63} %write{2147483647,-1} %derivs
-local	float	___471_k	%read{63,65} %write{62,62}
-local	float	___491_n	%read{41,41} %write{40,40} %derivs
-local	float	___491_result	%read{43,46} %write{42,45} %derivs
+local	float	___501_k	%read{63,65} %write{62,62}
+local	float	___521_n	%read{41,41} %write{40,40} %derivs
+local	float	___521_result	%read{43,46} %write{42,45} %derivs
 local	point	Pw	%read{5,5} %write{1,1} %derivs
 local	point	hvo	%read{5,5} %write{2,2} %derivs
 local	vector	proj	%read{6,6} %write{4,4} %derivs
@@ -25,11 +25,11 @@ local	float	y	%read{14,14} %write{9,9} %derivs
 local	float	z	%read{11,11} %write{10,10} %derivs
 local	float	s	%read{19,47} %write{13,46} %derivs
 local	float	t	%read{20,47} %write{16,16} %derivs
-local	float	___492_sp	%read{19,30} %write{18,18} %derivs
-local	float	___492_rs	%read{25,25} %write{19,19} %derivs
-local	float	___492_rt	%read{31,31} %write{20,20} %derivs
-local	float	___494_fade	%read{52,52} %write{51,51}
-local	normal	___495_bumpN	%read{62,64} %write{60,60}
+local	float	___522_sp	%read{19,30} %write{18,18} %derivs
+local	float	___522_rs	%read{25,25} %write{19,19} %derivs
+local	float	___522_rt	%read{31,31} %write{20,20} %derivs
+local	float	___524_fade	%read{52,52} %write{51,51}
+local	normal	___525_bumpN	%read{62,64} %write{60,60}
 const	string	$const1	"world"		%read{1,4} %write{2147483647,-1}
 const	string	$const2	"transform"		%read{0,0} %write{2147483647,-1}
 const	string	$const3	"common"		%read{1,1} %write{2147483647,-1}
@@ -90,9 +90,9 @@ code ___main___
 # PxrEnvGround.osl:102
 #     point Pw = transform("world", P);
 	functioncall	$const2 2 	%filename{"PxrEnvGround.osl"} %line{102} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:285
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:263
 # point  transform (string to, point p)  { return transform("common",to,p); }
-	transform	Pw $const3 $const1 P 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{285} %argrw{"wrrr"}
+	transform	Pw $const3 $const1 P 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{263} %argrw{"wrrr"}
 # PxrEnvGround.osl:103
 #     point hvo = point(offsetX, 0.0, offsetZ);
 	point		hvo offsetX $const4 offsetZ 	%filename{"PxrEnvGround.osl"} %line{103} %argrw{"wrrr"}
@@ -129,36 +129,36 @@ code ___main___
 	if		$const5 34 48 	%line{115} %argrw{"r"}
 # PxrEnvGround.osl:118
 #         float sp = 0.1;
-	assign		___492_sp $const10 	%line{118} %argrw{"wr"}
+	assign		___522_sp $const10 	%line{118} %argrw{"wr"}
 # PxrEnvGround.osl:119
 #         float rs = fmod(s, sp);
-	fmod		___492_rs s ___492_sp 	%line{119} %argrw{"wrr"}
+	fmod		___522_rs s ___522_sp 	%line{119} %argrw{"wrr"}
 # PxrEnvGround.osl:120
 #         float rt = fmod(t, sp);
-	fmod		___492_rt t ___492_sp 	%line{120} %argrw{"wrr"}
+	fmod		___522_rt t ___522_sp 	%line{120} %argrw{"wrr"}
 # PxrEnvGround.osl:121
 #         resultRGB = color(mix(clamp(s, 0.0, 1.0), 0, step(sp - 0.005, rs)),
 	functioncall	$const12 24 	%line{121} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:141
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp10 s $const11 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp10 s $const11 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{141} %argrw{"wrr"}
 	max		$tmp9 $tmp10 $const4 	%argrw{"wrr"}
 # PxrEnvGround.osl:121
 #         resultRGB = color(mix(clamp(s, 0.0, 1.0), 0, step(sp - 0.005, rs)),
-	sub		$tmp12 ___492_sp $const13 	%filename{"PxrEnvGround.osl"} %line{121} %argrw{"wrr"}
-	step		$tmp11 $tmp12 ___492_rs 	%argrw{"wrr"}
+	sub		$tmp12 ___522_sp $const13 	%filename{"PxrEnvGround.osl"} %line{121} %argrw{"wrr"}
+	step		$tmp11 $tmp12 ___522_rs 	%argrw{"wrr"}
 	mix		$tmp8 $tmp9 $const4 $tmp11 	%argrw{"wrrr"}
 # PxrEnvGround.osl:122
 #                           mix(clamp(t, 0.0, 1.0), 0, step(sp - 0.005, rt)),
 	functioncall	$const12 30 	%line{122} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:141
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp15 t $const11 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp15 t $const11 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{141} %argrw{"wrr"}
 	max		$tmp14 $tmp15 $const4 	%argrw{"wrr"}
 # PxrEnvGround.osl:122
 #                           mix(clamp(t, 0.0, 1.0), 0, step(sp - 0.005, rt)),
-	sub		$tmp17 ___492_sp $const13 	%filename{"PxrEnvGround.osl"} %line{122} %argrw{"wrr"}
-	step		$tmp16 $tmp17 ___492_rt 	%argrw{"wrr"}
+	sub		$tmp17 ___522_sp $const13 	%filename{"PxrEnvGround.osl"} %line{122} %argrw{"wrr"}
+	step		$tmp16 $tmp17 ___522_rt 	%argrw{"wrr"}
 	mix		$tmp13 $tmp14 $const4 $tmp16 	%argrw{"wrrr"}
 # PxrEnvGround.osl:121
 #         resultRGB = color(mix(clamp(s, 0.0, 1.0), 0, step(sp - 0.005, rs)),
@@ -173,19 +173,19 @@ code ___main___
 	div		$tmp21 $tmp19 $const11 	%line{43} %argrw{"wrr"}
 	assign		$tmp20 $tmp21 	%argrw{"wr"}
 	assign		$tmp22 $tmp20 	%argrw{"wr"}
-	assign		___491_n $tmp22 	%argrw{"wr"}
+	assign		___521_n $tmp22 	%argrw{"wr"}
 # PxrEnvGround.osl:44
 #     float result = x - n*y;
-	mul		$tmp23 ___491_n $const11 	%line{44} %argrw{"wrr"}
-	sub		___491_result $tmp19 $tmp23 	%argrw{"wrr"}
+	mul		$tmp23 ___521_n $const11 	%line{44} %argrw{"wrr"}
+	sub		___521_result $tmp19 $tmp23 	%argrw{"wrr"}
 # PxrEnvGround.osl:45
 #     if (result < 0.0) result += y;
-	lt		$tmp24 ___491_result $const4 	%line{45} %argrw{"wrr"}
+	lt		$tmp24 ___521_result $const4 	%line{45} %argrw{"wrr"}
 	if		$tmp24 46 46 	%argrw{"r"}
-	add		___491_result ___491_result $const11 	%argrw{"wrr"}
+	add		___521_result ___521_result $const11 	%argrw{"wrr"}
 # PxrEnvGround.osl:46
 #     return result;
-	assign		s ___491_result 	%line{46} %argrw{"wr"}
+	assign		s ___521_result 	%line{46} %argrw{"wr"}
 # PxrEnvGround.osl:128
 #         resultRGB = texture(filename, s, t, "width", filterWidth);
 	texture		resultRGB filename s t $const16 filterWidth 	%line{128} %argrw{"wrrrrr"} %argderivs{2,3}
@@ -196,10 +196,10 @@ code ___main___
 # PxrEnvGround.osl:133
 #         float fade = smoothstep(-0.125, -0.10, dir[1]);
 	compref		$tmp26 dir $const6 	%line{133} %argrw{"wrr"}
-	smoothstep	___494_fade $const17 $const18 $tmp26 	%argrw{"wrrr"}
+	smoothstep	___524_fade $const17 $const18 $tmp26 	%argrw{"wrrr"}
 # PxrEnvGround.osl:134
 #         resultPresence = 1.0 - fade;
-	sub		resultPresence $const11 ___494_fade 	%line{134} %argrw{"wrr"}
+	sub		resultPresence $const11 ___524_fade 	%line{134} %argrw{"wrr"}
 # PxrEnvGround.osl:137
 #     if (isconnected(resultNG))
 	isconnected	$tmp27 resultNG 	%line{137} %argrw{"wr"}
@@ -211,18 +211,18 @@ code ___main___
 	mul		$tmp31 N $tmp30 	%argrw{"wrr"}
 	add		$tmp32 P $tmp31 	%argrw{"wrr"}
 	calculatenormal	$tmp28 $tmp32 	%argrw{"wr"} %argderivs{1}
-	normalize	___495_bumpN $tmp28 	%argrw{"wr"}
+	normalize	___525_bumpN $tmp28 	%argrw{"wr"}
 # PxrEnvGround.osl:140
 #         resultNG = surfgradFromPerturbedNormal(bumpN, N);
 	functioncall	$const19 68 	%line{140} %argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:100
 # 	float k = dot(Nn, bN);
-	dot		___471_k N ___495_bumpN 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h"} %line{100} %argrw{"wrr"}
+	dot		___501_k N ___525_bumpN 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h"} %line{100} %argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:101
 # 	return (k * Nn - bN) / max(1.0e-8, abs(k));
-	mul		$tmp33 ___471_k N 	%line{101} %argrw{"wrr"}
-	sub		$tmp34 $tmp33 ___495_bumpN 	%argrw{"wrr"}
-	abs		$tmp36 ___471_k 	%argrw{"wr"}
+	mul		$tmp33 ___501_k N 	%line{101} %argrw{"wrr"}
+	sub		$tmp34 $tmp33 ___525_bumpN 	%argrw{"wrr"}
+	abs		$tmp36 ___501_k 	%argrw{"wr"}
 	max		$tmp35 $const20 $tmp36 	%argrw{"wrr"}
 	div		resultNG $tmp34 $tmp35 	%argrw{"wrr"}
 	end

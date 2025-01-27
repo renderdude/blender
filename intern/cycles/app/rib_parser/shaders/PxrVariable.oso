@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
-# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrVariable.osl/obj/PxrVariable.oso
+# Compiled by oslc 1.13.0.@PROJECT_VERSION_TWEAK@"dev"
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxSonoma_x86-64_clang15_external_release/osl/PxrVariable.osl/obj/PxrVariable.oso
 shader PxrVariable	%meta{int,rfm_nodeid,1053276} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/utility"} %meta{string,rfh_classification,"Pattern/Utility"} 
 param	string	variable	""		%meta{string,widget,"mapper"} %meta{string,help,"variable (string)"} %meta{string,options,"Use Named PrimVar:|Shading position (P):P|Undisplaced position (Po):Po|Shading normal (Nn):Nn|Geometric normal (Ngn):Ngn|Undisplaced normal (Non):Non|Analytical undisplaced normal (Naon):Naon|Shading tangent (Tn):Tn|Normalized view vector (Vn):Vn|Length of view vector (VLen):VLen|Surface mean curvature (curvature):curvature|Surface principal curvature in u dir (curvature_u):curvature_u|Surface principal curvature in v dir (curvature_v):curvature_v|Ray Spread (incidentRaySpread):incidentRaySpread|Ray Radius (incidentRayRadius):incidentRayRadius|Micropolygon radius (PRadius):PRadius|Micropolygon size (mpSize):mpSize|Reflection Bias (biasR):biasR|Transmission (biasT):biasT|Surface U (u):u|Surface V (v):v|Surface W (w):w|Surface UV (uv):uv|Surface UVW (uvw):uvw|Ray footprint U (du):du|Ray footprint V (dv):dv|Ray footprint W (dw):dw|Ray footprint UV (duv):duv|Ray footprint UVW (duvw):duvw|Surface derivative U (dPdu):dPdu|Surface derivative V (dPdv):dPdv|Surface derivative W (dPdw):dPdw|Velocity (dPdtime):dPdtime|Velocity with camera (dPcameradtime):dPcameradtime|Time (time):time|Outside IOR (outsideIOR):outsideIOR|Opacity (Oi):Oi|Forward Motion (motionFore):motionFore|Backward Motion (motionBack):motionBack"} %meta{int,connectable,0} %meta{string,label,"Variable"}  %read{0,3} %write{2147483647,-1}
 param	string	name	""		%meta{string,widget,"default"} %meta{string,help,"name (string)"} %meta{int,connectable,0} %meta{string,label,"PrimVar"}  %read{2,2} %write{2147483647,-1}
@@ -24,29 +24,29 @@ global	vector	dPdtime	%read{71,71} %write{2147483647,-1}
 local	string	var	%read{4,278} %write{2,3}
 local	string	dst_space	%read{19,274} %write{9,13}
 local	int	success	%read{241,276} %write{14,272}
-local	point	___325_val	%read{19,20} %write{17,19}
-local	point	___326_val	%read{25,26} %write{23,25}
-local	normal	___327_val	%read{31,32} %write{29,31}
-local	normal	___328_val	%read{37,38} %write{35,37}
-local	normal	___329_val	%read{48,49} %write{46,48}
-local	vector	___330_val	%read{55,56} %write{53,55}
-local	vector	___331_val	%read{61,62} %write{59,61}
-local	vector	___332_val	%read{67,68} %write{65,67}
-local	vector	___333_val	%read{73,74} %write{71,73}
-local	vector	___334_val	%read{100,101} %write{97,100}
-local	color	___335_val	%read{106,106} %write{104,105}
-local	float	___338_val	%read{188,188} %write{186,187}
-local	float	___343_fdu	%read{218,218} %write{214,216}
-local	float	___343_fdv	%read{218,218} %write{215,217}
-local	float	___344_duval	%read{2147483647,-1} %write{226,226}
-local	float	___344_dvval	%read{2147483647,-1} %write{227,227}
-local	float	___344_dwval	%read{2147483647,-1} %write{228,228}
-local	float	___345_val	%read{236,236} %write{235,235}
-local	float[2]	___346_val	%read{242,243} %write{239,240}
-local	point	___349_val	%read{253,254} %write{251,253}
-local	point	___351_val	%read{262,263} %write{260,262}
-local	vector	___352_val	%read{268,269} %write{266,268}
-local	normal	___353_val	%read{274,275} %write{272,274}
+local	point	___345_val	%read{19,20} %write{17,19}
+local	point	___346_val	%read{25,26} %write{23,25}
+local	normal	___347_val	%read{31,32} %write{29,31}
+local	normal	___348_val	%read{37,38} %write{35,37}
+local	normal	___349_val	%read{48,49} %write{46,48}
+local	vector	___350_val	%read{55,56} %write{53,55}
+local	vector	___351_val	%read{61,62} %write{59,61}
+local	vector	___352_val	%read{67,68} %write{65,67}
+local	vector	___353_val	%read{73,74} %write{71,73}
+local	vector	___354_val	%read{100,101} %write{97,100}
+local	color	___355_val	%read{106,106} %write{104,105}
+local	float	___358_val	%read{188,188} %write{186,187}
+local	float	___363_fdu	%read{218,218} %write{214,216}
+local	float	___363_fdv	%read{218,218} %write{215,217}
+local	float	___364_duval	%read{2147483647,-1} %write{226,226}
+local	float	___364_dvval	%read{2147483647,-1} %write{227,227}
+local	float	___364_dwval	%read{2147483647,-1} %write{228,228}
+local	float	___365_val	%read{236,236} %write{235,235}
+local	float[2]	___366_val	%read{242,243} %write{239,240}
+local	point	___369_val	%read{253,254} %write{251,253}
+local	point	___371_val	%read{262,263} %write{260,262}
+local	vector	___372_val	%read{268,269} %write{266,268}
+local	normal	___373_val	%read{274,275} %write{272,274}
 const	string	$const1	""		%read{0,7} %write{2147483647,-1}
 temp	int	$tmp1	%read{1,1} %write{0,0}
 temp	int	$tmp2	%read{5,5} %write{4,4}
@@ -243,64 +243,64 @@ code ___main___
 	if		$tmp5 21 276 	%argrw{"r"}
 # PxrVariable.osl:105
 #         point val = P;
-	assign		___325_val P 	%line{105} %argrw{"wr"}
+	assign		___345_val P 	%line{105} %argrw{"wr"}
 # PxrVariable.osl:106
 #         val = transform(dst_space, val);
 	functioncall	$const7 20 	%line{106} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:285
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:263
 # point  transform (string to, point p)  { return transform("common",to,p); }
-	transform	___325_val $const4 dst_space ___325_val 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{285} %argrw{"wrrr"}
+	transform	___345_val $const4 dst_space ___345_val 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{263} %argrw{"wrrr"}
 # PxrVariable.osl:107
 #         resultRGB = color(val);
-	assign		resultRGB ___325_val 	%filename{"PxrVariable.osl"} %line{107} %argrw{"wr"}
+	assign		resultRGB ___345_val 	%filename{"PxrVariable.osl"} %line{107} %argrw{"wr"}
 # PxrVariable.osl:109
 #     else if (var == "Po")
 	eq		$tmp6 var $const8 	%line{109} %argrw{"wrr"}
 	if		$tmp6 27 276 	%argrw{"r"}
 # PxrVariable.osl:113
 #         success = getattribute("primvar", "P", val);
-	getattribute	success $const9 $const6 ___326_val 	%line{113} %argrw{"wrrw"}
+	getattribute	success $const9 $const6 ___346_val 	%line{113} %argrw{"wrrw"}
 # PxrVariable.osl:114
 #         val = transform(dst_space, val);
 	functioncall	$const7 26 	%line{114} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:285
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:263
 # point  transform (string to, point p)  { return transform("common",to,p); }
-	transform	___326_val $const4 dst_space ___326_val 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{285} %argrw{"wrrr"}
+	transform	___346_val $const4 dst_space ___346_val 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{263} %argrw{"wrrr"}
 # PxrVariable.osl:115
 #         resultRGB = color(val);
-	assign		resultRGB ___326_val 	%filename{"PxrVariable.osl"} %line{115} %argrw{"wr"}
+	assign		resultRGB ___346_val 	%filename{"PxrVariable.osl"} %line{115} %argrw{"wr"}
 # PxrVariable.osl:117
 #     else if (var == "Nn")
 	eq		$tmp7 var $const10 	%line{117} %argrw{"wrr"}
 	if		$tmp7 33 276 	%argrw{"r"}
 # PxrVariable.osl:119
 #         normal val = N;
-	assign		___327_val N 	%line{119} %argrw{"wr"}
+	assign		___347_val N 	%line{119} %argrw{"wr"}
 # PxrVariable.osl:120
 #         val = transform(dst_space, val);
 	functioncall	$const7 32 	%line{120} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:283
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:261
 # normal transform (string to, normal p) { return transform("common",to,p); }
-	transformn	___327_val $const4 dst_space ___327_val 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{283} %argrw{"wrrr"}
+	transformn	___347_val $const4 dst_space ___347_val 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{261} %argrw{"wrrr"}
 # PxrVariable.osl:121
 #         resultRGB = color(val);
-	assign		resultRGB ___327_val 	%filename{"PxrVariable.osl"} %line{121} %argrw{"wr"}
+	assign		resultRGB ___347_val 	%filename{"PxrVariable.osl"} %line{121} %argrw{"wr"}
 # PxrVariable.osl:123
 #     else if (var == "Ngn")
 	eq		$tmp8 var $const11 	%line{123} %argrw{"wrr"}
 	if		$tmp8 39 276 	%argrw{"r"}
 # PxrVariable.osl:125
 #         normal val = Ng;
-	assign		___328_val Ng 	%line{125} %argrw{"wr"}
+	assign		___348_val Ng 	%line{125} %argrw{"wr"}
 # PxrVariable.osl:126
 #         val = transform(dst_space, val);
 	functioncall	$const7 38 	%line{126} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:283
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:261
 # normal transform (string to, normal p) { return transform("common",to,p); }
-	transformn	___328_val $const4 dst_space ___328_val 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{283} %argrw{"wrrr"}
+	transformn	___348_val $const4 dst_space ___348_val 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{261} %argrw{"wrrr"}
 # PxrVariable.osl:127
 #         resultRGB = color(val);
-	assign		resultRGB ___328_val 	%filename{"PxrVariable.osl"} %line{127} %argrw{"wr"}
+	assign		resultRGB ___348_val 	%filename{"PxrVariable.osl"} %line{127} %argrw{"wr"}
 # PxrVariable.osl:129
 #     else if (var == "Non" || var == "Naon")
 	eq		$tmp9 var $const12 	%line{129} %argrw{"wrr"}
@@ -312,16 +312,16 @@ code ___main___
 	if		$tmp10 50 276 	%argrw{"r"}
 # PxrVariable.osl:132
 #         success = getattribute("builtin", var, val);
-	getattribute	success $const15 var ___329_val 	%line{132} %argrw{"wrrw"}
+	getattribute	success $const15 var ___349_val 	%line{132} %argrw{"wrrw"}
 # PxrVariable.osl:133
 #         val = transform(dst_space, val);
 	functioncall	$const7 49 	%line{133} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:283
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:261
 # normal transform (string to, normal p) { return transform("common",to,p); }
-	transformn	___329_val $const4 dst_space ___329_val 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{283} %argrw{"wrrr"}
+	transformn	___349_val $const4 dst_space ___349_val 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{261} %argrw{"wrrr"}
 # PxrVariable.osl:134
 #         resultRGB = color(val);
-	assign		resultRGB ___329_val 	%filename{"PxrVariable.osl"} %line{134} %argrw{"wr"}
+	assign		resultRGB ___349_val 	%filename{"PxrVariable.osl"} %line{134} %argrw{"wr"}
 # PxrVariable.osl:136
 #     else if (var == "Vn")
 	eq		$tmp13 var $const16 	%line{136} %argrw{"wrr"}
@@ -329,64 +329,64 @@ code ___main___
 # PxrVariable.osl:138
 #         vector val = normalize(-I);
 	neg		$tmp14 I 	%line{138} %argrw{"wr"}
-	normalize	___330_val $tmp14 	%argrw{"wr"}
+	normalize	___350_val $tmp14 	%argrw{"wr"}
 # PxrVariable.osl:139
 #         val = transform(dst_space, val);
 	functioncall	$const7 56 	%line{139} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:284
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:262
 # vector transform (string to, vector p) { return transform("common",to,p); }
-	transformv	___330_val $const4 dst_space ___330_val 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{284} %argrw{"wrrr"}
+	transformv	___350_val $const4 dst_space ___350_val 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{262} %argrw{"wrrr"}
 # PxrVariable.osl:140
 #         resultRGB = color(val);
-	assign		resultRGB ___330_val 	%filename{"PxrVariable.osl"} %line{140} %argrw{"wr"}
+	assign		resultRGB ___350_val 	%filename{"PxrVariable.osl"} %line{140} %argrw{"wr"}
 # PxrVariable.osl:142
 #     else if (var == "dPdu")
 	eq		$tmp15 var $const17 	%line{142} %argrw{"wrr"}
 	if		$tmp15 63 276 	%argrw{"r"}
 # PxrVariable.osl:144
 #         vector val = dPdu;
-	assign		___331_val dPdu 	%line{144} %argrw{"wr"}
+	assign		___351_val dPdu 	%line{144} %argrw{"wr"}
 # PxrVariable.osl:145
 #         val = transform(dst_space, val);
 	functioncall	$const7 62 	%line{145} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:284
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:262
 # vector transform (string to, vector p) { return transform("common",to,p); }
-	transformv	___331_val $const4 dst_space ___331_val 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{284} %argrw{"wrrr"}
+	transformv	___351_val $const4 dst_space ___351_val 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{262} %argrw{"wrrr"}
 # PxrVariable.osl:146
 #         resultRGB = color(val);
-	assign		resultRGB ___331_val 	%filename{"PxrVariable.osl"} %line{146} %argrw{"wr"}
+	assign		resultRGB ___351_val 	%filename{"PxrVariable.osl"} %line{146} %argrw{"wr"}
 # PxrVariable.osl:148
 #     else if (var == "dPdv")
 	eq		$tmp16 var $const18 	%line{148} %argrw{"wrr"}
 	if		$tmp16 69 276 	%argrw{"r"}
 # PxrVariable.osl:150
 #         vector val = dPdv;
-	assign		___332_val dPdv 	%line{150} %argrw{"wr"}
+	assign		___352_val dPdv 	%line{150} %argrw{"wr"}
 # PxrVariable.osl:151
 #         val = transform(dst_space, val);
 	functioncall	$const7 68 	%line{151} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:284
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:262
 # vector transform (string to, vector p) { return transform("common",to,p); }
-	transformv	___332_val $const4 dst_space ___332_val 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{284} %argrw{"wrrr"}
+	transformv	___352_val $const4 dst_space ___352_val 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{262} %argrw{"wrrr"}
 # PxrVariable.osl:152
 #         resultRGB = color(val);
-	assign		resultRGB ___332_val 	%filename{"PxrVariable.osl"} %line{152} %argrw{"wr"}
+	assign		resultRGB ___352_val 	%filename{"PxrVariable.osl"} %line{152} %argrw{"wr"}
 # PxrVariable.osl:154
 #     else if (var == "dPdtime")
 	eq		$tmp17 var $const19 	%line{154} %argrw{"wrr"}
 	if		$tmp17 75 276 	%argrw{"r"}
 # PxrVariable.osl:156
 #         vector val = dPdtime;
-	assign		___333_val dPdtime 	%line{156} %argrw{"wr"}
+	assign		___353_val dPdtime 	%line{156} %argrw{"wr"}
 # PxrVariable.osl:157
 #         val = transform(dst_space, val);
 	functioncall	$const7 74 	%line{157} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:284
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:262
 # vector transform (string to, vector p) { return transform("common",to,p); }
-	transformv	___333_val $const4 dst_space ___333_val 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{284} %argrw{"wrrr"}
+	transformv	___353_val $const4 dst_space ___353_val 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{262} %argrw{"wrrr"}
 # PxrVariable.osl:158
 #         resultRGB = color(val);
-	assign		resultRGB ___333_val 	%filename{"PxrVariable.osl"} %line{158} %argrw{"wr"}
+	assign		resultRGB ___353_val 	%filename{"PxrVariable.osl"} %line{158} %argrw{"wr"}
 # PxrVariable.osl:160
 #     else if (var == "Tn" || var == "dPdw" || var == "dPcameradtime" ||
 	eq		$tmp18 var $const20 	%line{160} %argrw{"wrr"}
@@ -421,32 +421,32 @@ code ___main___
 	if		$tmp28 102 276 	%line{160} %argrw{"r"}
 # PxrVariable.osl:163
 #         vector val = 0;
-	assign		___334_val $const13 	%line{163} %argrw{"wr"}
+	assign		___354_val $const13 	%line{163} %argrw{"wr"}
 # PxrVariable.osl:164
 #         success = getattribute("builtin", var, val);
-	getattribute	success $const15 var ___334_val 	%line{164} %argrw{"wrrw"}
+	getattribute	success $const15 var ___354_val 	%line{164} %argrw{"wrrw"}
 # PxrVariable.osl:165
 #         val = transform(dst_space, val);
 	functioncall	$const7 101 	%line{165} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:284
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:262
 # vector transform (string to, vector p) { return transform("common",to,p); }
-	transformv	___334_val $const4 dst_space ___334_val 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{284} %argrw{"wrrr"}
+	transformv	___354_val $const4 dst_space ___354_val 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{262} %argrw{"wrrr"}
 # PxrVariable.osl:166
 #         resultRGB = color(val);
-	assign		resultRGB ___334_val 	%filename{"PxrVariable.osl"} %line{166} %argrw{"wr"}
+	assign		resultRGB ___354_val 	%filename{"PxrVariable.osl"} %line{166} %argrw{"wr"}
 # PxrVariable.osl:168
 #     else if (var == "Oi")
 	eq		$tmp31 var $const25 	%line{168} %argrw{"wrr"}
 	if		$tmp31 107 276 	%argrw{"r"}
 # PxrVariable.osl:170
 #         color val = 0;
-	assign		___335_val $const13 	%line{170} %argrw{"wr"}
+	assign		___355_val $const13 	%line{170} %argrw{"wr"}
 # PxrVariable.osl:171
 #         success = getattribute("builtin", var, val);
-	getattribute	success $const15 var ___335_val 	%line{171} %argrw{"wrrw"}
+	getattribute	success $const15 var ___355_val 	%line{171} %argrw{"wrrw"}
 # PxrVariable.osl:172
 #         resultRGB = val;
-	assign		resultRGB ___335_val 	%line{172} %argrw{"wr"}
+	assign		resultRGB ___355_val 	%line{172} %argrw{"wr"}
 # PxrVariable.osl:174
 #     else if (var == "VLen")
 	eq		$tmp32 var $const26 	%line{174} %argrw{"wrr"}
@@ -564,13 +564,13 @@ code ___main___
 	if		$tmp75 189 276 	%line{182} %argrw{"r"}
 # PxrVariable.osl:188
 #         float val = 0;
-	assign		___338_val $const13 	%line{188} %argrw{"wr"}
+	assign		___358_val $const13 	%line{188} %argrw{"wr"}
 # PxrVariable.osl:189
 #         success = getattribute("builtin", var, val);
-	getattribute	success $const15 var ___338_val 	%line{189} %argrw{"wrrw"}
+	getattribute	success $const15 var ___358_val 	%line{189} %argrw{"wrrw"}
 # PxrVariable.osl:190
 #         resultRGB =  color(val);
-	assign		resultRGB ___338_val 	%line{190} %argrw{"wr"}
+	assign		resultRGB ___358_val 	%line{190} %argrw{"wr"}
 # PxrVariable.osl:192
 #     else if (var == "u")
 	eq		$tmp78 var $const42 	%line{192} %argrw{"wrr"}
@@ -618,17 +618,17 @@ code ___main___
 	if		$tmp86 219 276 	%argrw{"r"}
 # PxrVariable.osl:212
 #         float fdu = 0, fdv = 0;
-	assign		___343_fdu $const13 	%line{212} %argrw{"wr"}
-	assign		___343_fdv $const13 	%argrw{"wr"}
+	assign		___363_fdu $const13 	%line{212} %argrw{"wr"}
+	assign		___363_fdv $const13 	%argrw{"wr"}
 # PxrVariable.osl:213
 #         success = getattribute("builtin", "du", fdu);
-	getattribute	success $const15 $const38 ___343_fdu 	%line{213} %argrw{"wrrw"}
+	getattribute	success $const15 $const38 ___363_fdu 	%line{213} %argrw{"wrrw"}
 # PxrVariable.osl:214
 #         success = getattribute("builtin", "dv", fdv);
-	getattribute	success $const15 $const39 ___343_fdv 	%line{214} %argrw{"wrrw"}
+	getattribute	success $const15 $const39 ___363_fdv 	%line{214} %argrw{"wrrw"}
 # PxrVariable.osl:215
 #         resultRGB = color(fdu, fdv, 0);
-	color		resultRGB ___343_fdu ___343_fdv $const46 	%line{215} %argrw{"wrrr"}
+	color		resultRGB ___363_fdu ___363_fdv $const46 	%line{215} %argrw{"wrrr"}
 # PxrVariable.osl:217
 #     else if (var == "duvw" || var == "duvwfp")
 	eq		$tmp89 var $const50 	%line{217} %argrw{"wrr"}
@@ -640,9 +640,9 @@ code ___main___
 	if		$tmp90 233 276 	%argrw{"r"}
 # PxrVariable.osl:219
 #         float duval = 0, dvval = 0, dwval = 0;
-	assign		___344_duval $const13 	%line{219} %argrw{"wr"}
-	assign		___344_dvval $const13 	%argrw{"wr"}
-	assign		___344_dwval $const13 	%argrw{"wr"}
+	assign		___364_duval $const13 	%line{219} %argrw{"wr"}
+	assign		___364_dvval $const13 	%argrw{"wr"}
+	assign		___364_dwval $const13 	%argrw{"wr"}
 # PxrVariable.osl:220
 #         success = getattribute("builtin", "du", resultR);
 	getattribute	success $const15 $const38 resultR 	%line{220} %argrw{"wrrw"}
@@ -661,27 +661,27 @@ code ___main___
 	if		$tmp93 237 276 	%argrw{"r"}
 # PxrVariable.osl:228
 #         success = getattribute("primvar", var, val);
-	getattribute	success $const9 var ___345_val 	%line{228} %argrw{"wrrw"}
+	getattribute	success $const9 var ___365_val 	%line{228} %argrw{"wrrw"}
 # PxrVariable.osl:229
 #         resultRGB = color(val);
-	assign		resultRGB ___345_val 	%line{229} %argrw{"wr"}
+	assign		resultRGB ___365_val 	%line{229} %argrw{"wr"}
 # PxrVariable.osl:231
 #     else if (type == "float2")
 	eq		$tmp94 type $const53 	%line{231} %argrw{"wrr"}
 	if		$tmp94 249 276 	%argrw{"r"}
 # PxrVariable.osl:233
 #         float val[2] = {0, 0};
-	assign		___346_val $const54 	%line{233} %argrw{"wr"}
+	assign		___366_val $const54 	%line{233} %argrw{"wr"}
 # PxrVariable.osl:234
 #         success = getattribute("primvar", var, val);
-	getattribute	success $const9 var ___346_val 	%line{234} %argrw{"wrrw"}
+	getattribute	success $const9 var ___366_val 	%line{234} %argrw{"wrrw"}
 # PxrVariable.osl:235
 #         if (success)
 	if		success 245 249 	%line{235} %argrw{"r"}
 # PxrVariable.osl:237
 #             resultRGB = color(val[0], val[1], 0);
-	aref		$tmp95 ___346_val $const13 	%line{237} %argrw{"wrr"}
-	aref		$tmp96 ___346_val $const5 	%argrw{"wrr"}
+	aref		$tmp95 ___366_val $const13 	%line{237} %argrw{"wrr"}
+	aref		$tmp96 ___366_val $const5 	%argrw{"wrr"}
 	color		resultRGB $tmp95 $tmp96 $const46 	%argrw{"wrrr"}
 # PxrVariable.osl:239
 #         else if (var == "st")
@@ -699,16 +699,16 @@ code ___main___
 	if		$tmp98 255 276 	%argrw{"r"}
 # PxrVariable.osl:249
 #         success = getattribute("primvar", var, val);
-	getattribute	success $const9 var ___349_val 	%line{249} %argrw{"wrrw"}
+	getattribute	success $const9 var ___369_val 	%line{249} %argrw{"wrrw"}
 # PxrVariable.osl:250
 #         val = transform(dst_space, val);
 	functioncall	$const7 254 	%line{250} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:285
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:263
 # point  transform (string to, point p)  { return transform("common",to,p); }
-	transform	___349_val $const4 dst_space ___349_val 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{285} %argrw{"wrrr"}
+	transform	___369_val $const4 dst_space ___369_val 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{263} %argrw{"wrrr"}
 # PxrVariable.osl:251
 #         resultRGB = color(val);
-	assign		resultRGB ___349_val 	%filename{"PxrVariable.osl"} %line{251} %argrw{"wr"}
+	assign		resultRGB ___369_val 	%filename{"PxrVariable.osl"} %line{251} %argrw{"wr"}
 # PxrVariable.osl:253
 #     else if (type == "color")
 	eq		$tmp99 type $const57 	%line{253} %argrw{"wrr"}
@@ -722,48 +722,48 @@ code ___main___
 	if		$tmp100 264 276 	%argrw{"r"}
 # PxrVariable.osl:260
 #         success = getattribute("primvar", var, val);
-	getattribute	success $const9 var ___351_val 	%line{260} %argrw{"wrrw"}
+	getattribute	success $const9 var ___371_val 	%line{260} %argrw{"wrrw"}
 # PxrVariable.osl:261
 #         val = transform(dst_space, val);
 	functioncall	$const7 263 	%line{261} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:285
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:263
 # point  transform (string to, point p)  { return transform("common",to,p); }
-	transform	___351_val $const4 dst_space ___351_val 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{285} %argrw{"wrrr"}
+	transform	___371_val $const4 dst_space ___371_val 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{263} %argrw{"wrrr"}
 # PxrVariable.osl:262
 #         resultRGB = color(val);
-	assign		resultRGB ___351_val 	%filename{"PxrVariable.osl"} %line{262} %argrw{"wr"}
+	assign		resultRGB ___371_val 	%filename{"PxrVariable.osl"} %line{262} %argrw{"wr"}
 # PxrVariable.osl:264
 #     else if (type == "vector")
 	eq		$tmp101 type $const59 	%line{264} %argrw{"wrr"}
 	if		$tmp101 270 276 	%argrw{"r"}
 # PxrVariable.osl:267
 #         success = getattribute("primvar", var, val);
-	getattribute	success $const9 var ___352_val 	%line{267} %argrw{"wrrw"}
+	getattribute	success $const9 var ___372_val 	%line{267} %argrw{"wrrw"}
 # PxrVariable.osl:268
 #         val = transform(dst_space, val);
 	functioncall	$const7 269 	%line{268} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:284
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:262
 # vector transform (string to, vector p) { return transform("common",to,p); }
-	transformv	___352_val $const4 dst_space ___352_val 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{284} %argrw{"wrrr"}
+	transformv	___372_val $const4 dst_space ___372_val 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{262} %argrw{"wrrr"}
 # PxrVariable.osl:269
 #         resultRGB = color(val);
-	assign		resultRGB ___352_val 	%filename{"PxrVariable.osl"} %line{269} %argrw{"wr"}
+	assign		resultRGB ___372_val 	%filename{"PxrVariable.osl"} %line{269} %argrw{"wr"}
 # PxrVariable.osl:271
 #     else if (type == "normal")
 	eq		$tmp102 type $const60 	%line{271} %argrw{"wrr"}
 	if		$tmp102 276 276 	%argrw{"r"}
 # PxrVariable.osl:274
 #         success = getattribute("primvar", var, val);
-	getattribute	success $const9 var ___353_val 	%line{274} %argrw{"wrrw"}
+	getattribute	success $const9 var ___373_val 	%line{274} %argrw{"wrrw"}
 # PxrVariable.osl:275
 #         val = transform(dst_space, val);
 	functioncall	$const7 275 	%line{275} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:283
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:261
 # normal transform (string to, normal p) { return transform("common",to,p); }
-	transformn	___353_val $const4 dst_space ___353_val 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{283} %argrw{"wrrr"}
+	transformn	___373_val $const4 dst_space ___373_val 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{261} %argrw{"wrrr"}
 # PxrVariable.osl:276
 #         resultRGB = color(val);
-	assign		resultRGB ___353_val 	%filename{"PxrVariable.osl"} %line{276} %argrw{"wr"}
+	assign		resultRGB ___373_val 	%filename{"PxrVariable.osl"} %line{276} %argrw{"wr"}
 # PxrVariable.osl:279
 #     if (!success) warning("PxrVariable failed to lookup %s", var);
 	eq		$tmp103 success $const13 	%line{279} %argrw{"wrr"}

@@ -1,106 +1,132 @@
 OpenShadingLanguage 1.00
-# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrBump.osl/obj/PxrBump.oso
+# Compiled by oslc 1.13.0.@PROJECT_VERSION_TWEAK@"dev"
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxSonoma_x86-64_clang15_external_release/osl/PxrBump.osl/obj/PxrBump.oso
 shader PxrBump	%meta{int,rfm_nodeid,1053416} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/bump"} %meta{string,rfh_classification,"Pattern/Bump"} %meta{string,help,"Calculate a bumped normal based on a floating point scalar displacement map."} 
-param	float	scale	1		%meta{string,widget,"default"} %meta{string,help,"An object-space scale applied to the bump.<br><br>scale (float)"} %meta{string,label,"Scale"}  %read{201,201} %write{2147483647,-1} %derivs
+param	float	scale	1		%meta{string,widget,"default"} %meta{string,help,"An object-space scale applied to the bump.<br><br>scale (float)"} %meta{string,label,"Scale"}  %read{313,313} %write{2147483647,-1} %derivs
 param	int	disable	0		%meta{string,widget,"checkBox"} %meta{string,help,"Use the geometric normal (ignore the modified bump).<br><br>disable (int)"} %meta{int,connectable,0} %meta{string,label,"Disabled"}  %read{47,47} %write{2147483647,-1}
 param	float	inputBump	0		%meta{string,widget,"default"} %meta{string,page,"Pattern"} %meta{int,page_open,1} %meta{string,help,"If \"Input Bump\" is connected,<br>the pattern executes the upstream shader graph connected to<br>\"Input Bump\"<br>. If \"Filename\" is connected, \"Input Bump\" is ignored.<br><br>inputBump (float)"} %meta{string,label,"Input Bump"} %meta{string,readOnly,"True"}  %read{68,68} %write{2147483647,-1} %derivs
 param	string	filename	""		%meta{string,widget,"assetIdInput"} %meta{string,page,"Texture"} %meta{int,page_open,1} %meta{string,help,"Filename could be a color or monochrome file.  The shader reads only one<br>channel of the file from Channel specified below.<br>If \"Filename\" is specified, the pattern has no upstream graph connected.<br>Instead it reads the bump value from the texture file.<br>The shader currently does not allow modifying the manifold of the texture.<br>If \"Input Bump\" is connected and Filename is also specified, Filename is<br>used while the connection of \"Input Bump\" is ignored.<br><br>filename (string)"} %meta{string,options,"texture"} %meta{int,connectable,0} %meta{string,label,"Filename"}  %read{1,66} %write{2147483647,-1} %derivs
 param	int	firstChannel	0		%meta{string,widget,"default"} %meta{string,page,"Texture"} %meta{string,help,"First channel offset to be looked up for Filename.<br><br>firstChannel (int)"} %meta{string,conditionalVisOp,"notEqualTo"} %meta{string,conditionalVisPath,"../filename"} %meta{string,conditionalVisValue,""} %meta{int,connectable,0} %meta{string,label,"First Channel Offset"}  %read{98,98} %write{2147483647,-1} %derivs
 param	int	atlasStyle	0		%meta{string,widget,"mapper"} %meta{string,page,"Texture"} %meta{string,help,"[DEPRECATED]: Specify which atlas style to use if _MAPID_ is in the Filename.<br><br>atlasStyle (int)"} %meta{string,conditionalVisOp,"notEqualTo"} %meta{string,conditionalVisPath,"../filename"} %meta{string,conditionalVisValue,""} %meta{string,options,"None:0|UDIM (Mari):1|UV Tile Base-1 (Mudbox):2|UV Tile Base-0 (Zbrush):3"} %meta{int,connectable,0} %meta{string,label,"Atlas Style"}  %read{5,24} %write{2147483647,-1}
 param	int	invertT	1		%meta{string,widget,"checkBox"} %meta{string,page,"Texture"} %meta{string,help,"Inverts the t texture coordinate for texture lookup.<br><br>invertT (int)"} %meta{string,conditionalVisOp,"notEqualTo"} %meta{string,conditionalVisPath,"../filename"} %meta{string,conditionalVisValue,""} %meta{int,connectable,0} %meta{string,label,"Invert T"}  %read{0,0} %write{2147483647,-1}
+param	int	smoothRayDerivs	1		%meta{string,widget,"checkBox"} %meta{string,page,"Texture"} %meta{string,help,"Compute texture filter widths at ray hit points in a more robust manner, providing consistent widths independent of the rotation of the underlying surface."} %meta{int,connectable,0} %meta{string,label,"Smooth Ray Derivs"}  %read{123,123} %write{2147483647,-1}
 param	float	blur	0		%meta{string,widget,"default"} %meta{string,page,"Texture"} %meta{string,help,"Specifies how much to blur the result from the texture.<br><br>blur (float)"} %meta{string,conditionalVisOp,"notEqualTo"} %meta{string,conditionalVisPath,"../filename"} %meta{string,conditionalVisValue,""} %meta{string,label,"Blur"}  %read{99,99} %write{2147483647,-1} %derivs
 param	int	lerp	1		%meta{string,widget,"checkBox"} %meta{string,page,"Texture"} %meta{string,help,"Selects whether to interpolate between adjacent resolutions in<br>the multi-resolution texture, resulting in smoother transitions<br>between levels.<br><br>lerp (int)"} %meta{string,conditionalVisOp,"notEqualTo"} %meta{string,conditionalVisPath,"../filename"} %meta{string,conditionalVisValue,""} %meta{int,connectable,0} %meta{string,label,"Mip Interpolate"}  %read{2147483647,-1} %write{2147483647,-1}
 param	struct Manifold	manifold			%meta{string,widget,"default"} %meta{string,page,"Texture"} %meta{string,help,"You can connect a PxrBumpManifold2D here. Any other manifold type<br>will be ignored.<br><br>manifold (struct)"} %meta{string,label,"Bump Manifold"} %meta{string,readOnly,"True"}  %read{69,69} %write{2147483647,-1} %struct{"Manifold"} %structfields{Q,QN,Qradius} %structfieldtypes{"pnf"} %structnfields{3}
 param	point	manifold.Q	0 0 0		%meta{string,widget,"default"} %meta{string,page,"Texture"} %meta{string,help,"You can connect a PxrBumpManifold2D here. Any other manifold type<br>will be ignored.<br><br>manifold (struct)"} %meta{string,label,"Bump Manifold"} %meta{string,readOnly,"True"}  %read{86,86} %write{2147483647,-1} %mystruct{manifold} %mystructfield{0} %derivs
 param	normal	manifold.QN	0 0 0		%meta{string,widget,"default"} %meta{string,page,"Texture"} %meta{string,help,"You can connect a PxrBumpManifold2D here. Any other manifold type<br>will be ignored.<br><br>manifold (struct)"} %meta{string,label,"Bump Manifold"} %meta{string,readOnly,"True"}  %read{87,87} %write{2147483647,-1} %mystruct{manifold} %mystructfield{1}
 param	float	manifold.Qradius	0		%meta{string,widget,"default"} %meta{string,page,"Texture"} %meta{string,help,"You can connect a PxrBumpManifold2D here. Any other manifold type<br>will be ignored.<br><br>manifold (struct)"} %meta{string,label,"Bump Manifold"} %meta{string,readOnly,"True"}  %read{88,88} %write{2147483647,-1} %mystruct{manifold} %mystructfield{2}
-param	int	mipBias	0		%meta{string,page,"Texture.Advanced Texture Settings"} %meta{int,page_open,1} %meta{string,help,"Offset the selected MIP level picked by the renderer.<br>Positive values will bias toward lower resolution MIPs.<br>Negative values will bias toward higher resolution MIPs.<br><br>mipBias (int)"} %meta{int,connectable,0} %meta{string,label,"MIP bias"} %meta{int,slidermax,10} %meta{int,slidermin,-10}  %read{135,145} %write{2147483647,-1} %derivs
-param	float	maxResolution	0		%meta{string,widget,"mapper"} %meta{string,page,"Texture.Advanced Texture Settings"} %meta{string,help,"Clamp the resolution to a maximum value.<br><br>maxResolution (float)"} %meta{string,options,"Unlimited:0|32:32|64:64|128:128|256:256|512:512|1024:1024|2048:2048|4096:4096|8192:8192"} %meta{string,label,"Max Resolution"}  %read{138,154} %write{2147483647,-1} %derivs
-param	normal	inputN	1 0 0		%meta{string,widget,"default"} %meta{string,page,"Advanced"} %meta{int,page_open,1} %meta{string,help,"An additional normal to be added to the bump normal.<br><br>inputN (normal)"} %meta{string,label,"Input Normal"} %meta{string,readOnly,"True"}  %read{208,213} %write{2147483647,-1}
-param	int	reverse	0		%meta{string,widget,"checkBox"} %meta{string,page,"Advanced"} %meta{string,help,"Reverse the resulting normal.<br><br>reverse (int)"} %meta{int,connectable,0} %meta{string,label,"Reverse Normal"}  %read{257,257} %write{2147483647,-1}
-param	float	adjustAmount	1		%meta{string,widget,"default"} %meta{string,page,"Advanced"} %meta{string,help,"Amount to adjust the normals when they are facing away from the camera.<br><br>adjustAmount (float)"} %meta{string,label,"Adjust Amount"} %meta{float,max,1} %meta{float,min,0}  %read{262,271} %write{2147483647,-1}
-param	float	surfaceNormalMix	0		%meta{string,widget,"default"} %meta{string,page,"Advanced"} %meta{string,help,"The amount to mix the resulting normals with the surface normals.<br><br>surfaceNormalMix (float)"} %meta{string,label,"Surface Normal Mix"} %meta{float,max,1} %meta{float,min,0} %meta{int,slider,1} %meta{float,slidermax,1} %meta{float,slidermin,0}  %read{50,279} %write{2147483647,-1}
+param	int	mipBias	0		%meta{string,page,"Texture.Advanced Texture Settings"} %meta{int,page_open,1} %meta{string,help,"Offset the selected MIP level picked by the renderer.<br>Positive values will bias toward lower resolution MIPs.<br>Negative values will bias toward higher resolution MIPs.<br><br>mipBias (int)"} %meta{int,connectable,0} %meta{string,label,"MIP bias"} %meta{int,slidermax,10} %meta{int,slidermin,-10}  %read{236,246} %write{2147483647,-1} %derivs
+param	float	maxResolution	0		%meta{string,widget,"mapper"} %meta{string,page,"Texture.Advanced Texture Settings"} %meta{string,help,"Clamp the resolution to a maximum value.<br><br>maxResolution (float)"} %meta{string,options,"Unlimited:0|32:32|64:64|128:128|256:256|512:512|1024:1024|2048:2048|4096:4096|8192:8192"} %meta{string,label,"Max Resolution"}  %read{239,253} %write{2147483647,-1}
+param	normal	inputN	1 0 0		%meta{string,widget,"default"} %meta{string,page,"Advanced"} %meta{int,page_open,1} %meta{string,help,"An additional normal to be added to the bump normal.<br><br>inputN (normal)"} %meta{string,label,"Input Normal"} %meta{string,readOnly,"True"}  %read{320,325} %write{2147483647,-1}
+param	int	reverse	0		%meta{string,widget,"checkBox"} %meta{string,page,"Advanced"} %meta{string,help,"Reverse the resulting normal.<br><br>reverse (int)"} %meta{int,connectable,0} %meta{string,label,"Reverse Normal"}  %read{369,369} %write{2147483647,-1}
+param	float	adjustAmount	1		%meta{string,widget,"default"} %meta{string,page,"Advanced"} %meta{string,help,"Amount to adjust the normals when they are facing away from the camera.<br><br>adjustAmount (float)"} %meta{string,label,"Adjust Amount"} %meta{float,max,1} %meta{float,min,0}  %read{374,383} %write{2147483647,-1}
+param	float	surfaceNormalMix	0		%meta{string,widget,"default"} %meta{string,page,"Advanced"} %meta{string,help,"The amount to mix the resulting normals with the surface normals.<br><br>surfaceNormalMix (float)"} %meta{string,label,"Surface Normal Mix"} %meta{float,max,1} %meta{float,min,0} %meta{int,slider,1} %meta{float,slidermax,1} %meta{float,slidermin,0}  %read{50,391} %write{2147483647,-1}
 param	float	s	0		%meta{int,lockgeom,0} %meta{string,widget,"null"} %meta{int,connectable,0}  %read{80,80} %write{2147483647,-1} %derivs
 param	float	t	0		%meta{int,lockgeom,0} %meta{string,widget,"null"} %meta{int,connectable,0}  %read{74,79} %write{2147483647,-1} %derivs
-oparam	normal	resultN	0 0 0		%meta{string,help,"resultN (normal)"}  %read{2147483647,-1} %write{59,281}
-global	point	P	%read{205,205} %write{2147483647,-1} %derivs
-global	vector	I	%read{259,259} %write{2147483647,-1}
-global	normal	N	%read{44,243} %write{2147483647,-1} %derivs
-global	normal	Ng	%read{246,265} %write{2147483647,-1}
-global	vector	dPdu	%read{244,244} %write{2147483647,-1}
-global	vector	dPdv	%read{244,244} %write{2147483647,-1}
-local	float	___446_k	%read{212,221} %write{211,218}
-local	float	___458_VdotN	%read{269,272} %write{268,268}
-local	float	___461_weight	%read{43,43} %write{30,42} %derivs
-local	float	___461_incidentRaySpread	%read{34,40} %write{31,32} %derivs
-local	string	___467_interp	%read{102,102} %write{93,97} %derivs
-local	int	___467_params.firstchannel	%read{104,104} %write{98,98} %mystruct{___467_params} %mystructfield{0} %derivs
-local	float	___467_params.blur	%read{105,105} %write{99,99} %mystruct{___467_params} %mystructfield{1} %derivs
-local	color	___467_params.missingcolor	%read{106,106} %write{100,100} %mystruct{___467_params} %mystructfield{2}
-local	float	___467_params.missingalpha	%read{107,107} %write{101,101} %mystruct{___467_params} %mystructfield{3} %derivs
-local	string	___467_params.interp	%read{108,108} %write{102,102} %mystruct{___467_params} %mystructfield{4} %derivs
-local	float	___467_params.width	%read{109,109} %write{103,103} %mystruct{___467_params} %mystructfield{5} %derivs
-local	float	___470__tt	%read{121,127} %write{118,119} %derivs
-local	float	___470_coords.s	%read{128,128} %write{120,120} %mystruct{___470_coords} %mystructfield{0} %derivs
-local	float	___470_coords.t	%read{129,129} %write{121,121} %mystruct{___470_coords} %mystructfield{1} %derivs
-local	float	___470_coords.dsdx	%read{130,130} %write{123,123} %mystruct{___470_coords} %mystructfield{2} %derivs
-local	float	___470_coords.dtdx	%read{131,131} %write{124,124} %mystruct{___470_coords} %mystructfield{3} %derivs
-local	float	___470_coords.dsdy	%read{132,132} %write{126,126} %mystruct{___470_coords} %mystructfield{4} %derivs
-local	float	___470_coords.dtdy	%read{133,133} %write{127,127} %mystruct{___470_coords} %mystructfield{5} %derivs
-local	float	___478_bias	%read{148,171} %write{146,148} %derivs
-local	float	___480_minRadius	%read{158,173} %write{154,155} %derivs
-local	float	___480_dsdx	%read{179,179} %write{160,160} %derivs
-local	float	___480_dtdx	%read{179,179} %write{165,165} %derivs
-local	float	___480_dsdy	%read{180,180} %write{170,170} %derivs
-local	float	___480_dtdy	%read{180,180} %write{175,175} %derivs
-local	vector	___480_v0	%read{189,190} %write{178,178} %derivs
-local	vector	___480_v1	%read{182,193} %write{181,181} %derivs
-local	color	___485_missingalpha	%read{200,200} %write{199,199} %derivs
-local	string	___486_UDIMfilename	%read{27,27} %write{10,26} %derivs
-local	string	___486_separator	%read{13,13} %write{11,11} %derivs
-local	string[2]	___486_tokens	%read{16,17} %write{12,13} %derivs
-local	int	___486_nTokens	%read{14,14} %write{13,13}
-local	string	___487_baseFileName	%read{20,26} %write{16,16} %derivs
-local	string	___487_extension	%read{20,26} %write{17,17} %derivs
+oparam	normal	resultN	0 0 0		%meta{string,help,"resultN (normal)"}  %read{2147483647,-1} %write{59,393}
+global	point	P	%read{317,317} %write{2147483647,-1} %derivs
+global	vector	I	%read{371,371} %write{2147483647,-1}
+global	normal	N	%read{44,355} %write{2147483647,-1} %derivs
+global	normal	Ng	%read{358,377} %write{2147483647,-1}
+global	vector	dPdu	%read{124,356} %write{2147483647,-1} %derivs
+global	vector	dPdv	%read{125,356} %write{2147483647,-1} %derivs
+local	float	___466_k	%read{324,333} %write{323,330}
+local	float	___478_VdotN	%read{381,384} %write{380,380}
+local	float	___481_weight	%read{43,43} %write{30,42} %derivs
+local	float	___481_incidentRaySpread	%read{34,40} %write{31,32} %derivs
+local	string	___487_interp	%read{102,102} %write{93,97} %derivs
+local	int	___487_params.firstchannel	%read{104,104} %write{98,98} %mystruct{___487_params} %mystructfield{0} %derivs
+local	float	___487_params.blur	%read{105,105} %write{99,99} %mystruct{___487_params} %mystructfield{1} %derivs
+local	color	___487_params.missingcolor	%read{106,106} %write{100,100} %mystruct{___487_params} %mystructfield{2}
+local	float	___487_params.missingalpha	%read{107,107} %write{101,101} %mystruct{___487_params} %mystructfield{3} %derivs
+local	string	___487_params.interp	%read{108,108} %write{102,102} %mystruct{___487_params} %mystructfield{4} %derivs
+local	float	___487_params.width	%read{109,109} %write{103,103} %mystruct{___487_params} %mystructfield{5} %derivs
+local	float	___489_coords.s	%read{228,228} %write{207,221} %mystruct{___489_coords} %mystructfield{0} %derivs
+local	float	___489_coords.t	%read{229,229} %write{208,222} %mystruct{___489_coords} %mystructfield{1} %derivs
+local	float	___489_coords.dsdx	%read{230,230} %write{209,223} %mystruct{___489_coords} %mystructfield{2} %derivs
+local	float	___489_coords.dtdx	%read{231,231} %write{210,224} %mystruct{___489_coords} %mystructfield{3} %derivs
+local	float	___489_coords.dsdy	%read{232,232} %write{211,225} %mystruct{___489_coords} %mystructfield{4} %derivs
+local	float	___489_coords.dtdy	%read{233,233} %write{212,226} %mystruct{___489_coords} %mystructfield{5} %derivs
+local	float	___489_coords.blur	%read{234,234} %write{213,227} %mystruct{___489_coords} %mystructfield{6}
+local	float	___489__tt	%read{130,226} %write{120,121} %derivs
+local	float	___489_blur0	%read{213,227} %write{122,122}
+local	float	___490_du	%read{127,131} %write{124,124} %derivs
+local	float	___490_dv	%read{129,133} %write{125,125} %derivs
+local	float	___490_dsdu	%read{134,149} %write{127,127} %derivs
+local	float	___490_dsdv	%read{135,163} %write{129,129} %derivs
+local	float	___490_dtdu	%read{135,172} %write{131,131} %derivs
+local	float	___490_dtdv	%read{134,153} %write{133,133} %derivs
+local	float	___490_det	%read{137,146} %write{136,136} %derivs
+local	vector	___490_dPds	%read{155,181} %write{142,176} %derivs
+local	vector	___490_dPdt	%read{164,183} %write{146,180} %derivs
+local	float	___490_filterwidthS	%read{201,218} %write{182,201} %derivs
+local	float	___490_filterwidthT	%read{202,217} %write{184,202} %derivs
+local	float	___490_dxss	%read{189,203} %write{185,185} %derivs
+local	float	___490_dxtt	%read{195,199} %write{186,186} %derivs
+local	float	___490_dyss	%read{190,204} %write{187,187} %derivs
+local	float	___490_dytt	%read{196,200} %write{188,188} %derivs
+local	float	___490_signS	%read{201,201} %write{193,194} %derivs
+local	float	___490_signT	%read{202,202} %write{199,200} %derivs
+local	int	___490_unmixedDerivsAreDominant	%read{206,206} %write{205,205}
+local	float	___504_eps	%read{264,289} %write{263,263} %derivs
+local	float	___504_eps2	%read{271,286} %write{264,264}
+local	float	___504_dxlen2	%read{271,288} %write{267,267} %derivs
+local	float	___504_dylen2	%read{273,286} %write{270,270} %derivs
+local	float	___507_scale	%read{281,284} %write{280,280} %derivs
+local	float	___508_scale	%read{291,293} %write{289,289} %derivs
+local	float	___509_bias	%read{249,249} %write{247,248} %derivs
+local	float	___510_minwidth	%read{307,307} %write{253,253}
+local	float	___510_swidth	%read{304,305} %write{297,297}
+local	float	___510_twidth	%read{304,305} %write{300,300}
+local	int	___510_conservative_filter	%read{303,303} %write{301,302}
+local	float	___510_filterwidth	%read{306,308} %write{304,307}
+local	color	___515_missingalpha	%read{312,312} %write{311,311} %derivs
+local	string	___516_UDIMfilename	%read{27,27} %write{10,26} %derivs
+local	string	___516_separator	%read{13,13} %write{11,11} %derivs
+local	string[2]	___516_tokens	%read{16,17} %write{12,13} %derivs
+local	int	___516_nTokens	%read{14,14} %write{13,13}
+local	string	___517_baseFileName	%read{20,26} %write{16,16} %derivs
+local	string	___517_extension	%read{20,26} %write{17,17} %derivs
 local	int	inInvertT	%read{72,72} %write{0,28}
-local	string	finalFilename	%read{200,200} %write{1,27} %derivs
-local	float	bumpFade	%read{55,202} %write{43,43} %derivs
-local	normal	Nin	%read{59,279} %write{44,243} %derivs
-local	int	hasUserNormals	%read{230,230} %write{45,45}
+local	string	finalFilename	%read{312,312} %write{1,27} %derivs
+local	float	bumpFade	%read{55,314} %write{43,43} %derivs
+local	normal	Nin	%read{59,391} %write{44,355} %derivs
+local	int	hasUserNormals	%read{342,342} %write{45,45}
 local	vector	vScale	%read{62,62} %write{61,61} %derivs
-local	float	referenceScale	%read{201,201} %write{64,64} %derivs
-local	float	signal	%read{203,204} %write{65,203} %derivs
-local	point	___494_inManifold.Q	%read{112,125} %write{82,86} %mystruct{___494_inManifold} %mystructfield{0} %derivs
-local	normal	___494_inManifold.QN	%read{2147483647,-1} %write{83,87} %mystruct{___494_inManifold} %mystructfield{1}
-local	float	___494_inManifold.Qradius	%read{2147483647,-1} %write{84,88} %mystruct{___494_inManifold} %mystructfield{2}
-local	int	___494_txparams.firstchannel	%read{200,200} %write{104,104} %mystruct{___494_txparams} %mystructfield{0} %derivs
-local	float	___494_txparams.blur	%read{200,200} %write{105,105} %mystruct{___494_txparams} %mystructfield{1} %derivs
-local	color	___494_txparams.missingcolor	%read{2147483647,-1} %write{106,106} %mystruct{___494_txparams} %mystructfield{2}
-local	float	___494_txparams.missingalpha	%read{199,199} %write{107,107} %mystruct{___494_txparams} %mystructfield{3} %derivs
-local	string	___494_txparams.interp	%read{200,200} %write{108,108} %mystruct{___494_txparams} %mystructfield{4} %derivs
-local	float	___494_txparams.width	%read{148,200} %write{109,197} %mystruct{___494_txparams} %mystructfield{5} %derivs
-local	float	___494_txcoords.s	%read{200,200} %write{128,128} %mystruct{___494_txcoords} %mystructfield{0} %derivs
-local	float	___494_txcoords.t	%read{200,200} %write{129,129} %mystruct{___494_txcoords} %mystructfield{1} %derivs
-local	float	___494_txcoords.dsdx	%read{156,200} %write{130,130} %mystruct{___494_txcoords} %mystructfield{2} %derivs
-local	float	___494_txcoords.dtdx	%read{161,200} %write{131,131} %mystruct{___494_txcoords} %mystructfield{3} %derivs
-local	float	___494_txcoords.dsdy	%read{166,200} %write{132,132} %mystruct{___494_txcoords} %mystructfield{4} %derivs
-local	float	___494_txcoords.dtdy	%read{171,200} %write{133,133} %mystruct{___494_txcoords} %mystructfield{5} %derivs
-local	normal	bumpN	%read{218,281} %write{207,280}
-local	vector	___496_inGrad	%read{224,224} %write{216,216}
-local	vector	___496_thisGrad	%read{224,224} %write{223,223}
-local	normal	Nfaceted	%read{239,250} %write{238,249}
-local	point	___497_Po	%read{235,236} %write{231,234} %derivs
-local	vector	___497_dPodu	%read{237,237} %write{235,235}
-local	vector	___497_dPodv	%read{237,237} %write{236,236}
-local	int	___497_PoOk	%read{232,232} %write{231,231}
-local	vector	deltaN	%read{251,251} %write{250,250}
-local	int	reverseNn	%read{255,255} %write{254,254}
-local	vector	Vn	%read{265,273} %write{260,260}
+local	float	referenceScale	%read{313,313} %write{64,64} %derivs
+local	float	signal	%read{315,316} %write{65,315} %derivs
+local	point	___524_inManifold.Q	%read{111,112} %write{82,86} %mystruct{___524_inManifold} %mystructfield{0} %derivs
+local	normal	___524_inManifold.QN	%read{2147483647,-1} %write{83,87} %mystruct{___524_inManifold} %mystructfield{1}
+local	float	___524_inManifold.Qradius	%read{2147483647,-1} %write{84,88} %mystruct{___524_inManifold} %mystructfield{2}
+local	int	___524_txparams.firstchannel	%read{312,312} %write{104,104} %mystruct{___524_txparams} %mystructfield{0} %derivs
+local	float	___524_txparams.blur	%read{306,312} %write{105,105} %mystruct{___524_txparams} %mystructfield{1} %derivs
+local	color	___524_txparams.missingcolor	%read{2147483647,-1} %write{106,106} %mystruct{___524_txparams} %mystructfield{2}
+local	float	___524_txparams.missingalpha	%read{311,311} %write{107,107} %mystruct{___524_txparams} %mystructfield{3} %derivs
+local	string	___524_txparams.interp	%read{312,312} %write{108,108} %mystruct{___524_txparams} %mystructfield{4} %derivs
+local	float	___524_txparams.width	%read{249,312} %write{109,309} %mystruct{___524_txparams} %mystructfield{5} %derivs
+local	float	___524_txcoords.s	%read{312,312} %write{228,228} %mystruct{___524_txcoords} %mystructfield{0} %derivs
+local	float	___524_txcoords.t	%read{312,312} %write{229,229} %mystruct{___524_txcoords} %mystructfield{1} %derivs
+local	float	___524_txcoords.dsdx	%read{255,312} %write{230,282} %mystruct{___524_txcoords} %mystructfield{2} %derivs
+local	float	___524_txcoords.dtdx	%read{257,312} %write{231,285} %mystruct{___524_txcoords} %mystructfield{3} %derivs
+local	float	___524_txcoords.dsdy	%read{259,312} %write{232,292} %mystruct{___524_txcoords} %mystructfield{4} %derivs
+local	float	___524_txcoords.dtdy	%read{261,312} %write{233,294} %mystruct{___524_txcoords} %mystructfield{5} %derivs
+local	float	___524_txcoords.blur	%read{2147483647,-1} %write{234,308} %mystruct{___524_txcoords} %mystructfield{6}
+local	normal	bumpN	%read{330,393} %write{319,392}
+local	vector	___526_inGrad	%read{336,336} %write{328,328}
+local	vector	___526_thisGrad	%read{336,336} %write{335,335}
+local	normal	Nfaceted	%read{351,362} %write{350,361}
+local	point	___527_Po	%read{347,348} %write{343,346} %derivs
+local	vector	___527_dPodu	%read{349,349} %write{347,347}
+local	vector	___527_dPodv	%read{349,349} %write{348,348}
+local	int	___527_PoOk	%read{344,344} %write{343,343}
+local	vector	deltaN	%read{363,363} %write{362,362}
+local	int	reverseNn	%read{367,367} %write{366,366}
+local	vector	Vn	%read{377,385} %write{372,372}
 const	string	$const1	""		%read{2,66} %write{2147483647,-1}
 temp	int	$tmp1	%read{3,3} %write{2,2}
 temp	int	$tmp2	%read{4,8} %write{3,7}
-const	int	$const2	0		%read{3,277} %write{2147483647,-1}
+const	int	$const2	0		%read{3,389} %write{2147483647,-1}
 temp	int	$tmp3	%read{6,6} %write{5,5}
 temp	int	$tmp4	%read{7,7} %write{6,6}
 const	string	$const3	"PxrAtlasRename"		%read{9,9} %write{2147483647,-1}
@@ -108,7 +134,7 @@ const	string	$const4	"_MAPID_"		%read{11,11} %write{2147483647,-1}
 const	string[2]	$const5	"" "" 		%read{12,12} %write{2147483647,-1}
 const	int	$const6	2		%read{13,94} %write{2147483647,-1}
 temp	int	$tmp5	%read{15,15} %write{14,14}
-const	int	$const7	1		%read{17,193} %write{2147483647,-1}
+const	int	$const7	1		%read{17,112} %write{2147483647,-1}
 temp	int	$tmp6	%read{19,19} %write{18,18}
 const	string	$const8	"%s%s%s"		%read{20,26} %write{2147483647,-1}
 const	string	$const9	"<UDIM>"		%read{20,20} %write{2147483647,-1}
@@ -118,8 +144,8 @@ const	int	$const11	3		%read{24,24} %write{2147483647,-1}
 temp	int	$tmp8	%read{25,25} %write{24,24}
 const	string	$const12	"_u<u>_v<v>"		%read{26,26} %write{2147483647,-1}
 const	string	$const13	"RixRaySpreadWeight"		%read{29,29} %write{2147483647,-1}
-const	float	$const14	1		%read{30,226} %write{2147483647,-1}
-const	float	$const15	0		%read{31,254} %write{2147483647,-1}
+const	float	$const14	1		%read{30,338} %write{2147483647,-1}
+const	float	$const15	0		%read{31,366} %write{2147483647,-1}
 temp	int	$tmp9	%read{33,33} %write{32,32}
 const	string	$const16	"builtin"		%read{32,46} %write{2147483647,-1}
 const	string	$const17	"incidentRaySpread"		%read{32,32} %write{2147483647,-1}
@@ -130,7 +156,7 @@ temp	int	$tmp11	%read{38,38} %write{37,37}
 temp	float	$tmp12	%read{41,41} %write{40,40} %derivs
 const	float	$const20	4		%read{41,41} %write{2147483647,-1}
 temp	float	$tmp13	%read{42,42} %write{41,41} %derivs
-const	string	$const21	"primvar"		%read{45,234} %write{2147483647,-1}
+const	string	$const21	"primvar"		%read{45,346} %write{2147483647,-1}
 const	string	$const22	"N"		%read{45,45} %write{2147483647,-1}
 temp	int	$tmp14	%read{2147483647,-1} %write{46,46}
 const	string	$const23	"Non"		%read{46,46} %write{2147483647,-1}
@@ -152,7 +178,7 @@ temp	int	$tmp26	%read{70,70} %write{69,69}
 temp	int	$tmp27	%read{71,71} %write{70,70}
 temp	point	$tmp28	%read{82,82} %write{80,80} %derivs
 temp	float	$tmp29	%read{80,80} %write{78,79} %derivs
-const	string	$const28	"invertCoord"		%read{73,113} %write{2147483647,-1}
+const	string	$const28	"invertCoord"		%read{73,115} %write{2147483647,-1}
 temp	float	$tmp30	%read{75,75} %write{74,74} %derivs
 temp	float	$tmp31	%read{78,78} %write{75,75} %derivs
 temp	float	$tmp32	%read{77,77} %write{76,76} %derivs
@@ -167,224 +193,247 @@ const	string	$const34	"closest"		%read{93,93} %write{2147483647,-1}
 temp	int	$tmp36	%read{95,95} %write{94,94}
 const	string	$const35	"linear"		%read{96,96} %write{2147483647,-1}
 const	string	$const36	"smartcubic"		%read{97,97} %write{2147483647,-1}
-const	string	$const37	"initTxCoords"		%read{110,110} %write{2147483647,-1}
-temp	float	$tmp37	%read{114,117} %write{112,112} %derivs
-temp	float	$tmp38	%read{115,115} %write{114,114} %derivs
-temp	float	$tmp39	%read{118,118} %write{115,115} %derivs
-temp	float	$tmp40	%read{117,117} %write{116,116} %derivs
-temp	float	$tmp41	%read{118,118} %write{117,117} %derivs
-temp	float	$tmp42	%read{123,123} %write{122,122} %derivs
-temp	float	$tmp43	%read{126,126} %write{125,125} %derivs
-temp	int	$tmp44	%read{136,136} %write{135,135}
-temp	int	$tmp45	%read{137,141} %write{136,140}
-temp	int	$tmp46	%read{139,139} %write{138,138}
-temp	int	$tmp47	%read{140,140} %write{139,139}
-const	string	$const38	"PxrTxMipControls"		%read{142,142} %write{2147483647,-1}
-temp	int	$tmp48	%read{144,144} %write{143,143}
-const	float	$const39	2		%read{146,146} %write{2147483647,-1}
-temp	float	$tmp49	%read{146,146} %write{145,145} %derivs
-temp	int	$tmp50	%read{150,150} %write{149,149}
-temp	int	$tmp51	%read{153,153} %write{152,152}
-temp	float	$tmp52	%read{160,160} %write{158,158} %derivs
-temp	float	$tmp53	%read{158,158} %write{157,157} %derivs
-temp	float	$tmp54	%read{157,157} %write{156,156} %derivs
-temp	float	$tmp55	%read{160,160} %write{159,159} %derivs
-temp	float	$tmp56	%read{165,165} %write{163,163} %derivs
-temp	float	$tmp57	%read{163,163} %write{162,162} %derivs
-temp	float	$tmp58	%read{162,162} %write{161,161} %derivs
-temp	float	$tmp59	%read{165,165} %write{164,164} %derivs
-temp	float	$tmp60	%read{170,170} %write{168,168} %derivs
-temp	float	$tmp61	%read{168,168} %write{167,167} %derivs
-temp	float	$tmp62	%read{167,167} %write{166,166} %derivs
-temp	float	$tmp63	%read{170,170} %write{169,169} %derivs
-temp	float	$tmp64	%read{175,175} %write{173,173} %derivs
-temp	float	$tmp65	%read{173,173} %write{172,172} %derivs
-temp	float	$tmp66	%read{172,172} %write{171,171} %derivs
-temp	float	$tmp67	%read{175,175} %write{174,174} %derivs
-temp	point	$tmp68	%read{178,178} %write{176,176} %derivs
-temp	point	$tmp69	%read{178,178} %write{177,177} %derivs
-temp	point	$tmp70	%read{181,181} %write{179,179} %derivs
-temp	point	$tmp71	%read{181,181} %write{180,180} %derivs
-temp	float	$tmp72	%read{184,184} %write{182,182} %derivs
+const	string	$const37	"initTxCoords"		%read{110,113} %write{2147483647,-1}
+temp	float	$tmp37	%read{126,225} %write{111,111} %derivs
+temp	float	$tmp38	%read{116,121} %write{112,112} %derivs
+temp	float	$tmp39	%read{117,117} %write{116,116} %derivs
+temp	float	$tmp40	%read{120,120} %write{117,117} %derivs
+temp	float	$tmp41	%read{119,119} %write{118,118} %derivs
+temp	float	$tmp42	%read{120,120} %write{119,119} %derivs
+temp	float	$tmp43	%read{127,127} %write{126,126} %derivs
+temp	float	$tmp44	%read{129,129} %write{128,128} %derivs
+temp	float	$tmp45	%read{131,131} %write{130,130} %derivs
+temp	float	$tmp46	%read{133,133} %write{132,132} %derivs
+temp	float	$tmp47	%read{136,136} %write{134,134} %derivs
+temp	float	$tmp48	%read{136,136} %write{135,135} %derivs
+temp	int	$tmp49	%read{138,138} %write{137,137}
+temp	vector	$tmp50	%read{141,141} %write{139,139} %derivs
+temp	vector	$tmp51	%read{141,141} %write{140,140} %derivs
+temp	vector	$tmp52	%read{142,142} %write{141,141} %derivs
+temp	vector	$tmp53	%read{145,145} %write{143,143} %derivs
+temp	vector	$tmp54	%read{145,145} %write{144,144} %derivs
+temp	vector	$tmp55	%read{146,146} %write{145,145} %derivs
+temp	int	$tmp56	%read{148,148} %write{147,147}
+const	vector	$const38	0 0 0		%read{150,154} %write{2147483647,-1}
+temp	int	$tmp57	%read{152,152} %write{151,151}
+temp	float	$tmp58	%read{156,156} %write{155,155}
+temp	int	$tmp59	%read{157,157} %write{156,156}
+temp	int	$tmp60	%read{158,162} %write{157,161}
+temp	int	$tmp61	%read{160,160} %write{159,159}
+temp	int	$tmp62	%read{161,161} %write{160,160}
+temp	float	$tmp63	%read{165,165} %write{164,164}
+temp	int	$tmp64	%read{166,166} %write{165,165}
+temp	int	$tmp65	%read{167,171} %write{166,170}
+temp	int	$tmp66	%read{169,169} %write{168,168}
+temp	int	$tmp67	%read{170,170} %write{169,169}
+temp	float	$tmp68	%read{174,174} %write{173,173}
+temp	int	$tmp69	%read{175,175} %write{174,174}
+temp	float	$tmp70	%read{178,178} %write{177,177}
+temp	int	$tmp71	%read{179,179} %write{178,178}
+temp	float	$tmp72	%read{182,182} %write{181,181} %derivs
 temp	float	$tmp73	%read{184,184} %write{183,183} %derivs
-temp	float	$tmp74	%read{188,188} %write{184,184} %derivs
-temp	float	$tmp75	%read{187,187} %write{185,185} %derivs
-temp	float	$tmp76	%read{187,187} %write{186,186} %derivs
-temp	float	$tmp77	%read{188,188} %write{187,187} %derivs
-temp	float	$tmp78	%read{196,196} %write{188,188} %derivs
-temp	float	$tmp79	%read{191,191} %write{189,189} %derivs
-temp	float	$tmp80	%read{191,191} %write{190,190} %derivs
-temp	float	$tmp81	%read{195,195} %write{191,191} %derivs
-temp	float	$tmp82	%read{194,194} %write{192,192} %derivs
-temp	float	$tmp83	%read{194,194} %write{193,193} %derivs
-temp	float	$tmp84	%read{195,195} %write{194,194} %derivs
-temp	float	$tmp85	%read{196,196} %write{195,195} %derivs
-const	string	$const40	"PxrTextureLookup"		%read{198,198} %write{2147483647,-1}
-const	string	$const41	"firstchannel"		%read{200,200} %write{2147483647,-1}
-const	string	$const42	"blur"		%read{200,200} %write{2147483647,-1}
-const	string	$const43	"missingcolor"		%read{200,200} %write{2147483647,-1}
-const	string	$const44	"interp"		%read{200,200} %write{2147483647,-1}
-const	string	$const45	"width"		%read{200,200} %write{2147483647,-1}
-temp	float	$tmp86	%read{202,202} %write{201,201} %derivs
-temp	float	$tmp87	%read{203,203} %write{202,202} %derivs
-temp	vector	$tmp88	%read{207,207} %write{206,206}
-temp	normal	$tmp89	%read{205,205} %write{204,204} %derivs
-temp	point	$tmp90	%read{206,206} %write{205,205} %derivs
-temp	int	$tmp91	%read{209,209} %write{208,208}
-const	string	$const46	"surfgradFromPerturbedNormal"		%read{210,217} %write{2147483647,-1}
-temp	vector	$tmp92	%read{213,213} %write{212,212}
-temp	vector	$tmp93	%read{216,216} %write{213,213}
-temp	float	$tmp94	%read{216,216} %write{215,215}
-const	float	$const47	9.99999994e-09		%read{215,222} %write{2147483647,-1}
-temp	float	$tmp95	%read{215,215} %write{214,214}
-temp	vector	$tmp96	%read{220,220} %write{219,219}
-temp	vector	$tmp97	%read{223,223} %write{220,220}
-temp	float	$tmp98	%read{223,223} %write{222,222}
-temp	float	$tmp99	%read{222,222} %write{221,221}
-temp	vector	$tmp100	%read{226,226} %write{224,224}
-const	string	$const48	"resolveNormalFromSurfaceGradient"		%read{225,225} %write{2147483647,-1}
-temp	vector	$tmp101	%read{227,227} %write{226,226}
-temp	normal	$tmp102	%read{228,228} %write{227,227}
-const	string	$const49	"Po"		%read{231,231} %write{2147483647,-1}
-temp	int	$tmp103	%read{233,233} %write{232,232}
-temp	int	$tmp104	%read{2147483647,-1} %write{234,234}
-const	string	$const50	"P"		%read{234,234} %write{2147483647,-1}
-temp	vector	$tmp105	%read{238,238} %write{237,237}
-temp	float	$tmp106	%read{240,240} %write{239,239}
-temp	int	$tmp107	%read{241,241} %write{240,240}
-temp	vector	$tmp108	%read{245,245} %write{244,244}
-temp	float	$tmp109	%read{247,247} %write{246,246}
-temp	int	$tmp110	%read{248,248} %write{247,247}
-temp	normal	$tmp111	%read{252,252} %write{251,251}
-temp	float	$tmp112	%read{254,254} %write{253,253}
-temp	vector	$tmp113	%read{260,260} %write{259,259}
-const	string	$const51	"RixAdjustNormal"		%read{261,261} %write{2147483647,-1}
-temp	int	$tmp114	%read{263,263} %write{262,262}
-temp	float	$tmp115	%read{266,266} %write{265,265}
-temp	int	$tmp116	%read{267,267} %write{266,266}
-temp	int	$tmp117	%read{270,270} %write{269,269}
-const	float	$const52	1.00999999		%read{271,271} %write{2147483647,-1}
-temp	float	$tmp118	%read{272,272} %write{271,271}
-temp	float	$tmp119	%read{273,273} %write{272,272}
-temp	vector	$tmp120	%read{274,274} %write{273,273}
-const	string	$const53	"RixBlendWithNormal"		%read{276,276} %write{2147483647,-1}
-temp	int	$tmp121	%read{278,278} %write{277,277}
-temp	normal	$tmp122	%read{280,280} %write{279,279}
+temp	float	$tmp74	%read{191,191} %write{189,189}
+temp	float	$tmp75	%read{191,191} %write{190,190}
+temp	int	$tmp76	%read{192,192} %write{191,191}
+temp	float	$tmp77	%read{197,197} %write{195,195}
+temp	float	$tmp78	%read{197,197} %write{196,196}
+temp	int	$tmp79	%read{198,198} %write{197,197}
+temp	float	$tmp80	%read{205,205} %write{203,203}
+temp	float	$tmp81	%read{205,205} %write{204,204}
+temp	int	$tmp82	%read{237,237} %write{236,236}
+temp	int	$tmp83	%read{238,242} %write{237,241}
+temp	int	$tmp84	%read{240,240} %write{239,239}
+temp	int	$tmp85	%read{241,241} %write{240,240}
+const	string	$const39	"PxrTxMipControls"		%read{243,243} %write{2147483647,-1}
+temp	int	$tmp86	%read{245,245} %write{244,244}
+const	float	$const40	2		%read{247,247} %write{2147483647,-1}
+temp	float	$tmp87	%read{247,247} %write{246,246} %derivs
+temp	int	$tmp88	%read{252,252} %write{251,251}
+const	string	$const41	"adjust_width"		%read{254,254} %write{2147483647,-1}
+const	float	$const42	9.99999994e-09		%read{263,334} %write{2147483647,-1}
+temp	float	$tmp89	%read{267,267} %write{265,265} %derivs
+temp	float	$tmp90	%read{267,267} %write{266,266} %derivs
+temp	float	$tmp91	%read{270,270} %write{268,268} %derivs
+temp	float	$tmp92	%read{270,270} %write{269,269} %derivs
+temp	int	$tmp93	%read{272,272} %write{271,271}
+temp	int	$tmp94	%read{274,274} %write{273,273}
+temp	float	$tmp95	%read{280,280} %write{279,279} %derivs
+temp	float	$tmp96	%read{284,284} %write{283,283} %derivs
+temp	int	$tmp97	%read{287,287} %write{286,286}
+temp	float	$tmp98	%read{289,289} %write{288,288} %derivs
+temp	float	$tmp99	%read{291,291} %write{290,290} %derivs
+temp	float	$tmp100	%read{297,297} %write{295,295}
+temp	float	$tmp101	%read{297,297} %write{296,296}
+temp	float	$tmp102	%read{300,300} %write{298,298}
+temp	float	$tmp103	%read{300,300} %write{299,299}
+temp	int	$tmp104	%read{2147483647,-1} %write{302,302}
+const	string	$const43	"context"		%read{302,302} %write{2147483647,-1}
+const	string	$const44	"reyesGrid"		%read{302,302} %write{2147483647,-1}
+const	string	$const45	"PxrTextureLookup"		%read{310,310} %write{2147483647,-1}
+const	string	$const46	"firstchannel"		%read{312,312} %write{2147483647,-1}
+const	string	$const47	"blur"		%read{312,312} %write{2147483647,-1}
+const	string	$const48	"missingcolor"		%read{312,312} %write{2147483647,-1}
+const	string	$const49	"interp"		%read{312,312} %write{2147483647,-1}
+const	string	$const50	"width"		%read{312,312} %write{2147483647,-1}
+temp	float	$tmp105	%read{314,314} %write{313,313} %derivs
+temp	float	$tmp106	%read{315,315} %write{314,314} %derivs
+temp	vector	$tmp107	%read{319,319} %write{318,318}
+temp	normal	$tmp108	%read{317,317} %write{316,316} %derivs
+temp	point	$tmp109	%read{318,318} %write{317,317} %derivs
+temp	int	$tmp110	%read{321,321} %write{320,320}
+const	string	$const51	"surfgradFromPerturbedNormal"		%read{322,329} %write{2147483647,-1}
+temp	vector	$tmp111	%read{325,325} %write{324,324}
+temp	vector	$tmp112	%read{328,328} %write{325,325}
+temp	float	$tmp113	%read{328,328} %write{327,327}
+temp	float	$tmp114	%read{327,327} %write{326,326}
+temp	vector	$tmp115	%read{332,332} %write{331,331}
+temp	vector	$tmp116	%read{335,335} %write{332,332}
+temp	float	$tmp117	%read{335,335} %write{334,334}
+temp	float	$tmp118	%read{334,334} %write{333,333}
+temp	vector	$tmp119	%read{338,338} %write{336,336}
+const	string	$const52	"resolveNormalFromSurfaceGradient"		%read{337,337} %write{2147483647,-1}
+temp	vector	$tmp120	%read{339,339} %write{338,338}
+temp	normal	$tmp121	%read{340,340} %write{339,339}
+const	string	$const53	"Po"		%read{343,343} %write{2147483647,-1}
+temp	int	$tmp122	%read{345,345} %write{344,344}
+temp	int	$tmp123	%read{2147483647,-1} %write{346,346}
+const	string	$const54	"P"		%read{346,346} %write{2147483647,-1}
+temp	vector	$tmp124	%read{350,350} %write{349,349}
+temp	float	$tmp125	%read{352,352} %write{351,351}
+temp	int	$tmp126	%read{353,353} %write{352,352}
+temp	vector	$tmp127	%read{357,357} %write{356,356}
+temp	float	$tmp128	%read{359,359} %write{358,358}
+temp	int	$tmp129	%read{360,360} %write{359,359}
+temp	normal	$tmp130	%read{364,364} %write{363,363}
+temp	float	$tmp131	%read{366,366} %write{365,365}
+temp	vector	$tmp132	%read{372,372} %write{371,371}
+const	string	$const55	"RixAdjustNormal"		%read{373,373} %write{2147483647,-1}
+temp	int	$tmp133	%read{375,375} %write{374,374}
+temp	float	$tmp134	%read{378,378} %write{377,377}
+temp	int	$tmp135	%read{379,379} %write{378,378}
+temp	int	$tmp136	%read{382,382} %write{381,381}
+const	float	$const56	1.00999999		%read{383,383} %write{2147483647,-1}
+temp	float	$tmp137	%read{384,384} %write{383,383}
+temp	float	$tmp138	%read{385,385} %write{384,384}
+temp	vector	$tmp139	%read{386,386} %write{385,385}
+const	string	$const57	"RixBlendWithNormal"		%read{388,388} %write{2147483647,-1}
+temp	int	$tmp140	%read{390,390} %write{389,389}
+temp	normal	$tmp141	%read{392,392} %write{391,391}
 code ___main___
-# PxrBump.osl:211
+# PxrBump.osl:220
 #     int inInvertT = invertT;
-	assign		inInvertT invertT 	%filename{"PxrBump.osl"} %line{211} %argrw{"wr"}
-# PxrBump.osl:212
+	assign		inInvertT invertT 	%filename{"PxrBump.osl"} %line{220} %argrw{"wr"}
+# PxrBump.osl:221
 #     string finalFilename = filename;
-	assign		finalFilename filename 	%line{212} %argrw{"wr"}
-# PxrBump.osl:213
+	assign		finalFilename filename 	%line{221} %argrw{"wr"}
+# PxrBump.osl:222
 #     if (filename != "" and atlasStyle > 0)
-	neq		$tmp1 filename $const1 	%line{213} %argrw{"wrr"}
+	neq		$tmp1 filename $const1 	%line{222} %argrw{"wrr"}
 	neq		$tmp2 $tmp1 $const2 	%argrw{"wrr"}
 	if		$tmp2 8 8 	%argrw{"r"}
 	gt		$tmp3 atlasStyle $const2 	%argrw{"wrr"}
 	neq		$tmp4 $tmp3 $const2 	%argrw{"wrr"}
 	assign		$tmp2 $tmp4 	%argrw{"wr"}
 	if		$tmp2 29 29 	%argrw{"r"}
-# PxrBump.osl:215
-#         finalFilename = PxrAtlasRename(filename, atlasStyle);
-	functioncall	$const3 28 	%line{215} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:238
-#     string UDIMfilename = filename;
-	assign		___486_UDIMfilename filename 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h"} %line{238} %argrw{"wr"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:239
-#     string separator = "_MAPID_";
-	assign		___486_separator $const4 	%line{239} %argrw{"wr"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:240
-#     string tokens[2] = {"",""};
-	assign		___486_tokens $const5 	%line{240} %argrw{"wr"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:242
-#     int nTokens = split(filename, tokens, separator, 2);
-	split		___486_nTokens filename ___486_tokens ___486_separator $const6 	%line{242} %argrw{"wrwrr"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:245
-#     if (nTokens == 2)
-	eq		$tmp5 ___486_nTokens $const6 	%line{245} %argrw{"wrr"}
-	if		$tmp5 27 27 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:247
-#         string baseFileName = tokens[0];
-	aref		___487_baseFileName ___486_tokens $const2 	%line{247} %argrw{"wrr"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:248
-#         string extension = tokens[1];
-	aref		___487_extension ___486_tokens $const7 	%line{248} %argrw{"wrr"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:250
-#         if (atlasStyle == 1) {
-	eq		$tmp6 atlasStyle $const7 	%line{250} %argrw{"wrr"}
-	if		$tmp6 21 27 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:251
-#             UDIMfilename = format("%s%s%s",baseFileName,"<UDIM>",extension);
-	format		___486_UDIMfilename $const8 ___487_baseFileName $const9 ___487_extension 	%line{251} %argrw{"wrrrr"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:253
-#         else if (atlasStyle == 2)
-	eq		$tmp7 atlasStyle $const6 	%line{253} %argrw{"wrr"}
-	if		$tmp7 24 27 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:255
-#             UDIMfilename = format("%s%s%s",baseFileName,"_u<U>_v<V>",extension);
-	format		___486_UDIMfilename $const8 ___487_baseFileName $const10 ___487_extension 	%line{255} %argrw{"wrrrr"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:257
-#         else if (atlasStyle == 3)
-	eq		$tmp8 atlasStyle $const11 	%line{257} %argrw{"wrr"}
-	if		$tmp8 27 27 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:259
-#             UDIMfilename = format("%s%s%s",baseFileName,"_u<u>_v<v>",extension);
-	format		___486_UDIMfilename $const8 ___487_baseFileName $const12 ___487_extension 	%line{259} %argrw{"wrrrr"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:262
-#     return UDIMfilename;
-	assign		finalFilename ___486_UDIMfilename 	%line{262} %argrw{"wr"}
-# PxrBump.osl:219
-#         inInvertT = 1;
-	assign		inInvertT $const7 	%filename{"PxrBump.osl"} %line{219} %argrw{"wr"}
 # PxrBump.osl:224
+#         finalFilename = PxrAtlasRename(filename, atlasStyle);
+	functioncall	$const3 28 	%line{224} %argrw{"r"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:376
+#     string UDIMfilename = filename;
+	assign		___516_UDIMfilename filename 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h"} %line{376} %argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:377
+#     string separator = "_MAPID_";
+	assign		___516_separator $const4 	%line{377} %argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:378
+#     string tokens[2] = {"",""};
+	assign		___516_tokens $const5 	%line{378} %argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:380
+#     int nTokens = split(filename, tokens, separator, 2);
+	split		___516_nTokens filename ___516_tokens ___516_separator $const6 	%line{380} %argrw{"wrwrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:383
+#     if (nTokens == 2)
+	eq		$tmp5 ___516_nTokens $const6 	%line{383} %argrw{"wrr"}
+	if		$tmp5 27 27 	%argrw{"r"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:385
+#         string baseFileName = tokens[0];
+	aref		___517_baseFileName ___516_tokens $const2 	%line{385} %argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:386
+#         string extension = tokens[1];
+	aref		___517_extension ___516_tokens $const7 	%line{386} %argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:388
+#         if (atlasStyle == 1) {
+	eq		$tmp6 atlasStyle $const7 	%line{388} %argrw{"wrr"}
+	if		$tmp6 21 27 	%argrw{"r"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:389
+#             UDIMfilename = format("%s%s%s",baseFileName,"<UDIM>",extension);
+	format		___516_UDIMfilename $const8 ___517_baseFileName $const9 ___517_extension 	%line{389} %argrw{"wrrrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:391
+#         else if (atlasStyle == 2)
+	eq		$tmp7 atlasStyle $const6 	%line{391} %argrw{"wrr"}
+	if		$tmp7 24 27 	%argrw{"r"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:393
+#             UDIMfilename = format("%s%s%s",baseFileName,"_u<U>_v<V>",extension);
+	format		___516_UDIMfilename $const8 ___517_baseFileName $const10 ___517_extension 	%line{393} %argrw{"wrrrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:395
+#         else if (atlasStyle == 3)
+	eq		$tmp8 atlasStyle $const11 	%line{395} %argrw{"wrr"}
+	if		$tmp8 27 27 	%argrw{"r"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:397
+#             UDIMfilename = format("%s%s%s",baseFileName,"_u<u>_v<v>",extension);
+	format		___516_UDIMfilename $const8 ___517_baseFileName $const12 ___517_extension 	%line{397} %argrw{"wrrrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:400
+#     return UDIMfilename;
+	assign		finalFilename ___516_UDIMfilename 	%line{400} %argrw{"wr"}
+# PxrBump.osl:228
+#         inInvertT = 1;
+	assign		inInvertT $const7 	%filename{"PxrBump.osl"} %line{228} %argrw{"wr"}
+# PxrBump.osl:233
 #     float bumpFade = RixRaySpreadWeight();
-	functioncall	$const13 44 	%line{224} %argrw{"r"}
+	functioncall	$const13 44 	%line{233} %argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:231
 #     float weight = 1.0;
-	assign		___461_weight $const14 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h"} %line{231} %argrw{"wr"}
+	assign		___481_weight $const14 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h"} %line{231} %argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:232
 #     float incidentRaySpread = 0.0;
-	assign		___461_incidentRaySpread $const15 	%line{232} %argrw{"wr"}
+	assign		___481_incidentRaySpread $const15 	%line{232} %argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:233
 #     if (getattribute("builtin", "incidentRaySpread", incidentRaySpread))
-	getattribute	$tmp9 $const16 $const17 ___461_incidentRaySpread 	%line{233} %argrw{"wrrw"}
+	getattribute	$tmp9 $const16 $const17 ___481_incidentRaySpread 	%line{233} %argrw{"wrrw"}
 	if		$tmp9 43 43 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:235
 #         if (incidentRaySpread < 0.25)
-	lt		$tmp10 ___461_incidentRaySpread $const18 	%line{235} %argrw{"wrr"}
+	lt		$tmp10 ___481_incidentRaySpread $const18 	%line{235} %argrw{"wrr"}
 	if		$tmp10 37 43 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:237
 #             weight = 1.0;
-	assign		___461_weight $const14 	%line{237} %argrw{"wr"}
+	assign		___481_weight $const14 	%line{237} %argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:239
 #         else if (incidentRaySpread > 0.5)
-	gt		$tmp11 ___461_incidentRaySpread $const19 	%line{239} %argrw{"wrr"}
+	gt		$tmp11 ___481_incidentRaySpread $const19 	%line{239} %argrw{"wrr"}
 	if		$tmp11 40 43 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:241
 #             weight = 0.0;
-	assign		___461_weight $const15 	%line{241} %argrw{"wr"}
+	assign		___481_weight $const15 	%line{241} %argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:247
 #             weight = 1.0 - (incidentRaySpread - 0.25) * 4.0;
-	sub		$tmp12 ___461_incidentRaySpread $const18 	%line{247} %argrw{"wrr"}
+	sub		$tmp12 ___481_incidentRaySpread $const18 	%line{247} %argrw{"wrr"}
 	mul		$tmp13 $tmp12 $const20 	%argrw{"wrr"}
-	sub		___461_weight $const14 $tmp13 	%argrw{"wrr"}
+	sub		___481_weight $const14 $tmp13 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:250
 #     return weight;
-	assign		bumpFade ___461_weight 	%line{250} %argrw{"wr"}
-# PxrBump.osl:227
+	assign		bumpFade ___481_weight 	%line{250} %argrw{"wr"}
+# PxrBump.osl:236
 #     normal Nin = N;
-	assign		Nin N 	%filename{"PxrBump.osl"} %line{227} %argrw{"wr"}
-# PxrBump.osl:228
+	assign		Nin N 	%filename{"PxrBump.osl"} %line{236} %argrw{"wr"}
+# PxrBump.osl:237
 #     int hasUserNormals = getattribute("primvar", "N", Nin);  // return code works in RIS, always true in XPU
-	getattribute	hasUserNormals $const21 $const22 Nin 	%line{228} %argrw{"wrrw"}
-# PxrBump.osl:229
+	getattribute	hasUserNormals $const21 $const22 Nin 	%line{237} %argrw{"wrrw"}
+# PxrBump.osl:238
 #     getattribute("builtin", "Non", Nin);  // (Non is always normalized, no need to normalize it here)
-	getattribute	$tmp14 $const16 $const23 Nin 	%line{229} %argrw{"wrrw"}
-# PxrBump.osl:232
+	getattribute	$tmp14 $const16 $const23 Nin 	%line{238} %argrw{"wrrw"}
+# PxrBump.osl:241
 #     if (disable != 0 || surfaceNormalMix == 1 || bumpFade == 0.0)
-	neq		$tmp15 disable $const2 	%line{232} %argrw{"wrr"}
+	neq		$tmp15 disable $const2 	%line{241} %argrw{"wrr"}
 	neq		$tmp16 $tmp15 $const2 	%argrw{"wrr"}
 	if		$tmp16 50 53 	%argrw{"r"}
 	eq		$tmp17 surfaceNormalMix $const7 	%argrw{"wrr"}
@@ -396,38 +445,38 @@ code ___main___
 	neq		$tmp21 $tmp20 $const2 	%argrw{"wrr"}
 	assign		$tmp19 $tmp21 	%argrw{"wr"}
 	if		$tmp19 61 61 	%argrw{"r"}
-# PxrBump.osl:234
+# PxrBump.osl:243
 #         resultN = Nin;
-	assign		resultN Nin 	%line{234} %argrw{"wr"}
-# PxrBump.osl:235
+	assign		resultN Nin 	%line{243} %argrw{"wr"}
+# PxrBump.osl:244
 #         return;
-	exit	%line{235}
-# PxrBump.osl:239
+	exit	%line{244}
+# PxrBump.osl:248
 #     vector vScale = transform("object", "current", vector(1, 1, 1));
-	transformv	vScale $const24 $const25 $const26 	%line{239} %argrw{"wrrr"}
-# PxrBump.osl:240
+	transformv	vScale $const24 $const25 $const26 	%line{248} %argrw{"wrrr"}
+# PxrBump.osl:249
 #     float referenceScale = length(vScale) / sqrt(3);
-	length		$tmp23 vScale 	%line{240} %argrw{"wr"}
+	length		$tmp23 vScale 	%line{249} %argrw{"wr"}
 	sqrt		$tmp24 $const27 	%argrw{"wr"}
 	div		referenceScale $tmp23 $tmp24 	%argrw{"wrr"}
-# PxrBump.osl:242
+# PxrBump.osl:251
 #     float signal = 0.0;
-	assign		signal $const15 	%line{242} %argrw{"wr"}
-# PxrBump.osl:243
+	assign		signal $const15 	%line{251} %argrw{"wr"}
+# PxrBump.osl:252
 #     if (filename == "")
-	eq		$tmp25 filename $const1 	%line{243} %argrw{"wrr"}
-	if		$tmp25 69 201 	%argrw{"r"}
-# PxrBump.osl:245
+	eq		$tmp25 filename $const1 	%line{252} %argrw{"wrr"}
+	if		$tmp25 69 313 	%argrw{"r"}
+# PxrBump.osl:254
 #         signal = inputBump;
-	assign		signal inputBump 	%line{245} %argrw{"wr"}
-# PxrBump.osl:250
+	assign		signal inputBump 	%line{254} %argrw{"wr"}
+# PxrBump.osl:259
 #         if (!isconnected(manifold))
-	isconnected	$tmp26 manifold 	%line{250} %argrw{"wr"}
+	isconnected	$tmp26 manifold 	%line{259} %argrw{"wr"}
 	eq		$tmp27 $tmp26 $const2 	%argrw{"wrr"}
 	if		$tmp27 85 89 	%argrw{"r"}
-# PxrBump.osl:253
+# PxrBump.osl:262
 #                 point(s, inInvertT ? invertCoord(t) : t, 0),
-	if		inInvertT 79 80 	%line{253} %argrw{"r"}
+	if		inInvertT 79 80 	%line{262} %argrw{"r"}
 	functioncall	$const28 79 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:48
 #     return floor(tt) + 1.0 - (tt - floor(tt));
@@ -436,37 +485,37 @@ code ___main___
 	floor		$tmp32 t 	%argrw{"wr"}
 	sub		$tmp33 t $tmp32 	%argrw{"wrr"}
 	sub		$tmp29 $tmp31 $tmp33 	%argrw{"wrr"}
-# PxrBump.osl:253
+# PxrBump.osl:262
 #                 point(s, inInvertT ? invertCoord(t) : t, 0),
-	assign		$tmp29 t 	%filename{"PxrBump.osl"} %line{253} %argrw{"wr"}
+	assign		$tmp29 t 	%filename{"PxrBump.osl"} %line{262} %argrw{"wr"}
 	point		$tmp28 s $tmp29 $const15 	%argrw{"wrrr"}
-# PxrBump.osl:252
+# PxrBump.osl:261
 #             Manifold_Construct(
-	functioncall	$const29 85 	%line{252} %argrw{"r"}
+	functioncall	$const29 85 	%line{261} %argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:69
 #     m.Q = inP;
-	assign		___494_inManifold.Q $tmp28 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{69} %argrw{"wr"}
+	assign		___524_inManifold.Q $tmp28 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{69} %argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:70
 #     m.QN = inN;
-	assign		___494_inManifold.QN Nin 	%line{70} %argrw{"wr"}
+	assign		___524_inManifold.QN Nin 	%line{70} %argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:71
 #     m.Qradius = 0.0;
-	assign		___494_inManifold.Qradius $const15 	%line{71} %argrw{"wr"}
-# PxrBump.osl:257
+	assign		___524_inManifold.Qradius $const15 	%line{71} %argrw{"wr"}
+# PxrBump.osl:266
 #             Manifold_Copy(manifold, inManifold);
-	functioncall	$const30 89 	%filename{"PxrBump.osl"} %line{257} %argrw{"r"}
+	functioncall	$const30 89 	%filename{"PxrBump.osl"} %line{266} %argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:53
 #     dest.Q = src.Q;
-	assign		___494_inManifold.Q manifold.Q 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{53} %argrw{"wr"}
+	assign		___524_inManifold.Q manifold.Q 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{53} %argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:54
 #     dest.QN = src.QN;
-	assign		___494_inManifold.QN manifold.QN 	%line{54} %argrw{"wr"}
+	assign		___524_inManifold.QN manifold.QN 	%line{54} %argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:55
 #     dest.Qradius = src.Qradius;
-	assign		___494_inManifold.Qradius manifold.Qradius 	%line{55} %argrw{"wr"}
-# PxrBump.osl:260
+	assign		___524_inManifold.Qradius manifold.Qradius 	%line{55} %argrw{"wr"}
+# PxrBump.osl:269
 #         TxParams txparams = initTxParams(firstChannel, blur, color(0), 0, -1);
-	functioncall	$const33 110 	%filename{"PxrBump.osl"} %line{260} %argrw{"r"}
+	functioncall	$const33 110 	%filename{"PxrBump.osl"} %line{269} %argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:83
 #     return initTxParams(firstchannel, blur, missingcolor, missingalpha, filter, 1.0);
 	functioncall	$const33 110 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h"} %line{83} %argrw{"r"}
@@ -476,337 +525,553 @@ code ___main___
 	if		$tmp35 94 98 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:69
 #         interp = "closest";
-	assign		___467_interp $const34 	%line{69} %argrw{"wr"}
+	assign		___487_interp $const34 	%line{69} %argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:70
 #     else if (filter == 2)
 	eq		$tmp36 $const32 $const6 	%line{70} %argrw{"wrr"}
 	if		$tmp36 97 98 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:71
 #         interp = "linear";
-	assign		___467_interp $const35 	%line{71} %argrw{"wr"}
+	assign		___487_interp $const35 	%line{71} %argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:73
 #         interp = "smartcubic";
-	assign		___467_interp $const36 	%line{73} %argrw{"wr"}
+	assign		___487_interp $const36 	%line{73} %argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:75
 #     TxParams params = {firstchannel, blur, missingcolor, missingalpha,
-	assign		___467_params.firstchannel firstChannel 	%line{75} %argrw{"wr"}
-	assign		___467_params.blur blur 	%argrw{"wr"}
-	assign		___467_params.missingcolor $const31 	%argrw{"wr"}
-	assign		___467_params.missingalpha $const15 	%argrw{"wr"}
-	assign		___467_params.interp ___467_interp 	%argrw{"wr"}
-	assign		___467_params.width $const14 	%argrw{"wr"}
+	assign		___487_params.firstchannel firstChannel 	%line{75} %argrw{"wr"}
+	assign		___487_params.blur blur 	%argrw{"wr"}
+	assign		___487_params.missingcolor $const31 	%argrw{"wr"}
+	assign		___487_params.missingalpha $const15 	%argrw{"wr"}
+	assign		___487_params.interp ___487_interp 	%argrw{"wr"}
+	assign		___487_params.width $const14 	%argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:77
 #     return params;
-	assign		___494_txparams.firstchannel ___467_params.firstchannel 	%line{77} %argrw{"wr"}
-	assign		___494_txparams.blur ___467_params.blur 	%argrw{"wr"}
-	assign		___494_txparams.missingcolor ___467_params.missingcolor 	%argrw{"wr"}
-	assign		___494_txparams.missingalpha ___467_params.missingalpha 	%argrw{"wr"}
-	assign		___494_txparams.interp ___467_params.interp 	%argrw{"wr"}
-	assign		___494_txparams.width ___467_params.width 	%argrw{"wr"}
-# PxrBump.osl:261
-#         TxCoords txcoords = initTxCoords(inManifold, 0);
-	functioncall	$const37 135 	%filename{"PxrBump.osl"} %line{261} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:109
-#     float _tt = invertT ? invertCoord(manifold.Q[1]) : manifold.Q[1];
-	if		$const2 119 120 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h"} %line{109} %argrw{"r"}
-	compref		$tmp37 ___494_inManifold.Q $const7 	%argrw{"wrr"}
-	functioncall	$const28 119 	%argrw{"r"}
+	assign		___524_txparams.firstchannel ___487_params.firstchannel 	%line{77} %argrw{"wr"}
+	assign		___524_txparams.blur ___487_params.blur 	%argrw{"wr"}
+	assign		___524_txparams.missingcolor ___487_params.missingcolor 	%argrw{"wr"}
+	assign		___524_txparams.missingalpha ___487_params.missingalpha 	%argrw{"wr"}
+	assign		___524_txparams.interp ___487_params.interp 	%argrw{"wr"}
+	assign		___524_txparams.width ___487_params.width 	%argrw{"wr"}
+# PxrBump.osl:270
+#         TxCoords txcoords = initTxCoords(inManifold, 0, smoothRayDerivs);
+	functioncall	$const37 236 	%filename{"PxrBump.osl"} %line{270} %argrw{"r"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:208
+#     return initTxCoords(manifold.Q[0], manifold.Q[1], invertT, smoothRayDerivs);
+	compref		$tmp37 ___524_inManifold.Q $const2 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h"} %line{208} %argrw{"wrr"}
+	compref		$tmp38 ___524_inManifold.Q $const7 	%argrw{"wrr"}
+	functioncall	$const37 236 	%argrw{"r"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:110
+#     float _tt = invertT ? invertCoord(tt) : tt;
+	if		$const2 121 122 	%line{110} %argrw{"r"}
+	functioncall	$const28 121 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:48
 #     return floor(tt) + 1.0 - (tt - floor(tt));
-	floor		$tmp38 $tmp37 	%line{48} %argrw{"wr"}
-	add		$tmp39 $tmp38 $const14 	%argrw{"wrr"}
-	floor		$tmp40 $tmp37 	%argrw{"wr"}
-	sub		$tmp41 $tmp37 $tmp40 	%argrw{"wrr"}
-	sub		___470__tt $tmp39 $tmp41 	%argrw{"wrr"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:109
-#     float _tt = invertT ? invertCoord(manifold.Q[1]) : manifold.Q[1];
-	compref		___470__tt ___494_inManifold.Q $const7 	%line{109} %argrw{"wrr"}
+	floor		$tmp39 $tmp38 	%line{48} %argrw{"wr"}
+	add		$tmp40 $tmp39 $const14 	%argrw{"wrr"}
+	floor		$tmp41 $tmp38 	%argrw{"wr"}
+	sub		$tmp42 $tmp38 $tmp41 	%argrw{"wrr"}
+	sub		___489__tt $tmp40 $tmp42 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:110
-#     TxCoords coords = { manifold.Q[0], _tt,
-	compref		___470_coords.s ___494_inManifold.Q $const2 	%line{110} %argrw{"wrr"}
-	assign		___470_coords.t ___470__tt 	%argrw{"wr"}
+#     float _tt = invertT ? invertCoord(tt) : tt;
+	assign		___489__tt $tmp38 	%line{110} %argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:111
-#                         Dx(manifold.Q[0]), Dx(_tt),
-	compref		$tmp42 ___494_inManifold.Q $const2 	%line{111} %argrw{"wrr"}
-	Dx		___470_coords.dsdx $tmp42 	%argrw{"wr"} %argderivs{1}
-	Dx		___470_coords.dtdx ___470__tt 	%argrw{"wr"} %argderivs{1}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:112
-#                         Dy(manifold.Q[0]), Dy(_tt) };
-	compref		$tmp43 ___494_inManifold.Q $const2 	%line{112} %argrw{"wrr"}
-	Dy		___470_coords.dsdy $tmp43 	%argrw{"wr"} %argderivs{1}
-	Dy		___470_coords.dtdy ___470__tt 	%argrw{"wr"} %argderivs{1}
+#     float blur0 = 0.0;
+	assign		___489_blur0 $const15 	%line{111} %argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:113
-#     return coords;
-	assign		___494_txcoords.s ___470_coords.s 	%line{113} %argrw{"wr"}
-	assign		___494_txcoords.t ___470_coords.t 	%argrw{"wr"}
-	assign		___494_txcoords.dsdx ___470_coords.dsdx 	%argrw{"wr"}
-	assign		___494_txcoords.dtdx ___470_coords.dtdx 	%argrw{"wr"}
-	assign		___494_txcoords.dsdy ___470_coords.dsdy 	%argrw{"wr"}
-	assign		___494_txcoords.dtdy ___470_coords.dtdy 	%argrw{"wr"}
-	return
-# PxrBump.osl:262
-#         if (mipBias != 0 || maxResolution != 0)
-	neq		$tmp44 mipBias $const2 	%filename{"PxrBump.osl"} %line{262} %argrw{"wrr"}
-	neq		$tmp45 $tmp44 $const2 	%argrw{"wrr"}
-	if		$tmp45 138 141 	%argrw{"r"}
-	neq		$tmp46 maxResolution $const2 	%argrw{"wrr"}
-	neq		$tmp47 $tmp46 $const2 	%argrw{"wrr"}
-	assign		$tmp45 $tmp47 	%argrw{"wr"}
-	if		$tmp45 198 198 	%argrw{"r"}
-# PxrBump.osl:263
-#             PxrTxMipControls(mipBias, maxResolution, txcoords, txparams);
-	functioncall	$const38 198 	%line{263} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:155
-#     float bias = (mipBias != 0) ? pow(2.0, mipBias) : 1.0;
-	neq		$tmp48 mipBias $const2 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h"} %line{155} %argrw{"wrr"}
-	if		$tmp48 147 148 	%argrw{"r"}
-	assign		$tmp49 mipBias 	%argrw{"wr"}
-	pow		___478_bias $const39 $tmp49 	%argrw{"wrr"}
-	assign		___478_bias $const14 	%argrw{"wr"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:156
-#     bias *= params.width;
-	mul		___478_bias ___478_bias ___494_txparams.width 	%line{156} %argrw{"wrr"}
+#     if (smoothRayDerivs)
+	if		smoothRayDerivs 221 228 	%line{113} %argrw{"r"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:115
+#         float du = length(dPdu);  // width of the ray hit footprint projected onto the dPdu direction
+	length		___490_du dPdu 	%line{115} %argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:116
+#         float dv = length(dPdv);  // width of the ray hit footprint projected onto the dPdv direction
+	length		___490_dv dPdv 	%line{116} %argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:118
+#         float dsdu = Dx(ss) * du;  // change in s over ray hit footprint
+	Dx		$tmp43 $tmp37 	%line{118} %argrw{"wr"} %argderivs{1}
+	mul		___490_dsdu $tmp43 ___490_du 	%argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:119
+#         float dsdv = Dy(ss) * dv;
+	Dy		$tmp44 $tmp37 	%line{119} %argrw{"wr"} %argderivs{1}
+	mul		___490_dsdv $tmp44 ___490_dv 	%argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:120
+#         float dtdu = Dx(_tt) * du;  // change in t over ray hit footprint
+	Dx		$tmp45 ___489__tt 	%line{120} %argrw{"wr"} %argderivs{1}
+	mul		___490_dtdu $tmp45 ___490_du 	%argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:121
+#         float dtdv = Dy(_tt) * dv;
+	Dy		$tmp46 ___489__tt 	%line{121} %argrw{"wr"} %argderivs{1}
+	mul		___490_dtdv $tmp46 ___490_dv 	%argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:148
+#         float det = dsdu * dtdv - dtdu * dsdv;
+	mul		$tmp47 ___490_dsdu ___490_dtdv 	%line{148} %argrw{"wrr"}
+	mul		$tmp48 ___490_dtdu ___490_dsdv 	%argrw{"wrr"}
+	sub		___490_det $tmp47 $tmp48 	%argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:150
+#         if (det != 0.0)
+	neq		$tmp49 ___490_det $const15 	%line{150} %argrw{"wrr"}
+	if		$tmp49 147 181 	%argrw{"r"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:152
+#             dPds = (dPdu*dtdv - dPdv*dtdu) / det;
+	mul		$tmp50 dPdu ___490_dtdv 	%line{152} %argrw{"wrr"}
+	mul		$tmp51 dPdv ___490_dtdu 	%argrw{"wrr"}
+	sub		$tmp52 $tmp50 $tmp51 	%argrw{"wrr"}
+	div		___490_dPds $tmp52 ___490_det 	%argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:153
+#             dPdt = (dPdv*dsdu - dPdu*dsdv) / det;
+	mul		$tmp53 dPdv ___490_dsdu 	%line{153} %argrw{"wrr"}
+	mul		$tmp54 dPdu ___490_dsdv 	%argrw{"wrr"}
+	sub		$tmp55 $tmp53 $tmp54 	%argrw{"wrr"}
+	div		___490_dPdt $tmp55 ___490_det 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:157
-#     if (maxResolution <= 0)
-	le		$tmp50 maxResolution $const2 	%line{157} %argrw{"wrr"}
-	if		$tmp50 152 198 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:159
-#         params.width = bias;
-	assign		___494_txparams.width ___478_bias 	%line{159} %argrw{"wr"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:165
-#         float minRadius = (maxResolution > 0.0) ? 1.0 / maxResolution : 0.0;
-	gt		$tmp51 maxResolution $const15 	%line{165} %argrw{"wrr"}
-	if		$tmp51 155 156 	%argrw{"r"}
-	div		___480_minRadius $const14 maxResolution 	%argrw{"wrr"}
-	assign		___480_minRadius $const15 	%argrw{"wr"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:167
-#         float dsdx = max(minRadius, abs(coords.dsdx * bias)) * sign(coords.dsdx);
-	mul		$tmp54 ___494_txcoords.dsdx ___478_bias 	%line{167} %argrw{"wrr"}
-	abs		$tmp53 $tmp54 	%argrw{"wr"}
-	max		$tmp52 ___480_minRadius $tmp53 	%argrw{"wrr"}
-	sign		$tmp55 ___494_txcoords.dsdx 	%argrw{"wr"}
-	mul		___480_dsdx $tmp52 $tmp55 	%argrw{"wrr"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:168
-#         float dtdx = max(minRadius, abs(coords.dtdx * bias)) * sign(coords.dtdx);
-	mul		$tmp58 ___494_txcoords.dtdx ___478_bias 	%line{168} %argrw{"wrr"}
-	abs		$tmp57 $tmp58 	%argrw{"wr"}
-	max		$tmp56 ___480_minRadius $tmp57 	%argrw{"wrr"}
-	sign		$tmp59 ___494_txcoords.dtdx 	%argrw{"wr"}
-	mul		___480_dtdx $tmp56 $tmp59 	%argrw{"wrr"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:169
-#         float dsdy = max(minRadius, abs(coords.dsdy * bias)) * sign(coords.dsdy);
-	mul		$tmp62 ___494_txcoords.dsdy ___478_bias 	%line{169} %argrw{"wrr"}
-	abs		$tmp61 $tmp62 	%argrw{"wr"}
-	max		$tmp60 ___480_minRadius $tmp61 	%argrw{"wrr"}
-	sign		$tmp63 ___494_txcoords.dsdy 	%argrw{"wr"}
-	mul		___480_dsdy $tmp60 $tmp63 	%argrw{"wrr"}
+#             dPds = (dsdu != 0.0) ? (dPdu / dsdu) : vector(0.0);
+	neq		$tmp56 ___490_dsdu $const15 	%line{157} %argrw{"wrr"}
+	if		$tmp56 150 151 	%argrw{"r"}
+	div		___490_dPds dPdu ___490_dsdu 	%argrw{"wrr"}
+	assign		___490_dPds $const38 	%argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:158
+#             dPdt = (dtdv != 0.0) ? (dPdv / dtdv) : vector(0.0);
+	neq		$tmp57 ___490_dtdv $const15 	%line{158} %argrw{"wrr"}
+	if		$tmp57 154 155 	%argrw{"r"}
+	div		___490_dPdt dPdv ___490_dtdv 	%argrw{"wrr"}
+	assign		___490_dPdt $const38 	%argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:160
+#             if (length(dPds) == 0.0 && dsdv != 0.0) dPds = dPdv / dsdv;
+	length		$tmp58 ___490_dPds 	%line{160} %argrw{"wr"}
+	eq		$tmp59 $tmp58 $const15 	%argrw{"wrr"}
+	neq		$tmp60 $tmp59 $const2 	%argrw{"wrr"}
+	if		$tmp60 162 162 	%argrw{"r"}
+	neq		$tmp61 ___490_dsdv $const15 	%argrw{"wrr"}
+	neq		$tmp62 $tmp61 $const2 	%argrw{"wrr"}
+	assign		$tmp60 $tmp62 	%argrw{"wr"}
+	if		$tmp60 164 164 	%argrw{"r"}
+	div		___490_dPds dPdv ___490_dsdv 	%argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:161
+#             if (length(dPdt) == 0.0 && dtdu != 0.0) dPdt = dPdu / dtdu;
+	length		$tmp63 ___490_dPdt 	%line{161} %argrw{"wr"}
+	eq		$tmp64 $tmp63 $const15 	%argrw{"wrr"}
+	neq		$tmp65 $tmp64 $const2 	%argrw{"wrr"}
+	if		$tmp65 171 171 	%argrw{"r"}
+	neq		$tmp66 ___490_dtdu $const15 	%argrw{"wrr"}
+	neq		$tmp67 $tmp66 $const2 	%argrw{"wrr"}
+	assign		$tmp65 $tmp67 	%argrw{"wr"}
+	if		$tmp65 173 173 	%argrw{"r"}
+	div		___490_dPdt dPdu ___490_dtdu 	%argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:163
+#             if (length(dPds) == 0.0) dPds = dPdt;
+	length		$tmp68 ___490_dPds 	%line{163} %argrw{"wr"}
+	eq		$tmp69 $tmp68 $const15 	%argrw{"wrr"}
+	if		$tmp69 177 177 	%argrw{"r"}
+	assign		___490_dPds ___490_dPdt 	%argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:164
+#             if (length(dPdt) == 0.0) dPdt = dPds;
+	length		$tmp70 ___490_dPdt 	%line{164} %argrw{"wr"}
+	eq		$tmp71 $tmp70 $const15 	%argrw{"wrr"}
+	if		$tmp71 181 181 	%argrw{"r"}
+	assign		___490_dPdt ___490_dPds 	%argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:170
-#         float dtdy = max(minRadius, abs(coords.dtdy * bias)) * sign(coords.dtdy);
-	mul		$tmp66 ___494_txcoords.dtdy ___478_bias 	%line{170} %argrw{"wrr"}
-	abs		$tmp65 $tmp66 	%argrw{"wr"}
-	max		$tmp64 ___480_minRadius $tmp65 	%argrw{"wrr"}
-	sign		$tmp67 ___494_txcoords.dtdy 	%argrw{"wr"}
-	mul		___480_dtdy $tmp64 $tmp67 	%argrw{"wrr"}
+#         float filterwidthS = 1.0 / length(dPds);
+	length		$tmp72 ___490_dPds 	%line{170} %argrw{"wr"}
+	div		___490_filterwidthS $const14 $tmp72 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:171
-#         vector v0 = point(coords.dsdx, coords.dtdx, 0) - point(coords.dsdy, coords.dtdy, 0);
-	point		$tmp68 ___494_txcoords.dsdx ___494_txcoords.dtdx $const15 	%line{171} %argrw{"wrrr"}
-	point		$tmp69 ___494_txcoords.dsdy ___494_txcoords.dtdy $const15 	%argrw{"wrrr"}
-	sub		___480_v0 $tmp68 $tmp69 	%argrw{"wrr"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:172
-#         vector v1 = point(dsdx, dtdx, 0) - point(dsdy, dtdy, 0);
-	point		$tmp70 ___480_dsdx ___480_dtdx $const15 	%line{172} %argrw{"wrrr"}
-	point		$tmp71 ___480_dsdy ___480_dtdy $const15 	%argrw{"wrrr"}
-	sub		___480_v1 $tmp70 $tmp71 	%argrw{"wrr"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:173
-#         params.width = (v1.x*v1.x + v1.y*v1.y) / (v0.x*v0.x + v1.y*v1.y);
-	compref		$tmp72 ___480_v1 $const2 	%line{173} %argrw{"wrr"}
-	compref		$tmp73 ___480_v1 $const2 	%argrw{"wrr"}
-	mul		$tmp74 $tmp72 $tmp73 	%argrw{"wrr"}
-	compref		$tmp75 ___480_v1 $const7 	%argrw{"wrr"}
-	compref		$tmp76 ___480_v1 $const7 	%argrw{"wrr"}
-	mul		$tmp77 $tmp75 $tmp76 	%argrw{"wrr"}
-	add		$tmp78 $tmp74 $tmp77 	%argrw{"wrr"}
-	compref		$tmp79 ___480_v0 $const2 	%argrw{"wrr"}
-	compref		$tmp80 ___480_v0 $const2 	%argrw{"wrr"}
-	mul		$tmp81 $tmp79 $tmp80 	%argrw{"wrr"}
-	compref		$tmp82 ___480_v1 $const7 	%argrw{"wrr"}
-	compref		$tmp83 ___480_v1 $const7 	%argrw{"wrr"}
-	mul		$tmp84 $tmp82 $tmp83 	%argrw{"wrr"}
-	add		$tmp85 $tmp81 $tmp84 	%argrw{"wrr"}
-	div		___494_txparams.width $tmp78 $tmp85 	%argrw{"wrr"}
-	assign		___494_txparams.width ___494_txparams.width 	%argrw{"wr"}
-# PxrBump.osl:264
-#         signal = PxrTextureLookup(finalFilename, txcoords, txparams);
-	functioncall	$const40 201 	%filename{"PxrBump.osl"} %line{264} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:225
-#     color missingalpha = params.missingalpha;
-	assign		___485_missingalpha ___494_txparams.missingalpha 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h"} %line{225} %argrw{"wr"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:226
-#     return texture(filename,
-	texture		signal finalFilename ___494_txcoords.s ___494_txcoords.t ___494_txcoords.dsdx ___494_txcoords.dtdx ___494_txcoords.dsdy ___494_txcoords.dtdy $const41 ___494_txparams.firstchannel $const42 ___494_txparams.blur $const43 ___485_missingalpha $const44 ___494_txparams.interp $const45 ___494_txparams.width 	%line{226} %argrw{"wrrrrrrrrrrrrrrrrr"}
-# PxrBump.osl:267
-#     signal *= referenceScale * scale * bumpFade;
-	mul		$tmp86 referenceScale scale 	%filename{"PxrBump.osl"} %line{267} %argrw{"wrr"}
-	mul		$tmp87 $tmp86 bumpFade 	%argrw{"wrr"}
-	mul		signal signal $tmp87 	%argrw{"wrr"}
-# PxrBump.osl:268
-#     normal bumpN = normalize(calculatenormal(P + Nin * signal));
-	mul		$tmp89 Nin signal 	%line{268} %argrw{"wrr"}
-	add		$tmp90 P $tmp89 	%argrw{"wrr"}
-	calculatenormal	$tmp88 $tmp90 	%argrw{"wr"} %argderivs{1}
-	normalize	bumpN $tmp88 	%argrw{"wr"}
-# PxrBump.osl:270
-#     if (isconnected(inputN))
-	isconnected	$tmp91 inputN 	%line{270} %argrw{"wr"}
-	if		$tmp91 230 230 	%argrw{"r"}
+#         float filterwidthT = 1.0 / length(dPdt);
+	length		$tmp73 ___490_dPdt 	%line{171} %argrw{"wr"}
+	div		___490_filterwidthT $const14 $tmp73 	%argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:176
+#         float dxss = Dx(ss);
+	Dx		___490_dxss $tmp37 	%line{176} %argrw{"wr"} %argderivs{1}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:177
+#         float dxtt = Dx(_tt);
+	Dx		___490_dxtt ___489__tt 	%line{177} %argrw{"wr"} %argderivs{1}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:178
+#         float dyss = Dy(ss);
+	Dy		___490_dyss $tmp37 	%line{178} %argrw{"wr"} %argderivs{1}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:179
+#         float dytt = Dy(_tt);
+	Dy		___490_dytt ___489__tt 	%line{179} %argrw{"wr"} %argderivs{1}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:181
+#         float signS = (abs(dxss) > abs(dyss)) ? sign(dxss) : sign(dyss);  // dominant sign (+/-) for ds
+	abs		$tmp74 ___490_dxss 	%line{181} %argrw{"wr"}
+	abs		$tmp75 ___490_dyss 	%argrw{"wr"}
+	gt		$tmp76 $tmp74 $tmp75 	%argrw{"wrr"}
+	if		$tmp76 194 195 	%argrw{"r"}
+	sign		___490_signS ___490_dxss 	%argrw{"wr"}
+	sign		___490_signS ___490_dyss 	%argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:182
+#         float signT = (abs(dxtt) > abs(dytt)) ? sign(dxtt) : sign(dytt);  // dominant sign (+/-) for dt
+	abs		$tmp77 ___490_dxtt 	%line{182} %argrw{"wr"}
+	abs		$tmp78 ___490_dytt 	%argrw{"wr"}
+	gt		$tmp79 $tmp77 $tmp78 	%argrw{"wrr"}
+	if		$tmp79 200 201 	%argrw{"r"}
+	sign		___490_signT ___490_dxtt 	%argrw{"wr"}
+	sign		___490_signT ___490_dytt 	%argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:184
+#         filterwidthS *= signS;
+	mul		___490_filterwidthS ___490_filterwidthS ___490_signS 	%line{184} %argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:185
+#         filterwidthT *= signT;
+	mul		___490_filterwidthT ___490_filterwidthT ___490_signT 	%line{185} %argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:187
+#         int unmixedDerivsAreDominant = (abs(dxss) > abs(dyss));
+	abs		$tmp80 ___490_dxss 	%line{187} %argrw{"wr"}
+	abs		$tmp81 ___490_dyss 	%argrw{"wr"}
+	gt		___490_unmixedDerivsAreDominant $tmp80 $tmp81 	%argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:188
+#         if (unmixedDerivsAreDominant)
+	if		___490_unmixedDerivsAreDominant 214 221 	%line{188} %argrw{"r"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:190
+#             coords = TxCoords( ss, _tt, filterwidthS, 0.0, 0.0, filterwidthT, blur0 );
+	assign		___489_coords.s $tmp37 	%line{190} %argrw{"wr"}
+	assign		___489_coords.t ___489__tt 	%argrw{"wr"}
+	assign		___489_coords.dsdx ___490_filterwidthS 	%argrw{"wr"}
+	assign		___489_coords.dtdx $const15 	%argrw{"wr"}
+	assign		___489_coords.dsdy $const15 	%argrw{"wr"}
+	assign		___489_coords.dtdy ___490_filterwidthT 	%argrw{"wr"}
+	assign		___489_coords.blur ___489_blur0 	%argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:194
+#             coords = TxCoords( ss, _tt, 0.0, filterwidthT, filterwidthS, 0.0, blur0 );
+	assign		___489_coords.s $tmp37 	%line{194} %argrw{"wr"}
+	assign		___489_coords.t ___489__tt 	%argrw{"wr"}
+	assign		___489_coords.dsdx $const15 	%argrw{"wr"}
+	assign		___489_coords.dtdx ___490_filterwidthT 	%argrw{"wr"}
+	assign		___489_coords.dsdy ___490_filterwidthS 	%argrw{"wr"}
+	assign		___489_coords.dtdy $const15 	%argrw{"wr"}
+	assign		___489_coords.blur ___489_blur0 	%argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:200
+#         coords = TxCoords( ss, _tt, Dx(ss), Dx(_tt), Dy(ss), Dy(_tt), blur0 );
+	assign		___489_coords.s $tmp37 	%line{200} %argrw{"wr"}
+	assign		___489_coords.t ___489__tt 	%argrw{"wr"}
+	Dx		___489_coords.dsdx $tmp37 	%argrw{"wr"} %argderivs{1}
+	Dx		___489_coords.dtdx ___489__tt 	%argrw{"wr"} %argderivs{1}
+	Dy		___489_coords.dsdy $tmp37 	%argrw{"wr"} %argderivs{1}
+	Dy		___489_coords.dtdy ___489__tt 	%argrw{"wr"} %argderivs{1}
+	assign		___489_coords.blur ___489_blur0 	%argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:203
+#     return coords;
+	assign		___524_txcoords.s ___489_coords.s 	%line{203} %argrw{"wr"}
+	assign		___524_txcoords.t ___489_coords.t 	%argrw{"wr"}
+	assign		___524_txcoords.dsdx ___489_coords.dsdx 	%argrw{"wr"}
+	assign		___524_txcoords.dtdx ___489_coords.dtdx 	%argrw{"wr"}
+	assign		___524_txcoords.dsdy ___489_coords.dsdy 	%argrw{"wr"}
+	assign		___524_txcoords.dtdy ___489_coords.dtdy 	%argrw{"wr"}
+	assign		___524_txcoords.blur ___489_coords.blur 	%argrw{"wr"}
+	return
+# PxrBump.osl:271
+#         if (mipBias != 0 || maxResolution != 0)
+	neq		$tmp82 mipBias $const2 	%filename{"PxrBump.osl"} %line{271} %argrw{"wrr"}
+	neq		$tmp83 $tmp82 $const2 	%argrw{"wrr"}
+	if		$tmp83 239 242 	%argrw{"r"}
+	neq		$tmp84 maxResolution $const2 	%argrw{"wrr"}
+	neq		$tmp85 $tmp84 $const2 	%argrw{"wrr"}
+	assign		$tmp83 $tmp85 	%argrw{"wr"}
+	if		$tmp83 310 310 	%argrw{"r"}
+# PxrBump.osl:272
+#             PxrTxMipControls(mipBias, maxResolution, txcoords, txparams);
+	functioncall	$const39 310 	%line{272} %argrw{"r"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:283
+#     float bias = (mipBias != 0) ? pow(2.0, mipBias) : 1.0;
+	neq		$tmp86 mipBias $const2 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h"} %line{283} %argrw{"wrr"}
+	if		$tmp86 248 249 	%argrw{"r"}
+	assign		$tmp87 mipBias 	%argrw{"wr"}
+	pow		___509_bias $const40 $tmp87 	%argrw{"wrr"}
+	assign		___509_bias $const14 	%argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:284
+#     params.width *= bias;
+	mul		___524_txparams.width ___524_txparams.width ___509_bias 	%line{284} %argrw{"wrr"}
+	assign		___524_txparams.width ___524_txparams.width 	%argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:286
+#     if (maxResolution > 0)
+	gt		$tmp88 maxResolution $const2 	%line{286} %argrw{"wrr"}
+	if		$tmp88 310 310 	%argrw{"r"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:290
+#         float minwidth = 1.0 / maxResolution;
+	div		___510_minwidth $const14 maxResolution 	%line{290} %argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:293
+#         adjust_width(params.width, coords);
+	functioncall	$const41 295 	%line{293} %argrw{"r"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:250
+#     coords.dsdx *= width;
+	mul		___524_txcoords.dsdx ___524_txcoords.dsdx ___524_txparams.width 	%line{250} %argrw{"wrr"}
+	assign		___524_txcoords.dsdx ___524_txcoords.dsdx 	%argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:251
+#     coords.dtdx *= width;
+	mul		___524_txcoords.dtdx ___524_txcoords.dtdx ___524_txparams.width 	%line{251} %argrw{"wrr"}
+	assign		___524_txcoords.dtdx ___524_txcoords.dtdx 	%argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:252
+#     coords.dsdy *= width;
+	mul		___524_txcoords.dsdy ___524_txcoords.dsdy ___524_txparams.width 	%line{252} %argrw{"wrr"}
+	assign		___524_txcoords.dsdy ___524_txcoords.dsdy 	%argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:253
+#     coords.dtdy *= width;
+	mul		___524_txcoords.dtdy ___524_txcoords.dtdy ___524_txparams.width 	%line{253} %argrw{"wrr"}
+	assign		___524_txcoords.dtdy ___524_txcoords.dtdy 	%argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:256
+#     float eps = 1.0e-8, eps2 = eps*eps;
+	assign		___504_eps $const42 	%line{256} %argrw{"wr"}
+	mul		___504_eps2 ___504_eps ___504_eps 	%argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:257
+#     float dxlen2 = coords.dsdx * coords.dsdx + coords.dtdx * coords.dtdx;
+	mul		$tmp89 ___524_txcoords.dsdx ___524_txcoords.dsdx 	%line{257} %argrw{"wrr"}
+	mul		$tmp90 ___524_txcoords.dtdx ___524_txcoords.dtdx 	%argrw{"wrr"}
+	add		___504_dxlen2 $tmp89 $tmp90 	%argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:258
+#     float dylen2 = coords.dsdy * coords.dsdy + coords.dtdy * coords.dtdy;
+	mul		$tmp91 ___524_txcoords.dsdy ___524_txcoords.dsdy 	%line{258} %argrw{"wrr"}
+	mul		$tmp92 ___524_txcoords.dtdy ___524_txcoords.dtdy 	%argrw{"wrr"}
+	add		___504_dylen2 $tmp91 $tmp92 	%argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:259
+#     if (dxlen2 < eps2) {   // Tiny dx
+	lt		$tmp93 ___504_dxlen2 ___504_eps2 	%line{259} %argrw{"wrr"}
+	if		$tmp93 286 295 	%argrw{"r"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:260
+#         if (dylen2 < eps2) {
+	lt		$tmp94 ___504_dylen2 ___504_eps2 	%line{260} %argrw{"wrr"}
+	if		$tmp94 279 286 	%argrw{"r"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:262
+#             coords.dsdx = eps; coords.dsdy = 0;
+	assign		___524_txcoords.dsdx ___504_eps 	%line{262} %argrw{"wr"}
+	assign		___524_txcoords.dsdy $const15 	%argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:263
+#             coords.dtdx = 0; coords.dtdy = eps;
+	assign		___524_txcoords.dtdx $const15 	%line{263} %argrw{"wr"}
+	assign		___524_txcoords.dtdy ___504_eps 	%argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:266
+#             float scale = eps / sqrt(dylen2);
+	sqrt		$tmp95 ___504_dylen2 	%line{266} %argrw{"wr"}
+	div		___507_scale ___504_eps $tmp95 	%argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:267
+#             coords.dsdx = coords.dtdy * scale;
+	mul		___524_txcoords.dsdx ___524_txcoords.dtdy ___507_scale 	%line{267} %argrw{"wrr"}
+	assign		___524_txcoords.dsdx ___524_txcoords.dsdx 	%argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:268
+#             coords.dtdx = -coords.dsdy * scale;
+	neg		$tmp96 ___524_txcoords.dsdy 	%line{268} %argrw{"wr"}
+	mul		___524_txcoords.dtdx $tmp96 ___507_scale 	%argrw{"wrr"}
+	assign		___524_txcoords.dtdx ___524_txcoords.dtdx 	%argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:270
+#     } else if (dylen2 < eps2) {
+	lt		$tmp97 ___504_dylen2 ___504_eps2 	%line{270} %argrw{"wrr"}
+	if		$tmp97 295 295 	%argrw{"r"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:272
+#         float scale = eps / sqrt(dxlen2);
+	sqrt		$tmp98 ___504_dxlen2 	%line{272} %argrw{"wr"}
+	div		___508_scale ___504_eps $tmp98 	%argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:273
+#         coords.dsdy = -coords.dtdx * scale;
+	neg		$tmp99 ___524_txcoords.dtdx 	%line{273} %argrw{"wr"}
+	mul		___524_txcoords.dsdy $tmp99 ___508_scale 	%argrw{"wrr"}
+	assign		___524_txcoords.dsdy ___524_txcoords.dsdy 	%argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:274
+#         coords.dtdy = coords.dsdx * scale;
+	mul		___524_txcoords.dtdy ___524_txcoords.dsdx ___508_scale 	%line{274} %argrw{"wrr"}
+	assign		___524_txcoords.dtdy ___524_txcoords.dtdy 	%argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:297
+#         float swidth = max(abs(coords.dsdx), abs(coords.dsdy));
+	abs		$tmp100 ___524_txcoords.dsdx 	%line{297} %argrw{"wr"}
+	abs		$tmp101 ___524_txcoords.dsdy 	%argrw{"wr"}
+	max		___510_swidth $tmp100 $tmp101 	%argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:298
+#         float twidth = max(abs(coords.dtdx), abs(coords.dtdy));
+	abs		$tmp102 ___524_txcoords.dtdx 	%line{298} %argrw{"wr"}
+	abs		$tmp103 ___524_txcoords.dtdy 	%argrw{"wr"}
+	max		___510_twidth $tmp102 $tmp103 	%argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:299
+#         int conservative_filter = 0;
+	assign		___510_conservative_filter $const2 	%line{299} %argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:300
+#         getattribute("context", "reyesGrid", conservative_filter);  // 1 if displ. shading, 0 if ray hit
+	getattribute	$tmp104 $const43 $const44 ___510_conservative_filter 	%line{300} %argrw{"wrrw"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:301
+#         float filterwidth = conservative_filter ? max(swidth, twidth)
+	if		___510_conservative_filter 305 306 	%line{301} %argrw{"r"}
+	max		___510_filterwidth ___510_swidth ___510_twidth 	%argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:302
+#                                                 : min(swidth, twidth);
+	min		___510_filterwidth ___510_swidth ___510_twidth 	%line{302} %argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:305
+#         filterwidth += params.blur;
+	add		___510_filterwidth ___510_filterwidth ___524_txparams.blur 	%line{305} %argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:308
+#         filterwidth = max(filterwidth, minwidth);
+	max		___510_filterwidth ___510_filterwidth ___510_minwidth 	%line{308} %argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:310
+#         coords.blur = filterwidth;  // coords.blur now specifies the texture lookup filter width
+	assign		___524_txcoords.blur ___510_filterwidth 	%line{310} %argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:311
+#         params.width = 0.0;  // set multiplier on derivatives to 0 so that only blur determines filter width
+	assign		___524_txparams.width $const15 	%line{311} %argrw{"wr"}
 # PxrBump.osl:273
+#         signal = PxrTextureLookup(finalFilename, txcoords, txparams);
+	functioncall	$const45 313 	%filename{"PxrBump.osl"} %line{273} %argrw{"r"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:363
+#     color missingalpha = params.missingalpha;
+	assign		___515_missingalpha ___524_txparams.missingalpha 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h"} %line{363} %argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:364
+#     return texture(filename,
+	texture		signal finalFilename ___524_txcoords.s ___524_txcoords.t ___524_txcoords.dsdx ___524_txcoords.dtdx ___524_txcoords.dsdy ___524_txcoords.dtdy $const46 ___524_txparams.firstchannel $const47 ___524_txparams.blur $const48 ___515_missingalpha $const49 ___524_txparams.interp $const50 ___524_txparams.width 	%line{364} %argrw{"wrrrrrrrrrrrrrrrrr"}
+# PxrBump.osl:276
+#     signal *= referenceScale * scale * bumpFade;
+	mul		$tmp105 referenceScale scale 	%filename{"PxrBump.osl"} %line{276} %argrw{"wrr"}
+	mul		$tmp106 $tmp105 bumpFade 	%argrw{"wrr"}
+	mul		signal signal $tmp106 	%argrw{"wrr"}
+# PxrBump.osl:277
+#     normal bumpN = normalize(calculatenormal(P + Nin * signal));
+	mul		$tmp108 Nin signal 	%line{277} %argrw{"wrr"}
+	add		$tmp109 P $tmp108 	%argrw{"wrr"}
+	calculatenormal	$tmp107 $tmp109 	%argrw{"wr"} %argderivs{1}
+	normalize	bumpN $tmp107 	%argrw{"wr"}
+# PxrBump.osl:279
+#     if (isconnected(inputN))
+	isconnected	$tmp110 inputN 	%line{279} %argrw{"wr"}
+	if		$tmp110 342 342 	%argrw{"r"}
+# PxrBump.osl:282
 #         vector inGrad = surfgradFromPerturbedNormal(inputN, Nin);
-	functioncall	$const46 217 	%line{273} %argrw{"r"}
+	functioncall	$const51 329 	%line{282} %argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:100
 # 	float k = dot(Nn, bN);
-	dot		___446_k Nin inputN 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h"} %line{100} %argrw{"wrr"}
+	dot		___466_k Nin inputN 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h"} %line{100} %argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:101
 # 	return (k * Nn - bN) / max(1.0e-8, abs(k));
-	mul		$tmp92 ___446_k Nin 	%line{101} %argrw{"wrr"}
-	sub		$tmp93 $tmp92 inputN 	%argrw{"wrr"}
-	abs		$tmp95 ___446_k 	%argrw{"wr"}
-	max		$tmp94 $const47 $tmp95 	%argrw{"wrr"}
-	div		___496_inGrad $tmp93 $tmp94 	%argrw{"wrr"}
-# PxrBump.osl:274
+	mul		$tmp111 ___466_k Nin 	%line{101} %argrw{"wrr"}
+	sub		$tmp112 $tmp111 inputN 	%argrw{"wrr"}
+	abs		$tmp114 ___466_k 	%argrw{"wr"}
+	max		$tmp113 $const42 $tmp114 	%argrw{"wrr"}
+	div		___526_inGrad $tmp112 $tmp113 	%argrw{"wrr"}
+# PxrBump.osl:283
 #         vector thisGrad = surfgradFromPerturbedNormal(bumpN, Nin);
-	functioncall	$const46 224 	%filename{"PxrBump.osl"} %line{274} %argrw{"r"}
+	functioncall	$const51 336 	%filename{"PxrBump.osl"} %line{283} %argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:100
 # 	float k = dot(Nn, bN);
-	dot		___446_k Nin bumpN 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h"} %line{100} %argrw{"wrr"}
+	dot		___466_k Nin bumpN 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h"} %line{100} %argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:101
 # 	return (k * Nn - bN) / max(1.0e-8, abs(k));
-	mul		$tmp96 ___446_k Nin 	%line{101} %argrw{"wrr"}
-	sub		$tmp97 $tmp96 bumpN 	%argrw{"wrr"}
-	abs		$tmp99 ___446_k 	%argrw{"wr"}
-	max		$tmp98 $const47 $tmp99 	%argrw{"wrr"}
-	div		___496_thisGrad $tmp97 $tmp98 	%argrw{"wrr"}
-# PxrBump.osl:275
+	mul		$tmp115 ___466_k Nin 	%line{101} %argrw{"wrr"}
+	sub		$tmp116 $tmp115 bumpN 	%argrw{"wrr"}
+	abs		$tmp118 ___466_k 	%argrw{"wr"}
+	max		$tmp117 $const42 $tmp118 	%argrw{"wrr"}
+	div		___526_thisGrad $tmp116 $tmp117 	%argrw{"wrr"}
+# PxrBump.osl:284
 #         bumpN = resolveNormalFromSurfaceGradient(inGrad + thisGrad, 1, Nin);
-	add		$tmp100 ___496_inGrad ___496_thisGrad 	%filename{"PxrBump.osl"} %line{275} %argrw{"wrr"}
-	functioncall	$const48 229 	%argrw{"r"}
+	add		$tmp119 ___526_inGrad ___526_thisGrad 	%filename{"PxrBump.osl"} %line{284} %argrw{"wrr"}
+	functioncall	$const52 341 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:110
 #     return normalize(Nn - resolveSign * surfGrad);
-	mul		$tmp101 $const14 $tmp100 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h"} %line{110} %argrw{"wrr"}
-	sub		$tmp102 Nin $tmp101 	%argrw{"wrr"}
-	normalize	bumpN $tmp102 	%argrw{"wr"}
-# PxrBump.osl:276
+	mul		$tmp120 $const14 $tmp119 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h"} %line{110} %argrw{"wrr"}
+	sub		$tmp121 Nin $tmp120 	%argrw{"wrr"}
+	normalize	bumpN $tmp121 	%argrw{"wr"}
+# PxrBump.osl:285
 #         bumpN = normalize(bumpN);
-	normalize	bumpN bumpN 	%filename{"PxrBump.osl"} %line{276} %argrw{"wr"}
-# PxrBump.osl:281
-#     if (hasUserNormals)  // RIS: input has user normals (always true in XPU, but that works out okay)
-	if		hasUserNormals 243 250 	%line{281} %argrw{"r"}
-# PxrBump.osl:289
-#         int PoOk = getattribute("primvar", "Po", Po);  // for XPU (if displacement)
-	getattribute	___497_PoOk $const21 $const49 ___497_Po 	%line{289} %argrw{"wrrw"}
+	normalize	bumpN bumpN 	%filename{"PxrBump.osl"} %line{285} %argrw{"wr"}
 # PxrBump.osl:290
-#         if (!PoOk) {
-	eq		$tmp103 ___497_PoOk $const2 	%line{290} %argrw{"wrr"}
-	if		$tmp103 235 235 	%argrw{"r"}
-# PxrBump.osl:291
-#             getattribute("primvar", "P", Po);  // for RIS (and if no displacement in XPU)
-	getattribute	$tmp104 $const21 $const50 ___497_Po 	%line{291} %argrw{"wrrw"}
-# PxrBump.osl:293
-#         dPodu = Dx(Po);
-	Dx		___497_dPodu ___497_Po 	%line{293} %argrw{"wr"} %argderivs{1}
-# PxrBump.osl:294
-#         dPodv = Dy(Po);
-	Dy		___497_dPodv ___497_Po 	%line{294} %argrw{"wr"} %argderivs{1}
-# PxrBump.osl:295
-#         Nfaceted = normalize(cross(dPodu, dPodv));
-	cross		$tmp105 ___497_dPodu ___497_dPodv 	%line{295} %argrw{"wrr"}
-	normalize	Nfaceted $tmp105 	%argrw{"wr"}
+#     if (hasUserNormals)  // RIS: input has user normals (always true in XPU, but that works out okay)
+	if		hasUserNormals 355 362 	%line{290} %argrw{"r"}
 # PxrBump.osl:298
-#         if (dot(Nin, Nfaceted) < 0.0) {
-	dot		$tmp106 Nin Nfaceted 	%line{298} %argrw{"wrr"}
-	lt		$tmp107 $tmp106 $const15 	%argrw{"wrr"}
-	if		$tmp107 243 243 	%argrw{"r"}
+#         int PoOk = getattribute("primvar", "Po", Po);  // for XPU (if displacement)
+	getattribute	___527_PoOk $const21 $const53 ___527_Po 	%line{298} %argrw{"wrrw"}
 # PxrBump.osl:299
+#         if (!PoOk) {
+	eq		$tmp122 ___527_PoOk $const2 	%line{299} %argrw{"wrr"}
+	if		$tmp122 347 347 	%argrw{"r"}
+# PxrBump.osl:300
+#             getattribute("primvar", "P", Po);  // for RIS (and if no displacement in XPU)
+	getattribute	$tmp123 $const21 $const54 ___527_Po 	%line{300} %argrw{"wrrw"}
+# PxrBump.osl:302
+#         dPodu = Dx(Po);
+	Dx		___527_dPodu ___527_Po 	%line{302} %argrw{"wr"} %argderivs{1}
+# PxrBump.osl:303
+#         dPodv = Dy(Po);
+	Dy		___527_dPodv ___527_Po 	%line{303} %argrw{"wr"} %argderivs{1}
+# PxrBump.osl:304
+#         Nfaceted = normalize(cross(dPodu, dPodv));
+	cross		$tmp124 ___527_dPodu ___527_dPodv 	%line{304} %argrw{"wrr"}
+	normalize	Nfaceted $tmp124 	%argrw{"wr"}
+# PxrBump.osl:307
+#         if (dot(Nin, Nfaceted) < 0.0) {
+	dot		$tmp125 Nin Nfaceted 	%line{307} %argrw{"wrr"}
+	lt		$tmp126 $tmp125 $const15 	%argrw{"wrr"}
+	if		$tmp126 355 355 	%argrw{"r"}
+# PxrBump.osl:308
 #             Nfaceted = -Nfaceted;
-	neg		Nfaceted Nfaceted 	%line{299} %argrw{"wr"}
-# PxrBump.osl:306
+	neg		Nfaceted Nfaceted 	%line{308} %argrw{"wr"}
+# PxrBump.osl:315
 #         Nin = N;
-	assign		Nin N 	%line{306} %argrw{"wr"}
-# PxrBump.osl:310
-#         Nfaceted = normalize(cross(dPdu, dPdv));
-	cross		$tmp108 dPdu dPdv 	%line{310} %argrw{"wrr"}
-	normalize	Nfaceted $tmp108 	%argrw{"wr"}
-# PxrBump.osl:312
-#         if (dot(Ng, Nfaceted) < 0.0) {
-	dot		$tmp109 Ng Nfaceted 	%line{312} %argrw{"wrr"}
-	lt		$tmp110 $tmp109 $const15 	%argrw{"wrr"}
-	if		$tmp110 250 250 	%argrw{"r"}
-# PxrBump.osl:313
-#             Nfaceted = -Nfaceted;
-	neg		Nfaceted Nfaceted 	%line{313} %argrw{"wr"}
-# PxrBump.osl:317
-#     vector deltaN = Nin - Nfaceted;
-	sub		deltaN Nin Nfaceted 	%line{317} %argrw{"wrr"}
+	assign		Nin N 	%line{315} %argrw{"wr"}
 # PxrBump.osl:319
-#     bumpN = normalize(bumpN + deltaN);
-	add		$tmp111 bumpN deltaN 	%line{319} %argrw{"wrr"}
-	normalize	bumpN $tmp111 	%argrw{"wr"}
+#         Nfaceted = normalize(cross(dPdu, dPdv));
+	cross		$tmp127 dPdu dPdv 	%line{319} %argrw{"wrr"}
+	normalize	Nfaceted $tmp127 	%argrw{"wr"}
+# PxrBump.osl:321
+#         if (dot(Ng, Nfaceted) < 0.0) {
+	dot		$tmp128 Ng Nfaceted 	%line{321} %argrw{"wrr"}
+	lt		$tmp129 $tmp128 $const15 	%argrw{"wrr"}
+	if		$tmp129 362 362 	%argrw{"r"}
 # PxrBump.osl:322
-#     int reverseNn = dot(Ng, bumpN) < 0.0;
-	dot		$tmp112 Ng bumpN 	%line{322} %argrw{"wrr"}
-	lt		reverseNn $tmp112 $const15 	%argrw{"wrr"}
-# PxrBump.osl:323
-#     if (reverseNn) bumpN = -bumpN;
-	if		reverseNn 257 257 	%line{323} %argrw{"r"}
-	neg		bumpN bumpN 	%argrw{"wr"}
-# PxrBump.osl:324
-#     if (reverse) bumpN = -bumpN;
-	if		reverse 259 259 	%line{324} %argrw{"r"}
-	neg		bumpN bumpN 	%argrw{"wr"}
-# PxrBump.osl:327
-#     vector Vn = normalize(-I);
-	neg		$tmp113 I 	%line{327} %argrw{"wr"}
-	normalize	Vn $tmp113 	%argrw{"wr"}
+#             Nfaceted = -Nfaceted;
+	neg		Nfaceted Nfaceted 	%line{322} %argrw{"wr"}
+# PxrBump.osl:326
+#     vector deltaN = Nin - Nfaceted;
+	sub		deltaN Nin Nfaceted 	%line{326} %argrw{"wrr"}
 # PxrBump.osl:328
+#     bumpN = normalize(bumpN + deltaN);
+	add		$tmp130 bumpN deltaN 	%line{328} %argrw{"wrr"}
+	normalize	bumpN $tmp130 	%argrw{"wr"}
+# PxrBump.osl:331
+#     int reverseNn = dot(Ng, bumpN) < 0.0;
+	dot		$tmp131 Ng bumpN 	%line{331} %argrw{"wrr"}
+	lt		reverseNn $tmp131 $const15 	%argrw{"wrr"}
+# PxrBump.osl:332
+#     if (reverseNn) bumpN = -bumpN;
+	if		reverseNn 369 369 	%line{332} %argrw{"r"}
+	neg		bumpN bumpN 	%argrw{"wr"}
+# PxrBump.osl:333
+#     if (reverse) bumpN = -bumpN;
+	if		reverse 371 371 	%line{333} %argrw{"r"}
+	neg		bumpN bumpN 	%argrw{"wr"}
+# PxrBump.osl:336
+#     vector Vn = normalize(-I);
+	neg		$tmp132 I 	%line{336} %argrw{"wr"}
+	normalize	Vn $tmp132 	%argrw{"wr"}
+# PxrBump.osl:337
 #     RixAdjustNormal(adjustAmount, Vn, Ng, bumpN);
-	functioncall	$const51 276 	%line{328} %argrw{"r"}
+	functioncall	$const55 388 	%line{337} %argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:198
 #     if (amount == 0) return;
-	eq		$tmp114 adjustAmount $const2 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h"} %line{198} %argrw{"wrr"}
-	if		$tmp114 265 265 	%argrw{"r"}
+	eq		$tmp133 adjustAmount $const2 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h"} %line{198} %argrw{"wrr"}
+	if		$tmp133 377 377 	%argrw{"r"}
 	return
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:200
 #     if (dot(Vn, Ngn) >= 0)
-	dot		$tmp115 Vn Ng 	%line{200} %argrw{"wrr"}
-	ge		$tmp116 $tmp115 $const2 	%argrw{"wrr"}
-	if		$tmp116 276 276 	%argrw{"r"}
+	dot		$tmp134 Vn Ng 	%line{200} %argrw{"wrr"}
+	ge		$tmp135 $tmp134 $const2 	%argrw{"wrr"}
+	if		$tmp135 388 388 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:202
 #         float VdotN = dot(Vn, Nn);
-	dot		___458_VdotN Vn bumpN 	%line{202} %argrw{"wrr"}
+	dot		___478_VdotN Vn bumpN 	%line{202} %argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:203
 #         if (VdotN <= 0)
-	le		$tmp117 ___458_VdotN $const2 	%line{203} %argrw{"wrr"}
-	if		$tmp117 276 276 	%argrw{"r"}
+	le		$tmp136 ___478_VdotN $const2 	%line{203} %argrw{"wrr"}
+	if		$tmp136 388 388 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:207
 #             Nn -= amount * 1.01 * VdotN * Vn;
-	mul		$tmp118 adjustAmount $const52 	%line{207} %argrw{"wrr"}
-	mul		$tmp119 $tmp118 ___458_VdotN 	%argrw{"wrr"}
-	mul		$tmp120 $tmp119 Vn 	%argrw{"wrr"}
-	sub		bumpN bumpN $tmp120 	%argrw{"wrr"}
+	mul		$tmp137 adjustAmount $const56 	%line{207} %argrw{"wrr"}
+	mul		$tmp138 $tmp137 ___478_VdotN 	%argrw{"wrr"}
+	mul		$tmp139 $tmp138 Vn 	%argrw{"wrr"}
+	sub		bumpN bumpN $tmp139 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:208
 #             Nn = normalize(Nn);
 	normalize	bumpN bumpN 	%line{208} %argrw{"wr"}
-# PxrBump.osl:329
+# PxrBump.osl:338
 #     RixBlendWithNormal(surfaceNormalMix, Nin, bumpN);
-	functioncall	$const53 281 	%filename{"PxrBump.osl"} %line{329} %argrw{"r"}
+	functioncall	$const57 393 	%filename{"PxrBump.osl"} %line{338} %argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:215
 #     if (surfaceNormalMix > 0)
-	gt		$tmp121 surfaceNormalMix $const2 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h"} %line{215} %argrw{"wrr"}
-	if		$tmp121 281 281 	%argrw{"r"}
+	gt		$tmp140 surfaceNormalMix $const2 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h"} %line{215} %argrw{"wrr"}
+	if		$tmp140 393 393 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:216
 #         bumpN = normalize(mix(bumpN, Nn, surfaceNormalMix));
-	mix		$tmp122 bumpN Nin surfaceNormalMix 	%line{216} %argrw{"wrrr"}
-	normalize	bumpN $tmp122 	%argrw{"wr"}
-# PxrBump.osl:331
+	mix		$tmp141 bumpN Nin surfaceNormalMix 	%line{216} %argrw{"wrrr"}
+	normalize	bumpN $tmp141 	%argrw{"wr"}
+# PxrBump.osl:340
 #     resultN = normalize(bumpN);
-	normalize	resultN bumpN 	%filename{"PxrBump.osl"} %line{331} %argrw{"wr"}
+	normalize	resultN bumpN 	%filename{"PxrBump.osl"} %line{340} %argrw{"wr"}
 	end

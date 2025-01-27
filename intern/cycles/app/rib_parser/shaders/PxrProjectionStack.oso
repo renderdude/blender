@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
-# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrProjectionStack.osl/obj/PxrProjectionStack.oso
+# Compiled by oslc 1.13.0.@PROJECT_VERSION_TWEAK@"dev"
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxSonoma_x86-64_clang15_external_release/osl/PxrProjectionStack.osl/obj/PxrProjectionStack.oso
 shader PxrProjectionStack	%meta{int,rfm_nodeid,1053388} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/color"} %meta{string,rfh_classification,"Pattern/Color"} 
 param	int[]	layersMode	1		%meta{string,label,"Layers Mode"} %meta{string,widget,"mapper"} %meta{string,options,"Off:0|On:1|Solo:2"} %meta{string,help,"Each layer has a mode to help you debug your setup:<br>- Off: disable this layer - it won't render.<br>- On: enable this layer - this is the default.<br>- Solo: disable all other layers - only solo-ed layers will render.<br><br>layersMode (int)"} %meta{string,uiStruct,"Layers"} %meta{int,isDynamicArray,1} %meta{int,arraySize,-1} %meta{int,connectable,0}  %read{258,300} %write{2147483647,-1}
 param	color[]	layersRGB	0.5 0.5 0.5		%meta{string,label,"Layers RGB"} %meta{string,widget,"default"} %meta{string,help,"Each layer's color source should be connected here.<br>You should use PxrProjectionLayer.resultRGB as a source.<br><br>layersRGB (color)"} %meta{string,uiStruct,"Layers"} %meta{int,isDynamicArray,1} %meta{int,arraySize,-1}  %read{256,313} %write{2147483647,-1}
@@ -73,17 +73,17 @@ local	int	numRGB	%read{289,426} %write{256,256}
 local	int	numA	%read{290,426} %write{257,257}
 local	int	numMode	%read{262,426} %write{258,258}
 local	int	soloEnabled	%read{262,426} %write{259,269}
-local	int	___353_m	%read{262,269} %write{261,269}
+local	int	___373_m	%read{262,269} %write{261,269}
 local	color[16]	resultChRGB	%read{290,531} %write{270,426}
 local	int	offset	%read{2147483647,-1} %write{286,286}
-local	int	___355_lyr	%read{290,426} %write{289,426}
-local	float	___356_a	%read{290,426} %write{290,426}
-local	float	___356_inv_a	%read{290,426} %write{290,426}
-local	int	___356_mode	%read{290,426} %write{290,426}
-local	color[16]	___357_channels	%read{290,426} %write{290,426}
-local	int	___357_numChannels	%read{290,426} %write{290,426}
-local	int	___358_ch	%read{290,426} %write{290,426}
-local	int	___360_ch	%read{432,443} %write{431,443}
+local	int	___375_lyr	%read{290,426} %write{289,426}
+local	float	___376_a	%read{290,426} %write{290,426}
+local	float	___376_inv_a	%read{290,426} %write{290,426}
+local	int	___376_mode	%read{290,426} %write{290,426}
+local	color[16]	___377_channels	%read{290,426} %write{290,426}
+local	int	___377_numChannels	%read{290,426} %write{290,426}
+local	int	___378_ch	%read{290,426} %write{290,426}
+local	int	___380_ch	%read{432,443} %write{431,443}
 const	color	$const1	0 0 0		%read{0,332} %write{2147483647,-1}
 const	int	$const2	0		%read{0,527} %write{2147483647,-1}
 const	int	$const3	1		%read{1,464} %write{2147483647,-1}
@@ -532,12 +532,12 @@ code ___main___
 # PxrProjectionStack.osl:270
 #     for (int m = 0; m < numMode; m++)
 	for		$tmp258 262 264 268 270 	%line{270} %argrw{"r"}
-	assign		___353_m $const2 	%argrw{"wr"}
-	lt		$tmp257 ___353_m numMode 	%argrw{"wrr"}
+	assign		___373_m $const2 	%argrw{"wr"}
+	lt		$tmp257 ___373_m numMode 	%argrw{"wrr"}
 	neq		$tmp258 $tmp257 $const2 	%argrw{"wrr"}
 # PxrProjectionStack.osl:272
 #         soloEnabled = layersMode[m] == k_solo;
-	aref		$tmp259 layersMode ___353_m 	%line{272} %argrw{"wrr"}
+	aref		$tmp259 layersMode ___373_m 	%line{272} %argrw{"wrr"}
 	eq		soloEnabled $tmp259 $const4 	%argrw{"wrr"}
 # PxrProjectionStack.osl:273
 #         if (soloEnabled) break;
@@ -545,8 +545,8 @@ code ___main___
 	break
 # PxrProjectionStack.osl:270
 #     for (int m = 0; m < numMode; m++)
-	assign		$tmp260 ___353_m 	%line{270} %argrw{"wr"}
-	add		___353_m ___353_m $const3 	%argrw{"wrr"}
+	assign		$tmp260 ___373_m 	%line{270} %argrw{"wr"}
+	add		___373_m ___373_m $const3 	%argrw{"wrr"}
 # PxrProjectionStack.osl:276
 #     color resultChRGB[16] = EMPTY_COLOR_ARRAY;
 	aassign		resultChRGB $const2 $const1 	%line{276} %argrw{"wrr"}
@@ -574,264 +574,264 @@ code ___main___
 # PxrProjectionStack.osl:279
 #     for (int lyr = numRGB - 1; lyr >= 0; lyr--)
 	for		$tmp278 290 292 425 427 	%line{279} %argrw{"r"}
-	sub		___355_lyr numRGB $const3 	%argrw{"wrr"}
-	ge		$tmp277 ___355_lyr $const2 	%argrw{"wrr"}
+	sub		___375_lyr numRGB $const3 	%argrw{"wrr"}
+	ge		$tmp277 ___375_lyr $const2 	%argrw{"wrr"}
 	neq		$tmp278 $tmp277 $const2 	%argrw{"wrr"}
 # PxrProjectionStack.osl:281
 #         float a = lyr >= numA ? 1.0 : layersA[lyr];
-	ge		$tmp279 ___355_lyr numA 	%line{281} %argrw{"wrr"}
+	ge		$tmp279 ___375_lyr numA 	%line{281} %argrw{"wrr"}
 	if		$tmp279 295 296 	%argrw{"r"}
-	assign		___356_a $const18 	%argrw{"wr"}
-	aref		___356_a layersA ___355_lyr 	%argrw{"wrr"}
+	assign		___376_a $const18 	%argrw{"wr"}
+	aref		___376_a layersA ___375_lyr 	%argrw{"wrr"}
 # PxrProjectionStack.osl:282
 #         float inv_a = 1.0 - a;
-	sub		___356_inv_a $const18 ___356_a 	%line{282} %argrw{"wrr"}
+	sub		___376_inv_a $const18 ___376_a 	%line{282} %argrw{"wrr"}
 # PxrProjectionStack.osl:283
 #         int mode = lyr >= numMode ? k_on : layersMode[lyr];
-	ge		$tmp280 ___355_lyr numMode 	%line{283} %argrw{"wrr"}
+	ge		$tmp280 ___375_lyr numMode 	%line{283} %argrw{"wrr"}
 	if		$tmp280 300 301 	%argrw{"r"}
-	assign		___356_mode $const3 	%argrw{"wr"}
-	aref		___356_mode layersMode ___355_lyr 	%argrw{"wrr"}
+	assign		___376_mode $const3 	%argrw{"wr"}
+	aref		___376_mode layersMode ___375_lyr 	%argrw{"wrr"}
 # PxrProjectionStack.osl:284
 #         if ((mode && !soloEnabled) || mode == k_solo)
-	neq		$tmp281 ___356_mode $const2 	%line{284} %argrw{"wrr"}
+	neq		$tmp281 ___376_mode $const2 	%line{284} %argrw{"wrr"}
 	if		$tmp281 306 306 	%argrw{"r"}
 	eq		$tmp282 soloEnabled $const2 	%argrw{"wrr"}
 	neq		$tmp283 $tmp282 $const2 	%argrw{"wrr"}
 	assign		$tmp281 $tmp283 	%argrw{"wr"}
 	neq		$tmp284 $tmp281 $const2 	%argrw{"wrr"}
 	if		$tmp284 308 311 	%argrw{"r"}
-	eq		$tmp285 ___356_mode $const4 	%argrw{"wrr"}
+	eq		$tmp285 ___376_mode $const4 	%argrw{"wrr"}
 	neq		$tmp286 $tmp285 $const2 	%argrw{"wrr"}
 	assign		$tmp284 $tmp286 	%argrw{"wr"}
 	if		$tmp284 425 425 	%argrw{"r"}
 # PxrProjectionStack.osl:290
 #             resultRGB = resultRGB * inv_a + layersRGB[lyr];
-	mul		$tmp287 resultRGB ___356_inv_a 	%line{290} %argrw{"wrr"}
-	aref		$tmp288 layersRGB ___355_lyr 	%argrw{"wrr"}
+	mul		$tmp287 resultRGB ___376_inv_a 	%line{290} %argrw{"wrr"}
+	aref		$tmp288 layersRGB ___375_lyr 	%argrw{"wrr"}
 	add		resultRGB $tmp287 $tmp288 	%argrw{"wrr"}
 # PxrProjectionStack.osl:291
 #             resultA = resultA * inv_a + a;
-	mul		$tmp289 resultA ___356_inv_a 	%line{291} %argrw{"wrr"}
-	add		resultA $tmp289 ___356_a 	%argrw{"wrr"}
+	mul		$tmp289 resultA ___376_inv_a 	%line{291} %argrw{"wrr"}
+	add		resultA $tmp289 ___376_a 	%argrw{"wrr"}
 # PxrProjectionStack.osl:293
 #             color channels[16] = EMPTY_COLOR_ARRAY;
-	aassign		___357_channels $const2 $const1 	%line{293} %argrw{"wrr"}
-	aassign		___357_channels $const3 $const1 	%argrw{"wrr"}
-	aassign		___357_channels $const4 $const1 	%argrw{"wrr"}
-	aassign		___357_channels $const5 $const1 	%argrw{"wrr"}
-	aassign		___357_channels $const6 $const1 	%argrw{"wrr"}
-	aassign		___357_channels $const7 $const1 	%argrw{"wrr"}
-	aassign		___357_channels $const8 $const1 	%argrw{"wrr"}
-	aassign		___357_channels $const9 $const1 	%argrw{"wrr"}
-	aassign		___357_channels $const10 $const1 	%argrw{"wrr"}
-	aassign		___357_channels $const11 $const1 	%argrw{"wrr"}
-	aassign		___357_channels $const12 $const1 	%argrw{"wrr"}
-	aassign		___357_channels $const13 $const1 	%argrw{"wrr"}
-	aassign		___357_channels $const14 $const1 	%argrw{"wrr"}
-	aassign		___357_channels $const15 $const1 	%argrw{"wrr"}
-	aassign		___357_channels $const16 $const1 	%argrw{"wrr"}
-	aassign		___357_channels $const17 $const1 	%argrw{"wrr"}
+	aassign		___377_channels $const2 $const1 	%line{293} %argrw{"wrr"}
+	aassign		___377_channels $const3 $const1 	%argrw{"wrr"}
+	aassign		___377_channels $const4 $const1 	%argrw{"wrr"}
+	aassign		___377_channels $const5 $const1 	%argrw{"wrr"}
+	aassign		___377_channels $const6 $const1 	%argrw{"wrr"}
+	aassign		___377_channels $const7 $const1 	%argrw{"wrr"}
+	aassign		___377_channels $const8 $const1 	%argrw{"wrr"}
+	aassign		___377_channels $const9 $const1 	%argrw{"wrr"}
+	aassign		___377_channels $const10 $const1 	%argrw{"wrr"}
+	aassign		___377_channels $const11 $const1 	%argrw{"wrr"}
+	aassign		___377_channels $const12 $const1 	%argrw{"wrr"}
+	aassign		___377_channels $const13 $const1 	%argrw{"wrr"}
+	aassign		___377_channels $const14 $const1 	%argrw{"wrr"}
+	aassign		___377_channels $const15 $const1 	%argrw{"wrr"}
+	aassign		___377_channels $const16 $const1 	%argrw{"wrr"}
+	aassign		___377_channels $const17 $const1 	%argrw{"wrr"}
 # PxrProjectionStack.osl:294
 #             int numChannels = getData(lyr, channels);
 	functioncall	$const19 414 	%line{294} %argrw{"r"}
 # PxrProjectionStack.osl:181
 #         if (idx == 0)
-	eq		$tmp306 ___355_lyr $const2 	%line{181} %argrw{"wrr"}
+	eq		$tmp306 ___375_lyr $const2 	%line{181} %argrw{"wrr"}
 	if		$tmp306 339 414 	%argrw{"r"}
 # PxrProjectionStack.osl:183
 #             data = layerChannelsRGB0.data;
-	arraycopy	___357_channels layerChannelsRGB0.data 	%line{183} %argrw{"wr"}
+	arraycopy	___377_channels layerChannelsRGB0.data 	%line{183} %argrw{"wr"}
 # PxrProjectionStack.osl:184
 #             return layerChannelsRGB0.numChannels;
-	assign		___357_numChannels layerChannelsRGB0.numChannels 	%line{184} %argrw{"wr"}
+	assign		___377_numChannels layerChannelsRGB0.numChannels 	%line{184} %argrw{"wr"}
 	return
 # PxrProjectionStack.osl:186
 #         else if (idx == 1)
-	eq		$tmp307 ___355_lyr $const3 	%line{186} %argrw{"wrr"}
+	eq		$tmp307 ___375_lyr $const3 	%line{186} %argrw{"wrr"}
 	if		$tmp307 344 414 	%argrw{"r"}
 # PxrProjectionStack.osl:188
 #             data = layerChannelsRGB1.data;
-	arraycopy	___357_channels layerChannelsRGB1.data 	%line{188} %argrw{"wr"}
+	arraycopy	___377_channels layerChannelsRGB1.data 	%line{188} %argrw{"wr"}
 # PxrProjectionStack.osl:189
 #             return layerChannelsRGB1.numChannels;
-	assign		___357_numChannels layerChannelsRGB1.numChannels 	%line{189} %argrw{"wr"}
+	assign		___377_numChannels layerChannelsRGB1.numChannels 	%line{189} %argrw{"wr"}
 	return
 # PxrProjectionStack.osl:191
 #         else if (idx == 2)
-	eq		$tmp308 ___355_lyr $const4 	%line{191} %argrw{"wrr"}
+	eq		$tmp308 ___375_lyr $const4 	%line{191} %argrw{"wrr"}
 	if		$tmp308 349 414 	%argrw{"r"}
 # PxrProjectionStack.osl:193
 #             data = layerChannelsRGB2.data;
-	arraycopy	___357_channels layerChannelsRGB2.data 	%line{193} %argrw{"wr"}
+	arraycopy	___377_channels layerChannelsRGB2.data 	%line{193} %argrw{"wr"}
 # PxrProjectionStack.osl:194
 #             return layerChannelsRGB2.numChannels;
-	assign		___357_numChannels layerChannelsRGB2.numChannels 	%line{194} %argrw{"wr"}
+	assign		___377_numChannels layerChannelsRGB2.numChannels 	%line{194} %argrw{"wr"}
 	return
 # PxrProjectionStack.osl:196
 #         else if (idx == 3)
-	eq		$tmp309 ___355_lyr $const5 	%line{196} %argrw{"wrr"}
+	eq		$tmp309 ___375_lyr $const5 	%line{196} %argrw{"wrr"}
 	if		$tmp309 354 414 	%argrw{"r"}
 # PxrProjectionStack.osl:198
 #             data = layerChannelsRGB3.data;
-	arraycopy	___357_channels layerChannelsRGB3.data 	%line{198} %argrw{"wr"}
+	arraycopy	___377_channels layerChannelsRGB3.data 	%line{198} %argrw{"wr"}
 # PxrProjectionStack.osl:199
 #             return layerChannelsRGB3.numChannels;
-	assign		___357_numChannels layerChannelsRGB3.numChannels 	%line{199} %argrw{"wr"}
+	assign		___377_numChannels layerChannelsRGB3.numChannels 	%line{199} %argrw{"wr"}
 	return
 # PxrProjectionStack.osl:201
 #         else if (idx == 4)
-	eq		$tmp310 ___355_lyr $const6 	%line{201} %argrw{"wrr"}
+	eq		$tmp310 ___375_lyr $const6 	%line{201} %argrw{"wrr"}
 	if		$tmp310 359 414 	%argrw{"r"}
 # PxrProjectionStack.osl:203
 #             data = layerChannelsRGB4.data;
-	arraycopy	___357_channels layerChannelsRGB4.data 	%line{203} %argrw{"wr"}
+	arraycopy	___377_channels layerChannelsRGB4.data 	%line{203} %argrw{"wr"}
 # PxrProjectionStack.osl:204
 #             return layerChannelsRGB4.numChannels;
-	assign		___357_numChannels layerChannelsRGB4.numChannels 	%line{204} %argrw{"wr"}
+	assign		___377_numChannels layerChannelsRGB4.numChannels 	%line{204} %argrw{"wr"}
 	return
 # PxrProjectionStack.osl:206
 #         else if (idx == 5)
-	eq		$tmp311 ___355_lyr $const7 	%line{206} %argrw{"wrr"}
+	eq		$tmp311 ___375_lyr $const7 	%line{206} %argrw{"wrr"}
 	if		$tmp311 364 414 	%argrw{"r"}
 # PxrProjectionStack.osl:208
 #             data = layerChannelsRGB5.data;
-	arraycopy	___357_channels layerChannelsRGB5.data 	%line{208} %argrw{"wr"}
+	arraycopy	___377_channels layerChannelsRGB5.data 	%line{208} %argrw{"wr"}
 # PxrProjectionStack.osl:209
 #             return layerChannelsRGB5.numChannels;
-	assign		___357_numChannels layerChannelsRGB5.numChannels 	%line{209} %argrw{"wr"}
+	assign		___377_numChannels layerChannelsRGB5.numChannels 	%line{209} %argrw{"wr"}
 	return
 # PxrProjectionStack.osl:211
 #         else if (idx == 6)
-	eq		$tmp312 ___355_lyr $const8 	%line{211} %argrw{"wrr"}
+	eq		$tmp312 ___375_lyr $const8 	%line{211} %argrw{"wrr"}
 	if		$tmp312 369 414 	%argrw{"r"}
 # PxrProjectionStack.osl:213
 #             data = layerChannelsRGB6.data;
-	arraycopy	___357_channels layerChannelsRGB6.data 	%line{213} %argrw{"wr"}
+	arraycopy	___377_channels layerChannelsRGB6.data 	%line{213} %argrw{"wr"}
 # PxrProjectionStack.osl:214
 #             return layerChannelsRGB6.numChannels;
-	assign		___357_numChannels layerChannelsRGB6.numChannels 	%line{214} %argrw{"wr"}
+	assign		___377_numChannels layerChannelsRGB6.numChannels 	%line{214} %argrw{"wr"}
 	return
 # PxrProjectionStack.osl:216
 #         else if (idx == 7)
-	eq		$tmp313 ___355_lyr $const9 	%line{216} %argrw{"wrr"}
+	eq		$tmp313 ___375_lyr $const9 	%line{216} %argrw{"wrr"}
 	if		$tmp313 374 414 	%argrw{"r"}
 # PxrProjectionStack.osl:218
 #             data = layerChannelsRGB7.data;
-	arraycopy	___357_channels layerChannelsRGB7.data 	%line{218} %argrw{"wr"}
+	arraycopy	___377_channels layerChannelsRGB7.data 	%line{218} %argrw{"wr"}
 # PxrProjectionStack.osl:219
 #             return layerChannelsRGB7.numChannels;
-	assign		___357_numChannels layerChannelsRGB7.numChannels 	%line{219} %argrw{"wr"}
+	assign		___377_numChannels layerChannelsRGB7.numChannels 	%line{219} %argrw{"wr"}
 	return
 # PxrProjectionStack.osl:221
 #         else if (idx == 8)
-	eq		$tmp314 ___355_lyr $const10 	%line{221} %argrw{"wrr"}
+	eq		$tmp314 ___375_lyr $const10 	%line{221} %argrw{"wrr"}
 	if		$tmp314 379 414 	%argrw{"r"}
 # PxrProjectionStack.osl:223
 #             data = layerChannelsRGB8.data;
-	arraycopy	___357_channels layerChannelsRGB8.data 	%line{223} %argrw{"wr"}
+	arraycopy	___377_channels layerChannelsRGB8.data 	%line{223} %argrw{"wr"}
 # PxrProjectionStack.osl:224
 #             return layerChannelsRGB8.numChannels;
-	assign		___357_numChannels layerChannelsRGB8.numChannels 	%line{224} %argrw{"wr"}
+	assign		___377_numChannels layerChannelsRGB8.numChannels 	%line{224} %argrw{"wr"}
 	return
 # PxrProjectionStack.osl:226
 #         else if (idx == 9)
-	eq		$tmp315 ___355_lyr $const11 	%line{226} %argrw{"wrr"}
+	eq		$tmp315 ___375_lyr $const11 	%line{226} %argrw{"wrr"}
 	if		$tmp315 384 414 	%argrw{"r"}
 # PxrProjectionStack.osl:228
 #             data = layerChannelsRGB9.data;
-	arraycopy	___357_channels layerChannelsRGB9.data 	%line{228} %argrw{"wr"}
+	arraycopy	___377_channels layerChannelsRGB9.data 	%line{228} %argrw{"wr"}
 # PxrProjectionStack.osl:229
 #             return layerChannelsRGB9.numChannels;
-	assign		___357_numChannels layerChannelsRGB9.numChannels 	%line{229} %argrw{"wr"}
+	assign		___377_numChannels layerChannelsRGB9.numChannels 	%line{229} %argrw{"wr"}
 	return
 # PxrProjectionStack.osl:231
 #         else if (idx == 10)
-	eq		$tmp316 ___355_lyr $const12 	%line{231} %argrw{"wrr"}
+	eq		$tmp316 ___375_lyr $const12 	%line{231} %argrw{"wrr"}
 	if		$tmp316 389 414 	%argrw{"r"}
 # PxrProjectionStack.osl:233
 #             data = layerChannelsRGB10.data;
-	arraycopy	___357_channels layerChannelsRGB10.data 	%line{233} %argrw{"wr"}
+	arraycopy	___377_channels layerChannelsRGB10.data 	%line{233} %argrw{"wr"}
 # PxrProjectionStack.osl:234
 #             return layerChannelsRGB10.numChannels;
-	assign		___357_numChannels layerChannelsRGB10.numChannels 	%line{234} %argrw{"wr"}
+	assign		___377_numChannels layerChannelsRGB10.numChannels 	%line{234} %argrw{"wr"}
 	return
 # PxrProjectionStack.osl:236
 #         else if (idx == 11)
-	eq		$tmp317 ___355_lyr $const13 	%line{236} %argrw{"wrr"}
+	eq		$tmp317 ___375_lyr $const13 	%line{236} %argrw{"wrr"}
 	if		$tmp317 394 414 	%argrw{"r"}
 # PxrProjectionStack.osl:238
 #             data = layerChannelsRGB11.data;
-	arraycopy	___357_channels layerChannelsRGB11.data 	%line{238} %argrw{"wr"}
+	arraycopy	___377_channels layerChannelsRGB11.data 	%line{238} %argrw{"wr"}
 # PxrProjectionStack.osl:239
 #             return layerChannelsRGB11.numChannels;
-	assign		___357_numChannels layerChannelsRGB11.numChannels 	%line{239} %argrw{"wr"}
+	assign		___377_numChannels layerChannelsRGB11.numChannels 	%line{239} %argrw{"wr"}
 	return
 # PxrProjectionStack.osl:241
 #         else if (idx == 12)
-	eq		$tmp318 ___355_lyr $const14 	%line{241} %argrw{"wrr"}
+	eq		$tmp318 ___375_lyr $const14 	%line{241} %argrw{"wrr"}
 	if		$tmp318 399 414 	%argrw{"r"}
 # PxrProjectionStack.osl:243
 #             data = layerChannelsRGB12.data;
-	arraycopy	___357_channels layerChannelsRGB12.data 	%line{243} %argrw{"wr"}
+	arraycopy	___377_channels layerChannelsRGB12.data 	%line{243} %argrw{"wr"}
 # PxrProjectionStack.osl:244
 #             return layerChannelsRGB12.numChannels;
-	assign		___357_numChannels layerChannelsRGB12.numChannels 	%line{244} %argrw{"wr"}
+	assign		___377_numChannels layerChannelsRGB12.numChannels 	%line{244} %argrw{"wr"}
 	return
 # PxrProjectionStack.osl:246
 #         else if (idx == 13)
-	eq		$tmp319 ___355_lyr $const15 	%line{246} %argrw{"wrr"}
+	eq		$tmp319 ___375_lyr $const15 	%line{246} %argrw{"wrr"}
 	if		$tmp319 404 414 	%argrw{"r"}
 # PxrProjectionStack.osl:248
 #             data = layerChannelsRGB13.data;
-	arraycopy	___357_channels layerChannelsRGB13.data 	%line{248} %argrw{"wr"}
+	arraycopy	___377_channels layerChannelsRGB13.data 	%line{248} %argrw{"wr"}
 # PxrProjectionStack.osl:249
 #             return layerChannelsRGB13.numChannels;
-	assign		___357_numChannels layerChannelsRGB13.numChannels 	%line{249} %argrw{"wr"}
+	assign		___377_numChannels layerChannelsRGB13.numChannels 	%line{249} %argrw{"wr"}
 	return
 # PxrProjectionStack.osl:251
 #         else if (idx == 14)
-	eq		$tmp320 ___355_lyr $const16 	%line{251} %argrw{"wrr"}
+	eq		$tmp320 ___375_lyr $const16 	%line{251} %argrw{"wrr"}
 	if		$tmp320 409 414 	%argrw{"r"}
 # PxrProjectionStack.osl:253
 #             data = layerChannelsRGB14.data;
-	arraycopy	___357_channels layerChannelsRGB14.data 	%line{253} %argrw{"wr"}
+	arraycopy	___377_channels layerChannelsRGB14.data 	%line{253} %argrw{"wr"}
 # PxrProjectionStack.osl:254
 #             return layerChannelsRGB14.numChannels;
-	assign		___357_numChannels layerChannelsRGB14.numChannels 	%line{254} %argrw{"wr"}
+	assign		___377_numChannels layerChannelsRGB14.numChannels 	%line{254} %argrw{"wr"}
 	return
 # PxrProjectionStack.osl:256
 #         else if (idx == 15)
-	eq		$tmp321 ___355_lyr $const17 	%line{256} %argrw{"wrr"}
+	eq		$tmp321 ___375_lyr $const17 	%line{256} %argrw{"wrr"}
 	if		$tmp321 414 414 	%argrw{"r"}
 # PxrProjectionStack.osl:258
 #             data = layerChannelsRGB15.data;
-	arraycopy	___357_channels layerChannelsRGB15.data 	%line{258} %argrw{"wr"}
+	arraycopy	___377_channels layerChannelsRGB15.data 	%line{258} %argrw{"wr"}
 # PxrProjectionStack.osl:259
 #             return layerChannelsRGB15.numChannels;
-	assign		___357_numChannels layerChannelsRGB15.numChannels 	%line{259} %argrw{"wr"}
+	assign		___377_numChannels layerChannelsRGB15.numChannels 	%line{259} %argrw{"wr"}
 	return
 # PxrProjectionStack.osl:295
 #             for (int ch = 0; ch < numChannels; ch++)
 	for		$tmp323 416 418 423 425 	%line{295} %argrw{"r"}
-	assign		___358_ch $const2 	%argrw{"wr"}
-	lt		$tmp322 ___358_ch ___357_numChannels 	%argrw{"wrr"}
+	assign		___378_ch $const2 	%argrw{"wr"}
+	lt		$tmp322 ___378_ch ___377_numChannels 	%argrw{"wrr"}
 	neq		$tmp323 $tmp322 $const2 	%argrw{"wrr"}
 # PxrProjectionStack.osl:297
 #                 resultChRGB[ch] = resultChRGB[ch] * inv_a + channels[ch];
-	aref		$tmp324 resultChRGB ___358_ch 	%line{297} %argrw{"wrr"}
-	mul		$tmp325 $tmp324 ___356_inv_a 	%argrw{"wrr"}
-	aref		$tmp326 ___357_channels ___358_ch 	%argrw{"wrr"}
+	aref		$tmp324 resultChRGB ___378_ch 	%line{297} %argrw{"wrr"}
+	mul		$tmp325 $tmp324 ___376_inv_a 	%argrw{"wrr"}
+	aref		$tmp326 ___377_channels ___378_ch 	%argrw{"wrr"}
 	add		$tmp327 $tmp325 $tmp326 	%argrw{"wrr"}
-	aassign		resultChRGB ___358_ch $tmp327 	%argrw{"wrr"}
+	aassign		resultChRGB ___378_ch $tmp327 	%argrw{"wrr"}
 # PxrProjectionStack.osl:295
 #             for (int ch = 0; ch < numChannels; ch++)
-	assign		$tmp328 ___358_ch 	%line{295} %argrw{"wr"}
-	add		___358_ch ___358_ch $const3 	%argrw{"wrr"}
+	assign		$tmp328 ___378_ch 	%line{295} %argrw{"wr"}
+	add		___378_ch ___378_ch $const3 	%argrw{"wrr"}
 # PxrProjectionStack.osl:279
 #     for (int lyr = numRGB - 1; lyr >= 0; lyr--)
-	assign		$tmp329 ___355_lyr 	%line{279} %argrw{"wr"}
-	sub		___355_lyr ___355_lyr $const3 	%argrw{"wrr"}
+	assign		$tmp329 ___375_lyr 	%line{279} %argrw{"wr"}
+	sub		___375_lyr ___375_lyr $const3 	%argrw{"wrr"}
 # PxrProjectionStack.osl:302
 #     resultR = resultRGB.r;
 	compref		resultR resultRGB $const2 	%line{302} %argrw{"wrr"}
@@ -844,25 +844,25 @@ code ___main___
 # PxrProjectionStack.osl:307
 #     for (int ch = 0; ch < NUM_CHANNELS; ch++)
 	for		$tmp331 432 434 442 444 	%line{307} %argrw{"r"}
-	assign		___360_ch $const2 	%argrw{"wr"}
-	lt		$tmp330 ___360_ch $const20 	%argrw{"wrr"}
+	assign		___380_ch $const2 	%argrw{"wr"}
+	lt		$tmp330 ___380_ch $const20 	%argrw{"wrr"}
 	neq		$tmp331 $tmp330 $const2 	%argrw{"wrr"}
 # PxrProjectionStack.osl:309
 #         if (channelsAovNames[ch] != "")
-	aref		$tmp332 channelsAovNames ___360_ch 	%line{309} %argrw{"wrr"}
+	aref		$tmp332 channelsAovNames ___380_ch 	%line{309} %argrw{"wrr"}
 	neq		$tmp333 $tmp332 $const21 	%argrw{"wrr"}
 	if		$tmp333 442 442 	%argrw{"r"}
 # PxrProjectionStack.osl:311
 #             Ci = Ci + resultChRGB[ch] * debug(channelsAovNames[ch]);
-	aref		$tmp335 channelsAovNames ___360_ch 	%line{311} %argrw{"wrr"}
+	aref		$tmp335 channelsAovNames ___380_ch 	%line{311} %argrw{"wrr"}
 	closure		$tmp334 $const22 $tmp335 	%argrw{"wrr"}
-	aref		$tmp336 resultChRGB ___360_ch 	%argrw{"wrr"}
+	aref		$tmp336 resultChRGB ___380_ch 	%argrw{"wrr"}
 	mul		$tmp337 $tmp334 $tmp336 	%argrw{"wrr"}
 	add		Ci Ci $tmp337 	%argrw{"wrr"}
 # PxrProjectionStack.osl:307
 #     for (int ch = 0; ch < NUM_CHANNELS; ch++)
-	assign		$tmp338 ___360_ch 	%line{307} %argrw{"wr"}
-	add		___360_ch ___360_ch $const3 	%argrw{"wrr"}
+	assign		$tmp338 ___380_ch 	%line{307} %argrw{"wr"}
+	add		___380_ch ___380_ch $const3 	%argrw{"wrr"}
 # PxrProjectionStack.osl:316
 #     if (outputChanIdx[0] >= 0 && outputChanIdx[0] < NUM_OUTPUTS)
 	aref		$tmp339 outputChanIdx $const2 	%line{316} %argrw{"wrr"}

@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
-# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrLayerMixer.osl/obj/PxrLayerMixer.oso
+# Compiled by oslc 1.13.0.@PROJECT_VERSION_TWEAK@"dev"
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxSonoma_x86-64_clang15_external_release/osl/PxrLayerMixer.osl/obj/PxrLayerMixer.oso
 shader PxrLayerMixer	%meta{int,rfm_nodeid,1200409} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/PxrSurface"} %meta{string,rfh_classification,"Pattern/PxrSurface"} %meta{int,rfc_nodeid,1037675} %meta{string,rfc_description,"Xpxrlayermixer"} %meta{string,help,"An OSL pattern for combining PxrLayer nodes.Wire this pxrMaterialOut to PxrSurface's inputMaterial."} 
 param	int	enableDiffuseAlways	1		%meta{string,widget,"null"} %meta{int,connectable,0}  %read{2147483647,-1} %write{2147483647,-1}
 param	float	baselayer	0		%meta{string,widget,"none"} %meta{string,page,""} %meta{string,label,"Base Layer"} %meta{string,readOnly,"true"} %meta{string,tag,"vstruct"} %meta{string,help,"This is a virtual struct plug. It connects all other parameters in the same scope. Values set on this parameter will be ignored."}  %read{2147483647,-1} %write{2147483647,-1}
@@ -1177,30 +1177,30 @@ code ___main___
 # PxrLayerMixer.osl:627
 #     float layer1MaskClamped = clamp(layer1Mask, 0.0, 1.0);
 	functioncall	$const3 3 	%filename{"PxrLayerMixer.osl"} %line{627} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:141
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp1 layer1Mask $const2 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp1 layer1Mask $const2 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{141} %argrw{"wrr"}
 	max		layer1MaskClamped $tmp1 $const1 	%argrw{"wrr"}
 # PxrLayerMixer.osl:628
 #     float layer2MaskClamped = clamp(layer2Mask, 0.0, 1.0);
 	functioncall	$const3 6 	%filename{"PxrLayerMixer.osl"} %line{628} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:141
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp2 layer2Mask $const2 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp2 layer2Mask $const2 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{141} %argrw{"wrr"}
 	max		layer2MaskClamped $tmp2 $const1 	%argrw{"wrr"}
 # PxrLayerMixer.osl:629
 #     float layer3MaskClamped = clamp(layer3Mask, 0.0, 1.0);
 	functioncall	$const3 9 	%filename{"PxrLayerMixer.osl"} %line{629} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:141
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp3 layer3Mask $const2 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp3 layer3Mask $const2 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{141} %argrw{"wrr"}
 	max		layer3MaskClamped $tmp3 $const1 	%argrw{"wrr"}
 # PxrLayerMixer.osl:630
 #     float layer4MaskClamped = clamp(layer4Mask, 0.0, 1.0);
 	functioncall	$const3 12 	%filename{"PxrLayerMixer.osl"} %line{630} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:141
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp4 layer4Mask $const2 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp4 layer4Mask $const2 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{141} %argrw{"wrr"}
 	max		layer4MaskClamped $tmp4 $const1 	%argrw{"wrr"}
 # PxrLayerMixer.osl:632
 #     MIX_GLOBAL_BUMP_PARM_LAYERS(bumpNormal)

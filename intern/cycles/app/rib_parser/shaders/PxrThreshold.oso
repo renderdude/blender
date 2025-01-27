@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
-# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrThreshold.osl/obj/PxrThreshold.oso
+# Compiled by oslc 1.13.0.@PROJECT_VERSION_TWEAK@"dev"
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxSonoma_x86-64_clang15_external_release/osl/PxrThreshold.osl/obj/PxrThreshold.oso
 shader PxrThreshold	%meta{int,rfm_nodeid,1053439} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/color"} %meta{string,rfh_classification,"Pattern/Color"} %meta{string,help,"Thresholds an input color pattern to create a black and white mask. The falloff will define a gradual transition from black to white. The output is always between 0 and 1. "} 
 param	color	inputRGB	0 0 0		%meta{string,widget,"color"} %meta{string,help,"The color pattern you would like to threshold."} %meta{string,label,"Input Color"}  %read{6,25} %write{2147483647,-1}
 param	int	channel	3		%meta{string,widget,"mapper"} %meta{string,options,"Red:0|Green:1|Blue:2|Luminance:3|Average:4"} %meta{string,help,"The input channel this node will operate on."} %meta{int,connectable,0} %meta{string,label,"Channel"}  %read{4,24} %write{2147483647,-1}
@@ -12,8 +12,8 @@ oparam	color	resultRGB	0 0 0		%read{87,89} %write{86,86}
 oparam	float	resultR	0		%read{2147483647,-1} %write{87,87}
 oparam	float	resultG	0		%read{2147483647,-1} %write{88,88}
 oparam	float	resultB	0		%read{2147483647,-1} %write{89,89}
-local	float	___269_result	%read{38,38} %write{36,37}
-local	float	___270_xclamped	%read{34,34} %write{33,33}
+local	float	___274_result	%read{38,38} %write{36,37}
+local	float	___275_xclamped	%read{34,34} %write{33,33}
 local	float	x	%read{32,86} %write{6,85}
 local	float	Min	%read{29,83} %write{2,2}
 local	float	Max	%read{29,83} %write{3,3}
@@ -131,28 +131,28 @@ code ___main___
 # PxrThreshold.osl:174
 #         x = linearstep(Min, Max, x);
 	functioncall	$const10 39 	%line{174} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:361
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:339
 #     if (edge0 != edge1) {
-	neq		$tmp13 Min Max 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{361} %argrw{"wrr"}
+	neq		$tmp13 Min Max 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{339} %argrw{"wrr"}
 	if		$tmp13 37 38 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:362
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:340
 #         float xclamped = clamp (x, edge0, edge1);
-	functioncall	$const11 34 	%line{362} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
+	functioncall	$const11 34 	%line{340} %argrw{"r"}
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:141
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp14 x Max 	%line{163} %argrw{"wrr"}
-	max		___270_xclamped $tmp14 Min 	%argrw{"wrr"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:363
+	min		$tmp14 x Max 	%line{141} %argrw{"wrr"}
+	max		___275_xclamped $tmp14 Min 	%argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:341
 #         result = (xclamped - edge0) / (edge1 - edge0);
-	sub		$tmp15 ___270_xclamped Min 	%line{363} %argrw{"wrr"}
+	sub		$tmp15 ___275_xclamped Min 	%line{341} %argrw{"wrr"}
 	sub		$tmp16 Max Min 	%argrw{"wrr"}
-	div		___269_result $tmp15 $tmp16 	%argrw{"wrr"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:365
+	div		___274_result $tmp15 $tmp16 	%argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:343
 #         result = step (edge0, x);
-	step		___269_result Min x 	%line{365} %argrw{"wrr"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:367
+	step		___274_result Min x 	%line{343} %argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:345
 #     return result;
-	assign		x ___269_result 	%line{367} %argrw{"wr"}
+	assign		x ___274_result 	%line{345} %argrw{"wr"}
 # PxrThreshold.osl:176
 #     else if (transitionProfile == k_smooth)
 	eq		$tmp17 transitionProfile $const4 	%filename{"PxrThreshold.osl"} %line{176} %argrw{"wrr"}

@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
-# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrBlackBody.osl/obj/PxrBlackBody.oso
+# Compiled by oslc 1.13.0.@PROJECT_VERSION_TWEAK@"dev"
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxSonoma_x86-64_clang15_external_release/osl/PxrBlackBody.osl/obj/PxrBlackBody.oso
 shader PxrBlackBody	%meta{int,rfm_nodeid,1053437} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/color"} %meta{string,rfh_classification,"Pattern/Color"} %meta{string,help,"Produces a color that represents the radiation emitted by an ideal black body heated at the given temperature in the visible<br>spectrum. This allows you to easily create plausible light colors based on standard temperature measurement. See the Color temperature article for more infomration. "} 
 param	float	temperature	6500		%meta{string,widget,"default"} %meta{string,help,"The temperature (in kelvin) of the black body.<br>Color temperatures over 6,500K are called cool colors (bluish white),<br>while lower color temperatures (2,700 to 3,000 K) are called warm colors (yellowish white through red). "} %meta{string,label,"Temperature"} %meta{float,max,50000} %meta{float,min,1000}  %read{204,240} %write{2147483647,-1}
 param	float	physicalIntensity	0		%meta{string,widget,"default"} %meta{string,help,"When set to 1, the color will emit the correct amount of energy. WARNING: Your color will become super intense. "} %meta{string,label,"Physical Intensity"} %meta{float,max,1} %meta{float,min,0}  %read{227,248} %write{2147483647,-1}
@@ -9,16 +9,16 @@ oparam	color	resultRGB	0 0 0		%read{251,253} %write{250,250}
 oparam	float	resultR	0		%read{2147483647,-1} %write{251,251}
 oparam	float	resultG	0		%read{2147483647,-1} %write{252,252}
 oparam	float	resultB	0		%read{2147483647,-1} %write{253,253}
-local	int	___422_foo	%read{223,223} %write{221,222}
-local	color[199]	___442_bb_Rec709	%read{213,213} %write{5,203}
-local	float	___442_temp	%read{213,213} %write{208,208}
-local	color	___442_rgb	%read{216,226} %write{209,225}
-local	color	___442_norm	%read{216,216} %write{210,214}
-local	string	___442_ocio	%read{2147483647,-1} %write{211,211}
-local	string	___442_cs_name	%read{2147483647,-1} %write{212,212}
-local	float	___443_lum	%read{217,219} %write{216,216}
-local	color	___445_rgb	%read{229,237} %write{226,236}
-local	float	___446_norm	%read{234,236} %write{233,233}
+local	int	___448_foo	%read{223,223} %write{221,222}
+local	color[199]	___472_bb_Rec709	%read{213,213} %write{5,203}
+local	float	___472_temp	%read{213,213} %write{208,208}
+local	color	___472_rgb	%read{216,226} %write{209,225}
+local	color	___472_norm	%read{216,216} %write{210,214}
+local	string	___472_ocio	%read{2147483647,-1} %write{211,211}
+local	string	___472_cs_name	%read{2147483647,-1} %write{212,212}
+local	float	___473_lum	%read{217,219} %write{216,216}
+local	color	___475_rgb	%read{229,237} %write{226,236}
+local	float	___476_norm	%read{234,236} %write{233,233}
 local	color	tempv	%read{247,247} %write{0,237}
 local	float	physv	%read{242,249} %write{1,245}
 local	float	expv	%read{247,247} %write{2,246}
@@ -474,281 +474,281 @@ code ___main___
 	functioncall	$const5 227 	%line{276} %argrw{"r"}
 # PxrBlackBody.osl:43
 #     color bb_Rec709[NUM_KNOTS] =
-	aassign		___442_bb_Rec709 $const4 $const6 	%line{43} %argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const7 $const6 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const9 $const8 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const11 $const10 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const13 $const12 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const15 $const14 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const17 $const16 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const19 $const18 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const21 $const20 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const23 $const22 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const25 $const24 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const27 $const26 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const29 $const28 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const31 $const30 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const33 $const32 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const35 $const34 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const37 $const36 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const39 $const38 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const41 $const40 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const43 $const42 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const45 $const44 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const47 $const46 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const49 $const48 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const51 $const50 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const53 $const52 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const55 $const54 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const57 $const56 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const59 $const58 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const61 $const60 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const63 $const62 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const65 $const64 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const67 $const66 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const69 $const68 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const71 $const70 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const73 $const72 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const75 $const74 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const77 $const76 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const79 $const78 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const81 $const80 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const83 $const82 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const85 $const84 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const87 $const86 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const89 $const88 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const91 $const90 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const93 $const92 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const95 $const94 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const97 $const96 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const99 $const98 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const101 $const100 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const103 $const102 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const105 $const104 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const107 $const106 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const109 $const108 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const111 $const110 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const113 $const112 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const115 $const114 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const117 $const116 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const119 $const118 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const121 $const120 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const123 $const122 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const125 $const124 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const127 $const126 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const129 $const128 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const131 $const130 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const133 $const132 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const135 $const134 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const137 $const136 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const139 $const138 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const141 $const140 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const143 $const142 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const145 $const144 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const147 $const146 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const149 $const148 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const151 $const150 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const153 $const152 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const155 $const154 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const157 $const156 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const159 $const158 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const161 $const160 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const163 $const162 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const165 $const164 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const167 $const166 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const169 $const168 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const171 $const170 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const173 $const172 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const175 $const174 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const177 $const176 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const179 $const178 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const181 $const180 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const183 $const182 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const185 $const184 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const187 $const186 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const189 $const188 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const191 $const190 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const193 $const192 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const195 $const194 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const197 $const196 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const199 $const198 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const201 $const200 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const203 $const202 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const205 $const204 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const207 $const206 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const209 $const208 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const211 $const210 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const213 $const212 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const215 $const214 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const217 $const216 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const219 $const218 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const221 $const220 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const223 $const222 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const225 $const224 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const227 $const226 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const229 $const228 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const231 $const230 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const233 $const232 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const235 $const234 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const237 $const236 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const239 $const238 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const241 $const240 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const243 $const242 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const245 $const244 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const247 $const246 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const249 $const248 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const251 $const250 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const253 $const252 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const255 $const254 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const257 $const256 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const259 $const258 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const261 $const260 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const263 $const262 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const265 $const264 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const267 $const266 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const269 $const268 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const271 $const270 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const273 $const272 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const275 $const274 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const277 $const276 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const279 $const278 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const281 $const280 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const283 $const282 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const285 $const284 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const287 $const286 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const289 $const288 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const291 $const290 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const293 $const292 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const295 $const294 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const297 $const296 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const299 $const298 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const301 $const300 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const303 $const302 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const305 $const304 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const307 $const306 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const309 $const308 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const311 $const310 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const313 $const312 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const315 $const314 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const317 $const316 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const319 $const318 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const321 $const320 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const323 $const322 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const325 $const324 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const327 $const326 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const329 $const328 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const331 $const330 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const333 $const332 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const335 $const334 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const337 $const336 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const339 $const338 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const341 $const340 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const343 $const342 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const345 $const344 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const347 $const346 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const349 $const348 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const351 $const350 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const353 $const352 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const355 $const354 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const357 $const356 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const359 $const358 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const361 $const360 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const363 $const362 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const365 $const364 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const367 $const366 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const369 $const368 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const371 $const370 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const373 $const372 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const375 $const374 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const377 $const376 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const379 $const378 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const381 $const380 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const383 $const382 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const385 $const384 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const387 $const386 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const389 $const388 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const391 $const390 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const393 $const392 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const395 $const394 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const397 $const396 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const399 $const398 	%argrw{"wrr"}
-	aassign		___442_bb_Rec709 $const400 $const398 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const4 $const6 	%line{43} %argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const7 $const6 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const9 $const8 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const11 $const10 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const13 $const12 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const15 $const14 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const17 $const16 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const19 $const18 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const21 $const20 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const23 $const22 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const25 $const24 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const27 $const26 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const29 $const28 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const31 $const30 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const33 $const32 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const35 $const34 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const37 $const36 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const39 $const38 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const41 $const40 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const43 $const42 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const45 $const44 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const47 $const46 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const49 $const48 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const51 $const50 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const53 $const52 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const55 $const54 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const57 $const56 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const59 $const58 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const61 $const60 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const63 $const62 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const65 $const64 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const67 $const66 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const69 $const68 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const71 $const70 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const73 $const72 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const75 $const74 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const77 $const76 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const79 $const78 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const81 $const80 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const83 $const82 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const85 $const84 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const87 $const86 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const89 $const88 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const91 $const90 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const93 $const92 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const95 $const94 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const97 $const96 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const99 $const98 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const101 $const100 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const103 $const102 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const105 $const104 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const107 $const106 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const109 $const108 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const111 $const110 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const113 $const112 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const115 $const114 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const117 $const116 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const119 $const118 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const121 $const120 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const123 $const122 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const125 $const124 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const127 $const126 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const129 $const128 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const131 $const130 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const133 $const132 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const135 $const134 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const137 $const136 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const139 $const138 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const141 $const140 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const143 $const142 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const145 $const144 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const147 $const146 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const149 $const148 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const151 $const150 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const153 $const152 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const155 $const154 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const157 $const156 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const159 $const158 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const161 $const160 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const163 $const162 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const165 $const164 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const167 $const166 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const169 $const168 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const171 $const170 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const173 $const172 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const175 $const174 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const177 $const176 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const179 $const178 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const181 $const180 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const183 $const182 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const185 $const184 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const187 $const186 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const189 $const188 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const191 $const190 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const193 $const192 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const195 $const194 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const197 $const196 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const199 $const198 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const201 $const200 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const203 $const202 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const205 $const204 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const207 $const206 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const209 $const208 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const211 $const210 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const213 $const212 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const215 $const214 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const217 $const216 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const219 $const218 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const221 $const220 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const223 $const222 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const225 $const224 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const227 $const226 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const229 $const228 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const231 $const230 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const233 $const232 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const235 $const234 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const237 $const236 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const239 $const238 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const241 $const240 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const243 $const242 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const245 $const244 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const247 $const246 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const249 $const248 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const251 $const250 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const253 $const252 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const255 $const254 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const257 $const256 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const259 $const258 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const261 $const260 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const263 $const262 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const265 $const264 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const267 $const266 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const269 $const268 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const271 $const270 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const273 $const272 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const275 $const274 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const277 $const276 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const279 $const278 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const281 $const280 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const283 $const282 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const285 $const284 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const287 $const286 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const289 $const288 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const291 $const290 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const293 $const292 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const295 $const294 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const297 $const296 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const299 $const298 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const301 $const300 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const303 $const302 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const305 $const304 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const307 $const306 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const309 $const308 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const311 $const310 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const313 $const312 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const315 $const314 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const317 $const316 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const319 $const318 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const321 $const320 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const323 $const322 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const325 $const324 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const327 $const326 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const329 $const328 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const331 $const330 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const333 $const332 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const335 $const334 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const337 $const336 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const339 $const338 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const341 $const340 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const343 $const342 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const345 $const344 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const347 $const346 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const349 $const348 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const351 $const350 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const353 $const352 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const355 $const354 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const357 $const356 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const359 $const358 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const361 $const360 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const363 $const362 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const365 $const364 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const367 $const366 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const369 $const368 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const371 $const370 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const373 $const372 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const375 $const374 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const377 $const376 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const379 $const378 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const381 $const380 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const383 $const382 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const385 $const384 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const387 $const386 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const389 $const388 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const391 $const390 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const393 $const392 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const395 $const394 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const397 $const396 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const399 $const398 	%argrw{"wrr"}
+	aassign		___472_bb_Rec709 $const400 $const398 	%argrw{"wrr"}
 # PxrBlackBody.osl:249
 #     float temp = clamp((colorTemp - 1000.0) / 49000.0, 0.0, 1.0);
 	sub		$tmp200 temperature $const401 	%line{249} %argrw{"wrr"}
 	div		$tmp201 $tmp200 $const402 	%argrw{"wrr"}
 	functioncall	$const404 209 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:141
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp202 $tmp201 $const403 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
-	max		___442_temp $tmp202 $const2 	%argrw{"wrr"}
+	min		$tmp202 $tmp201 $const403 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{141} %argrw{"wrr"}
+	max		___472_temp $tmp202 $const2 	%argrw{"wrr"}
 # PxrBlackBody.osl:252
 #     color rgb = 0, norm = 1;
-	assign		___442_rgb $const4 	%filename{"PxrBlackBody.osl"} %line{252} %argrw{"wr"}
-	assign		___442_norm $const7 	%argrw{"wr"}
+	assign		___472_rgb $const4 	%filename{"PxrBlackBody.osl"} %line{252} %argrw{"wr"}
+	assign		___472_norm $const7 	%argrw{"wr"}
 # PxrBlackBody.osl:253
 #     string ocio = "";
-	assign		___442_ocio $const405 	%line{253} %argrw{"wr"}
+	assign		___472_ocio $const405 	%line{253} %argrw{"wr"}
 # PxrBlackBody.osl:254
 #     string cs_name = "";
-	assign		___442_cs_name $const405 	%line{254} %argrw{"wr"}
+	assign		___472_cs_name $const405 	%line{254} %argrw{"wr"}
 # PxrBlackBody.osl:256
 #     rgb = spline("catmull-rom", temp, NUM_KNOTS, bb_Rec709);
-	spline		___442_rgb $const406 ___442_temp $const407 ___442_bb_Rec709 	%line{256} %argrw{"wrrrr"}
+	spline		___472_rgb $const406 ___472_temp $const407 ___472_bb_Rec709 	%line{256} %argrw{"wrrrr"}
 # PxrBlackBody.osl:257
 #     norm = color(0.21263901,  0.71516868,  0.07219232);
-	assign		___442_norm $const408 	%line{257} %argrw{"wr"}
+	assign		___472_norm $const408 	%line{257} %argrw{"wr"}
 # PxrBlackBody.osl:260
 #     if (normalize)
 	if		$const4 220 220 	%line{260} %argrw{"r"}
 # PxrBlackBody.osl:262
 #         float lum = dot(rgb, norm);
-	dot		___443_lum ___442_rgb ___442_norm 	%line{262} %argrw{"wrr"}
+	dot		___473_lum ___472_rgb ___472_norm 	%line{262} %argrw{"wrr"}
 # PxrBlackBody.osl:263
 #         if (lum > 0.0) rgb /= lum;
-	gt		$tmp203 ___443_lum $const2 	%line{263} %argrw{"wrr"}
+	gt		$tmp203 ___473_lum $const2 	%line{263} %argrw{"wrr"}
 	if		$tmp203 220 220 	%argrw{"r"}
-	div		___442_rgb ___442_rgb ___443_lum 	%argrw{"wrr"}
+	div		___472_rgb ___472_rgb ___473_lum 	%argrw{"wrr"}
 # PxrBlackBody.osl:266
 #     if (ocioEnabled())
 	functioncall	$const409 224 	%line{266} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:120
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:215
 #     int foo = 0;
-	assign		___422_foo $const4 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h"} %line{120} %argrw{"wr"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:121
+	assign		___448_foo $const4 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h"} %line{215} %argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:216
 #     getattribute("user:ocioenabled", foo);
-	getattribute	$tmp205 $const410 ___422_foo 	%line{121} %argrw{"wrw"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:122
+	getattribute	$tmp205 $const410 ___448_foo 	%line{216} %argrw{"wrw"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:217
 #     return foo;
-	assign		$tmp204 ___422_foo 	%line{122} %argrw{"wr"}
+	assign		$tmp204 ___448_foo 	%line{217} %argrw{"wr"}
 # PxrBlackBody.osl:266
 #     if (ocioEnabled())
 	if		$tmp204 226 226 	%filename{"PxrBlackBody.osl"} %line{266} %argrw{"r"}
 # PxrBlackBody.osl:268
 #         rgb = transformc("srgb_linear", "rendering", rgb);
-	transformc	___442_rgb $const411 $const412 ___442_rgb 	%line{268} %argrw{"wrrr"}
+	transformc	___472_rgb $const411 $const412 ___472_rgb 	%line{268} %argrw{"wrrr"}
 # PxrBlackBody.osl:271
 #     return rgb;
-	assign		___445_rgb ___442_rgb 	%line{271} %argrw{"wr"}
+	assign		___475_rgb ___472_rgb 	%line{271} %argrw{"wr"}
 # PxrBlackBody.osl:279
 #     if (physicalIntensity > 0.0)
 	gt		$tmp206 physicalIntensity $const2 	%line{279} %argrw{"wrr"}
 	if		$tmp206 237 237 	%argrw{"r"}
 # PxrBlackBody.osl:281
 #         float norm = rgb[0] + rgb[1] + rgb[2];
-	compref		$tmp207 ___445_rgb $const4 	%line{281} %argrw{"wrr"}
-	compref		$tmp208 ___445_rgb $const7 	%argrw{"wrr"}
+	compref		$tmp207 ___475_rgb $const4 	%line{281} %argrw{"wrr"}
+	compref		$tmp208 ___475_rgb $const7 	%argrw{"wrr"}
 	add		$tmp209 $tmp207 $tmp208 	%argrw{"wrr"}
-	compref		$tmp210 ___445_rgb $const9 	%argrw{"wrr"}
-	add		___446_norm $tmp209 $tmp210 	%argrw{"wrr"}
+	compref		$tmp210 ___475_rgb $const9 	%argrw{"wrr"}
+	add		___476_norm $tmp209 $tmp210 	%argrw{"wrr"}
 # PxrBlackBody.osl:282
 #         if (norm > 0.0) rgb /= norm;
-	gt		$tmp211 ___446_norm $const2 	%line{282} %argrw{"wrr"}
+	gt		$tmp211 ___476_norm $const2 	%line{282} %argrw{"wrr"}
 	if		$tmp211 237 237 	%argrw{"r"}
-	div		___445_rgb ___445_rgb ___446_norm 	%argrw{"wrr"}
+	div		___475_rgb ___475_rgb ___476_norm 	%argrw{"wrr"}
 # PxrBlackBody.osl:284
 #     return rgb;
-	assign		tempv ___445_rgb 	%line{284} %argrw{"wr"}
+	assign		tempv ___475_rgb 	%line{284} %argrw{"wr"}
 # PxrBlackBody.osl:339
 #     if (physicalIntensity > 0.0)
 	gt		$tmp212 physicalIntensity $const2 	%line{339} %argrw{"wrr"}

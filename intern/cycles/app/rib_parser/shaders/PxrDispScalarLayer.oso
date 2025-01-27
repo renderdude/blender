@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
-# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrDispScalarLayer.osl/obj/PxrDispScalarLayer.oso
+# Compiled by oslc 1.13.0.@PROJECT_VERSION_TWEAK@"dev"
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxSonoma_x86-64_clang15_external_release/osl/PxrDispScalarLayer.osl/obj/PxrDispScalarLayer.oso
 shader PxrDispScalarLayer	%meta{int,rfm_nodeid,1053341} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/displace"} %meta{string,rfh_classification,"Pattern/Displace"} %meta{string,help,"Layer scalar (float) displacement textures/values."} 
 param	float	overallAmount	1		%meta{string,widget,"default"} %meta{string,help,"Controls the gain amount of the final layered result.  This is handy when we<br>want to layer several layered displacement textures by adjusting the amount that<br>controls each group of layered displacements.<br><br>overallAmount (float)"} %meta{string,label,"Overall Gain"}  %read{77,77} %write{2147483647,-1}
 param	int	baseLayerEnabled	1		%meta{string,widget,"checkBox"} %meta{string,page,"Base Layer"} %meta{int,page_open,1} %meta{string,help,"Enable the base layer.  By default, this is on.  But for some case such as<br>debugging, we can disable the base layer.  It if is off, it won't be<br>contributing to the layered displacement result.<br><br>baseLayerEnabled (int)"} %meta{int,connectable,0} %meta{string,label,"Enabled"}  %read{20,20} %write{2147483647,-1}
@@ -27,13 +27,13 @@ param	float	layer4DispScalar	0		%meta{string,widget,"default"} %meta{string,page
 param	float	layer4Mask	1		%meta{string,widget,"default"} %meta{string,page,"Layer 4"} %meta{string,help,"Mask for this layer.<br><br>layer4Mask (float)"} %meta{string,label,"Layer 4 Mask"}  %read{15,15} %write{2147483647,-1}
 param	int	layer4Comp	1		%meta{string,widget,"mapper"} %meta{string,page,"Layer 4"} %meta{string,help,"Choose how this layer's displacement combines with the layer 3.<br>If layer 3 is disabled, it will combine with the previous layer.<br><br>layer4Comp (int)"} %meta{string,options,"Add:1|Over:2|Multiply:3|Average:4|Min:5|Max:6"} %meta{int,connectable,0} %meta{string,label,"Layer 4 Operation"}  %read{19,19} %write{2147483647,-1}
 oparam	float	resultF	0		%meta{string,help,"resultF (float)"}  %read{26,77} %write{22,77}
-local	float	___326_outputScalar	%read{26,76} %write{26,76}
+local	float	___346_outputScalar	%read{26,76} %write{26,76}
 local	int[4]	enabled	%read{26,76} %write{0,3}
 local	float[4]	amounts	%read{26,76} %write{4,7}
 local	float[4]	dispScalars	%read{26,76} %write{8,11}
 local	float[4]	masks	%read{26,76} %write{12,15}
 local	int[4]	comps	%read{26,76} %write{16,19}
-local	int	___327_l	%read{26,76} %write{25,76}
+local	int	___347_l	%read{26,76} %write{25,76}
 const	int	$const1	0		%read{0,27} %write{2147483647,-1}
 const	int	$const2	1		%read{1,76} %write{2147483647,-1}
 const	int	$const3	2		%read{2,41} %write{2147483647,-1}
@@ -122,29 +122,29 @@ code ___main___
 # PxrDispScalarLayer.osl:318
 #     for (int l=0; l < MAXLAYERS; l++)
 	for		$tmp3 26 28 75 77 	%line{318} %argrw{"r"}
-	assign		___327_l $const1 	%argrw{"wr"}
-	lt		$tmp2 ___327_l $const6 	%argrw{"wrr"}
+	assign		___347_l $const1 	%argrw{"wr"}
+	lt		$tmp2 ___347_l $const6 	%argrw{"wrr"}
 	neq		$tmp3 $tmp2 $const1 	%argrw{"wrr"}
 # PxrDispScalarLayer.osl:320
 #         if (enabled[l])
-	aref		$tmp4 enabled ___327_l 	%line{320} %argrw{"wrr"}
+	aref		$tmp4 enabled ___347_l 	%line{320} %argrw{"wrr"}
 	if		$tmp4 75 75 	%argrw{"r"}
 # PxrDispScalarLayer.osl:323
 #                                               dispScalars[l],
-	aref		$tmp5 dispScalars ___327_l 	%line{323} %argrw{"wrr"}
+	aref		$tmp5 dispScalars ___347_l 	%line{323} %argrw{"wrr"}
 # PxrDispScalarLayer.osl:324
 #                                               amounts[l],
-	aref		$tmp6 amounts ___327_l 	%line{324} %argrw{"wrr"}
+	aref		$tmp6 amounts ___347_l 	%line{324} %argrw{"wrr"}
 # PxrDispScalarLayer.osl:325
 #                                               comps[l], masks[l]);
-	aref		$tmp7 comps ___327_l 	%line{325} %argrw{"wrr"}
-	aref		$tmp8 masks ___327_l 	%argrw{"wrr"}
+	aref		$tmp7 comps ___347_l 	%line{325} %argrw{"wrr"}
+	aref		$tmp8 masks ___347_l 	%argrw{"wrr"}
 # PxrDispScalarLayer.osl:322
 #             resultF = computeLayerDispScalars(resultF,
 	functioncall	$const7 75 	%line{322} %argrw{"r"}
 # PxrDispScalarLayer.osl:57
 #     float outputScalar = 0.0;
-	assign		___326_outputScalar $const5 	%line{57} %argrw{"wr"}
+	assign		___346_outputScalar $const5 	%line{57} %argrw{"wr"}
 # PxrDispScalarLayer.osl:59
 #     if (comp == C_ADD)
 	eq		$tmp9 $tmp7 $const2 	%line{59} %argrw{"wrr"}
@@ -153,7 +153,7 @@ code ___main___
 #         outputScalar = mix(bottom, bottom + amount * top, mask);
 	mul		$tmp10 $tmp6 $tmp5 	%line{60} %argrw{"wrr"}
 	add		$tmp11 resultF $tmp10 	%argrw{"wrr"}
-	mix		___326_outputScalar resultF $tmp11 $tmp8 	%argrw{"wrrr"}
+	mix		___346_outputScalar resultF $tmp11 $tmp8 	%argrw{"wrrr"}
 # PxrDispScalarLayer.osl:61
 #     else if (comp == C_OVER)
 	eq		$tmp12 $tmp7 $const3 	%line{61} %argrw{"wrr"}
@@ -161,7 +161,7 @@ code ___main___
 # PxrDispScalarLayer.osl:62
 #         outputScalar = mix(bottom, amount * top, mask);
 	mul		$tmp13 $tmp6 $tmp5 	%line{62} %argrw{"wrr"}
-	mix		___326_outputScalar resultF $tmp13 $tmp8 	%argrw{"wrrr"}
+	mix		___346_outputScalar resultF $tmp13 $tmp8 	%argrw{"wrrr"}
 # PxrDispScalarLayer.osl:63
 #     else if (comp == C_SUBTRACT)
 	eq		$tmp14 $tmp7 $const4 	%line{63} %argrw{"wrr"}
@@ -170,7 +170,7 @@ code ___main___
 #         outputScalar = mix(bottom, bottom - amount * top, mask);
 	mul		$tmp15 $tmp6 $tmp5 	%line{64} %argrw{"wrr"}
 	sub		$tmp16 resultF $tmp15 	%argrw{"wrr"}
-	mix		___326_outputScalar resultF $tmp16 $tmp8 	%argrw{"wrrr"}
+	mix		___346_outputScalar resultF $tmp16 $tmp8 	%argrw{"wrrr"}
 # PxrDispScalarLayer.osl:65
 #     else if (comp == C_MULTIPLY)
 	eq		$tmp17 $tmp7 $const6 	%line{65} %argrw{"wrr"}
@@ -179,7 +179,7 @@ code ___main___
 #         outputScalar = bottom * mix(1.0, amount * top, mask);
 	mul		$tmp19 $tmp6 $tmp5 	%line{66} %argrw{"wrr"}
 	mix		$tmp18 $const8 $tmp19 $tmp8 	%argrw{"wrrr"}
-	mul		___326_outputScalar resultF $tmp18 	%argrw{"wrr"}
+	mul		___346_outputScalar resultF $tmp18 	%argrw{"wrr"}
 # PxrDispScalarLayer.osl:67
 #     else if (comp == C_AVERAGE)
 	eq		$tmp20 $tmp7 $const9 	%line{67} %argrw{"wrr"}
@@ -189,7 +189,7 @@ code ___main___
 	mul		$tmp21 $tmp6 $tmp5 	%line{68} %argrw{"wrr"}
 	add		$tmp22 resultF $tmp21 	%argrw{"wrr"}
 	mul		$tmp23 $const10 $tmp22 	%argrw{"wrr"}
-	mix		___326_outputScalar resultF $tmp23 $tmp8 	%argrw{"wrrr"}
+	mix		___346_outputScalar resultF $tmp23 $tmp8 	%argrw{"wrrr"}
 # PxrDispScalarLayer.osl:69
 #     else if (comp == C_MIN)
 	eq		$tmp24 $tmp7 $const11 	%line{69} %argrw{"wrr"}
@@ -198,7 +198,7 @@ code ___main___
 #         outputScalar = mix(bottom, min(bottom, amount * top), mask);
 	mul		$tmp26 $tmp6 $tmp5 	%line{70} %argrw{"wrr"}
 	min		$tmp25 resultF $tmp26 	%argrw{"wrr"}
-	mix		___326_outputScalar resultF $tmp25 $tmp8 	%argrw{"wrrr"}
+	mix		___346_outputScalar resultF $tmp25 $tmp8 	%argrw{"wrrr"}
 # PxrDispScalarLayer.osl:71
 #     else if (comp == C_MAX)
 	eq		$tmp27 $tmp7 $const12 	%line{71} %argrw{"wrr"}
@@ -207,19 +207,19 @@ code ___main___
 #         outputScalar = mix(bottom, max(bottom, amount * top), mask);
 	mul		$tmp29 $tmp6 $tmp5 	%line{72} %argrw{"wrr"}
 	max		$tmp28 resultF $tmp29 	%argrw{"wrr"}
-	mix		___326_outputScalar resultF $tmp28 $tmp8 	%argrw{"wrrr"}
+	mix		___346_outputScalar resultF $tmp28 $tmp8 	%argrw{"wrrr"}
 # PxrDispScalarLayer.osl:74
 #         outputScalar = mix(bottom, bottom + amount * top, mask);
 	mul		$tmp30 $tmp6 $tmp5 	%line{74} %argrw{"wrr"}
 	add		$tmp31 resultF $tmp30 	%argrw{"wrr"}
-	mix		___326_outputScalar resultF $tmp31 $tmp8 	%argrw{"wrrr"}
+	mix		___346_outputScalar resultF $tmp31 $tmp8 	%argrw{"wrrr"}
 # PxrDispScalarLayer.osl:76
 #     return outputScalar;
-	assign		resultF ___326_outputScalar 	%line{76} %argrw{"wr"}
+	assign		resultF ___346_outputScalar 	%line{76} %argrw{"wr"}
 # PxrDispScalarLayer.osl:318
 #     for (int l=0; l < MAXLAYERS; l++)
-	assign		$tmp32 ___327_l 	%line{318} %argrw{"wr"}
-	add		___327_l ___327_l $const2 	%argrw{"wrr"}
+	assign		$tmp32 ___347_l 	%line{318} %argrw{"wr"}
+	add		___347_l ___347_l $const2 	%argrw{"wrr"}
 # PxrDispScalarLayer.osl:330
 #     resultF *= overallAmount;
 	mul		resultF resultF overallAmount 	%line{330} %argrw{"wrr"}

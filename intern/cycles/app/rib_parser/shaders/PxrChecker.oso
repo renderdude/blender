@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
-# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrChecker.osl/obj/PxrChecker.oso
+# Compiled by oslc 1.13.0.@PROJECT_VERSION_TWEAK@"dev"
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxSonoma_x86-64_clang15_external_release/osl/PxrChecker.osl/obj/PxrChecker.oso
 shader PxrChecker	%meta{int,rfm_nodeid,1053270} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/texture"} %meta{string,rfh_classification,"Pattern/Texture"} %meta{string,help,"An OSL pattern for making a checkerboard texture."} 
 param	color	colorA	1 1 1		%meta{string,label,"Color A"} %meta{string,widget,"color"} %meta{string,help,"First checker color"} %meta{int,connectable,1}  %read{72,73} %write{2147483647,-1}
 param	color	colorB	0 0 0		%meta{string,label,"Color B"} %meta{string,widget,"color"} %meta{string,help,"Second checker color"} %meta{int,connectable,1}  %read{72,73} %write{2147483647,-1}
@@ -17,21 +17,21 @@ global	point	P	%read{4,4} %write{2147483647,-1} %derivs
 global	normal	N	%read{5,5} %write{2147483647,-1}
 global	float	u	%read{34,34} %write{2147483647,-1} %derivs
 global	float	v	%read{34,34} %write{2147483647,-1} %derivs
-local	vector	___392_vec1	%read{15,16} %write{14,15}
-local	float	___392_scale	%read{19,19} %write{18,18}
+local	vector	___412_vec1	%read{15,16} %write{14,15}
+local	float	___412_scale	%read{19,19} %write{18,18}
 local	point	inputManifoldRw.Q	%read{9,28} %write{4,22} %mystruct{inputManifoldRw} %mystructfield{0} %derivs
 local	normal	inputManifoldRw.QN	%read{11,13} %write{5,23} %mystruct{inputManifoldRw} %mystructfield{1}
 local	float	inputManifoldRw.Qradius	%read{19,63} %write{6,24} %mystruct{inputManifoldRw} %mystructfield{2}
 local	point	stOut	%read{40,59} %write{25,34} %derivs
-local	float[2]	___420_inManifold	%read{31,32} %write{29,29} %derivs
+local	float[2]	___440_inManifold	%read{31,32} %write{29,29} %derivs
 local	int	checkerIndex	%read{40,70} %write{35,59}
 local	float	minrad	%read{40,68} %write{36,59}
 local	float	minfilterwidth	%read{40,67} %write{37,59}
-local	int	___423_j	%read{40,59} %write{39,59} %derivs
-local	float	___424_mymod	%read{40,59} %write{40,59}
-local	float	___424_rad	%read{40,59} %write{40,59}
+local	int	___443_j	%read{40,59} %write{39,59} %derivs
+local	float	___444_mymod	%read{40,59} %write{40,59}
+local	float	___444_rad	%read{40,59} %write{40,59}
 local	float	myStep	%read{72,73} %write{60,69}
-local	float	___426_filterradius	%read{68,68} %write{67,67}
+local	float	___446_filterradius	%read{68,68} %write{67,67}
 temp	int	$tmp1	%read{1,1} %write{0,0}
 temp	int	$tmp2	%read{2,2} %write{1,1}
 const	int	$const1	0		%read{1,74} %write{2147483647,-1}
@@ -114,18 +114,18 @@ code ___main___
 	assign		inputManifoldRw.QN inputManifoldRw.QN 	%argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:81
 #     vector vec1 = vector(1.0);
-	assign		___392_vec1 $const7 	%line{81} %argrw{"wr"}
+	assign		___412_vec1 $const7 	%line{81} %argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:82
 #     vec1 = transform(fromSpace, toSpace, vec1);
-	transformv	___392_vec1 $const6 $const4 ___392_vec1 	%line{82} %argrw{"wrrr"}
+	transformv	___412_vec1 $const6 $const4 ___412_vec1 	%line{82} %argrw{"wrrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:83
 #     float scale = length(vec1) / sqrt(3.0);
-	length		$tmp4 ___392_vec1 	%line{83} %argrw{"wr"}
+	length		$tmp4 ___412_vec1 	%line{83} %argrw{"wr"}
 	sqrt		$tmp5 $const8 	%argrw{"wr"}
-	div		___392_scale $tmp4 $tmp5 	%argrw{"wrr"}
+	div		___412_scale $tmp4 $tmp5 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:84
 #     ioManifold.Qradius *= scale;
-	mul		inputManifoldRw.Qradius inputManifoldRw.Qradius ___392_scale 	%line{84} %argrw{"wrr"}
+	mul		inputManifoldRw.Qradius inputManifoldRw.Qradius ___412_scale 	%line{84} %argrw{"wrr"}
 	assign		inputManifoldRw.Qradius inputManifoldRw.Qradius 	%argrw{"wr"}
 # PxrChecker.osl:91
 #         Manifold_Copy(manifold,inputManifoldRw);
@@ -151,12 +151,12 @@ code ___main___
 	assign		stOut inputManifoldRw.Q 	%line{100} %argrw{"wr"}
 # PxrChecker.osl:106
 #         if (getattribute("primvar", "st", inManifold))
-	getattribute	$tmp7 $const11 $const12 ___420_inManifold 	%line{106} %argrw{"wrrw"}
+	getattribute	$tmp7 $const11 $const12 ___440_inManifold 	%line{106} %argrw{"wrrw"}
 	if		$tmp7 34 35 	%argrw{"r"}
 # PxrChecker.osl:108
 #             stOut = point(inManifold[0], inManifold[1], 0.0);
-	aref		$tmp8 ___420_inManifold $const1 	%line{108} %argrw{"wrr"}
-	aref		$tmp9 ___420_inManifold $const13 	%argrw{"wrr"}
+	aref		$tmp8 ___440_inManifold $const1 	%line{108} %argrw{"wrr"}
+	aref		$tmp9 ___440_inManifold $const13 	%argrw{"wrr"}
 	point		stOut $tmp8 $tmp9 $const3 	%argrw{"wrrr"}
 # PxrChecker.osl:112
 #             stOut = point(u, v, 0.0);
@@ -173,41 +173,41 @@ code ___main___
 # PxrChecker.osl:119
 #     for (int j = 0; j < dimensions; ++j)
 	for		$tmp11 40 42 59 60 	%line{119} %argrw{"r"}
-	assign		___423_j $const1 	%argrw{"wr"}
-	lt		$tmp10 ___423_j dimensions 	%argrw{"wrr"}
+	assign		___443_j $const1 	%argrw{"wr"}
+	lt		$tmp10 ___443_j dimensions 	%argrw{"wrr"}
 	neq		$tmp11 $tmp10 $const1 	%argrw{"wrr"}
 # PxrChecker.osl:122
 #         float mymod = mod(stOut[j], 1.0);
-	compref		$tmp12 stOut ___423_j 	%line{122} %argrw{"wrr"}
+	compref		$tmp12 stOut ___443_j 	%line{122} %argrw{"wrr"}
 	functioncall	$const16 48 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:154
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:132
 # float  mod (float  a, float  b) { return a - b*floor(a/b); }
-	div		$tmp14 $tmp12 $const15 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{154} %argrw{"wrr"}
+	div		$tmp14 $tmp12 $const15 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{132} %argrw{"wrr"}
 	floor		$tmp13 $tmp14 	%argrw{"wr"}
 	mul		$tmp15 $const15 $tmp13 	%argrw{"wrr"}
-	sub		___424_mymod $tmp12 $tmp15 	%argrw{"wrr"}
+	sub		___444_mymod $tmp12 $tmp15 	%argrw{"wrr"}
 # PxrChecker.osl:124
 #         float rad = 0.25 - abs(abs(mymod - 0.5) - 0.25);
-	sub		$tmp18 ___424_mymod $const18 	%filename{"PxrChecker.osl"} %line{124} %argrw{"wrr"}
+	sub		$tmp18 ___444_mymod $const18 	%filename{"PxrChecker.osl"} %line{124} %argrw{"wrr"}
 	abs		$tmp17 $tmp18 	%argrw{"wr"}
 	sub		$tmp19 $tmp17 $const17 	%argrw{"wrr"}
 	abs		$tmp16 $tmp19 	%argrw{"wr"}
-	sub		___424_rad $const17 $tmp16 	%argrw{"wrr"}
+	sub		___444_rad $const17 $tmp16 	%argrw{"wrr"}
 # PxrChecker.osl:126
 #         minrad = min(rad, minrad);
-	min		minrad ___424_rad minrad 	%line{126} %argrw{"wrr"}
+	min		minrad ___444_rad minrad 	%line{126} %argrw{"wrr"}
 # PxrChecker.osl:128
 #         minfilterwidth = min(filterwidth(stOut[j]), minfilterwidth);
-	compref		$tmp21 stOut ___423_j 	%line{128} %argrw{"wrr"}
+	compref		$tmp21 stOut ___443_j 	%line{128} %argrw{"wrr"}
 	filterwidth	$tmp20 $tmp21 	%argrw{"wr"} %argderivs{1}
 	min		minfilterwidth $tmp20 minfilterwidth 	%argrw{"wrr"}
 # PxrChecker.osl:130
 #         checkerIndex += (mymod < 0.5);
-	lt		$tmp22 ___424_mymod $const18 	%line{130} %argrw{"wrr"}
+	lt		$tmp22 ___444_mymod $const18 	%line{130} %argrw{"wrr"}
 	add		checkerIndex checkerIndex $tmp22 	%argrw{"wrr"}
 # PxrChecker.osl:119
 #     for (int j = 0; j < dimensions; ++j)
-	add		___423_j ___423_j $const13 	%line{119} %argrw{"wrr"}
+	add		___443_j ___443_j $const13 	%line{119} %argrw{"wrr"}
 # PxrChecker.osl:134
 #     float myStep = 1.0;
 	assign		myStep $const15 	%line{134} %argrw{"wr"}
@@ -225,10 +225,10 @@ code ___main___
 	if		$tmp25 70 70 	%argrw{"r"}
 # PxrChecker.osl:141
 #         float filterradius = 0.5 * minfilterwidth;
-	mul		___426_filterradius $const18 minfilterwidth 	%line{141} %argrw{"wrr"}
+	mul		___446_filterradius $const18 minfilterwidth 	%line{141} %argrw{"wrr"}
 # PxrChecker.osl:142
 #         myStep = smoothstep(-1.0, 1.0, minrad / filterradius);
-	div		$tmp26 minrad ___426_filterradius 	%line{142} %argrw{"wrr"}
+	div		$tmp26 minrad ___446_filterradius 	%line{142} %argrw{"wrr"}
 	smoothstep	myStep $const19 $const15 $tmp26 	%argrw{"wrrr"}
 # PxrChecker.osl:146
 #     if (checkerIndex % 2)

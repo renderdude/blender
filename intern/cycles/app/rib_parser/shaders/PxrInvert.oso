@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
-# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrInvert.osl/obj/PxrInvert.oso
+# Compiled by oslc 1.13.0.@PROJECT_VERSION_TWEAK@"dev"
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxSonoma_x86-64_clang15_external_release/osl/PxrInvert.osl/obj/PxrInvert.oso
 shader PxrInvert	%meta{int,rfm_nodeid,1053433} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/color"} %meta{string,rfh_classification,"Pattern/Color"} %meta{string,help,"Inverts one or more components of the incoming color. The input color can be in the in the RGB, HSL, or HSV color models. Note: The output is a RGB color clamped to the [0 0 0] to [1 1 1] range."} 
 param	color	inputRGB	0 0 0		%meta{string,widget,"color"} %meta{string,help,"The color that you would like to invert."} %meta{string,label,"Input Color"}  %read{0,6} %write{2147483647,-1}
 param	int	colorModel	0		%meta{string,widget,"mapper"} %meta{string,options,"RGB:0|HSL:1|HSV:2"} %meta{string,help,"The inputColor uses this color model."} %meta{int,connectable,0} %meta{string,label,"Color Model"}  %read{1,31} %write{2147483647,-1}
@@ -119,9 +119,9 @@ code ___main___
 	assign		$tmp18 $const9 	%line{151} %argrw{"wr"}
 	assign		$tmp19 $const8 	%argrw{"wr"}
 	functioncall	$const10 40 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:140
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp20 resultRGB $tmp19 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	min		$tmp20 resultRGB $tmp19 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{140} %argrw{"wrr"}
 	max		resultRGB $tmp20 $tmp18 	%argrw{"wrr"}
 # PxrInvert.osl:153
 #     resultR = resultRGB[0];

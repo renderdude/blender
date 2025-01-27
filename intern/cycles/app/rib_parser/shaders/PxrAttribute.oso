@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
-# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrAttribute.osl/obj/PxrAttribute.oso
+# Compiled by oslc 1.13.0.@PROJECT_VERSION_TWEAK@"dev"
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxSonoma_x86-64_clang15_external_release/osl/PxrAttribute.osl/obj/PxrAttribute.oso
 shader PxrAttribute	%meta{int,rfm_nodeid,1053260} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/utility"} %meta{string,rfh_classification,"Pattern/Utility"} 
 param	string	varname	""		%meta{string,widget,"default"} %meta{string,help,"varname (string)"} %meta{int,connectable,0} %meta{string,label,"Variable Name"}  %read{4,69} %write{2147483647,-1}
 param	string	type	"float"		%meta{string,widget,"mapper"} %meta{string,help,"type (string)"} %meta{string,options,"int:int|float:float|float2:float2|color:color|point:point|vector:vector|normal:normal"} %meta{int,connectable,0} %meta{string,label,"Variable Type"}  %read{1,54} %write{2147483647,-1}
@@ -13,13 +13,13 @@ oparam	color	resultRGB	0 0 0		%meta{string,help,"resultRGB (color)"}  %read{2147
 oparam	float	resultF	0		%meta{string,help,"resultF (float)"}  %read{2147483647,-1} %write{8,59}
 oparam	int	resultI	0		%meta{string,help,"resultF (int)"}  %read{2147483647,-1} %write{9,61}
 local	int	success	%read{62,62} %write{0,57}
-local	int	___325_val	%read{5,9} %write{3,4}
-local	float	___326_val	%read{14,16} %write{12,13}
-local	float[2]	___327_val	%read{24,28} %write{20,23}
-local	color	___328_val	%read{34,36} %write{32,33}
-local	point	___329_val	%read{42,44} %write{40,41}
-local	vector	___330_val	%read{50,52} %write{48,49}
-local	normal	___331_val	%read{58,60} %write{56,57}
+local	int	___345_val	%read{5,9} %write{3,4}
+local	float	___346_val	%read{14,16} %write{12,13}
+local	float[2]	___347_val	%read{24,28} %write{20,23}
+local	color	___348_val	%read{34,36} %write{32,33}
+local	point	___349_val	%read{42,44} %write{40,41}
+local	vector	___350_val	%read{50,52} %write{48,49}
+local	normal	___351_val	%read{58,60} %write{56,57}
 const	int	$const1	1		%read{0,25} %write{2147483647,-1}
 const	string	$const2	"int"		%read{1,1} %write{2147483647,-1}
 temp	int	$tmp1	%read{2,2} %write{1,1}
@@ -63,40 +63,40 @@ code ___main___
 	if		$tmp1 10 62 	%argrw{"r"}
 # PxrAttribute.osl:137
 #         int val = defaultInt;
-	assign		___325_val defaultInt 	%line{137} %argrw{"wr"}
+	assign		___345_val defaultInt 	%line{137} %argrw{"wr"}
 # PxrAttribute.osl:138
 #         success = getattribute(varname, val);
-	getattribute	success varname ___325_val 	%line{138} %argrw{"wrw"}
+	getattribute	success varname ___345_val 	%line{138} %argrw{"wrw"}
 # PxrAttribute.osl:139
 #         resultRGB = color(val);
-	assign		$tmp2 ___325_val 	%line{139} %argrw{"wr"}
+	assign		$tmp2 ___345_val 	%line{139} %argrw{"wr"}
 	assign		resultRGB $tmp2 	%argrw{"wr"}
 # PxrAttribute.osl:140
 #         resultF = float(val);
-	assign		$tmp3 ___325_val 	%line{140} %argrw{"wr"}
+	assign		$tmp3 ___345_val 	%line{140} %argrw{"wr"}
 	assign		resultF $tmp3 	%argrw{"wr"}
 # PxrAttribute.osl:141
 #         resultI = val;
-	assign		resultI ___325_val 	%line{141} %argrw{"wr"}
+	assign		resultI ___345_val 	%line{141} %argrw{"wr"}
 # PxrAttribute.osl:143
 #     else if (type == "float")
 	eq		$tmp4 type $const3 	%line{143} %argrw{"wrr"}
 	if		$tmp4 17 62 	%argrw{"r"}
 # PxrAttribute.osl:145
 #         float val = defaultFloat;
-	assign		___326_val defaultFloat 	%line{145} %argrw{"wr"}
+	assign		___346_val defaultFloat 	%line{145} %argrw{"wr"}
 # PxrAttribute.osl:146
 #         success = getattribute(varname, val);
-	getattribute	success varname ___326_val 	%line{146} %argrw{"wrw"}
+	getattribute	success varname ___346_val 	%line{146} %argrw{"wrw"}
 # PxrAttribute.osl:147
 #         resultRGB = color(val);
-	assign		resultRGB ___326_val 	%line{147} %argrw{"wr"}
+	assign		resultRGB ___346_val 	%line{147} %argrw{"wr"}
 # PxrAttribute.osl:148
 #         resultF = val;
-	assign		resultF ___326_val 	%line{148} %argrw{"wr"}
+	assign		resultF ___346_val 	%line{148} %argrw{"wr"}
 # PxrAttribute.osl:149
 #         resultI = int(val);
-	assign		resultI ___326_val 	%line{149} %argrw{"wr"}
+	assign		resultI ___346_val 	%line{149} %argrw{"wr"}
 # PxrAttribute.osl:151
 #     else if (type == "float2")
 	eq		$tmp5 type $const4 	%line{151} %argrw{"wrr"}
@@ -104,23 +104,23 @@ code ___main___
 # PxrAttribute.osl:153
 #         float val[2] = {defaultFloat3[0], defaultFloat3[1]};
 	compref		$tmp6 defaultFloat3 $const5 	%line{153} %argrw{"wrr"}
-	aassign		___327_val $const5 $tmp6 	%argrw{"wrr"}
+	aassign		___347_val $const5 $tmp6 	%argrw{"wrr"}
 	compref		$tmp7 defaultFloat3 $const1 	%argrw{"wrr"}
-	aassign		___327_val $const1 $tmp7 	%argrw{"wrr"}
+	aassign		___347_val $const1 $tmp7 	%argrw{"wrr"}
 # PxrAttribute.osl:154
 #         success = getattribute(varname, val);
-	getattribute	success varname ___327_val 	%line{154} %argrw{"wrw"}
+	getattribute	success varname ___347_val 	%line{154} %argrw{"wrw"}
 # PxrAttribute.osl:155
 #         resultRGB = color(val[0], val[1], 0.0);
-	aref		$tmp8 ___327_val $const5 	%line{155} %argrw{"wrr"}
-	aref		$tmp9 ___327_val $const1 	%argrw{"wrr"}
+	aref		$tmp8 ___347_val $const5 	%line{155} %argrw{"wrr"}
+	aref		$tmp9 ___347_val $const1 	%argrw{"wrr"}
 	color		resultRGB $tmp8 $tmp9 $const6 	%argrw{"wrrr"}
 # PxrAttribute.osl:156
 #         resultF = val[0];
-	aref		resultF ___327_val $const5 	%line{156} %argrw{"wrr"}
+	aref		resultF ___347_val $const5 	%line{156} %argrw{"wrr"}
 # PxrAttribute.osl:157
 #         resultI = int(val[0]);
-	aref		$tmp10 ___327_val $const5 	%line{157} %argrw{"wrr"}
+	aref		$tmp10 ___347_val $const5 	%line{157} %argrw{"wrr"}
 	assign		resultI $tmp10 	%argrw{"wr"}
 # PxrAttribute.osl:159
 #     else if (type == "color")
@@ -128,19 +128,19 @@ code ___main___
 	if		$tmp11 38 62 	%argrw{"r"}
 # PxrAttribute.osl:161
 #         color val = color(defaultColor);
-	assign		___328_val defaultColor 	%line{161} %argrw{"wr"}
+	assign		___348_val defaultColor 	%line{161} %argrw{"wr"}
 # PxrAttribute.osl:162
 #         success = getattribute(varname, val);
-	getattribute	success varname ___328_val 	%line{162} %argrw{"wrw"}
+	getattribute	success varname ___348_val 	%line{162} %argrw{"wrw"}
 # PxrAttribute.osl:163
 #         resultRGB = color(val);
-	assign		resultRGB ___328_val 	%line{163} %argrw{"wr"}
+	assign		resultRGB ___348_val 	%line{163} %argrw{"wr"}
 # PxrAttribute.osl:164
 #         resultF = val[0];
-	compref		resultF ___328_val $const5 	%line{164} %argrw{"wrr"}
+	compref		resultF ___348_val $const5 	%line{164} %argrw{"wrr"}
 # PxrAttribute.osl:165
 #         resultI = int(val[0]);
-	compref		$tmp12 ___328_val $const5 	%line{165} %argrw{"wrr"}
+	compref		$tmp12 ___348_val $const5 	%line{165} %argrw{"wrr"}
 	assign		resultI $tmp12 	%argrw{"wr"}
 # PxrAttribute.osl:167
 #     else if (type == "point")
@@ -148,19 +148,19 @@ code ___main___
 	if		$tmp13 46 62 	%argrw{"r"}
 # PxrAttribute.osl:169
 #         point val = point(defaultFloat3);
-	assign		___329_val defaultFloat3 	%line{169} %argrw{"wr"}
+	assign		___349_val defaultFloat3 	%line{169} %argrw{"wr"}
 # PxrAttribute.osl:170
 #         success = getattribute(varname, val);
-	getattribute	success varname ___329_val 	%line{170} %argrw{"wrw"}
+	getattribute	success varname ___349_val 	%line{170} %argrw{"wrw"}
 # PxrAttribute.osl:171
 #         resultRGB = color(val);
-	assign		resultRGB ___329_val 	%line{171} %argrw{"wr"}
+	assign		resultRGB ___349_val 	%line{171} %argrw{"wr"}
 # PxrAttribute.osl:172
 #         resultF = val[0];
-	compref		resultF ___329_val $const5 	%line{172} %argrw{"wrr"}
+	compref		resultF ___349_val $const5 	%line{172} %argrw{"wrr"}
 # PxrAttribute.osl:173
 #         resultI = int(val[0]);
-	compref		$tmp14 ___329_val $const5 	%line{173} %argrw{"wrr"}
+	compref		$tmp14 ___349_val $const5 	%line{173} %argrw{"wrr"}
 	assign		resultI $tmp14 	%argrw{"wr"}
 # PxrAttribute.osl:175
 #     else if (type == "vector")
@@ -168,19 +168,19 @@ code ___main___
 	if		$tmp15 54 62 	%argrw{"r"}
 # PxrAttribute.osl:177
 #         vector val = defaultFloat3;
-	assign		___330_val defaultFloat3 	%line{177} %argrw{"wr"}
+	assign		___350_val defaultFloat3 	%line{177} %argrw{"wr"}
 # PxrAttribute.osl:178
 #         success = getattribute(varname, val);
-	getattribute	success varname ___330_val 	%line{178} %argrw{"wrw"}
+	getattribute	success varname ___350_val 	%line{178} %argrw{"wrw"}
 # PxrAttribute.osl:179
 #         resultRGB = color(val);
-	assign		resultRGB ___330_val 	%line{179} %argrw{"wr"}
+	assign		resultRGB ___350_val 	%line{179} %argrw{"wr"}
 # PxrAttribute.osl:180
 #         resultF = val[0];
-	compref		resultF ___330_val $const5 	%line{180} %argrw{"wrr"}
+	compref		resultF ___350_val $const5 	%line{180} %argrw{"wrr"}
 # PxrAttribute.osl:181
 #         resultI = int(val[0]);
-	compref		$tmp16 ___330_val $const5 	%line{181} %argrw{"wrr"}
+	compref		$tmp16 ___350_val $const5 	%line{181} %argrw{"wrr"}
 	assign		resultI $tmp16 	%argrw{"wr"}
 # PxrAttribute.osl:183
 #     else if (type == "normal")
@@ -188,19 +188,19 @@ code ___main___
 	if		$tmp17 62 62 	%argrw{"r"}
 # PxrAttribute.osl:185
 #         normal val = normal(defaultFloat3);
-	assign		___331_val defaultFloat3 	%line{185} %argrw{"wr"}
+	assign		___351_val defaultFloat3 	%line{185} %argrw{"wr"}
 # PxrAttribute.osl:186
 #         success = getattribute(varname, val);
-	getattribute	success varname ___331_val 	%line{186} %argrw{"wrw"}
+	getattribute	success varname ___351_val 	%line{186} %argrw{"wrw"}
 # PxrAttribute.osl:187
 #         resultRGB = color(val);
-	assign		resultRGB ___331_val 	%line{187} %argrw{"wr"}
+	assign		resultRGB ___351_val 	%line{187} %argrw{"wr"}
 # PxrAttribute.osl:188
 #         resultF = val[0];
-	compref		resultF ___331_val $const5 	%line{188} %argrw{"wrr"}
+	compref		resultF ___351_val $const5 	%line{188} %argrw{"wrr"}
 # PxrAttribute.osl:189
 #         resultI = int(val[0]);
-	compref		$tmp18 ___331_val $const5 	%line{189} %argrw{"wrr"}
+	compref		$tmp18 ___351_val $const5 	%line{189} %argrw{"wrr"}
 	assign		resultI $tmp18 	%argrw{"wr"}
 # PxrAttribute.osl:192
 #     if (!success && verbosity > k_silent)

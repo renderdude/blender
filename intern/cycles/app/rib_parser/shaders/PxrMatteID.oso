@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
-# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrMatteID.osl/obj/PxrMatteID.oso
+# Compiled by oslc 1.13.0.@PROJECT_VERSION_TWEAK@"dev"
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxSonoma_x86-64_clang15_external_release/osl/PxrMatteID.osl/obj/PxrMatteID.oso
 shader PxrMatteID	%meta{int,rfm_nodeid,1053257} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/utility"} %meta{string,rfh_classification,"Pattern/Utility"} 
 param	int	inputAOV	0		%meta{string,widget,"default"} %meta{string,help,"This input can only be used to daisy-chain other nodes that<br>don't produce any output<br><br>inputAOV (int)"} %meta{string,label,"Input AOV"} %meta{string,readOnly,"True"}  %read{2,2} %write{2147483647,-1}
 param	int	enable	1		%meta{string,widget,"checkBox"} %meta{string,help,"Controls MatteID AOV output<br><br>enable (int)"} %meta{int,connectable,1} %meta{string,label,"Enable"}  %read{3,3} %write{2147483647,-1}
@@ -19,8 +19,8 @@ local	string[8]	s_matteid	%read{42,61} %write{1,1}
 local	int	foo	%read{2147483647,-1} %write{2,2}
 local	color[8]	mtex	%read{42,61} %write{6,37}
 local	color	attrColor	%read{42,61} %write{39,61}
-local	int	___325_d	%read{42,61} %write{41,61}
-local	int	___326_ok	%read{42,61} %write{42,61}
+local	int	___345_d	%read{42,61} %write{41,61}
+local	int	___346_ok	%read{42,61} %write{42,61}
 const	string[8]	$const1	"matteTexture0" "matteTexture1" "matteTexture2" "matteTexture3" "matteTexture4" "matteTexture5" "matteTexture6" "matteTexture7" 		%read{0,0} %write{2147483647,-1}
 const	string[8]	$const2	"MatteID0" "MatteID1" "MatteID2" "MatteID3" "MatteID4" "MatteID5" "MatteID6" "MatteID7" 		%read{1,1} %write{2147483647,-1}
 temp	int	$tmp1	%read{4,4} %write{3,3}
@@ -150,37 +150,37 @@ code ___main___
 # PxrMatteID.osl:158
 #     for (int d = 0; d < 8; d++)
 	for		$tmp19 42 44 60 62 	%line{158} %argrw{"r"}
-	assign		___325_d $const3 	%argrw{"wr"}
-	lt		$tmp18 ___325_d $const13 	%argrw{"wrr"}
+	assign		___345_d $const3 	%argrw{"wr"}
+	lt		$tmp18 ___345_d $const13 	%argrw{"wrr"}
 	neq		$tmp19 $tmp18 $const3 	%argrw{"wrr"}
 # PxrMatteID.osl:163
 #         int ok = getattribute(s_matteid[d], attrColor);
-	aref		$tmp20 s_matteid ___325_d 	%line{163} %argrw{"wrr"}
-	getattribute	___326_ok $tmp20 attrColor 	%argrw{"wrw"}
+	aref		$tmp20 s_matteid ___345_d 	%line{163} %argrw{"wrr"}
+	getattribute	___346_ok $tmp20 attrColor 	%argrw{"wrw"}
 # PxrMatteID.osl:165
 #         if (ok)
-	if		___326_ok 60 60 	%line{165} %argrw{"r"}
+	if		___346_ok 60 60 	%line{165} %argrw{"r"}
 # PxrMatteID.osl:168
 #             if (mtex[d] != INVALIDC)
-	aref		$tmp21 mtex ___325_d 	%line{168} %argrw{"wrr"}
+	aref		$tmp21 mtex ___345_d 	%line{168} %argrw{"wrr"}
 	neq		$tmp23 $tmp21 $const4 	%argrw{"wrr"}
 	if		$tmp23 56 60 	%argrw{"r"}
 # PxrMatteID.osl:170
 #                 Ci += attrColor * mtex[d] * debug(s_matteid[d]);
-	aref		$tmp25 s_matteid ___325_d 	%line{170} %argrw{"wrr"}
+	aref		$tmp25 s_matteid ___345_d 	%line{170} %argrw{"wrr"}
 	closure		$tmp24 $const14 $tmp25 	%argrw{"wrr"}
-	aref		$tmp26 mtex ___325_d 	%argrw{"wrr"}
+	aref		$tmp26 mtex ___345_d 	%argrw{"wrr"}
 	mul		$tmp27 attrColor $tmp26 	%argrw{"wrr"}
 	mul		$tmp28 $tmp24 $tmp27 	%argrw{"wrr"}
 	add		Ci Ci $tmp28 	%argrw{"wrr"}
 # PxrMatteID.osl:174
 #                 Ci += attrColor * debug(s_matteid[d]);
-	aref		$tmp30 s_matteid ___325_d 	%line{174} %argrw{"wrr"}
+	aref		$tmp30 s_matteid ___345_d 	%line{174} %argrw{"wrr"}
 	closure		$tmp29 $const14 $tmp30 	%argrw{"wrr"}
 	mul		$tmp31 $tmp29 attrColor 	%argrw{"wrr"}
 	add		Ci Ci $tmp31 	%argrw{"wrr"}
 # PxrMatteID.osl:158
 #     for (int d = 0; d < 8; d++)
-	assign		$tmp32 ___325_d 	%line{158} %argrw{"wr"}
-	add		___325_d ___325_d $const5 	%argrw{"wrr"}
+	assign		$tmp32 ___345_d 	%line{158} %argrw{"wr"}
+	add		___345_d ___345_d $const5 	%argrw{"wrr"}
 	end

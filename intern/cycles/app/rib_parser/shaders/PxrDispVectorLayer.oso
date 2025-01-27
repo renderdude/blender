@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
-# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrDispVectorLayer.osl/obj/PxrDispVectorLayer.oso
+# Compiled by oslc 1.13.0.@PROJECT_VERSION_TWEAK@"dev"
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxSonoma_x86-64_clang15_external_release/osl/PxrDispVectorLayer.osl/obj/PxrDispVectorLayer.oso
 shader PxrDispVectorLayer	%meta{int,rfm_nodeid,1053342} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/displace"} %meta{string,rfh_classification,"Pattern/Displace"} %meta{string,help,"Layer vector displacement textures/values."} 
 param	float	overallAmount	1		%meta{string,widget,"default"} %meta{string,help,"Controls the gain amount of the final layered result. This is handy when we<br>want to layer several layered displacement textures by adjusting the amount that<br>controls each group of layered displacements.<br><br>overallAmount (float)"} %meta{string,label,"Overall Gain"}  %read{215,215} %write{2147483647,-1}
 param	int	baseLayerEnabled	1		%meta{string,widget,"checkBox"} %meta{string,page,"Base Layer"} %meta{int,page_open,1} %meta{string,help,"Enable the base layer.  By default, this is on.  But for some case such as<br>debugging, we can disable the base layer.  It if is off, it won't be<br>contributing to the layered displacement result.<br><br>baseLayerEnabled (int)"} %meta{int,connectable,0} %meta{string,label,"Enabled"}  %read{20,20} %write{2147483647,-1}
@@ -30,13 +30,13 @@ oparam	vector	resultXYZ	0 0 0		%meta{string,help,"resultXYZ (vector)"}  %read{26
 oparam	float	resultX	0		%meta{string,help,"resultX (float)"}  %read{217,217} %write{217,217}
 oparam	float	resultY	0		%meta{string,help,"resultY (float)"}  %read{219,219} %write{219,219}
 oparam	float	resultZ	0		%meta{string,help,"resultZ (float)"}  %read{221,221} %write{221,221}
-local	vector	___326_outputVector	%read{26,214} %write{26,214}
+local	vector	___346_outputVector	%read{26,214} %write{26,214}
 local	int[4]	enabled	%read{26,214} %write{0,3}
 local	float[4]	amounts	%read{26,214} %write{4,7}
 local	vector[4]	dispVectors	%read{26,214} %write{8,11}
 local	float[4]	masks	%read{26,214} %write{12,15}
 local	int[4]	comps	%read{26,214} %write{16,19}
-local	int	___335_l	%read{26,214} %write{25,214}
+local	int	___355_l	%read{26,214} %write{25,214}
 const	int	$const1	0		%read{0,216} %write{2147483647,-1}
 const	int	$const2	1		%read{1,218} %write{2147483647,-1}
 const	int	$const3	2		%read{2,220} %write{2147483647,-1}
@@ -251,29 +251,29 @@ code ___main___
 # PxrDispVectorLayer.osl:362
 #     for (int l=0; l < MAXLAYERS; l++)
 	for		$tmp3 26 28 213 215 	%line{362} %argrw{"r"}
-	assign		___335_l $const1 	%argrw{"wr"}
-	lt		$tmp2 ___335_l $const6 	%argrw{"wrr"}
+	assign		___355_l $const1 	%argrw{"wr"}
+	lt		$tmp2 ___355_l $const6 	%argrw{"wrr"}
 	neq		$tmp3 $tmp2 $const1 	%argrw{"wrr"}
 # PxrDispVectorLayer.osl:364
 #         if (enabled[l])
-	aref		$tmp4 enabled ___335_l 	%line{364} %argrw{"wrr"}
+	aref		$tmp4 enabled ___355_l 	%line{364} %argrw{"wrr"}
 	if		$tmp4 213 213 	%argrw{"r"}
 # PxrDispVectorLayer.osl:367
 #                                               dispVectors[l],
-	aref		$tmp5 dispVectors ___335_l 	%line{367} %argrw{"wrr"}
+	aref		$tmp5 dispVectors ___355_l 	%line{367} %argrw{"wrr"}
 # PxrDispVectorLayer.osl:368
 #                                               amounts[l],
-	aref		$tmp6 amounts ___335_l 	%line{368} %argrw{"wrr"}
+	aref		$tmp6 amounts ___355_l 	%line{368} %argrw{"wrr"}
 # PxrDispVectorLayer.osl:369
 #                                               comps[l], masks[l]);
-	aref		$tmp7 comps ___335_l 	%line{369} %argrw{"wrr"}
-	aref		$tmp8 masks ___335_l 	%argrw{"wrr"}
+	aref		$tmp7 comps ___355_l 	%line{369} %argrw{"wrr"}
+	aref		$tmp8 masks ___355_l 	%argrw{"wrr"}
 # PxrDispVectorLayer.osl:366
 #             resultXYZ = computeLayerDispVectors(resultXYZ,
 	functioncall	$const7 213 	%line{366} %argrw{"r"}
 # PxrDispVectorLayer.osl:58
 #     vector outputVector = vector(1.0);
-	assign		___326_outputVector $const8 	%line{58} %argrw{"wr"}
+	assign		___346_outputVector $const8 	%line{58} %argrw{"wr"}
 # PxrDispVectorLayer.osl:60
 #     if (comp == C_ADD)
 	eq		$tmp9 $tmp7 $const2 	%line{60} %argrw{"wrr"}
@@ -286,7 +286,7 @@ code ___main___
 	mul		$tmp14 $tmp6 $tmp13 	%argrw{"wrr"}
 	add		$tmp15 $tmp12 $tmp14 	%argrw{"wrr"}
 	mix		$tmp10 $tmp11 $tmp15 $tmp8 	%argrw{"wrrr"}
-	compassign	___326_outputVector $const1 $tmp10 	%argrw{"wrr"}
+	compassign	___346_outputVector $const1 $tmp10 	%argrw{"wrr"}
 # PxrDispVectorLayer.osl:63
 #         outputVector[1] = mix(bottom[1], bottom[1] + amount * top[1], mask);
 	compref		$tmp17 resultXYZ $const2 	%line{63} %argrw{"wrr"}
@@ -295,7 +295,7 @@ code ___main___
 	mul		$tmp20 $tmp6 $tmp19 	%argrw{"wrr"}
 	add		$tmp21 $tmp18 $tmp20 	%argrw{"wrr"}
 	mix		$tmp16 $tmp17 $tmp21 $tmp8 	%argrw{"wrrr"}
-	compassign	___326_outputVector $const2 $tmp16 	%argrw{"wrr"}
+	compassign	___346_outputVector $const2 $tmp16 	%argrw{"wrr"}
 # PxrDispVectorLayer.osl:64
 #         outputVector[2] = mix(bottom[2], bottom[2] + amount * top[2], mask);
 	compref		$tmp23 resultXYZ $const3 	%line{64} %argrw{"wrr"}
@@ -304,7 +304,7 @@ code ___main___
 	mul		$tmp26 $tmp6 $tmp25 	%argrw{"wrr"}
 	add		$tmp27 $tmp24 $tmp26 	%argrw{"wrr"}
 	mix		$tmp22 $tmp23 $tmp27 $tmp8 	%argrw{"wrrr"}
-	compassign	___326_outputVector $const3 $tmp22 	%argrw{"wrr"}
+	compassign	___346_outputVector $const3 $tmp22 	%argrw{"wrr"}
 # PxrDispVectorLayer.osl:66
 #     else if (comp == C_OVER)
 	eq		$tmp28 $tmp7 $const3 	%line{66} %argrw{"wrr"}
@@ -315,21 +315,21 @@ code ___main___
 	compref		$tmp31 $tmp5 $const1 	%argrw{"wrr"}
 	mul		$tmp32 $tmp6 $tmp31 	%argrw{"wrr"}
 	mix		$tmp29 $tmp30 $tmp32 $tmp8 	%argrw{"wrrr"}
-	compassign	___326_outputVector $const1 $tmp29 	%argrw{"wrr"}
+	compassign	___346_outputVector $const1 $tmp29 	%argrw{"wrr"}
 # PxrDispVectorLayer.osl:69
 #         outputVector[1] = mix(bottom[1], amount * top[1], mask);
 	compref		$tmp34 resultXYZ $const2 	%line{69} %argrw{"wrr"}
 	compref		$tmp35 $tmp5 $const2 	%argrw{"wrr"}
 	mul		$tmp36 $tmp6 $tmp35 	%argrw{"wrr"}
 	mix		$tmp33 $tmp34 $tmp36 $tmp8 	%argrw{"wrrr"}
-	compassign	___326_outputVector $const2 $tmp33 	%argrw{"wrr"}
+	compassign	___346_outputVector $const2 $tmp33 	%argrw{"wrr"}
 # PxrDispVectorLayer.osl:70
 #         outputVector[2] = mix(bottom[2], amount * top[2], mask);
 	compref		$tmp38 resultXYZ $const3 	%line{70} %argrw{"wrr"}
 	compref		$tmp39 $tmp5 $const3 	%argrw{"wrr"}
 	mul		$tmp40 $tmp6 $tmp39 	%argrw{"wrr"}
 	mix		$tmp37 $tmp38 $tmp40 $tmp8 	%argrw{"wrrr"}
-	compassign	___326_outputVector $const3 $tmp37 	%argrw{"wrr"}
+	compassign	___346_outputVector $const3 $tmp37 	%argrw{"wrr"}
 # PxrDispVectorLayer.osl:72
 #     else if (comp == C_SUBTRACT)
 	eq		$tmp41 $tmp7 $const4 	%line{72} %argrw{"wrr"}
@@ -342,7 +342,7 @@ code ___main___
 	mul		$tmp46 $tmp6 $tmp45 	%argrw{"wrr"}
 	sub		$tmp47 $tmp44 $tmp46 	%argrw{"wrr"}
 	mix		$tmp42 $tmp43 $tmp47 $tmp8 	%argrw{"wrrr"}
-	compassign	___326_outputVector $const1 $tmp42 	%argrw{"wrr"}
+	compassign	___346_outputVector $const1 $tmp42 	%argrw{"wrr"}
 # PxrDispVectorLayer.osl:75
 #         outputVector[1] = mix(bottom[1], bottom[1] - amount * top[1], mask);
 	compref		$tmp49 resultXYZ $const2 	%line{75} %argrw{"wrr"}
@@ -351,7 +351,7 @@ code ___main___
 	mul		$tmp52 $tmp6 $tmp51 	%argrw{"wrr"}
 	sub		$tmp53 $tmp50 $tmp52 	%argrw{"wrr"}
 	mix		$tmp48 $tmp49 $tmp53 $tmp8 	%argrw{"wrrr"}
-	compassign	___326_outputVector $const2 $tmp48 	%argrw{"wrr"}
+	compassign	___346_outputVector $const2 $tmp48 	%argrw{"wrr"}
 # PxrDispVectorLayer.osl:76
 #         outputVector[2] = mix(bottom[2], bottom[2] - amount * top[2], mask);
 	compref		$tmp55 resultXYZ $const3 	%line{76} %argrw{"wrr"}
@@ -360,7 +360,7 @@ code ___main___
 	mul		$tmp58 $tmp6 $tmp57 	%argrw{"wrr"}
 	sub		$tmp59 $tmp56 $tmp58 	%argrw{"wrr"}
 	mix		$tmp54 $tmp55 $tmp59 $tmp8 	%argrw{"wrrr"}
-	compassign	___326_outputVector $const3 $tmp54 	%argrw{"wrr"}
+	compassign	___346_outputVector $const3 $tmp54 	%argrw{"wrr"}
 # PxrDispVectorLayer.osl:78
 #     else if (comp == C_MULTIPLY)
 	eq		$tmp60 $tmp7 $const6 	%line{78} %argrw{"wrr"}
@@ -372,7 +372,7 @@ code ___main___
 	mul		$tmp64 $tmp6 $tmp63 	%argrw{"wrr"}
 	mix		$tmp62 $const9 $tmp64 $tmp8 	%argrw{"wrrr"}
 	mul		$tmp65 $tmp61 $tmp62 	%argrw{"wrr"}
-	compassign	___326_outputVector $const1 $tmp65 	%argrw{"wrr"}
+	compassign	___346_outputVector $const1 $tmp65 	%argrw{"wrr"}
 # PxrDispVectorLayer.osl:81
 #         outputVector[1] = bottom[1] * mix(1.0, amount * top[1], mask);
 	compref		$tmp66 resultXYZ $const2 	%line{81} %argrw{"wrr"}
@@ -380,7 +380,7 @@ code ___main___
 	mul		$tmp69 $tmp6 $tmp68 	%argrw{"wrr"}
 	mix		$tmp67 $const9 $tmp69 $tmp8 	%argrw{"wrrr"}
 	mul		$tmp70 $tmp66 $tmp67 	%argrw{"wrr"}
-	compassign	___326_outputVector $const2 $tmp70 	%argrw{"wrr"}
+	compassign	___346_outputVector $const2 $tmp70 	%argrw{"wrr"}
 # PxrDispVectorLayer.osl:82
 #         outputVector[2] = bottom[2] * mix(1.0, amount * top[2], mask);
 	compref		$tmp71 resultXYZ $const3 	%line{82} %argrw{"wrr"}
@@ -388,7 +388,7 @@ code ___main___
 	mul		$tmp74 $tmp6 $tmp73 	%argrw{"wrr"}
 	mix		$tmp72 $const9 $tmp74 $tmp8 	%argrw{"wrrr"}
 	mul		$tmp75 $tmp71 $tmp72 	%argrw{"wrr"}
-	compassign	___326_outputVector $const3 $tmp75 	%argrw{"wrr"}
+	compassign	___346_outputVector $const3 $tmp75 	%argrw{"wrr"}
 # PxrDispVectorLayer.osl:84
 #     else if (comp == C_AVERAGE)
 	eq		$tmp76 $tmp7 $const10 	%line{84} %argrw{"wrr"}
@@ -402,7 +402,7 @@ code ___main___
 	add		$tmp82 $tmp79 $tmp81 	%argrw{"wrr"}
 	mul		$tmp83 $const11 $tmp82 	%argrw{"wrr"}
 	mix		$tmp77 $tmp78 $tmp83 $tmp8 	%argrw{"wrrr"}
-	compassign	___326_outputVector $const1 $tmp77 	%argrw{"wrr"}
+	compassign	___346_outputVector $const1 $tmp77 	%argrw{"wrr"}
 # PxrDispVectorLayer.osl:87
 #         outputVector[1] = mix(bottom[1], 0.5*(bottom[1]+amount * top[1]), mask);
 	compref		$tmp85 resultXYZ $const2 	%line{87} %argrw{"wrr"}
@@ -412,7 +412,7 @@ code ___main___
 	add		$tmp89 $tmp86 $tmp88 	%argrw{"wrr"}
 	mul		$tmp90 $const11 $tmp89 	%argrw{"wrr"}
 	mix		$tmp84 $tmp85 $tmp90 $tmp8 	%argrw{"wrrr"}
-	compassign	___326_outputVector $const2 $tmp84 	%argrw{"wrr"}
+	compassign	___346_outputVector $const2 $tmp84 	%argrw{"wrr"}
 # PxrDispVectorLayer.osl:88
 #         outputVector[2] = mix(bottom[2], 0.5*(bottom[2]+amount * top[2]), mask);
 	compref		$tmp92 resultXYZ $const3 	%line{88} %argrw{"wrr"}
@@ -422,7 +422,7 @@ code ___main___
 	add		$tmp96 $tmp93 $tmp95 	%argrw{"wrr"}
 	mul		$tmp97 $const11 $tmp96 	%argrw{"wrr"}
 	mix		$tmp91 $tmp92 $tmp97 $tmp8 	%argrw{"wrrr"}
-	compassign	___326_outputVector $const3 $tmp91 	%argrw{"wrr"}
+	compassign	___346_outputVector $const3 $tmp91 	%argrw{"wrr"}
 # PxrDispVectorLayer.osl:90
 #     else if (comp == C_MIN)
 	eq		$tmp98 $tmp7 $const12 	%line{90} %argrw{"wrr"}
@@ -435,7 +435,7 @@ code ___main___
 	mul		$tmp104 $tmp6 $tmp103 	%argrw{"wrr"}
 	min		$tmp101 $tmp102 $tmp104 	%argrw{"wrr"}
 	mix		$tmp99 $tmp100 $tmp101 $tmp8 	%argrw{"wrrr"}
-	compassign	___326_outputVector $const1 $tmp99 	%argrw{"wrr"}
+	compassign	___346_outputVector $const1 $tmp99 	%argrw{"wrr"}
 # PxrDispVectorLayer.osl:93
 #         outputVector[1] = mix(bottom[1], min(bottom[1], amount * top[1]), mask);
 	compref		$tmp106 resultXYZ $const2 	%line{93} %argrw{"wrr"}
@@ -444,7 +444,7 @@ code ___main___
 	mul		$tmp110 $tmp6 $tmp109 	%argrw{"wrr"}
 	min		$tmp107 $tmp108 $tmp110 	%argrw{"wrr"}
 	mix		$tmp105 $tmp106 $tmp107 $tmp8 	%argrw{"wrrr"}
-	compassign	___326_outputVector $const2 $tmp105 	%argrw{"wrr"}
+	compassign	___346_outputVector $const2 $tmp105 	%argrw{"wrr"}
 # PxrDispVectorLayer.osl:94
 #         outputVector[2] = mix(bottom[2], min(bottom[2], amount * top[2]), mask);
 	compref		$tmp112 resultXYZ $const3 	%line{94} %argrw{"wrr"}
@@ -453,7 +453,7 @@ code ___main___
 	mul		$tmp116 $tmp6 $tmp115 	%argrw{"wrr"}
 	min		$tmp113 $tmp114 $tmp116 	%argrw{"wrr"}
 	mix		$tmp111 $tmp112 $tmp113 $tmp8 	%argrw{"wrrr"}
-	compassign	___326_outputVector $const3 $tmp111 	%argrw{"wrr"}
+	compassign	___346_outputVector $const3 $tmp111 	%argrw{"wrr"}
 # PxrDispVectorLayer.osl:96
 #     else if (comp == C_MAX)
 	eq		$tmp117 $tmp7 $const13 	%line{96} %argrw{"wrr"}
@@ -466,7 +466,7 @@ code ___main___
 	mul		$tmp123 $tmp6 $tmp122 	%argrw{"wrr"}
 	max		$tmp120 $tmp121 $tmp123 	%argrw{"wrr"}
 	mix		$tmp118 $tmp119 $tmp120 $tmp8 	%argrw{"wrrr"}
-	compassign	___326_outputVector $const1 $tmp118 	%argrw{"wrr"}
+	compassign	___346_outputVector $const1 $tmp118 	%argrw{"wrr"}
 # PxrDispVectorLayer.osl:99
 #         outputVector[1] = mix(bottom[1], max(bottom[1], amount * top[1]), mask);
 	compref		$tmp125 resultXYZ $const2 	%line{99} %argrw{"wrr"}
@@ -475,7 +475,7 @@ code ___main___
 	mul		$tmp129 $tmp6 $tmp128 	%argrw{"wrr"}
 	max		$tmp126 $tmp127 $tmp129 	%argrw{"wrr"}
 	mix		$tmp124 $tmp125 $tmp126 $tmp8 	%argrw{"wrrr"}
-	compassign	___326_outputVector $const2 $tmp124 	%argrw{"wrr"}
+	compassign	___346_outputVector $const2 $tmp124 	%argrw{"wrr"}
 # PxrDispVectorLayer.osl:100
 #         outputVector[2] = mix(bottom[2], max(bottom[2], amount * top[2]), mask);
 	compref		$tmp131 resultXYZ $const3 	%line{100} %argrw{"wrr"}
@@ -484,7 +484,7 @@ code ___main___
 	mul		$tmp135 $tmp6 $tmp134 	%argrw{"wrr"}
 	max		$tmp132 $tmp133 $tmp135 	%argrw{"wrr"}
 	mix		$tmp130 $tmp131 $tmp132 $tmp8 	%argrw{"wrrr"}
-	compassign	___326_outputVector $const3 $tmp130 	%argrw{"wrr"}
+	compassign	___346_outputVector $const3 $tmp130 	%argrw{"wrr"}
 # PxrDispVectorLayer.osl:104
 #         outputVector[0] = mix(bottom[0], bottom[0] + amount * top[0], mask);
 	compref		$tmp137 resultXYZ $const1 	%line{104} %argrw{"wrr"}
@@ -493,7 +493,7 @@ code ___main___
 	mul		$tmp140 $tmp6 $tmp139 	%argrw{"wrr"}
 	add		$tmp141 $tmp138 $tmp140 	%argrw{"wrr"}
 	mix		$tmp136 $tmp137 $tmp141 $tmp8 	%argrw{"wrrr"}
-	compassign	___326_outputVector $const1 $tmp136 	%argrw{"wrr"}
+	compassign	___346_outputVector $const1 $tmp136 	%argrw{"wrr"}
 # PxrDispVectorLayer.osl:105
 #         outputVector[1] = mix(bottom[1], bottom[1] + amount * top[1], mask);
 	compref		$tmp143 resultXYZ $const2 	%line{105} %argrw{"wrr"}
@@ -502,7 +502,7 @@ code ___main___
 	mul		$tmp146 $tmp6 $tmp145 	%argrw{"wrr"}
 	add		$tmp147 $tmp144 $tmp146 	%argrw{"wrr"}
 	mix		$tmp142 $tmp143 $tmp147 $tmp8 	%argrw{"wrrr"}
-	compassign	___326_outputVector $const2 $tmp142 	%argrw{"wrr"}
+	compassign	___346_outputVector $const2 $tmp142 	%argrw{"wrr"}
 # PxrDispVectorLayer.osl:106
 #         outputVector[2] = mix(bottom[2], bottom[2] + amount * top[2], mask);
 	compref		$tmp149 resultXYZ $const3 	%line{106} %argrw{"wrr"}
@@ -511,14 +511,14 @@ code ___main___
 	mul		$tmp152 $tmp6 $tmp151 	%argrw{"wrr"}
 	add		$tmp153 $tmp150 $tmp152 	%argrw{"wrr"}
 	mix		$tmp148 $tmp149 $tmp153 $tmp8 	%argrw{"wrrr"}
-	compassign	___326_outputVector $const3 $tmp148 	%argrw{"wrr"}
+	compassign	___346_outputVector $const3 $tmp148 	%argrw{"wrr"}
 # PxrDispVectorLayer.osl:109
 #     return outputVector;
-	assign		resultXYZ ___326_outputVector 	%line{109} %argrw{"wr"}
+	assign		resultXYZ ___346_outputVector 	%line{109} %argrw{"wr"}
 # PxrDispVectorLayer.osl:362
 #     for (int l=0; l < MAXLAYERS; l++)
-	assign		$tmp154 ___335_l 	%line{362} %argrw{"wr"}
-	add		___335_l ___335_l $const2 	%argrw{"wrr"}
+	assign		$tmp154 ___355_l 	%line{362} %argrw{"wr"}
+	add		___355_l ___355_l $const2 	%argrw{"wrr"}
 # PxrDispVectorLayer.osl:374
 #     resultXYZ *= overallAmount;
 	mul		resultXYZ resultXYZ overallAmount 	%line{374} %argrw{"wrr"}

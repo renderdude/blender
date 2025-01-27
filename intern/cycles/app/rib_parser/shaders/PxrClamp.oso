@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
-# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrClamp.osl/obj/PxrClamp.oso
+# Compiled by oslc 1.13.0.@PROJECT_VERSION_TWEAK@"dev"
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxSonoma_x86-64_clang15_external_release/osl/PxrClamp.osl/obj/PxrClamp.oso
 shader PxrClamp	%meta{int,rfm_nodeid,1053432} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/color"} %meta{string,rfh_classification,"Pattern/Color"} %meta{string,help,"Clamps the separate channels of a color between the specified min and max values. If an RGB channel value is less then min, it will be set to the min value, and if an RGB channel is greater than max, it will be set to the max value. "} 
 param	color	inputRGB	0 0 0		%meta{string,widget,"color"} %meta{string,help,"Each of the R, G, and B channels of this color get clamped between the specified min and max values. For example, if a color value of [.8 .5 .2] is specified, and a *min* value of [.3 .3 .3] and *max* value of [.6 .6 .6] are specified, then the resulting color will be [.6 .5 .3]."} %meta{string,label,"Input Color"}  %read{2,5} %write{2147483647,-1}
 param	color	min	0 0 0		%meta{string,widget,"color"} %meta{string,help,"The minimum value allowed for each of the color channels."} %meta{string,label,"Min"}  %read{1,6} %write{2147483647,-1}
@@ -29,9 +29,9 @@ code ___main___
 # PxrClamp.osl:96
 #         resultRGB = clamp(inputRGB, min, max);
 	functioncall	$const1 7 	%line{96} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:140
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp3 inputRGB max 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	min		$tmp3 inputRGB max 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{140} %argrw{"wrr"}
 	max		resultRGB $tmp3 min 	%argrw{"wrr"}
 # PxrClamp.osl:98
 #     resultR = resultRGB[0];

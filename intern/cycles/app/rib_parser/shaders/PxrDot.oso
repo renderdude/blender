@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
-# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrDot.osl/obj/PxrDot.oso
+# Compiled by oslc 1.13.0.@PROJECT_VERSION_TWEAK@"dev"
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxSonoma_x86-64_clang15_external_release/osl/PxrDot.osl/obj/PxrDot.oso
 shader PxrDot	%meta{int,rfm_nodeid,1053387} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/geometry"} %meta{string,rfh_classification,"Pattern/Geometry"} %meta{string,help,"Computes the dot product of two vectors."} 
 param	vector	vector1	0 0 0		%meta{string,widget,"default"} %meta{string,help,"The first vector in the dot product calculation."} %meta{string,label,"Vector 1"}  %read{0,0} %write{2147483647,-1}
 param	vector	vector2	0 0 0		%meta{string,widget,"default"} %meta{string,help,"The second vector in the dot product calculation."} %meta{string,label,"Vector 2"}  %read{0,0} %write{2147483647,-1}

@@ -1,661 +1,631 @@
 OpenShadingLanguage 1.00
-# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrCurvature.osl/obj/PxrCurvature.oso
+# Compiled by oslc 1.13.0.@PROJECT_VERSION_TWEAK@"dev"
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxSonoma_x86-64_clang15_external_release/osl/PxrCurvature.osl/obj/PxrCurvature.oso
 shader PxrCurvature	%meta{int,rfm_nodeid,1200439} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/geometry"} %meta{string,rfh_classification,"Pattern/Geometry"} 
-param	int	numSamples	4		%meta{string,widget,"default"} %meta{string,page,"Sampling"} %meta{int,page_open,1} %meta{string,help,"Controls the number of curvature samples per camera hit point. The default is 4.<br><br>numSamples (int)"} %meta{int,connectable,0} %meta{string,label,"Num Samples"} %meta{int,min,1} %meta{int,slider,1} %meta{int,slidermax,64} %meta{int,slidermin,4}  %read{0,3} %write{2147483647,-1} %derivs
-param	float	maxDistance	0.100000001		%meta{string,widget,"default"} %meta{string,page,"Sampling"} %meta{string,help,"The max distance at which surfaces are detected for curvature comparison. 0 is infinite.<br><br>maxDistance (float)"} %meta{int,connectable,0} %meta{string,label,"Max Distance"} %meta{float,min,0} %meta{int,slider,1} %meta{float,slidermax,100}  %read{44,178} %write{2147483647,-1}
-param	string	traceSet	""		%meta{string,widget,"default"} %meta{string,page,"Sampling"} %meta{string,help,"Restrict ray tracing to a subset of objects defined by one or<br>more trace groups.<br><br>traceSet (string)"} %meta{int,connectable,0} %meta{string,label,"Trace Set"}  %read{162,162} %write{2147483647,-1}
-param	int	distribution	0		%meta{string,widget,"mapper"} %meta{string,page,"Sampling"} %meta{string,help,"Sample distribution can be uniform or cosine. The default is uniform.<br><br>distribution (int)"} %meta{string,options,"Uniform:0|Cosine:1"} %meta{int,connectable,0} %meta{string,label,"Sample Distribution"}  %read{107,107} %write{2147483647,-1}
-param	float	cosineSpread	1		%meta{string,widget,"default"} %meta{string,page,"Sampling"} %meta{string,help,"Sample spread of rays for cosine distribution. The default of 1<br>gives lambertian distribution.<br><br>cosineSpread (float)"} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisPath,"../distribution"} %meta{string,conditionalVisValue,"1"} %meta{int,connectable,0} %meta{string,label,"Cosine Spread"} %meta{float,min,0} %meta{int,slider,1} %meta{float,slidermax,1.5} %meta{float,slidermin,0.5}  %read{118,118} %write{2147483647,-1} %derivs
-param	float	bias	0.5		%meta{string,widget,"default"} %meta{string,page,"Sampling"} %meta{string,help,"Bias the linear contribution of closer curvature samples.<br>The default is 0.5.<br><br>bias (float)"} %meta{int,connectable,0} %meta{string,label,"Bias"} %meta{float,min,0} %meta{int,slider,1} %meta{float,slidermax,1}  %read{171,180} %write{2147483647,-1}
-param	float	convexThreshold	0		%meta{string,widget,"default"} %meta{string,page,"Sampling"} %meta{string,help,"Only consider curvature over that threshold.<br>This is useful to clean up flatter areas.<br><br>convexThreshold (float)"} %meta{int,connectable,0} %meta{string,label,"Convex Threshold"} %meta{float,max,1} %meta{float,min,0} %meta{int,slider,1}  %read{194,194} %write{2147483647,-1}
-param	float	concaveThreshold	0		%meta{string,widget,"default"} %meta{string,page,"Sampling"} %meta{string,help,"Only consider curvature over that threshold.<br>This is useful to clean up flatter areas.<br><br>concaveThreshold (float)"} %meta{int,connectable,0} %meta{string,label,"Concave Threshold"} %meta{float,max,1} %meta{float,min,0} %meta{int,slider,1}  %read{189,189} %write{2147483647,-1}
-param	float	outputGain	1		%meta{string,widget,"default"} %meta{string,page,"Output"} %meta{int,page_open,1} %meta{string,help,"Scale the output values.<br><br>outputGain (float)"} %meta{int,connectable,0} %meta{string,label,"Output Gain"} %meta{float,min,0} %meta{int,slider,1} %meta{float,slidermax,2}  %read{206,208} %write{2147483647,-1}
-param	int	outputType	2		%meta{string,widget,"mapper"} %meta{string,page,"Output"} %meta{string,help,"The type of curvature to output.<br><br>outputType (int)"} %meta{string,options,"Concave:0|Convex:1|Both:2"} %meta{int,connectable,0} %meta{string,label,"Output Type"}  %read{7,224} %write{2147483647,-1}
-param	int	monochrome	1		%meta{string,widget,"checkBox"} %meta{string,page,"Output"} %meta{string,help,"Output the result as a monochromatic color.<br><br>monochrome (int)"} %meta{int,connectable,0} %meta{string,label,"Monochrome Output"}  %read{221,229} %write{2147483647,-1}
-param	int	clampOutput	1		%meta{string,widget,"checkBox"} %meta{string,page,"Output"} %meta{string,help,"Keep the output values between 0 and 1.<br><br>clampOutput (int)"} %meta{int,connectable,0} %meta{string,label,"Clamp Output"}  %read{209,209} %write{2147483647,-1}
-oparam	color	resultRGB	0 0 0		%meta{string,help,"resultRGB (color)"}  %read{232,234} %write{222,231}
-oparam	float	resultR	0		%meta{string,help,"resultR (float)"}  %read{2147483647,-1} %write{232,232}
-oparam	float	resultG	0		%meta{string,help,"resultG (float)"}  %read{2147483647,-1} %write{233,233}
-oparam	float	resultB	0		%meta{string,help,"resultB (float)"}  %read{2147483647,-1} %write{234,234}
-oparam	float	resultF	0		%meta{string,help,"resultF (float)"}  %read{2147483647,-1} %write{235,235}
-oparam	float	resultConvex	0		%meta{string,help,"resultConvex (float)"}  %read{2147483647,-1} %write{236,236}
-oparam	float	resultConcave	0		%meta{string,help,"resultConcave (float)"}  %read{2147483647,-1} %write{237,237}
-global	point	P	%read{5,162} %write{2147483647,-1} %derivs
-global	normal	N	%read{12,185} %write{2147483647,-1} %derivs
-global	normal	Ng	%read{156,156} %write{2147483647,-1}
-local	float	___325_fsign	%read{18,41} %write{15,16} %derivs
-local	float	___325_a	%read{23,36} %write{19,19} %derivs
-local	float	___326_e1	%read{56,200} %write{56,200} %derivs
-local	float	___326_z	%read{56,200} %write{56,200} %derivs
-local	float	___326_r	%read{56,200} %write{56,200} %derivs
-local	vector	___326_outDir	%read{56,200} %write{56,200} %derivs
-local	float	___327_e1	%read{56,200} %write{56,200} %derivs
-local	float	___327_z	%read{56,200} %write{56,200} %derivs
-local	float	___327_r	%read{56,200} %write{56,200} %derivs
-local	float	___327_x	%read{56,200} %write{56,200} %derivs
-local	float	___327_y	%read{56,200} %write{56,200} %derivs
-local	vector	___327_outDir	%read{56,200} %write{56,200} %derivs
-local	point	___331_jitter	%read{56,200} %write{56,200} %derivs
-local	point	___331_xi	%read{56,200} %write{56,200} %derivs
-local	int	___331_sx	%read{56,200} %write{56,200} %derivs
-local	int	___331_sy	%read{56,200} %write{56,200} %derivs
-local	float	___332_biasR	%read{56,200} %write{56,200}
-local	float	___332_biasT	%read{56,200} %write{56,200}
-local	int	numStrataX	%read{3,200} %write{2,2} %derivs
-local	int	numStrataY	%read{4,200} %write{3,3} %derivs
-local	int	numStrata	%read{9,200} %write{4,4} %derivs
-local	point	offset	%read{56,200} %write{6,6} %derivs
-local	int	totalSamples	%read{56,203} %write{9,10}
-local	vector	t0	%read{56,200} %write{43,43} %derivs
-local	vector	t1	%read{38,200} %write{31,31} %derivs
-local	float	maxdist	%read{56,200} %write{46,47}
-local	vector	dir	%read{56,200} %write{56,200} %derivs
-local	float	concave	%read{56,237} %write{48,215}
-local	float	convex	%read{56,236} %write{49,212}
-local	float	dotAccum	%read{2147483647,-1} %write{50,50}
-local	float	perPointBias	%read{56,200} %write{51,200}
-local	float	n0	%read{2147483647,-1} %write{52,52}
-local	float	n1	%read{2147483647,-1} %write{53,53}
-local	int	___333_i	%read{56,200} %write{55,200} %derivs
-local	point	___334_xi	%read{56,200} %write{56,200} %derivs
-local	normal	___334_Nn	%read{56,200} %write{56,200} %derivs
-local	int	___334_hit	%read{56,200} %write{56,200}
-local	float	___335_hitdist	%read{56,200} %write{56,200}
-local	normal	___335_hitNg	%read{56,200} %write{56,200}
-local	float	___335_rayDotN	%read{56,200} %write{56,200}
-local	float	___335_NgDotNn	%read{56,200} %write{56,200}
-local	float	both	%read{208,235} %write{205,218}
-temp	float	$tmp1	%read{2,2} %write{1,1} %derivs
-temp	float	$tmp2	%read{1,1} %write{0,0} %derivs
-const	float	$const1	1000000		%read{5,5} %write{2147483647,-1}
-temp	point	$tmp3	%read{6,6} %write{5,5} %derivs
-const	int	$const2	2		%read{7,234} %write{2147483647,-1}
-temp	int	$tmp4	%read{8,8} %write{7,7}
-const	string	$const3	"CreateOrthonormalBasis"		%read{11,11} %write{2147483647,-1}
-temp	float	$tmp5	%read{13,13} %write{12,12}
-const	float	$const4	0		%read{13,231} %write{2147483647,-1}
-temp	int	$tmp6	%read{14,14} %write{13,13}
-const	float	$const5	1		%read{15,217} %write{2147483647,-1}
-const	float	$const6	-1		%read{16,19} %write{2147483647,-1}
-temp	float	$tmp7	%read{18,18} %write{17,17} %derivs
-temp	float	$tmp8	%read{19,19} %write{18,18} %derivs
-const	int	$const7	0		%read{20,232} %write{2147483647,-1}
-temp	float	$tmp9	%read{22,22} %write{20,20} %derivs
-const	int	$const8	1		%read{21,233} %write{2147483647,-1}
-temp	float	$tmp10	%read{22,22} %write{21,21} %derivs
-temp	float	$tmp11	%read{23,23} %write{22,22} %derivs
-temp	float	$tmp12	%read{31,31} %write{23,23} %derivs
-temp	float	$tmp13	%read{26,26} %write{24,24} %derivs
-temp	float	$tmp14	%read{26,26} %write{25,25} %derivs
-temp	float	$tmp15	%read{27,27} %write{26,26} %derivs
-temp	float	$tmp16	%read{28,28} %write{27,27} %derivs
-temp	float	$tmp17	%read{31,31} %write{28,28} %derivs
-temp	float	$tmp18	%read{30,30} %write{29,29} %derivs
-temp	float	$tmp19	%read{31,31} %write{30,30} %derivs
-temp	float	$tmp20	%read{33,33} %write{32,32} %derivs
-temp	float	$tmp21	%read{35,35} %write{33,33} %derivs
-temp	float	$tmp22	%read{35,35} %write{34,34} %derivs
-temp	float	$tmp23	%read{36,36} %write{35,35} %derivs
-temp	float	$tmp24	%read{37,37} %write{36,36} %derivs
-temp	float	$tmp25	%read{43,43} %write{37,37} %derivs
-temp	float	$tmp26	%read{39,39} %write{38,38} %derivs
-temp	float	$tmp27	%read{43,43} %write{39,39} %derivs
-temp	float	$tmp28	%read{41,41} %write{40,40} %derivs
-temp	float	$tmp29	%read{42,42} %write{41,41} %derivs
-temp	float	$tmp30	%read{43,43} %write{42,42} %derivs
-temp	int	$tmp31	%read{45,45} %write{44,44}
-const	float	$const9	9.99999968e+37		%read{47,47} %write{2147483647,-1}
-temp	int	$tmp32	%read{56,200} %write{56,200}
-temp	int	$tmp33	%read{54,200} %write{55,200}
-temp	int	$tmp34	%read{56,200} %write{56,200} %derivs
-const	string	$const10	"stratifiedSample"		%read{59,59} %write{2147483647,-1}
-const	float	$const11	3.14159274		%read{66,66} %write{2147483647,-1}
-temp	int	$tmp35	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp36	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp37	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp38	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp39	%read{56,200} %write{56,200} %derivs
-const	float	$const12	2.71828175		%read{72,72} %write{2147483647,-1}
-temp	int	$tmp40	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp41	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp42	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp43	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp44	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp45	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp46	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp47	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp48	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp49	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp50	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp51	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp52	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp53	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp54	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp55	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp56	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp57	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp58	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp59	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp60	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp61	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp62	%read{56,200} %write{56,200} %derivs
-temp	int	$tmp63	%read{56,200} %write{56,200}
-temp	int	$tmp64	%read{56,200} %write{56,200}
-temp	int	$tmp65	%read{56,200} %write{56,200}
-temp	int	$tmp66	%read{56,200} %write{56,200}
-const	string	$const13	"distributionCosine"		%read{109,109} %write{2147483647,-1}
-temp	float	$tmp67	%read{56,200} %write{56,200} %derivs
-const	float	$const14	6.28318548		%read{111,134} %write{2147483647,-1}
-temp	float	$tmp68	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp69	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp70	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp71	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp72	%read{56,200} %write{56,200} %derivs
-const	float	$const15	9.99999996e-13		%read{119,146} %write{2147483647,-1}
-temp	int	$tmp73	%read{56,200} %write{56,200}
-temp	float	$tmp74	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp75	%read{56,200} %write{56,200} %derivs
-temp	vector	$tmp76	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp77	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp78	%read{56,200} %write{56,200} %derivs
-temp	vector	$tmp79	%read{56,200} %write{56,200} %derivs
-temp	vector	$tmp80	%read{56,200} %write{56,200} %derivs
-temp	vector	$tmp81	%read{56,200} %write{56,200} %derivs
-const	string	$const16	"distributionUniform"		%read{132,132} %write{2147483647,-1}
-temp	float	$tmp82	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp83	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp84	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp85	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp86	%read{56,200} %write{56,200} %derivs
-temp	float	$tmp87	%read{56,200} %write{56,200} %derivs
-temp	int	$tmp88	%read{56,200} %write{56,200}
-temp	vector	$tmp89	%read{56,200} %write{56,200} %derivs
-temp	vector	$tmp90	%read{56,200} %write{56,200} %derivs
-temp	vector	$tmp91	%read{56,200} %write{56,200} %derivs
-temp	vector	$tmp92	%read{56,200} %write{56,200} %derivs
-const	string	$const17	"mindist"		%read{162,162} %write{2147483647,-1}
-temp	float	$tmp93	%read{56,200} %write{56,200}
-const	string	$const18	"autoBias"		%read{153,153} %write{2147483647,-1}
-temp	int	$tmp94	%read{2147483647,-1} %write{56,200}
-const	string	$const19	"builtin"		%read{154,155} %write{2147483647,-1}
-const	string	$const20	"biasR"		%read{154,154} %write{2147483647,-1}
-temp	int	$tmp95	%read{2147483647,-1} %write{56,200}
-const	string	$const21	"biasT"		%read{155,155} %write{2147483647,-1}
-temp	float	$tmp96	%read{56,200} %write{56,200}
-temp	int	$tmp97	%read{56,200} %write{56,200}
-const	string	$const22	"maxdist"		%read{162,162} %write{2147483647,-1}
-const	string	$const23	"traceset"		%read{162,162} %write{2147483647,-1}
-temp	int	$tmp98	%read{56,200} %write{56,200}
-const	string	$const24	"trace"		%read{165,170} %write{2147483647,-1}
-const	string	$const25	"hitdist"		%read{165,165} %write{2147483647,-1}
-temp	int	$tmp99	%read{56,200} %write{56,200}
-const	string	$const26	"Could not get hitdist !"		%read{168,168} %write{2147483647,-1}
-temp	int	$tmp100	%read{2147483647,-1} %write{56,200}
-const	string	$const27	"Ngn"		%read{170,170} %write{2147483647,-1}
-const	float	$const28	0.5		%read{171,171} %write{2147483647,-1}
-temp	int	$tmp101	%read{56,200} %write{56,200}
-temp	float	$tmp102	%read{56,200} %write{56,200}
-const	float	$const29	2		%read{174,179} %write{2147483647,-1}
-temp	float	$tmp103	%read{56,200} %write{56,200}
-temp	float	$tmp104	%read{56,200} %write{56,200}
-temp	float	$tmp105	%read{56,200} %write{56,200}
-temp	float	$tmp106	%read{56,200} %write{56,200}
-temp	float	$tmp107	%read{56,200} %write{56,200}
-temp	float	$tmp108	%read{56,200} %write{56,200}
-temp	float	$tmp109	%read{56,200} %write{56,200}
-temp	float	$tmp110	%read{56,200} %write{56,200}
-temp	int	$tmp111	%read{56,200} %write{56,200}
-temp	int	$tmp112	%read{56,200} %write{56,200}
-temp	float	$tmp113	%read{56,200} %write{56,200}
-temp	float	$tmp114	%read{56,200} %write{56,200}
-temp	int	$tmp115	%read{56,200} %write{56,200}
-temp	float	$tmp116	%read{56,200} %write{56,200}
-temp	float	$tmp117	%read{56,200} %write{56,200}
-temp	int	$tmp118	%read{2147483647,-1} %write{56,200}
-temp	float	$tmp119	%read{202,202} %write{201,201}
-temp	float	$tmp120	%read{204,204} %write{203,203}
-const	string	$const30	"clamp"		%read{210,216} %write{2147483647,-1}
-temp	float	$tmp121	%read{212,212} %write{211,211}
-temp	float	$tmp122	%read{215,215} %write{214,214}
-temp	float	$tmp123	%read{218,218} %write{217,217}
-temp	int	$tmp124	%read{220,220} %write{219,219}
-temp	int	$tmp125	%read{225,225} %write{224,224}
+param	int	numSamples	4		%meta{string,widget,"default"} %meta{string,page,"Sampling"} %meta{int,page_open,1} %meta{string,help,"Controls the number of curvature samples per camera hit point. The default is 4.<br><br>numSamples (int)"} %meta{int,connectable,0} %meta{string,label,"Num Samples"} %meta{int,min,1} %meta{int,slider,1} %meta{int,slidermax,64} %meta{int,slidermin,4}  %read{2,65} %write{2147483647,-1} %derivs
+param	float	maxDistance	0.100000001		%meta{string,widget,"default"} %meta{string,page,"Sampling"} %meta{string,help,"The max distance at which surfaces are detected for curvature comparison. 0 is infinite.<br><br>maxDistance (float)"} %meta{int,connectable,0} %meta{string,label,"Max Distance"} %meta{float,min,0} %meta{int,slider,1} %meta{float,slidermax,100}  %read{37,162} %write{2147483647,-1}
+param	float	minDistance	0		%meta{string,widget,"default"} %meta{string,page,"Sampling"} %meta{string,help,"The min distance at which objects are detected for curvature calculation. The default of 0.0 means a value will be automatically computed.<br><br>minDistance (float)"} %meta{int,connectable,0} %meta{string,label,"Min Distance"} %meta{float,min,0} %meta{int,slider,1} %meta{float,slidermax,1}  %read{115,117} %write{2147483647,-1}
+param	string	traceSet	""		%meta{string,widget,"default"} %meta{string,page,"Sampling"} %meta{string,help,"Restrict ray tracing to a subset of objects defined by one or<br>more trace groups.<br><br>traceSet (string)"} %meta{int,connectable,0} %meta{string,label,"Trace Set"}  %read{146,146} %write{2147483647,-1}
+param	int	distribution	0		%meta{string,widget,"mapper"} %meta{string,page,"Sampling"} %meta{string,help,"Sample distribution can be uniform or cosine. The default is uniform.<br><br>distribution (int)"} %meta{string,options,"Uniform:0|Cosine:1"} %meta{int,connectable,0} %meta{string,label,"Sample Distribution"}  %read{69,69} %write{2147483647,-1}
+param	float	cosineSpread	1		%meta{string,widget,"default"} %meta{string,page,"Sampling"} %meta{string,help,"Sample spread of rays for cosine distribution. The default of 1<br>gives lambertian distribution.<br><br>cosineSpread (float)"} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisPath,"../distribution"} %meta{string,conditionalVisValue,"1"} %meta{int,connectable,0} %meta{string,label,"Cosine Spread"} %meta{float,min,0} %meta{int,slider,1} %meta{float,slidermax,1.5} %meta{float,slidermin,0.5}  %read{80,80} %write{2147483647,-1} %derivs
+param	float	bias	0.5		%meta{string,widget,"default"} %meta{string,page,"Sampling"} %meta{string,help,"Bias the linear contribution of closer curvature samples.<br>The default is 0.5.<br><br>bias (float)"} %meta{int,connectable,0} %meta{string,label,"Bias"} %meta{float,min,0} %meta{int,slider,1} %meta{float,slidermax,1}  %read{155,164} %write{2147483647,-1}
+param	float	jitter	0		%meta{string,widget,"default"} %meta{string,page,"Sampling"} %meta{string,help,"Jitter the ray origins around the shading point P by this (small) amount. For baking of curvature values on objects with sharp edges.<br>The default is 0.0.<br><br>jitter (float)"} %meta{int,connectable,0} %meta{string,label,"Jitter"} %meta{float,min,0} %meta{int,slider,1} %meta{float,slidermax,1}  %read{128,144} %write{2147483647,-1} %derivs
+param	float	convexThreshold	0		%meta{string,widget,"default"} %meta{string,page,"Sampling"} %meta{string,help,"Only consider curvature over that threshold.<br>This is useful to clean up flatter areas.<br><br>convexThreshold (float)"} %meta{int,connectable,0} %meta{string,label,"Convex Threshold"} %meta{float,max,1} %meta{float,min,0} %meta{int,slider,1}  %read{178,178} %write{2147483647,-1}
+param	float	concaveThreshold	0		%meta{string,widget,"default"} %meta{string,page,"Sampling"} %meta{string,help,"Only consider curvature over that threshold.<br>This is useful to clean up flatter areas.<br><br>concaveThreshold (float)"} %meta{int,connectable,0} %meta{string,label,"Concave Threshold"} %meta{float,max,1} %meta{float,min,0} %meta{int,slider,1}  %read{173,173} %write{2147483647,-1}
+param	float	outputGain	1		%meta{string,widget,"default"} %meta{string,page,"Output"} %meta{int,page_open,1} %meta{string,help,"Scale the output values.<br><br>outputGain (float)"} %meta{int,connectable,0} %meta{string,label,"Output Gain"} %meta{float,min,0} %meta{int,slider,1} %meta{float,slidermax,2}  %read{190,192} %write{2147483647,-1}
+param	int	outputType	2		%meta{string,widget,"mapper"} %meta{string,page,"Output"} %meta{string,help,"The type of curvature to output.<br><br>outputType (int)"} %meta{string,options,"Concave:0|Convex:1|Both:2"} %meta{int,connectable,0} %meta{string,label,"Output Type"}  %read{0,208} %write{2147483647,-1}
+param	int	monochrome	1		%meta{string,widget,"checkBox"} %meta{string,page,"Output"} %meta{string,help,"Output the result as a monochromatic color.<br><br>monochrome (int)"} %meta{int,connectable,0} %meta{string,label,"Monochrome Output"}  %read{205,213} %write{2147483647,-1}
+param	int	clampOutput	1		%meta{string,widget,"checkBox"} %meta{string,page,"Output"} %meta{string,help,"Keep the output values between 0 and 1.<br><br>clampOutput (int)"} %meta{int,connectable,0} %meta{string,label,"Clamp Output"}  %read{193,193} %write{2147483647,-1}
+oparam	color	resultRGB	0 0 0		%meta{string,help,"resultRGB (color)"}  %read{216,218} %write{206,215}
+oparam	float	resultR	0		%meta{string,help,"resultR (float)"}  %read{2147483647,-1} %write{216,216}
+oparam	float	resultG	0		%meta{string,help,"resultG (float)"}  %read{2147483647,-1} %write{217,217}
+oparam	float	resultB	0		%meta{string,help,"resultB (float)"}  %read{2147483647,-1} %write{218,218}
+oparam	float	resultF	0		%meta{string,help,"resultF (float)"}  %read{2147483647,-1} %write{219,219}
+oparam	float	resultConvex	0		%meta{string,help,"resultConvex (float)"}  %read{2147483647,-1} %write{220,220}
+oparam	float	resultConcave	0		%meta{string,help,"resultConcave (float)"}  %read{2147483647,-1} %write{221,221}
+global	point	P	%read{127,132} %write{2147483647,-1} %derivs
+global	normal	N	%read{5,169} %write{2147483647,-1} %derivs
+global	normal	Ng	%read{121,121} %write{2147483647,-1}
+global	vector	dPdu	%read{130,138} %write{2147483647,-1} %derivs
+global	vector	dPdv	%read{131,141} %write{2147483647,-1} %derivs
+local	int	___293_combined	%read{49,184} %write{49,184} %derivs
+local	point	___293_xi	%read{49,184} %write{49,184} %derivs
+local	int	___293_ok	%read{2147483647,-1} %write{49,184}
+local	float	___345_fsign	%read{11,34} %write{8,9} %derivs
+local	float	___345_a	%read{16,29} %write{12,12} %derivs
+local	float	___346_e1	%read{49,184} %write{49,184} %derivs
+local	float	___346_z	%read{49,184} %write{49,184} %derivs
+local	float	___346_r	%read{49,184} %write{49,184} %derivs
+local	vector	___346_outDir	%read{49,184} %write{49,184} %derivs
+local	float	___347_e1	%read{49,184} %write{49,184} %derivs
+local	float	___347_z	%read{49,184} %write{49,184} %derivs
+local	float	___347_r	%read{49,184} %write{49,184} %derivs
+local	float	___347_x	%read{49,184} %write{49,184} %derivs
+local	float	___347_y	%read{49,184} %write{49,184} %derivs
+local	vector	___347_outDir	%read{49,184} %write{49,184} %derivs
+local	float	___351_biasR	%read{49,184} %write{49,184}
+local	float	___351_biasT	%read{49,184} %write{49,184}
+local	int	totalSamples	%read{49,187} %write{2,3} %derivs
+local	vector	t0	%read{49,184} %write{36,36} %derivs
+local	vector	t1	%read{31,184} %write{24,24} %derivs
+local	float	maxdist	%read{49,184} %write{39,40}
+local	vector	dir	%read{49,184} %write{49,184} %derivs
+local	float	concave	%read{49,221} %write{41,199}
+local	float	convex	%read{49,220} %write{42,196}
+local	float	dotAccum	%read{2147483647,-1} %write{43,43}
+local	float	perPointBias	%read{49,184} %write{44,184}
+local	float	n0	%read{2147483647,-1} %write{45,45}
+local	float	n1	%read{2147483647,-1} %write{46,46}
+local	int	___352_i	%read{49,184} %write{48,184} %derivs
+local	int	___353_seed	%read{49,184} %write{49,184} %derivs
+local	point	___353_xi	%read{49,184} %write{49,184} %derivs
+local	normal	___353_Nn	%read{49,184} %write{49,184} %derivs
+local	float	___353_mindist	%read{49,184} %write{49,184}
+local	point	___353_org	%read{49,184} %write{49,184} %derivs
+local	float	___354_dPduLen	%read{49,184} %write{49,184} %derivs
+local	float	___354_dPdvLen	%read{49,184} %write{49,184} %derivs
+local	point	___354_rnd	%read{49,184} %write{49,184} %derivs
+local	int	___353_hit	%read{49,184} %write{49,184}
+local	float	___355_hitdist	%read{49,184} %write{49,184}
+local	normal	___355_hitNg	%read{49,184} %write{49,184}
+local	float	___355_rayDotN	%read{49,184} %write{49,184}
+local	float	___355_NgDotNn	%read{49,184} %write{49,184}
+local	float	both	%read{192,219} %write{189,202}
+const	int	$const1	2		%read{0,218} %write{2147483647,-1}
+temp	int	$tmp1	%read{1,1} %write{0,0}
+const	string	$const2	"CreateOrthonormalBasis"		%read{4,4} %write{2147483647,-1}
+temp	float	$tmp2	%read{6,6} %write{5,5}
+const	float	$const3	0		%read{6,215} %write{2147483647,-1}
+temp	int	$tmp3	%read{7,7} %write{6,6}
+const	float	$const4	1		%read{8,201} %write{2147483647,-1}
+const	float	$const5	-1		%read{9,12} %write{2147483647,-1}
+temp	float	$tmp4	%read{11,11} %write{10,10} %derivs
+temp	float	$tmp5	%read{12,12} %write{11,11} %derivs
+const	int	$const6	0		%read{13,216} %write{2147483647,-1}
+temp	float	$tmp6	%read{15,15} %write{13,13} %derivs
+const	int	$const7	1		%read{14,217} %write{2147483647,-1}
+temp	float	$tmp7	%read{15,15} %write{14,14} %derivs
+temp	float	$tmp8	%read{16,16} %write{15,15} %derivs
+temp	float	$tmp9	%read{24,24} %write{16,16} %derivs
+temp	float	$tmp10	%read{19,19} %write{17,17} %derivs
+temp	float	$tmp11	%read{19,19} %write{18,18} %derivs
+temp	float	$tmp12	%read{20,20} %write{19,19} %derivs
+temp	float	$tmp13	%read{21,21} %write{20,20} %derivs
+temp	float	$tmp14	%read{24,24} %write{21,21} %derivs
+temp	float	$tmp15	%read{23,23} %write{22,22} %derivs
+temp	float	$tmp16	%read{24,24} %write{23,23} %derivs
+temp	float	$tmp17	%read{26,26} %write{25,25} %derivs
+temp	float	$tmp18	%read{28,28} %write{26,26} %derivs
+temp	float	$tmp19	%read{28,28} %write{27,27} %derivs
+temp	float	$tmp20	%read{29,29} %write{28,28} %derivs
+temp	float	$tmp21	%read{30,30} %write{29,29} %derivs
+temp	float	$tmp22	%read{36,36} %write{30,30} %derivs
+temp	float	$tmp23	%read{32,32} %write{31,31} %derivs
+temp	float	$tmp24	%read{36,36} %write{32,32} %derivs
+temp	float	$tmp25	%read{34,34} %write{33,33} %derivs
+temp	float	$tmp26	%read{35,35} %write{34,34} %derivs
+temp	float	$tmp27	%read{36,36} %write{35,35} %derivs
+temp	int	$tmp28	%read{38,38} %write{37,37}
+const	float	$const8	9.99999968e+37		%read{40,40} %write{2147483647,-1}
+temp	int	$tmp29	%read{49,184} %write{49,184}
+temp	int	$tmp30	%read{47,184} %write{48,184}
+const	string	$const9	"stratified"		%read{57,57} %write{2147483647,-1}
+const	string	$const10	"random"		%read{52,52} %write{2147483647,-1}
+const	int	$const11	16777216		%read{53,53} %write{2147483647,-1}
+temp	int	$tmp31	%read{49,184} %write{49,184} %derivs
+const	int	$const12	4096		%read{54,54} %write{2147483647,-1}
+temp	int	$tmp32	%read{49,184} %write{49,184} %derivs
+temp	int	$tmp33	%read{49,184} %write{49,184} %derivs
+const	string	$const13	"RNG"		%read{57,57} %write{2147483647,-1}
+temp	int	$tmp34	%read{49,184} %write{49,184}
+temp	int	$tmp35	%read{49,184} %write{49,184}
+temp	int	$tmp36	%read{49,184} %write{49,184}
+temp	int	$tmp37	%read{49,184} %write{49,184}
+const	string	$const14	"distributionCosine"		%read{71,71} %write{2147483647,-1}
+temp	float	$tmp38	%read{49,184} %write{49,184} %derivs
+const	float	$const15	6.28318548		%read{73,96} %write{2147483647,-1}
+temp	float	$tmp39	%read{49,184} %write{49,184} %derivs
+temp	float	$tmp40	%read{49,184} %write{49,184} %derivs
+temp	float	$tmp41	%read{49,184} %write{49,184} %derivs
+temp	float	$tmp42	%read{49,184} %write{49,184} %derivs
+temp	float	$tmp43	%read{49,184} %write{49,184} %derivs
+const	float	$const16	9.99999996e-13		%read{81,108} %write{2147483647,-1}
+temp	int	$tmp44	%read{49,184} %write{49,184}
+temp	float	$tmp45	%read{49,184} %write{49,184} %derivs
+temp	float	$tmp46	%read{49,184} %write{49,184} %derivs
+temp	vector	$tmp47	%read{49,184} %write{49,184} %derivs
+temp	float	$tmp48	%read{49,184} %write{49,184} %derivs
+temp	float	$tmp49	%read{49,184} %write{49,184} %derivs
+temp	vector	$tmp50	%read{49,184} %write{49,184} %derivs
+temp	vector	$tmp51	%read{49,184} %write{49,184} %derivs
+temp	vector	$tmp52	%read{49,184} %write{49,184} %derivs
+const	string	$const17	"distributionUniform"		%read{94,94} %write{2147483647,-1}
+temp	float	$tmp53	%read{49,184} %write{49,184} %derivs
+temp	float	$tmp54	%read{49,184} %write{49,184} %derivs
+temp	float	$tmp55	%read{49,184} %write{49,184} %derivs
+temp	float	$tmp56	%read{49,184} %write{49,184} %derivs
+temp	float	$tmp57	%read{49,184} %write{49,184} %derivs
+temp	float	$tmp58	%read{49,184} %write{49,184} %derivs
+temp	int	$tmp59	%read{49,184} %write{49,184}
+temp	vector	$tmp60	%read{49,184} %write{49,184} %derivs
+temp	vector	$tmp61	%read{49,184} %write{49,184} %derivs
+temp	vector	$tmp62	%read{49,184} %write{49,184} %derivs
+temp	vector	$tmp63	%read{49,184} %write{49,184} %derivs
+temp	int	$tmp64	%read{49,184} %write{49,184}
+const	string	$const18	"autoBias"		%read{118,118} %write{2147483647,-1}
+temp	int	$tmp65	%read{2147483647,-1} %write{49,184}
+const	string	$const19	"builtin"		%read{119,120} %write{2147483647,-1}
+const	string	$const20	"biasR"		%read{119,119} %write{2147483647,-1}
+temp	int	$tmp66	%read{2147483647,-1} %write{49,184}
+const	string	$const21	"biasT"		%read{120,120} %write{2147483647,-1}
+temp	float	$tmp67	%read{49,184} %write{49,184}
+temp	int	$tmp68	%read{49,184} %write{49,184}
+temp	int	$tmp69	%read{49,184} %write{49,184}
+temp	point	$tmp70	%read{49,184} %write{49,184} %derivs
+const	float	$const22	3000000		%read{133,133} %write{2147483647,-1}
+temp	point	$tmp71	%read{49,184} %write{49,184} %derivs
+temp	point	$tmp72	%read{49,184} %write{49,184} %derivs
+const	float	$const23	2		%read{135,163} %write{2147483647,-1}
+temp	float	$tmp73	%read{49,184} %write{49,184} %derivs
+temp	vector	$tmp74	%read{49,184} %write{49,184} %derivs
+temp	vector	$tmp75	%read{49,184} %write{49,184} %derivs
+temp	float	$tmp76	%read{49,184} %write{49,184} %derivs
+temp	vector	$tmp77	%read{49,184} %write{49,184} %derivs
+temp	vector	$tmp78	%read{49,184} %write{49,184} %derivs
+temp	vector	$tmp79	%read{49,184} %write{49,184} %derivs
+temp	vector	$tmp80	%read{49,184} %write{49,184} %derivs
+const	string	$const24	"mindist"		%read{146,146} %write{2147483647,-1}
+const	string	$const25	"maxdist"		%read{146,146} %write{2147483647,-1}
+const	string	$const26	"traceset"		%read{146,146} %write{2147483647,-1}
+temp	int	$tmp81	%read{49,184} %write{49,184}
+const	string	$const27	"trace"		%read{149,154} %write{2147483647,-1}
+const	string	$const28	"hitdist"		%read{149,149} %write{2147483647,-1}
+temp	int	$tmp82	%read{49,184} %write{49,184}
+const	string	$const29	"Could not get hitdist !"		%read{152,152} %write{2147483647,-1}
+temp	int	$tmp83	%read{2147483647,-1} %write{49,184}
+const	string	$const30	"Ngn"		%read{154,154} %write{2147483647,-1}
+const	float	$const31	0.5		%read{155,155} %write{2147483647,-1}
+temp	int	$tmp84	%read{49,184} %write{49,184}
+temp	float	$tmp85	%read{49,184} %write{49,184}
+temp	float	$tmp86	%read{49,184} %write{49,184}
+temp	float	$tmp87	%read{49,184} %write{49,184}
+temp	float	$tmp88	%read{49,184} %write{49,184}
+temp	float	$tmp89	%read{49,184} %write{49,184}
+temp	float	$tmp90	%read{49,184} %write{49,184}
+temp	float	$tmp91	%read{49,184} %write{49,184}
+temp	float	$tmp92	%read{49,184} %write{49,184}
+temp	float	$tmp93	%read{49,184} %write{49,184}
+temp	int	$tmp94	%read{49,184} %write{49,184}
+temp	int	$tmp95	%read{49,184} %write{49,184}
+temp	float	$tmp96	%read{49,184} %write{49,184}
+temp	float	$tmp97	%read{49,184} %write{49,184}
+temp	int	$tmp98	%read{49,184} %write{49,184}
+temp	float	$tmp99	%read{49,184} %write{49,184}
+temp	float	$tmp100	%read{49,184} %write{49,184}
+temp	int	$tmp101	%read{2147483647,-1} %write{49,184}
+temp	float	$tmp102	%read{186,186} %write{185,185}
+temp	float	$tmp103	%read{188,188} %write{187,187}
+const	string	$const32	"clamp"		%read{194,200} %write{2147483647,-1}
+temp	float	$tmp104	%read{196,196} %write{195,195}
+temp	float	$tmp105	%read{199,199} %write{198,198}
+temp	float	$tmp106	%read{202,202} %write{201,201}
+temp	int	$tmp107	%read{204,204} %write{203,203}
+temp	int	$tmp108	%read{209,209} %write{208,208}
 code ___main___
-# PxrCurvature.osl:213
-#     int numStrataX = (int)sqrt(numSamples);
-	assign		$tmp2 numSamples 	%filename{"PxrCurvature.osl"} %line{213} %argrw{"wr"}
-	sqrt		$tmp1 $tmp2 	%argrw{"wr"}
-	assign		numStrataX $tmp1 	%argrw{"wr"}
-# PxrCurvature.osl:214
-#     int numStrataY = numSamples / numStrataX;
-	div		numStrataY numSamples numStrataX 	%line{214} %argrw{"wrr"}
-# PxrCurvature.osl:215
-#     int numStrata = numStrataX * numStrataY;  // actual number of samples on hemisphere
-	mul		numStrata numStrataX numStrataY 	%line{215} %argrw{"wrr"}
-# PxrCurvature.osl:216
-#     point offset = cellnoise(P*1.0e6);  // used as a repeatable position-dependent 2D "random" number
-	mul		$tmp3 P $const1 	%line{216} %argrw{"wrr"}
-	cellnoise	offset $tmp3 	%argrw{"wr"}
-# PxrCurvature.osl:219
-#     int totalSamples = outputType == k_output_both ? 2 * numStrata : numStrata;
-	eq		$tmp4 outputType $const2 	%line{219} %argrw{"wrr"}
-	if		$tmp4 10 11 	%argrw{"r"}
-	mul		totalSamples $const2 numStrata 	%argrw{"wrr"}
-	assign		totalSamples numStrata 	%argrw{"wr"}
-# PxrCurvature.osl:223
+# PxrCurvature.osl:235
+#     int totalSamples = outputType == k_output_both ? 2 * numSamples : numSamples;
+	eq		$tmp1 outputType $const1 	%filename{"PxrCurvature.osl"} %line{235} %argrw{"wrr"}
+	if		$tmp1 3 4 	%argrw{"r"}
+	mul		totalSamples $const1 numSamples 	%argrw{"wrr"}
+	assign		totalSamples numSamples 	%argrw{"wr"}
+# PxrCurvature.osl:239
 #     CreateOrthonormalBasis(N, t0, t1);
-	functioncall	$const3 44 	%line{223} %argrw{"r"}
+	functioncall	$const2 37 	%line{239} %argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:42
 #     float fsign = (n[2] >= 0.0) ? 1.0 : -1.0;
-	compref		$tmp5 N $const2 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h"} %line{42} %argrw{"wrr"}
-	ge		$tmp6 $tmp5 $const4 	%argrw{"wrr"}
-	if		$tmp6 16 17 	%argrw{"r"}
-	assign		___325_fsign $const5 	%argrw{"wr"}
-	assign		___325_fsign $const6 	%argrw{"wr"}
+	compref		$tmp2 N $const1 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h"} %line{42} %argrw{"wrr"}
+	ge		$tmp3 $tmp2 $const3 	%argrw{"wrr"}
+	if		$tmp3 9 10 	%argrw{"r"}
+	assign		___345_fsign $const4 	%argrw{"wr"}
+	assign		___345_fsign $const5 	%argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:43
 #     float a = -1.0 / (fsign + n[2]);
-	compref		$tmp7 N $const2 	%line{43} %argrw{"wrr"}
-	add		$tmp8 ___325_fsign $tmp7 	%argrw{"wrr"}
-	div		___325_a $const6 $tmp8 	%argrw{"wrr"}
+	compref		$tmp4 N $const1 	%line{43} %argrw{"wrr"}
+	add		$tmp5 ___345_fsign $tmp4 	%argrw{"wrr"}
+	div		___345_a $const5 $tmp5 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:44
 #     v2 = vector(n[0]*n[1]*a, fsign + n[1]*n[1]*a, -n[1]);
-	compref		$tmp9 N $const7 	%line{44} %argrw{"wrr"}
-	compref		$tmp10 N $const8 	%argrw{"wrr"}
-	mul		$tmp11 $tmp9 $tmp10 	%argrw{"wrr"}
-	mul		$tmp12 $tmp11 ___325_a 	%argrw{"wrr"}
-	compref		$tmp13 N $const8 	%argrw{"wrr"}
-	compref		$tmp14 N $const8 	%argrw{"wrr"}
-	mul		$tmp15 $tmp13 $tmp14 	%argrw{"wrr"}
-	mul		$tmp16 $tmp15 ___325_a 	%argrw{"wrr"}
-	add		$tmp17 ___325_fsign $tmp16 	%argrw{"wrr"}
-	compref		$tmp18 N $const8 	%argrw{"wrr"}
-	neg		$tmp19 $tmp18 	%argrw{"wr"}
-	vector		t1 $tmp12 $tmp17 $tmp19 	%argrw{"wrrr"}
+	compref		$tmp6 N $const6 	%line{44} %argrw{"wrr"}
+	compref		$tmp7 N $const7 	%argrw{"wrr"}
+	mul		$tmp8 $tmp6 $tmp7 	%argrw{"wrr"}
+	mul		$tmp9 $tmp8 ___345_a 	%argrw{"wrr"}
+	compref		$tmp10 N $const7 	%argrw{"wrr"}
+	compref		$tmp11 N $const7 	%argrw{"wrr"}
+	mul		$tmp12 $tmp10 $tmp11 	%argrw{"wrr"}
+	mul		$tmp13 $tmp12 ___345_a 	%argrw{"wrr"}
+	add		$tmp14 ___345_fsign $tmp13 	%argrw{"wrr"}
+	compref		$tmp15 N $const7 	%argrw{"wrr"}
+	neg		$tmp16 $tmp15 	%argrw{"wr"}
+	vector		t1 $tmp9 $tmp14 $tmp16 	%argrw{"wrrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:45
 #     v1 = vector(1.0 + fsign*n[0]*n[0]*a, fsign*v2[0], -(fsign*n[0]));
-	compref		$tmp20 N $const7 	%line{45} %argrw{"wrr"}
-	mul		$tmp21 ___325_fsign $tmp20 	%argrw{"wrr"}
-	compref		$tmp22 N $const7 	%argrw{"wrr"}
-	mul		$tmp23 $tmp21 $tmp22 	%argrw{"wrr"}
-	mul		$tmp24 $tmp23 ___325_a 	%argrw{"wrr"}
-	add		$tmp25 $const5 $tmp24 	%argrw{"wrr"}
-	compref		$tmp26 t1 $const7 	%argrw{"wrr"}
-	mul		$tmp27 ___325_fsign $tmp26 	%argrw{"wrr"}
-	compref		$tmp28 N $const7 	%argrw{"wrr"}
-	mul		$tmp29 ___325_fsign $tmp28 	%argrw{"wrr"}
-	neg		$tmp30 $tmp29 	%argrw{"wr"}
-	vector		t0 $tmp25 $tmp27 $tmp30 	%argrw{"wrrr"}
-# PxrCurvature.osl:224
+	compref		$tmp17 N $const6 	%line{45} %argrw{"wrr"}
+	mul		$tmp18 ___345_fsign $tmp17 	%argrw{"wrr"}
+	compref		$tmp19 N $const6 	%argrw{"wrr"}
+	mul		$tmp20 $tmp18 $tmp19 	%argrw{"wrr"}
+	mul		$tmp21 $tmp20 ___345_a 	%argrw{"wrr"}
+	add		$tmp22 $const4 $tmp21 	%argrw{"wrr"}
+	compref		$tmp23 t1 $const6 	%argrw{"wrr"}
+	mul		$tmp24 ___345_fsign $tmp23 	%argrw{"wrr"}
+	compref		$tmp25 N $const6 	%argrw{"wrr"}
+	mul		$tmp26 ___345_fsign $tmp25 	%argrw{"wrr"}
+	neg		$tmp27 $tmp26 	%argrw{"wr"}
+	vector		t0 $tmp22 $tmp24 $tmp27 	%argrw{"wrrr"}
+# PxrCurvature.osl:240
 #     float maxdist = maxDistance > 0 ? maxDistance : MAXDIST;
-	gt		$tmp31 maxDistance $const7 	%filename{"PxrCurvature.osl"} %line{224} %argrw{"wrr"}
-	if		$tmp31 47 48 	%argrw{"r"}
+	gt		$tmp28 maxDistance $const6 	%filename{"PxrCurvature.osl"} %line{240} %argrw{"wrr"}
+	if		$tmp28 40 41 	%argrw{"r"}
 	assign		maxdist maxDistance 	%argrw{"wr"}
-	assign		maxdist $const9 	%argrw{"wr"}
-# PxrCurvature.osl:228
+	assign		maxdist $const8 	%argrw{"wr"}
+# PxrCurvature.osl:244
 #     float concave = 0, convex = 0, dotAccum = 0, perPointBias = 0;
-	assign		concave $const7 	%line{228} %argrw{"wr"}
-	assign		convex $const7 	%argrw{"wr"}
-	assign		dotAccum $const7 	%argrw{"wr"}
-	assign		perPointBias $const7 	%argrw{"wr"}
-# PxrCurvature.osl:229
+	assign		concave $const6 	%line{244} %argrw{"wr"}
+	assign		convex $const6 	%argrw{"wr"}
+	assign		dotAccum $const6 	%argrw{"wr"}
+	assign		perPointBias $const6 	%argrw{"wr"}
+# PxrCurvature.osl:245
 #     float n0 = 0, n1 = 0;
-	assign		n0 $const7 	%line{229} %argrw{"wr"}
-	assign		n1 $const7 	%argrw{"wr"}
-# PxrCurvature.osl:230
-#     for (int i = 0; i < totalSamples; i++)
-	for		$tmp33 56 58 199 201 	%line{230} %argrw{"r"}
-	assign		___333_i $const7 	%argrw{"wr"}
-	lt		$tmp32 ___333_i totalSamples 	%argrw{"wrr"}
-	neq		$tmp33 $tmp32 $const7 	%argrw{"wrr"}
-# PxrCurvature.osl:238
-#         point xi = stratifiedSample(i % numStrata, numStrataX, numStrataY, offset);
-	mod		$tmp34 ___333_i numStrata 	%line{238} %argrw{"wrr"}
-	functioncall	$const10 97 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:103
-#     int sx = stratum % numStrataX;
-	mod		___331_sx $tmp34 numStrataX 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h"} %line{103} %argrw{"wrr"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:104
-#     int sy = stratum / numStrataX;
-	div		___331_sy $tmp34 numStrataX 	%line{104} %argrw{"wrr"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:107
-#     jitter.x = M_PI * (stratum + 1 + offset.x);
-	add		$tmp35 $tmp34 $const8 	%line{107} %argrw{"wrr"}
-	compref		$tmp36 offset $const7 	%argrw{"wrr"}
-	assign		$tmp38 $tmp35 	%argrw{"wr"}
-	add		$tmp37 $tmp38 $tmp36 	%argrw{"wrr"}
-	mul		$tmp39 $const11 $tmp37 	%argrw{"wrr"}
-	compassign	___331_jitter $const7 $tmp39 	%argrw{"wrr"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:108
-#     jitter.y = M_E * (stratum + 1 + offset.y);
-	add		$tmp40 $tmp34 $const8 	%line{108} %argrw{"wrr"}
-	compref		$tmp41 offset $const8 	%argrw{"wrr"}
-	assign		$tmp43 $tmp40 	%argrw{"wr"}
-	add		$tmp42 $tmp43 $tmp41 	%argrw{"wrr"}
-	mul		$tmp44 $const12 $tmp42 	%argrw{"wrr"}
-	compassign	___331_jitter $const8 $tmp44 	%argrw{"wrr"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:109
-#     jitter.x = jitter.x - floor(jitter.x);
-	compref		$tmp45 ___331_jitter $const7 	%line{109} %argrw{"wrr"}
-	compref		$tmp47 ___331_jitter $const7 	%argrw{"wrr"}
-	floor		$tmp46 $tmp47 	%argrw{"wr"}
-	sub		$tmp48 $tmp45 $tmp46 	%argrw{"wrr"}
-	compassign	___331_jitter $const7 $tmp48 	%argrw{"wrr"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:110
-#     jitter.y = jitter.y - floor(jitter.y);
-	compref		$tmp49 ___331_jitter $const8 	%line{110} %argrw{"wrr"}
-	compref		$tmp51 ___331_jitter $const8 	%argrw{"wrr"}
-	floor		$tmp50 $tmp51 	%argrw{"wr"}
-	sub		$tmp52 $tmp49 $tmp50 	%argrw{"wrr"}
-	compassign	___331_jitter $const8 $tmp52 	%argrw{"wrr"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:113
-#     xi.x = (sx + jitter.x) / numStrataX;
-	compref		$tmp53 ___331_jitter $const7 	%line{113} %argrw{"wrr"}
-	assign		$tmp55 ___331_sx 	%argrw{"wr"}
-	add		$tmp54 $tmp55 $tmp53 	%argrw{"wrr"}
-	assign		$tmp57 numStrataX 	%argrw{"wr"}
-	div		$tmp56 $tmp54 $tmp57 	%argrw{"wrr"}
-	compassign	___331_xi $const7 $tmp56 	%argrw{"wrr"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:114
-#     xi.y = (sy + jitter.y) / numStrataY;
-	compref		$tmp58 ___331_jitter $const8 	%line{114} %argrw{"wrr"}
-	assign		$tmp60 ___331_sy 	%argrw{"wr"}
-	add		$tmp59 $tmp60 $tmp58 	%argrw{"wrr"}
-	assign		$tmp62 numStrataY 	%argrw{"wr"}
-	div		$tmp61 $tmp59 $tmp62 	%argrw{"wrr"}
-	compassign	___331_xi $const8 $tmp61 	%argrw{"wrr"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:115
-#     return xi;
-	assign		___334_xi ___331_xi 	%line{115} %argrw{"wr"}
-# PxrCurvature.osl:241
-#         normal Nn = outputType == k_output_convex ? -N :
-	eq		$tmp63 outputType $const8 	%filename{"PxrCurvature.osl"} %line{241} %argrw{"wrr"}
-	if		$tmp63 100 107 	%argrw{"r"}
-	neg		___334_Nn N 	%argrw{"wr"}
-# PxrCurvature.osl:242
-#                     outputType == k_output_concave ? N :
-	eq		$tmp64 outputType $const7 	%line{242} %argrw{"wrr"}
-	if		$tmp64 103 107 	%argrw{"r"}
-	assign		___334_Nn N 	%argrw{"wr"}
-# PxrCurvature.osl:243
-#                     i >= numStrata ? -N : N;
-	ge		$tmp65 ___333_i numStrata 	%line{243} %argrw{"wrr"}
-	if		$tmp65 106 107 	%argrw{"r"}
-	neg		___334_Nn N 	%argrw{"wr"}
-	assign		___334_Nn N 	%argrw{"wr"}
+	assign		n0 $const6 	%line{245} %argrw{"wr"}
+	assign		n1 $const6 	%argrw{"wr"}
 # PxrCurvature.osl:246
+#     for (int i = 0; i < totalSamples; i++)
+	for		$tmp30 49 51 183 185 	%line{246} %argrw{"r"}
+	assign		___352_i $const6 	%argrw{"wr"}
+	lt		$tmp29 ___352_i totalSamples 	%argrw{"wrr"}
+	neq		$tmp30 $tmp29 $const6 	%argrw{"wrr"}
+# PxrCurvature.osl:249
+#         int seed = 0;  // temporary limitation: seed = 0--127
+	assign		___353_seed $const6 	%line{249} %argrw{"wr"}
+# PxrCurvature.osl:250
+#         point xi = random("stratified", seed, i, totalSamples);  // xi.z is ignored below
+	functioncall	$const10 59 	%line{250} %argrw{"r"}
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:431
+#   int combined = 4096*4096*seed + 4096*N + index;
+	mul		$tmp31 $const11 ___353_seed 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{431} %argrw{"wrr"}
+	mul		$tmp32 $const12 totalSamples 	%argrw{"wrr"}
+	add		$tmp33 $tmp31 $tmp32 	%argrw{"wrr"}
+	add		___293_combined $tmp33 ___352_i 	%argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:435
+#   int ok = getattribute("RNG", type, combined, xi);
+	getattribute	___293_ok $const13 $const9 ___293_combined ___293_xi 	%line{435} %argrw{"wrrrw"}
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:436
+#   return xi;
+	assign		___353_xi ___293_xi 	%line{436} %argrw{"wr"}
+# PxrCurvature.osl:253
+#         normal Nn = outputType == k_output_convex ? -N :
+	eq		$tmp34 outputType $const7 	%filename{"PxrCurvature.osl"} %line{253} %argrw{"wrr"}
+	if		$tmp34 62 69 	%argrw{"r"}
+	neg		___353_Nn N 	%argrw{"wr"}
+# PxrCurvature.osl:254
+#                     outputType == k_output_concave ? N :
+	eq		$tmp35 outputType $const6 	%line{254} %argrw{"wrr"}
+	if		$tmp35 65 69 	%argrw{"r"}
+	assign		___353_Nn N 	%argrw{"wr"}
+# PxrCurvature.osl:255
+#                     i >= numSamples ? -N : N;
+	ge		$tmp36 ___352_i numSamples 	%line{255} %argrw{"wrr"}
+	if		$tmp36 68 69 	%argrw{"r"}
+	neg		___353_Nn N 	%argrw{"wr"}
+	assign		___353_Nn N 	%argrw{"wr"}
+# PxrCurvature.osl:258
 #         if (distribution == k_dist_cosine)
-	eq		$tmp66 distribution $const8 	%line{246} %argrw{"wrr"}
-	if		$tmp66 132 153 	%argrw{"r"}
-# PxrCurvature.osl:247
+	eq		$tmp37 distribution $const7 	%line{258} %argrw{"wrr"}
+	if		$tmp37 94 115 	%argrw{"r"}
+# PxrCurvature.osl:259
 #             dir = distributionCosine(xi, Nn, t0, t1, cosineSpread);
-	functioncall	$const13 132 	%line{247} %argrw{"r"}
+	functioncall	$const14 94 	%line{259} %argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:51
 #     float e1 = xi[0] * M_2PI;
-	compref		$tmp67 ___334_xi $const7 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h"} %line{51} %argrw{"wrr"}
-	mul		___326_e1 $tmp67 $const14 	%argrw{"wrr"}
+	compref		$tmp38 ___353_xi $const6 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h"} %line{51} %argrw{"wrr"}
+	mul		___346_e1 $tmp38 $const15 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:52
 #     float z = sqrt(xi[1]);
-	compref		$tmp68 ___334_xi $const8 	%line{52} %argrw{"wrr"}
-	sqrt		___326_z $tmp68 	%argrw{"wr"}
+	compref		$tmp39 ___353_xi $const7 	%line{52} %argrw{"wrr"}
+	sqrt		___346_z $tmp39 	%argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:53
 #     float r = spread * sqrt(max(0.0, 1.0 - xi[1]));
-	compref		$tmp71 ___334_xi $const8 	%line{53} %argrw{"wrr"}
-	sub		$tmp72 $const5 $tmp71 	%argrw{"wrr"}
-	max		$tmp70 $const4 $tmp72 	%argrw{"wrr"}
-	sqrt		$tmp69 $tmp70 	%argrw{"wr"}
-	mul		___326_r cosineSpread $tmp69 	%argrw{"wrr"}
+	compref		$tmp42 ___353_xi $const7 	%line{53} %argrw{"wrr"}
+	sub		$tmp43 $const4 $tmp42 	%argrw{"wrr"}
+	max		$tmp41 $const3 $tmp43 	%argrw{"wrr"}
+	sqrt		$tmp40 $tmp41 	%argrw{"wr"}
+	mul		___346_r cosineSpread $tmp40 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:54
 #     if (z < 1.e-12) z = 1.e-12;
-	lt		$tmp73 ___326_z $const15 	%line{54} %argrw{"wrr"}
-	if		$tmp73 122 122 	%argrw{"r"}
-	assign		___326_z $const15 	%argrw{"wr"}
+	lt		$tmp44 ___346_z $const16 	%line{54} %argrw{"wrr"}
+	if		$tmp44 84 84 	%argrw{"r"}
+	assign		___346_z $const16 	%argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:55
 #     vector outDir = r * cos(e1) * t0 + r * sin(e1) * t1 + z * n;
-	cos		$tmp74 ___326_e1 	%line{55} %argrw{"wr"}
-	mul		$tmp75 ___326_r $tmp74 	%argrw{"wrr"}
-	mul		$tmp76 $tmp75 t0 	%argrw{"wrr"}
-	sin		$tmp77 ___326_e1 	%argrw{"wr"}
-	mul		$tmp78 ___326_r $tmp77 	%argrw{"wrr"}
-	mul		$tmp79 $tmp78 t1 	%argrw{"wrr"}
-	add		$tmp80 $tmp76 $tmp79 	%argrw{"wrr"}
-	mul		$tmp81 ___326_z ___334_Nn 	%argrw{"wrr"}
-	add		___326_outDir $tmp80 $tmp81 	%argrw{"wrr"}
+	cos		$tmp45 ___346_e1 	%line{55} %argrw{"wr"}
+	mul		$tmp46 ___346_r $tmp45 	%argrw{"wrr"}
+	mul		$tmp47 $tmp46 t0 	%argrw{"wrr"}
+	sin		$tmp48 ___346_e1 	%argrw{"wr"}
+	mul		$tmp49 ___346_r $tmp48 	%argrw{"wrr"}
+	mul		$tmp50 $tmp49 t1 	%argrw{"wrr"}
+	add		$tmp51 $tmp47 $tmp50 	%argrw{"wrr"}
+	mul		$tmp52 ___346_z ___353_Nn 	%argrw{"wrr"}
+	add		___346_outDir $tmp51 $tmp52 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:56
 #     return normalize(outDir);
-	normalize	dir ___326_outDir 	%line{56} %argrw{"wr"}
-# PxrCurvature.osl:249
+	normalize	dir ___346_outDir 	%line{56} %argrw{"wr"}
+# PxrCurvature.osl:261
 #             dir = distributionUniform(xi, Nn, t0, t1);
-	functioncall	$const16 153 	%filename{"PxrCurvature.osl"} %line{249} %argrw{"r"}
+	functioncall	$const17 115 	%filename{"PxrCurvature.osl"} %line{261} %argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:62
 #     float e1 = xi[0] * M_2PI;
-	compref		$tmp82 ___334_xi $const7 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h"} %line{62} %argrw{"wrr"}
-	mul		___327_e1 $tmp82 $const14 	%argrw{"wrr"}
+	compref		$tmp53 ___353_xi $const6 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h"} %line{62} %argrw{"wrr"}
+	mul		___347_e1 $tmp53 $const15 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:63
 #     float z = xi[1];
-	compref		___327_z ___334_xi $const8 	%line{63} %argrw{"wrr"}
+	compref		___347_z ___353_xi $const7 	%line{63} %argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:64
 #     float r = sqrt(max(0.0, 1.0 - z * z));
-	mul		$tmp84 ___327_z ___327_z 	%line{64} %argrw{"wrr"}
-	sub		$tmp85 $const5 $tmp84 	%argrw{"wrr"}
-	max		$tmp83 $const4 $tmp85 	%argrw{"wrr"}
-	sqrt		___327_r $tmp83 	%argrw{"wr"}
+	mul		$tmp55 ___347_z ___347_z 	%line{64} %argrw{"wrr"}
+	sub		$tmp56 $const4 $tmp55 	%argrw{"wrr"}
+	max		$tmp54 $const3 $tmp56 	%argrw{"wrr"}
+	sqrt		___347_r $tmp54 	%argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:65
 #     float x = r * cos(e1);
-	cos		$tmp86 ___327_e1 	%line{65} %argrw{"wr"}
-	mul		___327_x ___327_r $tmp86 	%argrw{"wrr"}
+	cos		$tmp57 ___347_e1 	%line{65} %argrw{"wr"}
+	mul		___347_x ___347_r $tmp57 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:66
 #     float y = r * sin(e1);
-	sin		$tmp87 ___327_e1 	%line{66} %argrw{"wr"}
-	mul		___327_y ___327_r $tmp87 	%argrw{"wrr"}
+	sin		$tmp58 ___347_e1 	%line{66} %argrw{"wr"}
+	mul		___347_y ___347_r $tmp58 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:67
 #     if (z < 1.e-12) z = 1.e-12;
-	lt		$tmp88 ___327_z $const15 	%line{67} %argrw{"wrr"}
-	if		$tmp88 147 147 	%argrw{"r"}
-	assign		___327_z $const15 	%argrw{"wr"}
+	lt		$tmp59 ___347_z $const16 	%line{67} %argrw{"wrr"}
+	if		$tmp59 109 109 	%argrw{"r"}
+	assign		___347_z $const16 	%argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:68
 #     vector outDir = x * t0 + y * t1 + z * n;
-	mul		$tmp89 ___327_x t0 	%line{68} %argrw{"wrr"}
-	mul		$tmp90 ___327_y t1 	%argrw{"wrr"}
-	add		$tmp91 $tmp89 $tmp90 	%argrw{"wrr"}
-	mul		$tmp92 ___327_z ___334_Nn 	%argrw{"wrr"}
-	add		___327_outDir $tmp91 $tmp92 	%argrw{"wrr"}
+	mul		$tmp60 ___347_x t0 	%line{68} %argrw{"wrr"}
+	mul		$tmp61 ___347_y t1 	%argrw{"wrr"}
+	add		$tmp62 $tmp60 $tmp61 	%argrw{"wrr"}
+	mul		$tmp63 ___347_z ___353_Nn 	%argrw{"wrr"}
+	add		___347_outDir $tmp62 $tmp63 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:69
 #     return outDir;
-	assign		dir ___327_outDir 	%line{69} %argrw{"wr"}
-# PxrCurvature.osl:253
-#                         "mindist", autoBias(Ng, dir),
-	functioncall	$const18 162 	%filename{"PxrCurvature.osl"} %line{253} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:122
+	assign		dir ___347_outDir 	%line{69} %argrw{"wr"}
+# PxrCurvature.osl:263
+#         float mindist = minDistance > 0.0 ? minDistance : autoBias(Ng, dir);
+	gt		$tmp64 minDistance $const3 	%filename{"PxrCurvature.osl"} %line{263} %argrw{"wrr"}
+	if		$tmp64 118 127 	%argrw{"r"}
+	assign		___353_mindist minDistance 	%argrw{"wr"}
+	functioncall	$const18 127 	%argrw{"r"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:98
 #     getattribute("builtin", "biasR", biasR);
-	getattribute	$tmp94 $const19 $const20 ___332_biasR 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h"} %line{122} %argrw{"wrrw"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:123
+	getattribute	$tmp65 $const19 $const20 ___351_biasR 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h"} %line{98} %argrw{"wrrw"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:99
 #     getattribute("builtin", "biasT", biasT);
-	getattribute	$tmp95 $const19 $const21 ___332_biasT 	%line{123} %argrw{"wrrw"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:124
+	getattribute	$tmp66 $const19 $const21 ___351_biasT 	%line{99} %argrw{"wrrw"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/rmanTrace.h:100
 #     return dot(n, dir) < 0.0 ? biasT : biasR;
-	dot		$tmp96 Ng dir 	%line{124} %argrw{"wrr"}
-	lt		$tmp97 $tmp96 $const4 	%argrw{"wrr"}
-	if		$tmp97 160 161 	%argrw{"r"}
-	assign		$tmp93 ___332_biasT 	%argrw{"wr"}
-	assign		$tmp93 ___332_biasR 	%argrw{"wr"}
+	dot		$tmp67 Ng dir 	%line{100} %argrw{"wrr"}
+	lt		$tmp68 $tmp67 $const3 	%argrw{"wrr"}
+	if		$tmp68 125 126 	%argrw{"r"}
+	assign		___353_mindist ___351_biasT 	%argrw{"wr"}
+	assign		___353_mindist ___351_biasR 	%argrw{"wr"}
 	return
-# PxrCurvature.osl:252
-#         int hit = trace(P, dir,
-	trace		___334_hit P dir $const17 $tmp93 $const22 maxdist $const23 traceSet 	%filename{"PxrCurvature.osl"} %line{252} %argrw{"wrrrrrrrr"} %argderivs{1,2}
-# PxrCurvature.osl:258
-#         if (hit)
-	if		___334_hit 199 199 	%line{258} %argrw{"r"}
-# PxrCurvature.osl:260
-#             float hitdist = 0.0;
-	assign		___335_hitdist $const4 	%line{260} %argrw{"wr"}
-# PxrCurvature.osl:261
-#             if (!getmessage("trace", "hitdist", hitdist))
-	getmessage	$tmp98 $const24 $const25 ___335_hitdist 	%line{261} %argrw{"wrrw"}
-	eq		$tmp99 $tmp98 $const7 	%argrw{"wrr"}
-	if		$tmp99 169 169 	%argrw{"r"}
-# PxrCurvature.osl:262
-#                 warning("Could not get hitdist !");
-	warning		$const26 	%line{262} %argrw{"r"}
-# PxrCurvature.osl:266
-#             normal hitNg = 0;
-	assign		___335_hitNg $const7 	%line{266} %argrw{"wr"}
-# PxrCurvature.osl:267
-#             getmessage("trace", "Ngn", hitNg);
-	getmessage	$tmp100 $const24 $const27 ___335_hitNg 	%line{267} %argrw{"wrrw"}
-# PxrCurvature.osl:269
-#             if (bias < 0.5)
-	lt		$tmp101 bias $const28 	%line{269} %argrw{"wrr"}
-	if		$tmp101 178 183 	%argrw{"r"}
+# PxrCurvature.osl:265
+#         point org = P;
+	assign		___353_org P 	%filename{"PxrCurvature.osl"} %line{265} %argrw{"wr"}
+# PxrCurvature.osl:268
+#         if (jitter > 0.0)
+	gt		$tmp69 jitter $const3 	%line{268} %argrw{"wrr"}
+	if		$tmp69 146 146 	%argrw{"r"}
+# PxrCurvature.osl:270
+#             float dPduLen = length(dPdu);
+	length		___354_dPduLen dPdu 	%line{270} %argrw{"wr"}
 # PxrCurvature.osl:271
-#                 perPointBias = 1.0 - ((hitdist / maxDistance) *
-	div		$tmp102 ___335_hitdist maxDistance 	%line{271} %argrw{"wrr"}
+#             float dPdvLen = length(dPdv);
+	length		___354_dPdvLen dPdv 	%line{271} %argrw{"wr"}
 # PxrCurvature.osl:272
-#                                         (1.0 / (2.0 * bias)));
-	mul		$tmp103 $const29 bias 	%line{272} %argrw{"wrr"}
-	div		$tmp104 $const5 $tmp103 	%argrw{"wrr"}
-# PxrCurvature.osl:271
-#                 perPointBias = 1.0 - ((hitdist / maxDistance) *
-	mul		$tmp105 $tmp102 $tmp104 	%line{271} %argrw{"wrr"}
-	sub		perPointBias $const5 $tmp105 	%argrw{"wrr"}
-# PxrCurvature.osl:276
-#                 perPointBias = (2.0 * (hitdist / maxDistance) *
-	div		$tmp106 ___335_hitdist maxDistance 	%line{276} %argrw{"wrr"}
-	mul		$tmp107 $const29 $tmp106 	%argrw{"wrr"}
-# PxrCurvature.osl:277
-#                                 (bias - 1.0)) +
-	sub		$tmp108 bias $const5 	%line{277} %argrw{"wrr"}
-# PxrCurvature.osl:276
-#                 perPointBias = (2.0 * (hitdist / maxDistance) *
-	mul		$tmp109 $tmp107 $tmp108 	%line{276} %argrw{"wrr"}
-# PxrCurvature.osl:277
-#                                 (bias - 1.0)) +
-	add		perPointBias $tmp109 $const5 	%line{277} %argrw{"wrr"}
-# PxrCurvature.osl:280
-#             perPointBias = max(perPointBias, 0.0);
-	max		perPointBias perPointBias $const4 	%line{280} %argrw{"wrr"}
-# PxrCurvature.osl:282
-#             float rayDotN = dot(dir, N);
-	dot		___335_rayDotN dir N 	%line{282} %argrw{"wrr"}
-# PxrCurvature.osl:283
-#             float NgDotNn = abs(dot(hitNg, N));
-	dot		$tmp110 ___335_hitNg N 	%line{283} %argrw{"wrr"}
-	abs		___335_NgDotNn $tmp110 	%argrw{"wr"}
+#             point rnd = cellnoise((P + dir) * 3.0e6);  // used as a repeatable pos-dependent 2D "random" number
+	add		$tmp70 P dir 	%line{272} %argrw{"wrr"}
+	mul		$tmp71 $tmp70 $const22 	%argrw{"wrr"}
+	cellnoise	___354_rnd $tmp71 	%argrw{"wr"}
+# PxrCurvature.osl:273
+#             rnd = 2 * rnd - 1;
+	mul		$tmp72 $const23 ___354_rnd 	%line{273} %argrw{"wrr"}
+	sub		___354_rnd $tmp72 $const4 	%argrw{"wrr"}
+# PxrCurvature.osl:274
+#             org += jitter * (rnd.x * dPdu / dPduLen + rnd.y * dPdv / dPdvLen);
+	compref		$tmp73 ___354_rnd $const6 	%line{274} %argrw{"wrr"}
+	mul		$tmp74 $tmp73 dPdu 	%argrw{"wrr"}
+	div		$tmp75 $tmp74 ___354_dPduLen 	%argrw{"wrr"}
+	compref		$tmp76 ___354_rnd $const7 	%argrw{"wrr"}
+	mul		$tmp77 $tmp76 dPdv 	%argrw{"wrr"}
+	div		$tmp78 $tmp77 ___354_dPdvLen 	%argrw{"wrr"}
+	add		$tmp79 $tmp75 $tmp78 	%argrw{"wrr"}
+	mul		$tmp80 jitter $tmp79 	%argrw{"wrr"}
+	add		___353_org ___353_org $tmp80 	%argrw{"wrr"}
+# PxrCurvature.osl:278
+#         int hit = trace(org, dir,
+	trace		___353_hit ___353_org dir $const24 ___353_mindist $const25 maxdist $const26 traceSet 	%line{278} %argrw{"wrrrrrrrr"} %argderivs{1,2}
+# PxrCurvature.osl:284
+#         if (hit)
+	if		___353_hit 183 183 	%line{284} %argrw{"r"}
 # PxrCurvature.osl:286
-#             if (rayDotN >= 0)
-	ge		$tmp111 ___335_rayDotN $const7 	%line{286} %argrw{"wrr"}
-	if		$tmp111 194 199 	%argrw{"r"}
+#             float hitdist = 0.0;
+	assign		___355_hitdist $const3 	%line{286} %argrw{"wr"}
+# PxrCurvature.osl:287
+#             if (!getmessage("trace", "hitdist", hitdist))
+	getmessage	$tmp81 $const27 $const28 ___355_hitdist 	%line{287} %argrw{"wrrw"}
+	eq		$tmp82 $tmp81 $const6 	%argrw{"wrr"}
+	if		$tmp82 153 153 	%argrw{"r"}
 # PxrCurvature.osl:288
-#                 if (NgDotNn >= concaveThreshold)
-	ge		$tmp112 ___335_NgDotNn concaveThreshold 	%line{288} %argrw{"wrr"}
-	if		$tmp112 194 194 	%argrw{"r"}
-# PxrCurvature.osl:289
-#                     concave += (1.0 - NgDotNn) * perPointBias;
-	sub		$tmp113 $const5 ___335_NgDotNn 	%line{289} %argrw{"wrr"}
-	mul		$tmp114 $tmp113 perPointBias 	%argrw{"wrr"}
-	add		concave concave $tmp114 	%argrw{"wrr"}
+#                 warning("Could not get hitdist !");
+	warning		$const29 	%line{288} %argrw{"r"}
+# PxrCurvature.osl:292
+#             normal hitNg = 0;
+	assign		___355_hitNg $const6 	%line{292} %argrw{"wr"}
 # PxrCurvature.osl:293
-#                 if (NgDotNn >= convexThreshold)
-	ge		$tmp115 ___335_NgDotNn convexThreshold 	%line{293} %argrw{"wrr"}
-	if		$tmp115 199 199 	%argrw{"r"}
-# PxrCurvature.osl:294
-#                     convex += (1.0 - NgDotNn) * perPointBias;
-	sub		$tmp116 $const5 ___335_NgDotNn 	%line{294} %argrw{"wrr"}
-	mul		$tmp117 $tmp116 perPointBias 	%argrw{"wrr"}
-	add		convex convex $tmp117 	%argrw{"wrr"}
-# PxrCurvature.osl:230
-#     for (int i = 0; i < totalSamples; i++)
-	assign		$tmp118 ___333_i 	%line{230} %argrw{"wr"}
-	add		___333_i ___333_i $const8 	%argrw{"wrr"}
-# PxrCurvature.osl:300
-#     concave /= totalSamples;
-	assign		$tmp119 totalSamples 	%line{300} %argrw{"wr"}
-	div		concave concave $tmp119 	%argrw{"wrr"}
-# PxrCurvature.osl:301
-#     convex /= totalSamples;
-	assign		$tmp120 totalSamples 	%line{301} %argrw{"wr"}
-	div		convex convex $tmp120 	%argrw{"wrr"}
+#             getmessage("trace", "Ngn", hitNg);
+	getmessage	$tmp83 $const27 $const30 ___355_hitNg 	%line{293} %argrw{"wrrw"}
+# PxrCurvature.osl:295
+#             if (bias < 0.5)
+	lt		$tmp84 bias $const31 	%line{295} %argrw{"wrr"}
+	if		$tmp84 162 167 	%argrw{"r"}
+# PxrCurvature.osl:297
+#                 perPointBias = 1.0 - ((hitdist / maxDistance) *
+	div		$tmp85 ___355_hitdist maxDistance 	%line{297} %argrw{"wrr"}
+# PxrCurvature.osl:298
+#                                         (1.0 / (2.0 * bias)));
+	mul		$tmp86 $const23 bias 	%line{298} %argrw{"wrr"}
+	div		$tmp87 $const4 $tmp86 	%argrw{"wrr"}
+# PxrCurvature.osl:297
+#                 perPointBias = 1.0 - ((hitdist / maxDistance) *
+	mul		$tmp88 $tmp85 $tmp87 	%line{297} %argrw{"wrr"}
+	sub		perPointBias $const4 $tmp88 	%argrw{"wrr"}
 # PxrCurvature.osl:302
-#     float both = convex + concave;
-	add		both convex concave 	%line{302} %argrw{"wrr"}
-# PxrCurvature.osl:305
-#     convex *= outputGain;
-	mul		convex convex outputGain 	%line{305} %argrw{"wrr"}
+#                 perPointBias = (2.0 * (hitdist / maxDistance) *
+	div		$tmp89 ___355_hitdist maxDistance 	%line{302} %argrw{"wrr"}
+	mul		$tmp90 $const23 $tmp89 	%argrw{"wrr"}
+# PxrCurvature.osl:303
+#                                 (bias - 1.0)) +
+	sub		$tmp91 bias $const4 	%line{303} %argrw{"wrr"}
+# PxrCurvature.osl:302
+#                 perPointBias = (2.0 * (hitdist / maxDistance) *
+	mul		$tmp92 $tmp90 $tmp91 	%line{302} %argrw{"wrr"}
+# PxrCurvature.osl:303
+#                                 (bias - 1.0)) +
+	add		perPointBias $tmp92 $const4 	%line{303} %argrw{"wrr"}
 # PxrCurvature.osl:306
-#     concave *= outputGain;
-	mul		concave concave outputGain 	%line{306} %argrw{"wrr"}
-# PxrCurvature.osl:307
-#     both *= outputGain;
-	mul		both both outputGain 	%line{307} %argrw{"wrr"}
-# PxrCurvature.osl:310
-#     if (clampOutput)
-	if		clampOutput 219 219 	%line{310} %argrw{"r"}
+#             perPointBias = max(perPointBias, 0.0);
+	max		perPointBias perPointBias $const3 	%line{306} %argrw{"wrr"}
+# PxrCurvature.osl:308
+#             float rayDotN = dot(dir, N);
+	dot		___355_rayDotN dir N 	%line{308} %argrw{"wrr"}
+# PxrCurvature.osl:309
+#             float NgDotNn = abs(dot(hitNg, N));
+	dot		$tmp93 ___355_hitNg N 	%line{309} %argrw{"wrr"}
+	abs		___355_NgDotNn $tmp93 	%argrw{"wr"}
 # PxrCurvature.osl:312
-#         convex = clamp(convex, 0.0, 1.0);
-	functioncall	$const30 213 	%line{312} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
-# float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp121 convex $const5 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
-	max		convex $tmp121 $const4 	%argrw{"wrr"}
-# PxrCurvature.osl:313
-#         concave = clamp(concave, 0.0, 1.0);
-	functioncall	$const30 216 	%filename{"PxrCurvature.osl"} %line{313} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
-# float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp122 concave $const5 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
-	max		concave $tmp122 $const4 	%argrw{"wrr"}
+#             if (rayDotN >= 0)
+	ge		$tmp94 ___355_rayDotN $const6 	%line{312} %argrw{"wrr"}
+	if		$tmp94 178 183 	%argrw{"r"}
 # PxrCurvature.osl:314
-#         both = clamp(both, 0.0, 1.0);
-	functioncall	$const30 219 	%filename{"PxrCurvature.osl"} %line{314} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
-# float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp123 both $const5 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
-	max		both $tmp123 $const4 	%argrw{"wrr"}
-# PxrCurvature.osl:317
-#     if (outputType == k_output_convex)
-	eq		$tmp124 outputType $const8 	%filename{"PxrCurvature.osl"} %line{317} %argrw{"wrr"}
-	if		$tmp124 224 232 	%argrw{"r"}
+#                 if (NgDotNn >= concaveThreshold)
+	ge		$tmp95 ___355_NgDotNn concaveThreshold 	%line{314} %argrw{"wrr"}
+	if		$tmp95 178 178 	%argrw{"r"}
+# PxrCurvature.osl:315
+#                     concave += (1.0 - NgDotNn) * perPointBias;
+	sub		$tmp96 $const4 ___355_NgDotNn 	%line{315} %argrw{"wrr"}
+	mul		$tmp97 $tmp96 perPointBias 	%argrw{"wrr"}
+	add		concave concave $tmp97 	%argrw{"wrr"}
 # PxrCurvature.osl:319
-#         if (monochrome) resultRGB = color(both);
-	if		monochrome 223 224 	%line{319} %argrw{"r"}
-	assign		resultRGB both 	%argrw{"wr"}
+#                 if (NgDotNn >= convexThreshold)
+	ge		$tmp98 ___355_NgDotNn convexThreshold 	%line{319} %argrw{"wrr"}
+	if		$tmp98 183 183 	%argrw{"r"}
 # PxrCurvature.osl:320
-#         else resultRGB = color(both, 0, 0);
-	color		resultRGB both $const4 $const4 	%line{320} %argrw{"wrrr"}
-# PxrCurvature.osl:322
-#     else if (outputType == k_output_concave)
-	eq		$tmp125 outputType $const7 	%line{322} %argrw{"wrr"}
-	if		$tmp125 229 232 	%argrw{"r"}
-# PxrCurvature.osl:324
-#         if (monochrome) resultRGB = color(both);
-	if		monochrome 228 229 	%line{324} %argrw{"r"}
-	assign		resultRGB both 	%argrw{"wr"}
-# PxrCurvature.osl:325
-#         else resultRGB = color(0, both, 0);
-	color		resultRGB $const4 both $const4 	%line{325} %argrw{"wrrr"}
-# PxrCurvature.osl:329
-#         if (monochrome) resultRGB = color(both);
-	if		monochrome 231 232 	%line{329} %argrw{"r"}
-	assign		resultRGB both 	%argrw{"wr"}
-# PxrCurvature.osl:330
-#         else resultRGB = color(convex, concave, 0);
-	color		resultRGB convex concave $const4 	%line{330} %argrw{"wrrr"}
-# PxrCurvature.osl:334
-#     resultR = resultRGB[0];
-	compref		resultR resultRGB $const7 	%line{334} %argrw{"wrr"}
-# PxrCurvature.osl:335
-#     resultG = resultRGB[1];
-	compref		resultG resultRGB $const8 	%line{335} %argrw{"wrr"}
+#                     convex += (1.0 - NgDotNn) * perPointBias;
+	sub		$tmp99 $const4 ___355_NgDotNn 	%line{320} %argrw{"wrr"}
+	mul		$tmp100 $tmp99 perPointBias 	%argrw{"wrr"}
+	add		convex convex $tmp100 	%argrw{"wrr"}
+# PxrCurvature.osl:246
+#     for (int i = 0; i < totalSamples; i++)
+	assign		$tmp101 ___352_i 	%line{246} %argrw{"wr"}
+	add		___352_i ___352_i $const7 	%argrw{"wrr"}
+# PxrCurvature.osl:326
+#     concave /= totalSamples;
+	assign		$tmp102 totalSamples 	%line{326} %argrw{"wr"}
+	div		concave concave $tmp102 	%argrw{"wrr"}
+# PxrCurvature.osl:327
+#     convex /= totalSamples;
+	assign		$tmp103 totalSamples 	%line{327} %argrw{"wr"}
+	div		convex convex $tmp103 	%argrw{"wrr"}
+# PxrCurvature.osl:328
+#     float both = convex + concave;
+	add		both convex concave 	%line{328} %argrw{"wrr"}
+# PxrCurvature.osl:331
+#     convex *= outputGain;
+	mul		convex convex outputGain 	%line{331} %argrw{"wrr"}
+# PxrCurvature.osl:332
+#     concave *= outputGain;
+	mul		concave concave outputGain 	%line{332} %argrw{"wrr"}
+# PxrCurvature.osl:333
+#     both *= outputGain;
+	mul		both both outputGain 	%line{333} %argrw{"wrr"}
 # PxrCurvature.osl:336
-#     resultB = resultRGB[2];
-	compref		resultB resultRGB $const2 	%line{336} %argrw{"wrr"}
-# PxrCurvature.osl:337
-#     resultF = both;
-	assign		resultF both 	%line{337} %argrw{"wr"}
+#     if (clampOutput)
+	if		clampOutput 203 203 	%line{336} %argrw{"r"}
 # PxrCurvature.osl:338
-#     resultConvex = convex;
-	assign		resultConvex convex 	%line{338} %argrw{"wr"}
+#         convex = clamp(convex, 0.0, 1.0);
+	functioncall	$const32 197 	%line{338} %argrw{"r"}
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:141
+# float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
+	min		$tmp104 convex $const4 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{141} %argrw{"wrr"}
+	max		convex $tmp104 $const3 	%argrw{"wrr"}
 # PxrCurvature.osl:339
+#         concave = clamp(concave, 0.0, 1.0);
+	functioncall	$const32 200 	%filename{"PxrCurvature.osl"} %line{339} %argrw{"r"}
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:141
+# float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
+	min		$tmp105 concave $const4 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{141} %argrw{"wrr"}
+	max		concave $tmp105 $const3 	%argrw{"wrr"}
+# PxrCurvature.osl:340
+#         both = clamp(both, 0.0, 1.0);
+	functioncall	$const32 203 	%filename{"PxrCurvature.osl"} %line{340} %argrw{"r"}
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:141
+# float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
+	min		$tmp106 both $const4 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{141} %argrw{"wrr"}
+	max		both $tmp106 $const3 	%argrw{"wrr"}
+# PxrCurvature.osl:343
+#     if (outputType == k_output_convex)
+	eq		$tmp107 outputType $const7 	%filename{"PxrCurvature.osl"} %line{343} %argrw{"wrr"}
+	if		$tmp107 208 216 	%argrw{"r"}
+# PxrCurvature.osl:345
+#         if (monochrome) resultRGB = color(both);
+	if		monochrome 207 208 	%line{345} %argrw{"r"}
+	assign		resultRGB both 	%argrw{"wr"}
+# PxrCurvature.osl:346
+#         else resultRGB = color(both, 0, 0);
+	color		resultRGB both $const3 $const3 	%line{346} %argrw{"wrrr"}
+# PxrCurvature.osl:348
+#     else if (outputType == k_output_concave)
+	eq		$tmp108 outputType $const6 	%line{348} %argrw{"wrr"}
+	if		$tmp108 213 216 	%argrw{"r"}
+# PxrCurvature.osl:350
+#         if (monochrome) resultRGB = color(both);
+	if		monochrome 212 213 	%line{350} %argrw{"r"}
+	assign		resultRGB both 	%argrw{"wr"}
+# PxrCurvature.osl:351
+#         else resultRGB = color(0, both, 0);
+	color		resultRGB $const3 both $const3 	%line{351} %argrw{"wrrr"}
+# PxrCurvature.osl:355
+#         if (monochrome) resultRGB = color(both);
+	if		monochrome 215 216 	%line{355} %argrw{"r"}
+	assign		resultRGB both 	%argrw{"wr"}
+# PxrCurvature.osl:356
+#         else resultRGB = color(convex, concave, 0);
+	color		resultRGB convex concave $const3 	%line{356} %argrw{"wrrr"}
+# PxrCurvature.osl:360
+#     resultR = resultRGB[0];
+	compref		resultR resultRGB $const6 	%line{360} %argrw{"wrr"}
+# PxrCurvature.osl:361
+#     resultG = resultRGB[1];
+	compref		resultG resultRGB $const7 	%line{361} %argrw{"wrr"}
+# PxrCurvature.osl:362
+#     resultB = resultRGB[2];
+	compref		resultB resultRGB $const1 	%line{362} %argrw{"wrr"}
+# PxrCurvature.osl:363
+#     resultF = both;
+	assign		resultF both 	%line{363} %argrw{"wr"}
+# PxrCurvature.osl:364
+#     resultConvex = convex;
+	assign		resultConvex convex 	%line{364} %argrw{"wr"}
+# PxrCurvature.osl:365
 #     resultConcave = concave;
-	assign		resultConcave concave 	%line{339} %argrw{"wr"}
+	assign		resultConcave concave 	%line{365} %argrw{"wr"}
 	end

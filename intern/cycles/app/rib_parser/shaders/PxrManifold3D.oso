@@ -1,8 +1,8 @@
 OpenShadingLanguage 1.00
-# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrManifold3D.osl/obj/PxrManifold3D.oso
+# Compiled by oslc 1.13.0.@PROJECT_VERSION_TWEAK@"dev"
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxSonoma_x86-64_clang15_external_release/osl/PxrManifold3D.osl/obj/PxrManifold3D.oso
 shader PxrManifold3D	%meta{int,rfm_nodeid,1053423} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/manifold"} %meta{string,rfh_classification,"Pattern/Manifold"} %meta{string,help,"Encapsulates 3D parameterization for<br>pattern generators. Allows selection of Pref and<br>specification of a coordinate system to transform to.<br>Uses a simple struct to represent bundled dataflow of<br>outputs."} 
-param	float	scale	1		%meta{string,widget,"default"} %meta{string,help,"Scale the frequency of the feature uniformly in 3D<br><br>scale (float)"} %meta{string,label,"Scale"} %meta{float,slidermax,10} %meta{float,slidermin,-10}  %read{343,357} %write{2147483647,-1}
+param	float	scale	1		%meta{string,widget,"default"} %meta{string,help,"Scale the frequency of the feature uniformly in 3D<br><br>scale (float)"} %meta{string,label,"Scale"} %meta{float,slidermax,10} %meta{float,slidermin,-10}  %read{340,354} %write{2147483647,-1}
 param	int	use	0		%meta{string,widget,"mapper"} %meta{string,help,"Select the type of position you want to use. You can only use<br>__Pref and __WPref if these primitive variables have been attached to<br>your geometry.<br><br>use (int)"} %meta{string,options,"Current position (P):0|Undisplaced position (Po):1|Deform (__Pref):2|Deform & transform (__WPref):3"} %meta{int,connectable,0} %meta{string,label,"Use"}  %read{1,10} %write{2147483647,-1}
 param	string	pref	""		%meta{string,widget,"string"} %meta{string,help,"Name of geometry Pref.<br>If empty, we will use P.<br><br>pref (string)"} %meta{int,connectable,0} %meta{string,label,"Pref"}  %read{6,15} %write{2147483647,-1}
 param	string	coordsys	"object"		%meta{string,widget,"string"} %meta{string,houdiniui,"oplist"} %meta{string,help,"Name of coordinate system transform.<br>Standard coordinate systems : \"object\", \"world\", \"screen\", \"NDC\".<br><br>coordsys (string)"} %meta{int,connectable,0} %meta{string,label,"Coordinate System"}  %read{188,198} %write{2147483647,-1}
@@ -29,43 +29,43 @@ param	float	rScaleZMin	1		%meta{string,widget,"default"} %meta{string,label,"Sca
 param	float	rScaleZMax	1		%meta{string,widget,"default"} %meta{string,label,"Scale Z Max"} %meta{float,slidermin,-100} %meta{float,slidermax,100} %meta{string,page,"Randomize.Scale"} %meta{int,page_open,1} %meta{string,conditionalVisPath,"../enableNonUniformScale"} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisValue,"1"}  %read{169,177} %write{2147483647,-1}
 param	int	verbosity	0		%meta{string,widget,"mapper"} %meta{string,options,"Silent:0|Warnings:1|Info:2"} %meta{string,page,"Advanced"} %meta{string,help,"Diagnostic output levels for scene debugging.<br><br>verbosity (int)"} %meta{int,connectable,0} %meta{string,label,"Verbosity"}  %read{46,84} %write{2147483647,-1}
 oparam	struct Manifold	result			%meta{string,help,"result (struct)"}  %read{2147483647,-1} %write{2147483647,-1} %struct{"Manifold"} %structfields{Q,QN,Qradius} %structfieldtypes{"pnf"} %structnfields{3}
-oparam	point	result.Q	0 0 0		%meta{string,help,"result (struct)"}  %read{142,379} %write{3,366} %mystruct{result} %mystructfield{0}
-oparam	normal	result.QN	0 0 1		%meta{string,help,"result (struct)"}  %read{194,337} %write{19,337} %mystruct{result} %mystructfield{1}
-oparam	float	result.Qradius	0		%meta{string,help,"result (struct)"}  %read{33,376} %write{20,376} %mystruct{result} %mystructfield{2}
-oparam	float	resultX	0		%meta{string,help,"resultX (float)"}  %read{2147483647,-1} %write{377,377}
-oparam	float	resultY	0		%meta{string,help,"resultY (float)"}  %read{2147483647,-1} %write{378,378}
-oparam	float	resultZ	0		%meta{string,help,"resultZ (float)"}  %read{2147483647,-1} %write{379,379}
+oparam	point	result.Q	0 0 0		%meta{string,help,"result (struct)"}  %read{142,376} %write{3,363} %mystruct{result} %mystructfield{0}
+oparam	normal	result.QN	0 0 1		%meta{string,help,"result (struct)"}  %read{194,334} %write{19,334} %mystruct{result} %mystructfield{1}
+oparam	float	result.Qradius	0		%meta{string,help,"result (struct)"}  %read{33,373} %write{20,373} %mystruct{result} %mystructfield{2}
+oparam	float	resultX	0		%meta{string,help,"resultX (float)"}  %read{2147483647,-1} %write{374,374}
+oparam	float	resultY	0		%meta{string,help,"resultY (float)"}  %read{2147483647,-1} %write{375,375}
+oparam	float	resultZ	0		%meta{string,help,"resultZ (float)"}  %read{2147483647,-1} %write{376,376}
 global	point	P	%read{18,29} %write{2147483647,-1} %derivs
 global	normal	N	%read{19,19} %write{2147483647,-1}
-local	vector	___392_vec1	%read{198,213} %write{197,212}
-local	float	___392_scale	%read{202,216} %write{201,215}
-local	float	___400_cosAng	%read{235,256} %write{231,231}
-local	float	___400_sinAng	%read{237,254} %write{231,231}
-local	float	___401_cosAng	%read{274,292} %write{269,269}
-local	float	___401_sinAng	%read{272,294} %write{269,269}
-local	float	___402_cosAng	%read{310,331} %write{307,307}
-local	float	___402_sinAng	%read{312,329} %write{307,307}
-local	vector	___399_scaleFactor	%read{360,371} %write{359,359}
-local	float	___655_fseed	%read{48,98} %write{42,97}
-local	string	___659_idname	%read{61,61} %write{59,60}
-local	float	___655_instanceId	%read{92,92} %write{89,90}
+local	vector	___412_vec1	%read{198,213} %write{197,212}
+local	float	___412_scale	%read{202,216} %write{201,215}
+local	float	___420_cosAng	%read{234,255} %write{230,230}
+local	float	___420_sinAng	%read{236,253} %write{230,230}
+local	float	___421_cosAng	%read{272,290} %write{267,267}
+local	float	___421_sinAng	%read{270,292} %write{267,267}
+local	float	___422_cosAng	%read{307,328} %write{304,304}
+local	float	___422_sinAng	%read{309,326} %write{304,304}
+local	vector	___419_scaleFactor	%read{357,368} %write{356,356}
+local	float	___675_fseed	%read{48,98} %write{42,97}
+local	string	___679_idname	%read{61,61} %write{59,60}
+local	float	___675_instanceId	%read{92,92} %write{89,90}
 local	int	success	%read{16,22} %write{0,21}
-local	float	___680_width	%read{31,32} %write{28,31}
+local	float	___700_width	%read{31,32} %write{28,31}
 local	float	rOX	%read{141,141} %write{34,123}
 local	float	rOY	%read{141,141} %write{35,131}
 local	float	rOZ	%read{141,141} %write{36,132}
 local	float	rSX	%read{167,218} %write{37,154}
 local	float	rSY	%read{218,218} %write{38,167}
 local	float	rSZ	%read{218,218} %write{39,180}
-local	float	___681_fseed	%read{101,114} %write{99,104}
-local	float	___681_prob	%read{110,110} %write{108,109}
-local	color	___682_rnd	%read{119,173} %write{115,115}
-const	int	$const1	0		%read{0,377} %write{2147483647,-1}
-const	int	$const2	1		%read{1,378} %write{2147483647,-1}
+local	float	___701_fseed	%read{101,114} %write{99,104}
+local	float	___701_prob	%read{110,110} %write{108,109}
+local	color	___702_rnd	%read{119,173} %write{115,115}
+const	int	$const1	0		%read{0,374} %write{2147483647,-1}
+const	int	$const2	1		%read{1,375} %write{2147483647,-1}
 temp	int	$tmp1	%read{2,2} %write{1,1}
 const	string	$const3	"primvar"		%read{3,66} %write{2147483647,-1}
 const	string	$const4	"P"		%read{3,3} %write{2147483647,-1}
-const	int	$const5	2		%read{4,379} %write{2147483647,-1}
+const	int	$const5	2		%read{4,376} %write{2147483647,-1}
 temp	int	$tmp2	%read{5,5} %write{4,4}
 const	string	$const6	""		%read{6,188} %write{2147483647,-1}
 temp	int	$tmp3	%read{7,7} %write{6,6}
@@ -75,7 +75,7 @@ temp	int	$tmp4	%read{11,11} %write{10,10}
 temp	int	$tmp5	%read{13,13} %write{12,12}
 const	string	$const9	"__WPref"		%read{14,14} %write{2147483647,-1}
 temp	int	$tmp6	%read{17,17} %write{16,16}
-const	float	$const10	0		%read{20,364} %write{2147483647,-1}
+const	float	$const10	0		%read{20,361} %write{2147483647,-1}
 const	string	$const11	"builtin"		%read{21,45} %write{2147483647,-1}
 const	string	$const12	"PRadius"		%read{21,21} %write{2147483647,-1}
 temp	int	$tmp7	%read{23,23} %write{22,22}
@@ -195,122 +195,118 @@ const	string	$const37	"object"		%read{206,212} %write{2147483647,-1}
 temp	normal	$tmp97	%read{209,209} %write{208,208}
 temp	float	$tmp98	%read{215,215} %write{213,213}
 temp	float	$tmp99	%read{215,215} %write{214,214}
-const	point	$const38	0 0 0		%read{220,362} %write{2147483647,-1}
-temp	vector	$tmp101	%read{338,352} %write{218,218}
-const	vector	$const39	0 0 0		%read{364,364} %write{2147483647,-1}
+const	point	$const38	0 0 0		%read{220,359} %write{2147483647,-1}
+temp	vector	$tmp101	%read{335,349} %write{218,218}
+const	vector	$const39	0 0 0		%read{361,361} %write{2147483647,-1}
 const	string	$const40	"Manifold_Std_Xform"		%read{219,219} %write{2147483647,-1}
 temp	float	$tmp104	%read{224,224} %write{223,223}
 temp	float	$tmp105	%read{223,223} %write{222,222}
 temp	int	$tmp106	%read{225,225} %write{224,224}
-temp	float	$tmp107	%read{230,230} %write{229,229}
-temp	float	$tmp108	%read{229,229} %write{226,226}
-const	string	$const41	"radians"		%read{227,303} %write{2147483647,-1}
-const	float	$const42	3.14159274		%read{228,304} %write{2147483647,-1}
-const	float	$const43	180		%read{228,304} %write{2147483647,-1}
-temp	float	$tmp109	%read{229,229} %write{228,228}
-temp	float	$tmp110	%read{231,231} %write{230,230}
-const	string	$const44	"Math_RotateX"		%read{232,246} %write{2147483647,-1}
-temp	float	$tmp111	%read{244,244} %write{233,233}
-temp	float	$tmp112	%read{235,235} %write{234,234}
-temp	float	$tmp113	%read{238,238} %write{235,235}
+temp	float	$tmp107	%read{229,229} %write{228,228}
+temp	float	$tmp108	%read{228,228} %write{226,226}
+const	string	$const41	"radians"		%read{227,301} %write{2147483647,-1}
+const	float	$const42	0.0174532924		%read{228,302} %write{2147483647,-1}
+temp	float	$tmp109	%read{230,230} %write{229,229}
+const	string	$const43	"Math_RotateX"		%read{231,245} %write{2147483647,-1}
+temp	float	$tmp110	%read{243,243} %write{232,232}
+temp	float	$tmp111	%read{234,234} %write{233,233}
+temp	float	$tmp112	%read{237,237} %write{234,234}
+temp	float	$tmp113	%read{236,236} %write{235,235}
 temp	float	$tmp114	%read{237,237} %write{236,236}
-temp	float	$tmp115	%read{238,238} %write{237,237}
-temp	float	$tmp116	%read{244,244} %write{238,238}
-temp	float	$tmp117	%read{240,240} %write{239,239}
-temp	float	$tmp118	%read{243,243} %write{240,240}
+temp	float	$tmp115	%read{243,243} %write{237,237}
+temp	float	$tmp116	%read{239,239} %write{238,238}
+temp	float	$tmp117	%read{242,242} %write{239,239}
+temp	float	$tmp118	%read{241,241} %write{240,240}
 temp	float	$tmp119	%read{242,242} %write{241,241}
 temp	float	$tmp120	%read{243,243} %write{242,242}
-temp	float	$tmp121	%read{244,244} %write{243,243}
-temp	float	$tmp122	%read{258,258} %write{247,247}
-temp	float	$tmp123	%read{249,249} %write{248,248}
-temp	float	$tmp124	%read{252,252} %write{249,249}
+temp	float	$tmp121	%read{257,257} %write{246,246}
+temp	float	$tmp122	%read{248,248} %write{247,247}
+temp	float	$tmp123	%read{251,251} %write{248,248}
+temp	float	$tmp124	%read{250,250} %write{249,249}
 temp	float	$tmp125	%read{251,251} %write{250,250}
-temp	float	$tmp126	%read{252,252} %write{251,251}
-temp	float	$tmp127	%read{258,258} %write{252,252}
-temp	float	$tmp128	%read{254,254} %write{253,253}
-temp	float	$tmp129	%read{257,257} %write{254,254}
+temp	float	$tmp126	%read{257,257} %write{251,251}
+temp	float	$tmp127	%read{253,253} %write{252,252}
+temp	float	$tmp128	%read{256,256} %write{253,253}
+temp	float	$tmp129	%read{255,255} %write{254,254}
 temp	float	$tmp130	%read{256,256} %write{255,255}
 temp	float	$tmp131	%read{257,257} %write{256,256}
-temp	float	$tmp132	%read{258,258} %write{257,257}
-temp	float	$tmp133	%read{262,262} %write{261,261}
-temp	float	$tmp134	%read{261,261} %write{260,260}
-temp	int	$tmp135	%read{263,263} %write{262,262}
-temp	float	$tmp136	%read{268,268} %write{267,267}
-temp	float	$tmp137	%read{267,267} %write{264,264}
-temp	float	$tmp138	%read{267,267} %write{266,266}
-temp	float	$tmp139	%read{269,269} %write{268,268}
-const	string	$const45	"Math_RotateY"		%read{270,284} %write{2147483647,-1}
+temp	float	$tmp132	%read{261,261} %write{260,260}
+temp	float	$tmp133	%read{260,260} %write{259,259}
+temp	int	$tmp134	%read{262,262} %write{261,261}
+temp	float	$tmp135	%read{266,266} %write{265,265}
+temp	float	$tmp136	%read{265,265} %write{263,263}
+temp	float	$tmp137	%read{267,267} %write{266,266}
+const	string	$const44	"Math_RotateY"		%read{268,282} %write{2147483647,-1}
+temp	float	$tmp138	%read{270,270} %write{269,269}
+temp	float	$tmp139	%read{273,273} %write{270,270}
 temp	float	$tmp140	%read{272,272} %write{271,271}
-temp	float	$tmp141	%read{275,275} %write{272,272}
-temp	float	$tmp142	%read{274,274} %write{273,273}
-temp	float	$tmp143	%read{275,275} %write{274,274}
-temp	float	$tmp144	%read{282,282} %write{275,275}
-temp	float	$tmp145	%read{282,282} %write{276,276}
+temp	float	$tmp141	%read{273,273} %write{272,272}
+temp	float	$tmp142	%read{280,280} %write{273,273}
+temp	float	$tmp143	%read{280,280} %write{274,274}
+temp	float	$tmp144	%read{276,276} %write{275,275}
+temp	float	$tmp145	%read{279,279} %write{276,276}
 temp	float	$tmp146	%read{278,278} %write{277,277}
-temp	float	$tmp147	%read{281,281} %write{278,278}
+temp	float	$tmp147	%read{279,279} %write{278,278}
 temp	float	$tmp148	%read{280,280} %write{279,279}
-temp	float	$tmp149	%read{281,281} %write{280,280}
-temp	float	$tmp150	%read{282,282} %write{281,281}
+temp	float	$tmp149	%read{284,284} %write{283,283}
+temp	float	$tmp150	%read{287,287} %write{284,284}
 temp	float	$tmp151	%read{286,286} %write{285,285}
-temp	float	$tmp152	%read{289,289} %write{286,286}
-temp	float	$tmp153	%read{288,288} %write{287,287}
-temp	float	$tmp154	%read{289,289} %write{288,288}
-temp	float	$tmp155	%read{296,296} %write{289,289}
-temp	float	$tmp156	%read{296,296} %write{290,290}
+temp	float	$tmp152	%read{287,287} %write{286,286}
+temp	float	$tmp153	%read{294,294} %write{287,287}
+temp	float	$tmp154	%read{294,294} %write{288,288}
+temp	float	$tmp155	%read{290,290} %write{289,289}
+temp	float	$tmp156	%read{293,293} %write{290,290}
 temp	float	$tmp157	%read{292,292} %write{291,291}
-temp	float	$tmp158	%read{295,295} %write{292,292}
+temp	float	$tmp158	%read{293,293} %write{292,292}
 temp	float	$tmp159	%read{294,294} %write{293,293}
-temp	float	$tmp160	%read{295,295} %write{294,294}
-temp	float	$tmp161	%read{296,296} %write{295,295}
-temp	float	$tmp162	%read{300,300} %write{299,299}
-temp	float	$tmp163	%read{299,299} %write{298,298}
-temp	int	$tmp164	%read{301,301} %write{300,300}
-temp	float	$tmp165	%read{306,306} %write{305,305}
-temp	float	$tmp166	%read{305,305} %write{302,302}
-temp	float	$tmp167	%read{305,305} %write{304,304}
-temp	float	$tmp168	%read{307,307} %write{306,306}
-const	string	$const46	"Math_RotateZ"		%read{308,322} %write{2147483647,-1}
+temp	float	$tmp160	%read{298,298} %write{297,297}
+temp	float	$tmp161	%read{297,297} %write{296,296}
+temp	int	$tmp162	%read{299,299} %write{298,298}
+temp	float	$tmp163	%read{303,303} %write{302,302}
+temp	float	$tmp164	%read{302,302} %write{300,300}
+temp	float	$tmp165	%read{304,304} %write{303,303}
+const	string	$const45	"Math_RotateZ"		%read{305,319} %write{2147483647,-1}
+temp	float	$tmp166	%read{307,307} %write{306,306}
+temp	float	$tmp167	%read{310,310} %write{307,307}
+temp	float	$tmp168	%read{309,309} %write{308,308}
 temp	float	$tmp169	%read{310,310} %write{309,309}
-temp	float	$tmp170	%read{313,313} %write{310,310}
+temp	float	$tmp170	%read{317,317} %write{310,310}
 temp	float	$tmp171	%read{312,312} %write{311,311}
-temp	float	$tmp172	%read{313,313} %write{312,312}
-temp	float	$tmp173	%read{320,320} %write{313,313}
+temp	float	$tmp172	%read{315,315} %write{312,312}
+temp	float	$tmp173	%read{314,314} %write{313,313}
 temp	float	$tmp174	%read{315,315} %write{314,314}
-temp	float	$tmp175	%read{318,318} %write{315,315}
+temp	float	$tmp175	%read{317,317} %write{315,315}
 temp	float	$tmp176	%read{317,317} %write{316,316}
-temp	float	$tmp177	%read{318,318} %write{317,317}
-temp	float	$tmp178	%read{320,320} %write{318,318}
-temp	float	$tmp179	%read{320,320} %write{319,319}
+temp	float	$tmp177	%read{321,321} %write{320,320}
+temp	float	$tmp178	%read{324,324} %write{321,321}
+temp	float	$tmp179	%read{323,323} %write{322,322}
 temp	float	$tmp180	%read{324,324} %write{323,323}
-temp	float	$tmp181	%read{327,327} %write{324,324}
+temp	float	$tmp181	%read{331,331} %write{324,324}
 temp	float	$tmp182	%read{326,326} %write{325,325}
-temp	float	$tmp183	%read{327,327} %write{326,326}
-temp	float	$tmp184	%read{334,334} %write{327,327}
+temp	float	$tmp183	%read{329,329} %write{326,326}
+temp	float	$tmp184	%read{328,328} %write{327,327}
 temp	float	$tmp185	%read{329,329} %write{328,328}
-temp	float	$tmp186	%read{332,332} %write{329,329}
+temp	float	$tmp186	%read{331,331} %write{329,329}
 temp	float	$tmp187	%read{331,331} %write{330,330}
-temp	float	$tmp188	%read{332,332} %write{331,331}
-temp	float	$tmp189	%read{334,334} %write{332,332}
-temp	float	$tmp190	%read{334,334} %write{333,333}
-temp	float	$tmp191	%read{359,359} %write{342,343}
-temp	float	$tmp192	%read{340,343} %write{338,338}
-const	string	$const47	"Math_SafeDivide"		%read{339,353} %write{2147483647,-1}
-temp	int	$tmp193	%read{341,341} %write{340,340}
-temp	float	$tmp194	%read{359,359} %write{349,350}
-temp	float	$tmp195	%read{347,350} %write{345,345}
-temp	int	$tmp196	%read{348,348} %write{347,347}
-temp	float	$tmp197	%read{359,359} %write{356,357}
-temp	float	$tmp198	%read{354,357} %write{352,352}
-temp	int	$tmp199	%read{355,355} %write{354,354}
-temp	vector	$tmp200	%read{365,365} %write{364,364}
-temp	float	$tmp201	%read{375,375} %write{374,374}
-temp	float	$tmp202	%read{374,374} %write{368,368}
-temp	float	$tmp203	%read{368,368} %write{367,367}
-temp	float	$tmp204	%read{374,374} %write{373,373}
-temp	float	$tmp205	%read{373,373} %write{370,370}
-temp	float	$tmp206	%read{370,370} %write{369,369}
-temp	float	$tmp207	%read{373,373} %write{372,372}
-temp	float	$tmp208	%read{372,372} %write{371,371}
+temp	float	$tmp188	%read{356,356} %write{339,340}
+temp	float	$tmp189	%read{337,340} %write{335,335}
+const	string	$const46	"Math_SafeDivide"		%read{336,350} %write{2147483647,-1}
+temp	int	$tmp190	%read{338,338} %write{337,337}
+temp	float	$tmp191	%read{356,356} %write{346,347}
+temp	float	$tmp192	%read{344,347} %write{342,342}
+temp	int	$tmp193	%read{345,345} %write{344,344}
+temp	float	$tmp194	%read{356,356} %write{353,354}
+temp	float	$tmp195	%read{351,354} %write{349,349}
+temp	int	$tmp196	%read{352,352} %write{351,351}
+temp	vector	$tmp197	%read{362,362} %write{361,361}
+temp	float	$tmp198	%read{372,372} %write{371,371}
+temp	float	$tmp199	%read{371,371} %write{365,365}
+temp	float	$tmp200	%read{365,365} %write{364,364}
+temp	float	$tmp201	%read{371,371} %write{370,370}
+temp	float	$tmp202	%read{370,370} %write{367,367}
+temp	float	$tmp203	%read{367,367} %write{366,366}
+temp	float	$tmp204	%read{370,370} %write{369,369}
+temp	float	$tmp205	%read{369,369} %write{368,368}
 code ___main___
 # PxrManifold3D.osl:311
 #     int success = 0;
@@ -376,15 +372,15 @@ code ___main___
 	filterwidth	$tmp8 $tmp9 	%argrw{"wr"} %argderivs{1}
 	compref		$tmp11 P $const2 	%argrw{"wrr"}
 	filterwidth	$tmp10 $tmp11 	%argrw{"wr"} %argderivs{1}
-	max		___680_width $tmp8 $tmp10 	%argrw{"wrr"}
+	max		___700_width $tmp8 $tmp10 	%argrw{"wrr"}
 # PxrManifold3D.osl:347
 #         width = max(width, filterwidth(P.z));
 	compref		$tmp13 P $const5 	%line{347} %argrw{"wrr"}
 	filterwidth	$tmp12 $tmp13 	%argrw{"wr"} %argderivs{1}
-	max		___680_width ___680_width $tmp12 	%argrw{"wrr"}
+	max		___700_width ___700_width $tmp12 	%argrw{"wrr"}
 # PxrManifold3D.osl:348
 #         result.Qradius = 0.5 * width;
-	mul		result.Qradius $const13 ___680_width 	%line{348} %argrw{"wrr"}
+	mul		result.Qradius $const13 ___700_width 	%line{348} %argrw{"wrr"}
 	assign		result.Qradius result.Qradius 	%argrw{"wr"}
 # PxrManifold3D.osl:351
 #         float rOX = 0.0, rOY = 0.0, rOZ = 0.0,
@@ -404,21 +400,21 @@ code ___main___
 	functioncall	$const15 99 	%line{356} %argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h:175
 #     float fseed = defaultVal;
-	assign		___655_fseed $const10 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h"} %line{175} %argrw{"wr"}
+	assign		___675_fseed $const10 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h"} %line{175} %argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h:177
 #     if (source == k_IdentifierId)
 	eq		$tmp15 source $const1 	%line{177} %argrw{"wrr"}
 	if		$tmp15 49 89 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h:182
 #         getattribute("builtin", "id", fseed);
-	getattribute	$tmp16 $const11 $const16 ___655_fseed 	%line{182} %argrw{"wrrw"}
+	getattribute	$tmp16 $const11 $const16 ___675_fseed 	%line{182} %argrw{"wrrw"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h:183
 #         if (verbosity > k_Warnings)
 	gt		$tmp17 verbosity $const2 	%line{183} %argrw{"wrr"}
 	if		$tmp17 49 49 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h:185
 #             printf("[getRandomFloat] id: %f", fseed);
-	printf		$const17 ___655_fseed 	%line{185} %argrw{"rr"}
+	printf		$const17 ___675_fseed 	%line{185} %argrw{"rr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h:188
 #     else if (source == k_IdentifierName)
 	eq		$tmp18 source $const2 	%line{188} %argrw{"wrr"}
@@ -428,23 +424,23 @@ code ___main___
 	eq		$tmp19 $const1 $const1 	%line{191} %argrw{"wrr"}
 	neq		$tmp20 $tmp19 $const1 	%argrw{"wrr"}
 	if		$tmp20 54 58 	%argrw{"r"}
-	getattribute	$tmp21 $const18 ___655_fseed 	%argrw{"wrw"}
+	getattribute	$tmp21 $const18 ___675_fseed 	%argrw{"wrw"}
 	eq		$tmp22 $tmp21 $const1 	%argrw{"wrr"}
 	neq		$tmp23 $tmp22 $const1 	%argrw{"wrr"}
 	assign		$tmp20 $tmp23 	%argrw{"wr"}
 	if		$tmp20 64 64 	%argrw{"r"}
-	assign		___659_idname $const6 	%argrw{"wr"}
-	getattribute	$tmp24 $const19 ___659_idname 	%argrw{"wrw"}
-	hash		$tmp25 ___659_idname 	%argrw{"wr"}
+	assign		___679_idname $const6 	%argrw{"wr"}
+	getattribute	$tmp24 $const19 ___679_idname 	%argrw{"wrw"}
+	hash		$tmp25 ___679_idname 	%argrw{"wr"}
 	mod		$tmp26 $tmp25 $const20 	%argrw{"wrr"}
-	assign		___655_fseed $tmp26 	%argrw{"wr"}
+	assign		___675_fseed $tmp26 	%argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h:193
 #     else if (source == k_Primvar)
 	eq		$tmp27 source $const5 	%line{193} %argrw{"wrr"}
 	if		$tmp27 78 89 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h:195
 #         if (!getattribute("primvar", varName, fseed) && verbosity > k_Silent)
-	getattribute	$tmp28 $const3 varName ___655_fseed 	%line{195} %argrw{"wrrw"}
+	getattribute	$tmp28 $const3 varName ___675_fseed 	%line{195} %argrw{"wrrw"}
 	eq		$tmp29 $tmp28 $const1 	%argrw{"wrr"}
 	neq		$tmp30 $tmp29 $const1 	%argrw{"wrr"}
 	if		$tmp30 73 73 	%argrw{"r"}
@@ -460,15 +456,15 @@ code ___main___
 	if		scaleNormalizedPrimvar 78 78 	%line{200} %argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h:201
 #             fseed = (fseed - 0.5) * 65535.0;
-	sub		$tmp33 ___655_fseed $const13 	%line{201} %argrw{"wrr"}
-	mul		___655_fseed $tmp33 $const22 	%argrw{"wrr"}
+	sub		$tmp33 ___675_fseed $const13 	%line{201} %argrw{"wrr"}
+	mul		___675_fseed $tmp33 $const22 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h:203
 #     else if (source == k_Attribute)
 	eq		$tmp34 source $const8 	%line{203} %argrw{"wrr"}
 	if		$tmp34 89 89 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h:205
 #         if (!getattribute(varName, fseed) && verbosity > k_Silent)
-	getattribute	$tmp35 varName ___655_fseed 	%line{205} %argrw{"wrw"}
+	getattribute	$tmp35 varName ___675_fseed 	%line{205} %argrw{"wrw"}
 	eq		$tmp36 $tmp35 $const1 	%argrw{"wrr"}
 	neq		$tmp37 $tmp36 $const1 	%argrw{"wrr"}
 	if		$tmp37 87 87 	%argrw{"r"}
@@ -481,53 +477,53 @@ code ___main___
 	warning		$const23 varName 	%line{207} %argrw{"rr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h:213
 #     float instanceId = 0;
-	assign		___655_instanceId $const1 	%line{213} %argrw{"wr"}
+	assign		___675_instanceId $const1 	%line{213} %argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h:214
 #     if (getattribute("user:procprimid", instanceId))
-	getattribute	$tmp40 $const24 ___655_instanceId 	%line{214} %argrw{"wrw"}
+	getattribute	$tmp40 $const24 ___675_instanceId 	%line{214} %argrw{"wrw"}
 	if		$tmp40 98 98 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h:216
 #         fseed = mod(fseed + instanceId, 65535);
-	add		$tmp41 ___655_fseed ___655_instanceId 	%line{216} %argrw{"wrr"}
+	add		$tmp41 ___675_fseed ___675_instanceId 	%line{216} %argrw{"wrr"}
 	functioncall	$const26 98 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:154
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:132
 # float  mod (float  a, float  b) { return a - b*floor(a/b); }
-	div		$tmp43 $tmp41 $const22 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{154} %argrw{"wrr"}
+	div		$tmp43 $tmp41 $const22 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{132} %argrw{"wrr"}
 	floor		$tmp42 $tmp43 	%argrw{"wr"}
 	mul		$tmp44 $const22 $tmp42 	%argrw{"wrr"}
-	sub		___655_fseed $tmp41 $tmp44 	%argrw{"wrr"}
+	sub		___675_fseed $tmp41 $tmp44 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h:218
 #     return fseed;
-	assign		$tmp14 ___655_fseed 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h"} %line{218} %argrw{"wr"}
+	assign		$tmp14 ___675_fseed 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLRandomize.h"} %line{218} %argrw{"wr"}
 # PxrManifold3D.osl:357
 #                                      NEVER_MATCH_CPP, verbosity) + seed;
-	add		___681_fseed $tmp14 seed 	%filename{"PxrManifold3D.osl"} %line{357} %argrw{"wrr"}
+	add		___701_fseed $tmp14 seed 	%filename{"PxrManifold3D.osl"} %line{357} %argrw{"wrr"}
 # PxrManifold3D.osl:358
 #         fseed = mod(fseed, 65535);
 	functioncall	$const26 105 	%line{358} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:154
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:132
 # float  mod (float  a, float  b) { return a - b*floor(a/b); }
-	div		$tmp46 ___681_fseed $const22 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{154} %argrw{"wrr"}
+	div		$tmp46 ___701_fseed $const22 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{132} %argrw{"wrr"}
 	floor		$tmp45 $tmp46 	%argrw{"wr"}
 	mul		$tmp47 $const22 $tmp45 	%argrw{"wrr"}
-	sub		___681_fseed ___681_fseed $tmp47 	%argrw{"wrr"}
+	sub		___701_fseed ___701_fseed $tmp47 	%argrw{"wrr"}
 # PxrManifold3D.osl:359
 #         float prob = probability ? noise("cell", fseed + 173.0) : 1.0;
 	neq		$tmp48 probability $const10 	%filename{"PxrManifold3D.osl"} %line{359} %argrw{"wrr"}
 	if		$tmp48 109 110 	%argrw{"r"}
-	add		$tmp49 ___681_fseed $const28 	%argrw{"wrr"}
-	noise		___681_prob $const27 $tmp49 	%argrw{"wrr"}
-	assign		___681_prob $const14 	%argrw{"wr"}
+	add		$tmp49 ___701_fseed $const28 	%argrw{"wrr"}
+	noise		___701_prob $const27 $tmp49 	%argrw{"wrr"}
+	assign		___701_prob $const14 	%argrw{"wr"}
 # PxrManifold3D.osl:360
 #         if (prob <= probability)
-	le		$tmp50 ___681_prob probability 	%line{360} %argrw{"wrr"}
+	le		$tmp50 ___701_prob probability 	%line{360} %argrw{"wrr"}
 	if		$tmp50 181 181 	%argrw{"r"}
 # PxrManifold3D.osl:362
 #             color rnd = noise("cell", color(fseed, fseed + 7.0, fseed + 13.0));
-	add		$tmp52 ___681_fseed $const29 	%line{362} %argrw{"wrr"}
-	add		$tmp53 ___681_fseed $const30 	%argrw{"wrr"}
-	color		$tmp51 ___681_fseed $tmp52 $tmp53 	%argrw{"wrrr"}
-	noise		___682_rnd $const27 $tmp51 	%argrw{"wrr"}
+	add		$tmp52 ___701_fseed $const29 	%line{362} %argrw{"wrr"}
+	add		$tmp53 ___701_fseed $const30 	%argrw{"wrr"}
+	color		$tmp51 ___701_fseed $tmp52 $tmp53 	%argrw{"wrrr"}
+	noise		___702_rnd $const27 $tmp51 	%argrw{"wrr"}
 # PxrManifold3D.osl:363
 #             rOX = rOffsetXMin == rOffsetXMax
 	eq		$tmp54 rOffsetXMin rOffsetXMax 	%line{363} %argrw{"wrr"}
@@ -537,7 +533,7 @@ code ___main___
 	assign		rOX rOffsetXMin 	%argrw{"wr"}
 # PxrManifold3D.osl:365
 #                     : compress(rnd[0], rOffsetXMin, rOffsetXMax);
-	compref		$tmp55 ___682_rnd $const1 	%line{365} %argrw{"wrr"}
+	compref		$tmp55 ___702_rnd $const1 	%line{365} %argrw{"wrr"}
 	functioncall	$const31 124 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:158
 #     return (hi - lo) * x + lo;
@@ -553,7 +549,7 @@ code ___main___
 	assign		rOY rOffsetYMin 	%argrw{"wr"}
 # PxrManifold3D.osl:368
 #                     : compress(rnd[1], rOffsetYMin, rOffsetYMax);
-	compref		$tmp59 ___682_rnd $const2 	%line{368} %argrw{"wrr"}
+	compref		$tmp59 ___702_rnd $const2 	%line{368} %argrw{"wrr"}
 	functioncall	$const31 132 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:158
 #     return (hi - lo) * x + lo;
@@ -570,7 +566,7 @@ code ___main___
 	assign		$tmp62 rOffsetZMin 	%argrw{"wr"}
 # PxrManifold3D.osl:371
 #                     : compress(rnd[2], rOffsetZMin, rOffsetZMax);
-	compref		$tmp64 ___682_rnd $const5 	%line{371} %argrw{"wrr"}
+	compref		$tmp64 ___702_rnd $const5 	%line{371} %argrw{"wrr"}
 	functioncall	$const31 141 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLUtils.h:158
 #     return (hi - lo) * x + lo;
@@ -591,8 +587,8 @@ code ___main___
 	assign		rSX rScaleXMin 	%argrw{"wr"}
 # PxrManifold3D.osl:375
 #                     : compress((rnd[0] + rnd[1]) * 0.5, rScaleXMin, rScaleXMax);
-	compref		$tmp69 ___682_rnd $const1 	%line{375} %argrw{"wrr"}
-	compref		$tmp70 ___682_rnd $const2 	%argrw{"wrr"}
+	compref		$tmp69 ___702_rnd $const1 	%line{375} %argrw{"wrr"}
+	compref		$tmp70 ___702_rnd $const2 	%argrw{"wrr"}
 	add		$tmp71 $tmp69 $tmp70 	%argrw{"wrr"}
 	mul		$tmp72 $tmp71 $const13 	%argrw{"wrr"}
 	functioncall	$const31 155 	%argrw{"r"}
@@ -611,8 +607,8 @@ code ___main___
 	assign		rSY rScaleYMin 	%argrw{"wr"}
 # PxrManifold3D.osl:379
 #                     : compress((rnd[1] + rnd[2]) * 0.5, rScaleYMin, rScaleYMax)
-	compref		$tmp76 ___682_rnd $const2 	%line{379} %argrw{"wrr"}
-	compref		$tmp77 ___682_rnd $const5 	%argrw{"wrr"}
+	compref		$tmp76 ___702_rnd $const2 	%line{379} %argrw{"wrr"}
+	compref		$tmp77 ___702_rnd $const5 	%argrw{"wrr"}
 	add		$tmp78 $tmp76 $tmp77 	%argrw{"wrr"}
 	mul		$tmp79 $tmp78 $const13 	%argrw{"wrr"}
 	functioncall	$const31 167 	%argrw{"r"}
@@ -634,8 +630,8 @@ code ___main___
 	assign		rSZ rScaleZMin 	%argrw{"wr"}
 # PxrManifold3D.osl:384
 #                     : compress((rnd[0] + rnd[2]) * 0.5, rScaleZMin, rScaleZMax)
-	compref		$tmp83 ___682_rnd $const1 	%line{384} %argrw{"wrr"}
-	compref		$tmp84 ___682_rnd $const5 	%argrw{"wrr"}
+	compref		$tmp83 ___702_rnd $const1 	%line{384} %argrw{"wrr"}
+	compref		$tmp84 ___702_rnd $const5 	%argrw{"wrr"}
 	add		$tmp85 $tmp83 $tmp84 	%argrw{"wrr"}
 	mul		$tmp86 $tmp85 $const13 	%argrw{"wrr"}
 	functioncall	$const31 180 	%argrw{"r"}
@@ -679,18 +675,18 @@ code ___main___
 	assign		result.QN result.QN 	%argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:81
 #     vector vec1 = vector(1.0);
-	assign		___392_vec1 $const35 	%line{81} %argrw{"wr"}
+	assign		___412_vec1 $const35 	%line{81} %argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:82
 #     vec1 = transform(fromSpace, toSpace, vec1);
-	transformv	___392_vec1 $const34 coordsys ___392_vec1 	%line{82} %argrw{"wrrr"}
+	transformv	___412_vec1 $const34 coordsys ___412_vec1 	%line{82} %argrw{"wrrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:83
 #     float scale = length(vec1) / sqrt(3.0);
-	length		$tmp95 ___392_vec1 	%line{83} %argrw{"wr"}
+	length		$tmp95 ___412_vec1 	%line{83} %argrw{"wr"}
 	sqrt		$tmp96 $const36 	%argrw{"wr"}
-	div		___392_scale $tmp95 $tmp96 	%argrw{"wrr"}
+	div		___412_scale $tmp95 $tmp96 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:84
 #     ioManifold.Qradius *= scale;
-	mul		result.Qradius result.Qradius ___392_scale 	%line{84} %argrw{"wrr"}
+	mul		result.Qradius result.Qradius ___412_scale 	%line{84} %argrw{"wrr"}
 	assign		result.Qradius result.Qradius 	%argrw{"wr"}
 # PxrManifold3D.osl:400
 #         Manifold_Transform(result, "object");
@@ -709,25 +705,25 @@ code ___main___
 	assign		result.QN result.QN 	%argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:81
 #     vector vec1 = vector(1.0);
-	assign		___392_vec1 $const35 	%line{81} %argrw{"wr"}
+	assign		___412_vec1 $const35 	%line{81} %argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:82
 #     vec1 = transform(fromSpace, toSpace, vec1);
-	transformv	___392_vec1 $const34 $const37 ___392_vec1 	%line{82} %argrw{"wrrr"}
+	transformv	___412_vec1 $const34 $const37 ___412_vec1 	%line{82} %argrw{"wrrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:83
 #     float scale = length(vec1) / sqrt(3.0);
-	length		$tmp98 ___392_vec1 	%line{83} %argrw{"wr"}
+	length		$tmp98 ___412_vec1 	%line{83} %argrw{"wr"}
 	sqrt		$tmp99 $const36 	%argrw{"wr"}
-	div		___392_scale $tmp98 $tmp99 	%argrw{"wrr"}
+	div		___412_scale $tmp98 $tmp99 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:84
 #     ioManifold.Qradius *= scale;
-	mul		result.Qradius result.Qradius ___392_scale 	%line{84} %argrw{"wrr"}
+	mul		result.Qradius result.Qradius ___412_scale 	%line{84} %argrw{"wrr"}
 	assign		result.Qradius result.Qradius 	%argrw{"wr"}
 # PxrManifold3D.osl:406
 #                        vector(rSX, rSY, rSZ),   // scale
 	vector		$tmp101 rSX rSY rSZ 	%filename{"PxrManifold3D.osl"} %line{406} %argrw{"wrrr"}
 # PxrManifold3D.osl:403
 #     Manifold_Std_Xform(result,
-	functioncall	$const40 377 	%line{403} %argrw{"r"}
+	functioncall	$const40 374 	%line{403} %argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:221
 #     manifold.Q -= origin;
 	sub		result.Q result.Q $const38 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{221} %argrw{"wrr"}
@@ -737,208 +733,205 @@ code ___main___
 	compref		$tmp105 $const38 $const1 	%line{223} %argrw{"wrr"}
 	abs		$tmp104 $tmp105 	%argrw{"wr"}
 	gt		$tmp106 $tmp104 $const10 	%argrw{"wrr"}
-	if		$tmp106 260 260 	%argrw{"r"}
+	if		$tmp106 259 259 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:225
 #         sincos(-radians(rotation[0]), sinAng, cosAng);
 	compref		$tmp108 $const38 $const1 	%line{225} %argrw{"wrr"}
-	functioncall	$const41 230 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:88
+	functioncall	$const41 229 	%argrw{"r"}
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:65
 # float  radians (float x)  { return x*(M_PI/180.0); }
-	div		$tmp109 $const42 $const43 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{88} %argrw{"wrr"}
-	mul		$tmp107 $tmp108 $tmp109 	%argrw{"wrr"}
+	mul		$tmp107 $tmp108 $const42 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{65} %argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:225
 #         sincos(-radians(rotation[0]), sinAng, cosAng);
-	neg		$tmp110 $tmp107 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{225} %argrw{"wr"}
-	sincos		$tmp110 ___400_sinAng ___400_cosAng 	%argrw{"rww"}
+	neg		$tmp109 $tmp107 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{225} %argrw{"wr"}
+	sincos		$tmp109 ___420_sinAng ___420_cosAng 	%argrw{"rww"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:226
 #         manifold.Q = Math_RotateX(sinAng, cosAng, manifold.Q);
-	functioncall	$const44 245 	%line{226} %argrw{"r"}
+	functioncall	$const43 244 	%line{226} %argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:263
 #     return point(Q[0],
-	compref		$tmp111 result.Q $const1 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{263} %argrw{"wrr"}
+	compref		$tmp110 result.Q $const1 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{263} %argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:264
 #                  cosAng * Q[1] - sinAng * Q[2],
-	compref		$tmp112 result.Q $const2 	%line{264} %argrw{"wrr"}
-	mul		$tmp113 ___400_cosAng $tmp112 	%argrw{"wrr"}
-	compref		$tmp114 result.Q $const5 	%argrw{"wrr"}
-	mul		$tmp115 ___400_sinAng $tmp114 	%argrw{"wrr"}
-	sub		$tmp116 $tmp113 $tmp115 	%argrw{"wrr"}
+	compref		$tmp111 result.Q $const2 	%line{264} %argrw{"wrr"}
+	mul		$tmp112 ___420_cosAng $tmp111 	%argrw{"wrr"}
+	compref		$tmp113 result.Q $const5 	%argrw{"wrr"}
+	mul		$tmp114 ___420_sinAng $tmp113 	%argrw{"wrr"}
+	sub		$tmp115 $tmp112 $tmp114 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:265
 #                  sinAng * Q[1] + cosAng * Q[2]);
-	compref		$tmp117 result.Q $const2 	%line{265} %argrw{"wrr"}
-	mul		$tmp118 ___400_sinAng $tmp117 	%argrw{"wrr"}
-	compref		$tmp119 result.Q $const5 	%argrw{"wrr"}
-	mul		$tmp120 ___400_cosAng $tmp119 	%argrw{"wrr"}
-	add		$tmp121 $tmp118 $tmp120 	%argrw{"wrr"}
+	compref		$tmp116 result.Q $const2 	%line{265} %argrw{"wrr"}
+	mul		$tmp117 ___420_sinAng $tmp116 	%argrw{"wrr"}
+	compref		$tmp118 result.Q $const5 	%argrw{"wrr"}
+	mul		$tmp119 ___420_cosAng $tmp118 	%argrw{"wrr"}
+	add		$tmp120 $tmp117 $tmp119 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:263
 #     return point(Q[0],
-	point		result.Q $tmp111 $tmp116 $tmp121 	%line{263} %argrw{"wrrr"}
+	point		result.Q $tmp110 $tmp115 $tmp120 	%line{263} %argrw{"wrrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:226
 #         manifold.Q = Math_RotateX(sinAng, cosAng, manifold.Q);
 	assign		result.Q result.Q 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{226} %argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:227
 #         manifold.QN = Math_RotateX(sinAng, cosAng, manifold.QN);
-	functioncall	$const44 259 	%line{227} %argrw{"r"}
+	functioncall	$const43 258 	%line{227} %argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:263
 #     return point(Q[0],
-	compref		$tmp122 result.QN $const1 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{263} %argrw{"wrr"}
+	compref		$tmp121 result.QN $const1 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{263} %argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:264
 #                  cosAng * Q[1] - sinAng * Q[2],
-	compref		$tmp123 result.QN $const2 	%line{264} %argrw{"wrr"}
-	mul		$tmp124 ___400_cosAng $tmp123 	%argrw{"wrr"}
-	compref		$tmp125 result.QN $const5 	%argrw{"wrr"}
-	mul		$tmp126 ___400_sinAng $tmp125 	%argrw{"wrr"}
-	sub		$tmp127 $tmp124 $tmp126 	%argrw{"wrr"}
+	compref		$tmp122 result.QN $const2 	%line{264} %argrw{"wrr"}
+	mul		$tmp123 ___420_cosAng $tmp122 	%argrw{"wrr"}
+	compref		$tmp124 result.QN $const5 	%argrw{"wrr"}
+	mul		$tmp125 ___420_sinAng $tmp124 	%argrw{"wrr"}
+	sub		$tmp126 $tmp123 $tmp125 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:265
 #                  sinAng * Q[1] + cosAng * Q[2]);
-	compref		$tmp128 result.QN $const2 	%line{265} %argrw{"wrr"}
-	mul		$tmp129 ___400_sinAng $tmp128 	%argrw{"wrr"}
-	compref		$tmp130 result.QN $const5 	%argrw{"wrr"}
-	mul		$tmp131 ___400_cosAng $tmp130 	%argrw{"wrr"}
-	add		$tmp132 $tmp129 $tmp131 	%argrw{"wrr"}
+	compref		$tmp127 result.QN $const2 	%line{265} %argrw{"wrr"}
+	mul		$tmp128 ___420_sinAng $tmp127 	%argrw{"wrr"}
+	compref		$tmp129 result.QN $const5 	%argrw{"wrr"}
+	mul		$tmp130 ___420_cosAng $tmp129 	%argrw{"wrr"}
+	add		$tmp131 $tmp128 $tmp130 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:263
 #     return point(Q[0],
-	point		result.QN $tmp122 $tmp127 $tmp132 	%line{263} %argrw{"wrrr"}
+	point		result.QN $tmp121 $tmp126 $tmp131 	%line{263} %argrw{"wrrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:227
 #         manifold.QN = Math_RotateX(sinAng, cosAng, manifold.QN);
 	assign		result.QN result.QN 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{227} %argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:229
 #     if (abs(rotation[1]) > 0) {
-	compref		$tmp134 $const38 $const2 	%line{229} %argrw{"wrr"}
-	abs		$tmp133 $tmp134 	%argrw{"wr"}
-	gt		$tmp135 $tmp133 $const1 	%argrw{"wrr"}
-	if		$tmp135 298 298 	%argrw{"r"}
+	compref		$tmp133 $const38 $const2 	%line{229} %argrw{"wrr"}
+	abs		$tmp132 $tmp133 	%argrw{"wr"}
+	gt		$tmp134 $tmp132 $const1 	%argrw{"wrr"}
+	if		$tmp134 296 296 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:231
 #         sincos(-radians(rotation[1]), sinAng, cosAng);
-	compref		$tmp137 $const38 $const2 	%line{231} %argrw{"wrr"}
-	functioncall	$const41 268 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:88
+	compref		$tmp136 $const38 $const2 	%line{231} %argrw{"wrr"}
+	functioncall	$const41 266 	%argrw{"r"}
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:65
 # float  radians (float x)  { return x*(M_PI/180.0); }
-	div		$tmp138 $const42 $const43 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{88} %argrw{"wrr"}
-	mul		$tmp136 $tmp137 $tmp138 	%argrw{"wrr"}
+	mul		$tmp135 $tmp136 $const42 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{65} %argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:231
 #         sincos(-radians(rotation[1]), sinAng, cosAng);
-	neg		$tmp139 $tmp136 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{231} %argrw{"wr"}
-	sincos		$tmp139 ___401_sinAng ___401_cosAng 	%argrw{"rww"}
+	neg		$tmp137 $tmp135 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{231} %argrw{"wr"}
+	sincos		$tmp137 ___421_sinAng ___421_cosAng 	%argrw{"rww"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:232
 #         manifold.Q = Math_RotateY(sinAng, cosAng, manifold.Q);
-	functioncall	$const45 283 	%line{232} %argrw{"r"}
+	functioncall	$const44 281 	%line{232} %argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:282
 #     return point(sinAng * Q[2] + cosAng * Q[0],
-	compref		$tmp140 result.Q $const5 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{282} %argrw{"wrr"}
-	mul		$tmp141 ___401_sinAng $tmp140 	%argrw{"wrr"}
-	compref		$tmp142 result.Q $const1 	%argrw{"wrr"}
-	mul		$tmp143 ___401_cosAng $tmp142 	%argrw{"wrr"}
-	add		$tmp144 $tmp141 $tmp143 	%argrw{"wrr"}
+	compref		$tmp138 result.Q $const5 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{282} %argrw{"wrr"}
+	mul		$tmp139 ___421_sinAng $tmp138 	%argrw{"wrr"}
+	compref		$tmp140 result.Q $const1 	%argrw{"wrr"}
+	mul		$tmp141 ___421_cosAng $tmp140 	%argrw{"wrr"}
+	add		$tmp142 $tmp139 $tmp141 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:283
 #                  Q[1],
-	compref		$tmp145 result.Q $const2 	%line{283} %argrw{"wrr"}
+	compref		$tmp143 result.Q $const2 	%line{283} %argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:284
 #                  cosAng * Q[2] - sinAng * Q[0]);
-	compref		$tmp146 result.Q $const5 	%line{284} %argrw{"wrr"}
-	mul		$tmp147 ___401_cosAng $tmp146 	%argrw{"wrr"}
-	compref		$tmp148 result.Q $const1 	%argrw{"wrr"}
-	mul		$tmp149 ___401_sinAng $tmp148 	%argrw{"wrr"}
-	sub		$tmp150 $tmp147 $tmp149 	%argrw{"wrr"}
+	compref		$tmp144 result.Q $const5 	%line{284} %argrw{"wrr"}
+	mul		$tmp145 ___421_cosAng $tmp144 	%argrw{"wrr"}
+	compref		$tmp146 result.Q $const1 	%argrw{"wrr"}
+	mul		$tmp147 ___421_sinAng $tmp146 	%argrw{"wrr"}
+	sub		$tmp148 $tmp145 $tmp147 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:282
 #     return point(sinAng * Q[2] + cosAng * Q[0],
-	point		result.Q $tmp144 $tmp145 $tmp150 	%line{282} %argrw{"wrrr"}
+	point		result.Q $tmp142 $tmp143 $tmp148 	%line{282} %argrw{"wrrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:232
 #         manifold.Q = Math_RotateY(sinAng, cosAng, manifold.Q);
 	assign		result.Q result.Q 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{232} %argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:233
 #         manifold.QN = Math_RotateY(sinAng, cosAng, manifold.QN);
-	functioncall	$const45 297 	%line{233} %argrw{"r"}
+	functioncall	$const44 295 	%line{233} %argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:282
 #     return point(sinAng * Q[2] + cosAng * Q[0],
-	compref		$tmp151 result.QN $const5 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{282} %argrw{"wrr"}
-	mul		$tmp152 ___401_sinAng $tmp151 	%argrw{"wrr"}
-	compref		$tmp153 result.QN $const1 	%argrw{"wrr"}
-	mul		$tmp154 ___401_cosAng $tmp153 	%argrw{"wrr"}
-	add		$tmp155 $tmp152 $tmp154 	%argrw{"wrr"}
+	compref		$tmp149 result.QN $const5 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{282} %argrw{"wrr"}
+	mul		$tmp150 ___421_sinAng $tmp149 	%argrw{"wrr"}
+	compref		$tmp151 result.QN $const1 	%argrw{"wrr"}
+	mul		$tmp152 ___421_cosAng $tmp151 	%argrw{"wrr"}
+	add		$tmp153 $tmp150 $tmp152 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:283
 #                  Q[1],
-	compref		$tmp156 result.QN $const2 	%line{283} %argrw{"wrr"}
+	compref		$tmp154 result.QN $const2 	%line{283} %argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:284
 #                  cosAng * Q[2] - sinAng * Q[0]);
-	compref		$tmp157 result.QN $const5 	%line{284} %argrw{"wrr"}
-	mul		$tmp158 ___401_cosAng $tmp157 	%argrw{"wrr"}
-	compref		$tmp159 result.QN $const1 	%argrw{"wrr"}
-	mul		$tmp160 ___401_sinAng $tmp159 	%argrw{"wrr"}
-	sub		$tmp161 $tmp158 $tmp160 	%argrw{"wrr"}
+	compref		$tmp155 result.QN $const5 	%line{284} %argrw{"wrr"}
+	mul		$tmp156 ___421_cosAng $tmp155 	%argrw{"wrr"}
+	compref		$tmp157 result.QN $const1 	%argrw{"wrr"}
+	mul		$tmp158 ___421_sinAng $tmp157 	%argrw{"wrr"}
+	sub		$tmp159 $tmp156 $tmp158 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:282
 #     return point(sinAng * Q[2] + cosAng * Q[0],
-	point		result.QN $tmp155 $tmp156 $tmp161 	%line{282} %argrw{"wrrr"}
+	point		result.QN $tmp153 $tmp154 $tmp159 	%line{282} %argrw{"wrrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:233
 #         manifold.QN = Math_RotateY(sinAng, cosAng, manifold.QN);
 	assign		result.QN result.QN 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{233} %argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:235
 #     if (abs(rotation[2]) > 0) {
-	compref		$tmp163 $const38 $const5 	%line{235} %argrw{"wrr"}
-	abs		$tmp162 $tmp163 	%argrw{"wr"}
-	gt		$tmp164 $tmp162 $const1 	%argrw{"wrr"}
-	if		$tmp164 336 336 	%argrw{"r"}
+	compref		$tmp161 $const38 $const5 	%line{235} %argrw{"wrr"}
+	abs		$tmp160 $tmp161 	%argrw{"wr"}
+	gt		$tmp162 $tmp160 $const1 	%argrw{"wrr"}
+	if		$tmp162 333 333 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:237
 #         sincos(-radians(rotation[2]), sinAng, cosAng);
-	compref		$tmp166 $const38 $const5 	%line{237} %argrw{"wrr"}
-	functioncall	$const41 306 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:88
+	compref		$tmp164 $const38 $const5 	%line{237} %argrw{"wrr"}
+	functioncall	$const41 303 	%argrw{"r"}
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:65
 # float  radians (float x)  { return x*(M_PI/180.0); }
-	div		$tmp167 $const42 $const43 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{88} %argrw{"wrr"}
-	mul		$tmp165 $tmp166 $tmp167 	%argrw{"wrr"}
+	mul		$tmp163 $tmp164 $const42 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{65} %argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:237
 #         sincos(-radians(rotation[2]), sinAng, cosAng);
-	neg		$tmp168 $tmp165 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{237} %argrw{"wr"}
-	sincos		$tmp168 ___402_sinAng ___402_cosAng 	%argrw{"rww"}
+	neg		$tmp165 $tmp163 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{237} %argrw{"wr"}
+	sincos		$tmp165 ___422_sinAng ___422_cosAng 	%argrw{"rww"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:238
 #         manifold.Q = Math_RotateZ(sinAng, cosAng, manifold.Q);
-	functioncall	$const46 321 	%line{238} %argrw{"r"}
+	functioncall	$const45 318 	%line{238} %argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:301
 #     return point(cosAng * Q[0] - sinAng * Q[1],
-	compref		$tmp169 result.Q $const1 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{301} %argrw{"wrr"}
-	mul		$tmp170 ___402_cosAng $tmp169 	%argrw{"wrr"}
-	compref		$tmp171 result.Q $const2 	%argrw{"wrr"}
-	mul		$tmp172 ___402_sinAng $tmp171 	%argrw{"wrr"}
-	sub		$tmp173 $tmp170 $tmp172 	%argrw{"wrr"}
+	compref		$tmp166 result.Q $const1 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{301} %argrw{"wrr"}
+	mul		$tmp167 ___422_cosAng $tmp166 	%argrw{"wrr"}
+	compref		$tmp168 result.Q $const2 	%argrw{"wrr"}
+	mul		$tmp169 ___422_sinAng $tmp168 	%argrw{"wrr"}
+	sub		$tmp170 $tmp167 $tmp169 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:302
 #                  sinAng * Q[0] + cosAng * Q[1],
-	compref		$tmp174 result.Q $const1 	%line{302} %argrw{"wrr"}
-	mul		$tmp175 ___402_sinAng $tmp174 	%argrw{"wrr"}
-	compref		$tmp176 result.Q $const2 	%argrw{"wrr"}
-	mul		$tmp177 ___402_cosAng $tmp176 	%argrw{"wrr"}
-	add		$tmp178 $tmp175 $tmp177 	%argrw{"wrr"}
+	compref		$tmp171 result.Q $const1 	%line{302} %argrw{"wrr"}
+	mul		$tmp172 ___422_sinAng $tmp171 	%argrw{"wrr"}
+	compref		$tmp173 result.Q $const2 	%argrw{"wrr"}
+	mul		$tmp174 ___422_cosAng $tmp173 	%argrw{"wrr"}
+	add		$tmp175 $tmp172 $tmp174 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:303
 #                  Q[2]);
-	compref		$tmp179 result.Q $const5 	%line{303} %argrw{"wrr"}
+	compref		$tmp176 result.Q $const5 	%line{303} %argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:301
 #     return point(cosAng * Q[0] - sinAng * Q[1],
-	point		result.Q $tmp173 $tmp178 $tmp179 	%line{301} %argrw{"wrrr"}
+	point		result.Q $tmp170 $tmp175 $tmp176 	%line{301} %argrw{"wrrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:238
 #         manifold.Q = Math_RotateZ(sinAng, cosAng, manifold.Q);
 	assign		result.Q result.Q 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{238} %argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:239
 #         manifold.QN = Math_RotateZ(sinAng, cosAng, manifold.QN);
-	functioncall	$const46 335 	%line{239} %argrw{"r"}
+	functioncall	$const45 332 	%line{239} %argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:301
 #     return point(cosAng * Q[0] - sinAng * Q[1],
-	compref		$tmp180 result.QN $const1 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{301} %argrw{"wrr"}
-	mul		$tmp181 ___402_cosAng $tmp180 	%argrw{"wrr"}
-	compref		$tmp182 result.QN $const2 	%argrw{"wrr"}
-	mul		$tmp183 ___402_sinAng $tmp182 	%argrw{"wrr"}
-	sub		$tmp184 $tmp181 $tmp183 	%argrw{"wrr"}
+	compref		$tmp177 result.QN $const1 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{301} %argrw{"wrr"}
+	mul		$tmp178 ___422_cosAng $tmp177 	%argrw{"wrr"}
+	compref		$tmp179 result.QN $const2 	%argrw{"wrr"}
+	mul		$tmp180 ___422_sinAng $tmp179 	%argrw{"wrr"}
+	sub		$tmp181 $tmp178 $tmp180 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:302
 #                  sinAng * Q[0] + cosAng * Q[1],
-	compref		$tmp185 result.QN $const1 	%line{302} %argrw{"wrr"}
-	mul		$tmp186 ___402_sinAng $tmp185 	%argrw{"wrr"}
-	compref		$tmp187 result.QN $const2 	%argrw{"wrr"}
-	mul		$tmp188 ___402_cosAng $tmp187 	%argrw{"wrr"}
-	add		$tmp189 $tmp186 $tmp188 	%argrw{"wrr"}
+	compref		$tmp182 result.QN $const1 	%line{302} %argrw{"wrr"}
+	mul		$tmp183 ___422_sinAng $tmp182 	%argrw{"wrr"}
+	compref		$tmp184 result.QN $const2 	%argrw{"wrr"}
+	mul		$tmp185 ___422_cosAng $tmp184 	%argrw{"wrr"}
+	add		$tmp186 $tmp183 $tmp185 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:303
 #                  Q[2]);
-	compref		$tmp190 result.QN $const5 	%line{303} %argrw{"wrr"}
+	compref		$tmp187 result.QN $const5 	%line{303} %argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:301
 #     return point(cosAng * Q[0] - sinAng * Q[1],
-	point		result.QN $tmp184 $tmp189 $tmp190 	%line{301} %argrw{"wrrr"}
+	point		result.QN $tmp181 $tmp186 $tmp187 	%line{301} %argrw{"wrrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:239
 #         manifold.QN = Math_RotateZ(sinAng, cosAng, manifold.QN);
 	assign		result.QN result.QN 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{239} %argrw{"wr"}
@@ -948,43 +941,43 @@ code ___main___
 	assign		result.QN result.QN 	%argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:245
 #     vector scaleFactor = vector(Math_SafeDivide(frequency, scale[0]),
-	compref		$tmp192 $tmp101 $const1 	%line{245} %argrw{"wrr"}
-	functioncall	$const47 345 	%argrw{"r"}
+	compref		$tmp189 $tmp101 $const1 	%line{245} %argrw{"wrr"}
+	functioncall	$const46 342 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:176
 #     return (dem == 0) ? 0. : num/dem;
-	eq		$tmp193 $tmp192 $const1 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{176} %argrw{"wrr"}
-	if		$tmp193 343 344 	%argrw{"r"}
-	assign		$tmp191 $const10 	%argrw{"wr"}
-	div		$tmp191 scale $tmp192 	%argrw{"wrr"}
+	eq		$tmp190 $tmp189 $const1 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{176} %argrw{"wrr"}
+	if		$tmp190 340 341 	%argrw{"r"}
+	assign		$tmp188 $const10 	%argrw{"wr"}
+	div		$tmp188 scale $tmp189 	%argrw{"wrr"}
 	return
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:246
 #                                 Math_SafeDivide(frequency, scale[1]),
-	compref		$tmp195 $tmp101 $const2 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{246} %argrw{"wrr"}
-	functioncall	$const47 352 	%argrw{"r"}
+	compref		$tmp192 $tmp101 $const2 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{246} %argrw{"wrr"}
+	functioncall	$const46 349 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:176
 #     return (dem == 0) ? 0. : num/dem;
-	eq		$tmp196 $tmp195 $const1 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{176} %argrw{"wrr"}
-	if		$tmp196 350 351 	%argrw{"r"}
-	assign		$tmp194 $const10 	%argrw{"wr"}
-	div		$tmp194 scale $tmp195 	%argrw{"wrr"}
+	eq		$tmp193 $tmp192 $const1 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{176} %argrw{"wrr"}
+	if		$tmp193 347 348 	%argrw{"r"}
+	assign		$tmp191 $const10 	%argrw{"wr"}
+	div		$tmp191 scale $tmp192 	%argrw{"wrr"}
 	return
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:247
 #                                 Math_SafeDivide(frequency, scale[2]));
-	compref		$tmp198 $tmp101 $const5 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{247} %argrw{"wrr"}
-	functioncall	$const47 359 	%argrw{"r"}
+	compref		$tmp195 $tmp101 $const5 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{247} %argrw{"wrr"}
+	functioncall	$const46 356 	%argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:176
 #     return (dem == 0) ? 0. : num/dem;
-	eq		$tmp199 $tmp198 $const1 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{176} %argrw{"wrr"}
-	if		$tmp199 357 358 	%argrw{"r"}
-	assign		$tmp197 $const10 	%argrw{"wr"}
-	div		$tmp197 scale $tmp198 	%argrw{"wrr"}
+	eq		$tmp196 $tmp195 $const1 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{176} %argrw{"wrr"}
+	if		$tmp196 354 355 	%argrw{"r"}
+	assign		$tmp194 $const10 	%argrw{"wr"}
+	div		$tmp194 scale $tmp195 	%argrw{"wrr"}
 	return
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:245
 #     vector scaleFactor = vector(Math_SafeDivide(frequency, scale[0]),
-	vector		___399_scaleFactor $tmp191 $tmp194 $tmp197 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{245} %argrw{"wrrr"}
+	vector		___419_scaleFactor $tmp188 $tmp191 $tmp194 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h"} %line{245} %argrw{"wrrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:248
 #     manifold.Q *= scaleFactor;
-	mul		result.Q result.Q ___399_scaleFactor 	%line{248} %argrw{"wrr"}
+	mul		result.Q result.Q ___419_scaleFactor 	%line{248} %argrw{"wrr"}
 	assign		result.Q result.Q 	%argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:250
 #     manifold.Q += origin;
@@ -992,30 +985,30 @@ code ___main___
 	assign		result.Q result.Q 	%argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:251
 #     manifold.Q += offsetVector*offset;
-	mul		$tmp200 $const39 $const10 	%line{251} %argrw{"wrr"}
-	add		result.Q result.Q $tmp200 	%argrw{"wrr"}
+	mul		$tmp197 $const39 $const10 	%line{251} %argrw{"wrr"}
+	add		result.Q result.Q $tmp197 	%argrw{"wrr"}
 	assign		result.Q result.Q 	%argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:256
 #     manifold.Qradius *= max(abs(scaleFactor[0]),
-	compref		$tmp203 ___399_scaleFactor $const1 	%line{256} %argrw{"wrr"}
-	abs		$tmp202 $tmp203 	%argrw{"wr"}
+	compref		$tmp200 ___419_scaleFactor $const1 	%line{256} %argrw{"wrr"}
+	abs		$tmp199 $tmp200 	%argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:257
 #                              max(abs(scaleFactor[1]),
-	compref		$tmp206 ___399_scaleFactor $const2 	%line{257} %argrw{"wrr"}
-	abs		$tmp205 $tmp206 	%argrw{"wr"}
+	compref		$tmp203 ___419_scaleFactor $const2 	%line{257} %argrw{"wrr"}
+	abs		$tmp202 $tmp203 	%argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:258
 #                                  abs(scaleFactor[2])));
-	compref		$tmp208 ___399_scaleFactor $const5 	%line{258} %argrw{"wrr"}
-	abs		$tmp207 $tmp208 	%argrw{"wr"}
+	compref		$tmp205 ___419_scaleFactor $const5 	%line{258} %argrw{"wrr"}
+	abs		$tmp204 $tmp205 	%argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:257
 #                              max(abs(scaleFactor[1]),
-	max		$tmp204 $tmp205 $tmp207 	%line{257} %argrw{"wrr"}
+	max		$tmp201 $tmp202 $tmp204 	%line{257} %argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:256
 #     manifold.Qradius *= max(abs(scaleFactor[0]),
-	max		$tmp201 $tmp202 $tmp204 	%line{256} %argrw{"wrr"}
+	max		$tmp198 $tmp199 $tmp201 	%line{256} %argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:258
 #                                  abs(scaleFactor[2])));
-	mul		result.Qradius result.Qradius $tmp201 	%line{258} %argrw{"wrr"}
+	mul		result.Qradius result.Qradius $tmp198 	%line{258} %argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Manifold.h:256
 #     manifold.Qradius *= max(abs(scaleFactor[0]),
 	assign		result.Qradius result.Qradius 	%line{256} %argrw{"wr"}

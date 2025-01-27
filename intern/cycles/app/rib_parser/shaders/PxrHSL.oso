@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
-# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrHSL.osl/obj/PxrHSL.oso
+# Compiled by oslc 1.13.0.@PROJECT_VERSION_TWEAK@"dev"
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxSonoma_x86-64_clang15_external_release/osl/PxrHSL.osl/obj/PxrHSL.oso
 shader PxrHSL	%meta{int,rfm_nodeid,1053429} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/color"} %meta{string,rfh_classification,"Pattern/Color"} %meta{string,help,"Adjust the hue, saturation and value of a given input color. Note the output is in RGB color space. "} 
 param	color	inputRGB	0 0 0		%meta{string,widget,"color"} %meta{string,help,"The color to have HSL adjustments applied to it."} %meta{string,label,"Input Color"}  %read{0,0} %write{2147483647,-1}
 param	int	hdrInput	0		%meta{string,widget,"checkBox"} %meta{string,help,"When enabled (set to 1) the output is not clamped."} %meta{string,label,"HDR Input"} %meta{int,connectable,0}  %read{1,38} %write{2147483647,-1}
@@ -11,8 +11,8 @@ oparam	color	resultRGB	0 0 0		%meta{string,help,"resultRGB (color)"}  %read{58,6
 oparam	float	resultR	0		%meta{string,help,"resultR (float)"}  %read{2147483647,-1} %write{58,58}
 oparam	float	resultG	0		%meta{string,help,"resultG (float)"}  %read{2147483647,-1} %write{59,59}
 oparam	float	resultB	0		%meta{string,help,"resultB (float)"}  %read{2147483647,-1} %write{60,60}
-local	color	___325_result	%read{4,19} %write{3,18}
-local	color	___326_result	%read{41,56} %write{40,55}
+local	color	___345_result	%read{4,19} %write{3,18}
+local	color	___346_result	%read{41,56} %write{40,55}
 local	color	colorRemap	%read{3,57} %write{0,56}
 local	color	hsl	%read{21,37} %write{20,36}
 const	string	$const1	"reinhardMap"		%read{2,2} %write{2147483647,-1}
@@ -72,31 +72,31 @@ code ___main___
 	functioncall	$const1 20 	%line{125} %argrw{"r"}
 # PxrHSL.osl:40
 #     color result = input;
-	assign		___325_result colorRemap 	%line{40} %argrw{"wr"}
+	assign		___345_result colorRemap 	%line{40} %argrw{"wr"}
 # PxrHSL.osl:41
 #     result[0] = result[0] / (result[0] + 1.0);
-	compref		$tmp1 ___325_result $const2 	%line{41} %argrw{"wrr"}
-	compref		$tmp2 ___325_result $const2 	%argrw{"wrr"}
+	compref		$tmp1 ___345_result $const2 	%line{41} %argrw{"wrr"}
+	compref		$tmp2 ___345_result $const2 	%argrw{"wrr"}
 	add		$tmp3 $tmp2 $const3 	%argrw{"wrr"}
 	div		$tmp4 $tmp1 $tmp3 	%argrw{"wrr"}
-	compassign	___325_result $const2 $tmp4 	%argrw{"wrr"}
+	compassign	___345_result $const2 $tmp4 	%argrw{"wrr"}
 # PxrHSL.osl:42
 #     result[1] = result[1] / (result[1] + 1.0);
-	compref		$tmp5 ___325_result $const4 	%line{42} %argrw{"wrr"}
-	compref		$tmp6 ___325_result $const4 	%argrw{"wrr"}
+	compref		$tmp5 ___345_result $const4 	%line{42} %argrw{"wrr"}
+	compref		$tmp6 ___345_result $const4 	%argrw{"wrr"}
 	add		$tmp7 $tmp6 $const3 	%argrw{"wrr"}
 	div		$tmp8 $tmp5 $tmp7 	%argrw{"wrr"}
-	compassign	___325_result $const4 $tmp8 	%argrw{"wrr"}
+	compassign	___345_result $const4 $tmp8 	%argrw{"wrr"}
 # PxrHSL.osl:43
 #     result[2] = result[2] / (result[2] + 1.0);
-	compref		$tmp9 ___325_result $const5 	%line{43} %argrw{"wrr"}
-	compref		$tmp10 ___325_result $const5 	%argrw{"wrr"}
+	compref		$tmp9 ___345_result $const5 	%line{43} %argrw{"wrr"}
+	compref		$tmp10 ___345_result $const5 	%argrw{"wrr"}
 	add		$tmp11 $tmp10 $const3 	%argrw{"wrr"}
 	div		$tmp12 $tmp9 $tmp11 	%argrw{"wrr"}
-	compassign	___325_result $const5 $tmp12 	%argrw{"wrr"}
+	compassign	___345_result $const5 $tmp12 	%argrw{"wrr"}
 # PxrHSL.osl:44
 #     return result;
-	assign		colorRemap ___325_result 	%line{44} %argrw{"wr"}
+	assign		colorRemap ___345_result 	%line{44} %argrw{"wr"}
 # PxrHSL.osl:128
 #     color hsl = transformc("rgb", "hsl", colorRemap);
 	transformc	hsl $const6 $const7 colorRemap 	%line{128} %argrw{"wrrr"}
@@ -111,9 +111,9 @@ code ___main___
 	compref		$tmp17 hsl $const4 	%line{131} %argrw{"wrr"}
 	mul		$tmp18 $tmp17 saturation 	%argrw{"wrr"}
 	functioncall	$const9 30 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:141
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp19 $tmp18 $const3 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp19 $tmp18 $const3 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{141} %argrw{"wrr"}
 	max		$tmp16 $tmp19 $const8 	%argrw{"wrr"}
 # PxrHSL.osl:131
 #     hsl[1] = clamp(hsl[1] * saturation, 0, 1);
@@ -123,9 +123,9 @@ code ___main___
 	compref		$tmp21 hsl $const5 	%line{132} %argrw{"wrr"}
 	mul		$tmp22 $tmp21 lum 	%argrw{"wrr"}
 	functioncall	$const9 36 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:141
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp23 $tmp22 $const3 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp23 $tmp22 $const3 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{141} %argrw{"wrr"}
 	max		$tmp20 $tmp23 $const8 	%argrw{"wrr"}
 # PxrHSL.osl:132
 #     hsl[2] = clamp(hsl[2] * lum, 0, 1);
@@ -141,31 +141,31 @@ code ___main___
 	functioncall	$const10 57 	%line{137} %argrw{"r"}
 # PxrHSL.osl:50
 #     color result = input;
-	assign		___326_result colorRemap 	%line{50} %argrw{"wr"}
+	assign		___346_result colorRemap 	%line{50} %argrw{"wr"}
 # PxrHSL.osl:51
 #     result[0] = result[0] / (1.0 - result[0]);
-	compref		$tmp24 ___326_result $const2 	%line{51} %argrw{"wrr"}
-	compref		$tmp25 ___326_result $const2 	%argrw{"wrr"}
+	compref		$tmp24 ___346_result $const2 	%line{51} %argrw{"wrr"}
+	compref		$tmp25 ___346_result $const2 	%argrw{"wrr"}
 	sub		$tmp26 $const3 $tmp25 	%argrw{"wrr"}
 	div		$tmp27 $tmp24 $tmp26 	%argrw{"wrr"}
-	compassign	___326_result $const2 $tmp27 	%argrw{"wrr"}
+	compassign	___346_result $const2 $tmp27 	%argrw{"wrr"}
 # PxrHSL.osl:52
 #     result[1] = result[1] / (1.0 - result[1]);
-	compref		$tmp28 ___326_result $const4 	%line{52} %argrw{"wrr"}
-	compref		$tmp29 ___326_result $const4 	%argrw{"wrr"}
+	compref		$tmp28 ___346_result $const4 	%line{52} %argrw{"wrr"}
+	compref		$tmp29 ___346_result $const4 	%argrw{"wrr"}
 	sub		$tmp30 $const3 $tmp29 	%argrw{"wrr"}
 	div		$tmp31 $tmp28 $tmp30 	%argrw{"wrr"}
-	compassign	___326_result $const4 $tmp31 	%argrw{"wrr"}
+	compassign	___346_result $const4 $tmp31 	%argrw{"wrr"}
 # PxrHSL.osl:53
 #     result[2] = result[2] / (1.0 - result[2]);
-	compref		$tmp32 ___326_result $const5 	%line{53} %argrw{"wrr"}
-	compref		$tmp33 ___326_result $const5 	%argrw{"wrr"}
+	compref		$tmp32 ___346_result $const5 	%line{53} %argrw{"wrr"}
+	compref		$tmp33 ___346_result $const5 	%argrw{"wrr"}
 	sub		$tmp34 $const3 $tmp33 	%argrw{"wrr"}
 	div		$tmp35 $tmp32 $tmp34 	%argrw{"wrr"}
-	compassign	___326_result $const5 $tmp35 	%argrw{"wrr"}
+	compassign	___346_result $const5 $tmp35 	%argrw{"wrr"}
 # PxrHSL.osl:54
 #     return result;
-	assign		colorRemap ___326_result 	%line{54} %argrw{"wr"}
+	assign		colorRemap ___346_result 	%line{54} %argrw{"wr"}
 # PxrHSL.osl:140
 #     resultRGB = colorRemap;
 	assign		resultRGB colorRemap 	%line{140} %argrw{"wr"}

@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
-# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrSetRange.osl/obj/PxrSetRange.oso
+# Compiled by oslc 1.13.0.@PROJECT_VERSION_TWEAK@"dev"
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxSonoma_x86-64_clang15_external_release/osl/PxrSetRange.osl/obj/PxrSetRange.oso
 shader PxrSetRange	%meta{int,rfm_nodeid,1233493} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/color"} %meta{string,rfh_classification,"Pattern/Color"} 
 param	int	operation	1		%meta{string,label,"Operation"} %meta{string,widget,"mapper"} %meta{string,options,"No operation:0|Compress:1|Expand:2|Fit:3"} %meta{int,connectable,0} %meta{string,help,"Compress: Remaps input in [0,1] to [outputMin, outputMax]<br>Expand: Remaps input in [inputMin, inputMax] to [0,1]<br>Fit: Remaps input from the range [inputMin, inputMax] to the range [outputMin, outputMax]<br>"}  %read{2,78} %write{2147483647,-1}
 param	color	input	0 0 0		%meta{string,label,"Input"} %meta{int,color_enableFilmlookVis,0}  %read{5,126} %write{2147483647,-1} %derivs
@@ -14,7 +14,7 @@ oparam	color	resultRGB	0 0 0		%meta{string,match,"output"}  %read{132,192} %writ
 oparam	float	resultR	0		%meta{string,match,"outputX"}  %read{2147483647,-1} %write{190,190}
 oparam	float	resultG	0		%meta{string,match,"outputY"}  %read{2147483647,-1} %write{191,191}
 oparam	float	resultB	0		%meta{string,match,"outputZ"}  %read{2147483647,-1} %write{192,192}
-local	float	___387_w	%read{147,186} %write{146,182} %derivs
+local	float	___407_w	%read{147,186} %write{146,182} %derivs
 local	color	cmin	%read{133,172} %write{0,124} %derivs
 local	color	cmax	%read{132,173} %write{1,125} %derivs
 const	color	$const1	0 0 0		%read{0,0} %write{2147483647,-1}
@@ -366,9 +366,9 @@ code ___main___
 	le		$tmp85 clampFilterWidth $const8 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{210} %argrw{"wrr"}
 	if		$tmp85 135 135 	%argrw{"r"}
 	functioncall	$const13 134 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:140
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp86 resultRGB cmax 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	min		$tmp86 resultRGB cmax 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{140} %argrw{"wrr"}
 	max		resultRGB $tmp86 cmin 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:210
 #     if (fwidth <= 0.0) return clamp(c, cmin, cmax);
@@ -384,9 +384,9 @@ code ___main___
 	le		$tmp91 clampFilterWidth $const8 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{615} %argrw{"wrr"}
 	if		$tmp91 145 145 	%argrw{"r"}
 	functioncall	$const13 144 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:141
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp92 $tmp88 $tmp90 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp92 $tmp88 $tmp90 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{141} %argrw{"wrr"}
 	max		$tmp87 $tmp92 $tmp89 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:615
 #     if (fwidth <= 0.0) return clamp(x, fmin, fmax);
@@ -394,13 +394,13 @@ code ___main___
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:616
 #     float w = filterwidth(x) * fwidth;
 	filterwidth	$tmp93 $tmp88 	%line{616} %argrw{"wr"} %argderivs{1}
-	mul		___387_w $tmp93 clampFilterWidth 	%argrw{"wrr"}
+	mul		___407_w $tmp93 clampFilterWidth 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:617
 #     return mix(fmin, mix(x, fmax, smoothstep(fmax - w, fmax, x)), smoothstep(fmin, fmin + w, x));
-	sub		$tmp96 $tmp90 ___387_w 	%line{617} %argrw{"wrr"}
+	sub		$tmp96 $tmp90 ___407_w 	%line{617} %argrw{"wrr"}
 	smoothstep	$tmp95 $tmp96 $tmp90 $tmp88 	%argrw{"wrrr"}
 	mix		$tmp94 $tmp88 $tmp90 $tmp95 	%argrw{"wrrr"}
-	add		$tmp98 $tmp89 ___387_w 	%argrw{"wrr"}
+	add		$tmp98 $tmp89 ___407_w 	%argrw{"wrr"}
 	smoothstep	$tmp97 $tmp89 $tmp98 $tmp88 	%argrw{"wrrr"}
 	mix		$tmp87 $tmp89 $tmp94 $tmp97 	%argrw{"wrrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:212
@@ -414,9 +414,9 @@ code ___main___
 	le		$tmp103 clampFilterWidth $const8 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{615} %argrw{"wrr"}
 	if		$tmp103 163 163 	%argrw{"r"}
 	functioncall	$const13 162 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:141
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp104 $tmp100 $tmp102 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp104 $tmp100 $tmp102 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{141} %argrw{"wrr"}
 	max		$tmp99 $tmp104 $tmp101 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:615
 #     if (fwidth <= 0.0) return clamp(x, fmin, fmax);
@@ -424,13 +424,13 @@ code ___main___
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:616
 #     float w = filterwidth(x) * fwidth;
 	filterwidth	$tmp105 $tmp100 	%line{616} %argrw{"wr"} %argderivs{1}
-	mul		___387_w $tmp105 clampFilterWidth 	%argrw{"wrr"}
+	mul		___407_w $tmp105 clampFilterWidth 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:617
 #     return mix(fmin, mix(x, fmax, smoothstep(fmax - w, fmax, x)), smoothstep(fmin, fmin + w, x));
-	sub		$tmp108 $tmp102 ___387_w 	%line{617} %argrw{"wrr"}
+	sub		$tmp108 $tmp102 ___407_w 	%line{617} %argrw{"wrr"}
 	smoothstep	$tmp107 $tmp108 $tmp102 $tmp100 	%argrw{"wrrr"}
 	mix		$tmp106 $tmp100 $tmp102 $tmp107 	%argrw{"wrrr"}
-	add		$tmp110 $tmp101 ___387_w 	%argrw{"wrr"}
+	add		$tmp110 $tmp101 ___407_w 	%argrw{"wrr"}
 	smoothstep	$tmp109 $tmp101 $tmp110 $tmp100 	%argrw{"wrrr"}
 	mix		$tmp99 $tmp101 $tmp106 $tmp109 	%argrw{"wrrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:213
@@ -444,9 +444,9 @@ code ___main___
 	le		$tmp115 clampFilterWidth $const8 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h"} %line{615} %argrw{"wrr"}
 	if		$tmp115 181 181 	%argrw{"r"}
 	functioncall	$const13 180 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:141
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp116 $tmp112 $tmp114 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp116 $tmp112 $tmp114 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{141} %argrw{"wrr"}
 	max		$tmp111 $tmp116 $tmp113 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:615
 #     if (fwidth <= 0.0) return clamp(x, fmin, fmax);
@@ -454,13 +454,13 @@ code ___main___
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:616
 #     float w = filterwidth(x) * fwidth;
 	filterwidth	$tmp117 $tmp112 	%line{616} %argrw{"wr"} %argderivs{1}
-	mul		___387_w $tmp117 clampFilterWidth 	%argrw{"wrr"}
+	mul		___407_w $tmp117 clampFilterWidth 	%argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Math.h:617
 #     return mix(fmin, mix(x, fmax, smoothstep(fmax - w, fmax, x)), smoothstep(fmin, fmin + w, x));
-	sub		$tmp120 $tmp114 ___387_w 	%line{617} %argrw{"wrr"}
+	sub		$tmp120 $tmp114 ___407_w 	%line{617} %argrw{"wrr"}
 	smoothstep	$tmp119 $tmp120 $tmp114 $tmp112 	%argrw{"wrrr"}
 	mix		$tmp118 $tmp112 $tmp114 $tmp119 	%argrw{"wrrr"}
-	add		$tmp122 $tmp113 ___387_w 	%argrw{"wrr"}
+	add		$tmp122 $tmp113 ___407_w 	%argrw{"wrr"}
 	smoothstep	$tmp121 $tmp113 $tmp122 $tmp112 	%argrw{"wrrr"}
 	mix		$tmp111 $tmp113 $tmp118 $tmp121 	%argrw{"wrrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:211

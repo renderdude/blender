@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
-# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrFacingRatio.osl/obj/PxrFacingRatio.oso
+# Compiled by oslc 1.13.0.@PROJECT_VERSION_TWEAK@"dev"
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxSonoma_x86-64_clang15_external_release/osl/PxrFacingRatio.osl/obj/PxrFacingRatio.oso
 shader PxrFacingRatio	%meta{int,rfm_nodeid,1053349} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/geometry"} %meta{string,rfh_classification,"Pattern/Geometry"} %meta{string,help,"Computes the facing ratio of the geometry : a simple dot product between the camera vector and the surface normal."} 
 param	int	use	0		%meta{string,widget,"mapper"} %meta{string,options,"Camera:0|Direction:1"} %meta{string,page,"Parameters"} %meta{int,page_open,1} %meta{string,help,"Traditionnaly, the facing ratio is computed using the surface normal and the camera vector : This is the Camera mode. It can also be useful to the surface normal with an arbitrary direction, for example to create a dust mask on up-facing parts of a model : This is the Direction mode."} %meta{int,connectable,0} %meta{string,label,"Use"}  %read{5,5} %write{2147483647,-1}
 param	vector	direction	0 1 0		%meta{string,widget,"default"} %meta{string,page,"Parameters"} %meta{string,help,"Only active in Direction mode. Defines an direction of your choice"} %meta{int,connectable,0} %meta{string,label,"Direction"}  %read{9,9} %write{2147483647,-1}
@@ -15,11 +15,11 @@ param	normal	bumpNormal	0 0 0		%meta{string,widget,"default"} %meta{string,page,
 oparam	float	resultF	0		%meta{string,help,"resultF (float)"}  %read{17,63} %write{14,63}
 global	vector	I	%read{7,7} %write{2147483647,-1}
 global	normal	N	%read{3,3} %write{2147483647,-1}
-local	float	___325_f	%read{56,58} %write{55,55}
-local	float	___325_f2	%read{57,57} %write{56,56}
+local	float	___345_f	%read{56,58} %write{55,55}
+local	float	___345_f2	%read{57,57} %write{56,56}
 local	normal	Nn	%read{14,14} %write{3,4}
 local	vector	Vn	%read{12,14} %write{8,13}
-local	float	___332_r0	%read{44,60} %write{43,44}
+local	float	___352_r0	%read{44,60} %write{43,44}
 temp	int	$tmp1	%read{1,1} %write{0,0}
 temp	int	$tmp2	%read{2,2} %write{1,1}
 const	int	$const1	0		%read{1,61} %write{2147483647,-1}
@@ -134,13 +134,13 @@ code ___main___
 #         float r0 = ((1.0 - ior) / (1 + ior));
 	sub		$tmp16 $const5 ior 	%line{228} %argrw{"wrr"}
 	add		$tmp17 $const5 ior 	%argrw{"wrr"}
-	div		___332_r0 $tmp16 $tmp17 	%argrw{"wrr"}
+	div		___352_r0 $tmp16 $tmp17 	%argrw{"wrr"}
 # PxrFacingRatio.osl:229
 #         r0 *= r0;
-	mul		___332_r0 ___332_r0 ___332_r0 	%line{229} %argrw{"wrr"}
+	mul		___352_r0 ___352_r0 ___352_r0 	%line{229} %argrw{"wrr"}
 # PxrFacingRatio.osl:231
 #         resultF = r0 + (1.0 - r0) * RixSchlickFresnelWeight(resultF);
-	sub		$tmp18 $const5 ___332_r0 	%line{231} %argrw{"wrr"}
+	sub		$tmp18 $const5 ___352_r0 	%line{231} %argrw{"wrr"}
 	functioncall	$const9 59 	%argrw{"r"}
 # PxrFacingRatio.osl:43
 #     if (NdV <= 0.0) return 1.0;
@@ -156,18 +156,18 @@ code ___main___
 	return
 # PxrFacingRatio.osl:45
 #     float f = 1.0 - NdV;
-	sub		___325_f $const5 resultF 	%line{45} %argrw{"wrr"}
+	sub		___345_f $const5 resultF 	%line{45} %argrw{"wrr"}
 # PxrFacingRatio.osl:46
 #     float f2 = f * f;
-	mul		___325_f2 ___325_f ___325_f 	%line{46} %argrw{"wrr"}
+	mul		___345_f2 ___345_f ___345_f 	%line{46} %argrw{"wrr"}
 # PxrFacingRatio.osl:47
 #     return f2 * f2 * f;  // pow(f, 5); -- result between 0.0 and 1.0
-	mul		$tmp22 ___325_f2 ___325_f2 	%line{47} %argrw{"wrr"}
-	mul		$tmp19 $tmp22 ___325_f 	%argrw{"wrr"}
+	mul		$tmp22 ___345_f2 ___345_f2 	%line{47} %argrw{"wrr"}
+	mul		$tmp19 $tmp22 ___345_f 	%argrw{"wrr"}
 # PxrFacingRatio.osl:231
 #         resultF = r0 + (1.0 - r0) * RixSchlickFresnelWeight(resultF);
 	mul		$tmp23 $tmp18 $tmp19 	%line{231} %argrw{"wrr"}
-	add		resultF ___332_r0 $tmp23 	%argrw{"wrr"}
+	add		resultF ___352_r0 $tmp23 	%argrw{"wrr"}
 # PxrFacingRatio.osl:233
 #         if (invert == 0) resultF = 1.0 - resultF;
 	eq		$tmp24 invert $const1 	%line{233} %argrw{"wrr"}

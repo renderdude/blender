@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
-# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrSplineMap.osl/obj/PxrSplineMap.oso
+# Compiled by oslc 1.13.0.@PROJECT_VERSION_TWEAK@"dev"
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxSonoma_x86-64_clang15_external_release/osl/PxrSplineMap.osl/obj/PxrSplineMap.oso
 shader PxrSplineMap	%meta{int,rfm_nodeid,1233495} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/utility"} %meta{string,rfh_classification,"Pattern/Utility"} %meta{string,help,"Remap an incoming float signal through a user-defined spline with optional colorizing controls."} 
 param	float	input	0		%read{3,8} %write{2147483647,-1}
 param	float	inputMin	0		%meta{string,label,"Input Min"} %meta{int,slider,1} %meta{string,page,"Input Range"} %meta{int,page_open,1}  %read{1,9} %write{2147483647,-1}
@@ -22,26 +22,26 @@ oparam	color	resultRGB	0 0 0		%read{131,135} %write{82,129}
 oparam	color	resultR	0 0 0		%read{2147483647,-1} %write{132,132}
 oparam	color	resultG	0 0 0		%read{2147483647,-1} %write{134,134}
 oparam	color	resultB	0 0 0		%read{2147483647,-1} %write{136,136}
-local	int	___336_nknots	%read{19,65} %write{18,18}
-local	float[68]	___336_ka	%read{66,66} %write{29,63}
-local	float[68]	___336_va	%read{67,67} %write{29,63}
-local	int	___336_offset	%read{29,64} %write{25,26}
-local	int	___337_i	%read{29,36} %write{28,36}
-local	int	___339_i	%read{39,48} %write{38,48}
-local	int	___336_last	%read{52,63} %write{49,49}
-local	int	___341_i	%read{52,63} %write{51,63}
-local	int	___336_nk	%read{66,67} %write{65,65}
-local	float	___336_k	%read{67,67} %write{66,66}
-local	int	___343_nknots	%read{80,126} %write{79,79}
-local	float[68]	___343_ka	%read{127,127} %write{90,124}
-local	color[68]	___343_va	%read{128,128} %write{90,124}
-local	int	___343_offset	%read{90,125} %write{86,87}
-local	int	___344_i	%read{90,97} %write{89,97}
-local	int	___346_i	%read{100,109} %write{99,109}
-local	int	___343_last	%read{113,124} %write{110,110}
-local	int	___348_i	%read{113,124} %write{112,124}
-local	int	___343_nk	%read{127,128} %write{126,126}
-local	float	___343_k	%read{128,128} %write{127,127}
+local	int	___356_nknots	%read{19,65} %write{18,18}
+local	float[68]	___356_ka	%read{66,66} %write{29,63}
+local	float[68]	___356_va	%read{67,67} %write{29,63}
+local	int	___356_offset	%read{29,64} %write{25,26}
+local	int	___357_i	%read{29,36} %write{28,36}
+local	int	___359_i	%read{39,48} %write{38,48}
+local	int	___356_last	%read{52,63} %write{49,49}
+local	int	___361_i	%read{52,63} %write{51,63}
+local	int	___356_nk	%read{66,67} %write{65,65}
+local	float	___356_k	%read{67,67} %write{66,66}
+local	int	___363_nknots	%read{80,126} %write{79,79}
+local	float[68]	___363_ka	%read{127,127} %write{90,124}
+local	color[68]	___363_va	%read{128,128} %write{90,124}
+local	int	___363_offset	%read{90,125} %write{86,87}
+local	int	___364_i	%read{90,97} %write{89,97}
+local	int	___366_i	%read{100,109} %write{99,109}
+local	int	___363_last	%read{113,124} %write{110,110}
+local	int	___368_i	%read{113,124} %write{112,124}
+local	int	___363_nk	%read{127,128} %write{126,126}
+local	float	___363_k	%read{128,128} %write{127,127}
 const	string	$const1	"expand"		%read{0,0} %write{2147483647,-1}
 temp	int	$tmp1	%read{2,2} %write{1,1}
 temp	int	$tmp2	%read{4,4} %write{3,3}
@@ -139,9 +139,9 @@ code ___main___
 #     if (inputClamp) resultF = clamp(resultF, 0, 1);
 	if		inputClamp 16 16 	%filename{"PxrSplineMap.osl"} %line{188} %argrw{"r"}
 	functioncall	$const6 16 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:141
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp5 resultF $const3 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp5 resultF $const3 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{141} %argrw{"wrr"}
 	max		resultF $tmp5 $const2 	%argrw{"wrr"}
 # PxrSplineMap.osl:189
 #     resultF = float_ramp(resultF, floatRamp_Knots, floatRamp_Floats, floatRamp_Interpolation);
@@ -149,10 +149,10 @@ code ___main___
 # PxrSplineMap.osl:17
 #     int nknots = min(k_max_num_knots, arraylength(knots));
 	arraylength	$tmp6 floatRamp_Knots 	%line{17} %argrw{"wr"}
-	min		___336_nknots $const8 $tmp6 	%argrw{"wrr"}
+	min		___356_nknots $const8 $tmp6 	%argrw{"wrr"}
 # PxrSplineMap.osl:18
 #     if (nknots < 1) return input;
-	lt		$tmp7 ___336_nknots $const5 	%line{18} %argrw{"wrr"}
+	lt		$tmp7 ___356_nknots $const5 	%line{18} %argrw{"wrr"}
 	if		$tmp7 23 23 	%argrw{"r"}
 	assign		resultF resultF 	%argrw{"wr"}
 	return
@@ -160,81 +160,81 @@ code ___main___
 #     int offset = interp == "bezier" ? k_bezier_xtra : k_spline_xtra;
 	eq		$tmp8 floatRamp_Interpolation $const9 	%line{23} %argrw{"wrr"}
 	if		$tmp8 26 27 	%argrw{"r"}
-	assign		___336_offset $const10 	%argrw{"wr"}
-	assign		___336_offset $const5 	%argrw{"wr"}
+	assign		___356_offset $const10 	%argrw{"wr"}
+	assign		___356_offset $const5 	%argrw{"wr"}
 # PxrSplineMap.osl:24
 #     for (int i = 0; i < offset; i++)
 	for		$tmp10 29 31 35 37 	%line{24} %argrw{"r"}
-	assign		___337_i $const4 	%argrw{"wr"}
-	lt		$tmp9 ___337_i ___336_offset 	%argrw{"wrr"}
+	assign		___357_i $const4 	%argrw{"wr"}
+	lt		$tmp9 ___357_i ___356_offset 	%argrw{"wrr"}
 	neq		$tmp10 $tmp9 $const4 	%argrw{"wrr"}
 # PxrSplineMap.osl:26
 #         ka[i] = knots[0];
 	aref		$tmp11 floatRamp_Knots $const4 	%line{26} %argrw{"wrr"}
-	aassign		___336_ka ___337_i $tmp11 	%argrw{"wrr"}
+	aassign		___356_ka ___357_i $tmp11 	%argrw{"wrr"}
 # PxrSplineMap.osl:27
 #         va[i] = vals[0];
 	aref		$tmp12 floatRamp_Floats $const4 	%line{27} %argrw{"wrr"}
-	aassign		___336_va ___337_i $tmp12 	%argrw{"wrr"}
+	aassign		___356_va ___357_i $tmp12 	%argrw{"wrr"}
 # PxrSplineMap.osl:24
 #     for (int i = 0; i < offset; i++)
-	assign		$tmp13 ___337_i 	%line{24} %argrw{"wr"}
-	add		___337_i ___337_i $const5 	%argrw{"wrr"}
+	assign		$tmp13 ___357_i 	%line{24} %argrw{"wr"}
+	add		___357_i ___357_i $const5 	%argrw{"wrr"}
 # PxrSplineMap.osl:29
 #     for (int i = 0; i < nknots; i++)
 	for		$tmp15 39 41 47 49 	%line{29} %argrw{"r"}
-	assign		___339_i $const4 	%argrw{"wr"}
-	lt		$tmp14 ___339_i ___336_nknots 	%argrw{"wrr"}
+	assign		___359_i $const4 	%argrw{"wr"}
+	lt		$tmp14 ___359_i ___356_nknots 	%argrw{"wrr"}
 	neq		$tmp15 $tmp14 $const4 	%argrw{"wrr"}
 # PxrSplineMap.osl:31
 #         ka[i + offset] = knots[i];
-	aref		$tmp16 floatRamp_Knots ___339_i 	%line{31} %argrw{"wrr"}
-	add		$tmp17 ___339_i ___336_offset 	%argrw{"wrr"}
-	aassign		___336_ka $tmp17 $tmp16 	%argrw{"wrr"}
+	aref		$tmp16 floatRamp_Knots ___359_i 	%line{31} %argrw{"wrr"}
+	add		$tmp17 ___359_i ___356_offset 	%argrw{"wrr"}
+	aassign		___356_ka $tmp17 $tmp16 	%argrw{"wrr"}
 # PxrSplineMap.osl:32
 #         va[i + offset] = vals[i];
-	aref		$tmp18 floatRamp_Floats ___339_i 	%line{32} %argrw{"wrr"}
-	add		$tmp19 ___339_i ___336_offset 	%argrw{"wrr"}
-	aassign		___336_va $tmp19 $tmp18 	%argrw{"wrr"}
+	aref		$tmp18 floatRamp_Floats ___359_i 	%line{32} %argrw{"wrr"}
+	add		$tmp19 ___359_i ___356_offset 	%argrw{"wrr"}
+	aassign		___356_va $tmp19 $tmp18 	%argrw{"wrr"}
 # PxrSplineMap.osl:29
 #     for (int i = 0; i < nknots; i++)
-	assign		$tmp20 ___339_i 	%line{29} %argrw{"wr"}
-	add		___339_i ___339_i $const5 	%argrw{"wrr"}
+	assign		$tmp20 ___359_i 	%line{29} %argrw{"wr"}
+	add		___359_i ___359_i $const5 	%argrw{"wrr"}
 # PxrSplineMap.osl:34
 #     int last = nknots - 1;
-	sub		___336_last ___336_nknots $const5 	%line{34} %argrw{"wrr"}
+	sub		___356_last ___356_nknots $const5 	%line{34} %argrw{"wrr"}
 # PxrSplineMap.osl:35
 #     for (int i = 0; i < offset; i++)
 	for		$tmp22 52 54 62 64 	%line{35} %argrw{"r"}
-	assign		___341_i $const4 	%argrw{"wr"}
-	lt		$tmp21 ___341_i ___336_offset 	%argrw{"wrr"}
+	assign		___361_i $const4 	%argrw{"wr"}
+	lt		$tmp21 ___361_i ___356_offset 	%argrw{"wrr"}
 	neq		$tmp22 $tmp21 $const4 	%argrw{"wrr"}
 # PxrSplineMap.osl:37
 #         ka[nknots + offset + i] = knots[last];
-	aref		$tmp23 floatRamp_Knots ___336_last 	%line{37} %argrw{"wrr"}
-	add		$tmp24 ___336_nknots ___336_offset 	%argrw{"wrr"}
-	add		$tmp25 $tmp24 ___341_i 	%argrw{"wrr"}
-	aassign		___336_ka $tmp25 $tmp23 	%argrw{"wrr"}
+	aref		$tmp23 floatRamp_Knots ___356_last 	%line{37} %argrw{"wrr"}
+	add		$tmp24 ___356_nknots ___356_offset 	%argrw{"wrr"}
+	add		$tmp25 $tmp24 ___361_i 	%argrw{"wrr"}
+	aassign		___356_ka $tmp25 $tmp23 	%argrw{"wrr"}
 # PxrSplineMap.osl:38
 #         va[nknots + offset + i] = vals[last];
-	aref		$tmp26 floatRamp_Floats ___336_last 	%line{38} %argrw{"wrr"}
-	add		$tmp27 ___336_nknots ___336_offset 	%argrw{"wrr"}
-	add		$tmp28 $tmp27 ___341_i 	%argrw{"wrr"}
-	aassign		___336_va $tmp28 $tmp26 	%argrw{"wrr"}
+	aref		$tmp26 floatRamp_Floats ___356_last 	%line{38} %argrw{"wrr"}
+	add		$tmp27 ___356_nknots ___356_offset 	%argrw{"wrr"}
+	add		$tmp28 $tmp27 ___361_i 	%argrw{"wrr"}
+	aassign		___356_va $tmp28 $tmp26 	%argrw{"wrr"}
 # PxrSplineMap.osl:35
 #     for (int i = 0; i < offset; i++)
-	assign		$tmp29 ___341_i 	%line{35} %argrw{"wr"}
-	add		___341_i ___341_i $const5 	%argrw{"wrr"}
+	assign		$tmp29 ___361_i 	%line{35} %argrw{"wr"}
+	add		___361_i ___361_i $const5 	%argrw{"wrr"}
 # PxrSplineMap.osl:40
 #     int nk = nknots + offset * 2;
-	mul		$tmp30 ___336_offset $const10 	%line{40} %argrw{"wrr"}
-	add		___336_nk ___336_nknots $tmp30 	%argrw{"wrr"}
+	mul		$tmp30 ___356_offset $const10 	%line{40} %argrw{"wrr"}
+	add		___356_nk ___356_nknots $tmp30 	%argrw{"wrr"}
 # PxrSplineMap.osl:42
 #     float k = splineinverse(interp, input, nk, ka);
-	splineinverse	___336_k floatRamp_Interpolation resultF ___336_nk ___336_ka 	%line{42} %argrw{"wrrrr"}
+	splineinverse	___356_k floatRamp_Interpolation resultF ___356_nk ___356_ka 	%line{42} %argrw{"wrrrr"}
 # PxrSplineMap.osl:43
 #     return float(spline(interp, k, nk, va));
-	spline		resultF floatRamp_Interpolation ___336_k ___336_nk ___336_va 	%line{43} %argrw{"wrrrr"}
+	spline		resultF floatRamp_Interpolation ___356_k ___356_nk ___356_va 	%line{43} %argrw{"wrrrr"}
 	return
 # PxrSplineMap.osl:190
 #     resultF = compress(resultF, outputMin, outputMax);
@@ -248,9 +248,9 @@ code ___main___
 #     if (outputClamp) resultF = clamp(resultF, 0, 1);
 	if		outputClamp 77 77 	%filename{"PxrSplineMap.osl"} %line{191} %argrw{"r"}
 	functioncall	$const6 77 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:141
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp33 resultF $const3 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp33 resultF $const3 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{141} %argrw{"wrr"}
 	max		resultF $tmp33 $const2 	%argrw{"wrr"}
 # PxrSplineMap.osl:192
 #     resultRGB = color_ramp(resultF, colorRamp_Knots, colorRamp_Colors, colorRamp_Interpolation);
@@ -258,10 +258,10 @@ code ___main___
 # PxrSplineMap.osl:48
 #     int nknots = min(k_max_num_knots, arraylength(knots));
 	arraylength	$tmp34 colorRamp_Knots 	%line{48} %argrw{"wr"}
-	min		___343_nknots $const8 $tmp34 	%argrw{"wrr"}
+	min		___363_nknots $const8 $tmp34 	%argrw{"wrr"}
 # PxrSplineMap.osl:49
 #     if (nknots < 1) return color(input);
-	lt		$tmp35 ___343_nknots $const5 	%line{49} %argrw{"wrr"}
+	lt		$tmp35 ___363_nknots $const5 	%line{49} %argrw{"wrr"}
 	if		$tmp35 84 84 	%argrw{"r"}
 	assign		resultRGB resultF 	%argrw{"wr"}
 	return
@@ -269,81 +269,81 @@ code ___main___
 #     int offset = interp == "bezier" ? k_bezier_xtra : k_spline_xtra;
 	eq		$tmp36 colorRamp_Interpolation $const9 	%line{54} %argrw{"wrr"}
 	if		$tmp36 87 88 	%argrw{"r"}
-	assign		___343_offset $const10 	%argrw{"wr"}
-	assign		___343_offset $const5 	%argrw{"wr"}
+	assign		___363_offset $const10 	%argrw{"wr"}
+	assign		___363_offset $const5 	%argrw{"wr"}
 # PxrSplineMap.osl:55
 #     for (int i = 0; i < offset; i++)
 	for		$tmp38 90 92 96 98 	%line{55} %argrw{"r"}
-	assign		___344_i $const4 	%argrw{"wr"}
-	lt		$tmp37 ___344_i ___343_offset 	%argrw{"wrr"}
+	assign		___364_i $const4 	%argrw{"wr"}
+	lt		$tmp37 ___364_i ___363_offset 	%argrw{"wrr"}
 	neq		$tmp38 $tmp37 $const4 	%argrw{"wrr"}
 # PxrSplineMap.osl:57
 #         ka[i] = knots[0];
 	aref		$tmp39 colorRamp_Knots $const4 	%line{57} %argrw{"wrr"}
-	aassign		___343_ka ___344_i $tmp39 	%argrw{"wrr"}
+	aassign		___363_ka ___364_i $tmp39 	%argrw{"wrr"}
 # PxrSplineMap.osl:58
 #         va[i] = vals[0];
 	aref		$tmp40 colorRamp_Colors $const4 	%line{58} %argrw{"wrr"}
-	aassign		___343_va ___344_i $tmp40 	%argrw{"wrr"}
+	aassign		___363_va ___364_i $tmp40 	%argrw{"wrr"}
 # PxrSplineMap.osl:55
 #     for (int i = 0; i < offset; i++)
-	assign		$tmp41 ___344_i 	%line{55} %argrw{"wr"}
-	add		___344_i ___344_i $const5 	%argrw{"wrr"}
+	assign		$tmp41 ___364_i 	%line{55} %argrw{"wr"}
+	add		___364_i ___364_i $const5 	%argrw{"wrr"}
 # PxrSplineMap.osl:60
 #     for (int i = 0; i < nknots; i++)
 	for		$tmp43 100 102 108 110 	%line{60} %argrw{"r"}
-	assign		___346_i $const4 	%argrw{"wr"}
-	lt		$tmp42 ___346_i ___343_nknots 	%argrw{"wrr"}
+	assign		___366_i $const4 	%argrw{"wr"}
+	lt		$tmp42 ___366_i ___363_nknots 	%argrw{"wrr"}
 	neq		$tmp43 $tmp42 $const4 	%argrw{"wrr"}
 # PxrSplineMap.osl:62
 #         ka[i + offset] = knots[i];
-	aref		$tmp44 colorRamp_Knots ___346_i 	%line{62} %argrw{"wrr"}
-	add		$tmp45 ___346_i ___343_offset 	%argrw{"wrr"}
-	aassign		___343_ka $tmp45 $tmp44 	%argrw{"wrr"}
+	aref		$tmp44 colorRamp_Knots ___366_i 	%line{62} %argrw{"wrr"}
+	add		$tmp45 ___366_i ___363_offset 	%argrw{"wrr"}
+	aassign		___363_ka $tmp45 $tmp44 	%argrw{"wrr"}
 # PxrSplineMap.osl:63
 #         va[i + offset] = vals[i];
-	aref		$tmp46 colorRamp_Colors ___346_i 	%line{63} %argrw{"wrr"}
-	add		$tmp47 ___346_i ___343_offset 	%argrw{"wrr"}
-	aassign		___343_va $tmp47 $tmp46 	%argrw{"wrr"}
+	aref		$tmp46 colorRamp_Colors ___366_i 	%line{63} %argrw{"wrr"}
+	add		$tmp47 ___366_i ___363_offset 	%argrw{"wrr"}
+	aassign		___363_va $tmp47 $tmp46 	%argrw{"wrr"}
 # PxrSplineMap.osl:60
 #     for (int i = 0; i < nknots; i++)
-	assign		$tmp48 ___346_i 	%line{60} %argrw{"wr"}
-	add		___346_i ___346_i $const5 	%argrw{"wrr"}
+	assign		$tmp48 ___366_i 	%line{60} %argrw{"wr"}
+	add		___366_i ___366_i $const5 	%argrw{"wrr"}
 # PxrSplineMap.osl:65
 #     int last = nknots - 1;
-	sub		___343_last ___343_nknots $const5 	%line{65} %argrw{"wrr"}
+	sub		___363_last ___363_nknots $const5 	%line{65} %argrw{"wrr"}
 # PxrSplineMap.osl:66
 #     for (int i = 0; i < offset; i++)
 	for		$tmp50 113 115 123 125 	%line{66} %argrw{"r"}
-	assign		___348_i $const4 	%argrw{"wr"}
-	lt		$tmp49 ___348_i ___343_offset 	%argrw{"wrr"}
+	assign		___368_i $const4 	%argrw{"wr"}
+	lt		$tmp49 ___368_i ___363_offset 	%argrw{"wrr"}
 	neq		$tmp50 $tmp49 $const4 	%argrw{"wrr"}
 # PxrSplineMap.osl:68
 #         ka[nknots + offset + i] = knots[last];
-	aref		$tmp51 colorRamp_Knots ___343_last 	%line{68} %argrw{"wrr"}
-	add		$tmp52 ___343_nknots ___343_offset 	%argrw{"wrr"}
-	add		$tmp53 $tmp52 ___348_i 	%argrw{"wrr"}
-	aassign		___343_ka $tmp53 $tmp51 	%argrw{"wrr"}
+	aref		$tmp51 colorRamp_Knots ___363_last 	%line{68} %argrw{"wrr"}
+	add		$tmp52 ___363_nknots ___363_offset 	%argrw{"wrr"}
+	add		$tmp53 $tmp52 ___368_i 	%argrw{"wrr"}
+	aassign		___363_ka $tmp53 $tmp51 	%argrw{"wrr"}
 # PxrSplineMap.osl:69
 #         va[nknots + offset + i] = vals[last];
-	aref		$tmp54 colorRamp_Colors ___343_last 	%line{69} %argrw{"wrr"}
-	add		$tmp55 ___343_nknots ___343_offset 	%argrw{"wrr"}
-	add		$tmp56 $tmp55 ___348_i 	%argrw{"wrr"}
-	aassign		___343_va $tmp56 $tmp54 	%argrw{"wrr"}
+	aref		$tmp54 colorRamp_Colors ___363_last 	%line{69} %argrw{"wrr"}
+	add		$tmp55 ___363_nknots ___363_offset 	%argrw{"wrr"}
+	add		$tmp56 $tmp55 ___368_i 	%argrw{"wrr"}
+	aassign		___363_va $tmp56 $tmp54 	%argrw{"wrr"}
 # PxrSplineMap.osl:66
 #     for (int i = 0; i < offset; i++)
-	assign		$tmp57 ___348_i 	%line{66} %argrw{"wr"}
-	add		___348_i ___348_i $const5 	%argrw{"wrr"}
+	assign		$tmp57 ___368_i 	%line{66} %argrw{"wr"}
+	add		___368_i ___368_i $const5 	%argrw{"wrr"}
 # PxrSplineMap.osl:71
 #     int nk = nknots + offset * 2;
-	mul		$tmp58 ___343_offset $const10 	%line{71} %argrw{"wrr"}
-	add		___343_nk ___343_nknots $tmp58 	%argrw{"wrr"}
+	mul		$tmp58 ___363_offset $const10 	%line{71} %argrw{"wrr"}
+	add		___363_nk ___363_nknots $tmp58 	%argrw{"wrr"}
 # PxrSplineMap.osl:73
 #     float k = splineinverse(interp, input, nk, ka);
-	splineinverse	___343_k colorRamp_Interpolation resultF ___343_nk ___343_ka 	%line{73} %argrw{"wrrrr"}
+	splineinverse	___363_k colorRamp_Interpolation resultF ___363_nk ___363_ka 	%line{73} %argrw{"wrrrr"}
 # PxrSplineMap.osl:74
 #     return color(spline(interp, k, nk, va));
-	spline		$tmp59 colorRamp_Interpolation ___343_k ___343_nk ___343_va 	%line{74} %argrw{"wrrrr"}
+	spline		$tmp59 colorRamp_Interpolation ___363_k ___363_nk ___363_va 	%line{74} %argrw{"wrrrr"}
 	assign		resultRGB $tmp59 	%argrw{"wr"}
 	return
 # PxrSplineMap.osl:193

@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
-# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrGamma.osl/obj/PxrGamma.oso
+# Compiled by oslc 1.13.0.@PROJECT_VERSION_TWEAK@"dev"
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxSonoma_x86-64_clang15_external_release/osl/PxrGamma.osl/obj/PxrGamma.oso
 shader PxrGamma	%meta{int,rfm_nodeid,1053428} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/color"} %meta{string,rfh_classification,"Pattern/Color"} %meta{string,help,"Adjust the exposure of the input color by the given gamma."} 
 param	color	inputRGB	0 0 0		%meta{string,widget,"color"} %meta{string,help,"Plug a color pattern here"} %meta{string,label,"Input Color"}  %read{1,30} %write{2147483647,-1}
 param	float	gamma	1		%meta{string,widget,"default"} %meta{string,help,"The amount of gamma to adjust the input"} %meta{string,label,"Gamma"} %meta{float,min,0} %meta{int,slider,1} %meta{float,slidermax,4} %meta{float,slidermin,0}  %read{22,22} %write{2147483647,-1}

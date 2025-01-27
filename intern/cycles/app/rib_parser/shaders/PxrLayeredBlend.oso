@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
-# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrLayeredBlend.osl/obj/PxrLayeredBlend.oso
+# Compiled by oslc 1.13.0.@PROJECT_VERSION_TWEAK@"dev"
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxSonoma_x86-64_clang15_external_release/osl/PxrLayeredBlend.osl/obj/PxrLayeredBlend.oso
 shader PxrLayeredBlend	%meta{int,rfm_nodeid,1053346} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/color"} %meta{string,rfh_classification,"Pattern/Color"} 
 param	int	enable_0	0		%meta{string,widget,"checkBox"} %meta{string,page,"Layer 0"} %meta{int,page_open,1} %meta{int,connectable,0} %meta{string,label,"Enable 0"}  %read{0,0} %write{2147483647,-1}
 param	int	operation_0	19		%meta{string,widget,"mapper"} %meta{string,options,"Color:0|Color Burn:1|Color Dodge:2|Darken:3|Darker Color:4|Difference:5|Dissolve:6|Divide:7|Exclusion:8|Hard Light:9|Hard Mix:10|Hue:11|Lighten:12|Lighter Color:13|Linear Burn:14|Linear Dodge:15|Linear Light:16|Luminosity:17|Multiply:18|Normal:19|Overlay:20|Pin Light:21|Saturation:22|Screen:23|Soft Light:24|Subtract:25|Vivid Light:26 "} %meta{string,page,"Layer 0"} %meta{int,connectable,0} %meta{string,label,"Operation 0"}  %read{8,8} %write{2147483647,-1}
@@ -43,20 +43,20 @@ oparam	float	resultG	0		%meta{string,help,"resultG (float)"}  %read{2147483647,-
 oparam	float	resultB	0		%meta{string,help,"resultB (float)"}  %read{2147483647,-1} %write{1198,1198}
 oparam	float	resultA	0		%meta{string,help,"resultA (float)"}  %read{44,1189} %write{41,1189}
 global	point	P	%read{1173,1173} %write{2147483647,-1}
-local	color	___330_result	%read{44,1189} %write{44,1189}
-local	int	___330_min	%read{44,1189} %write{44,1189}
-local	int	___330_max	%read{44,1189} %write{44,1189}
-local	int	___330_mid	%read{44,1189} %write{44,1189}
-local	color	___333_result	%read{44,1189} %write{44,1189}
-local	float	___333_l	%read{44,1189} %write{44,1189}
-local	float	___333_n	%read{44,1189} %write{44,1189}
-local	float	___333_x	%read{44,1189} %write{44,1189}
-local	color	___336_result	%read{44,1189} %write{44,1189}
-local	float	___336_d	%read{44,1189} %write{44,1189}
-local	float	___365_a	%read{44,1189} %write{44,1189}
-local	point	___394_Pobj	%read{44,1189} %write{44,1189}
-local	float	___394_random	%read{44,1189} %write{44,1189}
-local	float	___365_invA	%read{44,1189} %write{44,1189}
+local	color	___350_result	%read{44,1189} %write{44,1189}
+local	int	___350_min	%read{44,1189} %write{44,1189}
+local	int	___350_max	%read{44,1189} %write{44,1189}
+local	int	___350_mid	%read{44,1189} %write{44,1189}
+local	color	___353_result	%read{44,1189} %write{44,1189}
+local	float	___353_l	%read{44,1189} %write{44,1189}
+local	float	___353_n	%read{44,1189} %write{44,1189}
+local	float	___353_x	%read{44,1189} %write{44,1189}
+local	color	___356_result	%read{44,1189} %write{44,1189}
+local	float	___356_d	%read{44,1189} %write{44,1189}
+local	float	___385_a	%read{44,1189} %write{44,1189}
+local	point	___414_Pobj	%read{44,1189} %write{44,1189}
+local	float	___414_random	%read{44,1189} %write{44,1189}
+local	float	___385_invA	%read{44,1189} %write{44,1189}
 local	int[8]	enable	%read{44,1189} %write{0,7}
 local	int[8]	op	%read{44,1189} %write{8,15}
 local	color[8]	RGB	%read{44,1189} %write{16,23}
@@ -65,7 +65,7 @@ local	color	frontC	%read{44,1189} %write{32,1189}
 local	color	backC	%read{44,1189} %write{33,1189}
 local	color	comp	%read{2147483647,-1} %write{34,34}
 local	float	alpha	%read{44,1189} %write{35,1189}
-local	int	___396_l	%read{44,1189} %write{43,1189}
+local	int	___416_l	%read{44,1189} %write{43,1189}
 const	int	$const1	0		%read{0,1196} %write{2147483647,-1}
 const	int	$const2	1		%read{1,1197} %write{2147483647,-1}
 const	int	$const3	2		%read{2,1198} %write{2147483647,-1}
@@ -985,18 +985,18 @@ code ___main___
 # PxrLayeredBlend.osl:391
 #     for (int l = 7; l >= 0; l--)
 	for		$tmp3 44 46 1188 1190 	%line{391} %argrw{"r"}
-	assign		___396_l $const8 	%argrw{"wr"}
-	ge		$tmp2 ___396_l $const1 	%argrw{"wrr"}
+	assign		___416_l $const8 	%argrw{"wr"}
+	ge		$tmp2 ___416_l $const1 	%argrw{"wrr"}
 	neq		$tmp3 $tmp2 $const1 	%argrw{"wrr"}
 # PxrLayeredBlend.osl:394
 #         if (enable[l] == 0) continue;
-	aref		$tmp4 enable ___396_l 	%line{394} %argrw{"wrr"}
+	aref		$tmp4 enable ___416_l 	%line{394} %argrw{"wrr"}
 	eq		$tmp5 $tmp4 $const1 	%argrw{"wrr"}
 	if		$tmp5 50 50 	%argrw{"r"}
 	continue
 # PxrLayeredBlend.osl:397
 #         if (A[l] == 0.0)
-	aref		$tmp6 A ___396_l 	%line{397} %argrw{"wrr"}
+	aref		$tmp6 A ___416_l 	%line{397} %argrw{"wrr"}
 	eq		$tmp7 $tmp6 $const10 	%argrw{"wrr"}
 	if		$tmp7 54 55 	%argrw{"r"}
 # PxrLayeredBlend.osl:398
@@ -1004,11 +1004,11 @@ code ___main___
 	assign		frontC $const9 	%line{398} %argrw{"wr"}
 # PxrLayeredBlend.osl:400
 #             frontC = RGB[l];
-	aref		frontC RGB ___396_l 	%line{400} %argrw{"wrr"}
+	aref		frontC RGB ___416_l 	%line{400} %argrw{"wrr"}
 # PxrLayeredBlend.osl:402
 #         PxrColorBlend(op[l], frontC, A[l], backC, alpha, resultRGB, resultA);
-	aref		$tmp8 op ___396_l 	%line{402} %argrw{"wrr"}
-	aref		$tmp9 A ___396_l 	%argrw{"wrr"}
+	aref		$tmp8 op ___416_l 	%line{402} %argrw{"wrr"}
+	aref		$tmp9 A ___416_l 	%argrw{"wrr"}
 	functioncall	$const11 1186 	%argrw{"r"}
 # PxrColorBlend.h:416
 #     if (mode == k_color)
@@ -1035,7 +1035,7 @@ code ___main___
 	functioncall	$const17 135 	%line{164} %argrw{"r"}
 # PxrColorBlend.h:147
 #     color result = c;
-	assign		___336_result frontC 	%line{147} %argrw{"wr"}
+	assign		___356_result frontC 	%line{147} %argrw{"wr"}
 # PxrColorBlend.h:148
 #     float d = l - pxrLum(c);
 	functioncall	$const13 81 	%line{148} %argrw{"r"}
@@ -1051,90 +1051,90 @@ code ___main___
 	add		$tmp19 $tmp24 $tmp26 	%argrw{"wrr"}
 # PxrColorBlend.h:148
 #     float d = l - pxrLum(c);
-	sub		___336_d $tmp11 $tmp19 	%line{148} %argrw{"wrr"}
+	sub		___356_d $tmp11 $tmp19 	%line{148} %argrw{"wrr"}
 # PxrColorBlend.h:149
 #     result = clamp(c + d, 0, 1);
-	add		$tmp27 frontC ___336_d 	%line{149} %argrw{"wrr"}
+	add		$tmp27 frontC ___356_d 	%line{149} %argrw{"wrr"}
 	assign		$tmp28 $const10 	%argrw{"wr"}
 	assign		$tmp29 $const18 	%argrw{"wr"}
 	functioncall	$const19 88 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:140
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp30 $tmp27 $tmp29 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
-	max		___336_result $tmp30 $tmp28 	%argrw{"wrr"}
+	min		$tmp30 $tmp27 $tmp29 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{140} %argrw{"wrr"}
+	max		___356_result $tmp30 $tmp28 	%argrw{"wrr"}
 # PxrColorBlend.h:150
 #     return pxrClipColor(result);
 	functioncall	$const20 135 	%filename{"PxrColorBlend.h"} %line{150} %argrw{"r"}
 # PxrColorBlend.h:130
 #     color result = c;
-	assign		___333_result ___336_result 	%line{130} %argrw{"wr"}
+	assign		___353_result ___356_result 	%line{130} %argrw{"wr"}
 # PxrColorBlend.h:131
 #     float l = pxrLum(result);
 	functioncall	$const13 99 	%line{131} %argrw{"r"}
 # PxrColorBlend.h:73
 #     return (0.3 * c[0]) + (0.59 * c[1]) + (0.11 * c[2]);
-	compref		$tmp31 ___333_result $const1 	%line{73} %argrw{"wrr"}
+	compref		$tmp31 ___353_result $const1 	%line{73} %argrw{"wrr"}
 	mul		$tmp32 $const14 $tmp31 	%argrw{"wrr"}
-	compref		$tmp33 ___333_result $const2 	%argrw{"wrr"}
+	compref		$tmp33 ___353_result $const2 	%argrw{"wrr"}
 	mul		$tmp34 $const15 $tmp33 	%argrw{"wrr"}
 	add		$tmp35 $tmp32 $tmp34 	%argrw{"wrr"}
-	compref		$tmp36 ___333_result $const3 	%argrw{"wrr"}
+	compref		$tmp36 ___353_result $const3 	%argrw{"wrr"}
 	mul		$tmp37 $const16 $tmp36 	%argrw{"wrr"}
-	add		___333_l $tmp35 $tmp37 	%argrw{"wrr"}
+	add		___353_l $tmp35 $tmp37 	%argrw{"wrr"}
 # PxrColorBlend.h:132
 #     float n = min(min(result[0], result[1]), result[2]);
-	compref		$tmp39 ___333_result $const1 	%line{132} %argrw{"wrr"}
-	compref		$tmp40 ___333_result $const2 	%argrw{"wrr"}
+	compref		$tmp39 ___353_result $const1 	%line{132} %argrw{"wrr"}
+	compref		$tmp40 ___353_result $const2 	%argrw{"wrr"}
 	min		$tmp38 $tmp39 $tmp40 	%argrw{"wrr"}
-	compref		$tmp41 ___333_result $const3 	%argrw{"wrr"}
-	min		___333_n $tmp38 $tmp41 	%argrw{"wrr"}
+	compref		$tmp41 ___353_result $const3 	%argrw{"wrr"}
+	min		___353_n $tmp38 $tmp41 	%argrw{"wrr"}
 # PxrColorBlend.h:133
 #     float x = max(max(result[0], result[1]), result[2]);
-	compref		$tmp43 ___333_result $const1 	%line{133} %argrw{"wrr"}
-	compref		$tmp44 ___333_result $const2 	%argrw{"wrr"}
+	compref		$tmp43 ___353_result $const1 	%line{133} %argrw{"wrr"}
+	compref		$tmp44 ___353_result $const2 	%argrw{"wrr"}
 	max		$tmp42 $tmp43 $tmp44 	%argrw{"wrr"}
-	compref		$tmp45 ___333_result $const3 	%argrw{"wrr"}
-	max		___333_x $tmp42 $tmp45 	%argrw{"wrr"}
+	compref		$tmp45 ___353_result $const3 	%argrw{"wrr"}
+	max		___353_x $tmp42 $tmp45 	%argrw{"wrr"}
 # PxrColorBlend.h:134
 #     if (n < 0.0)
-	lt		$tmp46 ___333_n $const10 	%line{134} %argrw{"wrr"}
+	lt		$tmp46 ___353_n $const10 	%line{134} %argrw{"wrr"}
 	if		$tmp46 121 121 	%argrw{"r"}
 # PxrColorBlend.h:136
 #         result = clamp(l + (((result - l) * l) / (l - n)), 0, 1);
-	sub		$tmp47 ___333_result ___333_l 	%line{136} %argrw{"wrr"}
-	mul		$tmp48 $tmp47 ___333_l 	%argrw{"wrr"}
-	sub		$tmp49 ___333_l ___333_n 	%argrw{"wrr"}
+	sub		$tmp47 ___353_result ___353_l 	%line{136} %argrw{"wrr"}
+	mul		$tmp48 $tmp47 ___353_l 	%argrw{"wrr"}
+	sub		$tmp49 ___353_l ___353_n 	%argrw{"wrr"}
 	div		$tmp50 $tmp48 $tmp49 	%argrw{"wrr"}
-	add		$tmp51 ___333_l $tmp50 	%argrw{"wrr"}
+	add		$tmp51 ___353_l $tmp50 	%argrw{"wrr"}
 	assign		$tmp52 $const10 	%argrw{"wr"}
 	assign		$tmp53 $const18 	%argrw{"wr"}
 	functioncall	$const19 121 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:140
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp54 $tmp51 $tmp53 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
-	max		___333_result $tmp54 $tmp52 	%argrw{"wrr"}
+	min		$tmp54 $tmp51 $tmp53 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{140} %argrw{"wrr"}
+	max		___353_result $tmp54 $tmp52 	%argrw{"wrr"}
 # PxrColorBlend.h:138
 #     if (x > 1)
-	gt		$tmp55 ___333_x $const2 	%filename{"PxrColorBlend.h"} %line{138} %argrw{"wrr"}
+	gt		$tmp55 ___353_x $const2 	%filename{"PxrColorBlend.h"} %line{138} %argrw{"wrr"}
 	if		$tmp55 134 134 	%argrw{"r"}
 # PxrColorBlend.h:140
 #         result = clamp(l + (((result - l) * (1 - l)) / (x - l)), 0, 1);
-	sub		$tmp56 ___333_result ___333_l 	%line{140} %argrw{"wrr"}
-	sub		$tmp57 $const18 ___333_l 	%argrw{"wrr"}
+	sub		$tmp56 ___353_result ___353_l 	%line{140} %argrw{"wrr"}
+	sub		$tmp57 $const18 ___353_l 	%argrw{"wrr"}
 	mul		$tmp58 $tmp56 $tmp57 	%argrw{"wrr"}
-	sub		$tmp59 ___333_x ___333_l 	%argrw{"wrr"}
+	sub		$tmp59 ___353_x ___353_l 	%argrw{"wrr"}
 	div		$tmp60 $tmp58 $tmp59 	%argrw{"wrr"}
-	add		$tmp61 ___333_l $tmp60 	%argrw{"wrr"}
+	add		$tmp61 ___353_l $tmp60 	%argrw{"wrr"}
 	assign		$tmp62 $const10 	%argrw{"wr"}
 	assign		$tmp63 $const18 	%argrw{"wr"}
 	functioncall	$const19 134 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:140
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp64 $tmp61 $tmp63 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
-	max		___333_result $tmp64 $tmp62 	%argrw{"wrr"}
+	min		$tmp64 $tmp61 $tmp63 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %argrw{"wrr"}
+	max		___353_result $tmp64 $tmp62 	%argrw{"wrr"}
 # PxrColorBlend.h:142
 #     return result;
-	assign		resultRGB ___333_result 	%filename{"PxrColorBlend.h"} %line{142} %argrw{"wr"}
+	assign		resultRGB ___353_result 	%filename{"PxrColorBlend.h"} %line{142} %argrw{"wr"}
 # PxrColorBlend.h:420
 #     else if (mode == k_colorBurn)
 	eq		$tmp65 $tmp8 $const2 	%line{420} %argrw{"wrr"}
@@ -1469,7 +1469,7 @@ code ___main___
 	functioncall	$const39 505 	%line{274} %argrw{"r"}
 # PxrColorBlend.h:110
 #     color result = c;
-	assign		___330_result frontC 	%line{110} %argrw{"wr"}
+	assign		___350_result frontC 	%line{110} %argrw{"wr"}
 # PxrColorBlend.h:111
 #     int min = pxrMinChannel(c);
 	functioncall	$const40 401 	%line{111} %argrw{"r"}
@@ -1488,7 +1488,7 @@ code ___main___
 	if		$tmp229 386 401 	%argrw{"r"}
 # PxrColorBlend.h:89
 #         return 0;
-	assign		___330_min $const1 	%line{89} %argrw{"wr"}
+	assign		___350_min $const1 	%line{89} %argrw{"wr"}
 	return
 # PxrColorBlend.h:90
 #     else if (c[1] <= c[0] && c[1] <= c[2])
@@ -1505,11 +1505,11 @@ code ___main___
 	if		$tmp237 399 401 	%argrw{"r"}
 # PxrColorBlend.h:91
 #         return 1;
-	assign		___330_min $const2 	%line{91} %argrw{"wr"}
+	assign		___350_min $const2 	%line{91} %argrw{"wr"}
 	return
 # PxrColorBlend.h:93
 #         return 2;
-	assign		___330_min $const3 	%line{93} %argrw{"wr"}
+	assign		___350_min $const3 	%line{93} %argrw{"wr"}
 	return
 # PxrColorBlend.h:112
 #     int max = pxrMaxChannel(c);
@@ -1529,7 +1529,7 @@ code ___main___
 	if		$tmp245 415 430 	%argrw{"r"}
 # PxrColorBlend.h:79
 #         return 0;
-	assign		___330_max $const1 	%line{79} %argrw{"wr"}
+	assign		___350_max $const1 	%line{79} %argrw{"wr"}
 	return
 # PxrColorBlend.h:80
 #     else if (c[1] >= c[0] && c[1] >= c[2])
@@ -1546,11 +1546,11 @@ code ___main___
 	if		$tmp253 428 430 	%argrw{"r"}
 # PxrColorBlend.h:81
 #         return 1;
-	assign		___330_max $const2 	%line{81} %argrw{"wr"}
+	assign		___350_max $const2 	%line{81} %argrw{"wr"}
 	return
 # PxrColorBlend.h:83
 #         return 2;
-	assign		___330_max $const3 	%line{83} %argrw{"wr"}
+	assign		___350_max $const3 	%line{83} %argrw{"wr"}
 	return
 # PxrColorBlend.h:113
 #     int mid = pxrMidChannel(c);
@@ -1584,7 +1584,7 @@ code ___main___
 	if		$tmp266 458 487 	%argrw{"r"}
 # PxrColorBlend.h:99
 #         return 0;
-	assign		___330_mid $const1 	%line{99} %argrw{"wr"}
+	assign		___350_mid $const1 	%line{99} %argrw{"wr"}
 	return
 # PxrColorBlend.h:100
 #     else if ((c[1] >= c[0] && c[1] <= c[2]) || (c[1] <= c[0] && c[1] >= c[2]))
@@ -1615,44 +1615,44 @@ code ___main___
 	if		$tmp284 485 487 	%argrw{"r"}
 # PxrColorBlend.h:101
 #         return 1;
-	assign		___330_mid $const2 	%line{101} %argrw{"wr"}
+	assign		___350_mid $const2 	%line{101} %argrw{"wr"}
 	return
 # PxrColorBlend.h:103
 #         return 2;
-	assign		___330_mid $const3 	%line{103} %argrw{"wr"}
+	assign		___350_mid $const3 	%line{103} %argrw{"wr"}
 	return
 # PxrColorBlend.h:114
 #     if (c[max] > c[min])
-	compref		$tmp294 frontC ___330_max 	%line{114} %argrw{"wrr"}
-	compref		$tmp295 frontC ___330_min 	%argrw{"wrr"}
+	compref		$tmp294 frontC ___350_max 	%line{114} %argrw{"wrr"}
+	compref		$tmp295 frontC ___350_min 	%argrw{"wrr"}
 	gt		$tmp296 $tmp294 $tmp295 	%argrw{"wrr"}
 	if		$tmp296 501 503 	%argrw{"r"}
 # PxrColorBlend.h:116
 #         result[mid] = ((c[mid] - c[min]) * s) / (c[max] - c[min]);
-	compref		$tmp297 frontC ___330_mid 	%line{116} %argrw{"wrr"}
-	compref		$tmp298 frontC ___330_min 	%argrw{"wrr"}
+	compref		$tmp297 frontC ___350_mid 	%line{116} %argrw{"wrr"}
+	compref		$tmp298 frontC ___350_min 	%argrw{"wrr"}
 	sub		$tmp299 $tmp297 $tmp298 	%argrw{"wrr"}
 	mul		$tmp300 $tmp299 $tmp215 	%argrw{"wrr"}
-	compref		$tmp301 frontC ___330_max 	%argrw{"wrr"}
-	compref		$tmp302 frontC ___330_min 	%argrw{"wrr"}
+	compref		$tmp301 frontC ___350_max 	%argrw{"wrr"}
+	compref		$tmp302 frontC ___350_min 	%argrw{"wrr"}
 	sub		$tmp303 $tmp301 $tmp302 	%argrw{"wrr"}
 	div		$tmp304 $tmp300 $tmp303 	%argrw{"wrr"}
-	compassign	___330_result ___330_mid $tmp304 	%argrw{"wrr"}
+	compassign	___350_result ___350_mid $tmp304 	%argrw{"wrr"}
 # PxrColorBlend.h:117
 #         result[max] = s;
-	compassign	___330_result ___330_max $tmp215 	%line{117} %argrw{"wrr"}
+	compassign	___350_result ___350_max $tmp215 	%line{117} %argrw{"wrr"}
 # PxrColorBlend.h:121
 #         result[mid] = 0;
-	compassign	___330_result ___330_mid $const1 	%line{121} %argrw{"wrr"}
+	compassign	___350_result ___350_mid $const1 	%line{121} %argrw{"wrr"}
 # PxrColorBlend.h:122
 #         result[max] = 0;
-	compassign	___330_result ___330_max $const1 	%line{122} %argrw{"wrr"}
+	compassign	___350_result ___350_max $const1 	%line{122} %argrw{"wrr"}
 # PxrColorBlend.h:124
 #     result[min] = 0;
-	compassign	___330_result ___330_min $const1 	%line{124} %argrw{"wrr"}
+	compassign	___350_result ___350_min $const1 	%line{124} %argrw{"wrr"}
 # PxrColorBlend.h:125
 #     return result;
-	assign		$tmp214 ___330_result 	%line{125} %argrw{"wr"}
+	assign		$tmp214 ___350_result 	%line{125} %argrw{"wr"}
 # PxrColorBlend.h:274
 #     result = pxrSetLum(pxrSetSat(cA, pxrSat(cB)), pxrLum(cB));
 	functioncall	$const13 514 	%line{274} %argrw{"r"}
@@ -1671,7 +1671,7 @@ code ___main___
 	functioncall	$const17 579 	%line{274} %argrw{"r"}
 # PxrColorBlend.h:147
 #     color result = c;
-	assign		___336_result $tmp214 	%line{147} %argrw{"wr"}
+	assign		___356_result $tmp214 	%line{147} %argrw{"wr"}
 # PxrColorBlend.h:148
 #     float d = l - pxrLum(c);
 	functioncall	$const13 525 	%line{148} %argrw{"r"}
@@ -1687,90 +1687,90 @@ code ___main___
 	add		$tmp313 $tmp318 $tmp320 	%argrw{"wrr"}
 # PxrColorBlend.h:148
 #     float d = l - pxrLum(c);
-	sub		___336_d $tmp305 $tmp313 	%line{148} %argrw{"wrr"}
+	sub		___356_d $tmp305 $tmp313 	%line{148} %argrw{"wrr"}
 # PxrColorBlend.h:149
 #     result = clamp(c + d, 0, 1);
-	add		$tmp321 $tmp214 ___336_d 	%line{149} %argrw{"wrr"}
+	add		$tmp321 $tmp214 ___356_d 	%line{149} %argrw{"wrr"}
 	assign		$tmp322 $const10 	%argrw{"wr"}
 	assign		$tmp323 $const18 	%argrw{"wr"}
 	functioncall	$const19 532 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:140
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp324 $tmp321 $tmp323 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
-	max		___336_result $tmp324 $tmp322 	%argrw{"wrr"}
+	min		$tmp324 $tmp321 $tmp323 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{140} %argrw{"wrr"}
+	max		___356_result $tmp324 $tmp322 	%argrw{"wrr"}
 # PxrColorBlend.h:150
 #     return pxrClipColor(result);
 	functioncall	$const20 579 	%filename{"PxrColorBlend.h"} %line{150} %argrw{"r"}
 # PxrColorBlend.h:130
 #     color result = c;
-	assign		___333_result ___336_result 	%line{130} %argrw{"wr"}
+	assign		___353_result ___356_result 	%line{130} %argrw{"wr"}
 # PxrColorBlend.h:131
 #     float l = pxrLum(result);
 	functioncall	$const13 543 	%line{131} %argrw{"r"}
 # PxrColorBlend.h:73
 #     return (0.3 * c[0]) + (0.59 * c[1]) + (0.11 * c[2]);
-	compref		$tmp325 ___333_result $const1 	%line{73} %argrw{"wrr"}
+	compref		$tmp325 ___353_result $const1 	%line{73} %argrw{"wrr"}
 	mul		$tmp326 $const14 $tmp325 	%argrw{"wrr"}
-	compref		$tmp327 ___333_result $const2 	%argrw{"wrr"}
+	compref		$tmp327 ___353_result $const2 	%argrw{"wrr"}
 	mul		$tmp328 $const15 $tmp327 	%argrw{"wrr"}
 	add		$tmp329 $tmp326 $tmp328 	%argrw{"wrr"}
-	compref		$tmp330 ___333_result $const3 	%argrw{"wrr"}
+	compref		$tmp330 ___353_result $const3 	%argrw{"wrr"}
 	mul		$tmp331 $const16 $tmp330 	%argrw{"wrr"}
-	add		___333_l $tmp329 $tmp331 	%argrw{"wrr"}
+	add		___353_l $tmp329 $tmp331 	%argrw{"wrr"}
 # PxrColorBlend.h:132
 #     float n = min(min(result[0], result[1]), result[2]);
-	compref		$tmp333 ___333_result $const1 	%line{132} %argrw{"wrr"}
-	compref		$tmp334 ___333_result $const2 	%argrw{"wrr"}
+	compref		$tmp333 ___353_result $const1 	%line{132} %argrw{"wrr"}
+	compref		$tmp334 ___353_result $const2 	%argrw{"wrr"}
 	min		$tmp332 $tmp333 $tmp334 	%argrw{"wrr"}
-	compref		$tmp335 ___333_result $const3 	%argrw{"wrr"}
-	min		___333_n $tmp332 $tmp335 	%argrw{"wrr"}
+	compref		$tmp335 ___353_result $const3 	%argrw{"wrr"}
+	min		___353_n $tmp332 $tmp335 	%argrw{"wrr"}
 # PxrColorBlend.h:133
 #     float x = max(max(result[0], result[1]), result[2]);
-	compref		$tmp337 ___333_result $const1 	%line{133} %argrw{"wrr"}
-	compref		$tmp338 ___333_result $const2 	%argrw{"wrr"}
+	compref		$tmp337 ___353_result $const1 	%line{133} %argrw{"wrr"}
+	compref		$tmp338 ___353_result $const2 	%argrw{"wrr"}
 	max		$tmp336 $tmp337 $tmp338 	%argrw{"wrr"}
-	compref		$tmp339 ___333_result $const3 	%argrw{"wrr"}
-	max		___333_x $tmp336 $tmp339 	%argrw{"wrr"}
+	compref		$tmp339 ___353_result $const3 	%argrw{"wrr"}
+	max		___353_x $tmp336 $tmp339 	%argrw{"wrr"}
 # PxrColorBlend.h:134
 #     if (n < 0.0)
-	lt		$tmp340 ___333_n $const10 	%line{134} %argrw{"wrr"}
+	lt		$tmp340 ___353_n $const10 	%line{134} %argrw{"wrr"}
 	if		$tmp340 565 565 	%argrw{"r"}
 # PxrColorBlend.h:136
 #         result = clamp(l + (((result - l) * l) / (l - n)), 0, 1);
-	sub		$tmp341 ___333_result ___333_l 	%line{136} %argrw{"wrr"}
-	mul		$tmp342 $tmp341 ___333_l 	%argrw{"wrr"}
-	sub		$tmp343 ___333_l ___333_n 	%argrw{"wrr"}
+	sub		$tmp341 ___353_result ___353_l 	%line{136} %argrw{"wrr"}
+	mul		$tmp342 $tmp341 ___353_l 	%argrw{"wrr"}
+	sub		$tmp343 ___353_l ___353_n 	%argrw{"wrr"}
 	div		$tmp344 $tmp342 $tmp343 	%argrw{"wrr"}
-	add		$tmp345 ___333_l $tmp344 	%argrw{"wrr"}
+	add		$tmp345 ___353_l $tmp344 	%argrw{"wrr"}
 	assign		$tmp346 $const10 	%argrw{"wr"}
 	assign		$tmp347 $const18 	%argrw{"wr"}
 	functioncall	$const19 565 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:140
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp348 $tmp345 $tmp347 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
-	max		___333_result $tmp348 $tmp346 	%argrw{"wrr"}
+	min		$tmp348 $tmp345 $tmp347 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{140} %argrw{"wrr"}
+	max		___353_result $tmp348 $tmp346 	%argrw{"wrr"}
 # PxrColorBlend.h:138
 #     if (x > 1)
-	gt		$tmp349 ___333_x $const2 	%filename{"PxrColorBlend.h"} %line{138} %argrw{"wrr"}
+	gt		$tmp349 ___353_x $const2 	%filename{"PxrColorBlend.h"} %line{138} %argrw{"wrr"}
 	if		$tmp349 578 578 	%argrw{"r"}
 # PxrColorBlend.h:140
 #         result = clamp(l + (((result - l) * (1 - l)) / (x - l)), 0, 1);
-	sub		$tmp350 ___333_result ___333_l 	%line{140} %argrw{"wrr"}
-	sub		$tmp351 $const18 ___333_l 	%argrw{"wrr"}
+	sub		$tmp350 ___353_result ___353_l 	%line{140} %argrw{"wrr"}
+	sub		$tmp351 $const18 ___353_l 	%argrw{"wrr"}
 	mul		$tmp352 $tmp350 $tmp351 	%argrw{"wrr"}
-	sub		$tmp353 ___333_x ___333_l 	%argrw{"wrr"}
+	sub		$tmp353 ___353_x ___353_l 	%argrw{"wrr"}
 	div		$tmp354 $tmp352 $tmp353 	%argrw{"wrr"}
-	add		$tmp355 ___333_l $tmp354 	%argrw{"wrr"}
+	add		$tmp355 ___353_l $tmp354 	%argrw{"wrr"}
 	assign		$tmp356 $const10 	%argrw{"wr"}
 	assign		$tmp357 $const18 	%argrw{"wr"}
 	functioncall	$const19 578 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:140
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp358 $tmp355 $tmp357 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
-	max		___333_result $tmp358 $tmp356 	%argrw{"wrr"}
+	min		$tmp358 $tmp355 $tmp357 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %argrw{"wrr"}
+	max		___353_result $tmp358 $tmp356 	%argrw{"wrr"}
 # PxrColorBlend.h:142
 #     return result;
-	assign		resultRGB ___333_result 	%filename{"PxrColorBlend.h"} %line{142} %argrw{"wr"}
+	assign		resultRGB ___353_result 	%filename{"PxrColorBlend.h"} %line{142} %argrw{"wr"}
 # PxrColorBlend.h:464
 #     else if (mode == k_lighten)
 	eq		$tmp359 $tmp8 $const43 	%line{464} %argrw{"wrr"}
@@ -1899,7 +1899,7 @@ code ___main___
 	functioncall	$const17 723 	%line{164} %argrw{"r"}
 # PxrColorBlend.h:147
 #     color result = c;
-	assign		___336_result backC 	%line{147} %argrw{"wr"}
+	assign		___356_result backC 	%line{147} %argrw{"wr"}
 # PxrColorBlend.h:148
 #     float d = l - pxrLum(c);
 	functioncall	$const13 669 	%line{148} %argrw{"r"}
@@ -1915,90 +1915,90 @@ code ___main___
 	add		$tmp409 $tmp414 $tmp416 	%argrw{"wrr"}
 # PxrColorBlend.h:148
 #     float d = l - pxrLum(c);
-	sub		___336_d $tmp401 $tmp409 	%line{148} %argrw{"wrr"}
+	sub		___356_d $tmp401 $tmp409 	%line{148} %argrw{"wrr"}
 # PxrColorBlend.h:149
 #     result = clamp(c + d, 0, 1);
-	add		$tmp417 backC ___336_d 	%line{149} %argrw{"wrr"}
+	add		$tmp417 backC ___356_d 	%line{149} %argrw{"wrr"}
 	assign		$tmp418 $const10 	%argrw{"wr"}
 	assign		$tmp419 $const18 	%argrw{"wr"}
 	functioncall	$const19 676 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:140
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp420 $tmp417 $tmp419 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
-	max		___336_result $tmp420 $tmp418 	%argrw{"wrr"}
+	min		$tmp420 $tmp417 $tmp419 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{140} %argrw{"wrr"}
+	max		___356_result $tmp420 $tmp418 	%argrw{"wrr"}
 # PxrColorBlend.h:150
 #     return pxrClipColor(result);
 	functioncall	$const20 723 	%filename{"PxrColorBlend.h"} %line{150} %argrw{"r"}
 # PxrColorBlend.h:130
 #     color result = c;
-	assign		___333_result ___336_result 	%line{130} %argrw{"wr"}
+	assign		___353_result ___356_result 	%line{130} %argrw{"wr"}
 # PxrColorBlend.h:131
 #     float l = pxrLum(result);
 	functioncall	$const13 687 	%line{131} %argrw{"r"}
 # PxrColorBlend.h:73
 #     return (0.3 * c[0]) + (0.59 * c[1]) + (0.11 * c[2]);
-	compref		$tmp421 ___333_result $const1 	%line{73} %argrw{"wrr"}
+	compref		$tmp421 ___353_result $const1 	%line{73} %argrw{"wrr"}
 	mul		$tmp422 $const14 $tmp421 	%argrw{"wrr"}
-	compref		$tmp423 ___333_result $const2 	%argrw{"wrr"}
+	compref		$tmp423 ___353_result $const2 	%argrw{"wrr"}
 	mul		$tmp424 $const15 $tmp423 	%argrw{"wrr"}
 	add		$tmp425 $tmp422 $tmp424 	%argrw{"wrr"}
-	compref		$tmp426 ___333_result $const3 	%argrw{"wrr"}
+	compref		$tmp426 ___353_result $const3 	%argrw{"wrr"}
 	mul		$tmp427 $const16 $tmp426 	%argrw{"wrr"}
-	add		___333_l $tmp425 $tmp427 	%argrw{"wrr"}
+	add		___353_l $tmp425 $tmp427 	%argrw{"wrr"}
 # PxrColorBlend.h:132
 #     float n = min(min(result[0], result[1]), result[2]);
-	compref		$tmp429 ___333_result $const1 	%line{132} %argrw{"wrr"}
-	compref		$tmp430 ___333_result $const2 	%argrw{"wrr"}
+	compref		$tmp429 ___353_result $const1 	%line{132} %argrw{"wrr"}
+	compref		$tmp430 ___353_result $const2 	%argrw{"wrr"}
 	min		$tmp428 $tmp429 $tmp430 	%argrw{"wrr"}
-	compref		$tmp431 ___333_result $const3 	%argrw{"wrr"}
-	min		___333_n $tmp428 $tmp431 	%argrw{"wrr"}
+	compref		$tmp431 ___353_result $const3 	%argrw{"wrr"}
+	min		___353_n $tmp428 $tmp431 	%argrw{"wrr"}
 # PxrColorBlend.h:133
 #     float x = max(max(result[0], result[1]), result[2]);
-	compref		$tmp433 ___333_result $const1 	%line{133} %argrw{"wrr"}
-	compref		$tmp434 ___333_result $const2 	%argrw{"wrr"}
+	compref		$tmp433 ___353_result $const1 	%line{133} %argrw{"wrr"}
+	compref		$tmp434 ___353_result $const2 	%argrw{"wrr"}
 	max		$tmp432 $tmp433 $tmp434 	%argrw{"wrr"}
-	compref		$tmp435 ___333_result $const3 	%argrw{"wrr"}
-	max		___333_x $tmp432 $tmp435 	%argrw{"wrr"}
+	compref		$tmp435 ___353_result $const3 	%argrw{"wrr"}
+	max		___353_x $tmp432 $tmp435 	%argrw{"wrr"}
 # PxrColorBlend.h:134
 #     if (n < 0.0)
-	lt		$tmp436 ___333_n $const10 	%line{134} %argrw{"wrr"}
+	lt		$tmp436 ___353_n $const10 	%line{134} %argrw{"wrr"}
 	if		$tmp436 709 709 	%argrw{"r"}
 # PxrColorBlend.h:136
 #         result = clamp(l + (((result - l) * l) / (l - n)), 0, 1);
-	sub		$tmp437 ___333_result ___333_l 	%line{136} %argrw{"wrr"}
-	mul		$tmp438 $tmp437 ___333_l 	%argrw{"wrr"}
-	sub		$tmp439 ___333_l ___333_n 	%argrw{"wrr"}
+	sub		$tmp437 ___353_result ___353_l 	%line{136} %argrw{"wrr"}
+	mul		$tmp438 $tmp437 ___353_l 	%argrw{"wrr"}
+	sub		$tmp439 ___353_l ___353_n 	%argrw{"wrr"}
 	div		$tmp440 $tmp438 $tmp439 	%argrw{"wrr"}
-	add		$tmp441 ___333_l $tmp440 	%argrw{"wrr"}
+	add		$tmp441 ___353_l $tmp440 	%argrw{"wrr"}
 	assign		$tmp442 $const10 	%argrw{"wr"}
 	assign		$tmp443 $const18 	%argrw{"wr"}
 	functioncall	$const19 709 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:140
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp444 $tmp441 $tmp443 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
-	max		___333_result $tmp444 $tmp442 	%argrw{"wrr"}
+	min		$tmp444 $tmp441 $tmp443 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{140} %argrw{"wrr"}
+	max		___353_result $tmp444 $tmp442 	%argrw{"wrr"}
 # PxrColorBlend.h:138
 #     if (x > 1)
-	gt		$tmp445 ___333_x $const2 	%filename{"PxrColorBlend.h"} %line{138} %argrw{"wrr"}
+	gt		$tmp445 ___353_x $const2 	%filename{"PxrColorBlend.h"} %line{138} %argrw{"wrr"}
 	if		$tmp445 722 722 	%argrw{"r"}
 # PxrColorBlend.h:140
 #         result = clamp(l + (((result - l) * (1 - l)) / (x - l)), 0, 1);
-	sub		$tmp446 ___333_result ___333_l 	%line{140} %argrw{"wrr"}
-	sub		$tmp447 $const18 ___333_l 	%argrw{"wrr"}
+	sub		$tmp446 ___353_result ___353_l 	%line{140} %argrw{"wrr"}
+	sub		$tmp447 $const18 ___353_l 	%argrw{"wrr"}
 	mul		$tmp448 $tmp446 $tmp447 	%argrw{"wrr"}
-	sub		$tmp449 ___333_x ___333_l 	%argrw{"wrr"}
+	sub		$tmp449 ___353_x ___353_l 	%argrw{"wrr"}
 	div		$tmp450 $tmp448 $tmp449 	%argrw{"wrr"}
-	add		$tmp451 ___333_l $tmp450 	%argrw{"wrr"}
+	add		$tmp451 ___353_l $tmp450 	%argrw{"wrr"}
 	assign		$tmp452 $const10 	%argrw{"wr"}
 	assign		$tmp453 $const18 	%argrw{"wr"}
 	functioncall	$const19 722 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:140
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp454 $tmp451 $tmp453 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
-	max		___333_result $tmp454 $tmp452 	%argrw{"wrr"}
+	min		$tmp454 $tmp451 $tmp453 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %argrw{"wrr"}
+	max		___353_result $tmp454 $tmp452 	%argrw{"wrr"}
 # PxrColorBlend.h:142
 #     return result;
-	assign		resultRGB ___333_result 	%filename{"PxrColorBlend.h"} %line{142} %argrw{"wr"}
+	assign		resultRGB ___353_result 	%filename{"PxrColorBlend.h"} %line{142} %argrw{"wr"}
 # PxrColorBlend.h:488
 #     else if (mode == k_multiply)
 	eq		$tmp455 $tmp8 $const55 	%line{488} %argrw{"wrr"}
@@ -2178,7 +2178,7 @@ code ___main___
 	functioncall	$const39 984 	%line{365} %argrw{"r"}
 # PxrColorBlend.h:110
 #     color result = c;
-	assign		___330_result backC 	%line{110} %argrw{"wr"}
+	assign		___350_result backC 	%line{110} %argrw{"wr"}
 # PxrColorBlend.h:111
 #     int min = pxrMinChannel(c);
 	functioncall	$const40 880 	%line{111} %argrw{"r"}
@@ -2197,7 +2197,7 @@ code ___main___
 	if		$tmp553 865 880 	%argrw{"r"}
 # PxrColorBlend.h:89
 #         return 0;
-	assign		___330_min $const1 	%line{89} %argrw{"wr"}
+	assign		___350_min $const1 	%line{89} %argrw{"wr"}
 	return
 # PxrColorBlend.h:90
 #     else if (c[1] <= c[0] && c[1] <= c[2])
@@ -2214,11 +2214,11 @@ code ___main___
 	if		$tmp561 878 880 	%argrw{"r"}
 # PxrColorBlend.h:91
 #         return 1;
-	assign		___330_min $const2 	%line{91} %argrw{"wr"}
+	assign		___350_min $const2 	%line{91} %argrw{"wr"}
 	return
 # PxrColorBlend.h:93
 #         return 2;
-	assign		___330_min $const3 	%line{93} %argrw{"wr"}
+	assign		___350_min $const3 	%line{93} %argrw{"wr"}
 	return
 # PxrColorBlend.h:112
 #     int max = pxrMaxChannel(c);
@@ -2238,7 +2238,7 @@ code ___main___
 	if		$tmp569 894 909 	%argrw{"r"}
 # PxrColorBlend.h:79
 #         return 0;
-	assign		___330_max $const1 	%line{79} %argrw{"wr"}
+	assign		___350_max $const1 	%line{79} %argrw{"wr"}
 	return
 # PxrColorBlend.h:80
 #     else if (c[1] >= c[0] && c[1] >= c[2])
@@ -2255,11 +2255,11 @@ code ___main___
 	if		$tmp577 907 909 	%argrw{"r"}
 # PxrColorBlend.h:81
 #         return 1;
-	assign		___330_max $const2 	%line{81} %argrw{"wr"}
+	assign		___350_max $const2 	%line{81} %argrw{"wr"}
 	return
 # PxrColorBlend.h:83
 #         return 2;
-	assign		___330_max $const3 	%line{83} %argrw{"wr"}
+	assign		___350_max $const3 	%line{83} %argrw{"wr"}
 	return
 # PxrColorBlend.h:113
 #     int mid = pxrMidChannel(c);
@@ -2293,7 +2293,7 @@ code ___main___
 	if		$tmp590 937 966 	%argrw{"r"}
 # PxrColorBlend.h:99
 #         return 0;
-	assign		___330_mid $const1 	%line{99} %argrw{"wr"}
+	assign		___350_mid $const1 	%line{99} %argrw{"wr"}
 	return
 # PxrColorBlend.h:100
 #     else if ((c[1] >= c[0] && c[1] <= c[2]) || (c[1] <= c[0] && c[1] >= c[2]))
@@ -2324,44 +2324,44 @@ code ___main___
 	if		$tmp608 964 966 	%argrw{"r"}
 # PxrColorBlend.h:101
 #         return 1;
-	assign		___330_mid $const2 	%line{101} %argrw{"wr"}
+	assign		___350_mid $const2 	%line{101} %argrw{"wr"}
 	return
 # PxrColorBlend.h:103
 #         return 2;
-	assign		___330_mid $const3 	%line{103} %argrw{"wr"}
+	assign		___350_mid $const3 	%line{103} %argrw{"wr"}
 	return
 # PxrColorBlend.h:114
 #     if (c[max] > c[min])
-	compref		$tmp618 backC ___330_max 	%line{114} %argrw{"wrr"}
-	compref		$tmp619 backC ___330_min 	%argrw{"wrr"}
+	compref		$tmp618 backC ___350_max 	%line{114} %argrw{"wrr"}
+	compref		$tmp619 backC ___350_min 	%argrw{"wrr"}
 	gt		$tmp620 $tmp618 $tmp619 	%argrw{"wrr"}
 	if		$tmp620 980 982 	%argrw{"r"}
 # PxrColorBlend.h:116
 #         result[mid] = ((c[mid] - c[min]) * s) / (c[max] - c[min]);
-	compref		$tmp621 backC ___330_mid 	%line{116} %argrw{"wrr"}
-	compref		$tmp622 backC ___330_min 	%argrw{"wrr"}
+	compref		$tmp621 backC ___350_mid 	%line{116} %argrw{"wrr"}
+	compref		$tmp622 backC ___350_min 	%argrw{"wrr"}
 	sub		$tmp623 $tmp621 $tmp622 	%argrw{"wrr"}
 	mul		$tmp624 $tmp623 $tmp539 	%argrw{"wrr"}
-	compref		$tmp625 backC ___330_max 	%argrw{"wrr"}
-	compref		$tmp626 backC ___330_min 	%argrw{"wrr"}
+	compref		$tmp625 backC ___350_max 	%argrw{"wrr"}
+	compref		$tmp626 backC ___350_min 	%argrw{"wrr"}
 	sub		$tmp627 $tmp625 $tmp626 	%argrw{"wrr"}
 	div		$tmp628 $tmp624 $tmp627 	%argrw{"wrr"}
-	compassign	___330_result ___330_mid $tmp628 	%argrw{"wrr"}
+	compassign	___350_result ___350_mid $tmp628 	%argrw{"wrr"}
 # PxrColorBlend.h:117
 #         result[max] = s;
-	compassign	___330_result ___330_max $tmp539 	%line{117} %argrw{"wrr"}
+	compassign	___350_result ___350_max $tmp539 	%line{117} %argrw{"wrr"}
 # PxrColorBlend.h:121
 #         result[mid] = 0;
-	compassign	___330_result ___330_mid $const1 	%line{121} %argrw{"wrr"}
+	compassign	___350_result ___350_mid $const1 	%line{121} %argrw{"wrr"}
 # PxrColorBlend.h:122
 #         result[max] = 0;
-	compassign	___330_result ___330_max $const1 	%line{122} %argrw{"wrr"}
+	compassign	___350_result ___350_max $const1 	%line{122} %argrw{"wrr"}
 # PxrColorBlend.h:124
 #     result[min] = 0;
-	compassign	___330_result ___330_min $const1 	%line{124} %argrw{"wrr"}
+	compassign	___350_result ___350_min $const1 	%line{124} %argrw{"wrr"}
 # PxrColorBlend.h:125
 #     return result;
-	assign		$tmp538 ___330_result 	%line{125} %argrw{"wr"}
+	assign		$tmp538 ___350_result 	%line{125} %argrw{"wr"}
 # PxrColorBlend.h:365
 #     result = pxrSetLum(pxrSetSat(cB, pxrSat(cA)), pxrLum(cB));
 	functioncall	$const13 993 	%line{365} %argrw{"r"}
@@ -2380,7 +2380,7 @@ code ___main___
 	functioncall	$const17 1058 	%line{365} %argrw{"r"}
 # PxrColorBlend.h:147
 #     color result = c;
-	assign		___336_result $tmp538 	%line{147} %argrw{"wr"}
+	assign		___356_result $tmp538 	%line{147} %argrw{"wr"}
 # PxrColorBlend.h:148
 #     float d = l - pxrLum(c);
 	functioncall	$const13 1004 	%line{148} %argrw{"r"}
@@ -2396,90 +2396,90 @@ code ___main___
 	add		$tmp637 $tmp642 $tmp644 	%argrw{"wrr"}
 # PxrColorBlend.h:148
 #     float d = l - pxrLum(c);
-	sub		___336_d $tmp629 $tmp637 	%line{148} %argrw{"wrr"}
+	sub		___356_d $tmp629 $tmp637 	%line{148} %argrw{"wrr"}
 # PxrColorBlend.h:149
 #     result = clamp(c + d, 0, 1);
-	add		$tmp645 $tmp538 ___336_d 	%line{149} %argrw{"wrr"}
+	add		$tmp645 $tmp538 ___356_d 	%line{149} %argrw{"wrr"}
 	assign		$tmp646 $const10 	%argrw{"wr"}
 	assign		$tmp647 $const18 	%argrw{"wr"}
 	functioncall	$const19 1011 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:140
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp648 $tmp645 $tmp647 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
-	max		___336_result $tmp648 $tmp646 	%argrw{"wrr"}
+	min		$tmp648 $tmp645 $tmp647 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{140} %argrw{"wrr"}
+	max		___356_result $tmp648 $tmp646 	%argrw{"wrr"}
 # PxrColorBlend.h:150
 #     return pxrClipColor(result);
 	functioncall	$const20 1058 	%filename{"PxrColorBlend.h"} %line{150} %argrw{"r"}
 # PxrColorBlend.h:130
 #     color result = c;
-	assign		___333_result ___336_result 	%line{130} %argrw{"wr"}
+	assign		___353_result ___356_result 	%line{130} %argrw{"wr"}
 # PxrColorBlend.h:131
 #     float l = pxrLum(result);
 	functioncall	$const13 1022 	%line{131} %argrw{"r"}
 # PxrColorBlend.h:73
 #     return (0.3 * c[0]) + (0.59 * c[1]) + (0.11 * c[2]);
-	compref		$tmp649 ___333_result $const1 	%line{73} %argrw{"wrr"}
+	compref		$tmp649 ___353_result $const1 	%line{73} %argrw{"wrr"}
 	mul		$tmp650 $const14 $tmp649 	%argrw{"wrr"}
-	compref		$tmp651 ___333_result $const2 	%argrw{"wrr"}
+	compref		$tmp651 ___353_result $const2 	%argrw{"wrr"}
 	mul		$tmp652 $const15 $tmp651 	%argrw{"wrr"}
 	add		$tmp653 $tmp650 $tmp652 	%argrw{"wrr"}
-	compref		$tmp654 ___333_result $const3 	%argrw{"wrr"}
+	compref		$tmp654 ___353_result $const3 	%argrw{"wrr"}
 	mul		$tmp655 $const16 $tmp654 	%argrw{"wrr"}
-	add		___333_l $tmp653 $tmp655 	%argrw{"wrr"}
+	add		___353_l $tmp653 $tmp655 	%argrw{"wrr"}
 # PxrColorBlend.h:132
 #     float n = min(min(result[0], result[1]), result[2]);
-	compref		$tmp657 ___333_result $const1 	%line{132} %argrw{"wrr"}
-	compref		$tmp658 ___333_result $const2 	%argrw{"wrr"}
+	compref		$tmp657 ___353_result $const1 	%line{132} %argrw{"wrr"}
+	compref		$tmp658 ___353_result $const2 	%argrw{"wrr"}
 	min		$tmp656 $tmp657 $tmp658 	%argrw{"wrr"}
-	compref		$tmp659 ___333_result $const3 	%argrw{"wrr"}
-	min		___333_n $tmp656 $tmp659 	%argrw{"wrr"}
+	compref		$tmp659 ___353_result $const3 	%argrw{"wrr"}
+	min		___353_n $tmp656 $tmp659 	%argrw{"wrr"}
 # PxrColorBlend.h:133
 #     float x = max(max(result[0], result[1]), result[2]);
-	compref		$tmp661 ___333_result $const1 	%line{133} %argrw{"wrr"}
-	compref		$tmp662 ___333_result $const2 	%argrw{"wrr"}
+	compref		$tmp661 ___353_result $const1 	%line{133} %argrw{"wrr"}
+	compref		$tmp662 ___353_result $const2 	%argrw{"wrr"}
 	max		$tmp660 $tmp661 $tmp662 	%argrw{"wrr"}
-	compref		$tmp663 ___333_result $const3 	%argrw{"wrr"}
-	max		___333_x $tmp660 $tmp663 	%argrw{"wrr"}
+	compref		$tmp663 ___353_result $const3 	%argrw{"wrr"}
+	max		___353_x $tmp660 $tmp663 	%argrw{"wrr"}
 # PxrColorBlend.h:134
 #     if (n < 0.0)
-	lt		$tmp664 ___333_n $const10 	%line{134} %argrw{"wrr"}
+	lt		$tmp664 ___353_n $const10 	%line{134} %argrw{"wrr"}
 	if		$tmp664 1044 1044 	%argrw{"r"}
 # PxrColorBlend.h:136
 #         result = clamp(l + (((result - l) * l) / (l - n)), 0, 1);
-	sub		$tmp665 ___333_result ___333_l 	%line{136} %argrw{"wrr"}
-	mul		$tmp666 $tmp665 ___333_l 	%argrw{"wrr"}
-	sub		$tmp667 ___333_l ___333_n 	%argrw{"wrr"}
+	sub		$tmp665 ___353_result ___353_l 	%line{136} %argrw{"wrr"}
+	mul		$tmp666 $tmp665 ___353_l 	%argrw{"wrr"}
+	sub		$tmp667 ___353_l ___353_n 	%argrw{"wrr"}
 	div		$tmp668 $tmp666 $tmp667 	%argrw{"wrr"}
-	add		$tmp669 ___333_l $tmp668 	%argrw{"wrr"}
+	add		$tmp669 ___353_l $tmp668 	%argrw{"wrr"}
 	assign		$tmp670 $const10 	%argrw{"wr"}
 	assign		$tmp671 $const18 	%argrw{"wr"}
 	functioncall	$const19 1044 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:140
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp672 $tmp669 $tmp671 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
-	max		___333_result $tmp672 $tmp670 	%argrw{"wrr"}
+	min		$tmp672 $tmp669 $tmp671 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{140} %argrw{"wrr"}
+	max		___353_result $tmp672 $tmp670 	%argrw{"wrr"}
 # PxrColorBlend.h:138
 #     if (x > 1)
-	gt		$tmp673 ___333_x $const2 	%filename{"PxrColorBlend.h"} %line{138} %argrw{"wrr"}
+	gt		$tmp673 ___353_x $const2 	%filename{"PxrColorBlend.h"} %line{138} %argrw{"wrr"}
 	if		$tmp673 1057 1057 	%argrw{"r"}
 # PxrColorBlend.h:140
 #         result = clamp(l + (((result - l) * (1 - l)) / (x - l)), 0, 1);
-	sub		$tmp674 ___333_result ___333_l 	%line{140} %argrw{"wrr"}
-	sub		$tmp675 $const18 ___333_l 	%argrw{"wrr"}
+	sub		$tmp674 ___353_result ___353_l 	%line{140} %argrw{"wrr"}
+	sub		$tmp675 $const18 ___353_l 	%argrw{"wrr"}
 	mul		$tmp676 $tmp674 $tmp675 	%argrw{"wrr"}
-	sub		$tmp677 ___333_x ___333_l 	%argrw{"wrr"}
+	sub		$tmp677 ___353_x ___353_l 	%argrw{"wrr"}
 	div		$tmp678 $tmp676 $tmp677 	%argrw{"wrr"}
-	add		$tmp679 ___333_l $tmp678 	%argrw{"wrr"}
+	add		$tmp679 ___353_l $tmp678 	%argrw{"wrr"}
 	assign		$tmp680 $const10 	%argrw{"wr"}
 	assign		$tmp681 $const18 	%argrw{"wr"}
 	functioncall	$const19 1057 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:140
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp682 $tmp679 $tmp681 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
-	max		___333_result $tmp682 $tmp680 	%argrw{"wrr"}
+	min		$tmp682 $tmp679 $tmp681 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %argrw{"wrr"}
+	max		___353_result $tmp682 $tmp680 	%argrw{"wrr"}
 # PxrColorBlend.h:142
 #     return result;
-	assign		resultRGB ___333_result 	%filename{"PxrColorBlend.h"} %line{142} %argrw{"wr"}
+	assign		resultRGB ___353_result 	%filename{"PxrColorBlend.h"} %line{142} %argrw{"wr"}
 # PxrColorBlend.h:508
 #     else if (mode == k_screen)
 	eq		$tmp683 $tmp8 $const65 	%line{508} %argrw{"wrr"}
@@ -2644,38 +2644,38 @@ code ___main___
 	assign		resultRGB frontC 	%line{335} %argrw{"wr"}
 # PxrColorBlend.h:529
 #     float a = aA;
-	assign		___365_a $tmp9 	%line{529} %argrw{"wr"}
+	assign		___385_a $tmp9 	%line{529} %argrw{"wr"}
 # PxrColorBlend.h:533
 #     if (mode == k_dissolve)
 	eq		$tmp761 $tmp8 $const7 	%line{533} %argrw{"wrr"}
 	if		$tmp761 1180 1180 	%argrw{"r"}
 # PxrColorBlend.h:536
 #         point Pobj = transform("current", "object", P);
-	transform	___394_Pobj $const73 $const74 P 	%line{536} %argrw{"wrrr"}
+	transform	___414_Pobj $const73 $const74 P 	%line{536} %argrw{"wrrr"}
 # PxrColorBlend.h:537
 #         float random = 1.0 - noise("uperlin", Pobj * 100000);
-	mul		$tmp763 ___394_Pobj $const77 	%line{537} %argrw{"wrr"}
+	mul		$tmp763 ___414_Pobj $const77 	%line{537} %argrw{"wrr"}
 	noise		$tmp762 $const75 $tmp763 	%argrw{"wrr"}
-	sub		___394_random $const18 $tmp762 	%argrw{"wrr"}
+	sub		___414_random $const18 $tmp762 	%argrw{"wrr"}
 # PxrColorBlend.h:538
 #         if (random >= a)
-	ge		$tmp764 ___394_random ___365_a 	%line{538} %argrw{"wrr"}
+	ge		$tmp764 ___414_random ___385_a 	%line{538} %argrw{"wrr"}
 	if		$tmp764 1180 1180 	%argrw{"r"}
 # PxrColorBlend.h:540
 #             a = 0.0;
-	assign		___365_a $const10 	%line{540} %argrw{"wr"}
+	assign		___385_a $const10 	%line{540} %argrw{"wr"}
 # PxrColorBlend.h:543
 #     float invA = 1.0 - a;
-	sub		___365_invA $const18 ___365_a 	%line{543} %argrw{"wrr"}
+	sub		___385_invA $const18 ___385_a 	%line{543} %argrw{"wrr"}
 # PxrColorBlend.h:544
 #     resultC = (invA * cB) + (a * resultC);
-	mul		$tmp765 ___365_invA backC 	%line{544} %argrw{"wrr"}
-	mul		$tmp766 ___365_a resultRGB 	%argrw{"wrr"}
+	mul		$tmp765 ___385_invA backC 	%line{544} %argrw{"wrr"}
+	mul		$tmp766 ___385_a resultRGB 	%argrw{"wrr"}
 	add		resultRGB $tmp765 $tmp766 	%argrw{"wrr"}
 # PxrColorBlend.h:545
 #     resultA = a + (invA * aB);
-	mul		$tmp767 ___365_invA alpha 	%line{545} %argrw{"wrr"}
-	add		resultA ___365_a $tmp767 	%argrw{"wrr"}
+	mul		$tmp767 ___385_invA alpha 	%line{545} %argrw{"wrr"}
+	add		resultA ___385_a $tmp767 	%argrw{"wrr"}
 # PxrLayeredBlend.osl:404
 #         backC = resultRGB;
 	assign		backC resultRGB 	%filename{"PxrLayeredBlend.osl"} %line{404} %argrw{"wr"}
@@ -2684,8 +2684,8 @@ code ___main___
 	assign		alpha resultA 	%line{405} %argrw{"wr"}
 # PxrLayeredBlend.osl:391
 #     for (int l = 7; l >= 0; l--)
-	assign		$tmp768 ___396_l 	%line{391} %argrw{"wr"}
-	sub		___396_l ___396_l $const2 	%argrw{"wrr"}
+	assign		$tmp768 ___416_l 	%line{391} %argrw{"wr"}
+	sub		___416_l ___416_l $const2 	%argrw{"wrr"}
 # PxrLayeredBlend.osl:408
 #     if (clampOutput)
 	if		clampOutput 1196 1196 	%line{408} %argrw{"r"}
@@ -2694,9 +2694,9 @@ code ___main___
 	assign		$tmp769 $const10 	%line{410} %argrw{"wr"}
 	assign		$tmp770 $const18 	%argrw{"wr"}
 	functioncall	$const19 1196 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:162
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:140
 # color  clamp (color x, color minval, color maxval) { return max(min(x,maxval),minval); }
-	min		$tmp771 resultRGB $tmp770 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{162} %argrw{"wrr"}
+	min		$tmp771 resultRGB $tmp770 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{140} %argrw{"wrr"}
 	max		resultRGB $tmp771 $tmp769 	%argrw{"wrr"}
 # PxrLayeredBlend.osl:413
 #     resultR = resultRGB[0];

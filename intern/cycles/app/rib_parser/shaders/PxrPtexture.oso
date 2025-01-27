@@ -1,6 +1,6 @@
 OpenShadingLanguage 1.00
-# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrPtexture.osl/obj/PxrPtexture.oso
+# Compiled by oslc 1.13.0.@PROJECT_VERSION_TWEAK@"dev"
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxSonoma_x86-64_clang15_external_release/osl/PxrPtexture.osl/obj/PxrPtexture.oso
 shader PxrPtexture	%meta{int,rfm_nodeid,1053401} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/texture"} %meta{string,rfh_classification,"Pattern/Texture"} %meta{string,help,"Read a ptex file."} 
 param	string	filename	""		%meta{string,widget,"assetIdInput"} %meta{string,help,"filename (string)"} %meta{string,options,"texture"} %meta{int,connectable,0} %meta{string,label,"Filename"}  %read{2,40} %write{2147483647,-1}
 param	int	firstChannel	0		%meta{string,widget,"default"} %meta{string,help,"First channel offset to be looked up for Filename.<br><br>firstChannel (int)"} %meta{int,connectable,0} %meta{string,label,"First Channel Offset"}  %read{29,40} %write{2147483647,-1}
@@ -25,10 +25,10 @@ oparam	float	resultB	0		%meta{string,help,"resultB (float)"}  %read{2147483647,-
 oparam	float	resultA	0		%meta{string,help,"resultA (float)"}  %read{72,72} %write{11,73}
 global	float	u	%read{15,17} %write{2147483647,-1} %derivs
 global	float	v	%read{14,18} %write{2147483647,-1} %derivs
-local	color	___420_tmpColor	%read{67,69} %write{66,66}
-local	float	___420_intensity	%read{68,68} %write{67,67}
-local	int	___446_foo	%read{46,46} %write{44,45}
-local	int	___449_i	%read{51,64} %write{50,64}
+local	color	___440_tmpColor	%read{67,69} %write{66,66}
+local	float	___440_intensity	%read{68,68} %write{67,67}
+local	int	___472_foo	%read{46,46} %write{44,45}
+local	int	___475_i	%read{51,64} %write{50,64}
 local	string[7]	filterNames	%read{1,1} %write{0,0}
 local	string	interp	%read{29,40} %write{1,1}
 local	int	fileExists	%read{3,5} %write{2,4}
@@ -36,8 +36,8 @@ local	float	up	%read{29,40} %write{14,15} %derivs
 local	float	vp	%read{29,40} %write{17,18} %derivs
 local	int	faceidx	%read{29,40} %write{21,21}
 local	int	nchannels	%read{24,38} %write{22,26}
-local	float	___467_f	%read{30,30} %write{29,29}
-local	float	___468_f	%read{34,34} %write{33,33}
+local	float	___497_f	%read{30,30} %write{29,29}
+local	float	___498_f	%read{34,34} %write{33,33}
 const	string[7]	$const1	"closest" "linear" "linear" "smartcubic" "smartcubic" "smartcubic" "smartcubic" 		%read{0,0} %write{2147483647,-1}
 const	string	$const2	""		%read{2,2} %write{2147483647,-1}
 temp	int	$tmp1	%read{2147483647,-1} %write{4,4}
@@ -157,20 +157,20 @@ code ___main___
 	if		$tmp7 31 41 	%argrw{"r"}
 # PxrPtexture.osl:208
 #         float f = texture(filename, up, vp,
-	texture		___467_f filename up vp $const9 firstChannel $const10 interp $const11 blur $const12 faceidx 	%line{208} %argrw{"wrrrrrrrrrrr"} %argderivs{2,3}
+	texture		___497_f filename up vp $const9 firstChannel $const10 interp $const11 blur $const12 faceidx 	%line{208} %argrw{"wrrrrrrrrrrr"} %argderivs{2,3}
 # PxrPtexture.osl:213
 #         resultRGB = color(f);
-	assign		resultRGB ___467_f 	%line{213} %argrw{"wr"}
+	assign		resultRGB ___497_f 	%line{213} %argrw{"wr"}
 # PxrPtexture.osl:215
 #     else if (nchannels == 2)
 	eq		$tmp8 nchannels $const6 	%line{215} %argrw{"wrr"}
 	if		$tmp8 35 41 	%argrw{"r"}
 # PxrPtexture.osl:218
 #         float f = texture(filename, up, vp,
-	texture		___468_f filename up vp $const13 resultA $const9 firstChannel $const10 interp $const11 blur $const12 faceidx 	%line{218} %argrw{"wrrrrwrrrrrrrr"} %argderivs{2,3}
+	texture		___498_f filename up vp $const13 resultA $const9 firstChannel $const10 interp $const11 blur $const12 faceidx 	%line{218} %argrw{"wrrrrwrrrrrrrr"} %argderivs{2,3}
 # PxrPtexture.osl:224
 #         resultRGB = color(f);
-	assign		resultRGB ___468_f 	%line{224} %argrw{"wr"}
+	assign		resultRGB ___498_f 	%line{224} %argrw{"wr"}
 # PxrPtexture.osl:226
 #     else if (nchannels == 3)
 	eq		$tmp9 nchannels $const14 	%line{226} %argrw{"wrr"}
@@ -189,61 +189,61 @@ code ___main___
 #     if (linearize) PxrLinearizeSRGB(resultRGB);
 	if		linearize 65 65 	%line{243} %argrw{"r"}
 	functioncall	$const15 65 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:127
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:222
 #     if (!ocioEnabled())
-	functioncall	$const16 47 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h"} %line{127} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:120
+	functioncall	$const16 47 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h"} %line{222} %argrw{"r"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:215
 #     int foo = 0;
-	assign		___446_foo $const4 	%line{120} %argrw{"wr"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:121
+	assign		___472_foo $const4 	%line{215} %argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:216
 #     getattribute("user:ocioenabled", foo);
-	getattribute	$tmp12 $const17 ___446_foo 	%line{121} %argrw{"wrw"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:122
+	getattribute	$tmp12 $const17 ___472_foo 	%line{216} %argrw{"wrw"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:217
 #     return foo;
-	assign		$tmp11 ___446_foo 	%line{122} %argrw{"wr"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:127
+	assign		$tmp11 ___472_foo 	%line{217} %argrw{"wr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:222
 #     if (!ocioEnabled())
-	eq		$tmp13 $tmp11 $const4 	%line{127} %argrw{"wrr"}
+	eq		$tmp13 $tmp11 $const4 	%line{222} %argrw{"wrr"}
 	if		$tmp13 65 65 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:129
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:224
 #         for (int i = 0; i < 3; ++i)
-	for		$tmp15 51 53 64 65 	%line{129} %argrw{"r"}
-	assign		___449_i $const4 	%argrw{"wr"}
-	lt		$tmp14 ___449_i $const14 	%argrw{"wrr"}
+	for		$tmp15 51 53 64 65 	%line{224} %argrw{"r"}
+	assign		___475_i $const4 	%argrw{"wr"}
+	lt		$tmp14 ___475_i $const14 	%argrw{"wrr"}
 	neq		$tmp15 $tmp14 $const4 	%argrw{"wrr"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:131
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:226
 #             if (inout[i] < 0.04045)
-	compref		$tmp16 resultRGB ___449_i 	%line{131} %argrw{"wrr"}
+	compref		$tmp16 resultRGB ___475_i 	%line{226} %argrw{"wrr"}
 	lt		$tmp17 $tmp16 $const18 	%argrw{"wrr"}
 	if		$tmp17 59 64 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:132
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:227
 #                 inout[i] = inout[i] * 0.07739938;
-	compref		$tmp18 resultRGB ___449_i 	%line{132} %argrw{"wrr"}
+	compref		$tmp18 resultRGB ___475_i 	%line{227} %argrw{"wrr"}
 	mul		$tmp19 $tmp18 $const19 	%argrw{"wrr"}
-	compassign	resultRGB ___449_i $tmp19 	%argrw{"wrr"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:134
+	compassign	resultRGB ___475_i $tmp19 	%argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:229
 #                 inout[i] = pow((inout[i] + 0.055) * 0.947867299, 2.4);
-	compref		$tmp21 resultRGB ___449_i 	%line{134} %argrw{"wrr"}
+	compref		$tmp21 resultRGB ___475_i 	%line{229} %argrw{"wrr"}
 	add		$tmp22 $tmp21 $const20 	%argrw{"wrr"}
 	mul		$tmp23 $tmp22 $const21 	%argrw{"wrr"}
 	pow		$tmp20 $tmp23 $const22 	%argrw{"wrr"}
-	compassign	resultRGB ___449_i $tmp20 	%argrw{"wrr"}
-# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:129
+	compassign	resultRGB ___475_i $tmp20 	%argrw{"wrr"}
+# /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLTexture.h:224
 #         for (int i = 0; i < 3; ++i)
-	add		___449_i ___449_i $const5 	%line{129} %argrw{"wrr"}
+	add		___475_i ___475_i $const5 	%line{224} %argrw{"wrr"}
 # PxrPtexture.osl:246
 #     resultRGB = Color_Saturate(resultRGB, saturation);
 	functioncall	$const23 70 	%filename{"PxrPtexture.osl"} %line{246} %argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:76
 #     color tmpColor = inputColor;
-	assign		___420_tmpColor resultRGB 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{76} %argrw{"wr"}
+	assign		___440_tmpColor resultRGB 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h"} %line{76} %argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:77
 #     float intensity = luminance(tmpColor);
-	luminance	___420_intensity ___420_tmpColor 	%line{77} %argrw{"wr"}
+	luminance	___440_intensity ___440_tmpColor 	%line{77} %argrw{"wr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/PxrOSLColor.h:78
 #     return mix(color(intensity), tmpColor, sat);
-	assign		$tmp24 ___420_intensity 	%line{78} %argrw{"wr"}
-	mix		resultRGB $tmp24 ___420_tmpColor saturation 	%argrw{"wrrr"}
+	assign		$tmp24 ___440_intensity 	%line{78} %argrw{"wr"}
+	mix		resultRGB $tmp24 ___440_tmpColor saturation 	%argrw{"wrrr"}
 # PxrPtexture.osl:247
 #     resultRGB = resultRGB * colorScale + colorOffset;
 	mul		$tmp25 resultRGB colorScale 	%filename{"PxrPtexture.osl"} %line{247} %argrw{"wrr"}

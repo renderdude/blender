@@ -1,13 +1,13 @@
 OpenShadingLanguage 1.00
-# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrRGBToNg.osl/obj/PxrRGBToNg.oso
+# Compiled by oslc 1.13.0.@PROJECT_VERSION_TWEAK@"dev"
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxSonoma_x86-64_clang15_external_release/osl/PxrRGBToNg.osl/obj/PxrRGBToNg.oso
 shader PxrRGBToNg	%meta{int,rfm_nodeid,1233496} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/utility"} %meta{string,rfh_classification,"Pattern/Utility"} %meta{string,help,"Calculates a surface gradient from an input color."} 
 param	color	inputColor	1 1 1		%meta{string,widget,"color"} %meta{string,help,"The color that you would like to use as input.<br>inputRGB (color)"} %meta{string,label,"Input Color"}  %read{2,2} %write{2147483647,-1} %derivs
 oparam	vector	resultNG	0 0 0		%meta{string,help,"Surface gradient from bump map.<br>resultNG (vector)"}  %read{0,0} %write{14,14}
 global	point	P	%read{5,5} %write{2147483647,-1} %derivs
 global	normal	N	%read{4,10} %write{2147483647,-1} %derivs
-local	float	___355_k	%read{10,12} %write{9,9}
-local	normal	___375_bumpN	%read{9,11} %write{7,7}
+local	float	___375_k	%read{10,12} %write{9,9}
+local	normal	___395_bumpN	%read{9,11} %write{7,7}
 temp	int	$tmp1	%read{1,1} %write{0,0}
 temp	vector	$tmp2	%read{7,7} %write{6,6}
 temp	float	$tmp3	%read{3,3} %write{2,2} %derivs
@@ -35,18 +35,18 @@ code ___main___
 	calculatenormal	$tmp2 $tmp6 	%argrw{"wr"} %argderivs{1}
 # PxrRGBToNg.osl:63
 #         normal bumpN = normalize(
-	normalize	___375_bumpN $tmp2 	%line{63} %argrw{"wr"}
+	normalize	___395_bumpN $tmp2 	%line{63} %argrw{"wr"}
 # PxrRGBToNg.osl:65
 #         resultNG = surfgradFromPerturbedNormal(bumpN, N);
 	functioncall	$const2 15 	%line{65} %argrw{"r"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:100
 # 	float k = dot(Nn, bN);
-	dot		___355_k N ___375_bumpN 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h"} %line{100} %argrw{"wrr"}
+	dot		___375_k N ___395_bumpN 	%filename{"/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h"} %line{100} %argrw{"wrr"}
 # /Users/Shared/build/ratbuild/rmanshare/RIS/include/osl/Bump.h:101
 # 	return (k * Nn - bN) / max(1.0e-8, abs(k));
-	mul		$tmp7 ___355_k N 	%line{101} %argrw{"wrr"}
-	sub		$tmp8 $tmp7 ___375_bumpN 	%argrw{"wrr"}
-	abs		$tmp10 ___355_k 	%argrw{"wr"}
+	mul		$tmp7 ___375_k N 	%line{101} %argrw{"wrr"}
+	sub		$tmp8 $tmp7 ___395_bumpN 	%argrw{"wrr"}
+	abs		$tmp10 ___375_k 	%argrw{"wr"}
 	max		$tmp9 $const3 $tmp10 	%argrw{"wrr"}
 	div		resultNG $tmp8 $tmp9 	%argrw{"wrr"}
 	end

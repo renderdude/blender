@@ -1,8 +1,8 @@
 OpenShadingLanguage 1.00
-# Compiled by oslc 1.11.0@OPROJECT_VERSION_RELEASE_TYPE@
-# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxMonterey_x86-64_clang14_external_release/osl/PxrColorCorrect.osl/obj/PxrColorCorrect.oso
+# Compiled by oslc 1.13.0.@PROJECT_VERSION_TWEAK@"dev"
+# options: -DOSX -I/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/common -I/Users/Shared/build/ratbuild/rmanshare/RIS/pattern/osl -I/Users/Shared/build/ratbuild/rmanshare/RIS/include/osl -o /Users/Shared/build/ratbuild/rmanshare/_built/osxSonoma_x86-64_clang15_external_release/osl/PxrColorCorrect.osl/obj/PxrColorCorrect.oso
 shader PxrColorCorrect	%meta{int,rfm_nodeid,1200405} %meta{string,rfm_classification,"rendernode/RenderMan/pattern/color"} %meta{string,rfh_classification,"Pattern/Color"} %meta{string,help,"PxrColorCorrect combines a number of classic remapping and color correction methods. "} 
-param	color	inputRGB	0 0 0		%meta{string,widget,"color"} %meta{string,help,"Plug an input color pattern here."} %meta{string,label,"Input Color"}  %read{0,195} %write{2147483647,-1}
+param	color	inputRGB	0 0 0		%meta{string,widget,"color"} %meta{string,help,"Plug an input color pattern here."} %meta{string,label,"Input Color"}  %read{0,203} %write{2147483647,-1}
 param	float	inputMask	1		%meta{string,widget,"default"} %meta{string,page,"Mask"} %meta{int,page_open,1} %meta{string,help,"A mask defining the color-corrected areas."} %meta{string,label,"Input Mask"} %meta{int,slider,1} %meta{float,slidermax,1} %meta{float,slidermin,0}  %read{3,4} %write{2147483647,-1}
 param	int	invertMask	0		%meta{string,widget,"checkBox"} %meta{string,page,"Mask"} %meta{string,help,"Inverts the mask's influence."} %meta{int,connectable,0} %meta{string,label,"Invert Mask"}  %read{1,1} %write{2147483647,-1}
 param	float	mixMask	1		%meta{string,widget,"default"} %meta{string,page,"Mask"} %meta{string,help,"Blend in the mask. When set to 0.0, there is no color correction at all."} %meta{int,connectable,0} %meta{string,label,"Mix Mask"} %meta{int,slider,1} %meta{float,slidermax,1} %meta{float,slidermin,0}  %read{5,5} %write{2147483647,-1}
@@ -11,40 +11,40 @@ param	vector	inputMax	1 1 1		%meta{string,widget,"default"} %meta{string,page,"I
 param	vector	gamma	1 1 1		%meta{string,widget,"default"} %meta{string,page,"Color Correct"} %meta{int,page_open,1} %meta{string,help,"Applies a per-channel gamma correction. Values lower than 0.0 are ignored, 1.0 is neutral. "} %meta{string,label,"Gamma"}  %read{43,67} %write{2147483647,-1}
 param	vector	contrast	0 0 0		%meta{string,widget,"default"} %meta{string,page,"Color Correct"} %meta{string,help,"Applies a per-channel contrast. The valid range is -1 to +1. 0.0 is neutral"} %meta{string,label,"Contrast"}  %read{85,85} %write{2147483647,-1}
 param	vector	contrastPivot	0.5 0.5 0.5		%meta{string,widget,"default"} %meta{string,page,"Color Correct"} %meta{string,help,"Specifies the per-channel pivot of the contrast curve. By default, it is centered at 0.5 to mimic classic photoshop-style operation. "} %meta{string,label,"Contrast Pivot"}  %read{86,86} %write{2147483647,-1}
-param	color	rgbGain	1 1 1		%meta{string,widget,"color"} %meta{string,page,"Color Correct"} %meta{string,help,"Use rgbGain to tint your input. This color will simply multiply your input color. 1.0 is neutral. "} %meta{string,label,"RGB Gain"}  %read{126,126} %write{2147483647,-1}
-param	vector	hsv	0 1 1		%meta{string,widget,"default"} %meta{string,page,"Color Correct"} %meta{string,help,"Apply a Hue, Saturation, Value color correction. Hue is an offset. Saturation and Value are multipliers. "} %meta{string,label,"HSV"}  %read{130,142} %write{2147483647,-1}
-param	float	exposure	0		%meta{string,widget,"default"} %meta{string,page,"Color Correct"} %meta{string,help,"Adjust the exposure of the input color by the given stops. Each positive stop will double the input's intensity.  Each negative stop will halve the input's intensity.  Often it is preferable to use Exposure instead of a straight multiplication (like rgbGain), as it is perceptually linear. "} %meta{string,label,"Exposure"} %meta{int,slider,1} %meta{float,slidermax,4} %meta{float,slidermin,-4}  %read{152,154} %write{2147483647,-1}
-param	vector	outputMin	0 0 0		%meta{string,widget,"default"} %meta{string,page,"Output Range"} %meta{int,page_open,1} %meta{string,help,"outputMin will remap the final color's 0.0 value to a value of your choice."} %meta{string,label,"Output Min"}  %read{171,171} %write{2147483647,-1}
-param	vector	outputMax	1 1 1		%meta{string,widget,"default"} %meta{string,page,"Output Range"} %meta{string,help,"outputMax will remap the final color's 1.0 value to a value of your choice."} %meta{string,label,"Output Max"}  %read{172,172} %write{2147483647,-1}
-param	int	clampOutput	0		%meta{string,widget,"checkBox"} %meta{string,page,"Clamp Output"} %meta{string,help,"The final color can optionaly be clamped to make sure it sits within a user- defined range. "} %meta{int,connectable,0} %meta{string,label,"Clamp Output"}  %read{190,190} %write{2147483647,-1}
-param	vector	clampMin	0 0 0		%meta{string,widget,"default"} %meta{string,page,"Clamp Output"} %meta{string,help,"This is the lowest value output by PxrColorCorrect"} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisPath,"clampOutput"} %meta{string,conditionalVisValue,"1"} %meta{string,label,"Clamp Min"}  %read{194,194} %write{2147483647,-1}
-param	vector	clampMax	1 1 1		%meta{string,widget,"default"} %meta{string,page,"Clamp Output"} %meta{string,help,"This is the highest value output by PxrColorCorrect"} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisPath,"clampOutput"} %meta{string,conditionalVisValue,"1"} %meta{string,label,"Clamp Max"}  %read{193,193} %write{2147483647,-1}
-oparam	color	resultRGB	0 0 0		%read{11,198} %write{0,195}
-oparam	float	resultR	0		%read{2147483647,-1} %write{196,196}
-oparam	float	resultG	0		%read{2147483647,-1} %write{197,197}
-oparam	float	resultB	0		%read{2147483647,-1} %write{198,198}
-local	color	___328_result	%read{40,40} %write{11,39}
-local	int	___329_i	%read{11,39} %write{10,39}
-local	color	___333_result	%read{189,189} %write{168,188}
-local	int	___334_i	%read{168,188} %write{167,188}
-local	color	___338_result	%read{78,78} %write{53,77}
-local	float	___339_result	%read{82,124} %write{82,124}
-local	float	___339_C	%read{82,124} %write{82,124}
-local	float	___339_power	%read{82,124} %write{82,124}
-local	color	___343_result	%read{125,125} %write{82,124}
-local	int	___344_i	%read{82,124} %write{81,124}
-local	color	___346_tmp	%read{129,148} %write{128,147}
-local	color	___346_result	%read{149,149} %write{148,148}
-local	color	___347_result	%read{155,164} %write{151,163}
-local	float	___348_exposure	%read{156,162} %write{154,154}
-local	float	maskValue	%read{5,195} %write{3,5}
-const	int	$const1	0		%read{1,196} %write{2147483647,-1}
+param	color	rgbGain	1 1 1		%meta{string,widget,"color"} %meta{string,page,"Color Correct"} %meta{string,help,"Use rgbGain to tint your input. This color will simply multiply your input color. 1.0 is neutral. "} %meta{string,label,"RGB Gain"}  %read{134,134} %write{2147483647,-1}
+param	vector	hsv	0 1 1		%meta{string,widget,"default"} %meta{string,page,"Color Correct"} %meta{string,help,"Apply a Hue, Saturation, Value color correction. Hue is an offset. Saturation and Value are multipliers. "} %meta{string,label,"HSV"}  %read{138,150} %write{2147483647,-1}
+param	float	exposure	0		%meta{string,widget,"default"} %meta{string,page,"Color Correct"} %meta{string,help,"Adjust the exposure of the input color by the given stops. Each positive stop will double the input's intensity.  Each negative stop will halve the input's intensity.  Often it is preferable to use Exposure instead of a straight multiplication (like rgbGain), as it is perceptually linear. "} %meta{string,label,"Exposure"} %meta{int,slider,1} %meta{float,slidermax,4} %meta{float,slidermin,-4}  %read{160,162} %write{2147483647,-1}
+param	vector	outputMin	0 0 0		%meta{string,widget,"default"} %meta{string,page,"Output Range"} %meta{int,page_open,1} %meta{string,help,"outputMin will remap the final color's 0.0 value to a value of your choice."} %meta{string,label,"Output Min"}  %read{179,179} %write{2147483647,-1}
+param	vector	outputMax	1 1 1		%meta{string,widget,"default"} %meta{string,page,"Output Range"} %meta{string,help,"outputMax will remap the final color's 1.0 value to a value of your choice."} %meta{string,label,"Output Max"}  %read{180,180} %write{2147483647,-1}
+param	int	clampOutput	0		%meta{string,widget,"checkBox"} %meta{string,page,"Clamp Output"} %meta{string,help,"The final color can optionaly be clamped to make sure it sits within a user- defined range. "} %meta{int,connectable,0} %meta{string,label,"Clamp Output"}  %read{198,198} %write{2147483647,-1}
+param	vector	clampMin	0 0 0		%meta{string,widget,"default"} %meta{string,page,"Clamp Output"} %meta{string,help,"This is the lowest value output by PxrColorCorrect"} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisPath,"clampOutput"} %meta{string,conditionalVisValue,"1"} %meta{string,label,"Clamp Min"}  %read{202,202} %write{2147483647,-1}
+param	vector	clampMax	1 1 1		%meta{string,widget,"default"} %meta{string,page,"Clamp Output"} %meta{string,help,"This is the highest value output by PxrColorCorrect"} %meta{string,conditionalVisOp,"equalTo"} %meta{string,conditionalVisPath,"clampOutput"} %meta{string,conditionalVisValue,"1"} %meta{string,label,"Clamp Max"}  %read{201,201} %write{2147483647,-1}
+oparam	color	resultRGB	0 0 0		%read{11,206} %write{0,203}
+oparam	float	resultR	0		%read{2147483647,-1} %write{204,204}
+oparam	float	resultG	0		%read{2147483647,-1} %write{205,205}
+oparam	float	resultB	0		%read{2147483647,-1} %write{206,206}
+local	color	___348_result	%read{40,40} %write{11,39}
+local	int	___349_i	%read{11,39} %write{10,39}
+local	color	___353_result	%read{197,197} %write{176,196}
+local	int	___354_i	%read{176,196} %write{175,196}
+local	color	___358_result	%read{78,78} %write{53,77}
+local	float	___359_C	%read{82,132} %write{82,132}
+local	float	___359_power	%read{82,132} %write{82,132}
+local	float	___359_signedPivot	%read{82,132} %write{82,132}
+local	color	___361_result	%read{133,133} %write{82,132}
+local	int	___362_i	%read{82,132} %write{81,132}
+local	color	___364_tmp	%read{137,156} %write{136,155}
+local	color	___364_result	%read{157,157} %write{156,156}
+local	color	___365_result	%read{163,172} %write{159,171}
+local	float	___366_exposure	%read{164,170} %write{162,162}
+local	float	maskValue	%read{5,203} %write{3,5}
+const	int	$const1	0		%read{1,204} %write{2147483647,-1}
 temp	int	$tmp1	%read{2,2} %write{1,1}
-const	float	$const2	1		%read{3,177} %write{2147483647,-1}
-const	float	$const3	0		%read{5,174} %write{2147483647,-1}
+const	float	$const2	1		%read{3,185} %write{2147483647,-1}
+const	float	$const3	0		%read{5,182} %write{2147483647,-1}
 temp	int	$tmp2	%read{7,7} %write{6,6}
 const	string	$const4	"RixInputRange"		%read{8,16} %write{2147483647,-1}
-const	int	$const5	3		%read{11,168} %write{2147483647,-1}
+const	int	$const5	3		%read{11,176} %write{2147483647,-1}
 temp	int	$tmp3	%read{11,39} %write{11,39}
 temp	int	$tmp4	%read{9,39} %write{10,39}
 temp	float	$tmp5	%read{11,39} %write{11,39}
@@ -59,7 +59,7 @@ temp	int	$tmp13	%read{11,39} %write{11,39}
 temp	int	$tmp14	%read{11,39} %write{11,39}
 temp	float	$tmp15	%read{11,39} %write{11,39}
 temp	float	$tmp16	%read{11,39} %write{11,39}
-const	int	$const6	1		%read{39,197} %write{2147483647,-1}
+const	int	$const6	1		%read{39,205} %write{2147483647,-1}
 temp	int	$tmp17	%read{2147483647,-1} %write{11,39}
 const	string	$const7	"RixGamma"		%read{41,68} %write{2147483647,-1}
 temp	float	$tmp18	%read{53,53} %write{50,52}
@@ -78,7 +78,7 @@ temp	float	$tmp29	%read{62,62} %write{59,59}
 temp	float	$tmp30	%read{61,61} %write{60,60}
 temp	float	$tmp31	%read{62,62} %write{61,61}
 temp	float	$tmp32	%read{77,77} %write{74,76}
-const	int	$const9	2		%read{66,198} %write{2147483647,-1}
+const	int	$const9	2		%read{66,206} %write{2147483647,-1}
 temp	float	$tmp33	%read{71,76} %write{66,66}
 temp	float	$tmp34	%read{69,72} %write{67,67}
 temp	int	$tmp35	%read{70,70} %write{69,69}
@@ -86,107 +86,113 @@ temp	float	$tmp36	%read{74,74} %write{71,71}
 temp	float	$tmp37	%read{73,73} %write{72,72}
 temp	float	$tmp38	%read{74,74} %write{73,73}
 const	string	$const10	"RixContrast"		%read{79,87} %write{2147483647,-1}
-temp	int	$tmp39	%read{82,124} %write{82,124}
-temp	int	$tmp40	%read{80,124} %write{81,124}
-temp	float	$tmp41	%read{82,124} %write{82,124}
-temp	float	$tmp42	%read{82,124} %write{82,124}
-temp	float	$tmp43	%read{82,124} %write{82,124}
-temp	float	$tmp44	%read{82,124} %write{82,124}
-temp	int	$tmp45	%read{82,124} %write{82,124}
-temp	int	$tmp46	%read{82,124} %write{82,124}
-temp	int	$tmp47	%read{82,124} %write{82,124}
-temp	int	$tmp48	%read{82,124} %write{82,124}
-temp	float	$tmp49	%read{82,124} %write{82,124}
-const	float	$const11	-1		%read{100,100} %write{2147483647,-1}
-const	string	$const12	"clamp"		%read{98,192} %write{2147483647,-1}
-temp	float	$tmp50	%read{82,124} %write{82,124}
-const	float	$const13	0.5		%read{101,102} %write{2147483647,-1}
-temp	float	$tmp51	%read{82,124} %write{82,124}
-const	float	$const14	0.999000013		%read{103,103} %write{2147483647,-1}
-temp	float	$tmp52	%read{82,124} %write{82,124}
-temp	float	$tmp53	%read{82,124} %write{82,124}
-const	float	$const15	-0.30103001		%read{106,106} %write{2147483647,-1}
-temp	int	$tmp54	%read{82,124} %write{82,124}
-temp	float	$tmp55	%read{82,124} %write{82,124}
-temp	float	$tmp56	%read{82,124} %write{82,124}
-temp	float	$tmp57	%read{82,124} %write{82,124}
-temp	float	$tmp58	%read{82,124} %write{82,124}
-temp	float	$tmp59	%read{82,124} %write{82,124}
-temp	float	$tmp60	%read{82,124} %write{82,124}
-temp	int	$tmp61	%read{2147483647,-1} %write{82,124}
-const	string	$const16	"RixHsvCorrect"		%read{127,127} %write{2147483647,-1}
-const	string	$const17	"rgb"		%read{128,148} %write{2147483647,-1}
-const	string	$const18	"hsv"		%read{128,148} %write{2147483647,-1}
-temp	float	$tmp62	%read{133,133} %write{132,132}
-temp	float	$tmp63	%read{131,131} %write{129,129}
-temp	float	$tmp64	%read{131,131} %write{130,130}
-temp	float	$tmp65	%read{132,132} %write{131,131}
-temp	float	$tmp66	%read{140,140} %write{139,139}
-temp	float	$tmp67	%read{136,136} %write{134,134}
-temp	float	$tmp68	%read{136,136} %write{135,135}
-temp	float	$tmp69	%read{138,138} %write{136,136}
+temp	int	$tmp39	%read{82,132} %write{82,132}
+temp	int	$tmp40	%read{80,132} %write{81,132}
+temp	float	$tmp41	%read{82,132} %write{82,132}
+temp	float	$tmp42	%read{82,132} %write{82,132}
+temp	float	$tmp43	%read{82,132} %write{82,132}
+temp	float	$tmp44	%read{82,132} %write{82,132}
+temp	int	$tmp45	%read{82,132} %write{82,132}
+temp	int	$tmp46	%read{82,132} %write{82,132}
+temp	int	$tmp47	%read{82,132} %write{82,132}
+temp	int	$tmp48	%read{82,132} %write{82,132}
+temp	float	$tmp49	%read{82,132} %write{82,132}
+const	float	$const11	-1		%read{99,99} %write{2147483647,-1}
+const	string	$const12	"clamp"		%read{97,200} %write{2147483647,-1}
+temp	float	$tmp50	%read{82,132} %write{82,132}
+const	float	$const13	0.5		%read{100,101} %write{2147483647,-1}
+temp	float	$tmp51	%read{82,132} %write{82,132}
+const	float	$const14	0.999000013		%read{102,102} %write{2147483647,-1}
+temp	float	$tmp52	%read{82,132} %write{82,132}
+temp	float	$tmp53	%read{82,132} %write{82,132}
+const	float	$const15	-0.30103001		%read{105,105} %write{2147483647,-1}
+temp	int	$tmp54	%read{82,132} %write{82,132}
+temp	int	$tmp55	%read{82,132} %write{82,132}
+temp	int	$tmp56	%read{82,132} %write{82,132}
+temp	int	$tmp57	%read{82,132} %write{82,132}
+temp	int	$tmp58	%read{82,132} %write{82,132}
+temp	int	$tmp59	%read{82,132} %write{82,132}
+temp	int	$tmp60	%read{82,132} %write{82,132}
+temp	int	$tmp61	%read{82,132} %write{82,132}
+temp	int	$tmp62	%read{82,132} %write{82,132}
+temp	int	$tmp63	%read{82,132} %write{82,132}
+temp	float	$tmp64	%read{82,132} %write{82,132}
+temp	float	$tmp65	%read{82,132} %write{82,132}
+temp	float	$tmp66	%read{82,132} %write{82,132}
+temp	int	$tmp67	%read{2147483647,-1} %write{82,132}
+const	string	$const16	"RixHsvCorrect"		%read{135,135} %write{2147483647,-1}
+const	string	$const17	"rgb"		%read{136,156} %write{2147483647,-1}
+const	string	$const18	"hsv"		%read{136,156} %write{2147483647,-1}
+temp	float	$tmp68	%read{141,141} %write{140,140}
+temp	float	$tmp69	%read{139,139} %write{137,137}
 temp	float	$tmp70	%read{139,139} %write{138,138}
-temp	float	$tmp71	%read{147,147} %write{146,146}
-temp	float	$tmp72	%read{143,143} %write{141,141}
-temp	float	$tmp73	%read{143,143} %write{142,142}
-temp	float	$tmp74	%read{145,145} %write{143,143}
-temp	float	$tmp75	%read{146,146} %write{145,145}
-const	string	$const19	"RixExposure"		%read{150,150} %write{2147483647,-1}
-temp	int	$tmp76	%read{153,153} %write{152,152}
-const	float	$const20	2		%read{154,154} %write{2147483647,-1}
-temp	float	$tmp77	%read{156,156} %write{155,155}
-temp	float	$tmp78	%read{157,157} %write{156,156}
-temp	float	$tmp79	%read{159,159} %write{158,158}
-temp	float	$tmp80	%read{160,160} %write{159,159}
-temp	float	$tmp81	%read{162,162} %write{161,161}
-temp	float	$tmp82	%read{163,163} %write{162,162}
-const	string	$const21	"RixOutputRange"		%read{165,173} %write{2147483647,-1}
-temp	int	$tmp83	%read{168,188} %write{168,188}
-temp	int	$tmp84	%read{166,188} %write{167,188}
-temp	float	$tmp85	%read{168,188} %write{168,188}
-temp	float	$tmp86	%read{168,188} %write{168,188}
-temp	float	$tmp87	%read{168,188} %write{168,188}
-temp	float	$tmp88	%read{168,188} %write{168,188}
-temp	int	$tmp89	%read{168,188} %write{168,188}
-temp	int	$tmp90	%read{168,188} %write{168,188}
-temp	int	$tmp91	%read{168,188} %write{168,188}
-temp	int	$tmp92	%read{168,188} %write{168,188}
-temp	float	$tmp93	%read{168,188} %write{168,188}
-temp	float	$tmp94	%read{168,188} %write{168,188}
-temp	int	$tmp95	%read{2147483647,-1} %write{168,188}
-temp	int	$tmp96	%read{191,191} %write{190,190}
-temp	vector	$tmp97	%read{194,194} %write{193,193}
+temp	float	$tmp71	%read{140,140} %write{139,139}
+temp	float	$tmp72	%read{148,148} %write{147,147}
+temp	float	$tmp73	%read{144,144} %write{142,142}
+temp	float	$tmp74	%read{144,144} %write{143,143}
+temp	float	$tmp75	%read{146,146} %write{144,144}
+temp	float	$tmp76	%read{147,147} %write{146,146}
+temp	float	$tmp77	%read{155,155} %write{154,154}
+temp	float	$tmp78	%read{151,151} %write{149,149}
+temp	float	$tmp79	%read{151,151} %write{150,150}
+temp	float	$tmp80	%read{153,153} %write{151,151}
+temp	float	$tmp81	%read{154,154} %write{153,153}
+const	string	$const19	"RixExposure"		%read{158,158} %write{2147483647,-1}
+temp	int	$tmp82	%read{161,161} %write{160,160}
+const	float	$const20	2		%read{162,162} %write{2147483647,-1}
+temp	float	$tmp83	%read{164,164} %write{163,163}
+temp	float	$tmp84	%read{165,165} %write{164,164}
+temp	float	$tmp85	%read{167,167} %write{166,166}
+temp	float	$tmp86	%read{168,168} %write{167,167}
+temp	float	$tmp87	%read{170,170} %write{169,169}
+temp	float	$tmp88	%read{171,171} %write{170,170}
+const	string	$const21	"RixOutputRange"		%read{173,181} %write{2147483647,-1}
+temp	int	$tmp89	%read{176,196} %write{176,196}
+temp	int	$tmp90	%read{174,196} %write{175,196}
+temp	float	$tmp91	%read{176,196} %write{176,196}
+temp	float	$tmp92	%read{176,196} %write{176,196}
+temp	float	$tmp93	%read{176,196} %write{176,196}
+temp	float	$tmp94	%read{176,196} %write{176,196}
+temp	int	$tmp95	%read{176,196} %write{176,196}
+temp	int	$tmp96	%read{176,196} %write{176,196}
+temp	int	$tmp97	%read{176,196} %write{176,196}
+temp	int	$tmp98	%read{176,196} %write{176,196}
+temp	float	$tmp99	%read{176,196} %write{176,196}
+temp	float	$tmp100	%read{176,196} %write{176,196}
+temp	int	$tmp101	%read{2147483647,-1} %write{176,196}
+temp	int	$tmp102	%read{199,199} %write{198,198}
+temp	vector	$tmp103	%read{202,202} %write{201,201}
 code ___main___
-# PxrColorCorrect.osl:325
+# PxrColorCorrect.osl:313
 #     resultRGB = inputRGB;
-	assign		resultRGB inputRGB 	%filename{"PxrColorCorrect.osl"} %line{325} %argrw{"wr"}
-# PxrColorCorrect.osl:327
+	assign		resultRGB inputRGB 	%filename{"PxrColorCorrect.osl"} %line{313} %argrw{"wr"}
+# PxrColorCorrect.osl:315
 #     float maskValue = (invertMask != 0) ? 1.0 - inputMask : inputMask;
-	neq		$tmp1 invertMask $const1 	%line{327} %argrw{"wrr"}
+	neq		$tmp1 invertMask $const1 	%line{315} %argrw{"wrr"}
 	if		$tmp1 4 5 	%argrw{"r"}
 	sub		maskValue $const2 inputMask 	%argrw{"wrr"}
 	assign		maskValue inputMask 	%argrw{"wr"}
-# PxrColorCorrect.osl:328
+# PxrColorCorrect.osl:316
 #     maskValue = mix(0.0, maskValue, mixMask);
-	mix		maskValue $const3 maskValue mixMask 	%line{328} %argrw{"wrrr"}
-# PxrColorCorrect.osl:330
+	mix		maskValue $const3 maskValue mixMask 	%line{316} %argrw{"wrrr"}
+# PxrColorCorrect.osl:318
 #     if (maskValue > 0.0)
-	gt		$tmp2 maskValue $const3 	%line{330} %argrw{"wrr"}
-	if		$tmp2 196 196 	%argrw{"r"}
-# PxrColorCorrect.osl:332
+	gt		$tmp2 maskValue $const3 	%line{318} %argrw{"wrr"}
+	if		$tmp2 204 204 	%argrw{"r"}
+# PxrColorCorrect.osl:320
 #         resultRGB = RixInputRange(resultRGB, inputMin, inputMax);
-	functioncall	$const4 41 	%line{332} %argrw{"r"}
+	functioncall	$const4 41 	%line{320} %argrw{"r"}
 # PxrColorCorrect.osl:55
 #     for (int i = 0; i < 3; i++)
 	for		$tmp4 11 13 38 40 	%line{55} %argrw{"r"}
-	assign		___329_i $const1 	%argrw{"wr"}
-	lt		$tmp3 ___329_i $const5 	%argrw{"wrr"}
+	assign		___349_i $const1 	%argrw{"wr"}
+	lt		$tmp3 ___349_i $const5 	%argrw{"wrr"}
 	neq		$tmp4 $tmp3 $const1 	%argrw{"wrr"}
 # PxrColorCorrect.osl:57
 #         result[i] = RixInputRange(rgb[i], min[i], max[i]);
-	compref		$tmp6 resultRGB ___329_i 	%line{57} %argrw{"wrr"}
-	compref		$tmp7 inputMin ___329_i 	%argrw{"wrr"}
-	compref		$tmp8 inputMax ___329_i 	%argrw{"wrr"}
+	compref		$tmp6 resultRGB ___349_i 	%line{57} %argrw{"wrr"}
+	compref		$tmp7 inputMin ___349_i 	%argrw{"wrr"}
+	compref		$tmp8 inputMax ___349_i 	%argrw{"wrr"}
 	functioncall	$const4 37 	%argrw{"r"}
 # PxrColorCorrect.osl:41
 #     if (min == 0.0 && max == 1.0)
@@ -220,17 +226,17 @@ code ___main___
 	return
 # PxrColorCorrect.osl:57
 #         result[i] = RixInputRange(rgb[i], min[i], max[i]);
-	compassign	___328_result ___329_i $tmp5 	%line{57} %argrw{"wrr"}
+	compassign	___348_result ___349_i $tmp5 	%line{57} %argrw{"wrr"}
 # PxrColorCorrect.osl:55
 #     for (int i = 0; i < 3; i++)
-	assign		$tmp17 ___329_i 	%line{55} %argrw{"wr"}
-	add		___329_i ___329_i $const6 	%argrw{"wrr"}
+	assign		$tmp17 ___349_i 	%line{55} %argrw{"wr"}
+	add		___349_i ___349_i $const6 	%argrw{"wrr"}
 # PxrColorCorrect.osl:59
 #     return result;
-	assign		resultRGB ___328_result 	%line{59} %argrw{"wr"}
-# PxrColorCorrect.osl:333
+	assign		resultRGB ___348_result 	%line{59} %argrw{"wr"}
+# PxrColorCorrect.osl:321
 #         resultRGB = RixGamma(resultRGB, gamma);
-	functioncall	$const7 79 	%line{333} %argrw{"r"}
+	functioncall	$const7 79 	%line{321} %argrw{"r"}
 # PxrColorCorrect.osl:93
 #     result[0] = RixGamma(rgb[0], g[0]);
 	compref		$tmp19 resultRGB $const1 	%line{93} %argrw{"wrr"}
@@ -252,7 +258,7 @@ code ___main___
 	assign		$tmp18 $tmp19 	%line{87} %argrw{"wr"}
 # PxrColorCorrect.osl:93
 #     result[0] = RixGamma(rgb[0], g[0]);
-	compassign	___338_result $const1 $tmp18 	%line{93} %argrw{"wrr"}
+	compassign	___358_result $const1 $tmp18 	%line{93} %argrw{"wrr"}
 # PxrColorCorrect.osl:94
 #     result[1] = RixGamma(rgb[1], g[1]);
 	compref		$tmp26 resultRGB $const6 	%line{94} %argrw{"wrr"}
@@ -274,7 +280,7 @@ code ___main___
 	assign		$tmp25 $tmp26 	%line{87} %argrw{"wr"}
 # PxrColorCorrect.osl:94
 #     result[1] = RixGamma(rgb[1], g[1]);
-	compassign	___338_result $const6 $tmp25 	%line{94} %argrw{"wrr"}
+	compassign	___358_result $const6 $tmp25 	%line{94} %argrw{"wrr"}
 # PxrColorCorrect.osl:95
 #     result[2] = RixGamma(rgb[2], g[2]);
 	compref		$tmp33 resultRGB $const9 	%line{95} %argrw{"wrr"}
@@ -296,25 +302,25 @@ code ___main___
 	assign		$tmp32 $tmp33 	%line{87} %argrw{"wr"}
 # PxrColorCorrect.osl:95
 #     result[2] = RixGamma(rgb[2], g[2]);
-	compassign	___338_result $const9 $tmp32 	%line{95} %argrw{"wrr"}
+	compassign	___358_result $const9 $tmp32 	%line{95} %argrw{"wrr"}
 # PxrColorCorrect.osl:96
 #     return result;
-	assign		resultRGB ___338_result 	%line{96} %argrw{"wr"}
-# PxrColorCorrect.osl:334
+	assign		resultRGB ___358_result 	%line{96} %argrw{"wr"}
+# PxrColorCorrect.osl:322
 #         resultRGB = RixContrast(resultRGB, contrast, contrastPivot);
-	functioncall	$const10 126 	%line{334} %argrw{"r"}
-# PxrColorCorrect.osl:128
+	functioncall	$const10 134 	%line{322} %argrw{"r"}
+# PxrColorCorrect.osl:116
 #     for (int i = 0; i < 3; i++)
-	for		$tmp40 82 84 123 125 	%line{128} %argrw{"r"}
-	assign		___344_i $const1 	%argrw{"wr"}
-	lt		$tmp39 ___344_i $const5 	%argrw{"wrr"}
+	for		$tmp40 82 84 131 133 	%line{116} %argrw{"r"}
+	assign		___362_i $const1 	%argrw{"wr"}
+	lt		$tmp39 ___362_i $const5 	%argrw{"wrr"}
 	neq		$tmp40 $tmp39 $const1 	%argrw{"wrr"}
-# PxrColorCorrect.osl:130
+# PxrColorCorrect.osl:118
 #         result[i] = RixContrast(rgb[i], contrast[i], pivot[i]);
-	compref		$tmp42 resultRGB ___344_i 	%line{130} %argrw{"wrr"}
-	compref		$tmp43 contrast ___344_i 	%argrw{"wrr"}
-	compref		$tmp44 contrastPivot ___344_i 	%argrw{"wrr"}
-	functioncall	$const10 122 	%argrw{"r"}
+	compref		$tmp42 resultRGB ___362_i 	%line{118} %argrw{"wrr"}
+	compref		$tmp43 contrast ___362_i 	%argrw{"wrr"}
+	compref		$tmp44 contrastPivot ___362_i 	%argrw{"wrr"}
+	functioncall	$const10 130 	%argrw{"r"}
 # PxrColorCorrect.osl:101
 #     if (contrast == 0.0 || f == pivot)
 	eq		$tmp45 $tmp43 $const3 	%line{101} %argrw{"wrr"}
@@ -329,211 +335,205 @@ code ___main___
 	assign		$tmp41 $tmp42 	%line{103} %argrw{"wr"}
 	return
 # PxrColorCorrect.osl:106
-#     float result = f;
-	assign		___339_result $tmp42 	%line{106} %argrw{"wr"}
-# PxrColorCorrect.osl:107
 #     float C = (clamp(contrast, -1.0, 1.0) * 0.5) + 0.5;
-	functioncall	$const12 101 	%line{107} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
+	functioncall	$const12 100 	%line{106} %argrw{"r"}
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:141
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp50 $tmp43 $const2 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
+	min		$tmp50 $tmp43 $const2 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{141} %argrw{"wrr"}
 	max		$tmp49 $tmp50 $const11 	%argrw{"wrr"}
-# PxrColorCorrect.osl:107
+# PxrColorCorrect.osl:106
 #     float C = (clamp(contrast, -1.0, 1.0) * 0.5) + 0.5;
-	mul		$tmp51 $tmp49 $const13 	%filename{"PxrColorCorrect.osl"} %line{107} %argrw{"wrr"}
-	add		___339_C $tmp51 $const13 	%argrw{"wrr"}
-# PxrColorCorrect.osl:108
+	mul		$tmp51 $tmp49 $const13 	%filename{"PxrColorCorrect.osl"} %line{106} %argrw{"wrr"}
+	add		___359_C $tmp51 $const13 	%argrw{"wrr"}
+# PxrColorCorrect.osl:107
 #     C = min(C, 0.999);
-	min		___339_C ___339_C $const14 	%line{108} %argrw{"wrr"}
-# PxrColorCorrect.osl:109
+	min		___359_C ___359_C $const14 	%line{107} %argrw{"wrr"}
+# PxrColorCorrect.osl:108
 #     float power = log(1.0 - C) / F_LOGDOTFIVE;
-	sub		$tmp53 $const2 ___339_C 	%line{109} %argrw{"wrr"}
+	sub		$tmp53 $const2 ___359_C 	%line{108} %argrw{"wrr"}
 	log		$tmp52 $tmp53 	%argrw{"wr"}
-	div		___339_power $tmp52 $const15 	%argrw{"wrr"}
+	div		___359_power $tmp52 $const15 	%argrw{"wrr"}
+# PxrColorCorrect.osl:109
+#     float signedPivot = ((f < 0 && pivot > 0) || (f > 0 && pivot < 0)) ? -pivot : pivot;
+	lt		$tmp54 $tmp42 $const1 	%line{109} %argrw{"wrr"}
+	neq		$tmp55 $tmp54 $const1 	%argrw{"wrr"}
+	if		$tmp55 112 112 	%argrw{"r"}
+	gt		$tmp56 $tmp44 $const1 	%argrw{"wrr"}
+	neq		$tmp57 $tmp56 $const1 	%argrw{"wrr"}
+	assign		$tmp55 $tmp57 	%argrw{"wr"}
+	neq		$tmp58 $tmp55 $const1 	%argrw{"wrr"}
+	if		$tmp58 114 122 	%argrw{"r"}
+	gt		$tmp59 $tmp42 $const1 	%argrw{"wrr"}
+	neq		$tmp60 $tmp59 $const1 	%argrw{"wrr"}
+	if		$tmp60 120 120 	%argrw{"r"}
+	lt		$tmp61 $tmp44 $const1 	%argrw{"wrr"}
+	neq		$tmp62 $tmp61 $const1 	%argrw{"wrr"}
+	assign		$tmp60 $tmp62 	%argrw{"wr"}
+	neq		$tmp63 $tmp60 $const1 	%argrw{"wrr"}
+	assign		$tmp58 $tmp63 	%argrw{"wr"}
+	if		$tmp58 124 125 	%argrw{"r"}
+	neg		___359_signedPivot $tmp44 	%argrw{"wr"}
+	assign		___359_signedPivot $tmp44 	%argrw{"wr"}
 # PxrColorCorrect.osl:110
-#     if (f < pivot)
-	lt		$tmp54 $tmp42 $tmp44 	%line{110} %argrw{"wrr"}
-	if		$tmp54 112 121 	%argrw{"r"}
-# PxrColorCorrect.osl:112
-#         result = f / pivot;
-	div		___339_result $tmp42 $tmp44 	%line{112} %argrw{"wrr"}
-# PxrColorCorrect.osl:113
-#         result = pow(result, power);
-	pow		___339_result ___339_result ___339_power 	%line{113} %argrw{"wrr"}
-# PxrColorCorrect.osl:114
-#         result *= pivot;
-	mul		___339_result ___339_result $tmp44 	%line{114} %argrw{"wrr"}
+#     return pow(abs(f / pivot), power) * signedPivot;
+	div		$tmp66 $tmp42 $tmp44 	%line{110} %argrw{"wrr"}
+	abs		$tmp65 $tmp66 	%argrw{"wr"}
+	pow		$tmp64 $tmp65 ___359_power 	%argrw{"wrr"}
+	mul		$tmp41 $tmp64 ___359_signedPivot 	%argrw{"wrr"}
+	return
 # PxrColorCorrect.osl:118
-#         result = (f - pivot) / (1.0 - pivot);
-	sub		$tmp55 $tmp42 $tmp44 	%line{118} %argrw{"wrr"}
-	sub		$tmp56 $const2 $tmp44 	%argrw{"wrr"}
-	div		___339_result $tmp55 $tmp56 	%argrw{"wrr"}
-# PxrColorCorrect.osl:119
-#         result = 1.0 - pow(1.0 - result, power);
-	sub		$tmp58 $const2 ___339_result 	%line{119} %argrw{"wrr"}
-	pow		$tmp57 $tmp58 ___339_power 	%argrw{"wrr"}
-	sub		___339_result $const2 $tmp57 	%argrw{"wrr"}
-# PxrColorCorrect.osl:120
-#         result *= (1.0 - pivot) + pivot;
-	sub		$tmp59 $const2 $tmp44 	%line{120} %argrw{"wrr"}
-	add		$tmp60 $tmp59 $tmp44 	%argrw{"wrr"}
-	mul		___339_result ___339_result $tmp60 	%argrw{"wrr"}
-# PxrColorCorrect.osl:122
-#     return result;
-	assign		$tmp41 ___339_result 	%line{122} %argrw{"wr"}
-# PxrColorCorrect.osl:130
 #         result[i] = RixContrast(rgb[i], contrast[i], pivot[i]);
-	compassign	___343_result ___344_i $tmp41 	%line{130} %argrw{"wrr"}
-# PxrColorCorrect.osl:128
+	compassign	___361_result ___362_i $tmp41 	%line{118} %argrw{"wrr"}
+# PxrColorCorrect.osl:116
 #     for (int i = 0; i < 3; i++)
-	assign		$tmp61 ___344_i 	%line{128} %argrw{"wr"}
-	add		___344_i ___344_i $const6 	%argrw{"wrr"}
-# PxrColorCorrect.osl:132
+	assign		$tmp67 ___362_i 	%line{116} %argrw{"wr"}
+	add		___362_i ___362_i $const6 	%argrw{"wrr"}
+# PxrColorCorrect.osl:120
 #     return result;
-	assign		resultRGB ___343_result 	%line{132} %argrw{"wr"}
-# PxrColorCorrect.osl:335
+	assign		resultRGB ___361_result 	%line{120} %argrw{"wr"}
+# PxrColorCorrect.osl:323
 #         resultRGB *= rgbGain;
-	mul		resultRGB resultRGB rgbGain 	%line{335} %argrw{"wrr"}
-# PxrColorCorrect.osl:336
+	mul		resultRGB resultRGB rgbGain 	%line{323} %argrw{"wrr"}
+# PxrColorCorrect.osl:324
 #         resultRGB = RixHsvCorrect(resultRGB, hsv);
-	functioncall	$const16 150 	%line{336} %argrw{"r"}
-# PxrColorCorrect.osl:138
+	functioncall	$const16 158 	%line{324} %argrw{"r"}
+# PxrColorCorrect.osl:126
 #     tmp = transformc("rgb", "hsv", rgb);
-	transformc	___346_tmp $const17 $const18 resultRGB 	%line{138} %argrw{"wrrr"}
-# PxrColorCorrect.osl:140
+	transformc	___364_tmp $const17 $const18 resultRGB 	%line{126} %argrw{"wrrr"}
+# PxrColorCorrect.osl:128
 #     tmp[0] = fmod(tmp[0] + hsv[0], 1.0);
-	compref		$tmp63 ___346_tmp $const1 	%line{140} %argrw{"wrr"}
-	compref		$tmp64 hsv $const1 	%argrw{"wrr"}
-	add		$tmp65 $tmp63 $tmp64 	%argrw{"wrr"}
-	fmod		$tmp62 $tmp65 $const2 	%argrw{"wrr"}
-	compassign	___346_tmp $const1 $tmp62 	%argrw{"wrr"}
-# PxrColorCorrect.osl:141
+	compref		$tmp69 ___364_tmp $const1 	%line{128} %argrw{"wrr"}
+	compref		$tmp70 hsv $const1 	%argrw{"wrr"}
+	add		$tmp71 $tmp69 $tmp70 	%argrw{"wrr"}
+	fmod		$tmp68 $tmp71 $const2 	%argrw{"wrr"}
+	compassign	___364_tmp $const1 $tmp68 	%argrw{"wrr"}
+# PxrColorCorrect.osl:129
 #     tmp[1] = clamp(tmp[1] * hsv[1], 0.0, 1.0);
-	compref		$tmp67 ___346_tmp $const6 	%line{141} %argrw{"wrr"}
-	compref		$tmp68 hsv $const6 	%argrw{"wrr"}
-	mul		$tmp69 $tmp67 $tmp68 	%argrw{"wrr"}
-	functioncall	$const12 140 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
+	compref		$tmp73 ___364_tmp $const6 	%line{129} %argrw{"wrr"}
+	compref		$tmp74 hsv $const6 	%argrw{"wrr"}
+	mul		$tmp75 $tmp73 $tmp74 	%argrw{"wrr"}
+	functioncall	$const12 148 	%argrw{"r"}
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:141
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp70 $tmp69 $const2 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
-	max		$tmp66 $tmp70 $const3 	%argrw{"wrr"}
-# PxrColorCorrect.osl:141
+	min		$tmp76 $tmp75 $const2 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{141} %argrw{"wrr"}
+	max		$tmp72 $tmp76 $const3 	%argrw{"wrr"}
+# PxrColorCorrect.osl:129
 #     tmp[1] = clamp(tmp[1] * hsv[1], 0.0, 1.0);
-	compassign	___346_tmp $const6 $tmp66 	%filename{"PxrColorCorrect.osl"} %line{141} %argrw{"wrr"}
-# PxrColorCorrect.osl:142
+	compassign	___364_tmp $const6 $tmp72 	%filename{"PxrColorCorrect.osl"} %line{129} %argrw{"wrr"}
+# PxrColorCorrect.osl:130
 #     tmp[2] = clamp(tmp[2] * hsv[2], 0.0, 1.0);
-	compref		$tmp72 ___346_tmp $const9 	%line{142} %argrw{"wrr"}
-	compref		$tmp73 hsv $const9 	%argrw{"wrr"}
-	mul		$tmp74 $tmp72 $tmp73 	%argrw{"wrr"}
-	functioncall	$const12 147 	%argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:163
+	compref		$tmp78 ___364_tmp $const9 	%line{130} %argrw{"wrr"}
+	compref		$tmp79 hsv $const9 	%argrw{"wrr"}
+	mul		$tmp80 $tmp78 $tmp79 	%argrw{"wrr"}
+	functioncall	$const12 155 	%argrw{"r"}
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:141
 # float  clamp (float x, float minval, float maxval) { return max(min(x,maxval),minval); }
-	min		$tmp75 $tmp74 $const2 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{163} %argrw{"wrr"}
-	max		$tmp71 $tmp75 $const3 	%argrw{"wrr"}
-# PxrColorCorrect.osl:142
+	min		$tmp81 $tmp80 $const2 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{141} %argrw{"wrr"}
+	max		$tmp77 $tmp81 $const3 	%argrw{"wrr"}
+# PxrColorCorrect.osl:130
 #     tmp[2] = clamp(tmp[2] * hsv[2], 0.0, 1.0);
-	compassign	___346_tmp $const9 $tmp71 	%filename{"PxrColorCorrect.osl"} %line{142} %argrw{"wrr"}
-# PxrColorCorrect.osl:143
+	compassign	___364_tmp $const9 $tmp77 	%filename{"PxrColorCorrect.osl"} %line{130} %argrw{"wrr"}
+# PxrColorCorrect.osl:131
 #     result = transformc("hsv", "rgb", tmp);
-	transformc	___346_result $const18 $const17 ___346_tmp 	%line{143} %argrw{"wrrr"}
-# PxrColorCorrect.osl:145
+	transformc	___364_result $const18 $const17 ___364_tmp 	%line{131} %argrw{"wrrr"}
+# PxrColorCorrect.osl:133
 #     return result;
-	assign		resultRGB ___346_result 	%line{145} %argrw{"wr"}
-# PxrColorCorrect.osl:337
+	assign		resultRGB ___364_result 	%line{133} %argrw{"wr"}
+# PxrColorCorrect.osl:325
 #         resultRGB = RixExposure(resultRGB, exposure);
-	functioncall	$const19 165 	%line{337} %argrw{"r"}
-# PxrColorCorrect.osl:150
+	functioncall	$const19 173 	%line{325} %argrw{"r"}
+# PxrColorCorrect.osl:138
 #     color result = rgb;
-	assign		___347_result resultRGB 	%line{150} %argrw{"wr"}
-# PxrColorCorrect.osl:151
+	assign		___365_result resultRGB 	%line{138} %argrw{"wr"}
+# PxrColorCorrect.osl:139
 #     if (e != 0.0)
-	neq		$tmp76 exposure $const3 	%line{151} %argrw{"wrr"}
-	if		$tmp76 164 164 	%argrw{"r"}
-# PxrColorCorrect.osl:153
+	neq		$tmp82 exposure $const3 	%line{139} %argrw{"wrr"}
+	if		$tmp82 172 172 	%argrw{"r"}
+# PxrColorCorrect.osl:141
 #         float exposure = pow(2.0, e);
-	pow		___348_exposure $const20 exposure 	%line{153} %argrw{"wrr"}
-# PxrColorCorrect.osl:154
+	pow		___366_exposure $const20 exposure 	%line{141} %argrw{"wrr"}
+# PxrColorCorrect.osl:142
 #         result[0] *= exposure;
-	compref		$tmp77 ___347_result $const1 	%line{154} %argrw{"wrr"}
-	mul		$tmp78 $tmp77 ___348_exposure 	%argrw{"wrr"}
-	compassign	___347_result $const1 $tmp78 	%argrw{"wrr"}
-# PxrColorCorrect.osl:155
+	compref		$tmp83 ___365_result $const1 	%line{142} %argrw{"wrr"}
+	mul		$tmp84 $tmp83 ___366_exposure 	%argrw{"wrr"}
+	compassign	___365_result $const1 $tmp84 	%argrw{"wrr"}
+# PxrColorCorrect.osl:143
 #         result[1] *= exposure;
-	compref		$tmp79 ___347_result $const6 	%line{155} %argrw{"wrr"}
-	mul		$tmp80 $tmp79 ___348_exposure 	%argrw{"wrr"}
-	compassign	___347_result $const6 $tmp80 	%argrw{"wrr"}
-# PxrColorCorrect.osl:156
+	compref		$tmp85 ___365_result $const6 	%line{143} %argrw{"wrr"}
+	mul		$tmp86 $tmp85 ___366_exposure 	%argrw{"wrr"}
+	compassign	___365_result $const6 $tmp86 	%argrw{"wrr"}
+# PxrColorCorrect.osl:144
 #         result[2] *= exposure;
-	compref		$tmp81 ___347_result $const9 	%line{156} %argrw{"wrr"}
-	mul		$tmp82 $tmp81 ___348_exposure 	%argrw{"wrr"}
-	compassign	___347_result $const9 $tmp82 	%argrw{"wrr"}
-# PxrColorCorrect.osl:158
+	compref		$tmp87 ___365_result $const9 	%line{144} %argrw{"wrr"}
+	mul		$tmp88 $tmp87 ___366_exposure 	%argrw{"wrr"}
+	compassign	___365_result $const9 $tmp88 	%argrw{"wrr"}
+# PxrColorCorrect.osl:146
 #     return result;
-	assign		resultRGB ___347_result 	%line{158} %argrw{"wr"}
-# PxrColorCorrect.osl:338
+	assign		resultRGB ___365_result 	%line{146} %argrw{"wr"}
+# PxrColorCorrect.osl:326
 #         resultRGB = RixOutputRange(resultRGB, outputMin, outputMax);
-	functioncall	$const21 190 	%line{338} %argrw{"r"}
+	functioncall	$const21 198 	%line{326} %argrw{"r"}
 # PxrColorCorrect.osl:74
 #     for (int i = 0; i < 3; i++)
-	for		$tmp84 168 170 187 189 	%line{74} %argrw{"r"}
-	assign		___334_i $const1 	%argrw{"wr"}
-	lt		$tmp83 ___334_i $const5 	%argrw{"wrr"}
-	neq		$tmp84 $tmp83 $const1 	%argrw{"wrr"}
+	for		$tmp90 176 178 195 197 	%line{74} %argrw{"r"}
+	assign		___354_i $const1 	%argrw{"wr"}
+	lt		$tmp89 ___354_i $const5 	%argrw{"wrr"}
+	neq		$tmp90 $tmp89 $const1 	%argrw{"wrr"}
 # PxrColorCorrect.osl:76
 #         result[i] = RixOutputRange(rgb[i], min[i], max[i]);
-	compref		$tmp86 resultRGB ___334_i 	%line{76} %argrw{"wrr"}
-	compref		$tmp87 outputMin ___334_i 	%argrw{"wrr"}
-	compref		$tmp88 outputMax ___334_i 	%argrw{"wrr"}
-	functioncall	$const21 186 	%argrw{"r"}
+	compref		$tmp92 resultRGB ___354_i 	%line{76} %argrw{"wrr"}
+	compref		$tmp93 outputMin ___354_i 	%argrw{"wrr"}
+	compref		$tmp94 outputMax ___354_i 	%argrw{"wrr"}
+	functioncall	$const21 194 	%argrw{"r"}
 # PxrColorCorrect.osl:64
 #     if (min == 0.0 && max == 1.0)
-	eq		$tmp89 $tmp87 $const3 	%line{64} %argrw{"wrr"}
-	neq		$tmp90 $tmp89 $const1 	%argrw{"wrr"}
-	if		$tmp90 180 180 	%argrw{"r"}
-	eq		$tmp91 $tmp88 $const2 	%argrw{"wrr"}
-	neq		$tmp92 $tmp91 $const1 	%argrw{"wrr"}
-	assign		$tmp90 $tmp92 	%argrw{"wr"}
-	if		$tmp90 183 183 	%argrw{"r"}
+	eq		$tmp95 $tmp93 $const3 	%line{64} %argrw{"wrr"}
+	neq		$tmp96 $tmp95 $const1 	%argrw{"wrr"}
+	if		$tmp96 188 188 	%argrw{"r"}
+	eq		$tmp97 $tmp94 $const2 	%argrw{"wrr"}
+	neq		$tmp98 $tmp97 $const1 	%argrw{"wrr"}
+	assign		$tmp96 $tmp98 	%argrw{"wr"}
+	if		$tmp96 191 191 	%argrw{"r"}
 # PxrColorCorrect.osl:66
 #         return f;
-	assign		$tmp85 $tmp86 	%line{66} %argrw{"wr"}
+	assign		$tmp91 $tmp92 	%line{66} %argrw{"wr"}
 	return
 # PxrColorCorrect.osl:68
 #     return ((max - min) * f + min);
-	sub		$tmp93 $tmp88 $tmp87 	%line{68} %argrw{"wrr"}
-	mul		$tmp94 $tmp93 $tmp86 	%argrw{"wrr"}
-	add		$tmp85 $tmp94 $tmp87 	%argrw{"wrr"}
+	sub		$tmp99 $tmp94 $tmp93 	%line{68} %argrw{"wrr"}
+	mul		$tmp100 $tmp99 $tmp92 	%argrw{"wrr"}
+	add		$tmp91 $tmp100 $tmp93 	%argrw{"wrr"}
 # PxrColorCorrect.osl:76
 #         result[i] = RixOutputRange(rgb[i], min[i], max[i]);
-	compassign	___333_result ___334_i $tmp85 	%line{76} %argrw{"wrr"}
+	compassign	___353_result ___354_i $tmp91 	%line{76} %argrw{"wrr"}
 # PxrColorCorrect.osl:74
 #     for (int i = 0; i < 3; i++)
-	assign		$tmp95 ___334_i 	%line{74} %argrw{"wr"}
-	add		___334_i ___334_i $const6 	%argrw{"wrr"}
+	assign		$tmp101 ___354_i 	%line{74} %argrw{"wr"}
+	add		___354_i ___354_i $const6 	%argrw{"wrr"}
 # PxrColorCorrect.osl:78
 #     return result;
-	assign		resultRGB ___333_result 	%line{78} %argrw{"wr"}
-# PxrColorCorrect.osl:340
+	assign		resultRGB ___353_result 	%line{78} %argrw{"wr"}
+# PxrColorCorrect.osl:328
 #         if (clampOutput != 0)
-	neq		$tmp96 clampOutput $const1 	%line{340} %argrw{"wrr"}
-	if		$tmp96 195 195 	%argrw{"r"}
-# PxrColorCorrect.osl:342
+	neq		$tmp102 clampOutput $const1 	%line{328} %argrw{"wrr"}
+	if		$tmp102 203 203 	%argrw{"r"}
+# PxrColorCorrect.osl:330
 #             resultRGB = clamp(resultRGB, clampMin, clampMax);
-	functioncall	$const12 195 	%line{342} %argrw{"r"}
-# /Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h:160
+	functioncall	$const12 203 	%line{330} %argrw{"r"}
+# /Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h:138
 # vector clamp (vector x, vector minval, vector maxval) { return max(min(x,maxval),minval); }
-	min		$tmp97 resultRGB clampMax 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxMonterey_x86-64_clang14_external_release/include/shaders/stdosl.h"} %line{160} %argrw{"wrr"}
-	max		resultRGB $tmp97 clampMin 	%argrw{"wrr"}
-# PxrColorCorrect.osl:347
+	min		$tmp103 resultRGB clampMax 	%filename{"/Users/Shared/build/ratbuild/rman/_built/osxSonoma_x86-64_clang15_external_release/include/shaders/stdosl.h"} %line{138} %argrw{"wrr"}
+	max		resultRGB $tmp103 clampMin 	%argrw{"wrr"}
+# PxrColorCorrect.osl:335
 #         resultRGB = mix(inputRGB, resultRGB, maskValue);
-	mix		resultRGB inputRGB resultRGB maskValue 	%filename{"PxrColorCorrect.osl"} %line{347} %argrw{"wrrr"}
-# PxrColorCorrect.osl:350
+	mix		resultRGB inputRGB resultRGB maskValue 	%filename{"PxrColorCorrect.osl"} %line{335} %argrw{"wrrr"}
+# PxrColorCorrect.osl:338
 #     resultR = resultRGB[0];
-	compref		resultR resultRGB $const1 	%line{350} %argrw{"wrr"}
-# PxrColorCorrect.osl:351
+	compref		resultR resultRGB $const1 	%line{338} %argrw{"wrr"}
+# PxrColorCorrect.osl:339
 #     resultG = resultRGB[1];
-	compref		resultG resultRGB $const6 	%line{351} %argrw{"wrr"}
-# PxrColorCorrect.osl:352
+	compref		resultG resultRGB $const6 	%line{339} %argrw{"wrr"}
+# PxrColorCorrect.osl:340
 #     resultB = resultRGB[2];
-	compref		resultB resultRGB $const9 	%line{352} %argrw{"wrr"}
+	compref		resultB resultRGB $const9 	%line{340} %argrw{"wrr"}
 	end
