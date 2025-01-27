@@ -13,6 +13,7 @@
 #include "util/task.h"
 #include "util/vector.h"
 
+#include <OpenImageIO/ustring.h>
 #include <pxr/base/tf/staticData.h>
 
 #include <string>
@@ -100,7 +101,38 @@ class RIBtoCycles {
                                                {"emitColor", ustring("emission_color")},
                                                //{ "", ustring("emission_strength")},
                                            }};
-
+#if 1
+  const PxrDisneyBsdftoPrincipled PxrDisneyBsdf = {
+      {"principled_bsdf"},
+      {
+          {"baseColor", ustring("base_color")},
+          {"emitColor", ustring("emission_color")},
+          {"metallic", ustring("metallic")},
+          {"specularTint", ustring("specular_tint")},
+          {"roughness", ustring("roughness")},
+          {"anisotropic", ustring("anisotropic")},
+          {"ior", ustring("ior")},
+          {"specReflectScale", ustring("specular_ior_level")},
+          {"clearcoat", ustring("coat_weight")},
+          //{"clearcoatGloss", ustring("clearcoatGloss")},
+          {"sheen", ustring("sheen_weight")},
+          {"sheenTint", ustring("sheen_tint")},
+          {"diffTrans", ustring("transmission_weight")},
+          //{"specTrans", ustring("specTrans")},
+          //{"isThin", ustring("isThin")},
+          //{"transColor", ustring("transColor")},
+          //{"transDistance", ustring("transDistance")},
+          {"subsurface", ustring("subsurface_weight")},
+          {"subsurfaceColor", ustring("subsurface_radius")},
+          //{"scatterDistances", ustring("scatterDistances")},
+          //{"g", ustring("g")},
+          //{"transmissionBehavior", ustring("transmissionBehavior")},
+          {"presence", ustring("alpha")},
+          {"bumpNormal", ustring("normal")},
+          //{"shadowBumpTerminator", ustring("shadowBumpTerminator")},
+          //{"inputAOV", ustring("inputAOV")},
+      }};
+#else
   const PxrDisneyBsdftoPrincipled PxrDisneyBsdf = {
       {"principled_bsdf"},
       {
@@ -112,11 +144,11 @@ class RIBtoCycles {
           //{ "", ustring("subsurface_ior")},
           //{ "", ustring("subsurface_anisotropy")},
           {"roughness", ustring("roughness")},
-          {"specularTint", ustring("specular_tint")},
+          //{"specularTint", ustring("specular_tint")},
           {"anisotropic", ustring("anisotropic")},
           {"sheen", ustring("sheen")},
           //{ "", ustring("sheen_roughness")},
-          {"sheenTint", ustring("sheen_tint")},
+          //{"sheenTint", ustring("sheen_tint")},
           {"clearcoat", ustring("clearcoat")},
           //{ "", ustring("clearcoat_roughness")},
           {"ior", ustring("ior")},
@@ -125,6 +157,7 @@ class RIBtoCycles {
           {"emitColor", ustring("emission_color")},
           //{ "", ustring("emission_strength")},
       }};
+#endif
 
   const PxrMarschnerHairtoPrincipled PxrMarschnerHair = {
       {"principled_hair_bsdf"},
