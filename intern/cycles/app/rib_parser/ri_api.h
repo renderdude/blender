@@ -431,7 +431,7 @@ class Ri {
   std::string _camera_name;
 
   std::string _display_name;
-  Parsed_Parameter_Vector *_cylinder_light_material = nullptr;
+  Parsed_Parameter_Vector *_light_material = nullptr;
   std::vector<float> _crop_window = {0., 1., 0., 1.};
 };
 

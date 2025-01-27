@@ -1169,17 +1169,28 @@ void Ri::Light(const std::string &name,
       render_from_object);
 
   if (active_instance_definition) {
-    if (name == "PxrCylinderLight") {
-      // A cylinder light lies along the X-axis, and is half the default cylinder size
-      Rotate(90, 0, 1, 0, loc);
-      Rotate(90, 0, 0, 1, loc);
-      Cylinder(0.5, -0.5, 0.5, 360, params, loc);
+    if (name == "PxrCylinderLight" || name == "PxrSphereLight") {
+      if (name == "PxrCylinderLight") {
+        // A cylinder light lies along the X-axis, and is half the default cylinder size
+        Rotate(90, 0, 1, 0, loc);
+        Rotate(90, 0, 0, 1, loc);
+        Cylinder(0.5, -0.5, 0.5, 360, params, loc);
+      }
+      else if (name == "PxrSphereLight") {
+        // A Sphere light lies along the X-axis, and is half the default sphere size
+        Rotate(90, 0, 1, 0, loc);
+        Rotate(90, 0, 0, 1, loc);
+        Sphere(0.5, -0.5, 0.5, 360, params, loc);
+      }
+      else {
+        // Can't reach here yet
+      }
 
-      _cylinder_light_material = new Parsed_Parameter_Vector;
+      _light_material = new Parsed_Parameter_Vector;
       Parsed_Parameter *param = new Parsed_Parameter(Parameter_Type::String, "__materialid", loc);
       param->may_be_unused = true;
       param->add_string(handle);
-      _cylinder_light_material->push_back(param);
+      _light_material->push_back(param);
 
       // Check if the light has a materialid parameter
       if (entity.parameters.get_one_string("__materialid", "").empty()) {
@@ -1405,14 +1416,14 @@ void Ri::ObjectInstance(const std::string &name, File_Loc loc)
 {
   VERIFY_WORLD("ObjectInstance");
 
-  if (_cylinder_light_material) {
+  if (_light_material) {
     Light("PxrMeshLight",
-          (*_cylinder_light_material)[0]->strings()[0],
-          *_cylinder_light_material,
+          (*_light_material)[0]->strings()[0],
+          *_light_material,
           loc);
     osl_shader_group[_shader_id] = osl_parameters;
-    delete _cylinder_light_material;
-    _cylinder_light_material = nullptr;
+    delete _light_material;
+    _light_material = nullptr;
   }
 
   Mapped_Parameter_Dictionary dict;
