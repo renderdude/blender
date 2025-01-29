@@ -40,10 +40,12 @@
 #include "BKE_armature.hh"
 #include "BKE_editmesh.hh"
 #include "BKE_idtype.hh"
+#include "BKE_main_invariants.hh"
 #include "BKE_paint.hh"
 #include "BKE_volume.hh"
 
 #include "ED_gpencil_legacy.hh"
+#include "ED_grease_pencil.hh"
 #include "ED_object.hh"
 #include "ED_uvedit.hh"
 
@@ -740,6 +742,7 @@ static const EnumPropertyItem eevee_resolution_scale_items[] = {
 #  include "BKE_main.hh"
 #  include "BKE_mesh.hh"
 #  include "BKE_node.hh"
+#  include "BKE_node_legacy_types.hh"
 #  include "BKE_pointcache.h"
 #  include "BKE_scene.hh"
 #  include "BKE_screen.hh"
@@ -790,52 +793,82 @@ static void rna_ToolSettings_snap_uv_mode_set(PointerRNA *ptr, int value)
   }
 }
 
-static void rna_Gpencil_mask_point_update(bContext * /*C*/, PointerRNA *ptr)
+static void rna_Gpencil_mask_point_update(bContext *C, PointerRNA *ptr)
 {
   ToolSettings *ts = (ToolSettings *)ptr->data;
 
   ts->gpencil_selectmode_sculpt &= ~GP_SCULPT_MASK_SELECTMODE_STROKE;
   ts->gpencil_selectmode_sculpt &= ~GP_SCULPT_MASK_SELECTMODE_SEGMENT;
+
+  Object *ob = CTX_data_active_object(C);
+  if (ob && ob->type == OB_GREASE_PENCIL) {
+    blender::ed::greasepencil::ensure_selection_domain(ts, ob);
+  }
 }
 
-static void rna_Gpencil_mask_stroke_update(bContext * /*C*/, PointerRNA *ptr)
+static void rna_Gpencil_mask_stroke_update(bContext *C, PointerRNA *ptr)
 {
   ToolSettings *ts = (ToolSettings *)ptr->data;
 
   ts->gpencil_selectmode_sculpt &= ~GP_SCULPT_MASK_SELECTMODE_POINT;
   ts->gpencil_selectmode_sculpt &= ~GP_SCULPT_MASK_SELECTMODE_SEGMENT;
+
+  Object *ob = CTX_data_active_object(C);
+  if (ob && ob->type == OB_GREASE_PENCIL) {
+    blender::ed::greasepencil::ensure_selection_domain(ts, ob);
+  }
 }
 
-static void rna_Gpencil_mask_segment_update(bContext * /*C*/, PointerRNA *ptr)
+static void rna_Gpencil_mask_segment_update(bContext *C, PointerRNA *ptr)
 {
   ToolSettings *ts = (ToolSettings *)ptr->data;
 
   ts->gpencil_selectmode_sculpt &= ~GP_SCULPT_MASK_SELECTMODE_POINT;
   ts->gpencil_selectmode_sculpt &= ~GP_SCULPT_MASK_SELECTMODE_STROKE;
+
+  Object *ob = CTX_data_active_object(C);
+  if (ob && ob->type == OB_GREASE_PENCIL) {
+    blender::ed::greasepencil::ensure_selection_domain(ts, ob);
+  }
 }
 
-static void rna_Gpencil_vertex_mask_point_update(bContext * /*C*/, PointerRNA *ptr)
+static void rna_Gpencil_vertex_mask_point_update(bContext *C, PointerRNA *ptr)
 {
   ToolSettings *ts = (ToolSettings *)ptr->data;
 
   ts->gpencil_selectmode_vertex &= ~GP_VERTEX_MASK_SELECTMODE_STROKE;
   ts->gpencil_selectmode_vertex &= ~GP_VERTEX_MASK_SELECTMODE_SEGMENT;
+
+  Object *ob = CTX_data_active_object(C);
+  if (ob && ob->type == OB_GREASE_PENCIL) {
+    blender::ed::greasepencil::ensure_selection_domain(ts, ob);
+  }
 }
 
-static void rna_Gpencil_vertex_mask_stroke_update(bContext * /*C*/, PointerRNA *ptr)
+static void rna_Gpencil_vertex_mask_stroke_update(bContext *C, PointerRNA *ptr)
 {
   ToolSettings *ts = (ToolSettings *)ptr->data;
 
   ts->gpencil_selectmode_vertex &= ~GP_VERTEX_MASK_SELECTMODE_POINT;
   ts->gpencil_selectmode_vertex &= ~GP_VERTEX_MASK_SELECTMODE_SEGMENT;
+
+  Object *ob = CTX_data_active_object(C);
+  if (ob && ob->type == OB_GREASE_PENCIL) {
+    blender::ed::greasepencil::ensure_selection_domain(ts, ob);
+  }
 }
 
-static void rna_Gpencil_vertex_mask_segment_update(bContext * /*C*/, PointerRNA *ptr)
+static void rna_Gpencil_vertex_mask_segment_update(bContext *C, PointerRNA *ptr)
 {
   ToolSettings *ts = (ToolSettings *)ptr->data;
 
   ts->gpencil_selectmode_vertex &= ~GP_VERTEX_MASK_SELECTMODE_POINT;
   ts->gpencil_selectmode_vertex &= ~GP_VERTEX_MASK_SELECTMODE_STROKE;
+
+  Object *ob = CTX_data_active_object(C);
+  if (ob && ob->type == OB_GREASE_PENCIL) {
+    blender::ed::greasepencil::ensure_selection_domain(ts, ob);
+  }
 }
 
 static void rna_active_grease_pencil_update(bContext *C, PointerRNA * /*ptr*/)
@@ -876,7 +909,7 @@ static void rna_Scene_objects_end(CollectionPropertyIterator *iter)
 static PointerRNA rna_Scene_objects_get(CollectionPropertyIterator *iter)
 {
   Object *ob = static_cast<Object *>(((BLI_Iterator *)iter->internal.custom)->current);
-  return rna_pointer_inherit_refine(&iter->parent, &RNA_Object, ob);
+  return RNA_id_pointer_create(reinterpret_cast<ID *>(ob));
 }
 
 /* End of read-only Iterator of all the scene objects. */
@@ -1236,7 +1269,7 @@ static std::optional<std::string> rna_ImageFormatSettings_path(const PointerRNA 
       bNode *node;
 
       for (node = static_cast<bNode *>(ntree->nodes.first); node; node = node->next) {
-        if (node->type == CMP_NODE_OUTPUT_FILE) {
+        if (node->type_legacy == CMP_NODE_OUTPUT_FILE) {
           if (&((NodeImageMultiFile *)node->storage)->format == imf) {
             char node_name_esc[sizeof(node->name) * 2];
             BLI_str_escape(node_name_esc, node->name, sizeof(node_name_esc));
@@ -1294,61 +1327,9 @@ static bool rna_RenderSettings_is_movie_format_get(PointerRNA *ptr)
   return BKE_imtype_is_movie(rd->im_format.imtype);
 }
 
-static int get_first_valid_depth(const int valid_depths)
-{
-  /* set first available depth */
-  const char depth_ls[] = {
-      R_IMF_CHAN_DEPTH_32,
-      R_IMF_CHAN_DEPTH_24,
-      R_IMF_CHAN_DEPTH_16,
-      R_IMF_CHAN_DEPTH_12,
-      R_IMF_CHAN_DEPTH_10,
-      R_IMF_CHAN_DEPTH_8,
-      R_IMF_CHAN_DEPTH_1,
-      0,
-  };
-  for (int i = 0; depth_ls[i]; i++) {
-    if (valid_depths & depth_ls[i]) {
-      return depth_ls[i];
-    }
-  }
-  return R_IMF_CHAN_DEPTH_8;
-}
-
 static void rna_ImageFormatSettings_file_format_set(PointerRNA *ptr, int value)
 {
-  ImageFormatData *imf = (ImageFormatData *)ptr->data;
-  ID *id = ptr->owner_id;
-  imf->imtype = value;
-
-  const bool is_render = (id && GS(id->name) == ID_SCE);
-  /* see note below on why this is */
-  const char chan_flag = BKE_imtype_valid_channels(imf->imtype, true) |
-                         (is_render ? IMA_CHAN_FLAG_BW : 0);
-
-  /* ensure depth and color settings match */
-  if ((imf->planes == R_IMF_PLANES_BW) && !(chan_flag & IMA_CHAN_FLAG_BW)) {
-    imf->planes = R_IMF_PLANES_RGBA;
-  }
-  if ((imf->planes == R_IMF_PLANES_RGBA) && !(chan_flag & IMA_CHAN_FLAG_RGBA)) {
-    imf->planes = R_IMF_PLANES_RGB;
-  }
-
-  /* ensure usable depth */
-  {
-    const int depth_ok = BKE_imtype_valid_depths(imf->imtype);
-    if ((imf->depth & depth_ok) == 0) {
-      imf->depth = get_first_valid_depth(depth_ok);
-    }
-  }
-
-  if (id && GS(id->name) == ID_SCE) {
-    Scene *scene = (Scene *)ptr->owner_id;
-    RenderData *rd = &scene->r;
-    MOV_validate_output_settings(rd, imf);
-  }
-
-  BKE_image_format_update_color_space_for_type(imf);
+  BKE_image_format_set((ImageFormatData *)ptr->data, ptr->owner_id, value);
 }
 
 static const EnumPropertyItem *rna_ImageFormatSettings_file_format_itemf(bContext * /*C*/,
@@ -1812,7 +1793,7 @@ void rna_Scene_compositor_update(Main *bmain, Scene * /*scene*/, PointerRNA *ptr
     bNodeTree *ntree = reinterpret_cast<bNodeTree *>(scene->nodetree);
     WM_main_add_notifier(NC_NODE | NA_EDITED, &ntree->id);
     WM_main_add_notifier(NC_SCENE | ND_NODES, &ntree->id);
-    ED_node_tree_propagate_change(nullptr, bmain, ntree);
+    BKE_main_ensure_invariants(*bmain, ntree->id);
   }
 }
 
@@ -2473,7 +2454,7 @@ PointerRNA rna_FreestyleLineSet_linestyle_get(PointerRNA *ptr)
 {
   FreestyleLineSet *lineset = (FreestyleLineSet *)ptr->data;
 
-  return rna_pointer_inherit_refine(ptr, &RNA_FreestyleLineStyle, lineset->linestyle);
+  return RNA_id_pointer_create(reinterpret_cast<ID *>(lineset->linestyle));
 }
 
 void rna_FreestyleLineSet_linestyle_set(PointerRNA *ptr,
@@ -2951,7 +2932,7 @@ static void rna_FFmpegSettings_codec_update(Main * /*bmain*/, Scene * /*scene*/,
     Scene *scene = (Scene *)ptr->owner_id;
     const int valid_depths = BKE_imtype_valid_depths_with_video(scene->r.im_format.imtype, id);
     if ((scene->r.im_format.depth & valid_depths) == 0) {
-      scene->r.im_format.depth = get_first_valid_depth(valid_depths);
+      scene->r.im_format.depth = BKE_imtype_first_valid_depth(valid_depths);
     }
   }
 }
@@ -4043,6 +4024,7 @@ static void rna_def_tool_settings(BlenderRNA *brna)
   RNA_def_property_enum_items(prop, rna_enum_beztriple_keyframe_type_items);
   RNA_def_property_ui_text(
       prop, "New Keyframe Type", "Type of keyframes to create when inserting keyframes");
+  RNA_def_property_translation_context(prop, BLT_I18NCONTEXT_ID_ACTION);
 
   /* UV */
   prop = RNA_def_property(srna, "uv_select_mode", PROP_ENUM, PROP_NONE);
@@ -4078,9 +4060,8 @@ static void rna_def_tool_settings(BlenderRNA *brna)
 
   /* Mesh */
   prop = RNA_def_property(srna, "mesh_select_mode", PROP_BOOLEAN, PROP_NONE);
-  RNA_def_property_boolean_sdna(prop, nullptr, "selectmode", 1);
+  RNA_def_property_boolean_bitset_array_sdna(prop, nullptr, "selectmode", 1 << 0, 3);
   RNA_def_property_flag(prop, PROP_DEG_SYNC_ONLY);
-  RNA_def_property_array(prop, 3);
   RNA_def_property_boolean_funcs(prop, nullptr, "rna_Scene_editmesh_select_mode_set");
   RNA_def_property_ui_text(prop, "Mesh Selection Mode", "Which mesh elements selection works on");
   RNA_def_property_flag(prop, PROP_CONTEXT_UPDATE);

@@ -9,10 +9,11 @@
 
 #include "MEM_guardedalloc.h"
 
-#include "BLI_blenlib.h"
+#include "BLI_index_mask.hh"
 #include "BLI_math_matrix.h"
 #include "BLI_math_rotation.h"
 #include "BLI_math_vector.hh"
+#include "BLI_string.h"
 #include "BLI_time.h"
 
 #include "BLT_translation.hh"
@@ -20,6 +21,7 @@
 #include "DNA_brush_types.h"
 #include "DNA_mesh_types.h"
 
+#include "BKE_attribute.hh"
 #include "BKE_brush.hh"
 #include "BKE_context.hh"
 #include "BKE_layer.hh"
@@ -688,7 +690,7 @@ static void dyntopo_detail_size_update_header(bContext *C,
   Scene *scene = CTX_data_scene(C);
 
   Sculpt *sd = scene->toolsettings->sculpt;
-  PointerRNA sculpt_ptr = RNA_pointer_create(&scene->id, &RNA_Sculpt, sd);
+  PointerRNA sculpt_ptr = RNA_pointer_create_discrete(&scene->id, &RNA_Sculpt, sd);
 
   char msg[UI_MAX_DRAW_STR];
   const char *format_string;

@@ -27,7 +27,8 @@ static void cmp_node_translate_declare(NodeDeclarationBuilder &b)
 {
   b.add_input<decl::Color>("Image")
       .default_value({1.0f, 1.0f, 1.0f, 1.0f})
-      .compositor_domain_priority(0);
+      .compositor_domain_priority(0)
+      .compositor_realization_options(CompositorInputRealizationOptions::None);
   b.add_input<decl::Float>("X")
       .default_value(0.0f)
       .min(-10000.0f)
@@ -63,6 +64,12 @@ class TranslateOperation : public NodeOperation {
   void execute() override
   {
     Result &input = this->get_input("Image");
+    Result &output = this->get_result("Image");
+
+    if (input.is_single_value()) {
+      input.pass_through(output);
+      return;
+    }
 
     float x = this->get_input("X").get_single_value_default(0.0f);
     float y = this->get_input("Y").get_single_value_default(0.0f);
@@ -77,7 +84,6 @@ class TranslateOperation : public NodeOperation {
       this->execute_wrapped(translation);
     }
     else {
-      Result &output = this->get_result("Image");
       input.pass_through(output);
       output.transform(math::from_location<float3x3>(translation));
       output.get_realization_options().interpolation = this->get_interpolation();
@@ -219,10 +225,11 @@ void register_node_type_cmp_translate()
 
   static blender::bke::bNodeType ntype;
 
-  cmp_node_type_base(&ntype, CMP_NODE_TRANSLATE, NODE_CLASS_DISTORT);
+  cmp_node_type_base(&ntype, "CompositorNodeTranslate", CMP_NODE_TRANSLATE);
   ntype.ui_name = "Translate";
   ntype.ui_description = "Offset an image";
   ntype.enum_name_legacy = "TRANSLATE";
+  ntype.nclass = NODE_CLASS_DISTORT;
   ntype.declare = file_ns::cmp_node_translate_declare;
   ntype.draw_buttons = file_ns::node_composit_buts_translate;
   ntype.initfunc = file_ns::node_composit_init_translate;

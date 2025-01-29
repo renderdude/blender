@@ -269,7 +269,8 @@ static void node_declare(NodeDeclarationBuilder &b)
       .short_label("Strength")
       .description(
           "Strength of the emitted light. A value of 1.0 ensures "
-          "that the object in the image has the exact same color as the Emission Color");
+          "that the object in the image has the exact same color as the Emission Color")
+      .translation_context(BLT_I18NCONTEXT_AMOUNT);
 #define SOCK_EMISSION_STRENGTH_ID 28
 
   /* Panel for Thin Film settings. */
@@ -348,14 +349,6 @@ static int node_shader_gpu_bsdf_principled(GPUMaterial *mat,
   }
   if (use_coat) {
     flag |= GPU_MATFLAG_COAT;
-  }
-
-  if (use_subsurf) {
-    bNodeSocket *socket = (bNodeSocket *)BLI_findlink(&node->runtime->original->inputs,
-                                                      SOCK_SUBSURFACE_RADIUS_ID);
-    bNodeSocketValueRGBA *socket_data = (bNodeSocketValueRGBA *)socket->default_value;
-    /* For some reason it seems that the socket value is in ARGB format. */
-    use_subsurf = GPU_material_sss_profile_create(mat, &socket_data->value[1]);
   }
 
   float use_multi_scatter = (node->custom1 == SHD_GLOSSY_MULTI_GGX) ? 1.0f : 0.0f;
@@ -663,12 +656,13 @@ void register_node_type_sh_bsdf_principled()
 
   static blender::bke::bNodeType ntype;
 
-  sh_node_type_base(&ntype, SH_NODE_BSDF_PRINCIPLED, NODE_CLASS_SHADER);
+  sh_node_type_base(&ntype, "ShaderNodeBsdfPrincipled", SH_NODE_BSDF_PRINCIPLED);
   ntype.ui_name = "Principled BSDF";
   ntype.ui_description =
       "Physically-based, easy-to-use shader for rendering surface materials, based on the OpenPBR "
       "model";
   ntype.enum_name_legacy = "BSDF_PRINCIPLED";
+  ntype.nclass = NODE_CLASS_SHADER;
   ntype.declare = file_ns::node_declare;
   ntype.add_ui_poll = object_shader_nodes_poll;
   blender::bke::node_type_size_preset(&ntype, blender::bke::eNodeSizePreset::Large);

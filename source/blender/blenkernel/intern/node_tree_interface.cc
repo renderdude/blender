@@ -15,7 +15,6 @@
 #include "BLI_math_vector.h"
 #include "BLI_stack.hh"
 #include "BLI_string.h"
-#include "BLI_vector.hh"
 
 #include "BLO_read_write.hh"
 
@@ -1078,6 +1077,7 @@ bNodeTreeInterfaceSocket *add_interface_socket_from_node(bNodeTree &ntree,
                                                          const StringRef socket_type,
                                                          const StringRef name)
 {
+  ntree.ensure_topology_cache();
   bNodeTreeInterfaceSocket *iosock = nullptr;
   if (from_node.is_group()) {
     if (const bNodeTree *group = reinterpret_cast<const bNodeTree *>(from_node.id)) {

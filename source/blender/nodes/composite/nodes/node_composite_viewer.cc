@@ -40,6 +40,7 @@ static void node_composit_init_viewer(bNodeTree * /*ntree*/, bNode *node)
   ImageUser *iuser = MEM_cnew<ImageUser>(__func__);
   node->storage = iuser;
   iuser->sfra = 1;
+  node->custom1 = NODE_VIEWER_SHORTCUT_NONE;
 
   node->id = (ID *)BKE_image_ensure_viewer(G.main, IMA_TYPE_COMPOSITE, "Viewer Node");
 }
@@ -324,11 +325,12 @@ void register_node_type_cmp_viewer()
 
   static blender::bke::bNodeType ntype;
 
-  cmp_node_type_base(&ntype, CMP_NODE_VIEWER, NODE_CLASS_OUTPUT);
+  cmp_node_type_base(&ntype, "CompositorNodeViewer", CMP_NODE_VIEWER);
   ntype.ui_name = "Viewer";
   ntype.ui_description =
       "Visualize data from inside a node graph, in the image editor or as a backdrop";
   ntype.enum_name_legacy = "VIEWER";
+  ntype.nclass = NODE_CLASS_OUTPUT;
   ntype.declare = file_ns::cmp_node_viewer_declare;
   ntype.draw_buttons = file_ns::node_composit_buts_viewer;
   ntype.initfunc = file_ns::node_composit_init_viewer;

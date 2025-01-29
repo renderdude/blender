@@ -442,8 +442,8 @@ void recurs_sel_seq(Strip *strip_meta)
 
 bool strip_point_image_isect(const Scene *scene, const Strip *strip, float point_view[2])
 {
-  float strip_image_quad[4][2];
-  SEQ_image_transform_final_quad_get(scene, strip, strip_image_quad);
+  const blender::Array<blender::float2> strip_image_quad = SEQ_image_transform_final_quad_get(
+      scene, strip);
   return isect_point_quad_v2(point_view,
                              strip_image_quad[0],
                              strip_image_quad[1],
@@ -1133,9 +1133,14 @@ StripSelection ED_sequencer_pick_strip_and_handle(const Scene *scene,
                                                   const View2D *v2d,
                                                   float mouse_co[2])
 {
-  blender::Vector<Strip *> strips = mouseover_strips_sorted_get(scene, v2d, mouse_co);
-
   StripSelection selection;
+  /* Do not pick strips when clicking inside time scrub region. */
+  float time_scrub_y = v2d->cur.ymax - UI_TIME_SCRUB_MARGIN_Y / UI_view2d_scale_get_y(v2d);
+  if (mouse_co[1] > time_scrub_y) {
+    return selection;
+  }
+
+  blender::Vector<Strip *> strips = mouseover_strips_sorted_get(scene, v2d, mouse_co);
 
   if (strips.size() == 0) {
     return selection;
@@ -1398,6 +1403,7 @@ void SEQUENCER_OT_select(wmOperatorType *ot)
 
 static int sequencer_select_handle_exec(bContext *C, wmOperator *op)
 {
+  /* This operator is only used in the RCS keymap by default and is not exposed in any menus. */
   const View2D *v2d = UI_view2d_fromcontext(C);
   Scene *scene = CTX_data_scene(C);
   Editing *ed = SEQ_editing_get(scene);
@@ -2019,8 +2025,8 @@ static bool strip_box_select_rect_image_isect(const Scene *scene,
                                               const Strip *strip,
                                               const rctf *rect)
 {
-  float strip_image_quad[4][2];
-  SEQ_image_transform_final_quad_get(scene, strip, strip_image_quad);
+  const blender::Array<blender::float2> strip_image_quad = SEQ_image_transform_final_quad_get(
+      scene, strip);
   float rect_quad[4][2] = {{rect->xmax, rect->ymax},
                            {rect->xmax, rect->ymin},
                            {rect->xmin, rect->ymin},

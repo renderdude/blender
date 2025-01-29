@@ -146,7 +146,7 @@ static const EnumPropertyItem part_fluid_type_items[] = {
 #  include "BKE_customdata.hh"
 #  include "BKE_deform.hh"
 #  include "BKE_effect.h"
-#  include "BKE_material.h"
+#  include "BKE_material.hh"
 #  include "BKE_modifier.hh"
 #  include "BKE_particle.h"
 #  include "BKE_pointcache.h"
@@ -950,7 +950,7 @@ static PointerRNA rna_particle_settings_get(PointerRNA *ptr)
   ParticleSystem *psys = (ParticleSystem *)ptr->data;
   ParticleSettings *part = psys->part;
 
-  return rna_pointer_inherit_refine(ptr, &RNA_ParticleSettings, part);
+  return RNA_id_pointer_create(reinterpret_cast<ID *>(part));
 }
 
 static void rna_particle_settings_set(PointerRNA *ptr, PointerRNA value, ReportList * /*reports*/)
@@ -1167,7 +1167,7 @@ static PointerRNA rna_ParticleSystem_active_particle_target_get(PointerRNA *ptr)
       return rna_pointer_inherit_refine(ptr, &RNA_ParticleTarget, pt);
     }
   }
-  return rna_pointer_inherit_refine(ptr, &RNA_ParticleTarget, nullptr);
+  return PointerRNA_NULL;
 }
 static void rna_ParticleSystem_active_particle_target_index_range(
     PointerRNA *ptr, int *min, int *max, int * /*softmin*/, int * /*softmax*/)
@@ -1308,7 +1308,7 @@ static PointerRNA rna_ParticleDupliWeight_active_get(PointerRNA *ptr)
       return rna_pointer_inherit_refine(ptr, &RNA_ParticleDupliWeight, dw);
     }
   }
-  return rna_pointer_inherit_refine(ptr, &RNA_ParticleTarget, nullptr);
+  return PointerRNA_NULL;
 }
 static void rna_ParticleDupliWeight_active_index_range(
     PointerRNA *ptr, int *min, int *max, int * /*softmin*/, int * /*softmax*/)
@@ -1538,7 +1538,7 @@ static PointerRNA rna_ParticleSettings_active_texture_get(PointerRNA *ptr)
   Tex *tex;
 
   tex = give_current_particle_texture(part);
-  return rna_pointer_inherit_refine(ptr, &RNA_Texture, tex);
+  return RNA_id_pointer_create(reinterpret_cast<ID *>(tex));
 }
 
 static void rna_ParticleSettings_active_texture_set(PointerRNA *ptr,
@@ -2800,6 +2800,7 @@ static void rna_def_particle_settings(BlenderRNA *brna)
   RNA_def_property_enum_items(prop, part_draw_as_items);
   RNA_def_property_enum_funcs(prop, nullptr, nullptr, "rna_Particle_draw_as_itemf");
   RNA_def_property_ui_text(prop, "Particle Display", "How particles are displayed in viewport");
+  RNA_def_property_translation_context(prop, BLT_I18NCONTEXT_ID_PARTICLESETTINGS);
   RNA_def_property_update(prop, 0, "rna_Particle_redo");
 
   prop = RNA_def_property(srna, "render_type", PROP_ENUM, PROP_NONE);

@@ -11,7 +11,6 @@
 #include "CLG_log.h"
 
 #include "BLI_array.hh"
-#include "BLI_linklist.h"
 #include "BLI_utildefines.h"
 
 #include "DNA_collection_types.h"
@@ -25,7 +24,7 @@
 #include "BKE_lib_query.hh"
 #include "BKE_lib_remap.hh"
 #include "BKE_main.hh"
-#include "BKE_material.h"
+#include "BKE_material.hh"
 #include "BKE_mball.hh"
 #include "BKE_modifier.hh"
 #include "BKE_multires.hh"

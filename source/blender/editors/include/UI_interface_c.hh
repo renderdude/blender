@@ -1973,13 +1973,15 @@ void UI_but_drag_attach_image(uiBut *but, const ImBuf *imb, float scale);
 /**
  * Sets #UI_BUT_DRAG_FULL_BUT so the full button can be dragged.
  * \param asset: May be passed from a temporary variable, drag data only stores a copy of this.
+ * \param icon: Small icon that will be drawn while dragging.
+ * \param preview_icon: Bigger preview size icon that will be drawn while dragging instead of \a
+ * icon.
  */
 void UI_but_drag_set_asset(uiBut *but,
                            const blender::asset_system::AssetRepresentation *asset,
                            int import_method, /* eAssetImportMethod */
                            int icon,
-                           const ImBuf *imb,
-                           float scale);
+                           int preview_icon);
 
 void UI_but_drag_set_rna(uiBut *but, PointerRNA *ptr);
 /**
@@ -2071,6 +2073,8 @@ void UI_panel_category_clear_all(ARegion *region);
  * Draw vertical tabs on the left side of the region, one tab per category.
  */
 void UI_panel_category_draw_all(ARegion *region, const char *category_id_active);
+
+void UI_panel_stop_animation(const bContext *C, Panel *panel);
 
 /* Panel custom data. */
 PointerRNA *UI_panel_custom_data_get(const Panel *panel);
@@ -2416,6 +2420,13 @@ uiLayout *uiLayoutPanelProp(const bContext *C,
                             PointerRNA *open_prop_owner,
                             const char *open_prop_name,
                             const char *label);
+
+uiLayout *uiLayoutPanelPropWithBoolHeader(const bContext *C,
+                                          uiLayout *layout,
+                                          PointerRNA *open_prop_owner,
+                                          const blender::StringRefNull open_prop_name,
+                                          const blender::StringRefNull bool_prop_name,
+                                          const std::optional<blender::StringRefNull> label);
 
 /**
  * Variant of #uiLayoutPanelProp that automatically stores the open-close-state in the root
@@ -3141,13 +3152,10 @@ void uiItemLDrag(uiLayout *layout, PointerRNA *ptr, blender::StringRef name, int
 /**
  * Menu.
  */
-void uiItemM_ptr(uiLayout *layout,
-                 MenuType *mt,
-                 std::optional<blender::StringRefNull> name,
-                 int icon);
+void uiItemM_ptr(uiLayout *layout, MenuType *mt, std::optional<blender::StringRef> name, int icon);
 void uiItemM(uiLayout *layout,
              blender::StringRefNull menuname,
-             std::optional<blender::StringRefNull> name,
+             std::optional<blender::StringRef> name,
              int icon);
 /**
  * Menu contents.

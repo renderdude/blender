@@ -34,6 +34,8 @@
 #include "GPU_context.hh"
 #include "GPU_texture.hh"
 
+#include "draw_view_data.hh"
+
 #include "compositor_engine.h" /* Own include. */
 
 namespace blender::draw::compositor_engine {
@@ -212,7 +214,7 @@ class Context : public compositor::Context {
 
   void set_info_message(StringRef message) const override
   {
-    message.copy(info_message_, GPU_INFO_SIZE);
+    message.copy_utf8_truncated(info_message_, GPU_INFO_SIZE);
   }
 
   IDRecalcFlag query_id_recalc_flag(ID *id) const override

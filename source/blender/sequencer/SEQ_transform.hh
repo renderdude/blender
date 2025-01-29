@@ -8,6 +8,8 @@
  * \ingroup sequencer
  */
 
+#include "BLI_array.hh"
+#include "BLI_math_matrix_types.hh"
 #include "BLI_span.hh"
 
 struct ListBase;
@@ -53,10 +55,6 @@ void SEQ_transform_handle_overlap(Scene *scene,
                                   blender::Span<Strip *> transformed_strips,
                                   bool use_sync_markers);
 /**
- * Check if the selected seq's reference unselected seq's.
- */
-bool SEQ_transform_seqbase_isolated_sel_check(ListBase *seqbase);
-/**
  * Move strips and markers (if not locked) that start after timeline_frame by delta frames
  *
  * \param scene: Scene in which strips are located
@@ -96,22 +94,20 @@ void SEQ_image_transform_origin_offset_pixelspace_get(const Scene *scene,
  * \param scene: Scene in which strips are located
  * \param seq: Sequence to calculate transformed image quad
  * \param apply_rotation: Apply sequence rotation transform to the quad
- * \param r_quad: array of 4 2D vectors
+ * \return array of 4 2D vectors
  */
-void SEQ_image_transform_quad_get(const Scene *scene,
-                                  const Strip *strip,
-                                  bool apply_rotation,
-                                  float r_quad[4][2]);
+blender::Array<blender::float2> SEQ_image_transform_quad_get(const Scene *scene,
+                                                             const Strip *strip,
+                                                             bool apply_rotation);
 /**
  * Get 4 corner points of strip image. Corner vectors are in viewport space.
  *
  * \param scene: Scene in which strips are located
  * \param seq: Sequence to calculate transformed image quad
- * \param r_quad: array of 4 2D vectors
+ * \return array of 4 2D vectors
  */
-void SEQ_image_transform_final_quad_get(const Scene *scene,
-                                        const Strip *strip,
-                                        float r_quad[4][2]);
+blender::Array<blender::float2> SEQ_image_transform_final_quad_get(const Scene *scene,
+                                                                   const Strip *strip);
 
 void SEQ_image_preview_unit_to_px(const Scene *scene, const float co_src[2], float co_dst[2]);
 void SEQ_image_preview_unit_from_px(const Scene *scene, const float co_src[2], float co_dst[2]);
@@ -138,8 +134,5 @@ void SEQ_image_transform_bounding_box_from_collection(Scene *scene,
  *
  * \param scene: Scene in which strips are located
  * \param seq: Strip that is used to construct the matrix
- * \param r_transform_matrix: Return value
  */
-void SEQ_image_transform_matrix_get(const Scene *scene,
-                                    const Strip *strip,
-                                    float r_transform_matrix[4][4]);
+blender::float4x4 SEQ_image_transform_matrix_get(const Scene *scene, const Strip *strip);

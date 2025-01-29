@@ -31,6 +31,7 @@
 namespace blender::animrig::versioning {
 
 constexpr const char *DEFAULT_VERSIONED_SLOT_NAME = "Legacy Slot";
+constexpr const char *DEFAULT_VERSIONED_LAYER_NAME = "Legacy Layer";
 
 bool action_is_layered(const bAction &dna_action)
 {
@@ -99,7 +100,7 @@ void convert_legacy_animato_action(bAction &dna_action)
                                     DATA_(DEFAULT_VERSIONED_SLOT_NAME)};
   action.slot_identifier_define(slot, slot_identifier);
 
-  Layer &layer = action.layer_add("Layer");
+  Layer &layer = action.layer_add(DATA_(DEFAULT_VERSIONED_LAYER_NAME));
   blender::animrig::Strip &strip = layer.strip_add(action,
                                                    blender::animrig::Strip::Type::Keyframe);
   Channelbag &bag = strip.data<StripKeyframeData>(action).channelbag_for_slot_ensure(slot);
@@ -155,7 +156,7 @@ void tag_action_users_for_slotted_actions_conversion(Main &bmain)
   auto flag_adt = [](ID &animated_id,
                      bAction *& /*action_ptr_ref*/,
                      slot_handle_t & /*slot_handle_ref*/,
-                     char * /*slot_name*/) -> bool {
+                     char * /*last_slot_identifier*/) -> bool {
     tag_action_user_for_slotted_actions_conversion(animated_id);
 
     /* Once tagged, the foreach loop can stop, because more tagging of the same

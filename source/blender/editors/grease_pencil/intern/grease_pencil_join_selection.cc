@@ -8,13 +8,13 @@
 
 #include "BKE_attribute.hh"
 #include "BKE_context.hh"
-#include "BKE_curves_utils.hh"
 #include "BKE_grease_pencil.hh"
 
 #include "DNA_scene_types.h"
 
 #include "DEG_depsgraph.hh"
 
+#include "ED_curves.hh"
 #include "ED_grease_pencil.hh"
 #include "RNA_access.hh"
 
@@ -484,6 +484,17 @@ int grease_pencil_join_selection_exec(bContext *C, wmOperator *op)
   }
 
   append_strokes_from(std::move(tmp_curves), dst_curves);
+
+  bke::GSpanAttributeWriter selection = ed::curves::ensure_selection_attribute(
+      dst_curves, selection_domain, CD_PROP_BOOL);
+
+  if (selection_domain == bke::AttrDomain::Curve) {
+    ed::curves::fill_selection_true(selection.span.take_back(tmp_curves.curves_num()));
+  }
+  else {
+    ed::curves::fill_selection_true(selection.span.take_back(tmp_curves.points_num()));
+  }
+  selection.finish();
 
   dst_curves.update_curve_types();
   dst_curves.tag_topology_changed();

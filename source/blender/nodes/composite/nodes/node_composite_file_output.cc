@@ -291,12 +291,12 @@ static void update_output_file(bNodeTree *ntree, bNode *node)
    * This is not ideal, but prevents crashes from missing storage.
    * FileOutput node needs a redesign to support this properly.
    */
-  LISTBASE_FOREACH (bNodeSocket *, sock, &node->inputs) {
+  LISTBASE_FOREACH_MUTABLE (bNodeSocket *, sock, &node->inputs) {
     if (sock->storage == nullptr) {
       blender::bke::node_remove_socket(ntree, node, sock);
     }
   }
-  LISTBASE_FOREACH (bNodeSocket *, sock, &node->outputs) {
+  LISTBASE_FOREACH_MUTABLE (bNodeSocket *, sock, &node->outputs) {
     blender::bke::node_remove_socket(ntree, node, sock);
   }
 
@@ -920,10 +920,11 @@ void register_node_type_cmp_output_file()
 
   static blender::bke::bNodeType ntype;
 
-  cmp_node_type_base(&ntype, CMP_NODE_OUTPUT_FILE, NODE_CLASS_OUTPUT);
+  cmp_node_type_base(&ntype, "CompositorNodeOutputFile", CMP_NODE_OUTPUT_FILE);
   ntype.ui_name = "File Output";
   ntype.ui_description = "Write image file to disk";
   ntype.enum_name_legacy = "OUTPUT_FILE";
+  ntype.nclass = NODE_CLASS_OUTPUT;
   ntype.draw_buttons = file_ns::node_composit_buts_file_output;
   ntype.draw_buttons_ex = file_ns::node_composit_buts_file_output_ex;
   ntype.initfunc_api = file_ns::init_output_file;

@@ -1179,7 +1179,9 @@ static void wm_operator_reports(bContext *C,
   }
 
   /* Refresh Info Editor with reports immediately, even if op returned #OPERATOR_CANCELLED. */
-  if ((retval & OPERATOR_CANCELLED) && !BLI_listbase_is_empty(&op->reports->list)) {
+  if ((retval & (OPERATOR_FINISHED | OPERATOR_CANCELLED)) &&
+      !BLI_listbase_is_empty(&op->reports->list))
+  {
     WM_event_add_notifier(C, NC_SPACE | ND_SPACE_INFO_REPORT, nullptr);
   }
   /* If the caller owns them, handle this. */
@@ -1451,7 +1453,7 @@ static wmOperator *wm_operator_create(wmWindowManager *wm,
   else {
     op->properties = blender::bke::idprop::create_group("wmOperatorProperties").release();
   }
-  *op->ptr = RNA_pointer_create(&wm->id, ot->srna, op->properties);
+  *op->ptr = RNA_pointer_create_discrete(&wm->id, ot->srna, op->properties);
 
   /* Initialize error reports. */
   if (reports) {
@@ -1895,7 +1897,7 @@ int WM_operator_name_call_with_properties(bContext *C,
                                           const wmEvent *event)
 {
   wmOperatorType *ot = WM_operatortype_find(opstring, false);
-  PointerRNA props_ptr = RNA_pointer_create(
+  PointerRNA props_ptr = RNA_pointer_create_discrete(
       &static_cast<wmWindowManager *>(G_MAIN->wm.first)->id, ot->srna, properties);
   return WM_operator_name_call_ptr(C, ot, context, &props_ptr, event);
 }
@@ -3181,6 +3183,11 @@ static eHandlerActionFlag wm_handlers_do_gizmo_handler(bContext *C,
   BLI_assert(gzmap != nullptr);
   wmGizmo *gz = wm_gizmomap_highlight_get(gzmap);
 
+  if (gz && ISMOUSE(event->type) && event->val == KM_PRESS) {
+    /* Remove any tooltips on mouse down. #83589 */
+    WM_tooltip_clear(C, CTX_wm_window(C));
+  }
+
   /* Needed so UI blocks over gizmos don't let events fall through to the gizmos,
    * noticeable for the node editor - where dragging on a node should move it, see: #73212.
    * note we still allow for starting the gizmo drag outside, then travel 'inside' the node. */
@@ -3399,6 +3406,8 @@ static eHandlerActionFlag wm_handlers_do_intern(bContext *C,
         wmEventHandler_KeymapResult km_result;
         WM_event_get_keymaps_from_handler(wm, win, handler, &km_result);
         eHandlerActionFlag action_iter = WM_HANDLER_CONTINUE;
+        /* Compute in advance, as event may be freed on WM_HANDLER_BREAK. */
+        const bool event_is_timer = ISTIMER(event->type);
         for (int km_index = 0; km_index < km_result.keymaps_len; km_index++) {
           wmKeyMap *keymap = km_result.keymaps[km_index];
           action_iter |= wm_handlers_do_keymap_with_keymap_handler(
@@ -3411,7 +3420,7 @@ static eHandlerActionFlag wm_handlers_do_intern(bContext *C,
 
         /* Clear the tool-tip whenever a key binding is handled, without this tool-tips
          * are kept when a modal operators starts (annoying but otherwise harmless). */
-        if (action & WM_HANDLER_BREAK && !ISTIMER(event->type)) {
+        if (action & WM_HANDLER_BREAK && !event_is_timer) {
           /* Window may be gone after file read. */
           if (CTX_wm_window(C) != nullptr) {
             WM_tooltip_clear(C, CTX_wm_window(C));

@@ -30,7 +30,7 @@ class ImagePrepass : Overlay {
  public:
   void begin_sync(Resources &res, const State &state) final
   {
-    enabled_ = state.is_space_image() && !res.is_selection();
+    enabled_ = state.is_space_image() && state.is_image_valid && !res.is_selection();
 
     if (!enabled_) {
       return;
@@ -72,7 +72,7 @@ class Prepass : Overlay {
  public:
   void begin_sync(Resources &res, const State &state) final
   {
-    enabled_ = state.is_space_v3d();
+    enabled_ = state.is_space_v3d() && (!state.xray_enabled || res.is_selection());
 
     if (!enabled_) {
       /* Not used. But release the data. */
@@ -190,7 +190,11 @@ class Prepass : Overlay {
                    Resources &res,
                    const State &state) final
   {
-    if (!enabled_) {
+    bool is_solid = ob_ref.object->dt >= OB_SOLID ||
+                    (state.v3d->shading.type == OB_RENDER &&
+                     !(ob_ref.object->visibility_flag & OB_HIDE_CAMERA));
+
+    if (!enabled_ || !is_solid) {
       return;
     }
 
@@ -212,7 +216,7 @@ class Prepass : Overlay {
       case OB_MESH:
         if (use_material_slot_selection_) {
           /* TODO(fclem): Improve the API. */
-          const int materials_len = DRW_cache_object_material_count_get(ob_ref.object);
+          const int materials_len = BKE_object_material_used_with_fallback_eval(*ob_ref.object);
           Array<GPUMaterial *> materials(materials_len, nullptr);
           geom_list = DRW_cache_mesh_surface_shaded_get(ob_ref.object, materials);
         }

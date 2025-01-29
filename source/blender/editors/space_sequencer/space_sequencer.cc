@@ -220,8 +220,7 @@ static void sequencer_init(wmWindowManager * /*wm*/, ScrArea *area)
 
 static void sequencer_refresh(const bContext *C, ScrArea *area)
 {
-  wmWindowManager *wm = CTX_wm_manager(C);
-  wmWindow *window = CTX_wm_window(C);
+  const wmWindow *window = CTX_wm_window(C);
   SpaceSeq *sseq = (SpaceSeq *)area->spacedata.first;
   ARegion *region_main = sequencer_find_region(area, RGN_TYPE_WINDOW);
   ARegion *region_preview = sequencer_find_region(area, RGN_TYPE_PREVIEW);
@@ -272,7 +271,7 @@ static void sequencer_refresh(const bContext *C, ScrArea *area)
   }
 
   if (view_changed) {
-    ED_area_init(wm, window, area);
+    ED_area_init(const_cast<bContext *>(C), window, area);
     ED_area_tag_redraw(area);
   }
 }
@@ -625,11 +624,11 @@ static void sequencer_main_region_message_subscribe(const wmRegionMessageSubscri
         &RNA_SequenceEditor,
 
         &RNA_Strip,
-        /* Members of 'Sequence'. */
-        &RNA_SequenceCrop,
-        &RNA_SequenceTransform,
-        &RNA_SequenceModifier,
-        &RNA_SequenceColorBalanceData,
+        /* Members of 'Strip'. */
+        &RNA_StripCrop,
+        &RNA_StripTransform,
+        &RNA_StripModifier,
+        &RNA_StripColorBalanceData,
     };
     wmMsgParams_RNA msg_key_params = {{}};
     for (int i = 0; i < ARRAY_SIZE(type_array); i++) {
@@ -678,6 +677,12 @@ static void sequencer_main_cursor(wmWindow *win, ScrArea *area, ARegion *region)
     return;
   }
 
+  const View2D *v2d = &region->v2d;
+  if (UI_view2d_mouse_in_scrollers(region, v2d, win->eventstate->xy)) {
+    WM_cursor_set(win, wmcursor);
+    return;
+  }
+
   float mouse_co_region[2] = {float(win->eventstate->xy[0] - region->winrct.xmin),
                               float(win->eventstate->xy[1] - region->winrct.ymin)};
   float mouse_co_view[2];
@@ -705,7 +710,6 @@ static void sequencer_main_cursor(wmWindow *win, ScrArea *area, ARegion *region)
     return;
   }
 
-  const View2D *v2d = &region->v2d;
   const float scale_y = UI_view2d_scale_get_y(v2d);
 
   if (!ED_sequencer_can_select_handle(scene, selection.seq1, v2d) || scale_y < 16 * U.pixelsize) {
@@ -795,9 +799,13 @@ static void sequencer_preview_region_init(wmWindowManager *wm, ARegion *region)
   keymap = WM_keymap_ensure(wm->defaultconf, "SequencerCommon", SPACE_SEQ, RGN_TYPE_WINDOW);
   WM_event_add_keymap_handler_v2d_mask(&region->runtime->handlers, keymap);
 
-  /* Do this instead of adding V2D keymap flag to `art->keymapflag` text editing keymap conflicts
-   * with V2D keymap. This seems to be only way to define order of evaluation. */
+  /* Do this instead of adding V2D and frames `ED_KEYMAP_*` flags to `art->keymapflag`, since text
+   * editing conflicts with several of their keymap items (e.g. arrow keys when editing text or
+   * advancing frames). This seems to be the best way to define the proper order of evaluation. */
   keymap = WM_keymap_ensure(wm->defaultconf, "View2D", SPACE_EMPTY, RGN_TYPE_WINDOW);
+  WM_event_add_keymap_handler_v2d_mask(&region->runtime->handlers, keymap);
+
+  keymap = WM_keymap_ensure(wm->defaultconf, "Frames", SPACE_EMPTY, RGN_TYPE_WINDOW);
   WM_event_add_keymap_handler_v2d_mask(&region->runtime->handlers, keymap);
 
   ListBase *lb = WM_dropboxmap_find("Sequencer", SPACE_SEQ, RGN_TYPE_PREVIEW);

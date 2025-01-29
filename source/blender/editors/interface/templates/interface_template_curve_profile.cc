@@ -38,10 +38,14 @@ static uiBlock *curve_profile_presets_fn(bContext *C, ARegion *region, void *cb_
 
   for (const auto &item :
        {std::pair<StringRef, eCurveProfilePresets>(IFACE_("Default"), PROF_PRESET_LINE),
-        std::pair<StringRef, eCurveProfilePresets>(IFACE_("Support Loops"), PROF_PRESET_SUPPORTS),
-        std::pair<StringRef, eCurveProfilePresets>(IFACE_("Cornice Molding"), PROF_PRESET_CORNICE),
-        std::pair<StringRef, eCurveProfilePresets>(IFACE_("Crown Molding"), PROF_PRESET_CROWN),
-        std::pair<StringRef, eCurveProfilePresets>(IFACE_("Steps"), PROF_PRESET_STEPS)})
+        std::pair<StringRef, eCurveProfilePresets>(
+            CTX_IFACE_(BLT_I18NCONTEXT_ID_MESH, "Support Loops"), PROF_PRESET_SUPPORTS),
+        std::pair<StringRef, eCurveProfilePresets>(
+            CTX_IFACE_(BLT_I18NCONTEXT_ID_MESH, "Cornice Molding"), PROF_PRESET_CORNICE),
+        std::pair<StringRef, eCurveProfilePresets>(
+            CTX_IFACE_(BLT_I18NCONTEXT_ID_MESH, "Crown Molding"), PROF_PRESET_CROWN),
+        std::pair<StringRef, eCurveProfilePresets>(CTX_IFACE_(BLT_I18NCONTEXT_ID_MESH, "Steps"),
+                                                   PROF_PRESET_STEPS)})
   {
     uiBut *but = uiDefIconTextBut(block,
                                   UI_BTYPE_BUT_MENU,
@@ -427,7 +431,8 @@ static void CurveProfile_buttons_layout(uiLayout *layout, PointerRNA *ptr, const
 
     row = uiLayoutRow(layout, true);
 
-    PointerRNA point_ptr = RNA_pointer_create(ptr->owner_id, &RNA_CurveProfilePoint, point);
+    PointerRNA point_ptr = RNA_pointer_create_discrete(
+        ptr->owner_id, &RNA_CurveProfilePoint, point);
     PropertyRNA *prop_handle_type = RNA_struct_find_property(&point_ptr, "handle_type_1");
     uiItemFullR(row,
                 &point_ptr,

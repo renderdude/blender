@@ -16,6 +16,7 @@
 
 #include "BLT_translation.hh"
 
+#include "BKE_main_invariants.hh"
 #include "BKE_node_tree_update.hh"
 
 #include "RNA_define.hh"
@@ -58,6 +59,7 @@ const EnumPropertyItem rna_enum_color_space_convert_default_items[] = {
 #  include "BKE_linestyle.h"
 #  include "BKE_movieclip.h"
 #  include "BKE_node.hh"
+#  include "BKE_node_legacy_types.hh"
 
 #  include "DEG_depsgraph.hh"
 
@@ -234,12 +236,12 @@ static std::optional<std::string> rna_ColorRamp_path(const PointerRNA *ptr)
         bNode *node;
 
         for (node = static_cast<bNode *>(ntree->nodes.first); node; node = node->next) {
-          if (ELEM(node->type, SH_NODE_VALTORGB, CMP_NODE_VALTORGB, TEX_NODE_VALTORGB)) {
+          if (ELEM(node->type_legacy, SH_NODE_VALTORGB, CMP_NODE_VALTORGB, TEX_NODE_VALTORGB)) {
             if (node->storage == ptr->data) {
               /* all node color ramp properties called 'color_ramp'
                * prepend path from ID to the node
                */
-              PointerRNA node_ptr = RNA_pointer_create(id, &RNA_Node, node);
+              PointerRNA node_ptr = RNA_pointer_create_discrete(id, &RNA_Node, node);
               std::string node_path = RNA_path_from_ID_to_struct(&node_ptr).value_or("");
               return fmt::format("{}.color_ramp", node_path);
             }
@@ -301,8 +303,8 @@ static std::optional<std::string> rna_ColorRampElement_path(const PointerRNA *pt
         bNode *node;
 
         for (node = static_cast<bNode *>(ntree->nodes.first); node; node = node->next) {
-          if (ELEM(node->type, SH_NODE_VALTORGB, CMP_NODE_VALTORGB, TEX_NODE_VALTORGB)) {
-            ramp_ptr = RNA_pointer_create(id, &RNA_ColorRamp, node->storage);
+          if (ELEM(node->type_legacy, SH_NODE_VALTORGB, CMP_NODE_VALTORGB, TEX_NODE_VALTORGB)) {
+            ramp_ptr = RNA_pointer_create_discrete(id, &RNA_ColorRamp, node->storage);
             COLRAMP_GETPATH;
           }
         }
@@ -314,7 +316,7 @@ static std::optional<std::string> rna_ColorRampElement_path(const PointerRNA *pt
 
         BKE_linestyle_modifier_list_color_ramps((FreestyleLineStyle *)id, &listbase);
         for (link = (LinkData *)listbase.first; link; link = link->next) {
-          ramp_ptr = RNA_pointer_create(id, &RNA_ColorRamp, link->data);
+          ramp_ptr = RNA_pointer_create_discrete(id, &RNA_ColorRamp, link->data);
           COLRAMP_GETPATH;
         }
         BLI_freelistN(&listbase);
@@ -357,9 +359,9 @@ static void rna_ColorRamp_update(Main *bmain, Scene * /*scene*/, PointerRNA *ptr
         bNode *node;
 
         for (node = static_cast<bNode *>(ntree->nodes.first); node; node = node->next) {
-          if (ELEM(node->type, SH_NODE_VALTORGB, CMP_NODE_VALTORGB, TEX_NODE_VALTORGB)) {
+          if (ELEM(node->type_legacy, SH_NODE_VALTORGB, CMP_NODE_VALTORGB, TEX_NODE_VALTORGB)) {
             BKE_ntree_update_tag_node_property(ntree, node);
-            ED_node_tree_propagate_change(nullptr, bmain, ntree);
+            BKE_main_ensure_invariants(*bmain, ntree->id);
           }
         }
         break;
@@ -941,6 +943,7 @@ static void rna_def_curvemapping(BlenderRNA *brna)
   RNA_def_property_enum_bitflag_sdna(prop, nullptr, "flag");
   RNA_def_property_enum_items(prop, prop_extend_items);
   RNA_def_property_ui_text(prop, "Extend", "Extrapolate the curve or extend it horizontally");
+  RNA_def_property_translation_context(prop, BLT_I18NCONTEXT_ID_CURVE_LEGACY);
   RNA_def_property_update(prop, 0, "rna_CurveMapping_extend_update");
 
   prop = RNA_def_property(srna, "curves", PROP_COLLECTION, PROP_NONE);

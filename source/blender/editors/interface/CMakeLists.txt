@@ -62,10 +62,10 @@ set(SRC
   templates/interface_template_color_management.cc
   templates/interface_template_color_picker.cc
   templates/interface_template_color_ramp.cc
+  templates/interface_template_component_menu.cc
   templates/interface_template_constraint.cc
   templates/interface_template_curve_mapping.cc
   templates/interface_template_curve_profile.cc
-  templates/interface_template_component_menu.cc
   templates/interface_template_event.cc
   templates/interface_template_grease_pencil_layer_tree.cc
   templates/interface_template_icon.cc
@@ -92,11 +92,11 @@ set(SRC
   interface_utils.cc
   interface_widgets.cc
   resources.cc
-  view2d.cc
-  view2d_draw.cc
-  view2d_edge_pan.cc
-  view2d_gizmo_navigate.cc
-  view2d_ops.cc
+  view2d/view2d.cc
+  view2d/view2d_draw.cc
+  view2d/view2d_edge_pan.cc
+  view2d/view2d_gizmo_navigate.cc
+  view2d/view2d_ops.cc
   views/abstract_view.cc
   views/abstract_view_item.cc
   views/grid_view.cc
@@ -107,7 +107,7 @@ set(SRC
   templates/interface_templates_intern.hh
   interface_intern.hh
   regions/interface_regions_intern.hh
-  view2d_intern.hh
+  view2d/view2d_intern.hh
 )
 
 set(LIB

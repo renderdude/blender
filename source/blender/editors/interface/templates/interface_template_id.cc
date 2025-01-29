@@ -14,6 +14,7 @@
 #include "BKE_lib_id.hh"
 #include "BKE_lib_override.hh"
 #include "BKE_main.hh"
+#include "BKE_main_invariants.hh"
 #include "BKE_packedFile.hh"
 
 #include "BLI_string.h"
@@ -771,7 +772,7 @@ static void template_id_cb(bContext *C, void *arg_litem, void *arg_event)
           WM_event_add_notifier(C, NC_SPACE | ND_SPACE_OUTLINER, nullptr);
           DEG_relations_tag_update(bmain);
         }
-        ED_node_tree_propagate_change(C, CTX_data_main(C), nullptr);
+        BKE_main_ensure_invariants(*CTX_data_main(C));
         undo_push_label = "Make Single User";
       }
       break;
@@ -1614,7 +1615,7 @@ void uiTemplateAction(uiLayout *layout,
    * has a `getter` & `setter` that only need the owner ID and are null-safe regarding the `adt`
    * itself. */
   AnimData *adt = BKE_animdata_from_id(id);
-  PointerRNA adt_ptr = RNA_pointer_create(id, &RNA_AnimData, adt);
+  PointerRNA adt_ptr = RNA_pointer_create_discrete(id, &RNA_AnimData, adt);
 
   TemplateID template_ui = {};
   template_ui.ptr = adt_ptr;

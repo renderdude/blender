@@ -12,6 +12,7 @@
 
 struct Main;
 struct bContext;
+class WorkspaceStatus;
 
 namespace blender::bke::id {
 class IDRemapper;
@@ -86,6 +87,8 @@ void ED_slider_status_string_get(const tSlider *slider,
                                  char *status_string,
                                  size_t size_of_status_string);
 
+void ED_slider_status_get(const tSlider *slider, WorkspaceStatus &status);
+
 float ED_slider_factor_get(const tSlider *slider);
 void ED_slider_factor_set(tSlider *slider, float factor);
 
@@ -93,7 +96,7 @@ void ED_slider_factor_set(tSlider *slider, float factor);
  * By default the increment step is 0.1, which depending on the factor bounds might not be desired.
  * Only has an effect if increment is allowed and enabled.
  * See `ED_slider_allow_increments_set`.
- * \param increment_step cannot be 0.
+ * \param increment_step: cannot be 0.
  */
 void ED_slider_increment_step_set(tSlider *slider, float increment_step);
 

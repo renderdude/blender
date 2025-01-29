@@ -23,6 +23,7 @@
 #include "BKE_image.hh"
 #include "BKE_image_format.hh"
 #include "BKE_node.hh"
+#include "BKE_node_legacy_types.hh"
 #include "BKE_screen.hh"
 
 #include "RE_pipeline.h"
@@ -53,7 +54,7 @@ ImageUser *ntree_get_active_iuser(bNodeTree *ntree)
 {
   if (ntree) {
     LISTBASE_FOREACH (bNode *, node, &ntree->nodes) {
-      if (node->type == CMP_NODE_VIEWER) {
+      if (node->type_legacy == CMP_NODE_VIEWER) {
         if (node->flag & NODE_DO_OUTPUT) {
           return static_cast<ImageUser *>(node->storage);
         }
@@ -161,6 +162,7 @@ static void ui_imageuser_layer_menu(bContext * /*C*/, uiLayout *layout, void *rn
   /* May have been freed since drawing. */
   RenderResult *rr = BKE_image_acquire_renderresult(scene, image);
   if (UNLIKELY(rr == nullptr)) {
+    BKE_image_release_renderresult(scene, image, rr);
     return;
   }
 
@@ -233,6 +235,7 @@ static void ui_imageuser_pass_menu(bContext * /*C*/, uiLayout *layout, void *rnd
   /* may have been freed since drawing */
   rr = BKE_image_acquire_renderresult(scene, image);
   if (UNLIKELY(rr == nullptr)) {
+    BKE_image_release_renderresult(scene, image, rr);
     return;
   }
 
@@ -305,6 +308,7 @@ static void ui_imageuser_view_menu_rr(bContext * /*C*/, uiLayout *layout, void *
   /* may have been freed since drawing */
   rr = BKE_image_acquire_renderresult(scene, image);
   if (UNLIKELY(rr == nullptr)) {
+    BKE_image_release_renderresult(scene, image, rr);
     return;
   }
 
@@ -412,6 +416,7 @@ static bool ui_imageuser_layer_menu_step(bContext *C, int direction, void *rnd_p
 
   rr = BKE_image_acquire_renderresult(scene, image);
   if (UNLIKELY(rr == nullptr)) {
+    BKE_image_release_renderresult(scene, image, rr);
     return false;
   }
 

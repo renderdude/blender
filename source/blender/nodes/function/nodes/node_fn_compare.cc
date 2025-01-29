@@ -14,6 +14,8 @@
 #include "UI_interface.hh"
 #include "UI_resources.hh"
 
+#include "IMB_colormanagement.hh"
+
 #include "RNA_enum_types.hh"
 
 #include "node_function_util.hh"
@@ -571,7 +573,7 @@ static const mf::MultiFunction *get_multi_function(const bNode &node)
           static auto fn = mf::build::SI2_SO<ColorGeometry4f, ColorGeometry4f, bool>(
               "Brighter",
               [](ColorGeometry4f a, ColorGeometry4f b) {
-                return rgb_to_grayscale(a) > rgb_to_grayscale(b);
+                return IMB_colormanagement_get_luminance(a) > IMB_colormanagement_get_luminance(b);
               },
               exec_preset_all);
           return &fn;
@@ -580,7 +582,7 @@ static const mf::MultiFunction *get_multi_function(const bNode &node)
           static auto fn = mf::build::SI2_SO<ColorGeometry4f, ColorGeometry4f, bool>(
               "Darker",
               [](ColorGeometry4f a, ColorGeometry4f b) {
-                return rgb_to_grayscale(a) < rgb_to_grayscale(b);
+                return IMB_colormanagement_get_luminance(a) < IMB_colormanagement_get_luminance(b);
               },
               exec_preset_all);
           return &fn;
@@ -737,9 +739,10 @@ static void node_rna(StructRNA *srna)
 static void node_register()
 {
   static blender::bke::bNodeType ntype;
-  fn_node_type_base(&ntype, FN_NODE_COMPARE, NODE_CLASS_CONVERTER);
+  fn_node_type_base(&ntype, "FunctionNodeCompare", FN_NODE_COMPARE);
   ntype.ui_name = "Compare";
   ntype.enum_name_legacy = "COMPARE";
+  ntype.nclass = NODE_CLASS_CONVERTER;
   ntype.declare = node_declare;
   ntype.labelfunc = node_label;
   ntype.updatefunc = node_update;

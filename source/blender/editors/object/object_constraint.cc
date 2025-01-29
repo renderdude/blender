@@ -11,10 +11,10 @@
 
 #include "MEM_guardedalloc.h"
 
-#include "BLI_blenlib.h"
 #include "BLI_dynstr.h"
 #include "BLI_math_matrix.h"
 #include "BLI_math_vector.h"
+#include "BLI_string.h"
 #include "BLI_utildefines.h"
 
 #include "BLT_translation.hh"
@@ -1105,7 +1105,7 @@ static int followpath_path_animate_exec(bContext *C, wmOperator *op)
     PropertyRNA *prop;
 
     /* get RNA pointer to constraint's "offset_factor" property - to build RNA path */
-    PointerRNA ptr = RNA_pointer_create(&ob->id, &RNA_FollowPathConstraint, con);
+    PointerRNA ptr = RNA_pointer_create_discrete(&ob->id, &RNA_FollowPathConstraint, con);
     prop = RNA_struct_find_property(&ptr, "offset_factor");
 
     const std::optional<std::string> path = RNA_path_from_ID_to_property(&ptr, prop);

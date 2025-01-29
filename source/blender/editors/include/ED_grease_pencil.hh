@@ -38,6 +38,7 @@ struct View3D;
 struct ViewContext;
 struct BVHTree;
 struct GreasePencilLineartModifierData;
+struct RV3DMatrixStore;
 namespace blender {
 namespace bke {
 enum class AttrDomain : int8_t;
@@ -113,7 +114,7 @@ namespace blender::ed::greasepencil {
 
 enum class ReprojectMode : int8_t { Front, Side, Top, View, Cursor, Surface, Keep };
 
-enum class DrawingPlacementDepth : int8_t { ObjectOrigin, Cursor, Surface, NearestStroke };
+enum class DrawingPlacementDepth : int8_t { ObjectOrigin, Cursor, Surface, Stroke };
 
 enum class DrawingPlacementPlane : int8_t { View, Front, Side, Top, Cursor };
 
@@ -129,7 +130,8 @@ class DrawingPlacement {
 
   float3 placement_loc_;
   float3 placement_normal_;
-  float4 placement_plane_;
+  /* Optional explicit placement plane. */
+  std::optional<float4> placement_plane_;
 
   float4x4 layer_space_to_world_space_;
   float4x4 world_space_to_layer_space_;
@@ -161,10 +163,15 @@ class DrawingPlacement {
 
  public:
   bool use_project_to_surface() const;
-  bool use_project_to_nearest_stroke() const;
+  bool use_project_to_stroke() const;
 
   void cache_viewport_depths(Depsgraph *depsgraph, ARegion *region, View3D *view3d);
-  void set_origin_to_nearest_stroke(float2 co);
+
+  /**
+   * Attempt to project from the depth buffer.
+   * \return Un-projected position if a valid depth is found at the screen position.
+   */
+  std::optional<float3> project_depth(float2 co) const;
 
   /**
    * Projects a screen space coordinate to the local drawing space.
@@ -177,6 +184,11 @@ class DrawingPlacement {
   float3 project_with_shift(float2 co) const;
 
   /**
+   * Convert a screen space coordinate with depth to the local drawing space.
+   */
+  float3 place(float2 co, float depth) const;
+
+  /**
    * Projects a 3D position (in local space) to the drawing plane.
    */
   float3 reproject(float3 pos) const;
@@ -184,8 +196,12 @@ class DrawingPlacement {
 
   float4x4 to_world_space() const;
 
+  /** Return depth buffer if possible. */
+  std::optional<float> get_depth(float2 co) const;
+
  private:
-  float3 project_depth(float2 co) const;
+  /** Return depth buffer projection if possible or "View" placement fallback. */
+  float3 try_project_depth(float2 co) const;
 };
 
 void set_selected_frames_type(bke::greasepencil::Layer &layer,
@@ -617,8 +633,9 @@ namespace image_render {
 
 /** Region size to restore after rendering. */
 struct RegionViewData {
-  int2 region_winsize;
-  rcti region_winrct;
+  int2 winsize;
+  rcti winrct;
+  RV3DMatrixStore *rv3d_store;
 };
 
 /**
@@ -909,5 +926,8 @@ GreasePencil *from_context(bContext &C);
  */
 bke::CurvesGeometry remove_points_and_split(const bke::CurvesGeometry &curves,
                                             const IndexMask &point_mask);
+
+/* Make sure selection domain is updated to match the current selection mode. */
+bool ensure_selection_domain(ToolSettings *ts, Object *object);
 
 }  // namespace blender::ed::greasepencil

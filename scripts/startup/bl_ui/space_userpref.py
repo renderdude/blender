@@ -450,8 +450,6 @@ class USERPREF_PT_edit_objects_duplicate_data(EditingPanel, CenterAlignMixIn, Pa
             row_label = row.row()
             row_label.label(text=type_name, icon=type_icon)
 
-            row_label.active = getattr(edit, prop)
-
 
 class USERPREF_PT_edit_cursor(EditingPanel, CenterAlignMixIn, Panel):
     bl_label = "3D Cursor"
@@ -728,7 +726,7 @@ class USERPREF_PT_system_os_settings(SystemPanel, CenterAlignMixIn, Panel):
                 return False
         else:
             # Linux.
-            if bpy.utils.resource_path('SYSTEM'):
+            if not bpy.app.portable:
                 layout.label(text="System Installation")
                 layout.label(text="File association is handled by the package manager")
                 return False
@@ -935,7 +933,7 @@ class USERPREF_PT_viewport_subdivision(ViewportPanel, CenterAlignMixIn, Panel):
     def poll(cls, context):
         import gpu
         backend = gpu.platform.backend_type_get()
-        return backend == "OPENGL"
+        return backend == 'OPENGL'
 
     def draw_centered(self, context, layout):
         prefs = context.preferences

@@ -20,11 +20,8 @@
 
 #include "BLI_bit_vector.hh"
 #include "BLI_bitmap.h"
-#include "BLI_color.hh"
-#include "BLI_endian_switch.h"
 #include "BLI_index_range.hh"
 #include "BLI_math_color_blend.h"
-#include "BLI_math_matrix.hh"
 #include "BLI_math_quaternion_types.hh"
 #include "BLI_math_vector.hh"
 #include "BLI_memory_counter.hh"
@@ -50,7 +47,6 @@
 #include "BKE_customdata_file.h"
 #include "BKE_deform.hh"
 #include "BKE_main.hh"
-#include "BKE_mesh_mapping.hh"
 #include "BKE_mesh_remap.hh"
 #include "BKE_multires.hh"
 #include "BKE_subsurf.hh"
@@ -3169,7 +3165,7 @@ static CustomDataLayer *customData_add_layer__internal(
   }
 
   if (!name.is_empty()) {
-    name.copy(new_layer.name);
+    name.copy_utf8_truncated(new_layer.name);
     CustomData_set_layer_unique_name(data, index);
   }
   else {
@@ -3794,7 +3790,7 @@ bool CustomData_set_layer_name(CustomData *data,
     return false;
   }
 
-  name.copy(data->layers[layer_index].name);
+  name.copy_utf8_truncated(data->layers[layer_index].name);
 
   return true;
 }
@@ -4574,9 +4570,7 @@ void CustomData_validate_layer_name(const CustomData *data,
     BLI_strncpy_utf8(outname, data->layers[index].name, MAX_CUSTOMDATA_LAYER_NAME);
   }
   else {
-    char name_c_str[MAX_CUSTOMDATA_LAYER_NAME];
-    name.copy(name_c_str);
-    BLI_strncpy_utf8(outname, name_c_str, MAX_CUSTOMDATA_LAYER_NAME);
+    name.copy_utf8_truncated(outname, MAX_CUSTOMDATA_LAYER_NAME);
   }
 }
 

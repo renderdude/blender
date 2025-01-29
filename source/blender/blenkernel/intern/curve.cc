@@ -13,8 +13,6 @@
 
 #include "MEM_guardedalloc.h"
 
-#include "BLI_blenlib.h"
-#include "BLI_endian_switch.h"
 #include "BLI_ghash.h"
 #include "BLI_index_range.hh"
 #include "BLI_math_base_safe.h"
@@ -25,6 +23,7 @@
 #include "BLI_math_vector.h"
 #include "BLI_math_vector_types.hh"
 #include "BLI_string.h"
+#include "BLI_string_utf8.h"
 #include "BLI_utildefines.h"
 #include "BLT_translation.hh"
 
@@ -5484,6 +5483,18 @@ void BKE_curve_correct_bezpart(const float v1[2], float v2[2], float v3[2], cons
     v3[0] = (v4[0] - fac * h2[0]);
     v3[1] = (v4[1] - fac * h2[1]);
   }
+}
+
+std::optional<int> Curve::material_index_max() const
+{
+  if (BLI_listbase_is_empty(&this->nurb)) {
+    return std::nullopt;
+  }
+  int max_index = 0;
+  LISTBASE_FOREACH (const Nurb *, nurb, &this->nurb) {
+    max_index = std::max<int>(max_index, nurb->mat_nr);
+  }
+  return max_index;
 }
 
 /* **** Depsgraph evaluation **** */

@@ -11,6 +11,8 @@
 
 #include "BLI_string.h"
 
+#include "BLT_translation.hh"
+
 #include "DNA_grease_pencil_types.h"
 #include "DNA_scene_types.h"
 
@@ -551,7 +553,7 @@ static PointerRNA rna_GreasePencil_active_layer_get(PointerRNA *ptr)
     return rna_pointer_inherit_refine(
         ptr, &RNA_GreasePencilLayer, static_cast<void *>(grease_pencil->get_active_layer()));
   }
-  return rna_pointer_inherit_refine(ptr, nullptr, nullptr);
+  return PointerRNA_NULL;
 }
 
 static void rna_GreasePencil_active_layer_set(PointerRNA *ptr,
@@ -583,7 +585,7 @@ static PointerRNA rna_GreasePencil_active_group_get(PointerRNA *ptr)
     return rna_pointer_inherit_refine(
         ptr, &RNA_GreasePencilLayerGroup, static_cast<void *>(grease_pencil->get_active_group()));
   }
-  return rna_pointer_inherit_refine(ptr, nullptr, nullptr);
+  return PointerRNA_NULL;
 }
 
 static void rna_GreasePencil_active_group_set(PointerRNA *ptr,
@@ -791,6 +793,7 @@ static void rna_def_grease_pencil_frame(BlenderRNA *brna)
   RNA_def_parameter_clear_flags(prop, PROP_ANIMATABLE, ParameterFlag(0));
   RNA_def_property_enum_items(prop, rna_enum_keyframe_type_items);
   RNA_def_property_ui_text(prop, "Keyframe Type", "Type of keyframe");
+  RNA_def_property_translation_context(prop, BLT_I18NCONTEXT_ID_GPENCIL);
   RNA_def_property_update(prop, NC_GPENCIL | ND_DATA, "rna_grease_pencil_update");
 }
 
@@ -1371,6 +1374,7 @@ static void rna_def_grease_pencil_onion_skinning(StructRNA *srna)
   RNA_def_parameter_clear_flags(prop, PROP_ANIMATABLE, ParameterFlag(0));
   RNA_def_property_enum_items(prop, prop_enum_onion_keyframe_type_items);
   RNA_def_property_ui_text(prop, "Filter by Type", "Type of keyframe (for filtering)");
+  RNA_def_property_translation_context(prop, BLT_I18NCONTEXT_ID_GPENCIL);
   RNA_def_property_update(prop, NC_GPENCIL | ND_DATA, "rna_grease_pencil_update");
 
   prop = RNA_def_property(srna, "use_onion_fade", PROP_BOOLEAN, PROP_NONE);

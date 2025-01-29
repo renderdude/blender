@@ -6,8 +6,6 @@
  * \ingroup edmesh
  */
 
-#include "MEM_guardedalloc.h"
-
 #include "DNA_mesh_types.h"
 #include "DNA_object_types.h"
 #include "DNA_scene_types.h"
@@ -627,6 +625,12 @@ static void mouse_mesh_shortest_path_face(Scene * /*scene*/,
       BM_select_history_store(bm, f_dst_last);
     }
     BM_mesh_active_face_set(bm, f_dst_last);
+
+    if (f_dst_last->mat_nr != obedit->actcol - 1) {
+      obedit->actcol = f_dst_last->mat_nr + 1;
+      em->mat_nr = f_dst_last->mat_nr;
+      WM_main_add_notifier(NC_MATERIAL | ND_SHADING_LINKS, nullptr);
+    }
   }
 
   EDBMUpdate_Params params{};

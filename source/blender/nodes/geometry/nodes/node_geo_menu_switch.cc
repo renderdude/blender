@@ -361,7 +361,8 @@ static void node_layout_ex(uiLayout *layout, bContext *C, PointerRNA *ptr)
 
   uiItemR(layout, ptr, "data_type", UI_ITEM_NONE, "", ICON_NONE);
 
-  if (uiLayout *panel = uiLayoutPanel(C, layout, "menu_switch_items", false, TIP_("Menu Items"))) {
+  if (uiLayout *panel = uiLayoutPanel(C, layout, "menu_switch_items", false, IFACE_("Menu Items")))
+  {
     socket_items::ui::draw_items_list_with_operators<MenuSwitchItemsAccessor>(
         C, panel, tree, node);
     socket_items::ui::draw_active_item_props<MenuSwitchItemsAccessor>(
@@ -407,10 +408,11 @@ static void register_node()
 {
   static blender::bke::bNodeType ntype;
 
-  geo_node_type_base(&ntype, GEO_NODE_MENU_SWITCH, NODE_CLASS_CONVERTER);
+  geo_node_type_base(&ntype, "GeometryNodeMenuSwitch", GEO_NODE_MENU_SWITCH);
   ntype.ui_name = "Menu Switch";
   ntype.ui_description = "Select from multiple inputs by name";
   ntype.enum_name_legacy = "MENU_SWITCH";
+  ntype.nclass = NODE_CLASS_CONVERTER;
   ntype.declare = node_declare;
   ntype.initfunc = node_init;
   blender::bke::node_type_storage(&ntype, "NodeMenuSwitch", node_free_storage, node_copy_storage);
@@ -433,14 +435,14 @@ std::unique_ptr<LazyFunction> get_menu_switch_node_lazy_function(
     const bNode &node, GeometryNodesLazyFunctionGraphInfo &lf_graph_info)
 {
   using namespace node_geo_menu_switch_cc;
-  BLI_assert(node.type == GEO_NODE_MENU_SWITCH);
+  BLI_assert(node.type_legacy == GEO_NODE_MENU_SWITCH);
   return std::make_unique<LazyFunctionForMenuSwitchNode>(node, lf_graph_info);
 }
 
 std::unique_ptr<LazyFunction> get_menu_switch_node_socket_usage_lazy_function(const bNode &node)
 {
   using namespace node_geo_menu_switch_cc;
-  BLI_assert(node.type == GEO_NODE_MENU_SWITCH);
+  BLI_assert(node.type_legacy == GEO_NODE_MENU_SWITCH);
   return std::make_unique<LazyFunctionForMenuSwitchSocketUsage>(node);
 }
 

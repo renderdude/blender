@@ -331,7 +331,7 @@ const EnumPropertyItem rna_enum_object_axis_items[] = {
 #  include "BKE_global.hh"
 #  include "BKE_key.hh"
 #  include "BKE_light_linking.h"
-#  include "BKE_material.h"
+#  include "BKE_material.hh"
 #  include "BKE_mesh.hh"
 #  include "BKE_mesh_wrapper.hh"
 #  include "BKE_modifier.hh"
@@ -524,9 +524,9 @@ static PointerRNA rna_Object_data_get(PointerRNA *ptr)
   if (ob->type == OB_MESH) {
     Mesh *mesh = static_cast<Mesh *>(ob->data);
     mesh = BKE_mesh_wrapper_ensure_subdivision(mesh);
-    return rna_pointer_inherit_refine(ptr, &RNA_Mesh, mesh);
+    return RNA_id_pointer_create(reinterpret_cast<ID *>(mesh));
   }
-  return rna_pointer_inherit_refine(ptr, &RNA_ID, ob->data);
+  return RNA_id_pointer_create(reinterpret_cast<ID *>(ob->data));
 }
 
 static void rna_Object_data_set(PointerRNA *ptr, PointerRNA value, ReportList *reports)
@@ -1139,7 +1139,7 @@ static PointerRNA rna_Object_active_material_get(PointerRNA *ptr)
   Material *ma;
 
   ma = (ob->totcol) ? BKE_object_material_get(ob, ob->actcol) : nullptr;
-  return rna_pointer_inherit_refine(ptr, &RNA_Material, ma);
+  return RNA_id_pointer_create(reinterpret_cast<ID *>(ma));
 }
 
 static void rna_Object_active_material_set(PointerRNA *ptr,
@@ -1373,7 +1373,7 @@ static PointerRNA rna_MaterialSlot_material_get(PointerRNA *ptr)
   else {
     ma = BKE_object_material_get(ob, index + 1);
   }
-  return rna_pointer_inherit_refine(ptr, &RNA_Material, ma);
+  return RNA_id_pointer_create(reinterpret_cast<ID *>(ma));
 }
 
 static void rna_MaterialSlot_material_set(PointerRNA *ptr,
@@ -1506,7 +1506,7 @@ static void rna_Object_material_slots_next(CollectionPropertyIterator *iter)
 static PointerRNA rna_Object_material_slots_get(CollectionPropertyIterator *iter)
 {
   ID *id = static_cast<ID *>(iter->internal.count.ptr);
-  PointerRNA ptr = RNA_pointer_create(
+  PointerRNA ptr = RNA_pointer_create_discrete(
       id,
       &RNA_MaterialSlot,
       /* Add offset, so that `ptr->data` is not null and unique across IDs. */
@@ -1576,7 +1576,7 @@ static PointerRNA rna_Object_active_shape_key_get(PointerRNA *ptr)
   }
 
   kb = static_cast<KeyBlock *>(BLI_findlink(&key->block, ob->shapenr - 1));
-  PointerRNA keyptr = RNA_pointer_create(reinterpret_cast<ID *>(key), &RNA_ShapeKey, kb);
+  PointerRNA keyptr = RNA_pointer_create_discrete(reinterpret_cast<ID *>(key), &RNA_ShapeKey, kb);
   return keyptr;
 }
 
@@ -2689,7 +2689,6 @@ static void rna_def_object_display(BlenderRNA *brna)
 
   prop = RNA_def_property(srna, "show_shadows", PROP_BOOLEAN, PROP_NONE);
   RNA_def_property_boolean_negative_sdna(prop, nullptr, "dtx", OB_DRAW_NO_SHADOW_CAST);
-  RNA_def_property_boolean_default(prop, true);
   RNA_def_property_ui_text(prop, "Shadow", "Object cast shadows in the 3D viewport");
   RNA_def_property_update(prop, NC_OBJECT | ND_DRAW, nullptr);
 
@@ -3181,15 +3180,13 @@ static void rna_def_object(BlenderRNA *brna)
 
   /* transform locks */
   prop = RNA_def_property(srna, "lock_location", PROP_BOOLEAN, PROP_NONE);
-  RNA_def_property_boolean_sdna(prop, nullptr, "protectflag", OB_LOCK_LOCX);
-  RNA_def_property_array(prop, 3);
+  RNA_def_property_boolean_bitset_array_sdna(prop, nullptr, "protectflag", OB_LOCK_LOCX, 3);
   RNA_def_property_ui_text(prop, "Lock Location", "Lock editing of location when transforming");
   RNA_def_property_ui_icon(prop, ICON_UNLOCKED, 1);
   RNA_def_property_update(prop, NC_OBJECT | ND_TRANSFORM, "rna_Object_internal_update");
 
   prop = RNA_def_property(srna, "lock_rotation", PROP_BOOLEAN, PROP_NONE);
-  RNA_def_property_boolean_sdna(prop, nullptr, "protectflag", OB_LOCK_ROTX);
-  RNA_def_property_array(prop, 3);
+  RNA_def_property_boolean_bitset_array_sdna(prop, nullptr, "protectflag", OB_LOCK_ROTX, 3);
   RNA_def_property_ui_text(prop, "Lock Rotation", "Lock editing of rotation when transforming");
   RNA_def_property_ui_icon(prop, ICON_UNLOCKED, 1);
   RNA_def_property_update(prop, NC_OBJECT | ND_TRANSFORM, "rna_Object_internal_update");
@@ -3212,8 +3209,7 @@ static void rna_def_object(BlenderRNA *brna)
       "Lock editing of four component rotations by components (instead of as Eulers)");
 
   prop = RNA_def_property(srna, "lock_scale", PROP_BOOLEAN, PROP_NONE);
-  RNA_def_property_boolean_sdna(prop, nullptr, "protectflag", OB_LOCK_SCALEX);
-  RNA_def_property_array(prop, 3);
+  RNA_def_property_boolean_bitset_array_sdna(prop, nullptr, "protectflag", OB_LOCK_SCALEX, 3);
   RNA_def_property_ui_text(prop, "Lock Scale", "Lock editing of scale when transforming");
   RNA_def_property_ui_icon(prop, ICON_UNLOCKED, 1);
   RNA_def_property_update(prop, NC_OBJECT | ND_TRANSFORM, "rna_Object_internal_update");
@@ -3576,8 +3572,9 @@ static void rna_def_object(BlenderRNA *brna)
   /* shape keys */
   prop = RNA_def_property(srna, "show_only_shape_key", PROP_BOOLEAN, PROP_NONE);
   RNA_def_property_boolean_sdna(prop, nullptr, "shapeflag", OB_SHAPE_LOCK);
-  RNA_def_property_ui_text(prop, "Shape Key Lock", "Only show the active shape key at full value");
-  RNA_def_property_ui_icon(prop, ICON_UNPINNED, 1);
+  RNA_def_property_ui_text(
+      prop, "Solo Active Shape Key", "Only show the active shape key at full value");
+  RNA_def_property_ui_icon(prop, ICON_SOLO_OFF, 1);
   RNA_def_property_update(prop, 0, "rna_Object_internal_update_data");
 
   prop = RNA_def_property(srna, "use_shape_key_edit_mode", PROP_BOOLEAN, PROP_NONE);

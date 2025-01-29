@@ -98,7 +98,7 @@ void USDTransformWriter::do_write(HierarchyContext &context)
         eUSDSceneUnits::USD_SCENE_UNITS_METERS)
     {
       float scale_mat[4][4];
-      scale_m4_fl(scale_mat, float(1.0 / get_meters_per_unit(&usd_export_context_.export_params)));
+      scale_m4_fl(scale_mat, float(1.0 / get_meters_per_unit(usd_export_context_.export_params)));
       mul_m4_m4m4(matrix_world, scale_mat, matrix_world);
     }
 
@@ -111,6 +111,10 @@ void USDTransformWriter::do_write(HierarchyContext &context)
   /* USD Xforms are by default the identity transform; only write if necessary when static. */
   if (is_animated_ || !compare_m4m4(parent_relative_matrix, UNIT_M4, 0.000000001f)) {
     set_xform_ops(parent_relative_matrix, xform);
+  }
+
+  if (usd_export_context_.export_params.use_instancing && context.is_instance()) {
+    mark_as_instance(context, xform.GetPrim());
   }
 
   if (context.object) {

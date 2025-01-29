@@ -13,6 +13,7 @@
 #include "BKE_image_format.hh"
 #include "BKE_main.hh"
 #include "BKE_node.hh"
+#include "BKE_node_legacy_types.hh"
 #include "BKE_node_runtime.hh"
 #include "BKE_report.hh"
 
@@ -68,8 +69,6 @@ static const pxr::TfToken opacity("opacity", pxr::TfToken::Immortal);
 static const pxr::TfToken opacityThreshold("opacityThreshold", pxr::TfToken::Immortal);
 static const pxr::TfToken surface("surface", pxr::TfToken::Immortal);
 static const pxr::TfToken displacement("displacement", pxr::TfToken::Immortal);
-static const pxr::TfToken perspective("perspective", pxr::TfToken::Immortal);
-static const pxr::TfToken orthographic("orthographic", pxr::TfToken::Immortal);
 static const pxr::TfToken rgb("rgb", pxr::TfToken::Immortal);
 static const pxr::TfToken r("r", pxr::TfToken::Immortal);
 static const pxr::TfToken g("g", pxr::TfToken::Immortal);
@@ -87,7 +86,6 @@ static const pxr::TfToken scale("scale", pxr::TfToken::Immortal);
 static const pxr::TfToken bias("bias", pxr::TfToken::Immortal);
 static const pxr::TfToken sRGB("sRGB", pxr::TfToken::Immortal);
 static const pxr::TfToken sourceColorSpace("sourceColorSpace", pxr::TfToken::Immortal);
-static const pxr::TfToken Shader("Shader", pxr::TfToken::Immortal);
 static const pxr::TfToken black("black", pxr::TfToken::Immortal);
 static const pxr::TfToken clamp("clamp", pxr::TfToken::Immortal);
 static const pxr::TfToken repeat("repeat", pxr::TfToken::Immortal);
@@ -538,7 +536,7 @@ static void create_uvmap_shader(const USDExporterContext &usd_export_context,
 {
   const bNode *uv_node = (uvmap_link && uvmap_link->fromnode ? uvmap_link->fromnode : nullptr);
 
-  BLI_assert(!uv_node || uv_node->type == SH_NODE_UVMAP);
+  BLI_assert(!uv_node || uv_node->type_legacy == SH_NODE_UVMAP);
 
   const char *shader_name = uv_node ? uv_node->name : "uvmap";
 
@@ -576,7 +574,7 @@ static void create_transform2d_shader(const USDExporterContext &usd_export_conte
   bNode *mapping_node = (mapping_link && mapping_link->fromnode ? mapping_link->fromnode :
                                                                   nullptr);
 
-  BLI_assert(mapping_node && mapping_node->type == SH_NODE_MAPPING);
+  BLI_assert(mapping_node && mapping_node->type_legacy == SH_NODE_MAPPING);
 
   if (!mapping_node) {
     return;
@@ -924,7 +922,7 @@ static pxr::TfToken get_node_tex_image_color_space(const bNode *node)
 
 static pxr::TfToken get_node_tex_image_wrap(const bNode *node)
 {
-  if (node->type != SH_NODE_TEX_IMAGE) {
+  if (node->type_legacy != SH_NODE_TEX_IMAGE) {
     return pxr::TfToken();
   }
 
@@ -964,7 +962,7 @@ static bNodeLink *traverse_channel(bNodeSocket *input, const short target_type)
   }
 
   bNode *linked_node = input->link->fromnode;
-  if (linked_node->type == target_type) {
+  if (linked_node->type_legacy == target_type) {
     /* Return match. */
     return input->link;
   }
@@ -984,7 +982,7 @@ static bNodeLink *traverse_channel(bNodeSocket *input, const short target_type)
 static bNode *find_bsdf_node(Material *material)
 {
   for (bNode *node : material->nodetree->all_nodes()) {
-    if (ELEM(node->type, SH_NODE_BSDF_PRINCIPLED, SH_NODE_BSDF_DIFFUSE)) {
+    if (ELEM(node->type_legacy, SH_NODE_BSDF_PRINCIPLED, SH_NODE_BSDF_DIFFUSE)) {
       return node;
     }
   }
@@ -1000,7 +998,7 @@ static bNode *find_bsdf_node(Material *material)
 static bNode *find_displacement_node(Material *material)
 {
   for (bNode *node : material->nodetree->all_nodes()) {
-    if (node->type == SH_NODE_DISPLACEMENT) {
+    if (node->type_legacy == SH_NODE_DISPLACEMENT) {
       return node;
     }
   }
@@ -1060,9 +1058,9 @@ static pxr::UsdShadeShader create_usd_preview_shader(const USDExporterContext &u
                                                      bNode *node)
 {
   pxr::UsdShadeShader shader = create_usd_preview_shader(
-      usd_export_context, material, node->name, node->type);
+      usd_export_context, material, node->name, node->type_legacy);
 
-  if (node->type != SH_NODE_TEX_IMAGE) {
+  if (node->type_legacy != SH_NODE_TEX_IMAGE) {
     return shader;
   }
 
@@ -1322,6 +1320,7 @@ static void export_texture(const USDExporterContext &usd_export_context, bNode *
                  usd_export_context.export_params.worker_status->reports);
 }
 
+#ifdef WITH_MATERIALX
 static void export_texture(const USDExporterContext &usd_export_context, Image *ima)
 {
   export_texture(ima,
@@ -1329,13 +1328,14 @@ static void export_texture(const USDExporterContext &usd_export_context, Image *
                  usd_export_context.export_params.overwrite_textures,
                  usd_export_context.export_params.worker_status->reports);
 }
+#endif
 
 void export_texture(bNode *node,
                     const pxr::UsdStageRefPtr stage,
                     const bool allow_overwrite,
                     ReportList *reports)
 {
-  if (!ELEM(node->type, SH_NODE_TEX_IMAGE, SH_NODE_TEX_ENVIRONMENT)) {
+  if (!ELEM(node->type_legacy, SH_NODE_TEX_IMAGE, SH_NODE_TEX_ENVIRONMENT)) {
     return;
   }
 
@@ -1411,6 +1411,8 @@ static void create_usd_materialx_material(const USDExporterContext &usd_export_c
                                           const pxr::UsdShadeMaterial &usd_material)
 {
   blender::nodes::materialx::ExportParams export_params = {
+      /* Output surface material node will have this name. */
+      usd_path.GetElementString(),
       /* We want to re-use the same MaterialX document generation code as used by the renderer.
        * While the graph is traversed, we also want it to export the textures out. */
       (usd_export_context.export_image_fn) ? usd_export_context.export_image_fn :
@@ -1425,9 +1427,8 @@ static void create_usd_materialx_material(const USDExporterContext &usd_export_c
       active_uvmap_name,
   };
 
-  std::string material_name = usd_path.GetElementString();
   MaterialX::DocumentPtr doc = blender::nodes::materialx::export_to_materialx(
-      usd_export_context.depsgraph, material, material_name, export_params);
+      usd_export_context.depsgraph, material, export_params);
 
   /* We want to merge the MaterialX graph under the same Material as the USDPreviewSurface
    * This allows for the same material assignment to have two levels of complexity so other

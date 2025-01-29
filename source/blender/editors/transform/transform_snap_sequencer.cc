@@ -11,15 +11,17 @@
 
 #include "BLI_assert.h"
 #include "BLI_map.hh"
-#include "DNA_scene_types.h"
+#include "BLI_math_base.h"
+
 #include "MEM_guardedalloc.h"
 
+#include "DNA_scene_types.h"
 #include "DNA_screen_types.h"
 #include "DNA_sequence_types.h"
+#include "DNA_space_types.h"
 
 #include "ED_transform.hh"
 
-#include "SEQ_retiming.hh"
 #include "UI_view2d.hh"
 
 #include "SEQ_channels.hh"
@@ -168,8 +170,8 @@ static bool seq_snap_source_points_build_preview(const Scene *scene,
   snap_data->source_snap_points.reinitialize(point_count_source);
   int i = 0;
   for (Strip *strip : snap_sources) {
-    float seq_image_quad[4][2];
-    SEQ_image_transform_final_quad_get(scene, strip, seq_image_quad);
+    const blender::Array<blender::float2> seq_image_quad = SEQ_image_transform_final_quad_get(
+        scene, strip);
 
     for (int j = 0; j < 4; j++) {
       snap_data->source_snap_points[i][0] = seq_image_quad[j][0];
@@ -447,8 +449,8 @@ static bool seq_snap_target_points_build_preview(const Scene *scene,
 
   if (snap_mode & SEQ_SNAP_TO_STRIPS_PREVIEW) {
     for (Strip *strip : snap_targets) {
-      float strip_image_quad[4][2];
-      SEQ_image_transform_final_quad_get(scene, strip, strip_image_quad);
+      const blender::Array<blender::float2> strip_image_quad = SEQ_image_transform_final_quad_get(
+          scene, strip);
 
       for (int j = 0; j < 4; j++) {
         snap_data->target_snap_points[i][0] = strip_image_quad[j][0];

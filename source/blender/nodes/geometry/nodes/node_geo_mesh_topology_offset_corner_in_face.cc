@@ -4,8 +4,6 @@
 
 #include "BKE_mesh.hh"
 
-#include "BLI_task.hh"
-
 #include "node_geometry_util.hh"
 
 namespace blender::nodes::node_geo_mesh_topology_offset_corner_in_face_cc {
@@ -107,10 +105,12 @@ static void node_geo_exec(GeoNodeExecParams params)
 static void node_register()
 {
   static blender::bke::bNodeType ntype;
-  geo_node_type_base(&ntype, GEO_NODE_MESH_TOPOLOGY_OFFSET_CORNER_IN_FACE, NODE_CLASS_INPUT);
+  geo_node_type_base(
+      &ntype, "GeometryNodeOffsetCornerInFace", GEO_NODE_MESH_TOPOLOGY_OFFSET_CORNER_IN_FACE);
   ntype.ui_name = "Offset Corner in Face";
   ntype.ui_description = "Retrieve corners in the same face as another";
   ntype.enum_name_legacy = "OFFSET_CORNER_IN_FACE";
+  ntype.nclass = NODE_CLASS_INPUT;
   ntype.geometry_node_execute = node_geo_exec;
   ntype.declare = node_declare;
   blender::bke::node_register_type(&ntype);

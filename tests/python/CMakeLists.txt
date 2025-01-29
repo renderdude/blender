@@ -47,6 +47,21 @@ function(add_blender_test testname)
   )
 endfunction()
 
+function(add_blender_test_io testname)
+  # Remove `--debug-exit-on-error` since errors
+  # are printed on e.g. meshes with invalid data. But
+  # we do want to test those in import tests.
+  set(EXE_PARAMS ${TEST_BLENDER_EXE_PARAMS})
+  list(REMOVE_ITEM EXE_PARAMS --debug-exit-on-error)
+  add_blender_test_impl(
+    "${testname}"
+    ""
+    "${TEST_BLENDER_EXE}"
+    ${EXE_PARAMS}
+    ${ARGN}
+  )
+endfunction()
+
 if(WITH_UI_TESTS)
   set(_blender_headless_env_vars "BLENDER_BIN=${TEST_BLENDER_EXE}")
 
@@ -237,6 +252,16 @@ add_blender_test(
   --python ${CMAKE_CURRENT_LIST_DIR}/bl_id_management.py
 )
 
+add_blender_test(
+  bl_rna_paths
+  --python ${CMAKE_CURRENT_LIST_DIR}/bl_rna_paths.py
+)
+
+add_blender_test(
+  bl_rna_accessors
+  --python ${CMAKE_CURRENT_LIST_DIR}/bl_rna_accessors.py
+)
+
 # ------------------------------------------------------------------------------
 # BLEND IO & LINKING
 
@@ -267,6 +292,14 @@ endforeach()
 add_blender_test(
   blendfile_liblink
   --python ${CMAKE_CURRENT_LIST_DIR}/bl_blendfile_liblink.py --
+  --src-test-dir ${TEST_SRC_DIR}/
+  --output-dir ${TEST_OUT_DIR}/blendfile_io/
+)
+
+add_blender_test(
+  blendfile_relationships
+  --python ${CMAKE_CURRENT_LIST_DIR}/bl_blendfile_relationships.py --
+  --src-test-dir ${TEST_SRC_DIR}/
   --output-dir ${TEST_OUT_DIR}/blendfile_io/
 )
 
@@ -535,6 +568,7 @@ if(WITH_CYCLES OR WITH_GPU_RENDER_TESTS)
       shader
       shadow_catcher
       sss
+      texture
     )
 
     if(WITH_OPENSUBDIV)
@@ -933,6 +967,44 @@ if(WITH_USD)
   )
 endif()
 
+add_blender_test_io(
+  io_fbx_import
+  --python ${CMAKE_CURRENT_LIST_DIR}/io_fbx_import_test.py
+  --
+  --testdir "${TEST_SRC_DIR}/io_tests/fbx"
+  --outdir "${TEST_OUT_DIR}/io_fbx"
+)
+
+if(WITH_IO_WAVEFRONT_OBJ)
+  add_blender_test_io(
+    io_obj_import
+    --python ${CMAKE_CURRENT_LIST_DIR}/io_obj_import_test.py
+    --
+    --testdir "${TEST_SRC_DIR}/io_tests/obj"
+    --outdir "${TEST_OUT_DIR}/io_obj"
+  )
+endif()
+
+if(WITH_IO_PLY)
+  add_blender_test_io(
+    io_ply_import
+    --python ${CMAKE_CURRENT_LIST_DIR}/io_ply_import_test.py
+    --
+    --testdir "${TEST_SRC_DIR}/io_tests/ply"
+    --outdir "${TEST_OUT_DIR}/io_ply"
+  )
+endif()
+
+if(WITH_IO_STL)
+  add_blender_test_io(
+    io_stl_import
+    --python ${CMAKE_CURRENT_LIST_DIR}/io_stl_import_test.py
+    --
+    --testdir "${TEST_SRC_DIR}/io_tests/stl"
+    --outdir "${TEST_OUT_DIR}/io_stl"
+  )
+endif()
+
 if(WITH_CODEC_FFMPEG)
   add_python_test(
     ffmpeg
@@ -1052,10 +1124,18 @@ add_subdirectory(collada)
 
 if(WITH_LINUX_OFFICIAL_RELEASE_TESTS)
   get_filename_component(release_root_folder ${TEST_BLENDER_EXE} DIRECTORY)
+  set(extra_args "")
+  if(WITH_COMPILER_ASAN)
+    set(extra_args
+      ${extra_args}
+      --sanitizer-build
+    )
+  endif()
   add_python_test(
     linux_release_sanity_checks
     ${CMAKE_SOURCE_DIR}/tools/check_blender_release/check_release.py
-    -- ${release_root_folder}
+    -- --directory "${release_root_folder}" ${extra_args}
   )
+  unset(extra_args)
   unset(release_root_folder)
 endif()

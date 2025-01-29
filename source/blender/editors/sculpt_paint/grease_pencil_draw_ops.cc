@@ -12,7 +12,7 @@
 #include "BKE_deform.hh"
 #include "BKE_geometry_set.hh"
 #include "BKE_grease_pencil.hh"
-#include "BKE_material.h"
+#include "BKE_material.hh"
 #include "BKE_object_deform.h"
 #include "BKE_paint.hh"
 #include "BKE_report.hh"
@@ -116,7 +116,8 @@ static std::unique_ptr<GreasePencilStrokeOperation> get_stroke_operation(bContex
         return greasepencil::new_tint_operation();
     }
   }
-  else if (mode == PaintMode::SculptGreasePencil) {
+  else if (mode == PaintMode::SculptGPencil) {
+
     if (stroke_mode == BRUSH_STROKE_SMOOTH) {
       return greasepencil::new_smooth_operation(stroke_mode, true);
     }
@@ -1055,15 +1056,19 @@ static void grease_pencil_fill_status_indicators(bContext &C,
 {
   const bool is_extend = (op_data.extension_mode == GP_FILL_EMODE_EXTEND);
 
-  const std::string status_str = fmt::format(
-      fmt::runtime(
-          IFACE_("Fill: ESC/RMB cancel, LMB Fill, MMB Adjust Extension, S: "
-                 "Switch Mode, D: Stroke Collision | Mode: {}, Collision {}, Length: {:.3f}")),
-      (is_extend) ? IFACE_("Extend") : IFACE_("Radius"),
-      (is_extend && op_data.extension_cut) ? IFACE_("ON") : IFACE_("OFF"),
-      op_data.extension_length);
-
-  ED_workspace_status_text(&C, status_str.c_str());
+  WorkspaceStatus status(&C);
+  status.item(IFACE_("Cancel"), ICON_EVENT_ESC);
+  status.item(IFACE_("Fill"), ICON_MOUSE_LMB);
+  status.item(
+      fmt::format("{} ({})", IFACE_("Mode"), (is_extend ? IFACE_("Extend") : IFACE_("Radius"))),
+      ICON_EVENT_S);
+  status.item(fmt::format("{} ({:.3f})",
+                          is_extend ? IFACE_("Length") : IFACE_("Radius"),
+                          op_data.extension_length),
+              ICON_MOUSE_MMB_SCROLL);
+  if (is_extend) {
+    status.item_bool(IFACE_("Collision"), op_data.extension_cut, ICON_EVENT_D);
+  }
 }
 
 /* Draw callback for fill tool overlay. */
