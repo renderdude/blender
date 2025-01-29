@@ -27,51 +27,51 @@ class RIBtoCycles {
   const PxrSurfacetoPrincipled PxrSurface = {
       {"principled_bsdf"},
       {
-          {"diffuseColor", ustring("base_color")},
-          {"subsurfaceDmfp", ustring("subsurface_scale")},
-          {"subsurfaceDmfpColor", ustring("subsurface_radius")},
-          {"subsurfaceIor", ustring("subsurface_ior")},
-          {"subsurfaceGain", ustring("subsurface_weight")},
-          {"specularFaceColor", ustring("specular")},
-          {"specularRoughness", ustring("roughness")},
-          {"clearcoatRoughness", ustring("clearcoat_roughness")},
-          {"glassIor", ustring("ior")},
-          {"refractionGain", ustring("transmission")},
-          {"glassRoughness", ustring("transmission_roughness")},
-          {"glowColor", ustring("emission_color")},
-          {"glowGain", ustring("\emission_strength")},
-          {"bumpNormal", ustring("normal")},
+          {"diffuseColor", {false, ustring("base_color")}},
+          {"subsurfaceDmfp", {false, ustring("subsurface_scale")}},
+          {"subsurfaceDmfpColor", {false, ustring("subsurface_radius")}},
+          {"subsurfaceIor", {false, ustring("subsurface_ior")}},
+          {"subsurfaceGain", {false, ustring("subsurface_weight")}},
+          {"specularFaceColor", {false, ustring("specular")}},
+          {"specularRoughness", {false, ustring("roughness")}},
+          {"clearcoatRoughness", {false, ustring("clearcoat_roughness")}},
+          {"glassIor", {false, ustring("ior")}},
+          {"refractionGain", {false, ustring("transmission")}},
+          {"glassRoughness", {false, ustring("transmission_roughness")}},
+          {"glowColor", {false, ustring("emission_color")}},
+          {"glowGain", {false, ustring("\emission_strength")}},
+          {"bumpNormal", {false, ustring("normal")}},
       }};
 #else
   const PxrSurfacetoPrincipled PxrSurface = {
       "StandardSurfaceSR_default.oso",
       {
           // diffuse parameters
-          {"diffuseGain", ustring("base")},
-          {"diffuseColor", ustring("base_color")},
-          {"diffuseRoughness", ustring("diffuse_roughness")},
-          {"diffuseTransmitGain", ustring("transmission")},
-          {"diffuseTransmitColor", ustring("transmission_color")},
+          {"diffuseGain", {false, ustring("base")}},
+          {"diffuseColor", {false, ustring("base_color")}},
+          {"diffuseRoughness", {false, ustring("diffuse_roughness")}},
+          {"diffuseTransmitGain", {false, ustring("transmission")}},
+          {"diffuseTransmitColor", {false, ustring("transmission_color")}},
           // specular parameters
-          {"specularFaceColor", ustring("specular_color")},
-          {"specularRoughness", ustring("specular_roughness")},
-          {"specularIOR", ustring("specular_IOR")},
-          {"specularAnisotropy", ustring("specular_anisotropy")},
+          {"specularFaceColor", {false, ustring("specular_color")}},
+          {"specularRoughness", {false, ustring("specular_roughness")}},
+          {"specularIOR", {false, ustring("specular_IOR")}},
+          {"specularAnisotropy", {false, ustring("specular_anisotropy")}},
           // clearcoat parameters
-          {"clearcoatFaceColor", ustring("coat_color")},
-          {"clearcoatRoughness", ustring("coat_roughness")},
-          {"emissiveColor", ustring("emission_color")},
-          {"opacity", ustring("alpha")},
+          {"clearcoatFaceColor", {false, ustring("coat_color")}},
+          {"clearcoatRoughness", {false, ustring("coat_roughness")}},
+          {"emissiveColor", {false, ustring("emission_color")}},
+          {"opacity", {false, ustring("alpha")}},
           // Subsurface
-          {"subsurfaceGain", ustring("subsurface1")},
-          {"subsurfaceColor", ustring("subsurface_color")},
-          {"subsurfaceDmfpColor", ustring("subsurface_radius")},
-          {"subsurfaceDmfp", ustring("subsurface_scale")},
+          {"subsurfaceGain", {false, ustring("subsurface1")}},
+          {"subsurfaceColor", {false, ustring("subsurface_color")}},
+          {"subsurfaceDmfpColor", {false, ustring("subsurface_radius")}},
+          {"subsurfaceDmfp", {false, ustring("subsurface_scale")}},
           // transmission
-          {"refractionGain", ustring("transmission")},
-          {"refractionColor", ustring("transmission_color")},
-          {"glassIor", ustring("subsurface_radius")},
-          {"glassRoughness", ustring("transmission_extra_roughness")},
+          {"refractionGain", {false, ustring("transmission")}},
+          {"refractionColor", {false, ustring("transmission_color")}},
+          {"glassIor", {false, ustring("subsurface_radius")}},
+          {"glassRoughness", {false, ustring("transmission_extra_roughness")}},
           // occlusion
           // displacement
       }};
@@ -79,107 +79,112 @@ class RIBtoCycles {
 
   const PxrDisneytoPrincipled PxrDisney = {{"principled_bsdf"},
                                            {
-                                               {"baseColor", ustring("base_color")},
-                                               {"subsurfaceColor", ustring("subsurface_color")},
-                                               {"metallic", ustring("metallic")},
-                                               {"subsurface", ustring("subsurface")},
-                                               //{ "", ustring("subsurface_radius")},
-                                               //{ "", ustring("subsurface_ior")},
-                                               //{ "", ustring("subsurface_anisotropy")},
-                                               {"specular", ustring("specular")},
-                                               {"roughness", ustring("roughness")},
-                                               //{ "", ustring("specular_tint")},
-                                               {"anisotropic", ustring("anisotropic")},
-                                               {"sheen", ustring("sheen")},
-                                               //{ "", ustring("sheen_roughness")},
-                                               {"sheenTint", ustring("sheen_tint")},
-                                               {"clearcoat", ustring("clearcoat")},
-                                               //{ "", ustring("clearcoat_roughness")},
-                                               //{ "", ustring("ior")},
-                                               //{ "", ustring("transmission")},
-                                               //{ "", ustring("anisotropic_rotation")},
-                                               {"emitColor", ustring("emission_color")},
-                                               //{ "", ustring("emission_strength")},
+                                               {"baseColor", {false, ustring("base_color")}},
+                                               {"subsurfaceColor", {false, ustring("subsurface_color")}},
+                                               {"metallic", {false, ustring("metallic")}},
+                                               {"subsurface", {false, ustring("subsurface")}},
+                                               //{ "", {false, ustring("subsurface_radius")}},
+                                               //{ "", {false, ustring("subsurface_ior")}},
+                                               //{ "", {false, ustring("subsurface_anisotropy")}},
+                                               {"specular", {false, ustring("specular")}},
+                                               {"roughness", {false, ustring("roughness")}},
+                                               //{ "", {false, ustring("specular_tint")}},
+                                               {"anisotropic", {false, ustring("anisotropic")}},
+                                               {"sheen", {false, ustring("sheen")}},
+                                               //{ "", {false, ustring("sheen_roughness")}},
+                                               {"sheenTint", {false, ustring("sheen_tint")}},
+                                               {"clearcoat", {false, ustring("clearcoat")}},
+                                               //{ "", {false, ustring("clearcoat_roughness")}},
+                                               //{ "", {false, ustring("ior")}},
+                                               //{ "", {false, ustring("transmission")}},
+                                               //{ "", {false, ustring("anisotropic_rotation")}},
+                                               {"emitColor", {false, ustring("emission_color")}},
+                                               //{ "", {false, ustring("emission_strength")}},
                                            }};
 #if 1
   const PxrDisneyBsdftoPrincipled PxrDisneyBsdf = {
       {"principled_bsdf"},
       {
-          {"baseColor", ustring("base_color")},
-          {"emitColor", ustring("emission_color")},
-          {"metallic", ustring("metallic")},
-          {"specularTint", ustring("specular_tint")},
-          {"roughness", ustring("roughness")},
-          {"anisotropic", ustring("anisotropic")},
-          {"ior", ustring("ior")},
-          {"specReflectScale", ustring("specular_ior_level")},
-          {"clearcoat", ustring("coat_weight")},
-          //{"clearcoatGloss", ustring("clearcoatGloss")},
-          {"sheen", ustring("sheen_weight")},
-          {"sheenTint", ustring("sheen_tint")},
-          {"diffTrans", ustring("transmission_weight")},
-          //{"specTrans", ustring("specTrans")},
-          //{"isThin", ustring("isThin")},
-          //{"transColor", ustring("transColor")},
-          //{"transDistance", ustring("transDistance")},
-          {"subsurface", ustring("subsurface_weight")},
-          {"subsurfaceColor", ustring("subsurface_radius")},
-          //{"scatterDistances", ustring("scatterDistances")},
-          //{"g", ustring("g")},
-          //{"transmissionBehavior", ustring("transmissionBehavior")},
-          {"presence", ustring("alpha")},
-          {"bumpNormal", ustring("normal")},
-          //{"shadowBumpTerminator", ustring("shadowBumpTerminator")},
-          //{"inputAOV", ustring("inputAOV")},
+          // Directly Mapped
+          {"baseColor", {false, ustring("base_color")}},
+          {"metallic", {false, ustring("metallic")}},
+          {"subsurface", {false, ustring("subsurface_weight")}},
+          {"subsurfaceColor", {false, ustring("subsurface_radius")}},
+          {"roughness", {false, ustring("roughness")}},
+          {"anisotropic", {false, ustring("anisotropic")}},
+          {"ior", {false, ustring("ior")}},
+          {"clearcoat", {false, ustring("coat_weight")}},
+          //{"clearcoatGloss", {false, ustring("clearcoatGloss")}},
+          {"sheen", {false, ustring("sheen_weight")}},
+          {"presence", {false, ustring("alpha")}},
+          {"bumpNormal", {false, ustring("normal")}},
+          {"specTrans", {false, ustring("transmission_weight")}},
+
+          // Need remapping
+          {"emitColor", {false, ustring("emission_color")}},
+          {"sheenTint", {true, ustring("sheen_tint")}},
+          {"specReflectScale", {true, ustring("specular_ior_level")}},
+          {"specularTint", {true, ustring("specular_tint")}},
+
+          // No corresponding parameter
+          //{"diffTrans", {false, ustring("transmission_weight")}},
+          //{"isThin", {false, ustring("isThin")}},
+          //{"transColor", {false, ustring("transColor")}},
+          //{"transDistance", {false, ustring("transDistance")}},
+          //{"scatterDistances", {false, ustring("scatterDistances")}},
+          //{"g", {false, ustring("g")}},
+          //{"transmissionBehavior", {false, ustring("transmissionBehavior")}},
+          //{"shadowBumpTerminator", {false, ustring("shadowBumpTerminator")}},
+          //{"inputAOV", {false, ustring("inputAOV")}},
       }};
 #else
   const PxrDisneyBsdftoPrincipled PxrDisneyBsdf = {
       {"principled_bsdf"},
       {
-          {"baseColor", ustring("base_color")},
-          {"subsurfaceColor", ustring("subsurface_color")},
-          {"metallic", ustring("metallic")},
-          {"subsurface", ustring("subsurface")},
-          //{ "", ustring("subsurface_radius")},
-          //{ "", ustring("subsurface_ior")},
-          //{ "", ustring("subsurface_anisotropy")},
-          {"roughness", ustring("roughness")},
-          //{"specularTint", ustring("specular_tint")},
-          {"anisotropic", ustring("anisotropic")},
-          {"sheen", ustring("sheen")},
-          //{ "", ustring("sheen_roughness")},
-          //{"sheenTint", ustring("sheen_tint")},
-          {"clearcoat", ustring("clearcoat")},
-          //{ "", ustring("clearcoat_roughness")},
-          {"ior", ustring("ior")},
-          {"diffTrans", ustring("transmission")},
-          //{ "", ustring("anisotropic_rotation")},
-          {"emitColor", ustring("emission_color")},
-          //{ "", ustring("emission_strength")},
+          {"baseColor", {false, ustring("base_color")}},
+          {"subsurfaceColor", {false, ustring("subsurface_color")}},
+          {"metallic", {false, ustring("metallic")}},
+          {"subsurface", {false, ustring("subsurface")}},
+          //{ "", {false, ustring("subsurface_radius")}},
+          //{ "", {false, ustring("subsurface_ior")}},
+          //{ "", {false, ustring("subsurface_anisotropy")}},
+          {"roughness", {false, ustring("roughness")}},
+          //{"specularTint", {false, ustring("specular_tint")}},
+          {"anisotropic", {false, ustring("anisotropic")}},
+          {"sheen", {false, ustring("sheen")}},
+          //{ "", {false, ustring("sheen_roughness")}},
+          //{"sheenTint", {false, ustring("sheen_tint")}},
+          {"clearcoat", {false, ustring("clearcoat")}},
+          //{ "", {false, ustring("clearcoat_roughness")}},
+          {"ior", {false, ustring("ior")}},
+          {"diffTrans", {false, ustring("transmission")}},
+          //{ "", {false, ustring("anisotropic_rotation")}},
+          {"emitColor", {false, ustring("emission_color")}},
+          //{ "", {false, ustring("emission_strength")}},
       }};
 #endif
 
   const PxrMarschnerHairtoPrincipled PxrMarschnerHair = {
       {"principled_hair_bsdf"},
       {
-          {"diffuseColor", ustring("color")},
-          {"melanin", ustring("melanin")},
-          {"redness", ustring("melanin_redness")},
-          {"dye", ustring("tint")},
-          //{"", ustring("absorption_coefficient")},
-          //{"", ustring("aspect_ratio")},
-          //{"", ustring("offset")},
-          //{"", ustring("roughness")},
-          //{"", ustring("radial_roughness")},
-          //{"", ustring("coat")},
-          {"specularIor", ustring("ior")},
-          //{"", ustring("random_roughness")},
-          //{"", ustring("random_color")},
-          //{"", ustring("random")},
-          {"specularGainR", ustring("R")},
-          {"specularGainTT", ustring("TT")},
-          {"specularGainTRT", ustring("TRT")},
-          //{"", ustring("surface_mix_weight")},
+          {"diffuseColor", {false, ustring("color")}},
+          {"melanin", {false, ustring("melanin")}},
+          {"redness", {false, ustring("melanin_redness")}},
+          {"dye", {false, ustring("tint")}},
+          //{"", {false, ustring("absorption_coefficient")}},
+          //{"", {false, ustring("aspect_ratio")}},
+          //{"", {false, ustring("offset")}},
+          //{"", {false, ustring("roughness")}},
+          //{"", {false, ustring("radial_roughness")}},
+          //{"", {false, ustring("coat")}},
+          {"specularIor", {false, ustring("ior")}},
+          //{"", {false, ustring("random_roughness")}},
+          //{"", {false, ustring("random_color")}},
+          //{"", {false, ustring("random")}},
+          {"specularGainR", {false, ustring("R")}},
+          {"specularGainTT", {false, ustring("TT")}},
+          {"specularGainTRT", {false, ustring("TRT")}},
+          //{"", {false, ustring("surface_mix_weight")}},
       }};
 
   const PxrImageNormalMaptoCycles PxrMultiNodeNormalMap = {
@@ -187,13 +192,13 @@ class RIBtoCycles {
       {"image_texture", "normal_map"},
       // Input Parameters
       {
-          {"filename", ustring("image_texture:filename")},
-          {"bumpScale", ustring("normal_map:strength")},
-          {"resultN", ustring("normal_map:normal")},
+          {"filename", {false, ustring("image_texture:filename")}},
+          {"bumpScale", {false, ustring("normal_map:strength")}},
+          {"resultN", {false, ustring("normal_map:normal")}},
       },
       // Node Connections
       {
-          {"image_texture:color", ustring("normal_map:color")},
+          {"image_texture:color", {false, ustring("normal_map:color")}},
       }};
 
   const PxrNormalMaptoCycles PxrNormalMap = {
@@ -201,45 +206,45 @@ class RIBtoCycles {
       {"normal_map"},
       // Input Parameters
       {
-          {"inputRGB", ustring("color")},
-          {"bumpScale", ustring("strength")},
-          {"resultN", ustring("normal")},
+          {"inputRGB", {false, ustring("color")}},
+          {"bumpScale", {false, ustring("strength")}},
+          {"resultN", {false, ustring("normal")}},
       }};
 
   const RIBtoCyclesMapping PxrDefault = {{""}, {}};
   const RIBtoCyclesMapping PxrBlack = {{"diffuse_bsdf"}, {}};
   const RIBtoCyclesMapping PxrDiffuse = {{"diffuse_bsdf"},
                                          {
-                                             {"diffuseColor", ustring("color")},
+                                             {"diffuseColor", {false, ustring("color")}},
                                          }};
 
   const RIBtoCyclesMapping PxrMeshLight = {{"emission"},
                                            {
-                                               {"lightColor", ustring("Color")},
-                                               {"strength", ustring("Strength")},
+                                               {"lightColor", {false, ustring("Color")}},
+                                               {"strength", {false, ustring("Strength")}},
                                            }};
 
   const PxrRamptoCycles PxrRamp = {{"rgb_ramp"},
                                    {
-                                       {"splineMap", ustring("fac")},
-                                       {"resultRGB", ustring("color")},
-                                       {"resultR", ustring("color")},
-                                       {"resultG", ustring("color")},
-                                       {"resultB", ustring("color")},
-                                       {"resultA", ustring("alpha")},
+                                       {"splineMap", {false, ustring("fac")}},
+                                       {"resultRGB", {false, ustring("color")}},
+                                       {"resultR", {false, ustring("color")}},
+                                       {"resultG", {false, ustring("color")}},
+                                       {"resultB", {false, ustring("color")}},
+                                       {"resultA", {false, ustring("alpha")}},
                                    }};
 
   const RIBtoCyclesTexture PxrTexture = {{"image_texture"},
                                          {
-                                             {"filename", ustring("filename")},
-                                             {"resultRGB", ustring("color")},
-                                             {"resultR", ustring("color")},
-                                             {"resultG", ustring("color")},
-                                             {"resultB", ustring("color")},
-                                             {"resultA", ustring("alpha")},
+                                             {"filename", {false, ustring("filename")}},
+                                             {"resultRGB", {false, ustring("color")}},
+                                             {"resultR", {false, ustring("color")}},
+                                             {"resultG", {false, ustring("color")}},
+                                             {"resultB", {false, ustring("color")}},
+                                             {"resultA", {false, ustring("alpha")}},
                                          }};
 
-  const RIBtoCyclesMapping UsdPrimvarReader = {{"attribute"}, {{"varname", ustring("attribute")}}};
+  const RIBtoCyclesMapping UsdPrimvarReader = {{"attribute"}, {{"varname", {false, ustring("attribute")}}}};
 
  public:
   RIBtoCyclesMapping *find(const std::string &nodeType, Parsed_Parameter_Vector const &pv)
@@ -315,6 +320,8 @@ void RIBCyclesMaterials::export_materials()
    */
   // updated_shaders.insert(_shader);
 
+  //std::string output_file = "/tmp/" + _osl_shader.first + ".dot";
+  //_shader->graph->dump_graph(output_file.c_str());
   _shader = nullptr;
 
   // pool.wait_work();

@@ -61,6 +61,65 @@ const SocketType *find_socket(std::string input_name, ShaderNode *node)
   return input;
 }
 
+Parsed_Parameter *RIBtoCyclesMapping::mix_color(std::string color_name,
+                                                float gain,
+                                                ShaderInput *bsdf_input)
+{
+  Parsed_Parameter updated_param;
+  Parsed_Parameter *param = nullptr;
+  const SocketType *input;
+  ShaderNode *color_hsv_node = nullptr;
+  ShaderNode *color_mix_node = nullptr;
+  if (_parameters.find(color_name) != _parameters.end()) {
+    param = _parameters[color_name];
+    color_hsv_node = _graph->create_node<HSVNode>();
+    color_mix_node = _graph->create_node<MixColorNode>();
+    ShaderInput *mix_input = color_mix_node->input(ustring("A"));
+    ShaderOutput *hsv_output = color_hsv_node->output(ustring("Color"));
+    _graph->connect(hsv_output, mix_input);
+    // For the mix node
+    // 'a' is the output of the HSV node
+    // 'b' is white
+    // 'fac' is the gain
+    // and the mode is multiply
+    input = find_socket("b", color_mix_node);
+    color_mix_node->set(*input, make_float3(1.0));
+    input = find_socket("fac", color_mix_node);
+    color_mix_node->set(*input, gain);
+    input = find_socket("blend_type", color_mix_node);
+    color_mix_node->set(*input, ccl::NodeMix::NODE_MIX_MUL);
+    if (param->storage != Container_Type::Reference) {
+      input = find_socket("color", color_hsv_node);
+      color_hsv_node->set(*input,
+                          make_float3(param->floats()[0], param->floats()[1], param->floats()[2]));
+      // Only export the param if it's a reference
+      param = nullptr;
+    }
+    else {
+      vector<string> tokens;
+      string_split(tokens, param->strings()[0], ":");
+      auto *output_node = _processed_nodes->find(tokens[0])->second;
+      ShaderInput *hsv_input = color_hsv_node->input(ustring("Color"));
+      std::string output_name = output_node->parameter_name(tokens[1]);
+      ShaderOutput *conn_output = nullptr;
+      for (ShaderOutput *out : output_node->node("")->outputs) {
+        if (string_iequals(out->socket_type.name.string(), output_name)) {
+          conn_output = out;
+          break;
+        }
+      }
+
+      _graph->connect(conn_output, hsv_input);
+    }
+
+    // And connect to the base node
+    ShaderOutput *mix_output = color_mix_node->output(ustring("Result"));
+    _graph->connect(mix_output, bsdf_input);
+  }
+
+  return param;
+}
+
 bool RIBtoCyclesMapping::create_shader_node(std::string const &shader, std::string const &path)
 {
   bool result = false;
@@ -120,7 +179,7 @@ bool RIBtoMultiNodeCycles::create_shader_node(std::string const &shader, std::st
   for (auto pp : _connectionMap) {
     vector<string> key_tokens, map_tokens;
     string_split(key_tokens, pp.first, ":");
-    string_split(map_tokens, pp.second.string(), ":");
+    string_split(map_tokens, pp.second.cycles_name.string(), ":");
 
     ShaderNode *map_node = _node_map[map_tokens[0]];
 
@@ -375,7 +434,7 @@ bool PxrImageNormalMaptoCycles::create_shader_node(std::string const &shader,
   for (auto pp : _connectionMap) {
     vector<string> key_tokens, map_tokens;
     string_split(key_tokens, pp.first, ":");
-    string_split(map_tokens, pp.second.string(), ":");
+    string_split(map_tokens, pp.second.cycles_name.string(), ":");
 
     ShaderNode *map_node = _node_map[map_tokens[0]];
 
@@ -637,48 +696,11 @@ void PxrSurfacetoPrincipled::update_parameters(Parameter_Dictionary const &param
           input = find_socket("specular_ior_level", _nodes.back());
           set_node_value(_nodes.back(), *input, &updated_param);
 
-          color_hsv_node = _graph->create_node<HSVNode>();
-          color_mix_node = _graph->create_node<MixColorNode>();
-          ShaderInput *mix_input = color_mix_node->input(ustring("A"));
-          ShaderOutput *hsv_output = color_hsv_node->output(ustring("Color"));
-          _graph->connect(hsv_output, mix_input);
-          // For the mix node
-          // 'a' is the output of the HSV node
-          // 'b' is white
-          // 'fac' is 2
-          // and the mode is multiply
-          input = find_socket("b", color_mix_node);
-          color_mix_node->set(*input, make_float3(1.0));
-          input = find_socket("fac", color_mix_node);
-          color_mix_node->set(*input, 2.0f);
-          input = find_socket("blend_type", color_mix_node);
-          color_mix_node->set(*input, ccl::NodeMix::NODE_MIX_MUL);
-          if (param->storage != Container_Type::Reference) {
-            input = find_socket("color", color_hsv_node);
-            color_hsv_node->set(
-                *input, make_float3(param->floats()[0], param->floats()[1], param->floats()[2]));
-          }
-          else {
+          param = mix_color(
+              "specularFaceColor", 2.0, _nodes.back()->input(ustring("Specular Tint")));
+          if (param) {
             connections.erase(std::find(connections.begin(), connections.end(), param));
-            vector<string> tokens;
-            string_split(tokens, param->strings()[0], ":");
-            auto *output_node = _processed_nodes->find(tokens[0])->second;
-            ShaderInput *hsv_input = color_hsv_node->input(ustring("Color"));
-            std::string output_name = output_node->parameter_name(tokens[1]);
-            ShaderOutput *conn_output = nullptr;
-            for (ShaderOutput *out : output_node->node("")->outputs) {
-              if (string_iequals(out->socket_type.name.string(), output_name)) {
-                conn_output = out;
-                break;
-              }
-            }
-
-            _graph->connect(conn_output, hsv_input);
           }
-
-          ShaderInput *bsdf_input = _nodes.back()->input(ustring("Specular Tint"));
-          ShaderOutput *mix_output = color_mix_node->output(ustring("Result"));
-          _graph->connect(mix_output, bsdf_input);
         }
       }
     }
@@ -745,7 +767,7 @@ void PxrDisneyBsdftoPrincipled::update_parameters(Parameter_Dictionary const &pa
     if (param->storage == Container_Type::Reference) {
       connections.push_back(param);
     }
-    else {
+    else if (!mapping_only(param->name)) {
       // See if the parameter name is in Pixar terms, and needs to be converted
       const std::string input_name = parameter_name(param->name);
 
@@ -768,6 +790,7 @@ void PxrDisneyBsdftoPrincipled::update_parameters(Parameter_Dictionary const &pa
   const SocketType *input;
 
   updated_param.payload = vector<float>();
+  // 'emitColor' is already hooked into 'emission_color', so just adjust the strength
   if (_parameters.find("emitColor") != _parameters.end()) {
     param = _parameters["emitColor"];
     if (param->storage != Container_Type::Reference) {
@@ -779,34 +802,35 @@ void PxrDisneyBsdftoPrincipled::update_parameters(Parameter_Dictionary const &pa
       set_node_value(_nodes.back(), *input, &updated_param);
     }
   }
-  if (_parameters.find("diffTrans") != _parameters.end()) {
-    param = _parameters["diffTrans"];
-    if (param->storage != Container_Type::Reference) {
-      updated_param.floats().clear();
-      updated_param.type = Parameter_Type::Real;
-      // RenderMan diffTrans is in the range [0,2] so rescale back to [0,1]
-      updated_param.add_float(param->floats()[0] / 2.0f);
-      input = find_socket("transmission_weight", _nodes.back());
-      set_node_value(_nodes.back(), *input, &updated_param);
-    }
-  }
   if (_parameters.find("specReflectScale") != _parameters.end()) {
     param = _parameters["specReflectScale"];
-    updated_param.floats().clear();
-    updated_param.type = Parameter_Type::Color;
-    updated_param.add_float(1.0);
-    updated_param.add_float(1.0);
-    updated_param.add_float(1.0);
-    input = find_socket("specular_tint", _nodes.back());
-    set_node_value(_nodes.back(), *input, &updated_param);
     if (param->storage != Container_Type::Reference) {
       updated_param.floats().clear();
       updated_param.type = Parameter_Type::Real;
-      updated_param.add_float(param->floats()[0]);
+      // Cycles 0.5 == RenderMan 1.0
+      updated_param.add_float(param->floats()[0] / 2.0);
       input = find_socket("specular_ior_level", _nodes.back());
       set_node_value(_nodes.back(), *input, &updated_param);
     }
   }
+  float gain = 0.0;
+  if (_parameters.find("specTint") != _parameters.end()) {
+    param = _parameters["specTint"];
+    gain = param->floats()[0];
+  }
+  // Ignore param here, because if we delete now it hoses 'sheen tint' 
+  param = mix_color("baseColor", gain, _nodes.back()->input(ustring("Specular Tint")));
+  
+  gain = 0.0;
+  if (_parameters.find("sheenTint") != _parameters.end()) {
+    param = _parameters["sheenTint"];
+    gain = param->floats()[0];
+  }
+  param = mix_color("baseColor", gain, _nodes.back()->input(ustring("Sheen Tint")));
+  // And don't erase 'baseColor', otherwise we're missing the texture.
+//  if (param) {
+//    connections.erase(std::find(connections.begin(), connections.end(), param));
+//  }
 }
 
 void PxrMarschnerHairtoPrincipled::update_parameters(Parameter_Dictionary const &parameters,

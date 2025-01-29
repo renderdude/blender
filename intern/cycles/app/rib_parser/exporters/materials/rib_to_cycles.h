@@ -14,19 +14,25 @@
 
 CCL_NAMESPACE_BEGIN
 
+struct Mapping_Info {
+  bool mapping_only = false;
+  ustring cycles_name;
+};
+
 class RIBtoCyclesMapping {
  public:
-  using ParamMap = std::unordered_map<std::string, ustring>;
+  using ParamMap = std::unordered_map<std::string, Mapping_Info>;
   RIBtoCyclesMapping(
       std::vector<std::string> nodeType,
       ParamMap paramMap,
-      std::function<void(std::vector<ShaderNode *>)> remapFunc =
-          [](std::vector<ShaderNode *>) {})
+      std::function<void(std::vector<ShaderNode *>)> remapFunc = [](std::vector<ShaderNode *>) {})
       : _nodeType(nodeType), _paramMap(std::move(paramMap)), _remapFunc(remapFunc)
   {
   }
 
-  void set(ShaderGraph *graph, Scene *scene, std::unordered_map<std::string, RIBtoCyclesMapping *> *nodes)
+  void set(ShaderGraph *graph,
+           Scene *scene,
+           std::unordered_map<std::string, RIBtoCyclesMapping *> *nodes)
   {
     _graph = graph;
     _scene = scene;
@@ -42,7 +48,14 @@ class RIBtoCyclesMapping {
   {
     // Simple mapping case
     const auto it = _paramMap.find(name);
-    return it != _paramMap.end() ? it->second.string() : name;
+    return it != _paramMap.end() ? it->second.cycles_name.string() : name;
+  }
+
+  virtual bool mapping_only(const std::string &name) const
+  {
+    // Simple mapping case
+    const auto it = _paramMap.find(name);
+    return it != _paramMap.end() ? it->second.mapping_only : true;
   }
 
   virtual void update_parameters(Parameter_Dictionary const &parameters,
@@ -56,6 +69,8 @@ class RIBtoCyclesMapping {
   }
 
  protected:
+  Parsed_Parameter *mix_color(std::string color_name, float gain, ShaderInput *bsdf_input);
+
   std::vector<ShaderNode *> _nodes;
   std::vector<std::string> _nodeType;
   ParamMap _paramMap;
@@ -63,6 +78,7 @@ class RIBtoCyclesMapping {
   Scene *_scene;
   std::unordered_map<std::string, RIBtoCyclesMapping *> *_processed_nodes;
   std::function<void(std::vector<ShaderNode *>)> _remapFunc;
+  std::unordered_map<std::string, Parsed_Parameter *> _parameters;
 };
 
 class RIBtoMultiNodeCycles : public RIBtoCyclesMapping {
@@ -71,8 +87,7 @@ class RIBtoMultiNodeCycles : public RIBtoCyclesMapping {
       std::vector<std::string> nodeType,
       ParamMap paramMap,
       ParamMap connectionMap,
-      std::function<void(std::vector<ShaderNode *>)> remapFunc =
-          [](std::vector<ShaderNode *>) {})
+      std::function<void(std::vector<ShaderNode *>)> remapFunc = [](std::vector<ShaderNode *>) {})
       : RIBtoCyclesMapping(nodeType, paramMap, remapFunc), _connectionMap(connectionMap)
   {
   }
@@ -99,9 +114,6 @@ class PxrNormalMaptoCycles : public RIBtoCyclesMapping {
 
   void update_parameters(Parameter_Dictionary const &parameters,
                          vector<Parsed_Parameter const *> &connections) override;
-
- private:
-  std::unordered_map<std::string, Parsed_Parameter *> _parameters;
 };
 
 class PxrRamptoCycles : public RIBtoCyclesMapping {
@@ -110,9 +122,6 @@ class PxrRamptoCycles : public RIBtoCyclesMapping {
 
   void update_parameters(Parameter_Dictionary const &parameters,
                          vector<Parsed_Parameter const *> &connections) override;
-
- private:
-  std::unordered_map<std::string, Parsed_Parameter *> _parameters;
 };
 
 class PxrImageNormalMaptoCycles : public RIBtoMultiNodeCycles {
@@ -135,9 +144,6 @@ class PxrSurfacetoPrincipled : public RIBtoCyclesMapping {
 
   void update_parameters(Parameter_Dictionary const &parameters,
                          vector<Parsed_Parameter const *> &connections) override;
-
- private:
-  std::unordered_map<std::string, Parsed_Parameter *> _parameters;
 };
 
 class PxrDisneytoPrincipled : public RIBtoCyclesMapping {
@@ -146,9 +152,6 @@ class PxrDisneytoPrincipled : public RIBtoCyclesMapping {
 
   void update_parameters(Parameter_Dictionary const &parameters,
                          vector<Parsed_Parameter const *> &connections) override;
-
- private:
-  std::unordered_map<std::string, Parsed_Parameter *> _parameters;
 };
 
 class PxrDisneyBsdftoPrincipled : public RIBtoCyclesMapping {
@@ -157,9 +160,6 @@ class PxrDisneyBsdftoPrincipled : public RIBtoCyclesMapping {
 
   void update_parameters(Parameter_Dictionary const &parameters,
                          vector<Parsed_Parameter const *> &connections) override;
-
- private:
-  std::unordered_map<std::string, Parsed_Parameter *> _parameters;
 };
 
 class PxrMarschnerHairtoPrincipled : public RIBtoCyclesMapping {
@@ -168,9 +168,6 @@ class PxrMarschnerHairtoPrincipled : public RIBtoCyclesMapping {
 
   void update_parameters(Parameter_Dictionary const &parameters,
                          vector<Parsed_Parameter const *> &connections) override;
-
- private:
-  std::unordered_map<std::string, Parsed_Parameter *> _parameters;
 };
 
 CCL_NAMESPACE_END
