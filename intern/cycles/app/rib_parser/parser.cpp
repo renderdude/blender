@@ -7,6 +7,7 @@
 
 #include <chrono>
 #include <cstdlib>
+#include <filesystem>
 #include <fcntl.h>
 #include <functional>
 #include <iostream>
@@ -15,9 +16,9 @@
 #include <utility>
 #include <vector>
 
-#include <boost/filesystem.hpp>
+namespace fs = std::filesystem;
+
 #include <double-conversion/double-conversion.h>
-namespace bfs = boost::filesystem;
 
 #include "app/rib_parser/parsed_parameter.h"
 #ifdef WITH_CYCLES_DISTRIBUTED
@@ -31,12 +32,12 @@ namespace bfs = boost::filesystem;
 
 CCL_NAMESPACE_BEGIN
 
-static bfs::path search_directory;
+static fs::path search_directory;
 
 void set_search_directory(std::string filename)
 {
-  bfs::path path(filename);
-  if (!bfs::is_directory(path)) {
+  fs::path path(filename);
+  if (!fs::is_directory(path)) {
     path = path.parent_path();
   }
   search_directory = path;
