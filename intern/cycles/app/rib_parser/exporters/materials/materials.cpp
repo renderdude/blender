@@ -39,7 +39,7 @@ class RIBtoCycles {
           {"refractionGain", {false, ustring("transmission")}},
           {"glassRoughness", {false, ustring("transmission_roughness")}},
           {"glowColor", {false, ustring("emission_color")}},
-          {"glowGain", {false, ustring("\emission_strength")}},
+          {"glowGain", {false, ustring("emission_strength")}},
           {"bumpNormal", {false, ustring("normal")}},
       }};
 #else
