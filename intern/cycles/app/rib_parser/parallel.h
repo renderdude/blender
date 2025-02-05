@@ -128,12 +128,12 @@ class Barrier {
   int _num_to_block, _num_to_exit;
 };
 
-void parallel_for(int64_t start, int64_t end, std::function<void(int64_t, int64_t)> func);
+void Parallel_For(int64_t start, int64_t end, std::function<void(int64_t, int64_t)> func);
 
 // Parallel Inline Functions
-inline void parallel_for(int64_t start, int64_t end, std::function<void(int64_t)> func)
+inline void Parallel_For(int64_t start, int64_t end, std::function<void(int64_t)> func)
 {
-  parallel_for(start, end, [&func](int64_t start, int64_t end) {
+  Parallel_For(start, end, [&func](int64_t start, int64_t end) {
     for (int64_t i = start; i < end; ++i) {
       func(i);
     }

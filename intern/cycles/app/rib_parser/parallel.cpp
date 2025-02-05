@@ -138,7 +138,7 @@ void Thread_Pool::for_each_thread(std::function<void(void)> func)
 {
   Barrier *barrier = new Barrier(threads.size() + 1);
 
-  parallel_for(0, threads.size() + 1, [barrier, &func](int64_t) {
+  Parallel_For(0, threads.size() + 1, [barrier, &func](int64_t) {
     func();
     if (barrier->block()) {
       delete barrier;
@@ -262,7 +262,7 @@ void Parallel_For_Loop_1D::run_step(std::unique_lock<std::mutex> *lock)
 }
 
 // Parallel Function Definitions
-void parallel_for(int64_t start, int64_t end, std::function<void(int64_t, int64_t)> func)
+void Parallel_For(int64_t start, int64_t end, std::function<void(int64_t, int64_t)> func)
 {
   CHECK(Parallel_Job::thread_pool);
   if (start == end) {
