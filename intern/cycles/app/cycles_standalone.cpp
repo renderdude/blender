@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <filesystem>
 
+#include "app/rib_parser/parallel.h"
 #include "device/device.h"
 #include "scene/camera.h"
 #include "scene/integrator.h"
@@ -711,7 +712,12 @@ int main(const int argc, const char **argv)
   path_init();
   options_parse(argc, argv);
 
-  if (options.session_params.background) {
+  parallel_init(options.session_params.threads != 0 ?
+                options.session_params.threads :
+                available_cores());
+
+  if (options.session_params.background);
+  {
     session_init();
     options.session->wait();
     session_exit();

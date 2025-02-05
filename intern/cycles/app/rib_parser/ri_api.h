@@ -8,6 +8,8 @@
 #include <vector>
 
 #include "app/cycles_standalone.h"
+#include "app/rib_parser/exporters/materials/materials.h"
+#include "app/rib_parser/parallel.h"
 #include "error.h"
 #include "intern_cache.h"
 #include "param_dict.h"
@@ -43,6 +45,7 @@ class Ri {
   void add_animated_shape(Animated_Shape_Scene_Entity shape);
   void add_instance_definition(Instance_Definition_Scene_Entity instance);
   void add_instance_uses(p_std::span<Instance_Scene_Entity> in);
+  void add_shader(Vector_Dictionary shader);
   void end_of_files();
 
   std::string get_display_name() const
@@ -420,8 +423,8 @@ class Ri {
   std::map<std::string, Light_Scene_Entity> _lights;
   std::vector<Scene_Entity> materials;
 
-  std::mutex area_light_mutex;
-  std::mutex light_mutex;
+  std::mutex shader_mutex;
+  std::mutex area_light_mutex, light_mutex;
   std::mutex shape_mutex, animated_shape_mutex;
   std::mutex instance_definition_mutex, instance_use_mutex;
   std::vector<Scene_Entity> area_lights;
@@ -433,6 +436,8 @@ class Ri {
   std::string _display_name;
   Parsed_Parameter_Vector *_light_material = nullptr;
   std::vector<float> _crop_window = {0., 1., 0., 1.};
+
+  std::vector<Async_Job<RIBCyclesMaterials> *> shader_jobs;
 };
 
 #define VERIFY_OPTIONS(func) \

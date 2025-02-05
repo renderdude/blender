@@ -140,11 +140,17 @@ void Ri::export_to_cycles()
   BoundBox scene_bounds{BoundBox::empty};
 
   export_options(filter, film, _camera[film.camera_name], sampler);
-  for (auto shader : osl_shader_group) {
-    RIBCyclesMaterials material(session->scene.get(), shader);
-    material.export_materials();
+
+  {
+    std::lock_guard<std::mutex> lock(shader_mutex);
+    for (auto *shader : shader_jobs) {
+      RIBCyclesMaterials material = shader->get_result();
+    }
   }
-  for (auto &inst : instance_uses) {
+  shader_jobs.clear();
+
+  for (auto &inst : instance_uses)
+  {
     auto *inst_def = instance_definitions[inst.first];
     if (!inst_def->lights.empty()) {
       export_lights(session->scene.get(), inst.second, inst_def);
@@ -312,12 +318,6 @@ int Ri::add_area_light(Scene_Entity light)
   return area_lights.size() - 1;
 }
 
-void Ri::add_shapes(p_std::span<Shape_Scene_Entity> s)
-{
-  std::lock_guard<std::mutex> lock(shape_mutex);
-  std::move(std::begin(s), std::end(s), std::back_inserter(shapes));
-}
-
 void Ri::add_animated_shape(Animated_Shape_Scene_Entity shape)
 {
   std::lock_guard<std::mutex> lock(animated_shape_mutex);
@@ -337,6 +337,18 @@ void Ri::add_instance_uses(p_std::span<Instance_Scene_Entity> in)
 {
   std::lock_guard<std::mutex> lock(instance_use_mutex);
   std::move(std::begin(in), std::end(in), std::back_inserter(instances));
+}
+
+void Ri::add_shader(Vector_Dictionary shader)
+{
+  std::lock_guard<std::mutex> lock(shader_mutex);
+
+  auto create = [this](Vector_Dictionary shader) {
+    RIBCyclesMaterials material(session->scene.get(), shader);
+    material.export_materials();
+    return material;
+  };
+  shader_jobs.push_back(run_async(create, shader));
 }
 
 // RI API Default Implementation
@@ -409,6 +421,7 @@ void Ri::AttributeEnd(File_Loc loc)
   VERIFY_WORLD("AttributeEnd");
   if (!osl_parameters.empty()) {
     osl_shader_group[_shader_id] = osl_parameters;
+    add_shader(std::make_pair(_shader_id, osl_parameters));
   }
 
   // Issue error on unmatched _AttributeEnd_
@@ -1400,10 +1413,7 @@ void Ri::ObjectInstance(const std::string &name, File_Loc loc)
   VERIFY_WORLD("ObjectInstance");
 
   if (_light_material) {
-    Light("PxrMeshLight",
-          (*_light_material)[0]->strings()[0],
-          *_light_material,
-          loc);
+    Light("PxrMeshLight", (*_light_material)[0]->strings()[0], *_light_material, loc);
     osl_shader_group[_shader_id] = osl_parameters;
     delete _light_material;
     _light_material = nullptr;
