@@ -481,19 +481,7 @@ void Ri::Bxdf(const std::string &bxdf,
       osl_parameters.push_back(dict);
     }
     else {
-      std::stringstream ss;
-      ss << material_id << "_" << graphics_state.identifier;
-      osl_shader_group[ss.str()] = osl_shader_group[material_id];
-      for (auto &dict : osl_shader_group[ss.str()]) {
-        param = dict.get_parameter("__materialid");
-        if (param) {
-          Parsed_Parameter *pp = new Parsed_Parameter(*param);
-          pp->strings()[0] = ss.str();
-          dict.remove_string("__materialid");
-          dict.push_back(pp);
-        }
-      }
-      graphics_state.current_material_name = ss.str();
+      graphics_state.current_material_name = material_id;
       graphics_state.current_material_index = -1;
     }
   }
