@@ -14,10 +14,7 @@
 #include <utility>
 #include <vector>
 
-#include <boost/filesystem.hpp>
-
 #include <double-conversion/double-conversion.h>
-namespace bfs = boost::filesystem;
 
 #include "kernel/types.h"
 #include "scene/camera.h"
@@ -47,8 +44,6 @@ namespace bfs = boost::filesystem;
 #include "ri_api.h"
 
 CCL_NAMESPACE_BEGIN
-
-static bfs::path search_directory;
 
 // Similar to util/projection.h with phi/theta reversed to match renderman specification
 float3 ri_spherical_to_direction(float theta, float phi)
