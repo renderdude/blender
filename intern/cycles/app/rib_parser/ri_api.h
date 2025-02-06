@@ -39,12 +39,10 @@ class Ri {
                       Scene_Entity &film,
                       Camera_Scene_Entity &camera,
                       Scene_Entity &sampler);
-  void add_light(Light_Scene_Entity light);
   int add_area_light(Scene_Entity light);
-  void add_shapes(p_std::span<Shape_Scene_Entity> shape);
   void add_animated_shape(Animated_Shape_Scene_Entity shape);
   void add_instance_definition(Instance_Definition_Scene_Entity instance);
-  void add_instance_uses(p_std::span<Instance_Scene_Entity> in);
+  void add_instance_use(std::string name, Instance_Scene_Entity in);
   void add_shader(Vector_Dictionary shader);
   void end_of_files();
 

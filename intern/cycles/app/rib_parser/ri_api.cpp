@@ -292,25 +292,6 @@ void Ri::export_options([[maybe_unused]] Scene_Entity &filter,
   *session->scene->dicing_camera = *session->scene->camera;
 }
 
-void Ri::add_light([[maybe_unused]] Light_Scene_Entity light)
-{
-  // Medium light_medium = get_medium(light.medium, &light.loc);
-  std::lock_guard<std::mutex> lock(light_mutex);
-
-#if 0
-  auto create = [this, light, light_medium]() {
-    return Light::create(light.name,
-                         light.parameters,
-                         light.render_from_object.start_transform,
-                         get_camera().get_camera_transform(),
-                         light_medium,
-                         &light.loc,
-                         thread_allocators.get());
-  };
-  light_jobs.push_back(run_async(create));
-#endif
-}
-
 int Ri::add_area_light(Scene_Entity light)
 {
   std::lock_guard<std::mutex> lock(area_light_mutex);
@@ -333,10 +314,8 @@ void Ri::add_instance_definition(Instance_Definition_Scene_Entity instance)
   instance_definitions[def->name] = def;
 }
 
-void Ri::add_instance_uses(p_std::span<Instance_Scene_Entity> in)
+void Ri::add_instance_use(std::string name, Instance_Scene_Entity inst)
 {
-  std::lock_guard<std::mutex> lock(instance_use_mutex);
-  std::move(std::begin(in), std::end(in), std::back_inserter(instances));
 }
 
 void Ri::add_shader(Vector_Dictionary shader)
