@@ -399,8 +399,8 @@ void Ri::AttributeEnd(File_Loc loc)
 {
   VERIFY_WORLD("AttributeEnd");
   if (!osl_parameters.empty()) {
-    osl_shader_group[_shader_id] = osl_parameters;
-    add_shader(std::make_pair(_shader_id, osl_parameters));
+    osl_shader_group[_shader_id] = true;
+    add_shader(std::make_pair(_shader_id, std::move(osl_parameters)));
   }
 
   // Issue error on unmatched _AttributeEnd_
@@ -1393,7 +1393,7 @@ void Ri::ObjectInstance(const std::string &name, File_Loc loc)
 
   if (_light_material) {
     Light("PxrMeshLight", (*_light_material)[0]->strings()[0], *_light_material, loc);
-    osl_shader_group[_shader_id] = osl_parameters;
+    osl_shader_group[_shader_id] = true;
     delete _light_material;
     _light_material = nullptr;
   }

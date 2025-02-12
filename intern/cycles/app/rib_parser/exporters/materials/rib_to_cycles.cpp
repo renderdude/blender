@@ -22,7 +22,9 @@ bool create_shader_node(std::string const &nodeType,
   bool check_if_osl = false;
   bool result = true;
   if (const NodeType *node_type = NodeType::find(ustring(nodeType))) {
+    scene->mutex.lock();
     *node = create_shader(graph, shader, node_type);
+    scene->mutex.unlock();
   }
   else {
     check_if_osl = true;
@@ -39,7 +41,9 @@ bool create_shader_node(std::string const &nodeType,
     if (path_is_relative(shader_name)) {
       shader_name = path_join(path, shader_name);
     }
+    scene->mutex.lock();
     *node = OSLShaderManager::osl_node(graph, scene->shader_manager.get(), shader_name, "");
+    scene->mutex.unlock();
     if (!node) {
       fprintf(stderr, "Could not create node '%s'", shader_name.c_str());
       result = false;

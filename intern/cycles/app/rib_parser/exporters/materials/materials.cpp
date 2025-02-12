@@ -313,7 +313,9 @@ void RIBCyclesMaterials::export_materials()
   add_default_renderman_inputs(_shader);
   fix_normal_maps();
 
+  _scene->mutex.lock();
   _shader->tag_update(_scene);
+  _scene->mutex.unlock();
   // pool.push(function_bind(&ShaderGraph::simplify, _shader->graph, _scene));
   /* NOTE: Update shaders out of the threads since those routines
    * are accessing and writing to a global context.
@@ -342,7 +344,9 @@ void RIBCyclesMaterials::initialize()
     return;
   }
 
+  _scene->mutex.lock();
   _shader = _scene->create_node<Shader>();
+  _scene->mutex.unlock();
 }
 
 void RIBCyclesMaterials::update_connections(RIBtoCyclesMapping *mapping,

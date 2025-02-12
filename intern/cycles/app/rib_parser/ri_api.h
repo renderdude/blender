@@ -410,7 +410,7 @@ class Ri {
   std::set<std::string> instance_names;
   Intern_Cache<ProjectionTransform, ProjectionTransformHasher> transform_cache;
   std::vector<Parameter_Dictionary> osl_parameters;
-  Mapped_Vector_Dictionary osl_shader_group;
+  std::map<std::string, bool> osl_shader_group;
 
   // Entity storage
   std::vector<Shape_Scene_Entity> shapes;
