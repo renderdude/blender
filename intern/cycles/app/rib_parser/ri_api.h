@@ -8,8 +8,10 @@
 #include <vector>
 
 #include "app/cycles_standalone.h"
-#include "app/rib_parser/exporters/materials/materials.h"
-#include "app/rib_parser/parallel.h"
+#include "exporters/curves.h"
+#include "exporters/geometry.h"
+#include "exporters/materials/materials.h"
+#include "parallel.h"
 #include "error.h"
 #include "intern_cache.h"
 #include "param_dict.h"
@@ -435,6 +437,8 @@ class Ri {
   Parsed_Parameter_Vector *_light_material = nullptr;
   std::vector<float> _crop_window = {0., 1., 0., 1.};
 
+  std::map<std::string, RIBCyclesMesh*> _mesh_elements;
+  std::map<std::string, RIBCyclesCurves*> _hair_elements;
   std::vector<Async_Job<RIBCyclesMaterials> *> shader_jobs;
 };
 

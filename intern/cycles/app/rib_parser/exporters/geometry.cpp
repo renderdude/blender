@@ -9,13 +9,16 @@
 
 #include "app/rib_parser/exporters/attribute.h"
 #include "app/rib_parser/exporters/geometry.h"
+#include "util/log.h"
 #include "util/vector.h"
 #include <algorithm>
 #include <cstddef>
 #include <cstdio>
+#include <cstring>
 #include <opensubdiv/vtr/types.h>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "app/rib_parser/util/mikktspace/mikktspace.hh"
@@ -184,6 +187,7 @@ static void mikk_compute_tangents(const char *layer_name, Mesh *mesh, bool need_
   }
 }
 
+#if 0
 void RIBCyclesMesh::export_geometry()
 {
   _shape = _inst_def->shapes[0];
@@ -302,32 +306,164 @@ void RIBCyclesMesh::export_geometry()
     _bounds.grow(instance->bounds);
   }
 }
+#endif
 
-void RIBCyclesMesh::initialize(std::string material_name)
+void RIBCyclesMesh::build_instance_definition(
+    Instance_Definition_Scene_Entity const *inst_def)
+{
+  _shape = inst_def->shapes[0];
+
+  auto shade_pp = _shape.graphics_state.rib_attributes.find("shade");
+  if (shade_pp != _shape.graphics_state.rib_attributes.end()) {
+    int nfaces = _shape.parameters.get_int_array("nfaces")[0];
+    // Check if we're using the entire set of prims for shading
+    auto &param = shade_pp->second;
+    if (param[0]->elem_per_item < nfaces) {
+      _shape = reduce_geometry_by_faceset(_shape, param[0]->ints());
+    }
+  }
+
+  if (inst_def->shapes.size() > 1) {
+    fprintf(stderr,
+            "An instance definition, %s, contains more than one shape.\n",
+            inst_def->name.c_str());
+    fprintf(stderr, "Only using the first shape found.\n");
+  }
+
+  initialize(inst_def->name);
+
+  populate();
+
+  _geomTransform = *_shape.render_from_object;
+}
+
+void RIBCyclesMesh::build_instance(Instance_Scene_Entity &inst)
+{
+  array<Node *> geom_shaders = _geom->get_used_shaders();
+  array<Node *> usedShaders(1);
+  usedShaders[0] = _scene->default_surface;
+
+  for (auto *shader : _scene->shaders) {
+    if (!shader->name.compare(inst.material_name)) {
+      usedShaders[0] = shader;
+      break;
+    }
+  }
+
+  needs_emission_normalization = false;
+
+  if (inst.parameters.find("Ri") != inst.parameters.end()) {
+    if (inst.parameters.at("Ri").get_one_bool("areaNormalize", false)) {
+      for (Node *shader : usedShaders) {
+        static_cast<Shader *>(shader)->tag_used(_scene);
+        for (ShaderNode *snode : static_cast<Shader *>(shader)->graph->nodes) {
+          needs_emission_normalization |= snode->has_surface_emission();
+        }
+      }
+    }
+  }
+
+  if (geom_shaders.size() > 0 && geom_shaders[0] != usedShaders[0]) {
+    VLOG_WARNING << "overriding shader in instanced geometry" << std::endl;
+  }
+  _geom->set_used_shaders(usedShaders);
+
+  // Need to check if we need to update the subd transform
+  if (_geom->get_subdivision_type() != Mesh::SUBDIVISION_NONE) {
+    const Transform tfm = projection_to_transform(*inst.render_from_instance) *
+                          _geom->get_subd_objecttoworld();
+
+    _geom->set_subd_objecttoworld(tfm);
+  }
+
+  // Can't populate the primvars until the material is set, otherwise it won't be able to tell
+  // that it needs uv's or other attributes
+  populate_primvars();
+
+  // Must happen after material ID update, so that attribute decisions can be made
+  // based on it (e.g. check whether an attribute is actually needed)
+  bool rebuild = (_geom->triangles_is_modified()) || (_geom->subd_start_corner_is_modified()) ||
+                 (_geom->subd_num_corners_is_modified()) || (_geom->subd_shader_is_modified()) ||
+                 (_geom->subd_smooth_is_modified()) || (_geom->subd_ptex_offset_is_modified()) ||
+                 (_geom->subd_face_corners_is_modified());
+
+  if (_geom->is_modified() || rebuild) {
+    _scene->mutex.lock();
+    _geom->tag_update(_scene, rebuild);
+    _geom->compute_bounds();
+    _scene->mutex.unlock();
+  }
+
+  _scene->mutex.lock();
+  _instance = _scene->create_node<Object>();
+  _scene->mutex.unlock();
+  std::string instance_id = initialize_instance(inst);
+
+  // Make sure the first object attribute is the instanceId
+  assert(!_instance->attributes.empty() && _instance->attributes.front().name() == instance_id);
+
+  // Default to a single instance with an identity transform
+  _instance->attributes.front() = ParamValue(instance_id, -1.0f);
+
+  // Update transform
+  const float metersPerUnit = 1.;
+
+  const Transform tfm = transform_scale(make_float3(metersPerUnit)) *
+                        projection_to_transform(*(inst.render_from_instance) * _geomTransform);
+  _instance->set_tfm(tfm);
+
+  uint visibility = PATH_RAY_ALL_VISIBILITY;
+  int rib_vis = inst.parameters.at("visibility").get_one_int("camera", 1);
+  if (rib_vis == 0) {
+    visibility &= ~PATH_RAY_CAMERA;
+  }
+  rib_vis = inst.parameters.at("visibility").get_one_int("indirect", 1);
+  if (rib_vis == 0) {
+    visibility &= ~PATH_RAY_REFLECT;
+  }
+  rib_vis = inst.parameters.at("visibility").get_one_int("transmission", 1);
+  if (rib_vis == 0) {
+    visibility &= ~PATH_RAY_SHADOW;
+  }
+
+  _instance->set_visibility(visibility);
+  if (needs_emission_normalization) {
+    normalize_emission(_instance);
+  }
+
+  _scene->mutex.lock();
+  _instance->tag_update(_scene);
+  _instance->compute_bounds(_instance->use_motion());
+  _scene->mutex.unlock();
+
+  _bounds.grow(_instance->bounds);
+}
+
+void RIBCyclesMesh::initialize(std::string name)
 {
   // Create geometry
+  _scene->mutex.lock();
   _geom = _scene->create_node<Mesh>();
-  _geom->name = _inst_def->name;
+  _scene->mutex.unlock();
+  _geom->name = name;
 
   vector<int3> tmp_vec;
   triangles.swap(tmp_vec);
-
-  _instanced_geom[material_name] = _geom;
 }
 
-void RIBCyclesMesh::initialize_instance(int index)
+std::string RIBCyclesMesh::initialize_instance(Instance_Scene_Entity &inst)
 {
-  Object *instance = _instances[index];
-  instance->set_geometry(_geom);
+  _instance->set_geometry(_geom);
 
-  std::string id = _inst_v[index].parameters.at("identifier").get_one_string("name", "");
-  instance->attributes.emplace_back(id,
-                                    _instances.size() == 1 ? -1.0f : static_cast<float>(index));
-  instance->set_color(make_float3(0.8f, 0.8f, 0.8f));
-  instance->set_random_id(hash_uint2(hash_string(_geom->name.c_str()), index));
+  std::string id = inst.parameters.at("identifier").get_one_string("name", "");
+  _instance->attributes.emplace_back(id, -1.0f);
+  _instance->set_color(make_float3(0.8f, 0.8f, 0.8f));
+  _instance->set_random_id(hash_string(id.c_str()));
+
+  return id;
 }
 
-void RIBCyclesMesh::populate(bool &rebuild)
+void RIBCyclesMesh::populate()
 {
   separate_face_varying_normals();
 
@@ -336,14 +472,6 @@ void RIBCyclesMesh::populate(bool &rebuild)
 
   // Must happen after topology update, so that normals attribute size can be calculated
   populate_normals();
-
-  // Must happen after topology update, so that appropriate attribute set can be selected
-  populate_primvars();
-
-  rebuild = (_geom->triangles_is_modified()) || (_geom->subd_start_corner_is_modified()) ||
-            (_geom->subd_num_corners_is_modified()) || (_geom->subd_shader_is_modified()) ||
-            (_geom->subd_smooth_is_modified()) || (_geom->subd_ptex_offset_is_modified()) ||
-            (_geom->subd_face_corners_is_modified());
 }
 
 void RIBCyclesMesh::separate_face_varying_normals()
@@ -754,8 +882,7 @@ void RIBCyclesMesh::populate_topology()
     const float metersPerUnit = 1.;
 
     const Transform tfm = transform_scale(make_float3(metersPerUnit)) *
-                          projection_to_transform((*_inst_v[0].render_from_instance) *
-                                                  (*_shape.render_from_object));
+                          projection_to_transform((*_shape.render_from_object));
 
     _geom->set_subd_dicing_rate(1.0f);
     _geom->set_subd_max_level(16);

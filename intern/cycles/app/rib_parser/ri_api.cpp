@@ -1,3 +1,4 @@
+#include <cassert>
 #include <cmath>
 #include <fcntl.h>
 #include <sstream>
@@ -32,10 +33,7 @@
 #include "util/transform.h"
 #include "util/vector.h"
 
-#include "exporters/curves.h"
-#include "exporters/geometry.h"
 #include "exporters/lights.h"
-#include "exporters/materials/materials.h"
 
 #include "app/cycles_xml.h"
 #include "app/rib_parser/param_dict.h"
@@ -149,22 +147,49 @@ void Ri::export_to_cycles()
   }
   shader_jobs.clear();
 
-  for (auto &inst : instance_uses)
-  {
-    auto *inst_def = instance_definitions[inst.first];
-    if (!inst_def->lights.empty()) {
-      export_lights(session->scene.get(), inst.second, inst_def);
+  for (auto inst_def_it = instance_definitions.cbegin(); inst_def_it != instance_definitions.cend(); ) {
+    // If we have a light. delay until processing instances
+    if (inst_def_it->second->lights.empty()) {
+      // Is this even possible, no shapes and no lights???
+      if (!inst_def_it->second->shapes.empty()) {
+        if (inst_def_it->second->shapes[0].name == "curve") {
+          //RIBCyclesCurves curve(session->scene.get());
+          //curve.export_curves();
+          //scene_bounds.grow(curve.bounds());
+        }
+        else {
+          RIBCyclesMesh* mesh = new RIBCyclesMesh(session->scene.get());
+          mesh->build_instance_definition(inst_def_it->second);
+          _mesh_elements[inst_def_it->first] = mesh;
+        }
+      }
+      inst_def_it = instance_definitions.erase(inst_def_it);
     }
-    else if (!inst_def->shapes.empty()) {
-      if (inst_def->shapes[0].name == "curve") {
-        RIBCyclesCurves curve(session->scene.get(), inst.second, inst_def);
-        curve.export_curves();
-        scene_bounds.grow(curve.bounds());
+    else {
+      ++inst_def_it;
+    }
+  }
+
+  for (auto &inst_v : instance_uses) {
+    if (instance_definitions.find(inst_v.first) != instance_definitions.end() ) {
+      auto *inst_def = instance_definitions[inst_v.first];
+      export_lights(session->scene.get(), inst_v.second, inst_def);
+    }
+    // it's a shape
+    else {
+      if (_mesh_elements.find(inst_v.first) != _mesh_elements.end()) {
+        auto *mesh = _mesh_elements[inst_v.first];
+        for (auto inst: inst_v.second) {
+          mesh->build_instance(inst);
+          scene_bounds.grow(mesh->bounds());
+        }
       }
       else {
-        RIBCyclesMesh mesh(session->scene.get(), inst.second, inst_def);
-        mesh.export_geometry();
-        scene_bounds.grow(mesh.bounds());
+        assert(_hair_elements.find(inst_v.first) != _hair_elements.end());
+        auto *curve = _hair_elements[inst_v.first];
+        //RIBCyclesCurves curve(session->scene.get(), inst.second, inst_def);
+        //curve.export_curves();
+        //scene_bounds.grow(curve.bounds());
       }
     }
   }
@@ -314,9 +339,7 @@ void Ri::add_instance_definition(Instance_Definition_Scene_Entity instance)
   instance_definitions[def->name] = def;
 }
 
-void Ri::add_instance_use(std::string name, Instance_Scene_Entity inst)
-{
-}
+void Ri::add_instance_use(std::string name, Instance_Scene_Entity inst) {}
 
 void Ri::add_shader(Vector_Dictionary shader)
 {

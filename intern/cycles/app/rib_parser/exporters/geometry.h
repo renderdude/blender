@@ -7,20 +7,20 @@
 #include "app/rib_parser/scene_entities.h"
 #include "util/boundbox.h"
 #include <string>
-#include <unordered_map>
 
 CCL_NAMESPACE_BEGIN
 
 class RIBCyclesMesh {
  public:
-  RIBCyclesMesh(Scene *scene,
-                vector<Instance_Scene_Entity> const &inst,
-                Instance_Definition_Scene_Entity const *inst_def)
-      : _scene(scene), _inst_v(inst), _inst_def(inst_def)
+  RIBCyclesMesh(Scene *scene)
+      : _scene(scene)
   {
   }
 
   ~RIBCyclesMesh() = default;
+
+  void build_instance_definition(Instance_Definition_Scene_Entity const *inst_def);
+  void build_instance(Instance_Scene_Entity &inst);
 
   void export_geometry();
 
@@ -28,8 +28,8 @@ class RIBCyclesMesh {
 
  protected:
   void initialize(std::string name);
-  void initialize_instance(int index);
-  void populate(bool &rebuild);
+  std::string initialize_instance(Instance_Scene_Entity &inst);
+  void populate();
   void separate_face_varying_normals();
   void populate_normals();
   void populate_primvars();
@@ -45,11 +45,8 @@ class RIBCyclesMesh {
 
  private:
   Scene *_scene = nullptr;
-  vector<Instance_Scene_Entity> const &_inst_v;
-  Instance_Definition_Scene_Entity const *_inst_def;
   Mesh *_geom = nullptr;
-  std::unordered_map<std::string, Mesh*> _instanced_geom;
-  vector<Object *> _instances;
+  Object * _instance;
   ProjectionTransform _geomTransform;
   vector<int3> triangles;
   BoundBox _bounds{BoundBox::empty};
