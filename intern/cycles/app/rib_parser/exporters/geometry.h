@@ -47,6 +47,7 @@ class RIBCyclesMesh {
   Scene *_scene = nullptr;
   Mesh *_geom = nullptr;
   Object * _instance;
+  Parsed_Parameter* _uv_param = nullptr;
   ProjectionTransform _geomTransform;
   vector<int3> triangles;
   BoundBox _bounds{BoundBox::empty};

@@ -378,7 +378,9 @@ void RIBCyclesMesh::build_instance(Instance_Scene_Entity &inst)
 
   // Can't populate the primvars until the material is set, otherwise it won't be able to tell
   // that it needs uv's or other attributes
-  populate_primvars();
+  if (_uv_param) {
+    create_uv_map(_uv_param);
+  }
 
   // Must happen after material ID update, so that attribute decisions can be made
   // based on it (e.g. check whether an attribute is actually needed)
@@ -472,6 +474,8 @@ void RIBCyclesMesh::populate()
 
   // Must happen after topology update, so that normals attribute size can be calculated
   populate_normals();
+
+  populate_primvars();
 }
 
 void RIBCyclesMesh::separate_face_varying_normals()
@@ -663,7 +667,7 @@ void RIBCyclesMesh::populate_primvars()
     AttributeStandard std = ATTR_STD_NONE;
     if (param->name == "st" || param->name == "uv") {
       param->name = "uv";
-      create_uv_map(param);
+      _uv_param = param;
       continue;
     }
     if (param->storage == Container_Type::Vertex) {
