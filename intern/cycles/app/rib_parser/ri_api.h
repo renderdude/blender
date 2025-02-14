@@ -437,8 +437,8 @@ class Ri {
   Parsed_Parameter_Vector *_light_material = nullptr;
   std::vector<float> _crop_window = {0., 1., 0., 1.};
 
-  std::map<std::string, RIBCyclesMesh*> _mesh_elements;
-  std::map<std::string, RIBCyclesCurves*> _hair_elements;
+  std::map<std::string, std::map<std::string,RIBCyclesMesh*>> _mesh_elements;
+  std::map<std::string, std::map<std::string,RIBCyclesCurves*>> _hair_elements;
   std::vector<Async_Job<RIBCyclesMaterials> *> shader_jobs;
 };
 

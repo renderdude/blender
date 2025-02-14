@@ -17,6 +17,7 @@
 
 #include <double-conversion/double-conversion.h>
 
+#include "app/rib_parser/exporters/geometry.h"
 #include "kernel/types.h"
 #include "scene/camera.h"
 #include "scene/shader.h"
@@ -147,20 +148,22 @@ void Ri::export_to_cycles()
   }
   shader_jobs.clear();
 
-  for (auto inst_def_it = instance_definitions.cbegin(); inst_def_it != instance_definitions.cend(); ) {
+  for (auto inst_def_it = instance_definitions.cbegin();
+       inst_def_it != instance_definitions.cend();)
+  {
     // If we have a light. delay until processing instances
     if (inst_def_it->second->lights.empty()) {
       // Is this even possible, no shapes and no lights???
       if (!inst_def_it->second->shapes.empty()) {
         if (inst_def_it->second->shapes[0].name == "curve") {
-          //RIBCyclesCurves curve(session->scene.get());
-          //curve.export_curves();
-          //scene_bounds.grow(curve.bounds());
+          // RIBCyclesCurves curve(session->scene.get());
+          // curve.export_curves();
+          // scene_bounds.grow(curve.bounds());
         }
         else {
-          RIBCyclesMesh* mesh = new RIBCyclesMesh(session->scene.get());
+          RIBCyclesMesh *mesh = new RIBCyclesMesh(session->scene.get());
           mesh->build_instance_definition(inst_def_it->second);
-          _mesh_elements[inst_def_it->first] = mesh;
+          _mesh_elements[inst_def_it->first]["unassigned"] = mesh;
         }
       }
       inst_def_it = instance_definitions.erase(inst_def_it);
@@ -171,25 +174,43 @@ void Ri::export_to_cycles()
   }
 
   for (auto &inst_v : instance_uses) {
-    if (instance_definitions.find(inst_v.first) != instance_definitions.end() ) {
+    if (instance_definitions.find(inst_v.first) != instance_definitions.end()) {
       auto *inst_def = instance_definitions[inst_v.first];
       export_lights(session->scene.get(), inst_v.second, inst_def);
     }
     // it's a shape
     else {
       if (_mesh_elements.find(inst_v.first) != _mesh_elements.end()) {
-        auto *mesh = _mesh_elements[inst_v.first];
-        for (auto inst: inst_v.second) {
+        auto mapped_meshes = _mesh_elements[inst_v.first];
+        for (auto inst : inst_v.second) {
+          RIBCyclesMesh* mesh = nullptr;
+          if (mapped_meshes.find("unassigned") != mapped_meshes.end()) {
+            // Processing first instance of the definition, so remove it from the list
+            mesh = mapped_meshes["unassigned"];
+            mapped_meshes.erase("unassigned");
+          }
+          else {
+            array<Node *> geom_shaders = mesh->get_used_shaders();
+            if (geom_shaders.size() > 0 && !geom_shaders[0]->name.compare(inst.material_name)) {
+              RIBCyclesMesh* new_mesh = new RIBCyclesMesh(*mesh);
+              mesh = new_mesh;
+            }
+          }
+
           mesh->build_instance(inst);
+          if (mapped_meshes.find(mesh->get_used_shaders()[0]->name.string()) == mapped_meshes.end()) {
+            mapped_meshes[mesh->get_used_shaders()[0]->name.string()] = mesh;
+            assert(mesh->get_used_shaders()[0]->name.string() == inst.material_name);
+          }
           scene_bounds.grow(mesh->bounds());
         }
       }
       else {
         assert(_hair_elements.find(inst_v.first) != _hair_elements.end());
-        auto *curve = _hair_elements[inst_v.first];
-        //RIBCyclesCurves curve(session->scene.get(), inst.second, inst_def);
-        //curve.export_curves();
-        //scene_bounds.grow(curve.bounds());
+        auto mapped_curves = _hair_elements[inst_v.first];
+        // RIBCyclesCurves curve(session->scene.get(), inst.second, inst_def);
+        // curve.export_curves();
+        // scene_bounds.grow(curve.bounds());
       }
     }
   }

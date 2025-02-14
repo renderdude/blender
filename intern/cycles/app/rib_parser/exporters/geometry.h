@@ -2,6 +2,7 @@
 
 #include "app/rib_parser/parsed_parameter.h"
 #include "bvh/build.h"
+#include "scene/mesh.h"
 #include "scene/scene.h"
 
 #include "app/rib_parser/scene_entities.h"
@@ -25,6 +26,10 @@ class RIBCyclesMesh {
   void export_geometry();
 
   BoundBox const& bounds() const {return _bounds;}
+
+  array<Node *> get_used_shaders() {
+    return _geom->get_used_shaders();
+  }
 
  protected:
   void initialize(std::string name);

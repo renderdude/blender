@@ -339,7 +339,6 @@ void RIBCyclesMesh::build_instance_definition(
 
 void RIBCyclesMesh::build_instance(Instance_Scene_Entity &inst)
 {
-  array<Node *> geom_shaders = _geom->get_used_shaders();
   array<Node *> usedShaders(1);
   usedShaders[0] = _scene->default_surface;
 
@@ -363,9 +362,6 @@ void RIBCyclesMesh::build_instance(Instance_Scene_Entity &inst)
     }
   }
 
-  if (geom_shaders.size() > 0 && geom_shaders[0] != usedShaders[0]) {
-    VLOG_WARNING << "overriding shader in instanced geometry" << std::endl;
-  }
   _geom->set_used_shaders(usedShaders);
 
   // Need to check if we need to update the subd transform
