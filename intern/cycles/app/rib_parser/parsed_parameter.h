@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <string>
 #include <string_view>
 #include <variant>
@@ -159,6 +160,29 @@ class Parsed_Parameter {
   bool has_pointers() const
   {
     return std::holds_alternative<vector<void*>>(payload);
+  }
+  ///@}
+  /// @name Measurement
+  ///@{
+  size_t size() {
+    size_t result = sizeof(Parsed_Parameter);
+    if (has_bools()) {
+      result += bools().size() * sizeof(bool);
+    }
+    else if (has_ints()) {
+      result += ints().size() * sizeof(int);
+    }
+    else if (has_floats()) {
+      result += floats().size() * sizeof(float);
+    }
+    else if (has_strings()) {
+      result += strings().size() * sizeof(std::string);
+    }
+    else if (has_pointers()) {
+      result += pointers().size() * sizeof(void*);
+    }
+
+    return result;
   }
   ///@}
   /// @name Conversion
