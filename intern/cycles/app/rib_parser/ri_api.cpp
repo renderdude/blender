@@ -148,6 +148,7 @@ void Ri::export_to_cycles()
   }
   shader_jobs.clear();
 
+  auto start = std::chrono::high_resolution_clock::now();
   for (auto inst_def_it = instance_definitions.cbegin();
        inst_def_it != instance_definitions.cend();)
   {
@@ -172,7 +173,11 @@ void Ri::export_to_cycles()
       ++inst_def_it;
     }
   }
+  auto stop = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<float, std::milli> dt = stop - start;
+  std::cout << "Time taken building defintions: " << dt.count() / 1000.0 << " seconds" << std::endl;
 
+  start = std::chrono::high_resolution_clock::now();
   for (auto &inst_v : instance_uses) {
     if (instance_definitions.find(inst_v.first) != instance_definitions.end()) {
       auto *inst_def = instance_definitions[inst_v.first];
@@ -214,6 +219,9 @@ void Ri::export_to_cycles()
       }
     }
   }
+  stop = std::chrono::high_resolution_clock::now();
+  dt = stop - start;
+  std::cout << "Time taken building defintions: " << dt.count() / 1000.0 << " seconds" << std::endl;
 
   // Lifted from hydra/session.cpp
   Scene *const scene = session->scene.get();
