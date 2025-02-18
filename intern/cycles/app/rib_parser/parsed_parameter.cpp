@@ -44,7 +44,7 @@ void Parsed_Parameter::add_int(int i)
 
 void Parsed_Parameter::add_pointer(void* v)
 {
-  assert(has_pointerss());
+  assert(has_pointers());
   pointers().push_back(v);
 }
 

@@ -156,7 +156,7 @@ class Parsed_Parameter {
   {
     return std::holds_alternative<vector<std::string>>(payload);
   }
-  bool has_pointerss() const
+  bool has_pointers() const
   {
     return std::holds_alternative<vector<void*>>(payload);
   }

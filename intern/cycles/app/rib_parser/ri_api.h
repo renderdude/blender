@@ -20,7 +20,6 @@
 
 #include "session/buffers.h"
 #include "util/projection.h"
-#include "util/span.h"
 
 CCL_NAMESPACE_BEGIN
 using Point3f = float[3];
