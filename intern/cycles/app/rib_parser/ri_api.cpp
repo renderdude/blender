@@ -140,88 +140,21 @@ void Ri::export_to_cycles()
 
   export_options(filter, film, _camera[film.camera_name], sampler);
 
+  // Force the instance jobs to finish
+  for (auto *instance_job : instance_use_jobs) {
+    instance_job->get_result();
+  }
+  instance_use_jobs.clear();
+
+  // that, should force the instance definitions and shders to finish, so we should
+  // be good to clear them here
   {
     std::lock_guard<std::mutex> lock(shader_mutex);
-    for (auto *shader : shader_jobs) {
-      RIBCyclesMaterials material = shader->get_result();
+    for (auto shader : shader_jobs) {
+      RIBCyclesMaterials material = shader.second->get_result();
     }
   }
   shader_jobs.clear();
-
-  auto start = std::chrono::high_resolution_clock::now();
-  for (auto inst_def_it = instance_definitions.cbegin();
-       inst_def_it != instance_definitions.cend();)
-  {
-    // If we have a light. delay until processing instances
-    if (inst_def_it->second->lights.empty()) {
-      // Is this even possible, no shapes and no lights???
-      if (!inst_def_it->second->shapes.empty()) {
-        if (inst_def_it->second->shapes[0].name == "curve") {
-          // RIBCyclesCurves curve(session->scene.get());
-          // curve.export_curves();
-          // scene_bounds.grow(curve.bounds());
-        }
-        else {
-          RIBCyclesMesh *mesh = new RIBCyclesMesh(session->scene.get());
-          mesh->build_instance_definition(inst_def_it->second);
-          _mesh_elements[inst_def_it->first]["unassigned"] = mesh;
-        }
-      }
-      inst_def_it = instance_definitions.erase(inst_def_it);
-    }
-    else {
-      ++inst_def_it;
-    }
-  }
-  auto stop = std::chrono::high_resolution_clock::now();
-  std::chrono::duration<float, std::milli> dt = stop - start;
-  std::cout << "Time taken building defintions: " << dt.count() / 1000.0 << " seconds" << std::endl;
-
-  start = std::chrono::high_resolution_clock::now();
-  for (auto &inst_v : instance_uses) {
-    if (instance_definitions.find(inst_v.first) != instance_definitions.end()) {
-      auto *inst_def = instance_definitions[inst_v.first];
-      export_lights(session->scene.get(), inst_v.second, inst_def);
-    }
-    // it's a shape
-    else {
-      if (_mesh_elements.find(inst_v.first) != _mesh_elements.end()) {
-        auto mapped_meshes = _mesh_elements[inst_v.first];
-        for (auto inst : inst_v.second) {
-          RIBCyclesMesh* mesh = nullptr;
-          if (mapped_meshes.find("unassigned") != mapped_meshes.end()) {
-            // Processing first instance of the definition, so remove it from the list
-            mesh = mapped_meshes["unassigned"];
-            mapped_meshes.erase("unassigned");
-          }
-          else {
-            array<Node *> geom_shaders = mesh->get_used_shaders();
-            if (geom_shaders.size() > 0 && !geom_shaders[0]->name.compare(inst.material_name)) {
-              RIBCyclesMesh* new_mesh = new RIBCyclesMesh(*mesh);
-              mesh = new_mesh;
-            }
-          }
-
-          mesh->build_instance(inst);
-          if (mapped_meshes.find(mesh->get_used_shaders()[0]->name.string()) == mapped_meshes.end()) {
-            mapped_meshes[mesh->get_used_shaders()[0]->name.string()] = mesh;
-            assert(mesh->get_used_shaders()[0]->name.string() == inst.material_name);
-          }
-          scene_bounds.grow(mesh->bounds());
-        }
-      }
-      else {
-        assert(_hair_elements.find(inst_v.first) != _hair_elements.end());
-        auto mapped_curves = _hair_elements[inst_v.first];
-        // RIBCyclesCurves curve(session->scene.get(), inst.second, inst_def);
-        // curve.export_curves();
-        // scene_bounds.grow(curve.bounds());
-      }
-    }
-  }
-  stop = std::chrono::high_resolution_clock::now();
-  dt = stop - start;
-  std::cout << "Time taken building defintions: " << dt.count() / 1000.0 << " seconds" << std::endl;
 
   // Lifted from hydra/session.cpp
   Scene *const scene = session->scene.get();
@@ -364,11 +297,82 @@ void Ri::add_instance_definition(Instance_Definition_Scene_Entity instance)
   Instance_Definition_Scene_Entity *def = new Instance_Definition_Scene_Entity(
       std::move(instance));
 
-  std::lock_guard<std::mutex> lock(instance_definition_mutex);
-  instance_definitions[def->name] = def;
+  if (def->lights.empty()) {
+    auto create = [this](Instance_Definition_Scene_Entity *def) {
+      RIBCyclesMesh *mesh = new RIBCyclesMesh(session->scene.get());
+      mesh->build_instance_definition(def);
+      return mesh;
+    };
+    mesh_definition_jobs[def->name] = run_async(create, def);
+  }
+  else {
+    std::lock_guard<std::mutex> lock(instance_definition_mutex);
+    instance_definitions[def->name] = def;
+  }
 }
 
-void Ri::add_instance_use(std::string name, Instance_Scene_Entity inst) {}
+void Ri::add_instance_use(Instance_Scene_Entity instance)
+{
+  Instance_Scene_Entity *inst = new Instance_Scene_Entity(std::move(instance));
+  auto create = [this](Instance_Scene_Entity *inst) {
+    if (!inst->material_name.empty()) {
+      // Wait until the material has been added as a shader job
+      bool exists = false;
+      while (!exists) {
+        if (shader_jobs.find(inst->material_name) != shader_jobs.end()) {
+          RIBCyclesMaterials material = shader_jobs[inst->material_name]->get_result();
+          exists = true;
+        }
+      }
+    }
+    if (instance_definitions.find(inst->name) != instance_definitions.end()) {
+      auto *inst_def = instance_definitions[inst->name];
+      export_lights(session->scene.get(), *inst, inst_def);
+    }
+    // it's a shape
+    else {
+      if (mesh_definition_jobs.find(inst->name) != mesh_definition_jobs.end()) {
+        RIBCyclesMesh *mesh = mesh_definition_jobs[inst->name]->get_result();
+        _mesh_elements[inst->name]["unassigned"] = mesh;
+      }
+      if (_mesh_elements.find(inst->name) != _mesh_elements.end()) {
+        auto mapped_meshes = _mesh_elements[inst->name];
+        RIBCyclesMesh *mesh = nullptr;
+        if (mapped_meshes.find("unassigned") != mapped_meshes.end()) {
+          std::lock_guard<std::mutex> lock(instance_definition_mutex);
+          // Processing first instance of the definition, so remove it from the list
+          mesh = mapped_meshes["unassigned"];
+          mapped_meshes.erase("unassigned");
+        }
+        else {
+          array<Node *> geom_shaders = mesh->get_used_shaders();
+          if (geom_shaders.size() > 0 && !geom_shaders[0]->name.compare(inst->material_name)) {
+            RIBCyclesMesh *new_mesh = new RIBCyclesMesh(*mesh);
+            mesh = new_mesh;
+          }
+        }
+
+        mesh->build_instance(*inst);
+        if (mapped_meshes.find(mesh->get_used_shaders()[0]->name.string()) == mapped_meshes.end())
+        {
+          std::lock_guard<std::mutex> lock(instance_definition_mutex);
+          mapped_meshes[mesh->get_used_shaders()[0]->name.string()] = mesh;
+          assert(mesh->get_used_shaders()[0]->name.string() == inst->material_name);
+        }
+      }
+      else {
+        assert(_hair_elements.find(inst->name) != _hair_elements.end());
+        auto mapped_curves = _hair_elements[inst->name];
+        // RIBCyclesCurves curve(session->scene.get(), inst->second, inst_def);
+        // curve.export_curves();
+        // scene_bounds.grow(curve.bounds());
+      }
+    }
+    return true;
+  };
+
+  instance_use_jobs.push_back(run_async(create, inst));
+}
 
 void Ri::add_shader(Vector_Dictionary shader)
 {
@@ -379,7 +383,7 @@ void Ri::add_shader(Vector_Dictionary shader)
     material.export_materials();
     return material;
   };
-  shader_jobs.push_back(run_async(create, shader));
+  shader_jobs[shader.first] = run_async(create, shader);
 }
 
 // RI API Default Implementation
@@ -1502,11 +1506,12 @@ void Ri::ObjectInstance(const std::string &name, File_Loc loc)
 
   const ProjectionTransform *render_from_instance = transform_cache.lookup(Render_From_Object(0) *
                                                                            world_from_render);
-  instance_uses[name].push_back(Instance_Scene_Entity(name,
-                                                      loc,
-                                                      graphics_state.current_material_name,
-                                                      std::move(dict) /* RenderMan*/,
-                                                      render_from_instance));
+
+  add_instance_use(Instance_Scene_Entity(name,
+                                         loc,
+                                         graphics_state.current_material_name,
+                                         std::move(dict) /* RenderMan*/,
+                                         render_from_instance));
 }
 
 void Ri::Option(const std::string &name,

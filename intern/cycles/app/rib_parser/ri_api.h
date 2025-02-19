@@ -43,7 +43,7 @@ class Ri {
   int add_area_light(Scene_Entity light);
   void add_animated_shape(Animated_Shape_Scene_Entity shape);
   void add_instance_definition(Instance_Definition_Scene_Entity instance);
-  void add_instance_use(std::string name, Instance_Scene_Entity in);
+  void add_instance_use(Instance_Scene_Entity instance);
   void add_shader(Vector_Dictionary shader);
   void end_of_files();
 
@@ -438,7 +438,9 @@ class Ri {
 
   std::map<std::string, std::map<std::string,RIBCyclesMesh*>> _mesh_elements;
   std::map<std::string, std::map<std::string,RIBCyclesCurves*>> _hair_elements;
-  std::vector<Async_Job<RIBCyclesMaterials> *> shader_jobs;
+  std::map<std::string, Async_Job<RIBCyclesMaterials> *> shader_jobs;
+  std::map<std::string, Async_Job<RIBCyclesMesh*> *> mesh_definition_jobs;
+  std::vector<Async_Job<bool> *> instance_use_jobs;
 };
 
 #define VERIFY_OPTIONS(func) \
