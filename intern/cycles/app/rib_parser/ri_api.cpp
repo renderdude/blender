@@ -17,6 +17,7 @@
 
 #include <double-conversion/double-conversion.h>
 
+#include "app/rib_parser/exporters/curves.h"
 #include "app/rib_parser/exporters/geometry.h"
 #include "kernel/types.h"
 #include "scene/camera.h"
@@ -298,12 +299,22 @@ void Ri::add_instance_definition(Instance_Definition_Scene_Entity instance)
       std::move(instance));
 
   if (def->lights.empty()) {
-    auto create = [this](Instance_Definition_Scene_Entity *def) {
-      RIBCyclesMesh *mesh = new RIBCyclesMesh(session->scene.get());
-      mesh->build_instance_definition(def);
-      return mesh;
-    };
-    mesh_definition_jobs[def->name] = run_async(create, def);
+    if (def->shapes[0].name == "curve") {
+      auto create = [this](Instance_Definition_Scene_Entity *def) {
+        RIBCyclesCurves *curve = new RIBCyclesCurves(session->scene.get());
+        curve->build_instance_definition(def);
+        return curve;
+      };
+      _curve_definition_jobs[def->name] = run_async(create, def);
+    }
+    else {
+      auto create = [this](Instance_Definition_Scene_Entity *def) {
+        RIBCyclesMesh *mesh = new RIBCyclesMesh(session->scene.get());
+        mesh->build_instance_definition(def);
+        return mesh;
+      };
+      _mesh_definition_jobs[def->name] = run_async(create, def);
+    }
   }
   else {
     std::lock_guard<std::mutex> lock(instance_definition_mutex);
@@ -361,11 +372,37 @@ void Ri::add_instance_use(Instance_Scene_Entity instance)
         }
       }
       else {
-        assert(_hair_elements.find(inst->name) != _hair_elements.end());
-        auto mapped_curves = _hair_elements[inst->name];
-        // RIBCyclesCurves curve(session->scene.get(), inst->second, inst_def);
-        // curve.export_curves();
-        // scene_bounds.grow(curve.bounds());
+        assert(_curve_elements.find(inst->name) != _curve_elements.end());
+        if (_curve_definition_jobs.find(inst->name) != _curve_definition_jobs.end()) {
+          RIBCyclesCurves *mesh = _curve_definition_jobs[inst->name]->get_result();
+          _curve_elements[inst->name]["unassigned"] = mesh;
+        }
+        if (_curve_elements.find(inst->name) != _curve_elements.end()) {
+          auto mapped_curves = _curve_elements[inst->name];
+          RIBCyclesCurves *curve = nullptr;
+          if (mapped_curves.find("unassigned") != mapped_curves.end()) {
+            std::lock_guard<std::mutex> lock(instance_definition_mutex);
+            // Processing first instance of the definition, so remove it from the list
+            curve = mapped_curves["unassigned"];
+            mapped_curves.erase("unassigned");
+          }
+          else {
+            array<Node *> geom_shaders = curve->get_used_shaders();
+            if (geom_shaders.size() > 0 && !geom_shaders[0]->name.compare(inst->material_name)) {
+              RIBCyclesCurves *new_curve = new RIBCyclesCurves(*curve);
+              curve = new_curve;
+            }
+          }
+
+          curve->build_instance(*inst);
+          if (mapped_curves.find(curve->get_used_shaders()[0]->name.string()) ==
+              mapped_curves.end())
+          {
+            std::lock_guard<std::mutex> lock(instance_definition_mutex);
+            mapped_curves[curve->get_used_shaders()[0]->name.string()] = curve;
+            assert(curve->get_used_shaders()[0]->name.string() == inst->material_name);
+          }
+        }
       }
     }
     return true;

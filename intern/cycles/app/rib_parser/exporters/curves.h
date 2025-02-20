@@ -1,6 +1,7 @@
 #pragma once
 
 #include "bvh/build.h"
+#include "scene/hair.h"
 #include "scene/scene.h"
 
 #include "app/rib_parser/scene_entities.h"
@@ -12,22 +13,26 @@ CCL_NAMESPACE_BEGIN
 
 class RIBCyclesCurves {
  public:
-  RIBCyclesCurves(Scene *scene,
-                  vector<Instance_Scene_Entity> &inst,
-                  Instance_Definition_Scene_Entity *inst_def)
-      : _scene(scene), _inst_v(inst), _inst_def(inst_def)
-  {
-  }
+  RIBCyclesCurves(Scene *scene) : _scene(scene) {}
 
   ~RIBCyclesCurves() = default;
 
-  void export_curves();
-  BoundBox const& bounds() const {return _bounds;}
-  
+  void build_instance_definition(Instance_Definition_Scene_Entity const *inst_def);
+  void build_instance(Instance_Scene_Entity &inst);
+
+  BoundBox const &bounds() const
+  {
+    return _bounds;
+  }
+
+  array<Node *> get_used_shaders() {
+    return _geom->get_used_shaders();
+  }
+
  protected:
   void initialize(std::string name);
-  void initialize_instance(int index);
-  void populate(bool &rebuild);
+  std::string initialize_instance(Instance_Scene_Entity &inst);
+  void populate();
   void populate_widths();
   void populate_primvars();
   void populate_points();
@@ -35,11 +40,9 @@ class RIBCyclesCurves {
 
  private:
   Scene *_scene = nullptr;
-  vector<Instance_Scene_Entity> const &_inst_v;
-  Instance_Definition_Scene_Entity const *_inst_def;
   Hair *_geom = nullptr;
   std::unordered_map<std::string, Hair *> _instanced_geom;
-  vector<Object *> _instances;
+  Object* _instance;
   ProjectionTransform _geomTransform;
   BoundBox _bounds{BoundBox::empty};
   Shape_Scene_Entity _shape;

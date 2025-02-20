@@ -3,126 +3,123 @@
 #include "app/rib_parser/parsed_parameter.h"
 #include "scene/hair.h"
 #include "scene/object.h"
+#include "scene/shader_graph.h"
 
 CCL_NAMESPACE_BEGIN
 
-void RIBCyclesCurves::export_curves()
+void RIBCyclesCurves::build_instance_definition(Instance_Definition_Scene_Entity const *inst_def)
 {
-  _shape = _inst_def->shapes[0];
+  _shape = inst_def->shapes[0];
 
-  if (_inst_def->shapes.size() > 1) {
+  if (inst_def->shapes.size() > 1) {
     fprintf(stderr,
             "An instance definition, %s, contains more than one shape.\n",
-            _inst_def->name.c_str());
+            inst_def->name.c_str());
     fprintf(stderr, "Only using the first shape found.\n");
   }
 
-  _instances.resize(_inst_v.size());
+  initialize(inst_def->name);
 
-  for (size_t i = 0; i < _inst_v.size(); ++i) {
-    std::string material_id = _inst_v[i].material_name;
-    if (_instanced_geom.find(material_id) != _instanced_geom.end()) {
-      _geom = _instanced_geom[material_id];
-    }
-    else {
-      initialize(material_id);
+  populate();
 
-      array<Node *> usedShaders(1);
-      usedShaders[0] = _scene->default_surface;
-
-      for (auto *shader : _scene->shaders) {
-        if (!shader->name.compare(material_id)) {
-          usedShaders[0] = shader;
-          break;
-        }
-      }
-
-      for (Node *shader : usedShaders) {
-        static_cast<Shader *>(shader)->tag_used(_scene);
-      }
-
-      _geom->set_used_shaders(usedShaders);
-
-      // Must happen after material ID update, so that attribute decisions can be made
-      // based on it (e.g. check whether an attribute is actually needed)
-      bool rebuild = false;
-      populate(rebuild);
-
-      if (_geom->is_modified() || rebuild) {
-        _geom->tag_update(_scene, rebuild);
-        _geom->compute_bounds();
-      }
-    }
-
-    _instances[i] = _scene->create_node<Object>();
-    initialize_instance(static_cast<int>(i));
-
-    if (i == 0) {
-      std::string instance_id = _inst_v[0].parameters.at("identifier").get_one_string("name", "");
-      // Make sure the first object attribute is the instanceId
-      assert(_instances[0]->attributes.size() >= 1 &&
-             _instances[0]->attributes.front().name() == instance_id);
-
-      if (_inst_v.size() > 1) {
-        _instances[0]->attributes.front() = ParamValue(instance_id, +0.0f);
-      }
-      else {
-        // Default to a single instance with an identity transform
-        _instances[0]->attributes.front() = ParamValue(instance_id, -1.0f);
-      }
-    }
-    // Update transform
-    const float metersPerUnit = 1.;
-
-    const Transform tfm = transform_scale(make_float3(metersPerUnit)) *
-                          projection_to_transform((*_inst_v[i].render_from_instance) *
-                                                  (*_shape.render_from_object));
-    _instances[i]->set_tfm(tfm);
-
-    /* Not sure where to pull visibility from a RIB file
-    if (HdChangeTracker::IsVisibilityDirty(*dirtyBits, id)) {
-      for (Object *instance : _instances) {
-        instance->set_visibility(Base::IsVisible() ? ~0 : 0);
-      }
-    }
-  */
-  }
-  for (Object *instance : _instances) {
-    instance->tag_update(_scene);
-    instance->compute_bounds(instance->use_motion());
-    _bounds.grow(instance->bounds);
-  }
+  _geomTransform = *_shape.render_from_object;
 }
 
-void RIBCyclesCurves::initialize(std::string material_name)
+void RIBCyclesCurves::build_instance(Instance_Scene_Entity &inst)
+{
+  array<Node *> usedShaders(1);
+  usedShaders[0] = _scene->default_surface;
+
+  for (auto *shader : _scene->shaders) {
+    if (!shader->name.compare(inst.material_name)) {
+      usedShaders[0] = shader;
+      break;
+    }
+  }
+
+  _geom->set_used_shaders(usedShaders);
+
+  // Must happen after material ID update, so that attribute decisions can be made
+  // based on it (e.g. check whether an attribute is actually needed)
+  bool rebuild = (_geom->curve_keys_is_modified() || _geom->curve_radius_is_modified());
+  if (_geom->is_modified() || rebuild)
+  {
+    _scene->mutex.lock();
+    _geom->tag_update(_scene, rebuild);
+    _geom->compute_bounds();
+    _scene->mutex.unlock();
+  }
+
+  _scene->mutex.lock();
+  _instance = _scene->create_node<Object>();
+  _scene->mutex.unlock();
+  std::string instance_id = initialize_instance(inst);
+
+  // Make sure the first object attribute is the instanceId
+  assert(!_instance->attributes.empty() &&
+         _instance->attributes.front().name() == instance_id);
+
+  // Default to a single instance with an identity transform
+  _instance->attributes.front() = ParamValue(instance_id, -1.0f);
+
+  // Update transform
+  const float metersPerUnit = 1.;
+
+  const Transform tfm = transform_scale(make_float3(metersPerUnit)) *
+                        projection_to_transform(*(inst.render_from_instance) * _geomTransform);
+  _instance->set_tfm(tfm);
+
+  uint visibility = PATH_RAY_ALL_VISIBILITY;
+  int rib_vis = inst.parameters.at("visibility").get_one_int("camera", 1);
+  if (rib_vis == 0) {
+    visibility &= ~PATH_RAY_CAMERA;
+  }
+  rib_vis = inst.parameters.at("visibility").get_one_int("indirect", 1);
+  if (rib_vis == 0) {
+    visibility &= ~PATH_RAY_REFLECT;
+  }
+  rib_vis = inst.parameters.at("visibility").get_one_int("transmission", 1);
+  if (rib_vis == 0) {
+    visibility &= ~PATH_RAY_SHADOW;
+  }
+
+  _instance->set_visibility(visibility);
+
+  _scene->mutex.lock();
+  _instance->tag_update(_scene);
+  _instance->compute_bounds(_instance->use_motion());
+  _scene->mutex.unlock();
+
+  _bounds.grow(_instance->bounds);
+}
+
+void RIBCyclesCurves::initialize(std::string name)
 {
   // Create geometry
+  _scene->mutex.lock();
   _geom = _scene->create_node<Hair>();
-  _geom->name = _inst_def->name;
-
-  _instanced_geom[material_name] = _geom;
+  _scene->mutex.unlock();
+  _geom->name = name;
 }
 
-void RIBCyclesCurves::initialize_instance(int index)
+std::string RIBCyclesCurves::initialize_instance(Instance_Scene_Entity &inst)
 {
-  Object *instance = _instances[index];
-  instance->set_geometry(_geom);
+  _instance->set_geometry(_geom);
 
-  std::string id = _inst_v[index].parameters.at("identifier").get_one_string("name", "");
-  instance->attributes.emplace_back(id,
-                                    _instances.size() == 1 ? -1.0f : static_cast<float>(index));
-  instance->set_color(make_float3(0.8f, 0.8f, 0.8f));
-  instance->set_random_id(hash_uint2(hash_string(_geom->name.c_str()), index));
+  std::string id = inst.parameters.at("identifier").get_one_string("name", "");
+  _instance->attributes.emplace_back(id, -1.0f);
+  _instance->set_color(make_float3(0.8f, 0.8f, 0.8f));
+  _instance->set_random_id(hash_string(id.c_str()));
+
+  return id;
 }
 
-void RIBCyclesCurves::populate(bool &rebuild)
+void RIBCyclesCurves::populate()
 {
   populate_topology();
   populate_points();
   populate_widths();
   populate_primvars();
-
-  rebuild = (_geom->curve_keys_is_modified()) || (_geom->curve_radius_is_modified());
 }
 
 void RIBCyclesCurves::populate_widths()
@@ -181,7 +178,7 @@ void RIBCyclesCurves::populate_primvars()
     }
     else if (param->name == "color" && param->storage == Container_Type::Constant) {
       auto color = param->floats();
-      _instances[0]->set_color(make_float3(color[0], color[1], color[2]));
+      _instance->set_color(make_float3(color[0], color[1], color[2]));
     }
 
     Parsed_Parameter *result = param;
