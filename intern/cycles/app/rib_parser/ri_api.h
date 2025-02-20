@@ -437,10 +437,11 @@ class Ri {
   std::vector<float> _crop_window = {0., 1., 0., 1.};
 
   std::map<std::string, std::map<std::string,RIBCyclesMesh*>> _mesh_elements;
-  std::map<std::string, std::map<std::string,RIBCyclesCurves*>> _hair_elements;
-  std::map<std::string, Async_Job<RIBCyclesMaterials> *> shader_jobs;
-  std::map<std::string, Async_Job<RIBCyclesMesh*> *> mesh_definition_jobs;
-  std::vector<Async_Job<bool> *> instance_use_jobs;
+  std::map<std::string, std::map<std::string,RIBCyclesCurves*>> _curve_elements;
+  std::map<std::string, Async_Job<RIBCyclesMaterials> *> _shader_jobs;
+  std::map<std::string, Async_Job<RIBCyclesMesh*> *> _mesh_definition_jobs;
+  std::map<std::string, Async_Job<RIBCyclesCurves*> *> _curve_definition_jobs;
+  std::vector<Async_Job<bool> *> _instance_use_jobs;
 };
 
 #define VERIFY_OPTIONS(func) \

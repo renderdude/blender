@@ -141,20 +141,20 @@ void Ri::export_to_cycles()
   export_options(filter, film, _camera[film.camera_name], sampler);
 
   // Force the instance jobs to finish
-  for (auto *instance_job : instance_use_jobs) {
+  for (auto *instance_job : _instance_use_jobs) {
     instance_job->get_result();
   }
-  instance_use_jobs.clear();
+  _instance_use_jobs.clear();
 
   // that, should force the instance definitions and shders to finish, so we should
   // be good to clear them here
   {
     std::lock_guard<std::mutex> lock(shader_mutex);
-    for (auto shader : shader_jobs) {
+    for (auto shader : _shader_jobs) {
       RIBCyclesMaterials material = shader.second->get_result();
     }
   }
-  shader_jobs.clear();
+  _shader_jobs.clear();
 
   // Lifted from hydra/session.cpp
   Scene *const scene = session->scene.get();
@@ -319,8 +319,8 @@ void Ri::add_instance_use(Instance_Scene_Entity instance)
       // Wait until the material has been added as a shader job
       bool exists = false;
       while (!exists) {
-        if (shader_jobs.find(inst->material_name) != shader_jobs.end()) {
-          RIBCyclesMaterials material = shader_jobs[inst->material_name]->get_result();
+        if (_shader_jobs.find(inst->material_name) != _shader_jobs.end()) {
+          RIBCyclesMaterials material = _shader_jobs[inst->material_name]->get_result();
           exists = true;
         }
       }
@@ -331,8 +331,8 @@ void Ri::add_instance_use(Instance_Scene_Entity instance)
     }
     // it's a shape
     else {
-      if (mesh_definition_jobs.find(inst->name) != mesh_definition_jobs.end()) {
-        RIBCyclesMesh *mesh = mesh_definition_jobs[inst->name]->get_result();
+      if (_mesh_definition_jobs.find(inst->name) != _mesh_definition_jobs.end()) {
+        RIBCyclesMesh *mesh = _mesh_definition_jobs[inst->name]->get_result();
         _mesh_elements[inst->name]["unassigned"] = mesh;
       }
       if (_mesh_elements.find(inst->name) != _mesh_elements.end()) {
@@ -371,7 +371,7 @@ void Ri::add_instance_use(Instance_Scene_Entity instance)
     return true;
   };
 
-  instance_use_jobs.push_back(run_async(create, inst));
+  _instance_use_jobs.push_back(run_async(create, inst));
 }
 
 void Ri::add_shader(Vector_Dictionary shader)
@@ -383,7 +383,7 @@ void Ri::add_shader(Vector_Dictionary shader)
     material.export_materials();
     return material;
   };
-  shader_jobs[shader.first] = run_async(create, shader);
+  _shader_jobs[shader.first] = run_async(create, shader);
 }
 
 // RI API Default Implementation
