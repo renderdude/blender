@@ -23,8 +23,6 @@ class RIBCyclesMesh {
   void build_instance_definition(Instance_Definition_Scene_Entity const *inst_def);
   void build_instance(Instance_Scene_Entity &inst);
 
-  void export_geometry();
-
   BoundBox const& bounds() const {return _bounds;}
 
   array<Node *> get_used_shaders() {
