@@ -311,6 +311,7 @@ void Ri::add_instance_definition(Instance_Definition_Scene_Entity instance)
       auto create = [this](Instance_Definition_Scene_Entity *def) {
         RIBCyclesMesh *mesh = new RIBCyclesMesh(session->scene.get());
         mesh->build_instance_definition(def);
+        delete def;
         return mesh;
       };
       _mesh_definition_jobs[def->name] = run_async(create, def);
@@ -356,6 +357,7 @@ void Ri::add_instance_use(Instance_Scene_Entity instance)
           mapped_meshes.erase("unassigned");
         }
         else {
+          mesh = mapped_meshes[inst->material_name];
           array<Node *> geom_shaders = mesh->get_used_shaders();
           if (geom_shaders.size() > 0 && !geom_shaders[0]->name.compare(inst->material_name)) {
             RIBCyclesMesh *new_mesh = new RIBCyclesMesh(*mesh);
