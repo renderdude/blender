@@ -6,13 +6,10 @@
  * \ingroup nodes
  */
 
-#include <cstdio>
-
-#include "BLI_string.h"
-
-#include "DNA_color_types.h"
 #include "DNA_node_types.h"
 #include "DNA_scene_types.h"
+
+#include "BLI_listbase.h"
 
 #include "BKE_context.hh"
 #include "BKE_global.hh"
@@ -31,8 +28,6 @@
 
 #include "NOD_composite.hh"
 #include "node_composite_util.hh"
-
-#include "COM_compositor.hh"
 
 static void composite_get_from_context(const bContext *C,
                                        blender::bke::bNodeTreeType * /*treetype*/,
@@ -99,7 +94,7 @@ static void local_merge(Main *bmain, bNodeTree *localtree, bNodeTree *ntree)
   blender::bke::node_preview_merge_tree(ntree, localtree, true);
 
   LISTBASE_FOREACH (bNode *, lnode, &localtree->nodes) {
-    if (bNode *orig_node = blender::bke::node_find_node_by_name(ntree, lnode->name)) {
+    if (bNode *orig_node = blender::bke::node_find_node_by_name(*ntree, lnode->name)) {
       if (lnode->type_legacy == CMP_NODE_VIEWER) {
         if (lnode->id && (lnode->flag & NODE_DO_OUTPUT)) {
           /* image_merge does sanity check for pointers */
@@ -124,7 +119,7 @@ static void local_merge(Main *bmain, bNodeTree *localtree, bNodeTree *ntree)
 
 static void update(bNodeTree *ntree)
 {
-  blender::bke::node_tree_set_output(ntree);
+  blender::bke::node_tree_set_output(*ntree);
 
   ntree_update_reroute_nodes(ntree);
 }
@@ -142,7 +137,7 @@ static void composite_node_add_init(bNodeTree * /*bnodetree*/, bNode *bnode)
 static bool composite_node_tree_socket_type_valid(blender::bke::bNodeTreeType * /*ntreetype*/,
                                                   blender::bke::bNodeSocketType *socket_type)
 {
-  return blender::bke::node_is_static_socket_type(socket_type) &&
+  return blender::bke::node_is_static_socket_type(*socket_type) &&
          ELEM(socket_type->type, SOCK_FLOAT, SOCK_INT, SOCK_VECTOR, SOCK_RGBA);
 }
 
@@ -170,7 +165,7 @@ void register_node_tree_type_cmp()
 
   tt->rna_ext.srna = &RNA_CompositorNodeTree;
 
-  blender::bke::node_tree_type_add(tt);
+  blender::bke::node_tree_type_add(*tt);
 }
 
 /* *********************************************** */

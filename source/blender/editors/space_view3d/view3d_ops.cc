@@ -6,12 +6,11 @@
  * \ingroup spview3d
  */
 
-#include <cmath>
-
 #include "DNA_object_types.h"
 #include "DNA_screen_types.h"
 #include "DNA_space_types.h"
 
+#include "BLI_listbase.h"
 #include "BLI_path_utils.hh"
 
 #include "BKE_appdir.hh"
@@ -231,7 +230,7 @@ void view3d_operatortypes()
   WM_operatortype_append(VIEW3D_OT_ruler_add);
   WM_operatortype_append(VIEW3D_OT_ruler_remove);
 
-  transform_operatortypes();
+  blender::ed::transform::transform_operatortypes();
 }
 
 void view3d_keymap(wmKeyConfig *keyconf)

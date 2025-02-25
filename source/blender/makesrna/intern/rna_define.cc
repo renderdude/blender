@@ -666,7 +666,7 @@ void RNA_identifier_sanitize(char *identifier, int property)
 static bool rna_range_from_int_type(const char *dnatype, int r_range[2])
 {
   /* Type `char` is unsigned too. */
-  if (STREQ(dnatype, "char") || STREQ(dnatype, "uchar")) {
+  if (STR_ELEM(dnatype, "char", "uchar")) {
     r_range[0] = CHAR_MIN;
     r_range[1] = CHAR_MAX;
     return true;
@@ -1737,7 +1737,7 @@ void RNA_def_property_ui_range(
       fprop->softmin = float(min);
       fprop->softmax = float(max);
       fprop->step = float(step);
-      fprop->precision = int(precision);
+      fprop->precision = precision;
       break;
     }
     default:
@@ -3527,6 +3527,28 @@ void RNA_def_property_string_search_func(PropertyRNA *prop,
       if (search != nullptr) {
         sprop->search_flag = search_flag | PROP_STRING_SEARCH_SUPPORTED;
       }
+      break;
+    }
+    default:
+      CLOG_ERROR(&LOG, "\"%s.%s\", type is not string.", srna->identifier, prop->identifier);
+      DefRNA.error = true;
+      break;
+  }
+}
+
+void RNA_def_property_string_filepath_filter_func(PropertyRNA *prop, const char *filter)
+{
+  StructRNA *srna = DefRNA.laststruct;
+
+  if (!DefRNA.preprocess) {
+    CLOG_ERROR(&LOG, "only during preprocessing.");
+    return;
+  }
+
+  switch (prop->type) {
+    case PROP_STRING: {
+      StringPropertyRNA *sprop = (StringPropertyRNA *)prop;
+      sprop->path_filter = (StringPropertyPathFilterFunc)filter;
       break;
     }
     default:

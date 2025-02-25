@@ -13,6 +13,7 @@
 #include "MEM_guardedalloc.h"
 
 #include "BLI_listbase.h"
+#include "BLI_math_vector.h"
 #include "BLI_rect.h"
 #include "BLI_string.h"
 #include "BLI_utildefines.h"
@@ -568,7 +569,7 @@ void ED_slider_status_get(const tSlider *slider, WorkspaceStatus &status)
   status.item_bool(IFACE_("Precision"), slider->precision, ICON_EVENT_SHIFT);
 
   if (slider->allow_increments) {
-    status.item_bool(IFACE_("Increments"), slider->increments, ICON_EVENT_CTRL);
+    status.item_bool(IFACE_("Snap"), slider->increments, ICON_EVENT_CTRL);
   }
 }
 

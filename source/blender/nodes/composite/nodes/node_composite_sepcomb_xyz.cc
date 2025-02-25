@@ -14,8 +14,6 @@
 
 #include "GPU_material.hh"
 
-#include "COM_shader_node.hh"
-
 #include "node_composite_util.hh"
 
 /* **************** SEPARATE XYZ ******************** */
@@ -32,29 +30,20 @@ static void cmp_node_separate_xyz_declare(NodeDeclarationBuilder &b)
 
 using namespace blender::compositor;
 
-class SeparateXYZShaderNode : public ShaderNode {
- public:
-  using ShaderNode::ShaderNode;
-
-  void compile(GPUMaterial *material) override
-  {
-    GPUNodeStack *inputs = get_inputs_array();
-    GPUNodeStack *outputs = get_outputs_array();
-
-    GPU_stack_link(material, &bnode(), "node_composite_separate_xyz", inputs, outputs);
-  }
-};
-
-static ShaderNode *get_compositor_shader_node(DNode node)
+static int node_gpu_material(GPUMaterial *material,
+                             bNode *node,
+                             bNodeExecData * /*execdata*/,
+                             GPUNodeStack *inputs,
+                             GPUNodeStack *outputs)
 {
-  return new SeparateXYZShaderNode(node);
+  return GPU_stack_link(material, node, "node_composite_separate_xyz", inputs, outputs);
 }
 
 static void node_build_multi_function(blender::nodes::NodeMultiFunctionBuilder &builder)
 {
-  static auto function = mf::build::SI1_SO3<float4, float, float, float>(
+  static auto function = mf::build::SI1_SO3<float3, float, float, float>(
       "Separate XYZ",
-      [](const float4 &vector, float &x, float &y, float &z) -> void {
+      [](const float3 &vector, float &x, float &y, float &z) -> void {
         x = vector.x;
         y = vector.y;
         z = vector.z;
@@ -77,10 +66,10 @@ void register_node_type_cmp_separate_xyz()
   ntype.enum_name_legacy = "SEPARATE_XYZ";
   ntype.nclass = NODE_CLASS_CONVERTER;
   ntype.declare = file_ns::cmp_node_separate_xyz_declare;
-  ntype.get_compositor_shader_node = file_ns::get_compositor_shader_node;
+  ntype.gpu_fn = file_ns::node_gpu_material;
   ntype.build_multi_function = file_ns::node_build_multi_function;
 
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 }
 
 /* **************** COMBINE XYZ ******************** */
@@ -97,29 +86,20 @@ static void cmp_node_combine_xyz_declare(NodeDeclarationBuilder &b)
 
 using namespace blender::compositor;
 
-class CombineXYZShaderNode : public ShaderNode {
- public:
-  using ShaderNode::ShaderNode;
-
-  void compile(GPUMaterial *material) override
-  {
-    GPUNodeStack *inputs = get_inputs_array();
-    GPUNodeStack *outputs = get_outputs_array();
-
-    GPU_stack_link(material, &bnode(), "node_composite_combine_xyz", inputs, outputs);
-  }
-};
-
-static ShaderNode *get_compositor_shader_node(DNode node)
+static int node_gpu_material(GPUMaterial *material,
+                             bNode *node,
+                             bNodeExecData * /*execdata*/,
+                             GPUNodeStack *inputs,
+                             GPUNodeStack *outputs)
 {
-  return new CombineXYZShaderNode(node);
+  return GPU_stack_link(material, node, "node_composite_combine_xyz", inputs, outputs);
 }
 
 static void node_build_multi_function(blender::nodes::NodeMultiFunctionBuilder &builder)
 {
-  static auto function = mf::build::SI3_SO<float, float, float, float4>(
+  static auto function = mf::build::SI3_SO<float, float, float, float3>(
       "Combine XYZ",
-      [](const float x, const float y, const float z) -> float4 { return float4(x, y, z, 0.0f); },
+      [](const float x, const float y, const float z) -> float3 { return float3(x, y, z); },
       mf::build::exec_presets::Materialized());
   builder.set_matching_fn(function);
 }
@@ -138,8 +118,8 @@ void register_node_type_cmp_combine_xyz()
   ntype.enum_name_legacy = "COMBINE_XYZ";
   ntype.nclass = NODE_CLASS_CONVERTER;
   ntype.declare = file_ns::cmp_node_combine_xyz_declare;
-  ntype.get_compositor_shader_node = file_ns::get_compositor_shader_node;
+  ntype.gpu_fn = file_ns::node_gpu_material;
   ntype.build_multi_function = file_ns::node_build_multi_function;
 
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 }

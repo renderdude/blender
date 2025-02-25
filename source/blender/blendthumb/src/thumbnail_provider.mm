@@ -19,7 +19,7 @@
  * 1. If an app is launched, or is registered with lsregister, its plugins also get registered.
  * 2. When a file thumbnail in Finder or QuickLook is requested, the system looks for a plugin
  *    that supports the file type UTI.
- * 3. The plugin is launched in a sandboxed environment and should call the handler with a reply.
+ * 3. The plugin is launched in a sand-boxed environment and should call the handler with a reply.
  *
  * # Plugin Info.plist
  * The Info.plist file should be properly configured with supported content type.
@@ -43,7 +43,7 @@
  *
  * LLDB/ Xcode etc., debuggers can be used to get extra logs than CLI invocation but breakpoints
  * still are a pain point. /usr/bin/qlmanage is the target executable. Other args to qlmanage
- * follow.
+ * follow. lldb qlmanage --  -t -x a.blend
  *
  * # Troubleshooting
  * - The appex shouldn't have any quarantine flag.
@@ -62,7 +62,7 @@
  * - The code cannot attempt to do anything outside sandbox like writing to blend.
  *
  * # Triggering a thumbnail
- * - qlmanage -t -s 512 -o /tmp/ /path/to/file.blend
+ * - qlmanage -t -x /path/to/file.blend
  *
  * # External resources
  * https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/Quicklook_Programming_Guide/Introduction/Introduction.html#//apple_ref/doc/uid/TP40005020-CH1-SW1

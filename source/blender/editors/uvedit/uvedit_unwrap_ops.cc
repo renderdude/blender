@@ -16,7 +16,6 @@
 #include "DNA_meshdata_types.h"
 #include "DNA_modifier_types.h"
 #include "DNA_object_types.h"
-#include "DNA_scene_defaults.h"
 #include "DNA_scene_types.h"
 
 #include "BKE_global.hh"
@@ -41,7 +40,6 @@
 #include "BKE_customdata.hh"
 #include "BKE_deform.hh"
 #include "BKE_editmesh.hh"
-#include "BKE_global.hh"
 #include "BKE_image.hh"
 #include "BKE_layer.hh"
 #include "BKE_lib_id.hh"
@@ -3509,7 +3507,7 @@ static int uv_from_view_exec(bContext *C, wmOperator *op)
           changed = true;
         }
 
-        MEM_freeN(uci);
+        BLI_uvproject_camera_info_free(uci);
       }
     }
     else {

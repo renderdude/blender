@@ -73,6 +73,7 @@ class Wireframe : Overlay {
       auto &pass = wireframe_ps_;
       pass.init();
       pass.bind_ubo(OVERLAY_GLOBALS_SLOT, &res.globals_buf);
+      pass.bind_ubo(DRW_CLIPPING_UBO_SLOT, &res.clip_planes_buf);
       pass.state_set(DRW_STATE_FIRST_VERTEX_CONVENTION | DRW_STATE_WRITE_COLOR |
                          DRW_STATE_WRITE_DEPTH | DRW_STATE_DEPTH_LESS_EQUAL,
                      state.clipping_plane_count);
@@ -161,7 +162,11 @@ class Wireframe : Overlay {
         break;
       }
       case OB_MESH: {
-        bool has_edit_cage = Meshes::mesh_has_edit_cage(ob_ref.object);
+        /* Force display in edit mode when overlay is off in wireframe mode (see #78484). */
+        const bool wireframe_no_overlay = state.hide_overlays && state.is_wireframe_mode;
+        /* Display only if there is an edit cage. Otherwise we get Z fighting with edit wires. */
+        const bool has_edit_cage = Meshes::mesh_has_edit_cage(ob_ref.object);
+        const bool bypass_mode_check = wireframe_no_overlay || has_edit_cage;
 
         if (show_surface_wire) {
           if (BKE_sculptsession_use_pbvh_draw(ob_ref.object, state.rv3d)) {
@@ -171,7 +176,7 @@ class Wireframe : Overlay {
               coloring.mesh_all_edges_ps_->draw(batch.batch, handle);
             }
           }
-          else if (!in_edit_mode || has_edit_cage) {
+          else if (!in_edit_mode || bypass_mode_check) {
             /* Only draw the wireframe in edit mode if object has edit cage.
              * Otherwise the wireframe will conflict with the edit cage drawing and produce
              * unpleasant aliasing. */
@@ -182,7 +187,7 @@ class Wireframe : Overlay {
         }
 
         /* Draw loose geometry. */
-        if (!in_edit_paint_mode || has_edit_cage) {
+        if (!in_edit_paint_mode || bypass_mode_check) {
           const Mesh *mesh = static_cast<const Mesh *>(ob_ref.object->data);
           gpu::Batch *geom;
           if ((mesh->edges_num == 0) && (mesh->verts_num > 0)) {

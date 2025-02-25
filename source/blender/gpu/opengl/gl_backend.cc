@@ -6,12 +6,17 @@
  * \ingroup gpu
  */
 
+#include <string>
+
 #include "BKE_global.hh"
 #if defined(WIN32)
 #  include "BLI_winstuff.h"
 #endif
+#include "BLI_string_ref.hh"
 #include "BLI_subprocess.hh"
 #include "BLI_threads.h"
+#include "BLI_vector.hh"
+
 #include "DNA_userdef_types.h"
 
 #include "gpu_capabilities_private.hh"
@@ -585,7 +590,6 @@ void GLBackend::capabilities_init()
   glGetIntegerv(GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT, &ssbo_alignment);
   GCaps.storage_buffer_alignment = size_t(ssbo_alignment);
 
-  GCaps.transform_feedback_support = true;
   GCaps.texture_view_support = epoxy_gl_version() >= 43 ||
                                epoxy_has_gl_extension("GL_ARB_texture_view");
   GCaps.stencil_export_support = epoxy_has_gl_extension("GL_ARB_shader_stencil_export");

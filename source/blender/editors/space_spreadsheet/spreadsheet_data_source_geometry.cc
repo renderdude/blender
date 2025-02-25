@@ -2,11 +2,11 @@
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
+#include "BLI_listbase.h"
 #include "BLI_math_matrix.hh"
 #include "BLI_virtual_array.hh"
 
 #include "BKE_attribute.hh"
-#include "BKE_compute_contexts.hh"
 #include "BKE_context.hh"
 #include "BKE_curves.hh"
 #include "BKE_editmesh.hh"
@@ -20,23 +20,18 @@
 #include "BKE_mesh.hh"
 #include "BKE_mesh_wrapper.hh"
 #include "BKE_modifier.hh"
-#include "BKE_node_socket_value.hh"
 #include "BKE_object_types.hh"
 #include "BKE_volume.hh"
 #include "BKE_volume_grid.hh"
 
-#include "DNA_ID.h"
 #include "DNA_pointcloud_types.h"
 #include "DNA_space_types.h"
-#include "DNA_userdef_types.h"
 
 #include "DEG_depsgraph_query.hh"
 
 #include "ED_curves.hh"
 #include "ED_outliner.hh"
-#include "ED_spreadsheet.hh"
 
-#include "NOD_geometry_nodes_lazy_function.hh"
 #include "NOD_geometry_nodes_log.hh"
 
 #include "BLT_translation.hh"
@@ -522,7 +517,7 @@ IndexMask GeometryDataSource::apply_selection_filter(IndexMaskMemory &memory) co
       BLI_assert(object_orig_->type == OB_POINTCLOUD);
       const bke::AttributeAccessor attributes = *component_->attributes();
       const VArray<bool> selection = *attributes.lookup_or_default(
-          ".selection", bke::AttrDomain::Point, false);
+          ".selection", bke::AttrDomain::Point, true);
       return IndexMask::from_bools(selection, memory);
     }
     default:

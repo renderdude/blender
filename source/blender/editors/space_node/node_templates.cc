@@ -159,7 +159,7 @@ static void node_remove_linked(Main *bmain, bNodeTree *ntree, bNode *rem_node)
     next = node->next;
 
     if (node->flag & NODE_TEST) {
-      bke::node_remove_node(bmain, ntree, node, true);
+      bke::node_remove_node(bmain, *ntree, *node, true);
     }
   }
 }
@@ -174,7 +174,7 @@ static void node_socket_disconnect(Main *bmain,
     return;
   }
 
-  bke::node_remove_link(ntree, sock_to->link);
+  bke::node_remove_link(ntree, *sock_to->link);
   sock_to->flag |= SOCK_COLLAPSED;
 
   BKE_ntree_update_tag_node_property(ntree, node_to);
@@ -211,7 +211,7 @@ static void node_socket_add_replace(const bContext *C,
   /* unlink existing node */
   if (sock_to->link) {
     node_prev = sock_to->link->fromnode;
-    bke::node_remove_link(ntree, sock_to->link);
+    bke::node_remove_link(ntree, *sock_to->link);
   }
 
   /* find existing node that we can use */
@@ -234,7 +234,7 @@ static void node_socket_add_replace(const bContext *C,
     node_from = node_prev;
   }
   else if (!node_from) {
-    node_from = bke::node_add_static_node(C, ntree, type);
+    node_from = bke::node_add_static_node(C, *ntree, type);
     if (node_prev != nullptr) {
       /* If we're replacing existing node, use its location. */
       node_from->location[0] = node_prev->location[0];
@@ -242,26 +242,26 @@ static void node_socket_add_replace(const bContext *C,
     }
     else {
       sock_from_tmp = (bNodeSocket *)BLI_findlink(&node_from->outputs, item->socket_index);
-      bke::node_position_relative(node_from, node_to, sock_from_tmp, sock_to);
+      bke::node_position_relative(*node_from, *node_to, *sock_from_tmp, *sock_to);
     }
 
     node_link_item_apply(ntree, node_from, item);
     BKE_main_ensure_invariants(*bmain, ntree->id);
   }
 
-  bke::node_set_active(ntree, node_from);
+  bke::node_set_active(*ntree, *node_from);
 
   /* add link */
   sock_from_tmp = (bNodeSocket *)BLI_findlink(&node_from->outputs, item->socket_index);
-  bke::node_add_link(ntree, node_from, sock_from_tmp, node_to, sock_to);
+  bke::node_add_link(*ntree, *node_from, *sock_from_tmp, *node_to, *sock_to);
   sock_to->flag &= ~SOCK_COLLAPSED;
 
   /* copy input sockets from previous node */
   if (node_prev && node_from != node_prev) {
     LISTBASE_FOREACH (bNodeSocket *, sock_prev, &node_prev->inputs) {
       LISTBASE_FOREACH (bNodeSocket *, sock_from, &node_from->inputs) {
-        if (bke::node_count_socket_links(ntree, sock_from) >=
-            bke::node_socket_link_limit(sock_from))
+        if (bke::node_count_socket_links(*ntree, *sock_from) >=
+            bke::node_socket_link_limit(*sock_from))
         {
           continue;
         }
@@ -272,8 +272,8 @@ static void node_socket_add_replace(const bContext *C,
           bNodeLink *link = sock_prev->link;
 
           if (link && link->fromnode) {
-            bke::node_add_link(ntree, link->fromnode, link->fromsock, node_from, sock_from);
-            bke::node_remove_link(ntree, link);
+            bke::node_add_link(*ntree, *link->fromnode, *link->fromsock, *node_from, *sock_from);
+            bke::node_remove_link(ntree, *link);
           }
 
           node_socket_copy_default_value(sock_from, sock_prev);
@@ -431,7 +431,7 @@ static void ui_node_sock_name(const bNodeTree *ntree,
     bNode *node = sock->link->fromnode;
     char node_name[UI_MAX_NAME_STR];
 
-    bke::nodeLabel(ntree, node, node_name, sizeof(node_name));
+    bke::nodeLabel(*ntree, *node, node_name, sizeof(node_name));
 
     if (BLI_listbase_is_empty(&node->inputs) && node->outputs.first != node->outputs.last) {
       BLI_snprintf(
@@ -539,7 +539,7 @@ static void ui_node_menu_column(NodeLinkArg *arg, int nclass, const char *cname)
         UI_block_layout_set_current(block, column);
 
         uiItemL(column, IFACE_(cname), ICON_NODE);
-        but = (uiBut *)block->buttons.last;
+        but = block->buttons.last().get();
 
         first = 0;
       }
@@ -628,7 +628,7 @@ static void ui_template_node_link_menu(bContext *C, uiLayout *layout, void *but_
 
   if (sock->link) {
     uiItemL(column, IFACE_("Link"), ICON_NONE);
-    but = (uiBut *)block->buttons.last;
+    but = block->buttons.last().get();
     but->drawflag = UI_BUT_TEXT_LEFT;
 
     but = uiDefBut(block,
@@ -755,7 +755,7 @@ static void ui_node_draw_panel(uiLayout &layout,
                                 UI_BTYPE_BUT,
                                 0,
                                 panel_state.is_collapsed() ? ICON_RIGHTARROW : ICON_DOWNARROW_HLT,
-                                IFACE_(panel_decl.name.c_str()),
+                                IFACE_(panel_decl.name),
                                 0,
                                 0,
                                 UI_UNIT_X * 4,

@@ -6,9 +6,7 @@
  * \ingroup spseq
  */
 
-#include "MEM_guardedalloc.h"
-
-#include "BLI_blenlib.h"
+#include "BLI_string.h"
 
 #include "DNA_sequence_types.h"
 
@@ -17,9 +15,10 @@
 
 #include "BLF_api.hh"
 
-#include "GPU_batch.hh"
+#include "GPU_immediate.hh"
 #include "GPU_matrix.hh"
 #include "GPU_state.hh"
+#include "GPU_vertex_format.hh"
 
 #include "WM_api.hh"
 #include "WM_types.hh"
@@ -30,9 +29,7 @@
 
 #include "UI_view2d.hh"
 
-#include "SEQ_connect.hh"
 #include "SEQ_retiming.hh"
-#include "SEQ_sequencer.hh"
 #include "SEQ_time.hh"
 
 /* Own include. */
@@ -111,7 +108,8 @@ rctf strip_retiming_keys_box_get(const Scene *scene, const View2D *v2d, const St
 int left_fake_key_frame_get(const bContext *C, const Strip *strip)
 {
   const Scene *scene = CTX_data_scene(C);
-  int sound_offset = SEQ_time_get_rounded_sound_offset(scene, strip);
+  const float scene_fps = float(scene->r.frs_sec) / float(scene->r.frs_sec_base);
+  const int sound_offset = SEQ_time_get_rounded_sound_offset(strip, scene_fps);
   const int content_start = SEQ_time_start_frame_get(strip) + sound_offset;
   return max_ii(content_start, SEQ_time_left_handle_frame_get(scene, strip));
 }
@@ -119,7 +117,8 @@ int left_fake_key_frame_get(const bContext *C, const Strip *strip)
 int right_fake_key_frame_get(const bContext *C, const Strip *strip)
 {
   const Scene *scene = CTX_data_scene(C);
-  int sound_offset = SEQ_time_get_rounded_sound_offset(scene, strip);
+  const float scene_fps = float(scene->r.frs_sec) / float(scene->r.frs_sec_base);
+  const int sound_offset = SEQ_time_get_rounded_sound_offset(strip, scene_fps);
   const int content_end = SEQ_time_content_end_frame_get(scene, strip) - 1 + sound_offset;
   return min_ii(content_end, SEQ_time_right_handle_frame_get(scene, strip));
 }
@@ -152,7 +151,9 @@ static bool retiming_fake_key_frame_clicked(const bContext *C,
   const float right_distance = fabs(UI_view2d_view_to_region_x(v2d, right_x) - mval[0]);
 
   r_frame = (left_distance < right_distance) ? left_frame : right_frame;
-  return min_ff(left_distance, right_distance) < RETIME_KEY_MOUSEOVER_THRESHOLD;
+
+  /* Fake key threshold is doubled to make them easier to select. */
+  return min_ff(left_distance, right_distance) < RETIME_KEY_MOUSEOVER_THRESHOLD * 2;
 }
 
 void realize_fake_keys(const Scene *scene, Strip *strip)
@@ -361,10 +362,11 @@ void sequencer_retiming_draw_continuity(const TimelineDrawContext *timeline_ctx,
 
 static SeqRetimingKey fake_retiming_key_init(const Scene *scene, const Strip *strip, int key_x)
 {
-  int sound_offset = SEQ_time_get_rounded_sound_offset(scene, strip);
+  const float scene_fps = float(scene->r.frs_sec) / float(scene->r.frs_sec_base);
+  const int sound_offset = SEQ_time_get_rounded_sound_offset(strip, scene_fps);
   SeqRetimingKey fake_key = {0};
   fake_key.strip_frame_index = (key_x - SEQ_time_start_frame_get(strip) - sound_offset) *
-                               SEQ_time_media_playback_rate_factor_get(scene, strip);
+                               SEQ_time_media_playback_rate_factor_get(strip, scene_fps);
   fake_key.flag = 0;
   return fake_key;
 }

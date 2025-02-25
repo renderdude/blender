@@ -242,7 +242,7 @@ static Mesh *modify_mesh(ModifierData *md, const ModifierEvalContext *ctx, Mesh 
           {static_cast<float3 *>(CustomData_get_layer_for_write(
                &result->corner_data, CD_NORMAL, result->corners_num)),
            result->corners_num});
-      CustomData_free_layers(&result->corner_data, CD_NORMAL, result->corners_num);
+      CustomData_free_layers(&result->corner_data, CD_NORMAL);
     }
     // blender::bke::subdiv::stats_print(&subdiv->stats);
     if (subdiv != runtime_data->subdiv) {
@@ -301,7 +301,7 @@ static void panel_draw(const bContext *C, Panel *panel)
   uiLayoutSetPropSep(layout, true);
 
   col = uiLayoutColumn(layout, true);
-  uiItemR(col, ptr, "levels", UI_ITEM_NONE, IFACE_("Level Viewport"), ICON_NONE);
+  uiItemR(col, ptr, "levels", UI_ITEM_NONE, IFACE_("Levels Viewport"), ICON_NONE);
   uiItemR(col, ptr, "sculpt_levels", UI_ITEM_NONE, IFACE_("Sculpt"), ICON_NONE);
   uiItemR(col, ptr, "render_levels", UI_ITEM_NONE, IFACE_("Render"), ICON_NONE);
 

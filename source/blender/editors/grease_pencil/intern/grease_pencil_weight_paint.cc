@@ -17,6 +17,7 @@
 #include "BKE_paint.hh"
 #include "BKE_report.hh"
 
+#include "BLI_listbase.h"
 #include "BLI_math_geom.h"
 #include "BLI_math_matrix.h"
 
@@ -447,8 +448,8 @@ void add_armature_automatic_weights(Scene &scene, Object &object, const Object &
 
 struct ClosestGreasePencilDrawing {
   const bke::greasepencil::Drawing *drawing = nullptr;
-  int active_defgroup_index;
-  ed::curves::FindClosestData elem = {};
+  int active_defgroup_index = -1;
+  ed::curves::FindClosestData elem;
 };
 
 static int weight_sample_invoke(bContext *C, wmOperator * /*op*/, const wmEvent *event)
@@ -465,7 +466,7 @@ static int weight_sample_invoke(bContext *C, wmOperator * /*op*/, const wmEvent 
       BLI_findlink(BKE_object_defgroup_list(vc.obact), object_defgroup_nr));
 
   /* Collect visible drawings. */
-  const Object *ob_eval = DEG_get_evaluated_object(vc.depsgraph, const_cast<Object *>(vc.obact));
+  const Object *ob_eval = DEG_get_evaluated_object(vc.depsgraph, vc.obact);
   GreasePencil &grease_pencil = *static_cast<GreasePencil *>(vc.obact->data);
   const Vector<DrawingInfo> drawings = retrieve_visible_drawings(*vc.scene, grease_pencil, false);
 

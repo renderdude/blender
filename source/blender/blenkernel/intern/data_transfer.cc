@@ -13,6 +13,7 @@
 #include "DNA_meshdata_types.h"
 #include "DNA_object_types.h"
 
+#include "BLI_listbase.h"
 #include "BLI_math_base.h"
 #include "BLI_math_matrix.h"
 #include "BLI_string.h"
@@ -34,6 +35,8 @@
 #include "DEG_depsgraph_query.hh"
 
 #include "data_transfer_intern.hh"
+
+using blender::StringRef;
 
 void BKE_object_data_transfer_dttypes_to_cdmask(const int dtdata_types,
                                                 CustomData_MeshMasks *r_data_masks)
@@ -259,7 +262,8 @@ static void data_transfer_mesh_attributes_transfer_active_color_string(
   const AttributeOwner owner_src = AttributeOwner::from_id(const_cast<ID *>(&mesh_src->id));
   AttributeOwner owner_dst = AttributeOwner::from_id(&mesh_dst->id);
 
-  const char *active_color_src = BKE_id_attributes_active_color_name(&mesh_src->id);
+  const StringRef active_color_src =
+      BKE_id_attributes_active_color_name(&mesh_src->id).value_or("");
 
   if ((data_type == CD_PROP_COLOR) &&
       !BKE_attribute_search(
@@ -278,13 +282,15 @@ static void data_transfer_mesh_attributes_transfer_active_color_string(
       BKE_attribute_search(
           owner_dst, active_color_src, CD_MASK_PROP_COLOR, ATTR_DOMAIN_MASK_COLOR))
   {
-    mesh_dst->active_color_attribute = BLI_strdup(active_color_src);
+    mesh_dst->active_color_attribute = BLI_strdupn(active_color_src.data(),
+                                                   active_color_src.size());
   }
   else if ((data_type == CD_PROP_BYTE_COLOR) &&
            BKE_attribute_search(
                owner_dst, active_color_src, CD_MASK_PROP_BYTE_COLOR, ATTR_DOMAIN_MASK_COLOR))
   {
-    mesh_dst->active_color_attribute = BLI_strdup(active_color_src);
+    mesh_dst->active_color_attribute = BLI_strdupn(active_color_src.data(),
+                                                   active_color_src.size());
   }
   else {
     CustomDataLayer *first_color_layer = BKE_attribute_from_index(
@@ -310,7 +316,8 @@ static void data_transfer_mesh_attributes_transfer_default_color_string(
   const AttributeOwner owner_src = AttributeOwner::from_id(const_cast<ID *>(&mesh_src->id));
   AttributeOwner owner_dst = AttributeOwner::from_id(&mesh_dst->id);
 
-  const char *default_color_src = BKE_id_attributes_default_color_name(&mesh_src->id);
+  const StringRef default_color_src =
+      BKE_id_attributes_default_color_name(&mesh_src->id).value_or("");
 
   if ((data_type == CD_PROP_COLOR) &&
       !BKE_attribute_search(
@@ -329,13 +336,15 @@ static void data_transfer_mesh_attributes_transfer_default_color_string(
       BKE_attribute_search(
           owner_dst, default_color_src, CD_MASK_PROP_COLOR, ATTR_DOMAIN_MASK_COLOR))
   {
-    mesh_dst->default_color_attribute = BLI_strdup(default_color_src);
+    mesh_dst->default_color_attribute = BLI_strdupn(default_color_src.data(),
+                                                    default_color_src.size());
   }
   else if ((data_type == CD_PROP_BYTE_COLOR) &&
            BKE_attribute_search(
                owner_dst, default_color_src, CD_MASK_PROP_BYTE_COLOR, ATTR_DOMAIN_MASK_COLOR))
   {
-    mesh_dst->default_color_attribute = BLI_strdup(default_color_src);
+    mesh_dst->default_color_attribute = BLI_strdupn(default_color_src.data(),
+                                                    default_color_src.size());
   }
   else {
     CustomDataLayer *first_color_layer = BKE_attribute_from_index(
@@ -386,7 +395,7 @@ static void data_transfer_dtdata_type_postprocess(Mesh *me_dst,
                                                   custom_nors_dst.span);
     custom_nors_dst.finish();
     sharp_edges.finish();
-    CustomData_free_layers(ldata_dst, CD_NORMAL, me_dst->corners_num);
+    CustomData_free_layers(ldata_dst, CD_NORMAL);
   }
 }
 
@@ -554,7 +563,7 @@ static bool data_transfer_layersmapping_cdlayers_multisrc_to_dst(ListBase *r_map
     if (use_delete) {
       idx_dst = tot_dst;
       while (idx_dst--) {
-        CustomData_free_layer(cd_dst, cddata_type, num_elem_dst, idx_dst);
+        CustomData_free_layer(cd_dst, cddata_type, idx_dst);
       }
     }
     return true;
@@ -585,7 +594,7 @@ static bool data_transfer_layersmapping_cdlayers_multisrc_to_dst(ListBase *r_map
       }
       else if (use_delete && idx_dst > idx_src) {
         while (idx_dst-- > idx_src) {
-          CustomData_free_layer(cd_dst, cddata_type, num_elem_dst, idx_dst);
+          CustomData_free_layer(cd_dst, cddata_type, idx_dst);
         }
       }
       if (r_map) {
@@ -625,8 +634,8 @@ static bool data_transfer_layersmapping_cdlayers_multisrc_to_dst(ListBase *r_map
 
         name = CustomData_get_layer_name(cd_src, cddata_type, idx_src);
         data_src = CustomData_get_layer_n(cd_src, cddata_type, idx_src);
-
-        if ((idx_dst = CustomData_get_named_layer(cd_dst, cddata_type, name)) == -1) {
+        idx_dst = CustomData_get_named_layer(cd_dst, cddata_type, name);
+        if (idx_dst == -1) {
           if (use_create) {
             CustomData_add_layer_named(
                 cd_dst, eCustomDataType(cddata_type), CD_SET_DEFAULT, num_elem_dst, name);
@@ -662,7 +671,7 @@ static bool data_transfer_layersmapping_cdlayers_multisrc_to_dst(ListBase *r_map
          * from index shifting when deleting a layer. */
         for (idx_dst = tot_dst; idx_dst--;) {
           if (data_dst_to_delete[idx_dst]) {
-            CustomData_free_layer(cd_dst, cddata_type, num_elem_dst, idx_dst);
+            CustomData_free_layer(cd_dst, cddata_type, idx_dst);
           }
         }
 
@@ -691,14 +700,13 @@ static bool data_transfer_layersmapping_cdlayers(ListBase *r_map,
                                                  cd_datatransfer_interp interp,
                                                  void *interp_data)
 {
-  int idx_src, idx_dst;
-  const void *data_src;
   void *data_dst = nullptr;
 
   if (CustomData_layertype_is_singleton(cddata_type)) {
-    if (!(data_src = CustomData_get_layer(cd_src, cddata_type))) {
+    const void *data_src = CustomData_get_layer(cd_src, cddata_type);
+    if (!data_src) {
       if (use_delete) {
-        CustomData_free_layer(cd_dst, cddata_type, num_elem_dst, 0);
+        CustomData_free_layer(cd_dst, cddata_type, 0);
       }
       return true;
     }
@@ -727,25 +735,29 @@ static bool data_transfer_layersmapping_cdlayers(ListBase *r_map,
   else if (fromlayers == DT_LAYERS_ACTIVE_SRC || fromlayers >= 0) {
     /* NOTE: use_delete has not much meaning in this case, ignored. */
 
+    int idx_src;
     if (fromlayers >= 0) { /* Real-layer index */
       idx_src = fromlayers;
     }
     else {
-      if ((idx_src = CustomData_get_active_layer(cd_src, cddata_type)) == -1) {
+      idx_src = CustomData_get_active_layer(cd_src, cddata_type);
+      if (idx_src == -1) {
         return true;
       }
     }
-    data_src = CustomData_get_layer_n(cd_src, cddata_type, idx_src);
+    const void *data_src = CustomData_get_layer_n(cd_src, cddata_type, idx_src);
     if (!data_src) {
       return true;
     }
 
+    int idx_dst;
     if (tolayers >= 0) { /* Real-layer index */
       idx_dst = tolayers;
       data_dst = CustomData_get_layer_n_for_write(cd_dst, cddata_type, idx_dst, num_elem_dst);
     }
     else if (tolayers == DT_LAYERS_ACTIVE_DST) {
-      if ((idx_dst = CustomData_get_active_layer(cd_dst, cddata_type)) == -1) {
+      idx_dst = CustomData_get_active_layer(cd_dst, cddata_type);
+      if (idx_dst == -1) {
         if (!use_create) {
           return true;
         }
@@ -772,7 +784,8 @@ static bool data_transfer_layersmapping_cdlayers(ListBase *r_map,
     }
     else if (tolayers == DT_LAYERS_NAME_DST) {
       const char *name = CustomData_get_layer_name(cd_src, cddata_type, idx_src);
-      if ((idx_dst = CustomData_get_named_layer(cd_dst, cddata_type, name)) == -1) {
+      idx_dst = CustomData_get_named_layer(cd_dst, cddata_type, name);
+      if (idx_dst == -1) {
         if (!use_create) {
           return true;
         }

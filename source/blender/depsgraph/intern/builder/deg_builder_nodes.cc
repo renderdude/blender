@@ -10,14 +10,14 @@
 
 #include "intern/builder/deg_builder_nodes.h"
 
+#include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 
 #include "MEM_guardedalloc.h"
 
-#include "BLI_blenlib.h"
+#include "BLI_listbase.h"
 #include "BLI_span.hh"
-#include "BLI_string.h"
 #include "BLI_utildefines.h"
 
 #include "DNA_action_types.h"
@@ -29,8 +29,6 @@
 #include "DNA_constraint_types.h"
 #include "DNA_curve_types.h"
 #include "DNA_curves_types.h"
-#include "DNA_effect_types.h"
-#include "DNA_gpencil_legacy_types.h"
 #include "DNA_key_types.h"
 #include "DNA_light_types.h"
 #include "DNA_lightprobe_types.h"
@@ -38,7 +36,6 @@
 #include "DNA_mask_types.h"
 #include "DNA_material_types.h"
 #include "DNA_mesh_types.h"
-#include "DNA_meta_types.h"
 #include "DNA_movieclip_types.h"
 #include "DNA_node_types.h"
 #include "DNA_object_types.h"
@@ -81,6 +78,7 @@
 #include "BKE_mesh.hh"
 #include "BKE_modifier.hh"
 #include "BKE_movieclip.h"
+#include "BKE_nla.hh"
 #include "BKE_node.hh"
 #include "BKE_node_runtime.hh"
 #include "BKE_object.hh"
@@ -139,12 +137,12 @@ DepsgraphNodeBuilder::DepsgraphNodeBuilder(Main *bmain,
 
 DepsgraphNodeBuilder::~DepsgraphNodeBuilder()
 {
-  for (IDInfo *id_info : id_info_hash_.values()) {
-    if (id_info->id_cow != nullptr) {
-      deg_free_eval_copy_datablock(id_info->id_cow);
-      MEM_freeN(id_info->id_cow);
+  /* Cannot be in an IDInfo destructor, as these COW IDs do not belong to the IDInfo data. */
+  for (IDInfo &id_info : id_info_hash_.values()) {
+    if (id_info.id_cow != nullptr) {
+      deg_free_eval_copy_datablock(id_info.id_cow);
+      MEM_freeN(id_info.id_cow);
     }
-    MEM_freeN(id_info);
   }
 }
 
@@ -158,7 +156,7 @@ IDNode *DepsgraphNodeBuilder::add_id_node(ID *id)
   IDComponentsMask previously_visible_components_mask = 0;
   uint32_t previous_eval_flags = 0;
   DEGCustomDataMeshMasks previous_customdata_masks;
-  IDInfo *id_info = id_info_hash_.lookup_default(id->session_uid, nullptr);
+  IDInfo *id_info = id_info_hash_.lookup_ptr(id->session_uid);
   if (id_info != nullptr) {
     id_cow = id_info->id_cow;
     previously_visible_components_mask = id_info->previously_visible_components_mask;
@@ -385,20 +383,20 @@ void DepsgraphNodeBuilder::begin_build()
      * for whether id_cow is expanded to access freed memory. In order to deal with this we
      * check whether an evaluated copy is needed based on a scalar value which does not lead to
      * access of possibly deleted memory. */
-    IDInfo *id_info = (IDInfo *)MEM_mallocN(sizeof(IDInfo), "depsgraph id info");
+    IDInfo id_info{};
     if (deg_eval_copy_is_needed(id_node->id_type) && deg_eval_copy_is_expanded(id_node->id_cow) &&
         id_node->id_orig != id_node->id_cow)
     {
-      id_info->id_cow = id_node->id_cow;
+      id_info.id_cow = id_node->id_cow;
     }
     else {
-      id_info->id_cow = nullptr;
+      id_info.id_cow = nullptr;
     }
-    id_info->previously_visible_components_mask = id_node->visible_components_mask;
-    id_info->previous_eval_flags = id_node->eval_flags;
-    id_info->previous_customdata_masks = id_node->customdata_masks;
+    id_info.previously_visible_components_mask = id_node->visible_components_mask;
+    id_info.previous_eval_flags = id_node->eval_flags;
+    id_info.previous_customdata_masks = id_node->customdata_masks;
     BLI_assert(!id_info_hash_.contains(id_node->id_orig_session_uid));
-    id_info_hash_.add_new(id_node->id_orig_session_uid, id_info);
+    id_info_hash_.add_new(id_node->id_orig_session_uid, std::move(id_info));
     id_node->id_cow = nullptr;
   }
 
@@ -765,7 +763,7 @@ void DepsgraphNodeBuilder::build_object(int base_index,
     if (id_node->linked_state == DEG_ID_LINKED_INDIRECTLY) {
       build_object_flags(base_index, object, linked_state);
     }
-    id_node->linked_state = max(id_node->linked_state, linked_state);
+    id_node->linked_state = std::max(id_node->linked_state, linked_state);
     id_node->is_visible_on_build |= is_visible;
     id_node->has_base |= (base_index != -1);
 
@@ -1257,6 +1255,9 @@ void DepsgraphNodeBuilder::build_animdata(ID *id)
   }
   /* NLA strips contain actions. */
   LISTBASE_FOREACH (NlaTrack *, nlt, &adt->nla_tracks) {
+    if (!BKE_nlatrack_is_enabled(*adt, *nlt)) {
+      continue;
+    }
     build_animdata_nlastrip_targets(&nlt->strips);
   }
   /* Drivers. */
@@ -1406,7 +1407,7 @@ void DepsgraphNodeBuilder::build_driver_id_property(const PointerRNA &target_pro
   if (ptr.owner_id) {
     build_id(ptr.owner_id);
   }
-  const char *prop_identifier = RNA_property_identifier((PropertyRNA *)prop);
+  const char *prop_identifier = RNA_property_identifier(prop);
   /* Custom properties of bones are placed in their components to improve granularity. */
   if (RNA_struct_is_a(ptr.type, &RNA_PoseBone)) {
     const bPoseChannel *pchan = static_cast<const bPoseChannel *>(ptr.data);
@@ -1720,7 +1721,7 @@ void DepsgraphNodeBuilder::build_object_data_geometry_datablock(ID *obdata)
   }
   OperationNode *op_node;
   /* Make sure we've got an ID node before requesting evaluated pointer. */
-  (void)add_id_node((ID *)obdata);
+  (void)add_id_node(obdata);
   ID *obdata_cow = get_cow_id(obdata);
   build_idproperties(obdata->properties);
   /* Animation. */
@@ -1808,7 +1809,13 @@ void DepsgraphNodeBuilder::build_object_data_geometry_datablock(ID *obdata)
       break;
     }
     case ID_GP: {
-      op_node = add_operation_node(obdata, NodeType::GEOMETRY, OperationCode::GEOMETRY_EVAL);
+      op_node = add_operation_node(obdata,
+                                   NodeType::GEOMETRY,
+                                   OperationCode::GEOMETRY_EVAL,
+                                   [obdata_cow](::Depsgraph *depsgraph) {
+                                     BKE_grease_pencil_eval_geometry(
+                                         depsgraph, reinterpret_cast<GreasePencil *>(obdata_cow));
+                                   });
       op_node->set_as_entry();
       break;
     }

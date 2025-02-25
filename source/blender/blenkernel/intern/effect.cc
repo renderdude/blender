@@ -24,6 +24,7 @@
 #include "DNA_texture_types.h"
 
 #include "BLI_ghash.h"
+#include "BLI_listbase.h"
 #include "BLI_math_base_safe.h"
 #include "BLI_math_matrix.h"
 #include "BLI_math_rotation.h"
@@ -1073,8 +1074,8 @@ static void do_physical_effector(EffectorCache *eff,
       flow_falloff = 0;
 #ifdef WITH_FLUID
       if (pd->f_source) {
-        float density;
-        if ((density = BKE_fluid_get_velocity_at(pd->f_source, point->loc, force)) >= 0.0f) {
+        const float density = BKE_fluid_get_velocity_at(pd->f_source, point->loc, force);
+        if (density >= 0.0f) {
           float influence = strength * efd->falloff;
           if (pd->flag & PFIELD_SMOKE_DENSITY) {
             influence *= density;

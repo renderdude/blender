@@ -25,6 +25,7 @@
 #include "DNA_scene_types.h"
 #include "DNA_screen_types.h"
 #include "DNA_space_types.h"
+#include "DNA_userdef_types.h"
 #include "DNA_view3d_types.h"
 
 #include "BLI_listbase.h"
@@ -53,6 +54,8 @@
 #  include "BPY_extern.hh"
 #endif
 
+#include "WM_types.hh"
+
 using blender::Span;
 using blender::Vector;
 
@@ -77,7 +80,12 @@ static void screen_free_data(ID *id)
   BKE_previewimg_free(&screen->preview);
 
   /* Region and timer are freed by the window manager. */
-  MEM_SAFE_FREE(screen->tool_tip);
+  /* Cannot use MEM_SAFE_FREE, as #wmTooltipState type is only defined in `WM_types.hh`, which is
+   * currently not included here. */
+  if (screen->tool_tip) {
+    MEM_freeN(static_cast<void *>(screen->tool_tip));
+    screen->tool_tip = nullptr;
+  }
 }
 
 void BKE_screen_foreach_id_screen_area(LibraryForeachIDData *data, ScrArea *area)

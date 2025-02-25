@@ -7,15 +7,14 @@
  */
 
 #include <cfloat>
-#include <cmath>
 #include <cstdlib>
 #include <cstring>
 
 #include "MEM_guardedalloc.h"
 
 #include "BLI_lasso_2d.hh"
+#include "BLI_listbase.h"
 #include "BLI_math_vector.h"
-#include "BLI_utildefines.h"
 
 #include "DNA_anim_types.h"
 #include "DNA_scene_types.h"
@@ -29,7 +28,6 @@
 #include "BKE_nla.hh"
 
 #include "UI_interface_c.hh"
-#include "UI_resources.hh"
 #include "UI_view2d.hh"
 
 #include "ED_anim_api.hh"
@@ -687,7 +685,7 @@ static int rectf_curve_zone_y(const FCurve *fcu,
                               const float unit_scale,
                               const float eval_x)
 {
-  const float fcurve_y = (evaluate_fcurve(fcu, eval_x) + offset) * unit_scale;
+  const float fcurve_y = (evaluate_fcurve_only_curve(fcu, eval_x) + offset) * unit_scale;
   return fcurve_y < rectf->ymin ? BELOW : fcurve_y <= rectf->ymax ? INSIDE : ABOVE;
 }
 
@@ -2072,8 +2070,7 @@ static void graphkeys_select_key_handles(
 
   const eAnimFilter_Flags filter = (ANIMFILTER_DATA_VISIBLE | ANIMFILTER_CURVE_VISIBLE |
                                     ANIMFILTER_FCURVESONLY | ANIMFILTER_NODUPLIS);
-  ANIM_animdata_filter(
-      ac, &anim_data, filter, ac->data, static_cast<eAnimCont_Types>(ac->datatype));
+  ANIM_animdata_filter(ac, &anim_data, filter, ac->data, ac->datatype);
   LISTBASE_FOREACH (bAnimListElem *, ale, &anim_data) {
     BLI_assert(ale->type & ANIMTYPE_FCURVE);
     FCurve *fcu = (FCurve *)ale->key_data;

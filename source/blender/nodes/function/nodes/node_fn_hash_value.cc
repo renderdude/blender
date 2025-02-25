@@ -4,11 +4,9 @@
 
 #include "BLI_hash.h"
 #include "BLI_math_matrix_types.hh"
-#include "BLI_math_quaternion.hh"
 #include "BLI_noise.hh"
 
 #include "NOD_rna_define.hh"
-#include "NOD_socket.hh"
 #include "NOD_socket_search_link.hh"
 
 #include "RNA_enum_types.hh"
@@ -186,7 +184,7 @@ static void node_register()
   ntype.build_multi_function = node_build_multi_function;
   ntype.draw_buttons = node_layout;
   ntype.gather_link_search_ops = node_gather_link_searches;
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 
   node_rna(ntype.rna_ext.srna);
 }

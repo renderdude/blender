@@ -129,8 +129,7 @@ class IndexOfNearestFieldInput final : public bke::GeometryFieldInput {
     return VArray<int>::ForContainer(std::move(result));
   }
 
- public:
-  void for_each_field_input_recursive(FunctionRef<void(const FieldInput &)> fn) const
+  void for_each_field_input_recursive(FunctionRef<void(const FieldInput &)> fn) const override
   {
     positions_field_.node().for_each_field_input_recursive(fn);
     group_field_.node().for_each_field_input_recursive(fn);
@@ -198,8 +197,7 @@ class HasNeighborFieldInput final : public bke::GeometryFieldInput {
     return VArray<bool>::ForContainer(std::move(result));
   }
 
- public:
-  void for_each_field_input_recursive(FunctionRef<void(const FieldInput &)> fn) const
+  void for_each_field_input_recursive(FunctionRef<void(const FieldInput &)> fn) const override
   {
     group_field_.node().for_each_field_input_recursive(fn);
   }
@@ -253,7 +251,7 @@ static void node_register()
   ntype.nclass = NODE_CLASS_CONVERTER;
   ntype.geometry_node_execute = node_geo_exec;
   ntype.declare = node_declare;
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 }
 NOD_REGISTER_NODE(node_register)
 

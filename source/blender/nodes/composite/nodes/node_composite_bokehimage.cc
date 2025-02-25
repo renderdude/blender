@@ -6,13 +6,10 @@
  * \ingroup cmpnodes
  */
 
-#include "BLI_math_base.h"
 #include "BLI_math_vector_types.hh"
 
 #include "UI_interface.hh"
 #include "UI_resources.hh"
-
-#include "GPU_shader.hh"
 
 #include "COM_bokeh_kernel.hh"
 #include "COM_node_operation.hh"
@@ -117,8 +114,8 @@ void register_node_type_cmp_bokehimage()
   ntype.flag |= NODE_PREVIEW;
   ntype.initfunc = file_ns::node_composit_init_bokehimage;
   blender::bke::node_type_storage(
-      &ntype, "NodeBokehImage", node_free_standard_storage, node_copy_standard_storage);
+      ntype, "NodeBokehImage", node_free_standard_storage, node_copy_standard_storage);
   ntype.get_compositor_operation = file_ns::get_compositor_operation;
 
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 }

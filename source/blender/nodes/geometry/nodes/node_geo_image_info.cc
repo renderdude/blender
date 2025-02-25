@@ -9,8 +9,6 @@
 
 #include "MOV_read.hh"
 
-#include "UI_resources.hh"
-
 #include "node_geometry_util.hh"
 
 namespace blender::nodes::node_geo_image_info_cc {
@@ -84,8 +82,8 @@ static void node_register()
   ntype.nclass = NODE_CLASS_INPUT;
   ntype.declare = node_declare;
   ntype.geometry_node_execute = node_geo_exec;
-  blender::bke::node_type_size_preset(&ntype, blender::bke::eNodeSizePreset::Large);
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_type_size_preset(ntype, blender::bke::eNodeSizePreset::Large);
+  blender::bke::node_register_type(ntype);
 }
 NOD_REGISTER_NODE(node_register)
 

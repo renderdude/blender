@@ -262,13 +262,15 @@ class SampleCurveFunction : public mf::MultiFunction {
     };
 
     if (!geometry_set_.has_curves()) {
-      return return_default();
+      return_default();
+      return;
     }
 
     const Curves &curves_id = *geometry_set_.get_curves();
     const bke::CurvesGeometry &curves = curves_id.geometry.wrap();
     if (curves.is_empty()) {
-      return return_default();
+      return_default();
+      return;
     }
     curves.ensure_can_interpolate_to_evaluated();
     Span<float3> evaluated_positions = curves.evaluated_positions();
@@ -504,10 +506,10 @@ static void node_register()
   ntype.declare = node_declare;
   ntype.initfunc = node_init;
   blender::bke::node_type_storage(
-      &ntype, "NodeGeometryCurveSample", node_free_standard_storage, node_copy_standard_storage);
+      ntype, "NodeGeometryCurveSample", node_free_standard_storage, node_copy_standard_storage);
   ntype.draw_buttons = node_layout;
   ntype.gather_link_search_ops = node_gather_link_searches;
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 }
 NOD_REGISTER_NODE(node_register)
 

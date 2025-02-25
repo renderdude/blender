@@ -86,8 +86,16 @@ ccl_device_noinline void svm_node_set_bump(KernelGlobals kg,
 
     strength = max(strength, 0.0f);
 
-    /* compute and output perturbed normal */
-    float3 normal_out = safe_normalize(absdet * normal_in - scale * signf(det) * surfgrad);
+    /* Compute and output perturbed normal.
+     * dP'dx = dPdx + scale * (h_x - h_c) / BUMP_DX * normal
+     * dP'dy = dPdy + scale * (h_y - h_c) / BUMP_DY * normal
+     * N' = cross(dP'dx, dP'dy)
+     *    = cross(dPdx, dPdy) - scale * ((h_y - h_c) / BUMP_DY * Ry + (h_x - h_c) / BUMP_DX * Rx)
+     *    ≈ det * normal_in - scale * surfgrad / BUMP_DX
+     */
+    kernel_assert(BUMP_DX == BUMP_DY);
+    float3 normal_out = safe_normalize(BUMP_DX * absdet * normal_in -
+                                       scale * signf(det) * surfgrad);
     if (is_zero(normal_out)) {
       normal_out = normal_in;
     }
@@ -196,7 +204,7 @@ ccl_device_noinline int svm_node_vector_displacement(KernelGlobals kg,
       const AttributeDescriptor attr = find_attribute(kg, sd, node.z);
       float3 tangent;
       if (attr.offset != ATTR_STD_NOT_FOUND) {
-        tangent = primitive_surface_attribute_float3(kg, sd, attr, nullptr, nullptr);
+        tangent = primitive_surface_attribute<float3>(kg, sd, attr, nullptr, nullptr);
       }
       else {
         tangent = normalize(sd->dPdu);
@@ -205,7 +213,7 @@ ccl_device_noinline int svm_node_vector_displacement(KernelGlobals kg,
       float3 bitangent = safe_normalize(cross(normal, tangent));
       const AttributeDescriptor attr_sign = find_attribute(kg, sd, node.w);
       if (attr_sign.offset != ATTR_STD_NOT_FOUND) {
-        const float sign = primitive_surface_attribute_float(kg, sd, attr_sign, nullptr, nullptr);
+        const float sign = primitive_surface_attribute<float>(kg, sd, attr_sign, nullptr, nullptr);
         bitangent *= sign;
       }
 

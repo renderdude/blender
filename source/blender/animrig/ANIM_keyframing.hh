@@ -15,6 +15,7 @@
 #include "BLI_string_ref.hh"
 
 #include "DNA_anim_types.h"
+#include "DNA_userdef_types.h"
 #include "DNA_windowmanager_types.h"
 
 #include "RNA_path.hh"
@@ -92,8 +93,8 @@ class CombinedKeyingResult {
  * For example, for object location/rotation/scale this returns the standard
  * "Object Transforms" channel group name.
  */
-const std::optional<StringRefNull> default_channel_group_for_path(
-    const PointerRNA *animated_struct, const StringRef prop_rna_path);
+std::optional<StringRefNull> default_channel_group_for_path(const PointerRNA *animated_struct,
+                                                            StringRef prop_rna_path);
 
 /* -------------------------------------------------------------------- */
 

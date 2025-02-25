@@ -21,8 +21,10 @@
 
 #include "BLT_translation.hh"
 
-#include "BLI_blenlib.h"
+#include "BLI_listbase.h"
 #include "BLI_math_color.h"
+#include "BLI_string.h"
+#include "BLI_string_utf8.h"
 
 #include "BIF_glutil.hh"
 
@@ -35,18 +37,18 @@
 #include "BKE_preview_image.hh"
 #include "BKE_screen.hh"
 
-#include "GHOST_C-api.h"
-
 #include "BLO_readfile.hh"
 
 #include "ED_fileselect.hh"
 #include "ED_screen.hh"
 
-#include "GPU_shader.hh"
+#include "GPU_shader_builtin.hh"
 #include "GPU_state.hh"
 
 #include "IMB_imbuf.hh"
 #include "IMB_imbuf_types.hh"
+
+#include "GHOST_Types.h"
 
 #include "UI_interface.hh"
 #include "UI_interface_icons.hh"
@@ -853,8 +855,9 @@ wmDragPath *WM_drag_create_path_data(blender::Span<const char *> paths)
 
   for (const char *path : paths) {
     path_data->paths.append(path);
-    path_data->file_types_bit_flag |= ED_path_extension_type(path);
-    path_data->file_types.append(ED_path_extension_type(path));
+    const int type_flag = ED_path_extension_type(path);
+    path_data->file_types_bit_flag |= type_flag;
+    path_data->file_types.append(type_flag);
   }
 
   path_data->tooltip = path_data->paths[0];

@@ -492,6 +492,12 @@ struct StringPropertyRNA {
   StringPropertySearchFunc search;
   eStringPropertySearchFlag search_flag;
 
+  /**
+   * Used for strings which are #PROP_FILEPATH to have a default filter when opening a file
+   * browser.
+   */
+  StringPropertyPathFilterFunc path_filter;
+
   int maxlength; /* includes string terminator! */
 
   const char *defaultvalue;
@@ -549,8 +555,12 @@ struct StructRNA {
   /* unique identifier, keep after 'cont' */
   const char *identifier;
 
-  /** Python type, this is a subtype of #pyrna_struct_Type
-   * but used so each struct can have its own type which is useful for subclassing RNA. */
+  /**
+   * Python type, this is a sub-type of #pyrna_struct_Type
+   * but used so each struct can have its own type which is useful for subclassing RNA.
+   *
+   * Owns a reference so the value isn't freed by Python.
+   */
   void *py_type;
   void *blender_type;
 

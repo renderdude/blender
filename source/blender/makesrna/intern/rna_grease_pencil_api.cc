@@ -6,7 +6,7 @@
  * \ingroup RNA
  */
 
-#include "DNA_grease_pencil_types.h"
+#include "DNA_curves_types.h"
 #include "DNA_scene_types.h"
 
 #include "RNA_define.hh"
@@ -164,7 +164,7 @@ static GreasePencilFrame *rna_Frames_frame_new(ID *id,
 {
   using namespace blender::bke::greasepencil;
   GreasePencil &grease_pencil = *reinterpret_cast<GreasePencil *>(id);
-  Layer &layer = static_cast<GreasePencilLayer *>(layer_in)->wrap();
+  Layer &layer = layer_in->wrap();
 
   if (layer.frames().contains(frame_number)) {
     BKE_reportf(reports, RPT_ERROR, "Frame already exists on frame number %d", frame_number);
@@ -185,7 +185,7 @@ static void rna_Frames_frame_remove(ID *id,
 {
   using namespace blender::bke::greasepencil;
   GreasePencil &grease_pencil = *reinterpret_cast<GreasePencil *>(id);
-  Layer &layer = static_cast<GreasePencilLayer *>(layer_in)->wrap();
+  Layer &layer = layer_in->wrap();
 
   if (!layer.frames().contains(frame_number)) {
     BKE_reportf(reports, RPT_ERROR, "Frame doesn't exists on frame number %d", frame_number);
@@ -197,7 +197,7 @@ static void rna_Frames_frame_remove(ID *id,
     WM_main_add_notifier(NC_GPENCIL | NA_EDITED, &grease_pencil);
   }
 
-  /* TODO: Use `RNA_POINTER_INVALIDATE` to invalidate python objects pointing to the frame_number?
+  /* TODO: Use #PointerRNA::invalidate() to invalidate python objects pointing to the frame_number?
    */
 }
 
@@ -210,7 +210,7 @@ static GreasePencilFrame *rna_Frames_frame_copy(ID *id,
 {
   using namespace blender::bke::greasepencil;
   GreasePencil &grease_pencil = *reinterpret_cast<GreasePencil *>(id);
-  Layer &layer = static_cast<GreasePencilLayer *>(layer_in)->wrap();
+  Layer &layer = layer_in->wrap();
 
   if (!layer.frames().contains(from_frame_number)) {
     BKE_reportf(reports, RPT_ERROR, "Frame doesn't exists on frame number %d", from_frame_number);
@@ -236,7 +236,7 @@ static GreasePencilFrame *rna_Frames_frame_move(ID *id,
 {
   using namespace blender::bke::greasepencil;
   GreasePencil &grease_pencil = *reinterpret_cast<GreasePencil *>(id);
-  Layer &layer = static_cast<GreasePencilLayer *>(layer_in)->wrap();
+  Layer &layer = layer_in->wrap();
 
   if (!layer.frames().contains(from_frame_number)) {
     BKE_reportf(reports, RPT_ERROR, "Frame doesn't exists on frame number %d", from_frame_number);
@@ -251,7 +251,7 @@ static GreasePencilFrame *rna_Frames_frame_move(ID *id,
   grease_pencil.remove_frames(layer, {from_frame_number});
   WM_main_add_notifier(NC_GPENCIL | NA_EDITED, &grease_pencil);
 
-  /* TODO: Use `RNA_POINTER_INVALIDATE` to invalidate python objects pointing to the
+  /* TODO: Use #PointerRNA::invalidate() to invalidate python objects pointing to the
    * from_frame_number? */
 
   return layer.frame_at(to_frame_number);
@@ -304,7 +304,7 @@ static void rna_GreasePencil_layer_remove(GreasePencil *grease_pencil, PointerRN
       layer_ptr->data);
   grease_pencil->remove_layer(layer);
 
-  RNA_POINTER_INVALIDATE(layer_ptr);
+  layer_ptr->invalidate();
   DEG_id_tag_update(&grease_pencil->id, ID_RECALC_GEOMETRY);
   WM_main_add_notifier(NC_GPENCIL | ND_DATA | NA_SELECTED, grease_pencil);
 }
@@ -403,7 +403,7 @@ static void rna_GreasePencil_layer_group_remove(GreasePencil *grease_pencil,
   LayerGroup &layer_group = *static_cast<LayerGroup *>(layer_group_ptr->data);
   grease_pencil->remove_group(layer_group, keep_children);
 
-  RNA_POINTER_INVALIDATE(layer_group_ptr);
+  layer_group_ptr->invalidate();
   DEG_id_tag_update(&grease_pencil->id, ID_RECALC_GEOMETRY);
   WM_main_add_notifier(NC_GPENCIL | ND_DATA | NA_SELECTED, grease_pencil);
 }

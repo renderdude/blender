@@ -6,8 +6,6 @@
  * \ingroup cmpnodes
  */
 
-#include <climits>
-
 #include "BLI_math_base.hh"
 #include "BLI_math_vector_types.hh"
 
@@ -257,9 +255,7 @@ class DefocusOperation : public NodeOperation {
     if (node_storage(bnode()).no_zbuf) {
       return compute_defocus_radius_from_scale();
     }
-    else {
-      return compute_defocus_radius_from_depth();
-    }
+    return compute_defocus_radius_from_depth();
   }
 
   Result compute_defocus_radius_from_scale()
@@ -516,7 +512,7 @@ class DefocusOperation : public NodeOperation {
   }
 
   /* Returns the f-stop number. Fallback to 1e-3 for zero f-stop. */
-  const float get_f_stop()
+  float get_f_stop()
   {
     return math::max(1e-3f, node_storage(bnode()).fstop);
   }
@@ -569,8 +565,8 @@ void register_node_type_cmp_defocus()
   ntype.draw_buttons = file_ns::node_composit_buts_defocus;
   ntype.initfunc = file_ns::node_composit_init_defocus;
   blender::bke::node_type_storage(
-      &ntype, "NodeDefocus", node_free_standard_storage, node_copy_standard_storage);
+      ntype, "NodeDefocus", node_free_standard_storage, node_copy_standard_storage);
   ntype.get_compositor_operation = file_ns::get_compositor_operation;
 
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 }

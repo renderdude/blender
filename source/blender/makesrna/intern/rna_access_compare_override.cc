@@ -36,6 +36,7 @@
 #include "BKE_idprop.hh"
 #include "BKE_idtype.hh"
 #include "BKE_lib_override.hh"
+#include "BKE_library.hh"
 #include "BKE_main.hh"
 
 #include "RNA_access.hh"
@@ -1063,9 +1064,8 @@ static bool rna_property_override_collection_subitem_name_id_lookup(
 
     return iter.valid;
   }
-  else {
-    return RNA_property_collection_lookup_string(ptr, prop, item_name, r_ptr_item_name);
-  }
+
+  return RNA_property_collection_lookup_string(ptr, prop, item_name, r_ptr_item_name);
 }
 
 static void rna_property_override_collection_subitem_name_index_lookup(
@@ -1077,8 +1077,8 @@ static void rna_property_override_collection_subitem_name_index_lookup(
     PointerRNA *r_ptr_item_name,
     PointerRNA *r_ptr_item_index)
 {
-  RNA_POINTER_INVALIDATE(r_ptr_item_name);
-  RNA_POINTER_INVALIDATE(r_ptr_item_index);
+  r_ptr_item_name->invalidate();
+  r_ptr_item_index->invalidate();
 
   const bool do_id_pointer = item_id && RNA_struct_is_ID(RNA_property_pointer_type(ptr, prop));
 
@@ -1110,7 +1110,7 @@ static void rna_property_override_collection_subitem_name_index_lookup(
   if (rna_property_override_collection_subitem_name_id_lookup(
           ptr, prop, item_name, item_name_len, do_id_pointer, item_id, r_ptr_item_name))
   {
-    RNA_POINTER_INVALIDATE(r_ptr_item_index);
+    r_ptr_item_index->invalidate();
     return;
   }
 
@@ -1149,10 +1149,10 @@ static void rna_property_override_collection_subitem_lookup(
                                                  std::optional(opop->subitem_reference_id) :
                                                  std::nullopt;
 
-  RNA_POINTER_INVALIDATE(ptr_item_dst);
-  RNA_POINTER_INVALIDATE(ptr_item_src);
+  ptr_item_dst->invalidate();
+  ptr_item_src->invalidate();
   if (prop_storage != nullptr) {
-    RNA_POINTER_INVALIDATE(ptr_item_storage);
+    ptr_item_storage->invalidate();
   }
 
   PointerRNA ptr_item_dst_name, ptr_item_dst_index;
@@ -1357,7 +1357,7 @@ static void rna_property_override_check_resync(Main *bmain,
   {
     id_owner_dst->tag |= ID_TAG_LIBOVERRIDE_NEED_RESYNC;
     if (ID_IS_LINKED(id_owner_src)) {
-      id_owner_src->lib->runtime.tag |= LIBRARY_TAG_RESYNC_REQUIRED;
+      id_owner_src->lib->runtime->tag |= LIBRARY_TAG_RESYNC_REQUIRED;
     }
     CLOG_INFO(&LOG,
               3,
@@ -1367,7 +1367,7 @@ static void rna_property_override_check_resync(Main *bmain,
   if ((id_owner_src->override_library->reference->tag & ID_TAG_LIBOVERRIDE_NEED_RESYNC) != 0) {
     id_owner_dst->tag |= ID_TAG_LIBOVERRIDE_NEED_RESYNC;
     if (ID_IS_LINKED(id_owner_src)) {
-      id_owner_src->lib->runtime.tag |= LIBRARY_TAG_RESYNC_REQUIRED;
+      id_owner_src->lib->runtime->tag |= LIBRARY_TAG_RESYNC_REQUIRED;
     }
     CLOG_INFO(&LOG,
               3,

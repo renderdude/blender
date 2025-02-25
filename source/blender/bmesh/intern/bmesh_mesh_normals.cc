@@ -17,6 +17,7 @@
 #include "BLI_array.hh"
 #include "BLI_bitmap.h"
 #include "BLI_linklist_stack.h"
+#include "BLI_listbase.h"
 #include "BLI_math_base.hh"
 #include "BLI_math_vector.h"
 #include "BLI_task.h"
@@ -1197,7 +1198,7 @@ struct BMLoopsCalcNormalsWithCoords_TLS {
 static void bm_mesh_loops_calc_normals_for_vert_init_fn(const void *__restrict userdata,
                                                         void *__restrict chunk)
 {
-  auto *data = static_cast<const BMLoopsCalcNormalsWithCoordsData *>(userdata);
+  const auto *data = static_cast<const BMLoopsCalcNormalsWithCoordsData *>(userdata);
   auto *tls_data = static_cast<BMLoopsCalcNormalsWithCoords_TLS *>(chunk);
   if (data->r_lnors_spacearr) {
     tls_data->edge_vectors = MEM_new<blender::Vector<blender::float3, 16>>(__func__);
@@ -1213,7 +1214,7 @@ static void bm_mesh_loops_calc_normals_for_vert_reduce_fn(const void *__restrict
                                                           void *__restrict /*chunk_join*/,
                                                           void *__restrict chunk)
 {
-  auto *data = static_cast<const BMLoopsCalcNormalsWithCoordsData *>(userdata);
+  const auto *data = static_cast<const BMLoopsCalcNormalsWithCoordsData *>(userdata);
   auto *tls_data = static_cast<BMLoopsCalcNormalsWithCoords_TLS *>(chunk);
 
   if (data->r_lnors_spacearr) {
@@ -1224,7 +1225,7 @@ static void bm_mesh_loops_calc_normals_for_vert_reduce_fn(const void *__restrict
 static void bm_mesh_loops_calc_normals_for_vert_free_fn(const void *__restrict userdata,
                                                         void *__restrict chunk)
 {
-  auto *data = static_cast<const BMLoopsCalcNormalsWithCoordsData *>(userdata);
+  const auto *data = static_cast<const BMLoopsCalcNormalsWithCoordsData *>(userdata);
   auto *tls_data = static_cast<BMLoopsCalcNormalsWithCoords_TLS *>(chunk);
 
   if (data->r_lnors_spacearr) {

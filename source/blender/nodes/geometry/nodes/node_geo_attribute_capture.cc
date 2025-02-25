@@ -2,8 +2,6 @@
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
-#include "NOD_rna_define.hh"
-
 #include "UI_interface.hh"
 #include "UI_resources.hh"
 
@@ -16,6 +14,7 @@
 
 #include "BLO_read_write.hh"
 
+#include "BKE_library.hh"
 #include "BKE_screen.hh"
 
 #include "node_geometry_util.hh"
@@ -258,7 +257,7 @@ static void node_register()
   ntype.enum_name_legacy = "CAPTURE_ATTRIBUTE";
   ntype.nclass = NODE_CLASS_ATTRIBUTE;
   blender::bke::node_type_storage(
-      &ntype, "NodeGeometryAttributeCapture", node_free_storage, node_copy_storage);
+      ntype, "NodeGeometryAttributeCapture", node_free_storage, node_copy_storage);
   ntype.initfunc = node_init;
   ntype.declare = node_declare;
   ntype.geometry_node_execute = node_geo_exec;
@@ -267,7 +266,7 @@ static void node_register()
   ntype.draw_buttons_ex = node_layout_ex;
   ntype.register_operators = node_operators;
   ntype.gather_link_search_ops = node_gather_link_searches;
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 }
 NOD_REGISTER_NODE(node_register)
 

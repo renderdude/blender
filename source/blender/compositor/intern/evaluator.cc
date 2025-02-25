@@ -2,8 +2,6 @@
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
-#include <string>
-
 #include "DNA_node_types.h"
 
 #include "NOD_derived_node_tree.hh"
@@ -162,7 +160,7 @@ void Evaluator::map_node_operation_inputs_to_their_results(DNode node,
 
 /* Create one of the concrete subclasses of the PixelOperation based on the context and compile
  * state. Deleting the operation is the caller's responsibility. */
-PixelOperation *create_pixel_operation(Context &context, CompileState &compile_state)
+static PixelOperation *create_pixel_operation(Context &context, CompileState &compile_state)
 {
   const Schedule &schedule = compile_state.get_schedule();
   PixelCompileUnit &compile_unit = compile_state.get_pixel_compile_unit();
@@ -239,6 +237,12 @@ void Evaluator::map_pixel_operation_inputs_to_their_results(PixelOperation *oper
   for (const auto item : operation->get_inputs_to_linked_outputs_map().items()) {
     Result &result = compile_state.get_result_from_output_socket(item.value);
     operation->map_input_to_result(item.key, &result);
+
+    /* Correct the reference count of the result in case multiple of the result's outgoing links
+     * corresponds to a single input in the pixel operation. See the description of the member
+     * inputs_to_reference_counts_map_ variable for more information. */
+    const int internal_reference_count = operation->get_internal_input_reference_count(item.key);
+    result.decrement_reference_count(internal_reference_count - 1);
   }
 }
 

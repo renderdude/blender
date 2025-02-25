@@ -17,7 +17,6 @@
 
 #include "BLI_map.hh"
 
-#include <mutex>
 #include <string>
 
 namespace blender::gpu {
@@ -26,7 +25,7 @@ class GPULogParser;
 class Context;
 
 /* Set to 1 to log the full source of shaders that fail to compile. */
-#define DEBUG_LOG_SHADER_SRC_ON_ERROR 0
+#define DEBUG_LOG_SHADER_SRC_ON_ERROR 1
 
 /**
  * Compilation is done on a list of GLSL sources. This list contains placeholders that should be
@@ -99,11 +98,6 @@ class Shader {
    * See `GPU_shader_warm_cache(..)` in `GPU_shader.hh` for more information. */
   virtual void warm_cache(int limit) = 0;
 
-  virtual void transform_feedback_names_set(Span<const char *> name_list,
-                                            eGPUShaderTFBType geom_type) = 0;
-  virtual bool transform_feedback_enable(VertBuf *) = 0;
-  virtual void transform_feedback_disable() = 0;
-
   virtual void bind() = 0;
   virtual void unbind() = 0;
 
@@ -124,17 +118,17 @@ class Shader {
   /* DEPRECATED: Kept only because of BGL API. */
   virtual int program_handle_get() const = 0;
 
-  inline StringRefNull name_get() const
+  StringRefNull name_get() const
   {
     return name;
   }
 
-  inline void parent_set(Shader *parent)
+  void parent_set(Shader *parent)
   {
     parent_shader_ = parent;
   }
 
-  inline Shader *parent_get() const
+  Shader *parent_get() const
   {
     return parent_shader_;
   }

@@ -637,7 +637,9 @@ vec3 displacement_bump()
   vec3 surfgrad = dHd.x * Rx + dHd.y * Ry;
 
   float facing = FrontFacing ? 1.0 : -1.0;
-  return normalize(abs(det) * g_data.N - facing * sign(det) * surfgrad);
+  /* NOTE: keep the same as defined `BUMP_DX`. */
+  const float bump_dx = 0.1;
+  return normalize(bump_dx * abs(det) * g_data.N - facing * sign(det) * surfgrad);
 #  else
   return g_data.N;
 #  endif
@@ -741,7 +743,7 @@ float texture_lod_bias_get()
 
 /* Point clouds and curves are not compatible with volume grids.
  * They will fallback to their own attributes loading. */
-#if defined(MAT_VOLUME) && !defined(MAT_GEOM_CURVES) && !defined(MAT_GEOM_POINT_CLOUD)
+#if defined(MAT_VOLUME) && !defined(MAT_GEOM_CURVES) && !defined(MAT_GEOM_POINTCLOUD)
 #  if defined(VOLUME_INFO_LIB) && !defined(MAT_GEOM_WORLD)
 /* We could just check for GRID_ATTRIBUTES but this avoids for header dependency. */
 #    define GRID_ATTRIBUTES_LOAD_POST

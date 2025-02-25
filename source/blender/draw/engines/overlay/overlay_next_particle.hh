@@ -8,12 +8,15 @@
 
 #pragma once
 
+#include "BKE_material.hh"
 #include "BKE_pointcache.h"
 #include "DEG_depsgraph_query.hh"
 #include "DNA_collection_types.h"
+#include "DNA_material_types.h"
 #include "DNA_particle_types.h"
 #include "ED_particle.hh"
 
+#include "draw_cache.hh"
 #include "overlay_next_base.hh"
 
 namespace blender::draw::overlay {
@@ -59,6 +62,7 @@ class Particles : Overlay {
       auto &pass = particle_ps_;
       pass.init();
       pass.bind_ubo(OVERLAY_GLOBALS_SLOT, &res.globals_buf);
+      pass.bind_ubo(DRW_CLIPPING_UBO_SLOT, &res.clip_planes_buf);
       pass.state_set(DRW_STATE_WRITE_COLOR | DRW_STATE_WRITE_DEPTH | DRW_STATE_DEPTH_LESS_EQUAL,
                      state.clipping_plane_count);
       res.select_bind(pass);
@@ -87,6 +91,7 @@ class Particles : Overlay {
       auto &pass = edit_particle_ps_;
       pass.init();
       pass.bind_ubo(OVERLAY_GLOBALS_SLOT, &res.globals_buf);
+      pass.bind_ubo(DRW_CLIPPING_UBO_SLOT, &res.clip_planes_buf);
       pass.state_set(DRW_STATE_WRITE_COLOR | DRW_STATE_WRITE_DEPTH | DRW_STATE_DEPTH_LESS_EQUAL,
                      state.clipping_plane_count);
       res.select_bind(pass);

@@ -15,7 +15,8 @@
 
 #include "MEM_guardedalloc.h"
 
-#include "BLI_blenlib.h"
+#include "BLI_listbase.h"
+#include "BLI_string.h"
 #include "BLI_threads.h"
 
 #include "BKE_colortools.hh"
@@ -47,7 +48,6 @@
 #include "WM_types.hh"
 
 #include "UI_interface.hh"
-#include "UI_resources.hh"
 #include "UI_view2d.hh"
 
 #include "BLO_read_write.hh"
@@ -461,7 +461,7 @@ static void IMAGE_GGT_gizmo2d(wmGizmoGroupType *gzgt)
   gzgt->gzmap_params.spaceid = SPACE_IMAGE;
   gzgt->gzmap_params.regionid = RGN_TYPE_WINDOW;
 
-  ED_widgetgroup_gizmo2d_xform_callbacks_set(gzgt);
+  blender::ed::transform::ED_widgetgroup_gizmo2d_xform_callbacks_set(gzgt);
 }
 
 static void IMAGE_GGT_gizmo2d_translate(wmGizmoGroupType *gzgt)
@@ -475,7 +475,7 @@ static void IMAGE_GGT_gizmo2d_translate(wmGizmoGroupType *gzgt)
   gzgt->gzmap_params.spaceid = SPACE_IMAGE;
   gzgt->gzmap_params.regionid = RGN_TYPE_WINDOW;
 
-  ED_widgetgroup_gizmo2d_xform_no_cage_callbacks_set(gzgt);
+  blender::ed::transform::ED_widgetgroup_gizmo2d_xform_no_cage_callbacks_set(gzgt);
 }
 
 static void IMAGE_GGT_gizmo2d_resize(wmGizmoGroupType *gzgt)
@@ -489,7 +489,7 @@ static void IMAGE_GGT_gizmo2d_resize(wmGizmoGroupType *gzgt)
   gzgt->gzmap_params.spaceid = SPACE_IMAGE;
   gzgt->gzmap_params.regionid = RGN_TYPE_WINDOW;
 
-  ED_widgetgroup_gizmo2d_resize_callbacks_set(gzgt);
+  blender::ed::transform::ED_widgetgroup_gizmo2d_resize_callbacks_set(gzgt);
 }
 
 static void IMAGE_GGT_gizmo2d_rotate(wmGizmoGroupType *gzgt)
@@ -503,7 +503,7 @@ static void IMAGE_GGT_gizmo2d_rotate(wmGizmoGroupType *gzgt)
   gzgt->gzmap_params.spaceid = SPACE_IMAGE;
   gzgt->gzmap_params.regionid = RGN_TYPE_WINDOW;
 
-  ED_widgetgroup_gizmo2d_rotate_callbacks_set(gzgt);
+  blender::ed::transform::ED_widgetgroup_gizmo2d_rotate_callbacks_set(gzgt);
 }
 
 static void IMAGE_GGT_navigate(wmGizmoGroupType *gzgt)
@@ -567,11 +567,11 @@ static void image_main_region_set_view2d(SpaceImage *sima, ARegion *region)
   y1 -= sima->zoom * sima->yof;
 
   /* relative display right */
-  region->v2d.cur.xmin = ((region->winrct.xmin - float(x1)) / sima->zoom);
+  region->v2d.cur.xmin = ((region->winrct.xmin - x1) / sima->zoom);
   region->v2d.cur.xmax = region->v2d.cur.xmin + (float(winx) / sima->zoom);
 
   /* relative display left */
-  region->v2d.cur.ymin = ((region->winrct.ymin - float(y1)) / sima->zoom);
+  region->v2d.cur.ymin = ((region->winrct.ymin - y1) / sima->zoom);
   region->v2d.cur.ymax = region->v2d.cur.ymin + (float(winy) / sima->zoom);
 
   /* normalize 0.0..1.0 */

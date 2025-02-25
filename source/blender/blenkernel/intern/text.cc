@@ -31,6 +31,7 @@
 #include "BKE_bpath.hh"
 #include "BKE_idtype.hh"
 #include "BKE_lib_id.hh"
+#include "BKE_library.hh"
 #include "BKE_main.hh"
 #include "BKE_text.h"
 
@@ -154,7 +155,7 @@ static void text_foreach_path(ID *id, BPathForeachPathData *bpath_data)
 {
   Text *text = (Text *)id;
 
-  if (text->filepath != nullptr) {
+  if (text->filepath != nullptr && text->filepath[0] != '\0') {
     BKE_bpath_foreach_path_allocated_process(bpath_data, &text->filepath);
   }
 }

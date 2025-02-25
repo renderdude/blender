@@ -15,11 +15,7 @@ struct DerivedMesh;
 struct MultiresBakeRender;
 struct Scene;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-typedef struct MultiresBakeRender {
+struct MultiresBakeRender {
   Scene *scene;
   DerivedMesh *lores_dm, *hires_dm;
   int bake_margin;
@@ -51,10 +47,6 @@ typedef struct MultiresBakeRender {
   bool *stop;
   bool *do_update;
   float *progress;
-} MultiresBakeRender;
+};
 
 void RE_multires_bake_images(struct MultiresBakeRender *bkr);
-
-#ifdef __cplusplus
-}
-#endif

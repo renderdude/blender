@@ -8,46 +8,24 @@
 
 #include <cstdlib>
 
-#include "DNA_brush_types.h"
-#include "DNA_collection_types.h"
-#include "DNA_gpencil_legacy_types.h"
-#include "DNA_grease_pencil_types.h"
+#include "DNA_curve_types.h"
 #include "DNA_layer_types.h"
-#include "DNA_linestyle_types.h"
-#include "DNA_modifier_types.h"
-#include "DNA_particle_types.h"
-#include "DNA_rigidbody_types.h"
 #include "DNA_scene_types.h"
-#include "DNA_screen_types.h" /* TransformOrientation */
 #include "DNA_userdef_types.h"
 #include "DNA_view3d_types.h"
-#include "DNA_world_types.h"
 
 #include "IMB_colormanagement.hh"
-#include "IMB_imbuf_types.hh"
 
 #include "MOV_enums.hh"
-#include "MOV_util.hh"
 
-#include "BLI_listbase.h"
-#include "BLI_math_matrix.h"
 #include "BLI_math_rotation.h"
-#include "BLI_math_vector.h"
 #include "BLI_string_utf8_symbols.h"
 
 #include "BLT_translation.hh"
 
-#include "BKE_armature.hh"
-#include "BKE_editmesh.hh"
-#include "BKE_idtype.hh"
-#include "BKE_main_invariants.hh"
 #include "BKE_paint.hh"
-#include "BKE_volume.hh"
 
-#include "ED_gpencil_legacy.hh"
-#include "ED_grease_pencil.hh"
 #include "ED_object.hh"
-#include "ED_uvedit.hh"
 
 #include "RNA_define.hh"
 #include "RNA_enum_types.hh"
@@ -55,20 +33,12 @@
 #include "rna_internal.hh"
 
 /* Include for Bake Options */
-#include "RE_engine.h"
 #include "RE_pipeline.h"
-
-#include "ED_render.hh"
-#include "ED_transform.hh"
 
 #include "WM_api.hh"
 #include "WM_types.hh"
 
 #include "BLI_threads.h"
-
-#include "ANIM_keyingsets.hh"
-
-#include "DEG_depsgraph.hh"
 
 #ifdef WITH_OPENEXR
 const EnumPropertyItem rna_enum_exr_codec_items[] = {
@@ -717,21 +687,29 @@ static const EnumPropertyItem eevee_resolution_scale_items[] = {
 #  include "DNA_anim_types.h"
 #  include "DNA_cachefile_types.h"
 #  include "DNA_color_types.h"
+#  include "DNA_grease_pencil_types.h"
+#  include "DNA_linestyle_types.h"
 #  include "DNA_mesh_types.h"
 #  include "DNA_node_types.h"
 #  include "DNA_object_types.h"
+#  include "DNA_particle_types.h"
 #  include "DNA_text_types.h"
 #  include "DNA_workspace_types.h"
+#  include "DNA_world_types.h"
 
 #  include "RNA_access.hh"
 
 #  include "MEM_guardedalloc.h"
 
+#  include "MOV_util.hh"
+
 #  include "BKE_animsys.h"
+#  include "BKE_armature.hh"
 #  include "BKE_bake_geometry_nodes_modifier.hh"
 #  include "BKE_brush.hh"
 #  include "BKE_collection.hh"
 #  include "BKE_context.hh"
+#  include "BKE_editmesh.hh"
 #  include "BKE_freestyle.h"
 #  include "BKE_global.hh"
 #  include "BKE_gpencil_legacy.h"
@@ -740,6 +718,7 @@ static const EnumPropertyItem eevee_resolution_scale_items[] = {
 #  include "BKE_image_format.hh"
 #  include "BKE_layer.hh"
 #  include "BKE_main.hh"
+#  include "BKE_main_invariants.hh"
 #  include "BKE_mesh.hh"
 #  include "BKE_node.hh"
 #  include "BKE_node_legacy_types.hh"
@@ -750,14 +729,18 @@ static const EnumPropertyItem eevee_resolution_scale_items[] = {
 
 #  include "NOD_composite.hh"
 
+#  include "ED_grease_pencil.hh"
 #  include "ED_image.hh"
 #  include "ED_info.hh"
 #  include "ED_keyframing.hh"
 #  include "ED_mesh.hh"
 #  include "ED_node.hh"
+#  include "ED_render.hh"
 #  include "ED_scene.hh"
+#  include "ED_uvedit.hh"
 #  include "ED_view3d.hh"
 
+#  include "DEG_depsgraph.hh"
 #  include "DEG_depsgraph_build.hh"
 #  include "DEG_depsgraph_query.hh"
 
@@ -768,6 +751,14 @@ static const EnumPropertyItem eevee_resolution_scale_items[] = {
 #  ifdef WITH_FREESTYLE
 #    include "FRS_freestyle.h"
 #  endif
+
+#  ifdef WITH_ALEMBIC
+#    include "ABC_alembic.h"
+#  endif
+
+#  include "RE_engine.h"
+
+#  include "ANIM_keyingsets.hh"
 
 using blender::Vector;
 
@@ -1130,8 +1121,8 @@ static void rna_Scene_frame_update(Main * /*bmain*/, Scene * /*current_scene*/, 
 static PointerRNA rna_Scene_active_keying_set_get(PointerRNA *ptr)
 {
   Scene *scene = (Scene *)ptr->data;
-  return rna_pointer_inherit_refine(
-      ptr, &RNA_KeyingSet, blender::animrig::scene_get_active_keyingset(scene));
+  return RNA_pointer_create_with_parent(
+      *ptr, &RNA_KeyingSet, blender::animrig::scene_get_active_keyingset(scene));
 }
 
 static void rna_Scene_active_keying_set_set(PointerRNA *ptr,
@@ -1175,10 +1166,10 @@ static void rna_Scene_all_keyingsets_begin(CollectionPropertyIterator *iter, Poi
    * but only if we have any Keying Sets to use...
    */
   if (scene->keyingsets.first) {
-    rna_iterator_listbase_begin(iter, &scene->keyingsets, nullptr);
+    rna_iterator_listbase_begin(iter, ptr, &scene->keyingsets, nullptr);
   }
   else {
-    rna_iterator_listbase_begin(iter, &builtin_keyingsets, nullptr);
+    rna_iterator_listbase_begin(iter, ptr, &builtin_keyingsets, nullptr);
   }
 }
 
@@ -1234,7 +1225,7 @@ static bool rna_RenderSettings_stereoViews_skip(CollectionPropertyIterator *iter
 static void rna_RenderSettings_stereoViews_begin(CollectionPropertyIterator *iter, PointerRNA *ptr)
 {
   RenderData *rd = (RenderData *)ptr->data;
-  rna_iterator_listbase_begin(iter, &rd->views, rna_RenderSettings_stereoViews_skip);
+  rna_iterator_listbase_begin(iter, ptr, &rd->views, rna_RenderSettings_stereoViews_skip);
 }
 
 static std::optional<std::string> rna_RenderSettings_path(const PointerRNA * /*ptr*/)
@@ -1608,7 +1599,7 @@ static PointerRNA rna_RenderSettings_active_view_get(PointerRNA *ptr)
   RenderData *rd = (RenderData *)ptr->data;
   SceneRenderView *srv = static_cast<SceneRenderView *>(BLI_findlink(&rd->views, rd->actview));
 
-  return rna_pointer_inherit_refine(ptr, &RNA_SceneRenderView, srv);
+  return RNA_pointer_create_with_parent(*ptr, &RNA_SceneRenderView, srv);
 }
 
 static void rna_RenderSettings_active_view_set(PointerRNA *ptr,
@@ -1648,7 +1639,7 @@ static void rna_RenderView_remove(
     return;
   }
 
-  RNA_POINTER_INVALIDATE(srv_ptr);
+  srv_ptr->invalidate();
 
   WM_main_add_notifier(NC_SCENE | ND_RENDER_OPTIONS, nullptr);
 }
@@ -2148,8 +2139,13 @@ static void rna_Scene_transform_orientation_slots_begin(CollectionPropertyIterat
 {
   Scene *scene = (Scene *)ptr->owner_id;
   TransformOrientationSlot *orient_slot = &scene->orientation_slots[0];
-  rna_iterator_array_begin(
-      iter, orient_slot, sizeof(*orient_slot), ARRAY_SIZE(scene->orientation_slots), 0, nullptr);
+  rna_iterator_array_begin(iter,
+                           ptr,
+                           orient_slot,
+                           sizeof(*orient_slot),
+                           ARRAY_SIZE(scene->orientation_slots),
+                           0,
+                           nullptr);
 }
 
 static int rna_Scene_transform_orientation_slots_length(PointerRNA * /*ptr*/)
@@ -2301,7 +2297,7 @@ static void rna_TimeLine_remove(Scene *scene, ReportList *reports, PointerRNA *m
   }
 
   MEM_freeN(marker);
-  RNA_POINTER_INVALIDATE(marker_ptr);
+  marker_ptr->invalidate();
 
   WM_main_add_notifier(NC_SCENE | ND_MARKERS, nullptr);
   WM_main_add_notifier(NC_ANIMATION | ND_MARKERS, nullptr);
@@ -2497,7 +2493,7 @@ void rna_FreestyleSettings_lineset_remove(ID *id,
     return;
   }
 
-  RNA_POINTER_INVALIDATE(lineset_ptr);
+  lineset_ptr->invalidate();
 
   DEG_id_tag_update(&scene->id, ID_RECALC_SYNC_TO_EVAL);
   WM_main_add_notifier(NC_SCENE | ND_RENDER_OPTIONS, nullptr);
@@ -2507,7 +2503,7 @@ PointerRNA rna_FreestyleSettings_active_lineset_get(PointerRNA *ptr)
 {
   FreestyleConfig *config = (FreestyleConfig *)ptr->data;
   FreestyleLineSet *lineset = BKE_freestyle_lineset_get_active(config);
-  return rna_pointer_inherit_refine(ptr, &RNA_FreestyleLineSet, lineset);
+  return RNA_pointer_create_with_parent(*ptr, &RNA_FreestyleLineSet, lineset);
 }
 
 void rna_FreestyleSettings_active_lineset_index_range(
@@ -2563,7 +2559,7 @@ void rna_FreestyleSettings_module_remove(ID *id,
     return;
   }
 
-  RNA_POINTER_INVALIDATE(module_ptr);
+  module_ptr->invalidate();
 
   DEG_id_tag_update(&scene->id, ID_RECALC_SYNC_TO_EVAL);
   WM_main_add_notifier(NC_SCENE | ND_RENDER_OPTIONS, nullptr);
@@ -2610,7 +2606,7 @@ static void rna_ViewLayer_remove(
   ViewLayer *view_layer = static_cast<ViewLayer *>(sl_ptr->data);
 
   if (ED_scene_view_layer_delete(bmain, scene, view_layer, reports)) {
-    RNA_POINTER_INVALIDATE(sl_ptr);
+    sl_ptr->invalidate();
   }
 }
 
@@ -2743,7 +2739,7 @@ static PointerRNA rna_TransformOrientationSlot_get(PointerRNA *ptr)
   else {
     orientation = BKE_scene_transform_orientation_find(scene, orient_slot->index_custom);
   }
-  return rna_pointer_inherit_refine(ptr, &RNA_TransformOrientation, orientation);
+  return RNA_pointer_create_with_parent(*ptr, &RNA_TransformOrientation, orientation);
 }
 
 static const EnumPropertyItem *rna_TransformOrientation_impl_itemf(Scene *scene,
@@ -7575,7 +7571,7 @@ static void rna_def_timeline_markers(BlenderRNA *brna, PropertyRNA *cprop)
   RNA_def_struct_ui_text(srna, "Timeline Markers", "Collection of timeline markers");
 
   func = RNA_def_function(srna, "new", "rna_TimeLine_add");
-  RNA_def_function_ui_description(func, "Add a keyframe to the curve");
+  RNA_def_function_ui_description(func, "Add a timeline marker");
   parm = RNA_def_string(func, "name", "Marker", 0, "", "New name for the marker (not unique)");
   RNA_def_parameter_flags(parm, PropertyFlag(0), PARM_REQUIRED);
   parm = RNA_def_int(func,

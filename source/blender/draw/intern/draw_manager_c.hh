@@ -19,13 +19,11 @@
 #include "GPU_batch.hh"
 #include "GPU_context.hh"
 #include "GPU_framebuffer.hh"
-#include "GPU_shader.hh"
 #include "GPU_viewport.hh"
 
 #include "draw_instance_data.hh"
 
 struct DRWDebugModule;
-struct DRWTexturePool;
 struct DRWUniformChunk;
 struct DRWViewData;
 struct DRWTextStore;
@@ -33,7 +31,9 @@ struct DupliObject;
 struct Object;
 struct Mesh;
 namespace blender::draw {
-struct CurvesUniformBufPool;
+struct CurvesModule;
+struct VolumeModule;
+struct PointCloudModule;
 struct DRW_Attributes;
 struct DRW_MeshCDMask;
 class CurveRefinePass;
@@ -41,55 +41,6 @@ class View;
 }  // namespace blender::draw
 struct GPUMaterial;
 struct GSet;
-
-/** Use draw manager to call GPU_select, see: #DRW_draw_select_loop */
-#define USE_GPU_SELECT
-
-/** Use draw-call batching using instanced rendering. */
-#define USE_BATCHING 1
-
-// #define DRW_DEBUG_CULLING
-#define DRW_DEBUG_USE_UNIFORM_NAME 0
-#define DRW_UNIFORM_BUFFER_NAME 64
-
-/* -------------------------------------------------------------------- */
-/** \name Profiling
- * \{ */
-
-#define USE_PROFILE
-
-#ifdef USE_PROFILE
-
-#  define PROFILE_TIMER_FALLOFF 0.04
-
-#  define PROFILE_START(time_start) \
-    double time_start = BLI_time_now_seconds(); \
-    ((void)0)
-
-#  define PROFILE_END_ACCUM(time_accum, time_start) \
-    { \
-      time_accum += (BLI_time_now_seconds() - time_start) * 1e3; \
-    } \
-    ((void)0)
-
-/* exp average */
-#  define PROFILE_END_UPDATE(time_update, time_start) \
-    { \
-      double _time_delta = (BLI_time_now_seconds() - time_start) * 1e3; \
-      time_update = (time_update * (1.0 - PROFILE_TIMER_FALLOFF)) + \
-                    (_time_delta * PROFILE_TIMER_FALLOFF); \
-    } \
-    ((void)0)
-
-#else /* USE_PROFILE */
-
-#  define PROFILE_START(time_start) (() 0)
-#  define PROFILE_END_ACCUM(time_accum, time_start) (() 0)
-#  define PROFILE_END_UPDATE(time_update, time_start) (() 0)
-
-#endif /* USE_PROFILE */
-
-/** \} */
 
 /* -------------------------------------------------------------------- */
 /** \name Data Structure
@@ -115,20 +66,15 @@ typedef struct DRWRegisteredDrawEngine {
 struct DRWData {
   /** Instance data. */
   DRWInstanceDataList *idatalist;
-  /** Per draw-call volume object data. */
-  void *volume_grids_ubos; /* VolumeUniformBufPool */
   /** List of smoke textures to free after drawing. */
   ListBase smoke_textures;
-  /**
-   * Texture pool to reuse temp texture across engines.
-   * TODO(@fclem): The pool could be shared even between view-ports.
-   */
-  DRWTexturePool *texture_pool;
   /** Per stereo view data. Contains engine data and default frame-buffers. */
   DRWViewData *view_data[2];
-  /** Per draw-call curves object data. */
-  blender::draw::CurvesUniformBufPool *curves_ubos;
-  blender::draw::CurveRefinePass *curves_refine;
+  /** Module storage. */
+  blender::draw::CurvesModule *curves_module;
+  blender::draw::VolumeModule *volume_module;
+  blender::draw::PointCloudModule *pointcloud_module;
+  /** Default view that feeds every engine. */
   blender::draw::View *default_view;
 };
 
@@ -166,16 +112,11 @@ struct DRWManager {
   /* Dupli data for the current dupli for each enabled engine. */
   void **dupli_datas;
 
-  /* Rendering state */
-  GPUShader *shader;
-  blender::gpu::Batch *batch;
-
   /* Per viewport */
   GPUViewport *viewport;
   GPUFrameBuffer *default_framebuffer;
   float size[2];
   float inv_size[2];
-  float pixsize;
 
   struct {
     uint is_select : 1;
@@ -195,12 +136,6 @@ struct DRWManager {
 
   /** True, when drawing is in progress, see #DRW_draw_in_progress. */
   bool in_progress;
-
-  uint primary_view_num;
-
-#ifdef USE_GPU_SELECT
-  uint select_id;
-#endif
 
   TaskGraph *task_graph;
   /* Contains list of objects that needs to be extracted from other objects. */
@@ -240,12 +175,6 @@ void drw_batch_cache_generate_requested(Object *ob);
  */
 void drw_batch_cache_generate_requested_delayed(Object *ob);
 void drw_batch_cache_generate_requested_evaluated_mesh_or_curve(Object *ob);
-
-/* Procedural Drawing */
-blender::gpu::Batch *drw_cache_procedural_points_get();
-blender::gpu::Batch *drw_cache_procedural_lines_get();
-blender::gpu::Batch *drw_cache_procedural_triangles_get();
-blender::gpu::Batch *drw_cache_procedural_triangle_strips_get();
 
 namespace blender::draw {
 

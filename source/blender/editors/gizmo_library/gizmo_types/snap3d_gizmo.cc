@@ -12,9 +12,6 @@
  * \brief Snap gizmo which exposes the location, normal and index in the props.
  */
 
-#include "MEM_guardedalloc.h"
-
-#include "BLI_math_color.h"
 #include "BLI_math_vector.h"
 
 #include "BKE_context.hh"
@@ -43,7 +40,8 @@ struct SnapGizmo3D {
 /** \name ED_gizmo_library specific API
  * \{ */
 
-SnapObjectContext *ED_gizmotypes_snap_3d_context_ensure(Scene *scene, wmGizmo * /*gz*/)
+blender::ed::transform::SnapObjectContext *ED_gizmotypes_snap_3d_context_ensure(Scene *scene,
+                                                                                wmGizmo * /*gz*/)
 {
   return ED_view3d_cursor_snap_context_ensure(scene);
 }

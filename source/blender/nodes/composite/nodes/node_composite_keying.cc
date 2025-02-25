@@ -6,19 +6,15 @@
  * \ingroup cmpnodes
  */
 
-#include "BLI_math_base.h"
 #include "BLI_math_color.h"
-#include "BLI_math_vector.h"
 #include "BLI_math_vector_types.hh"
 
-#include "DNA_movieclip_types.h"
 #include "DNA_scene_types.h"
 
 #include "UI_interface.hh"
 #include "UI_resources.hh"
 
 #include "GPU_shader.hh"
-#include "GPU_texture.hh"
 
 #include "COM_algorithm_morphological_distance.hh"
 #include "COM_algorithm_morphological_distance_feather.hh"
@@ -692,8 +688,8 @@ void register_node_type_cmp_keying()
   ntype.draw_buttons = file_ns::node_composit_buts_keying;
   ntype.initfunc = file_ns::node_composit_init_keying;
   blender::bke::node_type_storage(
-      &ntype, "NodeKeyingData", node_free_standard_storage, node_copy_standard_storage);
+      ntype, "NodeKeyingData", node_free_standard_storage, node_copy_standard_storage);
   ntype.get_compositor_operation = file_ns::get_compositor_operation;
 
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 }

@@ -5,6 +5,7 @@
 #include <cstring>
 #include <string>
 
+#include "BLI_listbase.h"
 #include "BLI_math_vector_types.hh"
 #include "BLI_threads.h"
 #include "BLI_vector.hh"
@@ -24,8 +25,6 @@
 
 #include "IMB_imbuf.hh"
 
-#include "DEG_depsgraph_query.hh"
-
 #include "COM_context.hh"
 #include "COM_domain.hh"
 #include "COM_evaluator.hh"
@@ -37,84 +36,12 @@
 #include "WM_api.hh"
 
 #include "GPU_context.hh"
+#include "GPU_state.hh"
+#include "GPU_texture_pool.hh"
 
 #include "render_types.h"
 
 namespace blender::render {
-
-/**
- * Render Texture Pool
- *
- * TODO: should share pool with draw manager. It needs some globals initialization figured out
- * there first.
- */
-class TexturePool : public compositor::TexturePool {
- private:
-  /** Textures that are not yet used and are available to be acquired. After evaluation, any
-   * texture in this map should be freed because it was not acquired in the evaluation and is thus
-   * unused. Textures removed from this map should be moved to the textures_in_use_ map when
-   * acquired. */
-  Map<compositor::TexturePoolKey, Vector<GPUTexture *>> available_textures_;
-  /** Textures that were acquired in this compositor evaluation. After evaluation, those textures
-   * are moved to the available_textures_ map to be acquired in the next evaluation. */
-  Map<compositor::TexturePoolKey, Vector<GPUTexture *>> textures_in_use_;
-
- public:
-  virtual ~TexturePool()
-  {
-    for (Vector<GPUTexture *> &available_textures : available_textures_.values()) {
-      for (GPUTexture *texture : available_textures) {
-        GPU_texture_free(texture);
-      }
-    }
-
-    for (Vector<GPUTexture *> &textures_in_use : textures_in_use_.values()) {
-      for (GPUTexture *texture : textures_in_use) {
-        GPU_texture_free(texture);
-      }
-    }
-  }
-
-  GPUTexture *allocate_texture(int2 size, eGPUTextureFormat format) override
-  {
-    const compositor::TexturePoolKey key(size, format);
-    Vector<GPUTexture *> &available_textures = available_textures_.lookup_or_add_default(key);
-    GPUTexture *texture = nullptr;
-    if (available_textures.is_empty()) {
-      texture = GPU_texture_create_2d("compositor_texture_pool",
-                                      size.x,
-                                      size.y,
-                                      1,
-                                      format,
-                                      GPU_TEXTURE_USAGE_GENERAL,
-                                      nullptr);
-    }
-    else {
-      texture = available_textures.pop_last();
-    }
-
-    textures_in_use_.lookup_or_add_default(key).append(texture);
-    return texture;
-  }
-
-  /** Should be called after compositor evaluation to free unused textures and reset the texture
-   * pool. */
-  void free_unused_and_reset()
-  {
-    /* Free all textures in the available textures vectors. The fact that they still exist in those
-     * vectors after evaluation means they were not acquired during the evaluation, and are thus
-     * consequently no longer used. */
-    for (Vector<GPUTexture *> &available_textures : available_textures_.values()) {
-      for (GPUTexture *texture : available_textures) {
-        GPU_texture_free(texture);
-      }
-    }
-
-    /* Move all textures in-use to be available textures for the next evaluation. */
-    available_textures_ = textures_in_use_;
-    textures_in_use_.clear();
-  }
-};
 
 /**
  * Render Context Data
@@ -130,19 +57,22 @@ class ContextInputData {
   std::string view_name;
   compositor::RenderContext *render_context;
   compositor::Profiler *profiler;
+  compositor::OutputTypes needed_outputs;
 
   ContextInputData(const Scene &scene,
                    const RenderData &render_data,
                    const bNodeTree &node_tree,
                    const char *view_name,
                    compositor::RenderContext *render_context,
-                   compositor::Profiler *profiler)
+                   compositor::Profiler *profiler,
+                   compositor::OutputTypes needed_outputs)
       : scene(&scene),
         render_data(&render_data),
         node_tree(&node_tree),
         view_name(view_name),
         render_context(render_context),
-        profiler(profiler)
+        profiler(profiler),
+        needed_outputs(needed_outputs)
   {
   }
 };
@@ -167,8 +97,8 @@ class Context : public compositor::Context {
   Vector<ImBuf *> cached_cpu_passes_;
 
  public:
-  Context(const ContextInputData &input_data, TexturePool &texture_pool)
-      : compositor::Context(texture_pool),
+  Context(const ContextInputData &input_data)
+      : compositor::Context(),
         input_data_(input_data),
         output_result_(this->create_result(compositor::ResultType::Color)),
         viewer_output_result_(this->create_result(compositor::ResultType::Color))
@@ -218,19 +148,9 @@ class Context : public compositor::Context {
         this->get_render_data().compositor_denoise_preview_quality);
   }
 
-  bool use_file_output() const override
+  compositor::OutputTypes needed_outputs() const override
   {
-    return this->render_context() != nullptr;
-  }
-
-  bool should_compute_node_previews() const override
-  {
-    return this->render_context() == nullptr;
-  }
-
-  bool use_composite_output() const override
-  {
-    return true;
+    return input_data_.needed_outputs;
   }
 
   const RenderData &get_render_data() const override
@@ -261,12 +181,10 @@ class Context : public compositor::Context {
       if (render_size == output_result_.domain().size) {
         return output_result_;
       }
-      else {
-        /* Otherwise, the size changed, so release its data and reset it, then we reallocate it on
-         * the new render size below. */
-        output_result_.release();
-        output_result_.reset();
-      }
+      /* Otherwise, the size changed, so release its data and reset it, then we reallocate it on
+       * the new render size below. */
+      output_result_.release();
+      output_result_.reset();
     }
 
     output_result_.allocate_texture(render_size, false);
@@ -287,12 +205,10 @@ class Context : public compositor::Context {
       {
         return viewer_output_result_;
       }
-      else {
-        /* Otherwise, the size or precision changed, so release its data and reset it, then we
-         * reallocate it on the new domain below. */
-        viewer_output_result_.release();
-        viewer_output_result_.reset();
-      }
+      /* Otherwise, the size or precision changed, so release its data and reset it, then we
+       * reallocate it on the new domain below. */
+      viewer_output_result_.release();
+      viewer_output_result_.reset();
     }
 
     viewer_output_result_.set_precision(precision);
@@ -343,10 +259,8 @@ class Context : public compositor::Context {
       return compositor::Result(*this);
     }
 
-    const eGPUTextureFormat format = (render_pass->channels == 1) ? GPU_R32F :
-                                     (render_pass->channels == 3) ? GPU_RGB32F :
-                                                                    GPU_RGBA32F;
-    compositor::Result pass = compositor::Result(*this, format);
+    compositor::Result pass = compositor::Result(
+        *this, this->result_type_from_pass(render_pass), compositor::ResultPrecision::Full);
 
     if (this->use_gpu()) {
       GPUTexture *pass_texture = RE_pass_ensure_gpu_texture_cache(render, render_pass);
@@ -365,6 +279,30 @@ class Context : public compositor::Context {
 
     RE_ReleaseResult(render);
     return pass;
+  }
+
+  compositor::ResultType result_type_from_pass(const RenderPass *pass)
+  {
+    switch (pass->channels) {
+      case 1:
+        return compositor::ResultType::Float;
+      case 2:
+        return compositor::ResultType::Float2;
+      case 3:
+        return compositor::ResultType::Float3;
+      case 4:
+        if (StringRef(pass->chan_id) == "XYZW") {
+          return compositor::ResultType::Float4;
+        }
+        else {
+          return compositor::ResultType::Color;
+        }
+      default:
+        break;
+    }
+
+    BLI_assert_unreachable();
+    return compositor::ResultType::Float;
   }
 
   StringRef get_view_name() const override
@@ -474,23 +412,6 @@ class Context : public compositor::Context {
         },
         false);
 
-    RenderLayer *render_layer = RE_GetRenderLayer(render_result, view_layer->name);
-    if (!render_layer) {
-      RE_ReleaseResult(render);
-      return;
-    }
-
-    RenderPass *render_pass = RE_pass_find_by_name(
-        render_layer, pass_name, this->get_view_name().data());
-    if (!render_pass) {
-      RE_ReleaseResult(render);
-      return;
-    }
-
-    if (StringRef(render_pass->chan_id) == "XYZW") {
-      meta_data.is_4d_vector = true;
-    }
-
     RE_ReleaseResult(render);
   }
 
@@ -519,7 +440,7 @@ class Context : public compositor::Context {
             MEM_malloc_arrayN(rr->rectx * rr->recty, 4 * sizeof(float), __func__));
         IMB_assign_float_buffer(ibuf, data, IB_TAKE_OWNERSHIP);
         std::memcpy(
-            data, output_result_.float_texture(), rr->rectx * rr->recty * 4 * sizeof(float));
+            data, output_result_.cpu_data().data(), rr->rectx * rr->recty * 4 * sizeof(float));
       }
     }
 
@@ -592,7 +513,7 @@ class Context : public compositor::Context {
     }
     else {
       std::memcpy(image_buffer->float_buffer.data,
-                  viewer_output_result_.float_texture(),
+                  viewer_output_result_.cpu_data().data(),
                   size.x * size.y * 4 * sizeof(float));
     }
 
@@ -635,7 +556,6 @@ class Compositor {
   /* Render instance for GPU context to run compositor in. */
   Render &render_;
 
-  std::unique_ptr<TexturePool> texture_pool_;
   std::unique_ptr<Context> context_;
 
   /* Stores the execution device and precision used in the last evaluation of the compositor. Those
@@ -648,8 +568,7 @@ class Compositor {
  public:
   Compositor(Render &render, const ContextInputData &input_data) : render_(render)
   {
-    texture_pool_ = std::make_unique<TexturePool>();
-    context_ = std::make_unique<Context>(input_data, *texture_pool_);
+    context_ = std::make_unique<Context>(input_data);
 
     uses_gpu_ = context_->use_gpu();
     used_precision_ = context_->get_precision();
@@ -671,7 +590,6 @@ class Compositor {
     }
 
     context_.reset();
-    texture_pool_.reset();
 
     /* See comment above on context enabling. */
     if (uses_gpu_) {
@@ -720,9 +638,10 @@ class Compositor {
 
     context_->output_to_render_result();
     context_->viewer_output_to_viewer_image();
-    texture_pool_->free_unused_and_reset();
 
     if (context_->use_gpu()) {
+      blender::gpu::TexturePool::get().reset();
+
       void *re_system_gpu_context = RE_system_gpu_context_get(&render_);
       if (BLI_thread_is_main() || re_system_gpu_context == nullptr) {
         DRW_gpu_context_disable();
@@ -755,12 +674,13 @@ void Render::compositor_execute(const Scene &scene,
                                 const bNodeTree &node_tree,
                                 const char *view_name,
                                 blender::compositor::RenderContext *render_context,
-                                blender::compositor::Profiler *profiler)
+                                blender::compositor::Profiler *profiler,
+                                blender::compositor::OutputTypes needed_outputs)
 {
   std::unique_lock lock(this->compositor_mutex);
 
   blender::render::ContextInputData input_data(
-      scene, render_data, node_tree, view_name, render_context, profiler);
+      scene, render_data, node_tree, view_name, render_context, profiler, needed_outputs);
 
   if (this->compositor) {
     this->compositor->update_input_data(input_data);
@@ -795,9 +715,11 @@ void RE_compositor_execute(Render &render,
                            const bNodeTree &node_tree,
                            const char *view_name,
                            blender::compositor::RenderContext *render_context,
-                           blender::compositor::Profiler *profiler)
+                           blender::compositor::Profiler *profiler,
+                           blender::compositor::OutputTypes needed_outputs)
 {
-  render.compositor_execute(scene, render_data, node_tree, view_name, render_context, profiler);
+  render.compositor_execute(
+      scene, render_data, node_tree, view_name, render_context, profiler, needed_outputs);
 }
 
 void RE_compositor_free(Render &render)

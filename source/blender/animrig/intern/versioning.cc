@@ -12,6 +12,7 @@
 
 #include "ANIM_action.hh"
 #include "ANIM_action_iterators.hh"
+#include "ANIM_action_legacy.hh"
 #include "ANIM_versioning.hh"
 
 #include "DNA_action_defaults.h"
@@ -28,13 +29,21 @@
 
 #include "BLO_readfile.hh"
 
-namespace blender::animrig::versioning {
+#include "RNA_access.hh"
+#include "RNA_prototypes.hh"
 
-constexpr const char *DEFAULT_VERSIONED_SLOT_NAME = "Legacy Slot";
-constexpr const char *DEFAULT_VERSIONED_LAYER_NAME = "Legacy Layer";
+namespace blender::animrig::versioning {
 
 bool action_is_layered(const bAction &dna_action)
 {
+  /* NOTE: due to how forward-compatibility is handled when writing Actions to
+   * blend files, it is important that this function does NOT check
+   * `Action.idroot` as part of its determination of whether this is a layered
+   * action or not.
+   *
+   * See: `action_blend_write()` and `action_blend_read_data()`
+   */
+
   const animrig::Action &action = dna_action.wrap();
 
   const bool has_layered_data = action.layer_array_num > 0 || action.slot_array_num > 0;
@@ -96,11 +105,11 @@ void convert_legacy_animato_action(bAction &dna_action)
   Slot &slot = action.slot_add();
   slot.idtype = idtype;
 
-  const std::string slot_identifier{slot.identifier_prefix_for_idtype() +
-                                    DATA_(DEFAULT_VERSIONED_SLOT_NAME)};
+  const std::string slot_identifier{slot.idtype_string() +
+                                    DATA_(legacy::DEFAULT_LEGACY_SLOT_NAME)};
   action.slot_identifier_define(slot, slot_identifier);
 
-  Layer &layer = action.layer_add(DATA_(DEFAULT_VERSIONED_LAYER_NAME));
+  Layer &layer = action.layer_add(DATA_(legacy::DEFAULT_LEGACY_LAYER_NAME));
   blender::animrig::Strip &strip = layer.strip_add(action,
                                                    blender::animrig::Strip::Type::Keyframe);
   Channelbag &bag = strip.data<StripKeyframeData>(action).channelbag_for_slot_ensure(slot);
@@ -183,11 +192,12 @@ void tag_action_users_for_slotted_actions_conversion(Main &bmain)
 void convert_legacy_action_assignments(Main &bmain, ReportList *reports)
 {
   auto version_slot_assignment = [&](ID &animated_id,
-                                     bAction *&action_ptr_ref,
-                                     slot_handle_t &slot_handle_ref,
+                                     bAction *dna_action,
+                                     PointerRNA &action_slot_owner_ptr,
+                                     PropertyRNA &action_slot_prop,
                                      char *last_used_slot_identifier) {
-    BLI_assert(action_ptr_ref); /* Ensured by the foreach loop. */
-    Action &action = action_ptr_ref->wrap();
+    BLI_assert(dna_action); /* Ensured by the foreach loop. */
+    Action &action = dna_action->wrap();
 
     if (action.slot_array_num == 0) {
       /* animated_id is from an older file (because it is in the being-versioned-right-now bmain),
@@ -215,7 +225,7 @@ void convert_legacy_action_assignments(Main &bmain, ReportList *reports)
 
     static_assert(Slot::identifier_length_max > 2); /* Because of the -2 below. */
     BLI_strncpy_utf8(last_used_slot_identifier + 2,
-                     DATA_(DEFAULT_VERSIONED_SLOT_NAME),
+                     DATA_(legacy::DEFAULT_LEGACY_SLOT_NAME),
                      Slot::identifier_length_max - 2);
 
     Slot *slot_to_assign = generic_slot_for_autoassign(
@@ -236,47 +246,11 @@ void convert_legacy_action_assignments(Main &bmain, ReportList *reports)
       return true;
     }
 
-    const ActionSlotAssignmentResult result = generic_assign_action_slot(
-        slot_to_assign, animated_id, action_ptr_ref, slot_handle_ref, last_used_slot_identifier);
-    switch (result) {
-      case ActionSlotAssignmentResult::OK:
-        break;
-      case ActionSlotAssignmentResult::SlotNotSuitable:
-        /* If the slot wasn't suitable for the ID, we force assignment anyway,
-         * but with a warning.
-         *
-         * This happens when the legacy action assigned to the ID had a
-         * mismatched idroot, and therefore the created slot does as well.
-         * This mismatch can happen in a variety of ways, and we opt to
-         * preserve this unusual (but technically valid) state of affairs.
-         */
-        slot_handle_ref = slot_to_assign->handle;
-        BLI_strncpy_utf8(
-            last_used_slot_identifier, slot_to_assign->identifier, Slot::identifier_length_max);
-        /* Not necessary to add this ID to the slot user list, as that list is
-         * going to get refreshed after versioning anyway. */
-
-        BKE_reportf(
-            reports,
-            RPT_WARNING,
-            "Legacy action \"%s\" is assigned to \"%s\", which does not match the "
-            "action's id_root \"%s\". The action has been upgraded to a slotted action with "
-            "slot \"%s\" with an id_type \"%s\", which has also been assigned to \"%s\" despite "
-            "this type mismatch. This likely indicates something odd about the blend file.\n",
-            action.id.name + 2,
-            animated_id.name,
-            slot_to_assign->identifier_prefix_for_idtype().c_str(),
-            slot_to_assign->identifier_without_prefix().c_str(),
-            slot_to_assign->identifier_prefix_for_idtype().c_str(),
-            animated_id.name);
-        break;
-      case ActionSlotAssignmentResult::SlotNotFromAction:
-        BLI_assert_msg(false, "SlotNotFromAction should not be returned here");
-        break;
-      case ActionSlotAssignmentResult::MissingAction:
-        BLI_assert_msg(false, "MissingAction should not be returned here");
-        break;
-    }
+    PointerRNA slot_to_assign_ptr = RNA_pointer_create_discrete(
+        &action.id, &RNA_ActionSlot, slot_to_assign);
+    RNA_property_pointer_set(
+        &action_slot_owner_ptr, &action_slot_prop, slot_to_assign_ptr, reports);
+    RNA_property_update_main(&bmain, nullptr, &action_slot_owner_ptr, &action_slot_prop);
 
     return true;
   };
@@ -285,7 +259,7 @@ void convert_legacy_action_assignments(Main &bmain, ReportList *reports)
   FOREACH_MAIN_ID_BEGIN (&bmain, id) {
     /* Process the ID itself. */
     if (BLO_readfile_id_runtime_tags(*id).action_assignment_needs_slot) {
-      foreach_action_slot_use_with_references(*id, version_slot_assignment);
+      foreach_action_slot_use_with_rna(*id, version_slot_assignment);
       id->runtime.readfile_data->tags.action_assignment_needs_slot = false;
     }
 
@@ -295,7 +269,7 @@ void convert_legacy_action_assignments(Main &bmain, ReportList *reports)
      * node tree. */
     bNodeTree *node_tree = blender::bke::node_tree_from_id(id);
     if (node_tree && BLO_readfile_id_runtime_tags(node_tree->id).action_assignment_needs_slot) {
-      foreach_action_slot_use_with_references(node_tree->id, version_slot_assignment);
+      foreach_action_slot_use_with_rna(node_tree->id, version_slot_assignment);
       node_tree->id.runtime.readfile_data->tags.action_assignment_needs_slot = false;
     }
   }

@@ -56,7 +56,12 @@ Testing Targets
 Static Source Code Checking
    Not associated with building Blender.
 
-   * check_cppcheck:        Run blender source through cppcheck (C & C++).
+   * check_cppcheck:
+     Run blender source through cppcheck (C & C++).
+
+     To write log files into a user defined location append 'OUTPUT_DIR',
+     e.g. 'OUTPUT_DIR=/example/path'
+
    * check_clang_array:     Run blender source through clang array checking script (C & C++).
    * check_struct_comments: Check struct member comments are correct (C & C++).
    * check_deprecated:      Check if there is any deprecated code to remove.
@@ -474,9 +479,10 @@ project_eclipse: .FORCE
 
 check_cppcheck: .FORCE
 	@$(CMAKE_CONFIG)
-	@cd "$(BUILD_DIR)" ; \
 	$(PYTHON) \
-	    "$(BLENDER_DIR)/tools/check_source/static_check_cppcheck.py"
+	    "$(BLENDER_DIR)/tools/check_source/static_check_cppcheck.py" \
+	    --build-dir=$(BUILD_DIR) \
+	    --output-dir=$(OUTPUT_DIR)
 
 check_struct_comments: .FORCE
 	@$(CMAKE_CONFIG)
@@ -502,9 +508,12 @@ check_spelling_py: .FORCE
 	    "$(BLENDER_DIR)/tools/check_source/check_spelling.py" \
 	    --cache-file=$(CHECK_SPELLING_CACHE) \
 	    --match=".*\.(py)$$" \
+	    "$(BLENDER_DIR)/release" \
 	    "$(BLENDER_DIR)/scripts" \
 	    "$(BLENDER_DIR)/source" \
-	    "$(BLENDER_DIR)/tools"
+	    "$(BLENDER_DIR)/tools" \
+	    "$(BLENDER_DIR)/doc" \
+	    "$(BLENDER_DIR)/build_files"
 
 check_spelling_c: .FORCE
 	@PYTHONIOENCODING=utf_8 $(PYTHON) \

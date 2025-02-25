@@ -207,19 +207,19 @@ static void edbm_bevel_update_status_text(bContext *C, wmOperator *op)
   std::string desc;
 
   desc = fmt::format("{} ({}) ", IFACE_("Affect"), affect_str);
-  status.opmodal(desc.c_str(), op->type, BEV_MODAL_AFFECT_CHANGE);
+  status.opmodal(desc, op->type, BEV_MODAL_AFFECT_CHANGE);
 
   desc = fmt::format("{} ({}) ", IFACE_("Outer"), omiter_str);
-  status.opmodal(desc.c_str(), op->type, BEV_MODAL_OUTER_MITER_CHANGE);
+  status.opmodal(desc, op->type, BEV_MODAL_OUTER_MITER_CHANGE);
 
   desc = fmt::format("{} ({}) ", IFACE_("Inner"), imiter_str);
-  status.opmodal(desc.c_str(), op->type, BEV_MODAL_INNER_MITER_CHANGE);
+  status.opmodal(desc, op->type, BEV_MODAL_INNER_MITER_CHANGE);
 
   desc = fmt::format("{} ({}) ", IFACE_("Profile Type"), profile_type_str);
-  status.opmodal(desc.c_str(), op->type, BEV_MODAL_PROFILE_TYPE_CHANGE);
+  status.opmodal(desc, op->type, BEV_MODAL_PROFILE_TYPE_CHANGE);
 
   desc = fmt::format("{} ({}) ", IFACE_("Intersection"), vmesh_str);
-  status.opmodal(desc.c_str(), op->type, BEV_MODAL_VERTEX_MESH_CHANGE);
+  status.opmodal(desc, op->type, BEV_MODAL_VERTEX_MESH_CHANGE);
 }
 
 static bool edbm_bevel_init(bContext *C, wmOperator *op, const bool is_modal)
@@ -493,7 +493,9 @@ static int edbm_bevel_invoke(bContext *C, wmOperator *op, const wmEvent *event)
 
   /* initialize mouse values */
   float center_3d[3];
-  if (!calculateTransformCenter(C, V3D_AROUND_CENTER_MEDIAN, center_3d, opdata->mcenter)) {
+  if (!blender::ed::transform::calculateTransformCenter(
+          C, V3D_AROUND_CENTER_MEDIAN, center_3d, opdata->mcenter))
+  {
     /* in this case the tool will likely do nothing,
      * ideally this will never happen and should be checked for above */
     opdata->mcenter[0] = opdata->mcenter[1] = 0;

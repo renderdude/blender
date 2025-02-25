@@ -14,9 +14,12 @@
 #include "DNA_ID.h"
 #include "DNA_object_types.h"
 
+#include "BLI_listbase.h"
+
 #include "BKE_action.hh"
 #include "BKE_context.hh"
 #include "BKE_lib_override.hh"
+#include "BKE_library.hh"
 #include "BKE_report.hh"
 
 #include "BLT_translation.hh"
@@ -268,7 +271,7 @@ static void bone_collection_assign_editbones(bContext *C,
   ED_armature_edit_sync_selection(arm->edbo);
 
   LISTBASE_FOREACH (EditBone *, ebone, arm->edbo) {
-    if (!EBONE_EDITABLE(ebone)) {
+    if (!EBONE_EDITABLE(ebone) || !EBONE_VISIBLE(arm, ebone)) {
       continue;
     }
     *made_any_changes |= assign_func(bcoll, ebone);

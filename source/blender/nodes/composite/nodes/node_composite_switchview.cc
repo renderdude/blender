@@ -6,11 +6,12 @@
  * \ingroup cmpnodes
  */
 
+#include "BLI_listbase.h"
+
 #include "BKE_context.hh"
 #include "BKE_lib_id.hh"
 
 #include "UI_interface.hh"
-#include "UI_resources.hh"
 
 #include "COM_node_operation.hh"
 
@@ -96,5 +97,5 @@ void register_node_type_cmp_switch_view()
   ntype.initfunc_api = file_ns::init_switch_view;
   ntype.get_compositor_operation = file_ns::get_compositor_operation;
 
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 }

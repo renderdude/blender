@@ -42,8 +42,8 @@ NODE_STORAGE_FUNCS(NodePlaneTrackDeformData)
 
 static void cmp_node_planetrackdeform_declare(NodeDeclarationBuilder &b)
 {
-  b.add_input<decl::Color>("Image").compositor_realization_options(
-      CompositorInputRealizationOptions::None);
+  b.add_input<decl::Color>("Image").compositor_realization_mode(
+      CompositorInputRealizationMode::Transforms);
   b.add_output<decl::Color>("Image");
   b.add_output<decl::Float>("Plane");
 }
@@ -446,8 +446,8 @@ void register_node_type_cmp_planetrackdeform()
   ntype.draw_buttons = file_ns::node_composit_buts_planetrackdeform;
   ntype.initfunc_api = file_ns::init;
   blender::bke::node_type_storage(
-      &ntype, "NodePlaneTrackDeformData", node_free_standard_storage, node_copy_standard_storage);
+      ntype, "NodePlaneTrackDeformData", node_free_standard_storage, node_copy_standard_storage);
   ntype.get_compositor_operation = file_ns::get_compositor_operation;
 
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 }

@@ -13,10 +13,12 @@
 #include "BKE_layer.hh"
 #include "BKE_lib_id.hh"
 #include "BKE_lib_override.hh"
+#include "BKE_library.hh"
 #include "BKE_main.hh"
 #include "BKE_main_invariants.hh"
 #include "BKE_packedFile.hh"
 
+#include "BLI_listbase.h"
 #include "BLI_string.h"
 #include "BLI_string_search.hh"
 
@@ -784,10 +786,11 @@ static void template_id_cb(bContext *C, void *arg_litem, void *arg_event)
 
   if (undo_push_label != nullptr) {
     ED_undo_push(C, undo_push_label);
+    WM_event_add_notifier(C, NC_SPACE | ND_SPACE_OUTLINER, nullptr);
   }
 }
 
-static const char *template_id_browse_tip(const StructRNA *type)
+static StringRef template_id_browse_tip(const StructRNA *type)
 {
   if (type) {
     switch ((ID_Type)RNA_type_to_ID_code(type)) {
@@ -982,7 +985,7 @@ static uiBut *template_id_def_new_but(uiBlock *block,
                             0,
                             w,
                             but_height,
-                            nullptr);
+                            std::nullopt);
     UI_but_funcN_set(but,
                      template_id_cb,
                      MEM_new<TemplateID>(__func__, template_ui),
@@ -992,7 +995,7 @@ static uiBut *template_id_def_new_but(uiBlock *block,
   }
   else {
     but = uiDefIconTextBut(
-        block, but_type, 0, icon, button_text, 0, 0, w, but_height, nullptr, 0, 0, nullptr);
+        block, but_type, 0, icon, button_text, 0, 0, w, but_height, nullptr, 0, 0, std::nullopt);
     UI_but_funcN_set(but,
                      template_id_cb,
                      MEM_new<TemplateID>(__func__, template_ui),
@@ -1235,7 +1238,7 @@ static void template_ID(const bContext *C,
                       0,
                       UI_UNIT_X,
                       UI_UNIT_Y,
-                      nullptr);
+                      std::nullopt);
       }
       else if (!ELEM(GS(id->name), ID_GR, ID_SCE, ID_SCR, ID_OB, ID_WS) && (hide_buttons == false))
       {
@@ -1252,7 +1255,7 @@ static void template_ID(const bContext *C,
                       -1,
                       0,
                       0,
-                      nullptr);
+                      std::nullopt);
       }
     }
   }
@@ -1304,7 +1307,7 @@ static void template_ID(const bContext *C,
                               0,
                               w,
                               UI_UNIT_Y,
-                              nullptr);
+                              std::nullopt);
       UI_but_funcN_set(but,
                        template_id_cb,
                        MEM_new<TemplateID>(__func__, template_ui),
@@ -1325,7 +1328,7 @@ static void template_ID(const bContext *C,
                              nullptr,
                              0,
                              0,
-                             nullptr);
+                             std::nullopt);
       UI_but_funcN_set(but,
                        template_id_cb,
                        MEM_new<TemplateID>(__func__, template_ui),
@@ -1355,7 +1358,7 @@ static void template_ID(const bContext *C,
                           0,
                           UI_UNIT_X,
                           UI_UNIT_Y,
-                          nullptr);
+                          std::nullopt);
       /* so we can access the template from operators, font unlinking needs this */
       UI_but_funcN_set(but,
                        template_id_cb,
@@ -1613,9 +1616,12 @@ void uiTemplateAction(uiLayout *layout,
   /* Construct a pointer with the animated ID as owner, even when `adt` may be `nullptr`.
    * This way it is possible to use this RNA pointer to get/set `adt->action`, as that RNA property
    * has a `getter` & `setter` that only need the owner ID and are null-safe regarding the `adt`
-   * itself. */
+   * itself.
+   * FIXME: This is a very dirty hack, would be good to find a way to not rely on typed-but-null
+   * PointerRNA.
+   */
   AnimData *adt = BKE_animdata_from_id(id);
-  PointerRNA adt_ptr = RNA_pointer_create_discrete(id, &RNA_AnimData, adt);
+  PointerRNA adt_ptr = PointerRNA{id, &RNA_AnimData, adt, RNA_id_pointer_create(id)};
 
   TemplateID template_ui = {};
   template_ui.ptr = adt_ptr;

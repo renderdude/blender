@@ -531,6 +531,49 @@ void GreasePencilStrokeOperationCommon::foreach_editable_drawing(
 
 void GreasePencilStrokeOperationCommon::foreach_editable_drawing(
     const bContext &C,
+    FunctionRef<bool(const GreasePencilStrokeParams &params,
+                     const DeltaProjectionFunc &projection_fn)> fn) const
+{
+  using namespace blender::bke::greasepencil;
+
+  const Scene &scene = *CTX_data_scene(&C);
+  Depsgraph &depsgraph = *CTX_data_depsgraph_pointer(&C);
+  ARegion &region = *CTX_wm_region(&C);
+  RegionView3D &rv3d = *CTX_wm_region_view3d(&C);
+  Object &object = *CTX_data_active_object(&C);
+  Object &object_eval = *DEG_get_evaluated_object(&depsgraph, &object);
+  GreasePencil &grease_pencil = *static_cast<GreasePencil *>(object.data);
+
+  bool changed = false;
+  const Vector<MutableDrawingInfo> drawings = get_drawings_for_stroke_operation(C);
+  for (const int64_t i : drawings.index_range()) {
+    const MutableDrawingInfo &info = drawings[i];
+    const Layer &layer = grease_pencil.layer(info.layer_index);
+    GreasePencilStrokeParams params = GreasePencilStrokeParams::from_context(
+        scene,
+        depsgraph,
+        region,
+        rv3d,
+        object,
+        info.layer_index,
+        info.frame_number,
+        info.multi_frame_falloff,
+        info.drawing);
+
+    const DeltaProjectionFunc projection_fn = get_screen_projection_fn(params, object_eval, layer);
+    if (fn(params, projection_fn)) {
+      changed = true;
+    }
+  }
+
+  if (changed) {
+    DEG_id_tag_update(&grease_pencil.id, ID_RECALC_GEOMETRY);
+    WM_event_add_notifier(&C, NC_GEOM | ND_DATA, &grease_pencil);
+  }
+}
+
+void GreasePencilStrokeOperationCommon::foreach_editable_drawing(
+    const bContext &C,
     const GrainSize grain_size,
     FunctionRef<bool(const GreasePencilStrokeParams &params)> fn) const
 {
@@ -590,8 +633,6 @@ void GreasePencilStrokeOperationCommon::init_auto_masking(const bContext &C,
   RegionView3D &rv3d = *CTX_wm_region_view3d(&C);
   Object &object = *CTX_data_active_object(&C);
   Depsgraph &depsgraph = *CTX_data_depsgraph_pointer(&C);
-  Paint &paint = *BKE_paint_get_active_from_context(&C);
-  const Brush &brush = *BKE_paint_brush(&paint);
 
   const eGP_Sculpt_SelectMaskFlag sculpt_selection_flag = eGP_Sculpt_SelectMaskFlag(
       scene.toolsettings->gpencil_selectmode_sculpt);
@@ -610,7 +651,7 @@ void GreasePencilStrokeOperationCommon::init_auto_masking(const bContext &C,
   const bool use_auto_mask_active_material = (sculpt_settings_flag &
                                               GP_SCULPT_SETT_FLAG_AUTOMASK_MATERIAL_ACTIVE);
 
-  const float radius = brush_radius(scene, brush);
+  const float stroke_distance_threshold = 20.0f;
   const int2 mval_i = int2(math::round(start_sample.mouse_position));
   const int active_material_index = math::max(object.actcol - 1, 0);
 
@@ -667,7 +708,7 @@ void GreasePencilStrokeOperationCommon::init_auto_masking(const bContext &C,
           stroke_selection, GrainSize(512), memory, [&](const int curve_i) {
             for (const int point_i : points_by_curve[curve_i]) {
               const float distance = math::distance(mval_i, int2(view_positions[point_i]));
-              if (distance <= radius) {
+              if (distance <= stroke_distance_threshold) {
                 return true;
               }
             }

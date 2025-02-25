@@ -19,8 +19,6 @@
 #include "BKE_movieclip.h"
 #include "BKE_tracking.h"
 
-#include "GPU_texture.hh"
-
 #include "RNA_access.hh"
 #include "RNA_prototypes.hh"
 
@@ -179,8 +177,8 @@ void register_node_type_cmp_keyingscreen()
   ntype.draw_buttons = file_ns::node_composit_buts_keyingscreen;
   ntype.initfunc_api = file_ns::node_composit_init_keyingscreen;
   blender::bke::node_type_storage(
-      &ntype, "NodeKeyingScreenData", node_free_standard_storage, node_copy_standard_storage);
+      ntype, "NodeKeyingScreenData", node_free_standard_storage, node_copy_standard_storage);
   ntype.get_compositor_operation = file_ns::get_compositor_operation;
 
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 }

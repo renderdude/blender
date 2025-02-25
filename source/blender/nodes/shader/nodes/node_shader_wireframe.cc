@@ -35,9 +35,7 @@ static int node_shader_gpu_wireframe(GPUMaterial *mat,
   if (node->custom1) {
     return GPU_stack_link(mat, node, "node_wireframe_screenspace", in, out);
   }
-  else {
-    return GPU_stack_link(mat, node, "node_wireframe", in, out);
-  }
+  return GPU_stack_link(mat, node, "node_wireframe", in, out);
 }
 
 NODE_SHADER_MATERIALX_BEGIN
@@ -70,5 +68,5 @@ void register_node_type_sh_wireframe()
   ntype.gpu_fn = file_ns::node_shader_gpu_wireframe;
   ntype.materialx_fn = file_ns::node_shader_materialx;
 
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 }

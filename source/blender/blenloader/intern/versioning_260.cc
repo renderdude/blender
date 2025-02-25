@@ -6,7 +6,10 @@
  * \ingroup blenloader
  */
 
+#include <algorithm>
+
 #include "BKE_idprop.hh"
+#include "BLI_listbase.h"
 #include "BLI_utildefines.h"
 
 /* allow readfile to use deprecated functionality */
@@ -42,10 +45,12 @@
 
 #include "MEM_guardedalloc.h"
 
-#include "BLI_blenlib.h"
 #include "BLI_math_matrix.h"
 #include "BLI_math_rotation.h"
 #include "BLI_math_vector.h"
+#include "BLI_path_utils.hh"
+#include "BLI_string.h"
+#include "BLI_string_utf8.h"
 #include "BLI_string_utils.hh"
 
 #include "BKE_anim_visualization.h"
@@ -314,8 +319,8 @@ static void do_versions_nodetree_multi_file_output_format_2_62_1(Scene *sce, bNo
         }
       }
 
-      blender::bke::node_remove_socket(ntree, node, old_image);
-      blender::bke::node_remove_socket(ntree, node, old_z);
+      blender::bke::node_remove_socket(*ntree, *node, *old_image);
+      blender::bke::node_remove_socket(*ntree, *node, *old_z);
       if (old_data) {
         MEM_freeN(old_data);
       }
@@ -1099,7 +1104,7 @@ static bNode *version_add_group_in_out_node(bNodeTree *ntree, const int type)
 
   node->runtime = MEM_new<blender::bke::bNodeRuntime>(__func__);
   BLI_addtail(&ntree->nodes, node);
-  blender::bke::node_unique_id(ntree, node);
+  blender::bke::node_unique_id(*ntree, *node);
 
   /* Manual initialization of the node,
    * node->typeinfo is only set after versioning. */
@@ -1896,7 +1901,7 @@ void blo_do_versions_260(FileData *fd, Library * /*lib*/, Main *bmain)
     {
       LISTBASE_FOREACH (Mesh *, me, &bmain->meshes) {
         CustomData_update_typemap(&me->vert_data);
-        CustomData_free_layers(&me->vert_data, CD_MSTICKY, me->verts_num);
+        CustomData_free_layers(&me->vert_data, CD_MSTICKY);
       }
     }
   }
@@ -2251,7 +2256,7 @@ void blo_do_versions_260(FileData *fd, Library * /*lib*/, Main *bmain)
         }
 
         LISTBASE_FOREACH (bNode *, node, &ntree->nodes) {
-          blender::bke::node_unique_name(ntree, node);
+          blender::bke::node_unique_name(*ntree, *node);
         }
       }
       FOREACH_NODETREE_END;
@@ -2313,9 +2318,7 @@ void blo_do_versions_260(FileData *fd, Library * /*lib*/, Main *bmain)
             num_inputs++;
 
             if (link->tonode) {
-              if (input_locx > link->tonode->locx_legacy - offsetx) {
-                input_locx = link->tonode->locx_legacy - offsetx;
-              }
+              input_locx = std::min(input_locx, link->tonode->locx_legacy - offsetx);
               input_locy += link->tonode->locy_legacy;
             }
           }
@@ -2332,9 +2335,7 @@ void blo_do_versions_260(FileData *fd, Library * /*lib*/, Main *bmain)
             num_outputs++;
 
             if (link->fromnode) {
-              if (output_locx < link->fromnode->locx_legacy + offsetx) {
-                output_locx = link->fromnode->locx_legacy + offsetx;
-              }
+              output_locx = std::max(output_locx, link->fromnode->locx_legacy + offsetx);
               output_locy += link->fromnode->locy_legacy;
             }
           }
@@ -2344,7 +2345,7 @@ void blo_do_versions_260(FileData *fd, Library * /*lib*/, Main *bmain)
         }
 
         if (free_link) {
-          blender::bke::node_remove_link(ntree, link);
+          blender::bke::node_remove_link(ntree, *link);
         }
       }
 
@@ -2373,7 +2374,7 @@ void blo_do_versions_260(FileData *fd, Library * /*lib*/, Main *bmain)
       {
         next_link = link->next;
         if (link->fromnode == nullptr || link->tonode == nullptr) {
-          blender::bke::node_remove_link(ntree, link);
+          blender::bke::node_remove_link(ntree, *link);
         }
       }
     }

@@ -2,6 +2,20 @@
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
+#ifdef GPU_SHADER
+#  pragma once
+#  include "gpu_glsl_cpp_stubs.hh"
+
+#  include "draw_common_shader_shared.hh"
+#  include "draw_object_infos_info.hh"
+#  include "draw_view_info.hh"
+
+#  include "gpu_index_load_info.hh"
+
+#  include "overlay_common_info.hh"
+#  include "overlay_shader_shared.h"
+#endif
+
 #include "overlay_common_info.hh"
 
 GPU_SHADER_CREATE_INFO(overlay_frag_output)
@@ -134,6 +148,7 @@ PUSH_CONSTANT(BOOL, do_smooth_wire)
 STORAGE_BUF_FREQ(0, READ, float, pos[], GEOMETRY)
 STORAGE_BUF(1, READ, mat4, data_buf[])
 PUSH_CONSTANT(IVEC2, gpu_attr_0)
+PUSH_CONSTANT(BOOL, use_arrow_drawing)
 VERTEX_OUT(overlay_armature_shape_wire_iface)
 VERTEX_SOURCE("overlay_armature_shape_wire_vert.glsl")
 FRAGMENT_SOURCE("overlay_armature_shape_wire_frag.glsl")

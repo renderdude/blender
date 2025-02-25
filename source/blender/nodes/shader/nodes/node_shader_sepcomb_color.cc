@@ -9,9 +9,6 @@
 #include "node_shader_util.hh"
 #include "node_util.hh"
 
-#include "UI_interface.hh"
-#include "UI_resources.hh"
-
 static void node_combsep_color_init(bNodeTree * /*tree*/, bNode *node)
 {
   NodeCombSepColor *data = MEM_cnew<NodeCombSepColor>(__func__);
@@ -111,11 +108,11 @@ void register_node_type_sh_sepcolor()
   ntype.updatefunc = file_ns::node_sepcolor_update;
   ntype.initfunc = node_combsep_color_init;
   blender::bke::node_type_storage(
-      &ntype, "NodeCombSepColor", node_free_standard_storage, node_copy_standard_storage);
+      ntype, "NodeCombSepColor", node_free_standard_storage, node_copy_standard_storage);
   ntype.gpu_fn = file_ns::gpu_shader_sepcolor;
   ntype.materialx_fn = file_ns::node_shader_materialx;
 
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 }
 
 /* **************** COMBINE COLOR ******************** */
@@ -216,9 +213,9 @@ void register_node_type_sh_combcolor()
   ntype.updatefunc = file_ns::node_combcolor_update;
   ntype.initfunc = node_combsep_color_init;
   blender::bke::node_type_storage(
-      &ntype, "NodeCombSepColor", node_free_standard_storage, node_copy_standard_storage);
+      ntype, "NodeCombSepColor", node_free_standard_storage, node_copy_standard_storage);
   ntype.gpu_fn = file_ns::gpu_shader_combcolor;
   ntype.materialx_fn = file_ns::node_shader_materialx;
 
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 }

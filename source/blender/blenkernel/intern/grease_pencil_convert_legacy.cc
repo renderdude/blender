@@ -166,8 +166,8 @@ class AnimDataConvertor {
    * Source and destination RNA root path. These can be modified by user code at any time (e.g.
    * when processing animation data for different modifiers...).
    */
-  std::string root_path_src = "";
-  std::string root_path_dst = "";
+  std::string root_path_src;
+  std::string root_path_dst;
 
  private:
   /**
@@ -873,6 +873,8 @@ static Drawing legacy_gpencil_frame_to_grease_pencil_drawing(const bGPDframe &gp
                                                    MutableSpan<float3>();
   MutableSpan<float> radii = drawing.radii_for_write();
   MutableSpan<float> opacities = drawing.opacities_for_write();
+  /* Note: Since we *know* the drawing are created from scratch, we assume that the following
+   * `lookup_or_add_for_write_span` calls always return valid writers. */
   SpanAttributeWriter<float> delta_times = attributes.lookup_or_add_for_write_span<float>(
       "delta_time", AttrDomain::Point);
   SpanAttributeWriter<float> rotations = attributes.lookup_or_add_for_write_span<float>(
@@ -1208,80 +1210,80 @@ static bNodeTree *offset_radius_node_tree_add(ConversionData &conversion_data, L
   group->tree_interface.add_socket(
       DATA_("Layer"), "", "NodeSocketString", NODE_INTERFACE_SOCKET_INPUT, nullptr);
 
-  bNode *group_output = bke::node_add_node(nullptr, group, "NodeGroupOutput");
+  bNode *group_output = bke::node_add_node(nullptr, *group, "NodeGroupOutput");
   group_output->location[0] = 800;
   group_output->location[1] = 160;
-  bNode *group_input = bke::node_add_node(nullptr, group, "NodeGroupInput");
+  bNode *group_input = bke::node_add_node(nullptr, *group, "NodeGroupInput");
   group_input->location[0] = 0;
   group_input->location[1] = 160;
 
-  bNode *set_curve_radius = bke::node_add_node(nullptr, group, "GeometryNodeSetCurveRadius");
+  bNode *set_curve_radius = bke::node_add_node(nullptr, *group, "GeometryNodeSetCurveRadius");
   set_curve_radius->location[0] = 600;
   set_curve_radius->location[1] = 160;
   bNode *named_layer_selection = bke::node_add_node(
-      nullptr, group, "GeometryNodeInputNamedLayerSelection");
+      nullptr, *group, "GeometryNodeInputNamedLayerSelection");
   named_layer_selection->location[0] = 200;
   named_layer_selection->location[1] = 100;
-  bNode *input_radius = bke::node_add_node(nullptr, group, "GeometryNodeInputRadius");
+  bNode *input_radius = bke::node_add_node(nullptr, *group, "GeometryNodeInputRadius");
   input_radius->location[0] = 0;
   input_radius->location[1] = 0;
 
-  bNode *add = bke::node_add_node(nullptr, group, "ShaderNodeMath");
+  bNode *add = bke::node_add_node(nullptr, *group, "ShaderNodeMath");
   add->custom1 = NODE_MATH_ADD;
   add->location[0] = 200;
   add->location[1] = 0;
 
-  bNode *clamp_radius = bke::node_add_node(nullptr, group, "ShaderNodeClamp");
+  bNode *clamp_radius = bke::node_add_node(nullptr, *group, "ShaderNodeClamp");
   clamp_radius->location[0] = 400;
   clamp_radius->location[1] = 0;
-  bNodeSocket *sock_max = bke::node_find_socket(clamp_radius, SOCK_IN, "Max");
+  bNodeSocket *sock_max = bke::node_find_socket(*clamp_radius, SOCK_IN, "Max");
   static_cast<bNodeSocketValueFloat *>(sock_max->default_value)->value = FLT_MAX;
 
-  bke::node_add_link(group,
-                     group_input,
-                     bke::node_find_socket(group_input, SOCK_OUT, "Socket_0"),
-                     set_curve_radius,
-                     bke::node_find_socket(set_curve_radius, SOCK_IN, "Curve"));
-  bke::node_add_link(group,
-                     set_curve_radius,
-                     bke::node_find_socket(set_curve_radius, SOCK_OUT, "Curve"),
-                     group_output,
-                     bke::node_find_socket(group_output, SOCK_IN, "Socket_1"));
+  bke::node_add_link(*group,
+                     *group_input,
+                     *bke::node_find_socket(*group_input, SOCK_OUT, "Socket_0"),
+                     *set_curve_radius,
+                     *bke::node_find_socket(*set_curve_radius, SOCK_IN, "Curve"));
+  bke::node_add_link(*group,
+                     *set_curve_radius,
+                     *bke::node_find_socket(*set_curve_radius, SOCK_OUT, "Curve"),
+                     *group_output,
+                     *bke::node_find_socket(*group_output, SOCK_IN, "Socket_1"));
 
-  bke::node_add_link(group,
-                     group_input,
-                     bke::node_find_socket(group_input, SOCK_OUT, "Socket_3"),
-                     named_layer_selection,
-                     bke::node_find_socket(named_layer_selection, SOCK_IN, "Name"));
-  bke::node_add_link(group,
-                     named_layer_selection,
-                     bke::node_find_socket(named_layer_selection, SOCK_OUT, "Selection"),
-                     set_curve_radius,
-                     bke::node_find_socket(set_curve_radius, SOCK_IN, "Selection"));
+  bke::node_add_link(*group,
+                     *group_input,
+                     *bke::node_find_socket(*group_input, SOCK_OUT, "Socket_3"),
+                     *named_layer_selection,
+                     *bke::node_find_socket(*named_layer_selection, SOCK_IN, "Name"));
+  bke::node_add_link(*group,
+                     *named_layer_selection,
+                     *bke::node_find_socket(*named_layer_selection, SOCK_OUT, "Selection"),
+                     *set_curve_radius,
+                     *bke::node_find_socket(*set_curve_radius, SOCK_IN, "Selection"));
 
-  bke::node_add_link(group,
-                     group_input,
-                     bke::node_find_socket(group_input, SOCK_OUT, "Socket_2"),
-                     add,
-                     bke::node_find_socket(add, SOCK_IN, "Value"));
-  bke::node_add_link(group,
-                     input_radius,
-                     bke::node_find_socket(input_radius, SOCK_OUT, "Radius"),
-                     add,
-                     bke::node_find_socket(add, SOCK_IN, "Value_001"));
-  bke::node_add_link(group,
-                     add,
-                     bke::node_find_socket(add, SOCK_OUT, "Value"),
-                     clamp_radius,
-                     bke::node_find_socket(clamp_radius, SOCK_IN, "Value"));
-  bke::node_add_link(group,
-                     clamp_radius,
-                     bke::node_find_socket(clamp_radius, SOCK_OUT, "Result"),
-                     set_curve_radius,
-                     bke::node_find_socket(set_curve_radius, SOCK_IN, "Radius"));
+  bke::node_add_link(*group,
+                     *group_input,
+                     *bke::node_find_socket(*group_input, SOCK_OUT, "Socket_2"),
+                     *add,
+                     *bke::node_find_socket(*add, SOCK_IN, "Value"));
+  bke::node_add_link(*group,
+                     *input_radius,
+                     *bke::node_find_socket(*input_radius, SOCK_OUT, "Radius"),
+                     *add,
+                     *bke::node_find_socket(*add, SOCK_IN, "Value_001"));
+  bke::node_add_link(*group,
+                     *add,
+                     *bke::node_find_socket(*add, SOCK_OUT, "Value"),
+                     *clamp_radius,
+                     *bke::node_find_socket(*clamp_radius, SOCK_IN, "Value"));
+  bke::node_add_link(*group,
+                     *clamp_radius,
+                     *bke::node_find_socket(*clamp_radius, SOCK_OUT, "Result"),
+                     *set_curve_radius,
+                     *bke::node_find_socket(*set_curve_radius, SOCK_IN, "Radius"));
 
   LISTBASE_FOREACH (bNode *, node, &group->nodes) {
-    bke::node_set_selected(node, false);
+    bke::node_set_selected(*node, false);
   }
 
   return group;
@@ -1536,7 +1538,9 @@ static ModifierData &legacy_object_modifier_common(ConversionData &conversion_da
     for (md = static_cast<ModifierData *>(object.modifiers.first);
          md && BKE_modifier_get_info(ModifierType(md->type))->type == ModifierTypeType::OnlyDeform;
          md = md->next)
+    {
       ;
+    }
     BLI_insertlinkbefore(&object.modifiers, md, &new_md);
   }
   else {
@@ -2162,6 +2166,23 @@ static void legacy_object_modifier_opacity(ConversionData &conversion_data,
   }
   md_opacity.color_factor = legacy_md_opacity.factor;
   md_opacity.hardness_factor = legacy_md_opacity.hardness;
+
+  /* Account for animation on renamed properties. */
+  char modifier_name[MAX_NAME * 2];
+  BLI_str_escape(modifier_name, md.name, sizeof(modifier_name));
+  AnimDataConvertor anim_convertor_factor(
+      conversion_data, object.id, object.id, {{".factor", ".color_factor"}});
+  anim_convertor_factor.root_path_src = fmt::format("modifiers[\"{}\"]", modifier_name);
+  anim_convertor_factor.root_path_dst = fmt::format("modifiers[\"{}\"]", modifier_name);
+  anim_convertor_factor.fcurves_convert();
+  anim_convertor_factor.fcurves_convert_finalize();
+  AnimDataConvertor anim_convertor_hardness(
+      conversion_data, object.id, object.id, {{".hardness", ".hardness_factor"}});
+  anim_convertor_hardness.root_path_src = fmt::format("modifiers[\"{}\"]", modifier_name);
+  anim_convertor_hardness.root_path_dst = fmt::format("modifiers[\"{}\"]", modifier_name);
+  anim_convertor_hardness.fcurves_convert();
+  anim_convertor_hardness.fcurves_convert_finalize();
+  DEG_relations_tag_update(&conversion_data.bmain);
 
   legacy_object_modifier_influence(md_opacity.influence,
                                    legacy_md_opacity.layername,

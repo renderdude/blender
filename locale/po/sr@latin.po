@@ -1,9 +1,9 @@
 
 msgid ""
 msgstr ""
-"Project-Id-Version: Blender 4.4.0 Alpha (b'efff379ea583')\n"
+"Project-Id-Version: Blender 4.4.0 Beta (b'63c460d93d55')\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-27 10:58+0000\n"
+"POT-Creation-Date: 2025-02-24 09:56+0000\n"
 "PO-Revision-Date: 2012-09-07 22:32+0100\n"
 "Last-Translator: Nikola Radovanovic <cobisimo@gmail.com>\n"
 "Language-Team: Nikola Radovanovic\n"
@@ -37,6 +37,10 @@ msgstr "Vrednost"
 
 msgid "F-Curves"
 msgstr "F-kriva"
+
+
+msgid "Slot"
+msgstr "Slot"
 
 
 msgid "Action Group"
@@ -183,34 +187,6 @@ msgid "Expanded"
 msgstr "Prošireno"
 
 
-msgid "Influence"
-msgstr "Uticaj"
-
-
-msgid "Mix Mode"
-msgstr "Režim mešanja"
-
-
-msgid "Replace"
-msgstr "Zameni"
-
-
-msgid "Offset"
-msgstr "Odstojanje"
-
-
-msgid "Add"
-msgstr "Dodaj"
-
-
-msgid "Subtract"
-msgstr "Oduzimanje"
-
-
-msgid "Multiply"
-msgstr "Umnoženo"
-
-
 msgid "Strips"
 msgstr "Trake"
 
@@ -297,6 +273,22 @@ msgstr "Trajna putanja do podataka"
 
 msgid "Action"
 msgstr "Akcija"
+
+
+msgid "Replace"
+msgstr "Zameni"
+
+
+msgid "Add"
+msgstr "Dodaj"
+
+
+msgid "Subtract"
+msgstr "Oduzimanje"
+
+
+msgid "Multiply"
+msgstr "Umnoženo"
 
 
 msgid "Nothing"
@@ -1457,6 +1449,10 @@ msgid "Image"
 msgstr "Slika"
 
 
+msgid "Offset"
+msgstr "Odstojanje"
+
+
 msgid "Rotation"
 msgstr "Rotacija"
 
@@ -2034,6 +2030,10 @@ msgid "Constraint modifying the transformation of objects and bones"
 msgstr "Ograničenje koji menja transformaciju objekata i kostiju"
 
 
+msgid "Influence"
+msgstr "Uticaj"
+
+
 msgid "Amount of influence constraint will have on the final solution"
 msgstr "Nivo koji će uticaj ovog ograničenja imati na krajnji rezultat"
 
@@ -2232,6 +2232,10 @@ msgstr "Minimum"
 
 msgid "Minimum value for target channel range"
 msgstr "Postavlja minimalnu Y vrednost renderovanog okvira"
+
+
+msgid "Mix Mode"
+msgstr "Režim mešanja"
 
 
 msgid "Transform Channel"
@@ -4974,14 +4978,6 @@ msgstr "Kutija"
 
 msgid "Loop"
 msgstr "Petlje"
-
-
-msgid "Clone Alpha"
-msgstr "X alfa"
-
-
-msgid "Clone Image"
-msgstr "Kloniraj sloj"
 
 
 msgid "Local"
@@ -8634,24 +8630,12 @@ msgid "Material slot name"
 msgstr "Naziv slota materijala"
 
 
-msgid "Names"
-msgstr "Imena"
-
-
-msgid "Bone Roll"
-msgstr "Rolna kostiju"
-
-
-msgid "Show/Hide"
-msgstr "Prikaži/sakrij"
+msgid "Mirror"
+msgstr "Ogledalo"
 
 
 msgid "Snap"
 msgstr "Lepljenje"
-
-
-msgid "Mirror"
-msgstr "Ogledalo"
 
 
 msgid "UV Mapping"
@@ -8702,6 +8686,10 @@ msgid "Quick Effects"
 msgstr "Brzi efekti"
 
 
+msgid "Show/Hide"
+msgstr "Prikaži/sakrij"
+
+
 msgid "Hooks"
 msgstr "Udice"
 
@@ -8716,6 +8704,10 @@ msgstr "U međuvremenu"
 
 msgid "Propagate"
 msgstr "Prenesi"
+
+
+msgid "Names"
+msgstr "Imena"
 
 
 msgid "Toggle Bone Options"
@@ -8740,6 +8732,10 @@ msgstr "Sjedini"
 
 msgid "Special Characters"
 msgstr "Specijalni znaci"
+
+
+msgid "Bone Roll"
+msgstr "Rolna kostiju"
 
 
 msgid "Basic"
@@ -19792,6 +19788,14 @@ msgid "Canvas"
 msgstr "Platno"
 
 
+msgid "Clone Alpha"
+msgstr "X alfa"
+
+
+msgid "Clone Image"
+msgstr "Kloniraj sloj"
+
+
 msgid "Dither"
 msgstr "Međuton"
 
@@ -19850,10 +19854,6 @@ msgstr "Koristi samo deformacije"
 
 msgid "Use only deformation modifiers (temporary disable all constructive modifiers except multi-resolution)"
 msgstr "Koristi samo deformacione modifikatore (privremeno isključuje sve konstruktivne modifikatore osim više-rezolucija)"
-
-
-msgid "UV Sculpting"
-msgstr "UV vajanje"
 
 
 msgid "Properties of vertex and weight paint mode"
@@ -19986,10 +19986,6 @@ msgstr "Putanja animacije"
 
 msgid "Text Boxes"
 msgstr "Blok teksta"
-
-
-msgid "Slot"
-msgstr "Slot"
 
 
 msgid "Filters"
@@ -20809,10 +20805,6 @@ msgstr "Izvrnuta osa skretanja (Y)"
 
 msgid "Invert Roll (Z) Axis"
 msgstr "Izvrnuta osa okretanja (Z)"
-
-
-msgid "Show Navigation Guide"
-msgstr "Promena pogleda"
 
 
 msgid "Turntable"
@@ -23191,6 +23183,10 @@ msgid "Solid Light"
 msgstr "Osnovna svetla"
 
 
+msgid "UV Sculpting"
+msgstr "UV vajanje"
+
+
 msgid "Group Index"
 msgstr "Grupisano"
 
@@ -24969,6 +24965,10 @@ msgid "Cannot remove built in keying set"
 msgstr "Ne mogu da uklonim ugrađenu zbirku ključeva"
 
 
+msgid "Cancel"
+msgstr "Odustani"
+
+
 msgid "No keyframes to slide between"
 msgstr "Ključni kadrovi"
 
@@ -25031,10 +25031,6 @@ msgstr "Modifikator vrednosti F-krive"
 
 msgid "Nothing selected"
 msgstr "Ništa nije izabrano"
-
-
-msgid "Cancel"
-msgstr "Odustani"
 
 
 msgid "Pin"

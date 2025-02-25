@@ -12,20 +12,17 @@
 
 #include "MEM_guardedalloc.h"
 
-#include "DNA_image_types.h"
-#include "DNA_material_types.h"
 #include "DNA_node_types.h"
 #include "DNA_object_types.h"
 #include "DNA_scene_types.h"
 #include "DNA_space_types.h"
 
-#include "BLI_alloca.h"
-#include "BLI_blenlib.h"
 #include "BLI_hash.h"
 #include "BLI_heap.h"
 #include "BLI_kdopbvh.hh"
 #include "BLI_kdtree.h"
 #include "BLI_lasso_2d.hh"
+#include "BLI_listbase.h"
 #include "BLI_math_geom.h"
 #include "BLI_math_matrix.h"
 #include "BLI_math_vector.h"

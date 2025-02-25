@@ -705,10 +705,10 @@ static void restore_geometry_data(const NodeGeometry *geometry, Mesh *mesh)
 
 static void geometry_free_data(NodeGeometry *geometry)
 {
-  CustomData_free(&geometry->vert_data, geometry->totvert);
-  CustomData_free(&geometry->edge_data, geometry->totedge);
-  CustomData_free(&geometry->corner_data, geometry->totloop);
-  CustomData_free(&geometry->face_data, geometry->faces_num);
+  CustomData_free(&geometry->vert_data);
+  CustomData_free(&geometry->edge_data);
+  CustomData_free(&geometry->corner_data);
+  CustomData_free(&geometry->face_data);
   implicit_sharing::free_shared_data(&geometry->face_offset_indices,
                                      &geometry->face_offsets_sharing_info);
 }
@@ -898,7 +898,7 @@ static void restore_list(bContext *C, Depsgraph *depsgraph, StepData &step_data)
          * We need to manually clear that cache. */
         mesh.runtime->corner_normals_cache.tag_dirty();
       }
-      bke::pbvh::update_bounds(*depsgraph, object, pbvh);
+      pbvh.update_bounds(*depsgraph, object);
       bke::pbvh::store_bounds_orig(pbvh);
       break;
     }
@@ -939,7 +939,7 @@ static void restore_list(bContext *C, Depsgraph *depsgraph, StepData &step_data)
       }
 
       BKE_pbvh_sync_visibility_from_verts(object);
-      bke::pbvh::update_visibility(object, pbvh);
+      pbvh.update_visibility(object);
       if (BKE_sculpt_multires_active(scene, &object)) {
         multires_mark_as_modified(depsgraph, &object, MULTIRES_HIDDEN_MODIFIED);
       }
@@ -982,7 +982,7 @@ static void restore_list(bContext *C, Depsgraph *depsgraph, StepData &step_data)
       }
 
       hide::sync_all_from_faces(object);
-      bke::pbvh::update_visibility(object, pbvh);
+      pbvh.update_visibility(object);
       break;
     }
     case Type::Mask: {
@@ -1143,7 +1143,7 @@ static void store_vert_visibility_grids(const SubdivCCG &subdiv_ccg,
                                         const bke::pbvh::GridsNode &node,
                                         Node &unode)
 {
-  const BitGroupVector<> grid_hidden = subdiv_ccg.grid_hidden;
+  const BitGroupVector<> &grid_hidden = subdiv_ccg.grid_hidden;
   if (grid_hidden.is_empty()) {
     return;
   }

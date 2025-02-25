@@ -16,8 +16,10 @@
 #include "MEM_guardedalloc.h"
 
 #include "BLI_bitmap_draw_2d.h"
-#include "BLI_blenlib.h"
 #include "BLI_lasso_2d.hh"
+#include "BLI_listbase.h"
+#include "BLI_math_vector.h"
+#include "BLI_rect.h"
 #include "BLI_utildefines.h"
 
 #include "WM_api.hh"

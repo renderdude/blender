@@ -29,7 +29,6 @@
 
 #include "DNA_anim_types.h"
 #include "DNA_armature_types.h"
-#include "DNA_brush_types.h"
 #include "DNA_cachefile_types.h"
 #include "DNA_camera_types.h"
 #include "DNA_curves_types.h"
@@ -63,6 +62,7 @@
 
 #include "BLI_alloca.h"
 #include "BLI_ghash.h"
+#include "BLI_listbase.h"
 #include "BLI_string.h"
 #include "BLI_utildefines.h"
 
@@ -76,6 +76,7 @@
 #include "BKE_grease_pencil.hh"
 #include "BKE_key.hh"
 #include "BKE_layer.hh"
+#include "BKE_library.hh"
 #include "BKE_main.hh"
 #include "BKE_mask.h"
 #include "BKE_material.hh"
@@ -453,9 +454,7 @@ bool ANIM_animdata_can_have_greasepencil(const eAnimCont_Types type)
 #define ANIMDATA_HAS_DRIVERS(id) ((id)->adt && (id)->adt->drivers.first)
 
 /* quick macro to test if AnimData is usable for NLA */
-#define ANIMDATA_HAS_NLA(id) \
-  ((id)->adt && (id)->adt->nla_tracks.first && \
-   (!(id)->adt->action || (id)->adt->action->wrap().is_action_legacy()))
+#define ANIMDATA_HAS_NLA(id) ((id)->adt && (id)->adt->nla_tracks.first)
 
 /**
  * Quick macro to test for all three above usability tests, performing the appropriate provided
@@ -508,7 +507,8 @@ bool ANIM_animdata_can_have_greasepencil(const eAnimCont_Types type)
             nlaOk \
           } \
           else if (!(ac->ads->filterflag & ADS_FILTER_NLA_NOACT) || \
-                   ANIMDATA_HAS_ACTION_LEGACY(id)) { \
+                   ANIMDATA_HAS_ACTION_LAYERED(id)) \
+          { \
             nlaOk \
           } \
         } \
@@ -1061,7 +1061,7 @@ static bool skip_fcurve_selected_data(bAnimContext *ac,
         BLI_str_quoted_substr(fcu->rna_path, "nodes[", node_name, sizeof(node_name)))
     {
       /* Get strip name, and check if this strip is selected. */
-      node = bke::node_find_node_by_name(ntree, node_name);
+      node = bke::node_find_node_by_name(*ntree, node_name);
 
       /* Can only add this F-Curve if it is selected. */
       if (node) {
@@ -2262,7 +2262,7 @@ static size_t animdata_filter_grease_pencil(bAnimContext *ac,
 {
   size_t items = 0;
   Scene *scene = ac->scene;
-  ViewLayer *view_layer = (ViewLayer *)ac->view_layer;
+  ViewLayer *view_layer = ac->view_layer;
   bDopeSheet *ads = ac->ads;
 
   BKE_view_layer_synced_ensure(scene, view_layer);
@@ -3394,7 +3394,6 @@ static size_t animdata_filter_dopesheet_scene(bAnimContext *ac,
   /* filter data contained under object first */
   BEGIN_ANIMFILTER_SUBCHANNELS (EXPANDED_SCEC(sce)) {
     bNodeTree *ntree = sce->nodetree;
-    bGPdata *gpd = sce->gpd;
     World *wo = sce->world;
 
     /* Action, Drivers, or NLA for Scene */
@@ -3415,11 +3414,6 @@ static size_t animdata_filter_dopesheet_scene(bAnimContext *ac,
     /* line styles */
     if ((ac->ads->filterflag & ADS_FILTER_NOLINESTYLE) == 0) {
       tmp_items += animdata_filter_ds_linestyle(ac, &tmp_data, sce, filter_mode);
-    }
-
-    /* grease pencil */
-    if ((gpd) && !(ac->ads->filterflag & ADS_FILTER_NOGPENCIL)) {
-      tmp_items += animdata_filter_ds_gpencil(ac, &tmp_data, gpd, filter_mode);
     }
 
     /* TODO: one day, when sequencer becomes its own datatype,
@@ -3636,7 +3630,7 @@ static size_t animdata_filter_dopesheet(bAnimContext *ac,
 {
   bDopeSheet *ads = ac->ads;
   Scene *scene = (Scene *)ads->source;
-  ViewLayer *view_layer = (ViewLayer *)ac->view_layer;
+  ViewLayer *view_layer = ac->view_layer;
   size_t items = 0;
 
   /* check that we do indeed have a scene */
@@ -3664,6 +3658,15 @@ static size_t animdata_filter_dopesheet(bAnimContext *ac,
   {
     LISTBASE_FOREACH (CacheFile *, cache_file, &ac->bmain->cachefiles) {
       items += animdata_filter_ds_cachefile(ac, anim_data, cache_file, filter_mode);
+    }
+  }
+
+  /* Annotations are always shown if "Only Show Selected" is disabled. This works in the Timeline
+   * as well as in the Dope Sheet.*/
+  if (!(ac->ads->filterflag & ADS_FILTER_ONLYSEL) && !(ac->ads->filterflag & ADS_FILTER_NOGPENCIL))
+  {
+    LISTBASE_FOREACH (bGPdata *, gp_data, &ac->bmain->gpencils) {
+      items += animdata_filter_ds_gpencil(ac, anim_data, gp_data, filter_mode);
     }
   }
 

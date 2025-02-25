@@ -85,7 +85,7 @@ void BKE_mesh_wrapper_ensure_mdata(Mesh *mesh)
 
   /* Must isolate multithreaded tasks while holding a mutex lock. */
   blender::threading::isolate_task([&]() {
-    switch (static_cast<eMeshWrapperType>(mesh->runtime->wrapper_type)) {
+    switch (mesh->runtime->wrapper_type) {
       case ME_WRAPPER_TYPE_MDATA:
       case ME_WRAPPER_TYPE_SUBD: {
         break; /* Quiet warning. */
@@ -310,7 +310,7 @@ int BKE_mesh_wrapper_face_len(const Mesh *mesh)
 static Mesh *mesh_wrapper_ensure_subdivision(Mesh *mesh)
 {
   using namespace blender::bke;
-  SubsurfRuntimeData *runtime_data = (SubsurfRuntimeData *)mesh->runtime->subsurf_runtime_data;
+  SubsurfRuntimeData *runtime_data = mesh->runtime->subsurf_runtime_data;
   if (runtime_data == nullptr || runtime_data->settings.level == 0) {
     return mesh;
   }
@@ -349,7 +349,7 @@ static Mesh *mesh_wrapper_ensure_subdivision(Mesh *mesh)
         {static_cast<float3 *>(CustomData_get_layer_for_write(
              &subdiv_mesh->corner_data, CD_NORMAL, subdiv_mesh->corners_num)),
          subdiv_mesh->corners_num});
-    CustomData_free_layers(&subdiv_mesh->corner_data, CD_NORMAL, mesh->corners_num);
+    CustomData_free_layers(&subdiv_mesh->corner_data, CD_NORMAL);
   }
 
   if (!ELEM(subdiv, runtime_data->subdiv_cpu, runtime_data->subdiv_gpu)) {

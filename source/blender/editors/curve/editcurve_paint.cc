@@ -11,8 +11,10 @@
 
 #include "MEM_guardedalloc.h"
 
+#include "BLI_listbase.h"
 #include "BLI_math_matrix.h"
 #include "BLI_math_rotation.h"
+#include "BLI_math_vector.h"
 #include "BLI_mempool.h"
 
 #include "BLT_translation.hh"
@@ -1108,7 +1110,7 @@ static int curve_draw_invoke(bContext *C, wmOperator *op, const wmEvent *event)
     else {
       if ((cps->depth_mode == CURVE_PAINT_PROJECT_SURFACE) && (v3d->shading.type > OB_WIRE)) {
         /* needed or else the draw matrix can be incorrect */
-        view3d_operator_needs_opengl(C);
+        view3d_operator_needs_gpu(C);
 
         eV3DDepthOverrideMode depth_mode = V3D_DEPTH_ALL;
         if (cps->flag & CURVE_PAINT_FLAG_DEPTH_ONLY_SELECTED) {

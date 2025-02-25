@@ -2,8 +2,15 @@
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
-#include "common_view_clipping_lib.glsl"
+#include "infos/overlay_edit_mode_info.hh"
+
+VERTEX_SHADER_CREATE_INFO(overlay_mesh_loop_normal)
+#ifdef GLSL_CPP_STUBS
+#  define LOOP_NORMAL
+#endif
+
 #include "draw_model_lib.glsl"
+#include "draw_view_clipping_lib.glsl"
 #include "draw_view_lib.glsl"
 #include "gpu_shader_attribute_load_lib.glsl"
 #include "gpu_shader_index_load_lib.glsl"
@@ -65,7 +72,12 @@ void main()
   finalColor = colorNormal;
 
 #elif defined(VERT_NORMAL)
+#  if defined(FLOAT_NORMAL)
+  /* Path for opensubdiv. To be phased out at some point. */
+  nor = gpu_attr_load_float3(vnor, gpu_attr_0, vert_i);
+#  else
   nor = gpu_attr_load_uint_1010102_snorm(vnor, gpu_attr_0, vert_i).xyz;
+#  endif
   finalColor = colorVNormal;
 
 #elif defined(LOOP_NORMAL)

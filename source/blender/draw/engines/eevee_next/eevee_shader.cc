@@ -417,7 +417,7 @@ class SamplerSlots {
                bool has_shader_to_rgba)
   {
     index_ = 0;
-    if (ELEM(geometry_type, MAT_GEOM_POINT_CLOUD, MAT_GEOM_CURVES)) {
+    if (ELEM(geometry_type, MAT_GEOM_POINTCLOUD, MAT_GEOM_CURVES)) {
       index_ = 1;
     }
     else if (geometry_type == MAT_GEOM_GPENCIL) {
@@ -469,7 +469,7 @@ void ShaderModule::material_create_info_amend(GPUMaterial *gpumat, GPUCodegenOut
 
   /* WORKAROUND: Add new ob attr buffer. */
   if (GPU_material_uniform_attributes(gpumat) != nullptr) {
-    info.additional_info("draw_object_attribute_new");
+    info.additional_info("draw_object_attributes");
 
     /* Search and remove the old object attribute UBO which would creating bind point collision. */
     for (auto &resource_info : info.batch_resources_) {
@@ -645,7 +645,7 @@ void ShaderModule::material_create_info_amend(GPUMaterial *gpumat, GPUCodegenOut
         info.additional_info("draw_volume_infos");
       }
       break;
-    case MAT_GEOM_POINT_CLOUD:
+    case MAT_GEOM_POINTCLOUD:
     case MAT_GEOM_CURVES:
       /** Hair attributes come from sampler buffer. Transfer attributes to sampler. */
       for (auto &input : info.vertex_inputs_) {
@@ -716,7 +716,7 @@ void ShaderModule::material_create_info_amend(GPUMaterial *gpumat, GPUCodegenOut
   attr_load << (!codegen.attr_load.empty() ? codegen.attr_load : "");
   attr_load << "}\n\n";
 
-  std::stringstream vert_gen, frag_gen, comp_gen;
+  std::stringstream vert_gen, frag_gen;
 
   if (do_vertex_attrib_load) {
     vert_gen << global_vars.str() << attr_load.str();
@@ -772,8 +772,8 @@ void ShaderModule::material_create_info_amend(GPUMaterial *gpumat, GPUCodegenOut
         frag_gen << "return 0.0;\n";
       }
       else {
-        if (info.additional_infos_.first_index_of_try("draw_object_infos_new") == -1) {
-          info.additional_info("draw_object_infos_new");
+        if (info.additional_infos_.first_index_of_try("draw_object_infos") == -1) {
+          info.additional_info("draw_object_infos");
         }
         /* TODO(fclem): Should use `to_scale` but the gpu_shader_math_matrix_lib.glsl isn't
          * included everywhere yet. */
@@ -815,8 +815,8 @@ void ShaderModule::material_create_info_amend(GPUMaterial *gpumat, GPUCodegenOut
     case MAT_GEOM_MESH:
       info.additional_info("eevee_geom_mesh");
       break;
-    case MAT_GEOM_POINT_CLOUD:
-      info.additional_info("eevee_geom_point_cloud");
+    case MAT_GEOM_POINTCLOUD:
+      info.additional_info("eevee_geom_pointcloud");
       break;
     case MAT_GEOM_VOLUME:
       info.additional_info("eevee_geom_volume");

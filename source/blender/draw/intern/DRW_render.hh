@@ -10,18 +10,10 @@
 
 #pragma once
 
+#include "BLI_math_vector_types.hh"
 #include "DNA_object_enums.h"
 
 #include "GPU_material.hh"
-
-/* Uncomment to track unused resource bindings. */
-// #define DRW_UNUSED_RESOURCE_TRACKING
-
-#ifdef DRW_UNUSED_RESOURCE_TRACKING
-#  define DRW_DEBUG_FILE_LINE_ARGS , const char *file, int line
-#else
-#  define DRW_DEBUG_FILE_LINE_ARGS
-#endif
 
 namespace blender::gpu {
 class Batch;
@@ -62,34 +54,10 @@ struct BoundSphere {
   float center[3], radius;
 };
 
-/* declare members as empty (unused) */
-typedef char DRWViewportEmptyList;
-
-#define DRW_VIEWPORT_LIST_SIZE(list) \
-  (sizeof(list) == sizeof(DRWViewportEmptyList) ? 0 : (sizeof(list) / sizeof(void *)))
-
-/* Unused members must be either pass list or 'char *' when not used. */
-#define DRW_VIEWPORT_DATA_SIZE(ty) \
-  { \
-    DRW_VIEWPORT_LIST_SIZE(*(((ty *)nullptr)->fbl)), \
-        DRW_VIEWPORT_LIST_SIZE(*(((ty *)nullptr)->txl)), \
-        DRW_VIEWPORT_LIST_SIZE(*(((ty *)nullptr)->psl)), \
-        DRW_VIEWPORT_LIST_SIZE(*(((ty *)nullptr)->stl)), \
-  }
-
-struct DrawEngineDataSize {
-  int fbl_len;
-  int txl_len;
-  int psl_len;
-  int stl_len;
-};
-
 struct DrawEngineType {
   DrawEngineType *next, *prev;
 
   char idname[32];
-
-  const DrawEngineDataSize *vedata_size;
 
   void (*engine_init)(void *vedata);
   void (*engine_free)();
@@ -138,9 +106,7 @@ void DRW_shader_queue_optimize_material(GPUMaterial *mat);
 
 /* Viewport. */
 
-const float *DRW_viewport_size_get();
-const float *DRW_viewport_invert_size_get();
-const float *DRW_viewport_pixelsize_get();
+blender::float2 DRW_viewport_size_get();
 
 DefaultFramebufferList *DRW_viewport_framebuffer_list_get();
 DefaultTextureList *DRW_viewport_texture_list_get();
@@ -199,10 +165,6 @@ DrawData *DRW_drawdata_ensure(ID *id,
                               size_t size,
                               DrawDataInitCb init_cb,
                               DrawDataFreeCb free_cb);
-/**
- * Return nullptr if not a dupli or a pointer of pointer to the engine data.
- */
-void **DRW_duplidata_get(void *vedata);
 
 /* Settings. */
 

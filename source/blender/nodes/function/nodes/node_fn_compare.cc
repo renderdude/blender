@@ -6,7 +6,6 @@
 
 #include "BLI_listbase.h"
 #include "BLI_math_vector.h"
-#include "BLI_string.h"
 #include "BLI_string_utf8.h"
 
 #include "BLT_translation.hh"
@@ -78,22 +77,22 @@ static void node_update(bNodeTree *ntree, bNode *node)
 
   LISTBASE_FOREACH (bNodeSocket *, socket, &node->inputs) {
     bke::node_set_socket_availability(
-        ntree, socket, socket->type == (eNodeSocketDatatype)data->data_type);
+        *ntree, *socket, socket->type == (eNodeSocketDatatype)data->data_type);
   }
 
   bke::node_set_socket_availability(
-      ntree,
-      sock_epsilon,
+      *ntree,
+      *sock_epsilon,
       ELEM(data->operation, NODE_COMPARE_EQUAL, NODE_COMPARE_NOT_EQUAL) &&
           !ELEM(data->data_type, SOCK_INT, SOCK_STRING));
 
-  bke::node_set_socket_availability(ntree,
-                                    sock_comp,
+  bke::node_set_socket_availability(*ntree,
+                                    *sock_comp,
                                     ELEM(data->mode, NODE_COMPARE_MODE_DOT_PRODUCT) &&
                                         data->data_type == SOCK_VECTOR);
 
-  bke::node_set_socket_availability(ntree,
-                                    sock_angle,
+  bke::node_set_socket_availability(*ntree,
+                                    *sock_angle,
                                     ELEM(data->mode, NODE_COMPARE_MODE_DIRECTION) &&
                                         data->data_type == SOCK_VECTOR);
 }
@@ -688,13 +687,13 @@ static void node_rna(StructRNA *srna)
                 return !ELEM(item.value, NODE_COMPARE_COLOR_BRIGHTER, NODE_COMPARE_COLOR_DARKER);
               });
         }
-        else if (data->data_type == SOCK_STRING) {
+        if (data->data_type == SOCK_STRING) {
           return enum_items_filter(
               rna_enum_node_compare_operation_items, [](const EnumPropertyItem &item) {
                 return ELEM(item.value, NODE_COMPARE_EQUAL, NODE_COMPARE_NOT_EQUAL);
               });
         }
-        else if (data->data_type == SOCK_RGBA) {
+        if (data->data_type == SOCK_RGBA) {
           return enum_items_filter(rna_enum_node_compare_operation_items,
                                    [](const EnumPropertyItem &item) {
                                      return ELEM(item.value,
@@ -704,10 +703,8 @@ static void node_rna(StructRNA *srna)
                                                  NODE_COMPARE_COLOR_DARKER);
                                    });
         }
-        else {
-          return enum_items_filter(rna_enum_node_compare_operation_items,
-                                   [](const EnumPropertyItem & /*item*/) { return false; });
-        }
+        return enum_items_filter(rna_enum_node_compare_operation_items,
+                                 [](const EnumPropertyItem & /*item*/) { return false; });
       });
 
   prop = RNA_def_node_enum(
@@ -748,11 +745,11 @@ static void node_register()
   ntype.updatefunc = node_update;
   ntype.initfunc = node_init;
   blender::bke::node_type_storage(
-      &ntype, "NodeFunctionCompare", node_free_standard_storage, node_copy_standard_storage);
+      ntype, "NodeFunctionCompare", node_free_standard_storage, node_copy_standard_storage);
   ntype.build_multi_function = node_build_multi_function;
   ntype.draw_buttons = node_layout;
   ntype.gather_link_search_ops = node_gather_link_searches;
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 
   node_rna(ntype.rna_ext.srna);
 }

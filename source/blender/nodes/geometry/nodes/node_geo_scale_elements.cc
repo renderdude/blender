@@ -17,8 +17,6 @@
 #include "UI_interface.hh"
 #include "UI_resources.hh"
 
-#include "BKE_mesh.hh"
-
 #include "GEO_mesh_selection.hh"
 
 #include "NOD_rna_define.hh"
@@ -574,7 +572,7 @@ static void node_register()
   ntype.declare = node_declare;
   ntype.draw_buttons = node_layout;
   ntype.initfunc = node_init;
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 
   node_rna(ntype.rna_ext.srna);
 }

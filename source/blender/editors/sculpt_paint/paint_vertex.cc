@@ -40,6 +40,7 @@
 #include "BKE_deform.hh"
 #include "BKE_editmesh.hh"
 #include "BKE_lib_id.hh"
+#include "BKE_library.hh"
 #include "BKE_mesh.hh"
 #include "BKE_object.hh"
 #include "BKE_object_types.hh"
@@ -540,7 +541,7 @@ void update_cache_variants(bContext *C, VPaint &vp, Object &ob, PointerRNA *ptr)
   cache->radius_squared = cache->radius * cache->radius;
 
   if (bke::pbvh::Tree *pbvh = bke::object::pbvh_get(ob)) {
-    bke::pbvh::update_bounds(depsgraph, ob, *pbvh);
+    pbvh->update_bounds(depsgraph, ob);
   }
 }
 
@@ -725,10 +726,8 @@ static void paint_and_tex_color_alpha_intern(const VPaint &vp,
   else {
     float co_ss[2]; /* screenspace */
     if (ED_view3d_project_float_object(
-            vc->region,
-            co,
-            co_ss,
-            (eV3DProjTest)(V3D_PROJ_TEST_CLIP_BB | V3D_PROJ_TEST_CLIP_NEAR)) == V3D_PROJ_RET_OK)
+            vc->region, co, co_ss, (V3D_PROJ_TEST_CLIP_BB | V3D_PROJ_TEST_CLIP_NEAR)) ==
+        V3D_PROJ_RET_OK)
     {
       const float co_ss_3d[3] = {co_ss[0], co_ss[1], 0.0f}; /* we need a 3rd empty value */
       BKE_brush_sample_tex_3d(vc->scene, brush, mtex, co_ss_3d, r_rgba, 0, nullptr);
@@ -910,7 +909,7 @@ struct VPaintData : public PaintModeData {
   /* For brushes that don't use accumulation, a temporary holding array */
   GArray<> prev_colors;
 
-  ~VPaintData()
+  ~VPaintData() override
   {
     if (vp_handle) {
       ED_vpaint_proj_handle_free(vp_handle);
@@ -994,7 +993,7 @@ static bool vpaint_stroke_test_start(bContext *C, wmOperator *op, const float mo
 
   ED_mesh_color_ensure(mesh, nullptr);
 
-  const std::optional<bke::AttributeMetaData> meta_data = *mesh->attributes().lookup_meta_data(
+  const std::optional<bke::AttributeMetaData> meta_data = mesh->attributes().lookup_meta_data(
       mesh->active_color_attribute);
   if (!BKE_color_attribute_supported(*mesh, mesh->active_color_attribute)) {
     return false;
@@ -1082,6 +1081,7 @@ static void do_vpaint_brush_blur_loops(const bContext *C,
     tls.factors.resize(verts.size());
     const MutableSpan<float> factors = tls.factors;
     fill_factor_from_hide(hide_vert, verts, factors);
+    filter_region_clip_factors(ss, vert_positions, verts, factors);
     if (!select_vert.is_empty()) {
       filter_factors_with_selection(select_vert, verts, factors);
     }
@@ -1237,6 +1237,7 @@ static void do_vpaint_brush_blur_verts(const bContext *C,
     tls.factors.resize(verts.size());
     const MutableSpan<float> factors = tls.factors;
     fill_factor_from_hide(hide_vert, verts, factors);
+    filter_region_clip_factors(ss, vert_positions, verts, factors);
     if (!select_vert.is_empty()) {
       filter_factors_with_selection(select_vert, verts, factors);
     }
@@ -1395,6 +1396,7 @@ static void do_vpaint_brush_smear(const bContext *C,
     tls.factors.resize(verts.size());
     const MutableSpan<float> factors = tls.factors;
     fill_factor_from_hide(hide_vert, verts, factors);
+    filter_region_clip_factors(ss, vert_positions, verts, factors);
     if (!select_vert.is_empty()) {
       filter_factors_with_selection(select_vert, verts, factors);
     }
@@ -1566,17 +1568,16 @@ static void calculate_average_color(VPaintData &vpd,
     using Blend = typename Traits::BlendType;
     const Span<Color> colors = attribute.typed<T>().template cast<Color>();
 
-    Array<VPaintAverageAccum<Blend>> accum(nodes.size());
+    Array<VPaintAverageAccum<Blend>> accum(nodes.size(), {0, {0, 0, 0}});
     node_mask.foreach_index(GrainSize(1), [&](const int i) {
-      LocalData &tls = all_tls.local();
       VPaintAverageAccum<Blend> &accum2 = accum[i];
-      accum2.len = 0;
-      memset(accum2.value, 0, sizeof(accum2.value));
+      LocalData &tls = all_tls.local();
 
       const Span<int> verts = nodes[i].verts();
       tls.factors.resize(verts.size());
       const MutableSpan<float> factors = tls.factors;
       fill_factor_from_hide(hide_vert, verts, factors);
+      filter_region_clip_factors(ss, vert_positions, verts, factors);
       if (!select_vert.is_empty()) {
         filter_factors_with_selection(select_vert, verts, factors);
       }
@@ -1618,12 +1619,12 @@ static void calculate_average_color(VPaintData &vpd,
     Blend accum_value[3] = {0};
     Color blend(0, 0, 0, 0);
 
-    for (int i = 0; i < nodes.size(); i++) {
+    node_mask.foreach_index([&](const int i) {
       accum_len += accum[i].len;
       accum_value[0] += accum[i].value[0];
       accum_value[1] += accum[i].value[1];
       accum_value[2] += accum[i].value[2];
-    }
+    });
     if (accum_len != 0) {
       blend.r = Traits::round(sqrtf(Traits::divide_round(accum_value[0], accum_len)));
       blend.g = Traits::round(sqrtf(Traits::divide_round(accum_value[1], accum_len)));
@@ -1706,6 +1707,7 @@ static void vpaint_do_draw(const bContext *C,
     tls.factors.resize(verts.size());
     const MutableSpan<float> factors = tls.factors;
     fill_factor_from_hide(hide_vert, verts, factors);
+    filter_region_clip_factors(ss, vert_positions, verts, factors);
     if (!select_vert.is_empty()) {
       filter_factors_with_selection(select_vert, verts, factors);
     }
@@ -2203,8 +2205,7 @@ static void fill_mesh_color(Mesh &mesh,
 {
   if (BMEditMesh *em = mesh.runtime->edit_mesh.get()) {
     BMesh *bm = em->bm;
-    const std::string name = attribute_name;
-    const CustomDataLayer *layer = BKE_id_attributes_color_find(&mesh.id, name.c_str());
+    const CustomDataLayer *layer = BKE_id_attributes_color_find(&mesh.id, attribute_name);
     AttributeOwner owner = AttributeOwner::from_id(&mesh.id);
     const AttrDomain domain = BKE_attribute_domain(owner, layer);
     if (layer->type == CD_PROP_COLOR) {

@@ -2,7 +2,6 @@
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
-#include "BLI_array.hh"
 #include "BLI_math_matrix.hh"
 
 #include "DNA_pointcloud_types.h"
@@ -125,7 +124,7 @@ static PointCloud *pointcloud_from_curves(bke::CurvesGeometry curves,
   }
 
   /* Move the curve point custom data to the pointcloud, to avoid any copying. */
-  CustomData_free(&pointcloud->pdata, pointcloud->totpoint);
+  CustomData_free(&pointcloud->pdata);
   pointcloud->pdata = curves.point_data;
   CustomData_reset(&curves.point_data);
 
@@ -381,9 +380,9 @@ static void node_register()
   ntype.geometry_node_execute = node_geo_exec;
   ntype.draw_buttons = node_layout;
   blender::bke::node_type_storage(
-      &ntype, "NodeGeometryCurveToPoints", node_free_standard_storage, node_copy_standard_storage);
+      ntype, "NodeGeometryCurveToPoints", node_free_standard_storage, node_copy_standard_storage);
   ntype.initfunc = node_init;
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 
   node_rna(ntype.rna_ext.srna);
 }

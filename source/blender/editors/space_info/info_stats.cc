@@ -13,13 +13,13 @@
 
 #include "DNA_armature_types.h"
 #include "DNA_curve_types.h"
-#include "DNA_gpencil_legacy_types.h"
 #include "DNA_grease_pencil_types.h"
 #include "DNA_lattice_types.h"
 #include "DNA_mesh_types.h"
 #include "DNA_meta_types.h"
 #include "DNA_scene_types.h"
 #include "DNA_space_types.h"
+#include "DNA_userdef_types.h"
 #include "DNA_windowmanager_types.h"
 
 #include "BLF_api.hh"
@@ -58,8 +58,6 @@
 #include "ED_info.hh"
 
 #include "WM_api.hh"
-
-#include "UI_resources.hh"
 
 #include "GPU_capabilities.hh"
 
@@ -452,11 +450,16 @@ void ED_info_stats_clear(wmWindowManager *wm, ViewLayer *view_layer)
       if (area->spacetype == SPACE_VIEW3D) {
         View3D *v3d = (View3D *)area->spacedata.first;
         if (v3d->localvd) {
-          MEM_SAFE_FREE(v3d->runtime.local_stats);
+          ED_view3d_local_stats_free(v3d);
         }
       }
     }
   }
+}
+
+void ED_view3d_local_stats_free(View3D *v3d)
+{
+  MEM_SAFE_FREE(v3d->runtime.local_stats);
 }
 
 static bool format_stats(
@@ -576,7 +579,7 @@ static void get_stats_string(char *info,
     *ofs += BLI_snprintf_rlen(
         info + *ofs, len - *ofs, IFACE_("Bones:%s/%s"), stats_fmt->totbonesel, stats_fmt->totbone);
   }
-  else if ((ob) && (ob->type == OB_GPENCIL_LEGACY)) {
+  else if ((ob) && (ob->type == OB_GREASE_PENCIL)) {
     *ofs += BLI_snprintf_rlen(info + *ofs,
                               len - *ofs,
 

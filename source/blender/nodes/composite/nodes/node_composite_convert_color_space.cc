@@ -81,7 +81,7 @@ class ConvertColorSpaceOperation : public NodeOperation {
       execute_single();
       return;
     }
-    else if (this->context().use_gpu()) {
+    if (this->context().use_gpu()) {
       execute_gpu();
     }
     else {
@@ -140,7 +140,7 @@ class ConvertColorSpaceOperation : public NodeOperation {
     });
 
     IMB_colormanagement_processor_apply(color_processor,
-                                        output_image.float_texture(),
+                                        static_cast<float *>(output_image.cpu_data().data()),
                                         domain.size.x,
                                         domain.size.y,
                                         input_image.channels_count(),
@@ -203,11 +203,11 @@ void register_node_type_cmp_convert_color_space()
   ntype.nclass = NODE_CLASS_CONVERTER;
   ntype.declare = file_ns::CMP_NODE_CONVERT_COLOR_SPACE_declare;
   ntype.draw_buttons = file_ns::node_composit_buts_convert_colorspace;
-  blender::bke::node_type_size_preset(&ntype, blender::bke::eNodeSizePreset::Middle);
+  blender::bke::node_type_size_preset(ntype, blender::bke::eNodeSizePreset::Middle);
   ntype.initfunc = file_ns::node_composit_init_convert_colorspace;
   blender::bke::node_type_storage(
-      &ntype, "NodeConvertColorSpace", node_free_standard_storage, node_copy_standard_storage);
+      ntype, "NodeConvertColorSpace", node_free_standard_storage, node_copy_standard_storage);
   ntype.get_compositor_operation = file_ns::get_compositor_operation;
 
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 }

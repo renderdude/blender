@@ -1,9 +1,9 @@
 
 msgid ""
 msgstr ""
-"Project-Id-Version: Blender 4.4.0 Alpha (b'efff379ea583')\n"
+"Project-Id-Version: Blender 4.4.0 Beta (b'63c460d93d55')\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-27 10:58+0000\n"
+"POT-Creation-Date: 2025-02-24 09:56+0000\n"
 "PO-Revision-Date: 2024-03-13 11:04+0000\n"
 "Last-Translator: Bartosz <gang65@poczta.onet.pl>\n"
 "Language-Team: Ukrainian <https://translate.blender.org/projects/blender-ui/ui/uk/>\n"
@@ -63,12 +63,12 @@ msgid "F-Curves"
 msgstr "Ф-Криві"
 
 
+msgid "Slot"
+msgstr "Гніздо"
+
+
 msgid "Action F-Curves"
 msgstr "Ф-криві дій"
-
-
-msgid "Collection of action F-Curves"
-msgstr "Колекція Ф-кривих дій"
 
 
 msgid "Action Group"
@@ -241,34 +241,6 @@ msgstr "Групи дій"
 
 msgid "Collection of action groups"
 msgstr "Колекція груп дій"
-
-
-msgid "Influence"
-msgstr "Вплив"
-
-
-msgid "Mix Mode"
-msgstr "Режим Мішання"
-
-
-msgid "Replace"
-msgstr "Замінити"
-
-
-msgid "Offset"
-msgstr "Зсув"
-
-
-msgid "Add"
-msgstr "Додання"
-
-
-msgid "Subtract"
-msgstr "Відняти"
-
-
-msgid "Multiply"
-msgstr "Множення"
 
 
 msgid "Strips"
@@ -639,6 +611,10 @@ msgid "Method used for combining Active Action's result with result of NLA stack
 msgstr "Метод, який використовується для об'єднання результаті активних дій з результатом стосу НЛА"
 
 
+msgid "Replace"
+msgstr "Замінити"
+
+
 msgid "The strip values replace the accumulated results by amount specified by influence"
 msgstr "Значення смужки замінюють накопичені результати в обсязі, визначеному впливом"
 
@@ -651,12 +627,24 @@ msgid "The strip values are combined with accumulated results by appropriately u
 msgstr "Значення смужки комбінуються з накопиченими результатами шляхом відповідного використання додання, множення або математики кватерніонів, базуючись на типі каналу"
 
 
+msgid "Add"
+msgstr "Додання"
+
+
 msgid "Weighted result of strip is added to the accumulated results"
 msgstr "Виважений результат смужки додається до накопичених результатів"
 
 
+msgid "Subtract"
+msgstr "Відняти"
+
+
 msgid "Weighted result of strip is removed from the accumulated results"
 msgstr "Виважений результат смужки вилучається з накопичених результатів"
+
+
+msgid "Multiply"
+msgstr "Множення"
 
 
 msgid "Weighted result of strip is multiplied with the accumulated results"
@@ -4002,6 +3990,10 @@ msgid "Parameters defining which layer, pass and frame of the image is displayed
 msgstr "Параметри, що визначають, який шар, прохід і кадр зображення показано"
 
 
+msgid "Offset"
+msgstr "Зсув"
+
+
 msgid "Rotation"
 msgstr "Обертання"
 
@@ -5355,6 +5347,10 @@ msgid "Amount of residual error in radians for constraints that work on orientat
 msgstr "Величина залишкової похибки в радіанах для примусів, що працюють з орієнтацією"
 
 
+msgid "Influence"
+msgstr "Вплив"
+
+
 msgid "Amount of influence constraint will have on the final solution"
 msgstr "Рівень впливу примусу на фінальне обчислення"
 
@@ -5709,6 +5705,10 @@ msgstr "Мінімум"
 
 msgid "Minimum value for target channel range"
 msgstr "Найменше значення діапазону цільового каналу"
+
+
+msgid "Mix Mode"
+msgstr "Режим Мішання"
 
 
 msgid "Specify how existing transformations and the action channels are combined"
@@ -14361,10 +14361,6 @@ msgid "A collection of F-Curves for animation"
 msgstr "Колекція Ф-Кривих для анімації"
 
 
-msgid "The individual F-Curves that make up the action"
-msgstr "Окремі Ф-Криві, які створюють дію"
-
-
 msgid "Frame Range"
 msgstr "Діапазон кадрів"
 
@@ -14373,17 +14369,9 @@ msgid "Groups"
 msgstr "Групи"
 
 
-msgid "Convenient groupings of F-Curves"
-msgstr "Зручне групування Ф-Кривих"
-
-
 msgctxt "ID"
 msgid "ID Root Type"
 msgstr "Тип кореневого ID"
-
-
-msgid "Type of ID block that action can be used on - DO NOT CHANGE UNLESS YOU KNOW WHAT YOU ARE DOING"
-msgstr "Тип ID-блока, до якого може бути застосована дія. НЕ ЗМІНЮЙТЕ, ЯКЩО НЕ РОЗУМІЄТЕ, ЩО РОБИТЕ"
 
 
 msgid "Layers"
@@ -14752,22 +14740,6 @@ msgstr "Зсув початку рубежу відносно радіуса п�
 
 msgid "Brush's capabilities"
 msgstr "Можливості пензля"
-
-
-msgid "Clone Alpha"
-msgstr "Клонувати прозорість"
-
-
-msgid "Opacity of clone image display"
-msgstr "Непрозорість при показі клону зображення"
-
-
-msgid "Clone Image"
-msgstr "Клонувати зображення"
-
-
-msgid "Clone Offset"
-msgstr "Клонувати зсув"
 
 
 msgid "Soft Body Plasticity"
@@ -19981,10 +19953,6 @@ msgstr "Показ Імені"
 
 msgid "Display the object's name"
 msgstr "Показувати назву об'єкта"
-
-
-msgid "Shape Key Lock"
-msgstr "Зафіксувати ключ форми"
 
 
 msgid "Display Texture Space"
@@ -26664,52 +26632,12 @@ msgid "Material slot name"
 msgstr "Назва гнізда матеріалу"
 
 
-msgid "Names"
-msgstr "Назви"
-
-
-msgid "Bone Roll"
-msgstr "Прокручення Кістки"
-
-
-msgid "Show/Hide"
-msgstr "Показати/приховати"
-
-
-msgid "Clean Up"
-msgstr "Вичищення"
-
-
-msgid "Pivot Point"
-msgstr "Точка Опертя"
+msgid "Mirror"
+msgstr "Дзеркалення"
 
 
 msgid "Snap"
 msgstr "Підхоп"
-
-
-msgid "Proportional Editing Falloff"
-msgstr "Спад Пропорційного Редагування"
-
-
-msgid "Mask Edit"
-msgstr "Редагування Маски"
-
-
-msgid "Automasking"
-msgstr "Автомаскування"
-
-
-msgid "Face Sets Edit"
-msgstr "Редагування Наборів Граней"
-
-
-msgid "Vertex Group Locks"
-msgstr "Блокування Груп Вершин"
-
-
-msgid "Mirror"
-msgstr "Дзеркалення"
 
 
 msgid "UV Mapping"
@@ -26800,6 +26728,14 @@ msgid "Quick Effects"
 msgstr "Швидкі ефекти"
 
 
+msgid "Show/Hide"
+msgstr "Показати/приховати"
+
+
+msgid "Clean Up"
+msgstr "Вичищення"
+
+
 msgid "Asset"
 msgstr "Актив"
 
@@ -26820,6 +26756,10 @@ msgid "Hooks"
 msgstr "Гачки"
 
 
+msgid "Vertex Group Locks"
+msgstr "Блокування Груп Вершин"
+
+
 msgid "Sculpt Set Pivot"
 msgstr "Ліплення Задати Опертя"
 
@@ -26838,6 +26778,10 @@ msgstr "У проміжках"
 
 msgid "Propagate"
 msgstr "Поширити"
+
+
+msgid "Names"
+msgstr "Назви"
 
 
 msgid "Toggle Bone Options"
@@ -26882,6 +26826,30 @@ msgstr "Кернінг"
 
 msgid "Text"
 msgstr "Текст"
+
+
+msgid "Bone Roll"
+msgstr "Прокручення Кістки"
+
+
+msgid "Pivot Point"
+msgstr "Точка Опертя"
+
+
+msgid "Proportional Editing Falloff"
+msgstr "Спад Пропорційного Редагування"
+
+
+msgid "Mask Edit"
+msgstr "Редагування Маски"
+
+
+msgid "Automasking"
+msgstr "Автомаскування"
+
+
+msgid "Face Sets Edit"
+msgstr "Редагування Наборів Граней"
 
 
 msgid "Basic"
@@ -34369,24 +34337,8 @@ msgid "Channel Key"
 msgstr "Ключ каналу"
 
 
-msgid "RGB color space"
-msgstr "Колірний простір RGB"
-
-
-msgid "HSV color space"
-msgstr "Колірний простір HSV"
-
-
-msgid "YUV color space"
-msgstr "Колірний простір YUV"
-
-
 msgid "YCbCr"
 msgstr "YCbCr"
-
-
-msgid "YCbCr color space"
-msgstr "Колірний простір YCbCr"
 
 
 msgid "Limit by this channel's value"
@@ -35087,6 +35039,10 @@ msgstr "Розтушовка"
 
 msgid "Distance Key"
 msgstr "Ключ відстані"
+
+
+msgid "RGB color space"
+msgstr "Колірний простір RGB"
 
 
 msgid "YCbCr suppression"
@@ -35930,40 +35886,16 @@ msgid "Use relative (fraction of input image size) values to define translation"
 msgstr "Використати відносні (частина від розміру вхідного зображення) значення для визначення переміщення"
 
 
-msgid "Wrapping"
-msgstr "Обгортання"
-
-
-msgid "Wrap image on a specific axis"
-msgstr "Обгортати зображення за вказаними осями"
-
-
-msgid "No wrapping on X and Y"
-msgstr "Не обгортати за X та Y"
-
-
 msgid "X Axis"
 msgstr "Вісь X"
-
-
-msgid "Wrap all pixels on the X axis"
-msgstr "Обгортати всі пікселі за віссю X"
 
 
 msgid "Y Axis"
 msgstr "Вісь Y"
 
 
-msgid "Wrap all pixels on the Y axis"
-msgstr "Обгортати всі пікселі за віссю Y"
-
-
 msgid "Both Axes"
 msgstr "Обидві осі"
-
-
-msgid "Wrap all pixels on both axes"
-msgstr "Обгортати усі пікселі за обома осями"
 
 
 msgid "Vector Blur"
@@ -50472,6 +50404,18 @@ msgid "Reset viewable area to show selected strips range"
 msgstr "Скинути видиму область, щоб показати діапазон вибраних смужок"
 
 
+msgid "Source color"
+msgstr "Колір джерела"
+
+
+msgid "Gamma Corrected"
+msgstr "Гамму виправлено"
+
+
+msgid "The source color is gamma corrected"
+msgstr "Джерельний колір є з корекцією гамми"
+
+
 msgctxt "Operator"
 msgid "Add File Node"
 msgstr "Додати вузол файлу"
@@ -59666,18 +59610,6 @@ msgid "Drop colors to buttons"
 msgstr "Перетягти кольори на кнопки"
 
 
-msgid "Source color"
-msgstr "Колір джерела"
-
-
-msgid "Gamma Corrected"
-msgstr "Гамму виправлено"
-
-
-msgid "The source color is gamma corrected"
-msgstr "Джерельний колір є з корекцією гамми"
-
-
 msgctxt "Operator"
 msgid "Edit Source"
 msgstr "Джерело редагування"
@@ -63225,8 +63157,24 @@ msgid "Image used as canvas"
 msgstr "Зображення, використане як канва"
 
 
+msgid "Clone Alpha"
+msgstr "Клонувати прозорість"
+
+
+msgid "Opacity of clone image display"
+msgstr "Непрозорість при показі клону зображення"
+
+
+msgid "Clone Image"
+msgstr "Клонувати зображення"
+
+
 msgid "Image used as clone source"
 msgstr "Зображення, що використовується як джерело клонування"
+
+
+msgid "Clone Offset"
+msgstr "Клонувати зсув"
 
 
 msgid "Dither"
@@ -63499,10 +63447,6 @@ msgstr "Вжити лише деформацію"
 
 msgid "Use only deformation modifiers (temporary disable all constructive modifiers except multi-resolution)"
 msgstr "Використати лише модифікатори деформації (тимчасове відключення всіх модифікаторів конструювання, за винятком мультироздільності)"
-
-
-msgid "UV Sculpting"
-msgstr "UV-ліплення"
 
 
 msgid "Properties of vertex and weight paint mode"
@@ -63871,10 +63815,6 @@ msgstr "Текстові поля"
 
 msgid "OpenVDB File"
 msgstr "Файл OpenVDB"
-
-
-msgid "Slot"
-msgstr "Гніздо"
 
 
 msgid "Filters"
@@ -66730,10 +66670,6 @@ msgstr "Інвертувати вісь вертіння (Z)"
 
 msgid "Overall sensitivity of the 3D Mouse for panning"
 msgstr "Загальна чутливість 3D-маніпулятора при панорамуванні"
-
-
-msgid "Show Navigation Guide"
-msgstr "Показати напрямні при навігації"
 
 
 msgid "Display the center and axis during rotation"
@@ -77978,6 +77914,10 @@ msgid "Color of the light's specular highlight"
 msgstr "Колір дзеркального підсвічування"
 
 
+msgid "UV Sculpting"
+msgstr "UV-ліплення"
+
+
 msgid "Group of vertices, used for armature deform and other purposes"
 msgstr "Група вершин, що використовується для арматурного деформування та інших цілей"
 
@@ -80775,14 +80715,6 @@ msgid "Only Axis Aligned"
 msgstr "Лише Вирівняно по Осі"
 
 
-msgid "Keyframes Before"
-msgstr "Ключкадри Перед"
-
-
-msgid "Keyframes After"
-msgstr "Ключкадри Після"
-
-
 msgid "Stroke Thickness"
 msgstr "Товщина Штриха"
 
@@ -80818,6 +80750,14 @@ msgstr "Розблокувати Все"
 msgctxt "Operator"
 msgid "Merge Down"
 msgstr "Об'єднати вниз"
+
+
+msgid "Keyframes Before"
+msgstr "Ключкадри Перед"
+
+
+msgid "Keyframes After"
+msgstr "Ключкадри Після"
 
 
 msgid "Interpolation U"
@@ -86677,44 +86617,8 @@ msgid "Sliding-Tool"
 msgstr "Засіб Ковзання"
 
 
-msgid "[X]/Y/Z axis only (X to clear)"
-msgstr "[X]/Y/Z вісь лише (X для зчищення)"
-
-
-msgid "X/[Y]/Z axis only (Y to clear)"
-msgstr "X/[Y]/Z вісь лише (Y для зчищення)"
-
-
-msgid "X/Y/[Z] axis only (Z to clear)"
-msgstr "X/Y/[Z] вісь лише (Z для зчищення)"
-
-
-msgid "X/Y/Z = Axis Constraint"
-msgstr "X/Y/Z = Примус за віссю"
-
-
-msgid "[G]/R/S/B/C - Location only (G to clear) | %s"
-msgstr "[G]/R/S/B/C - лише положення (G для зчищення) | %s"
-
-
-msgid "G/[R]/S/B/C - Rotation only (R to clear) | %s"
-msgstr "G/[R]/S/B/C - лише обертання (R для зчищення) | %s"
-
-
-msgid "G/R/[S]/B/C - Scale only (S to clear) | %s"
-msgstr "G/R/[S]/B/C - лише масштаб (S для зчищення) | %s"
-
-
-msgid "G/R/S/[B]/C - Bendy Bone properties only (B to clear) | %s"
-msgstr "G/R/S/[B]/C - лише властивості гнутих кісток (B для зчищення) | %s"
-
-
-msgid "G/R/S/B/[C] - Custom Properties only (C to clear) | %s"
-msgstr "G/R/S/B/[C] - лише власні властивості (C для зчищення) | %s"
-
-
-msgid "G/R/S/B/C - Limit to Transform/Property Set"
-msgstr "G/R/S/B/C - обмежити набором трансформ/властивостей"
+msgid "Cancel"
+msgstr "Скасувати"
 
 
 msgid "No keyframes to slide between"
@@ -86911,10 +86815,6 @@ msgid "Nothing selected"
 msgstr "Нічого не вибрано"
 
 
-msgid "Active layer is locked or hidden"
-msgstr "Активний шар заблоковано або сховано"
-
-
 msgid "Cannot add active layer as mask"
 msgstr "Неможливо додати активний шар як маску"
 
@@ -86927,8 +86827,8 @@ msgid "Unable to find layer to add"
 msgstr "Неможливо знайти шар для додання"
 
 
-msgid "Cancel"
-msgstr "Скасувати"
+msgid "Active layer is locked or hidden"
+msgstr "Активний шар заблоковано або сховано"
 
 
 msgid "Could not resolve path '%s'"
@@ -89222,14 +89122,6 @@ msgid "File not found '%s'"
 msgstr "Файл не знайдено '%s'"
 
 
-msgid "ON"
-msgstr "Увімкн."
-
-
-msgid "OFF"
-msgstr "Вимкн."
-
-
 msgid "Active group is locked, aborting"
 msgstr "Активна група заблокована, припинено"
 
@@ -89933,10 +89825,6 @@ msgstr "%d з %d каналів обертання було фільтрован
 
 msgid "All %d rotation channels were filtered"
 msgstr "Усі %d каналів обертання було фільтровано"
-
-
-msgid "Decimate Keyframes"
-msgstr "Спростити Ключкадри"
 
 
 msgid "Discard"
@@ -92141,7 +92029,7 @@ msgid "Flip UDIM"
 msgstr "Переверт UDIM"
 
 
-msgid "Level Viewport"
+msgid "Levels Viewport"
 msgstr "Рівні Оглядвікно"
 
 
@@ -92243,10 +92131,6 @@ msgstr "Оболонка"
 
 msgid "Adaptive Subdivision"
 msgstr "Адаптивне Підподілення"
-
-
-msgid "Levels Viewport"
-msgstr "Рівні Оглядвікно"
 
 
 msgid "External library data"
@@ -92878,6 +92762,14 @@ msgstr "Bksp"
 
 msgid "dbl-"
 msgstr "2х-"
+
+
+msgid "ON"
+msgstr "Увімкн."
+
+
+msgid "OFF"
+msgstr "Вимкн."
 
 
 msgid "unsupported format"

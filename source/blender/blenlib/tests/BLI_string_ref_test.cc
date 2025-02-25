@@ -8,7 +8,7 @@
 
 #include "testing/testing.h"
 
-#include "BLI_strict_flags.h" /* Keep last. */
+#include "BLI_strict_flags.h" /* IWYU pragma: keep. Keep last. */
 
 namespace blender::tests {
 
@@ -161,6 +161,12 @@ TEST(string_ref, StdStringConstructor)
   StringRef ref(str);
   EXPECT_EQ(ref.size(), 4);
   EXPECT_EQ(ref.data(), str.data());
+}
+
+TEST(string_ref, SpanConstructor)
+{
+  EXPECT_EQ(StringRef(Span<char>("hello", 5)), "hello");
+  EXPECT_EQ(StringRef(Span<char>("hello", 2)), "he");
 }
 
 TEST(string_ref, SubscriptOperator)

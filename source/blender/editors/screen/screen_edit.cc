@@ -15,6 +15,7 @@
 #include "DNA_scene_types.h"
 #include "DNA_userdef_types.h"
 
+#include "BLI_listbase.h"
 #include "BLI_rect.h"
 #include "BLI_string.h"
 #include "BLI_utildefines.h"
@@ -660,10 +661,16 @@ void ED_screen_do_listen(bContext *C, const wmNotifier *note)
       }
       break;
     case NC_WINDOW:
+      if (WM_capabilities_flag() & WM_CAPABILITY_WINDOW_DECORATION_STYLES) {
+        WM_window_decoration_style_apply(win, screen);
+      }
       screen->do_draw = true;
       break;
     case NC_SCREEN:
       if (note->action == NA_EDITED) {
+        if (WM_capabilities_flag() & WM_CAPABILITY_WINDOW_DECORATION_STYLES) {
+          WM_window_decoration_style_apply(win, screen);
+        }
         screen->do_draw = screen->do_refresh = true;
       }
       break;
@@ -1312,7 +1319,7 @@ void ED_screen_global_areas_refresh(wmWindow *win)
 {
   /* Don't create global area for child and temporary windows. */
   bScreen *screen = BKE_workspace_active_screen_get(win->workspace_hook);
-  if ((win->parent != nullptr) || screen->temp) {
+  if (!WM_window_is_main_top_level(win)) {
     if (win->global_areas.areabase.first) {
       screen->do_refresh = true;
       BKE_screen_area_map_free(&win->global_areas);

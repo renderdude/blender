@@ -14,6 +14,8 @@
 
 #include "BKE_curves.hh"
 
+#include "FN_multi_function_builder.hh"
+
 #include "GEO_randomize.hh"
 
 namespace blender::nodes::node_geo_interpolate_curves_cc {
@@ -879,7 +881,7 @@ static void node_register()
   ntype.nclass = NODE_CLASS_GEOMETRY;
   ntype.geometry_node_execute = node_geo_exec;
   ntype.declare = node_declare;
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 }
 NOD_REGISTER_NODE(node_register)
 

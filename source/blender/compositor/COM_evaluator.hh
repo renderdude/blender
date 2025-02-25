@@ -8,15 +8,12 @@
 
 #include "BLI_vector.hh"
 
-#include "DNA_node_types.h"
-
 #include "NOD_derived_node_tree.hh"
 
 #include "COM_compile_state.hh"
 #include "COM_context.hh"
 #include "COM_node_operation.hh"
 #include "COM_operation.hh"
-#include "COM_shader_operation.hh"
 
 namespace blender::compositor {
 
@@ -165,7 +162,8 @@ class Evaluator {
    * compile unit. */
   void compile_and_evaluate_pixel_compile_unit(CompileState &compile_state);
 
-  /* Map each input of the pixel operation to the result of the output linked to it. */
+  /* Map each input of the pixel operation to the result of the output linked to it. This might
+   * also correct the reference counts of the results, see the implementation for more details. */
   void map_pixel_operation_inputs_to_their_results(PixelOperation *operation,
                                                    CompileState &compile_state);
 

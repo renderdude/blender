@@ -15,6 +15,7 @@
 #include "GPU_immediate.hh"
 #include "GPU_matrix.hh"
 #include "GPU_texture.hh"
+#include "GPU_uniform_buffer.hh"
 
 #include "gpu_context_private.hh"
 #include "gpu_immediate_private.hh"
@@ -283,7 +284,7 @@ void Immediate::polyline_draw_workaround(uint64_t offset)
   /* Check compatible input primitive. */
   BLI_assert(ELEM(imm->prim_type, GPU_PRIM_LINES, GPU_PRIM_LINE_STRIP, GPU_PRIM_LINE_LOOP));
 
-  Batch *tri_batch = Context::get()->polyline_batch_get();
+  Batch *tri_batch = Context::get()->procedural_triangles_batch_get();
   GPU_batch_set_shader(tri_batch, imm->shader);
 
   BLI_assert(offset % 4 == 0);

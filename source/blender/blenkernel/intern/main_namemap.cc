@@ -8,6 +8,7 @@
 
 #include "BKE_idtype.hh"
 #include "BKE_lib_id.hh"
+#include "BKE_library.hh"
 #include "BKE_main.hh"
 #include "BKE_main_namemap.hh"
 
@@ -185,17 +186,19 @@ UniqueName_Map *BKE_main_namemap_create()
 void BKE_main_namemap_destroy(UniqueName_Map **r_name_map)
 {
 #ifdef DEBUG_PRINT_MEMORY_USAGE
-  int64_t size_sets = 0;
-  int64_t size_maps = 0;
-  for (const UniqueName_TypeMap &type_map : (*r_name_map)->type_maps) {
-    size_sets += type_map.full_names.size_in_bytes();
-    size_maps += type_map.base_name_to_num_suffix.size_in_bytes();
+  if (*r_name_map) {
+    int64_t size_sets = 0;
+    int64_t size_maps = 0;
+    for (const UniqueName_TypeMap &type_map : (*r_name_map)->type_maps) {
+      size_sets += type_map.full_names.size_in_bytes();
+      size_maps += type_map.base_name_to_num_suffix.size_in_bytes();
+    }
+    printf("NameMap memory usage: sets %.1fKB, maps %.1fKB\n",
+           size_sets / 1024.0,
+           size_maps / 1024.0);
   }
-  printf(
-      "NameMap memory usage: sets %.1fKB, maps %.1fKB\n", size_sets / 1024.0, size_maps / 1024.0);
 #endif
-  MEM_delete<UniqueName_Map>(*r_name_map);
-  *r_name_map = nullptr;
+  MEM_SAFE_DELETE(*r_name_map);
 }
 
 void BKE_main_namemap_clear(Main *bmain)
@@ -211,8 +214,8 @@ void BKE_main_namemap_clear(Main *bmain)
          lib_iter != nullptr;
          lib_iter = static_cast<Library *>(lib_iter->id.next))
     {
-      if (lib_iter->runtime.name_map != nullptr) {
-        BKE_main_namemap_destroy(&lib_iter->runtime.name_map);
+      if (lib_iter->runtime->name_map != nullptr) {
+        BKE_main_namemap_destroy(&lib_iter->runtime->name_map);
       }
     }
   }
@@ -278,11 +281,11 @@ static UniqueName_Map *get_namemap_for(Main *bmain,
   }
 
   if (id->lib != nullptr) {
-    if (ensure_created && id->lib->runtime.name_map == nullptr) {
-      id->lib->runtime.name_map = BKE_main_namemap_create();
-      main_namemap_populate(id->lib->runtime.name_map, bmain, id->lib, id, false);
+    if (ensure_created && id->lib->runtime->name_map == nullptr) {
+      id->lib->runtime->name_map = BKE_main_namemap_create();
+      main_namemap_populate(id->lib->runtime->name_map, bmain, id->lib, id, false);
     }
-    return id->lib->runtime.name_map;
+    return id->lib->runtime->name_map;
   }
   if (ensure_created && bmain->name_map == nullptr) {
     bmain->name_map = BKE_main_namemap_create();
@@ -593,7 +596,7 @@ static bool main_namemap_validate_and_fix(Main *bmain, const bool do_fix)
       }
     }
     lib = static_cast<Library *>((lib == nullptr) ? bmain->libraries.first : lib->id.next);
-    name_map = (lib != nullptr) ? lib->runtime.name_map : nullptr;
+    name_map = (lib != nullptr) ? lib->runtime->name_map : nullptr;
   } while (lib != nullptr);
 
   if (is_valid || !do_fix) {

@@ -8,7 +8,6 @@
 
 #include <algorithm>
 #include <climits>
-#include <cstdio>
 #include <cstring>
 
 #include "CLG_log.h"
@@ -947,7 +946,7 @@ static bool mesh_validate_customdata(CustomData *data,
 
     if (ok == false) {
       if (do_fixes) {
-        CustomData_free_layer(data, type, 0, i);
+        CustomData_free_layer(data, type, i);
         has_fixes = true;
       }
     }

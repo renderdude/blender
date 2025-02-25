@@ -11,7 +11,6 @@
 
 #include "NOD_inverse_eval_params.hh"
 #include "NOD_math_functions.hh"
-#include "NOD_multi_function.hh"
 #include "NOD_socket_search_link.hh"
 #include "NOD_value_elem_eval.hh"
 
@@ -378,5 +377,5 @@ void register_node_type_sh_math()
   ntype.eval_inverse_elem = file_ns::node_eval_inverse_elem;
   ntype.eval_inverse = file_ns::node_eval_inverse;
 
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 }

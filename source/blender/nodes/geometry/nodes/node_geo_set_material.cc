@@ -4,16 +4,14 @@
 
 #include "node_geometry_util.hh"
 
-#include "UI_resources.hh"
-
 #include "DNA_curves_types.h"
+#include "DNA_mesh_types.h"
 #include "DNA_pointcloud_types.h"
 #include "DNA_volume_types.h"
 
 #include "BKE_curves.hh"
 #include "BKE_grease_pencil.hh"
 #include "BKE_material.hh"
-#include "BKE_mesh.hh"
 
 namespace blender::nodes::node_geo_set_material_cc {
 
@@ -171,7 +169,7 @@ static void node_register()
   ntype.nclass = NODE_CLASS_GEOMETRY;
   ntype.declare = node_declare;
   ntype.geometry_node_execute = node_geo_exec;
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 }
 NOD_REGISTER_NODE(node_register)
 

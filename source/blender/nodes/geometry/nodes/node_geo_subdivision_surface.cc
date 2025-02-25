@@ -2,8 +2,6 @@
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
-#include "BLI_task.hh"
-
 #include "DNA_modifier_types.h"
 
 #include "BKE_attribute.hh"
@@ -20,6 +18,8 @@
 #include "NOD_rna_define.hh"
 
 #include "GEO_randomize.hh"
+
+#include "FN_multi_function_builder.hh"
 
 #include "node_geometry_util.hh"
 
@@ -241,12 +241,12 @@ static void node_register()
   ntype.geometry_node_execute = node_geo_exec;
   ntype.draw_buttons = node_layout;
   ntype.initfunc = node_init;
-  bke::node_type_size_preset(&ntype, bke::eNodeSizePreset::Middle);
-  blender::bke::node_type_storage(&ntype,
+  bke::node_type_size_preset(ntype, bke::eNodeSizePreset::Middle);
+  blender::bke::node_type_storage(ntype,
                                   "NodeGeometrySubdivisionSurface",
                                   node_free_standard_storage,
                                   node_copy_standard_storage);
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 
   node_rna(ntype.rna_ext.srna);
 }

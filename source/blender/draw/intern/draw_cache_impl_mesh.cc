@@ -21,6 +21,7 @@
 #include "DNA_mesh_types.h"
 #include "DNA_object_types.h"
 #include "DNA_scene_types.h"
+#include "DNA_userdef_types.h"
 
 #include "BKE_attribute.hh"
 #include "BKE_customdata.hh"
@@ -1218,10 +1219,9 @@ gpu::Batch *DRW_mesh_batch_cache_get_uv_edges(Object &object, Mesh &mesh)
   return DRW_batch_request(&cache.batch.wire_loops_uvs);
 }
 
-gpu::Batch *DRW_mesh_batch_cache_get_surface_edges(Object &object, Mesh &mesh)
+gpu::Batch *DRW_mesh_batch_cache_get_surface_edges(Mesh &mesh)
 {
   MeshBatchCache &cache = *mesh_batch_cache_get(mesh);
-  texpaint_request_active_uv(cache, object, mesh);
   mesh_batch_cache_add_request(cache, MBC_WIRE_LOOPS);
   return DRW_batch_request(&cache.batch.wire_loops);
 }
@@ -1719,7 +1719,7 @@ void DRW_mesh_batch_cache_create_requested(TaskGraph &task_graph,
     if (edit_mapping_valid) {
       DRW_ibo_request(cache.batch.edit_vnor, &mbuflist->ibo.points);
       DRW_vbo_request(cache.batch.edit_vnor, &mbuflist->vbo.pos);
-      if (!do_subdivision) {
+      if (!do_subdivision || do_cage) {
         /* For GPU subdivision, vertex normals are included in the `pos` VBO. */
         DRW_vbo_request(cache.batch.edit_vnor, &mbuflist->vbo.vnor);
       }

@@ -4,8 +4,9 @@
 
 #include "BLI_math_euler.hh"
 
+#include "DNA_mesh_types.h"
+
 #include "BKE_material.hh"
-#include "BKE_mesh.hh"
 
 #include "GEO_mesh_primitive_cuboid.hh"
 #include "GEO_mesh_primitive_grid.hh"
@@ -122,7 +123,7 @@ static void node_register()
   ntype.nclass = NODE_CLASS_GEOMETRY;
   ntype.declare = node_declare;
   ntype.geometry_node_execute = node_geo_exec;
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 }
 NOD_REGISTER_NODE(node_register)
 

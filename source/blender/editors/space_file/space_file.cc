@@ -6,12 +6,13 @@
  * \ingroup spfile
  */
 
-#include <cstdio>
 #include <cstring>
 
 #include "MEM_guardedalloc.h"
 
-#include "BLI_blenlib.h"
+#include "BLI_listbase.h"
+#include "BLI_path_utils.hh"
+#include "BLI_string.h"
 #include "BLI_utildefines.h"
 
 #include "BKE_appdir.hh"
@@ -116,7 +117,6 @@ static void file_free(SpaceLink *sl)
     /* XXX would need to do thumbnails_stop here, but no context available */
     filelist_freelib(sfile->files);
     filelist_free(sfile->files);
-    MEM_freeN(sfile->files);
     sfile->files = nullptr;
   }
 

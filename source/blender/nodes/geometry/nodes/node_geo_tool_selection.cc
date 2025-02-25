@@ -78,7 +78,7 @@ class EditSelectionFieldInput final : public bke::GeometryFieldInput {
   }
 
   GVArray get_varray_for_context(const bke::GeometryFieldContext &context,
-                                 const IndexMask & /*mask*/) const
+                                 const IndexMask & /*mask*/) const override
   {
     const AttrDomain domain = context.domain();
     const eCustomDataType data_type = bke::cpp_type_to_custom_data_type(*type_);
@@ -182,7 +182,7 @@ static void node_register()
   ntype.declare = node_declare;
   ntype.geometry_node_execute = node_geo_exec;
   ntype.gather_link_search_ops = search_link_ops_for_tool_node;
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 }
 NOD_REGISTER_NODE(node_register)
 

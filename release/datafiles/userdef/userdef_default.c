@@ -5,14 +5,12 @@
 /* Preferences Data File 'U_default'. */
 
 /* For constants. */
-#include "BLI_math_base.h"
+#include "BLI_math_constants.h"
 
 #include "DNA_anim_types.h"
 #include "DNA_curve_types.h"
 #include "DNA_space_types.h"
 #include "DNA_userdef_types.h"
-
-#include "BLI_math_rotation.h"
 
 #include "BKE_blender_version.h"
 
@@ -79,7 +77,7 @@ const UserDef U_default = {
     .scrollback = 256,
     .node_margin = 40,
     .node_preview_res = 120,
-    .transopts = USER_TR_TOOLTIPS,
+    .transopts = USER_TR_TOOLTIPS | USER_TR_IFACE | USER_TR_REPORTS | USER_TR_NEWDATANAME,
     .menuthreshold1 = 5,
     .menuthreshold2 = 2,
     .app_template = "",
@@ -158,8 +156,8 @@ const UserDef U_default = {
     .ndof_sensitivity = 4.0,
     .ndof_orbit_sensitivity = 4.0,
     .ndof_deadzone = 0.0,
-    .ndof_flag = (NDOF_MODE_ORBIT | NDOF_LOCK_HORIZON | NDOF_SHOULD_PAN | NDOF_SHOULD_ZOOM |
-                  NDOF_SHOULD_ROTATE |
+    .ndof_flag = (NDOF_SHOW_GUIDE_ORBIT_CENTER | NDOF_ORBIT_CENTER_AUTO | NDOF_MODE_ORBIT |
+                  NDOF_LOCK_HORIZON | NDOF_SHOULD_PAN | NDOF_SHOULD_ZOOM | NDOF_SHOULD_ROTATE |
                   /* Software from the driver authors follows this convention
                    * so invert this by default, see: #67579. */
                   NDOF_ROTX_INVERT_AXIS | NDOF_ROTY_INVERT_AXIS | NDOF_ROTZ_INVERT_AXIS |

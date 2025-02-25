@@ -13,7 +13,6 @@
 #include "DNA_texture_types.h"
 
 #include "BLI_listbase.h"
-#include "BLI_string.h"
 #include "BLI_threads.h"
 #include "BLI_utildefines.h"
 
@@ -107,8 +106,8 @@ static void localize(bNodeTree *localtree, bNodeTree * /*ntree*/)
     node_next = node->next;
 
     if (node->is_muted() || node->is_reroute()) {
-      blender::bke::node_internal_relink(localtree, node);
-      blender::bke::node_tree_free_local_node(localtree, node);
+      blender::bke::node_internal_relink(*localtree, *node);
+      blender::bke::node_tree_free_local_node(*localtree, *node);
     }
   }
 }
@@ -124,7 +123,7 @@ static void update(bNodeTree *ntree)
 static bool texture_node_tree_socket_type_valid(blender::bke::bNodeTreeType * /*ntreetype*/,
                                                 blender::bke::bNodeSocketType *socket_type)
 {
-  return blender::bke::node_is_static_socket_type(socket_type) &&
+  return blender::bke::node_is_static_socket_type(*socket_type) &&
          ELEM(socket_type->type, SOCK_FLOAT, SOCK_VECTOR, SOCK_RGBA);
 }
 
@@ -150,7 +149,7 @@ void register_node_tree_type_tex()
 
   tt->rna_ext.srna = &RNA_TextureNodeTree;
 
-  blender::bke::node_tree_type_add(tt);
+  blender::bke::node_tree_type_add(*tt);
 }
 
 /**** Material/Texture trees ****/

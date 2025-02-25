@@ -10,7 +10,6 @@
 
 #include "DNA_brush_enums.h"
 #include "DNA_brush_types.h"
-#include "DNA_gpencil_legacy_types.h"
 
 #include "GEO_smooth_curves.hh"
 
@@ -139,19 +138,22 @@ void SmoothOperation::on_stroke_extended(const bContext &C, const InputSample &e
           changed = true;
         }
         if (sculpt_mode_flag & GP_SCULPT_FLAGMODE_APPLY_UV) {
-          bke::SpanAttributeWriter<float> rotations =
-              attributes.lookup_or_add_for_write_span<float>("rotation", bke::AttrDomain::Point);
-          geometry::smooth_curve_attribute(curves.curves_range(),
-                                           points_by_curve,
-                                           selection_varray,
-                                           cyclic,
-                                           iterations,
-                                           influences,
-                                           true,
-                                           false,
-                                           rotations.span);
-          rotations.finish();
-          changed = true;
+          if (bke::SpanAttributeWriter<float> rotations =
+                  attributes.lookup_or_add_for_write_span<float>("rotation",
+                                                                 bke::AttrDomain::Point))
+          {
+            geometry::smooth_curve_attribute(curves.curves_range(),
+                                             points_by_curve,
+                                             selection_varray,
+                                             cyclic,
+                                             iterations,
+                                             influences,
+                                             true,
+                                             false,
+                                             rotations.span);
+            rotations.finish();
+            changed = true;
+          }
         }
         return changed;
       });

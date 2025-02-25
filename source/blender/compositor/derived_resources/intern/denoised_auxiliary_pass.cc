@@ -12,6 +12,7 @@
 
 #  include "MEM_guardedalloc.h"
 
+#  include "GPU_state.hh"
 #  include "GPU_texture.hh"
 
 #  include "COM_context.hh"
@@ -80,12 +81,18 @@ DenoisedAuxiliaryPass::DenoisedAuxiliaryPass(Context &context,
     this->denoised_buffer = static_cast<float *>(GPU_texture_read(pass, GPU_DATA_FLOAT, 0));
   }
   else {
-    this->denoised_buffer = static_cast<float *>(MEM_dupallocN(pass.float_texture()));
+    this->denoised_buffer = static_cast<float *>(MEM_dupallocN(pass.cpu_data().data()));
   }
 
   const int width = pass.domain().size.x;
   const int height = pass.domain().size.y;
-  const int pixel_stride = sizeof(float) * 4;
+
+  /* Float3 results might be stored in 4-component textures due to hardware limitations, so we
+   * need to use the pixel stride of the texture. */
+  const int pixel_stride = sizeof(float) *
+                           (context.use_gpu() ?
+                                GPU_texture_component_len(GPU_texture_format(pass)) :
+                                pass.channels_count());
 
   oidn::DeviceRef device = oidn::newDevice(oidn::DeviceType::CPU);
   device.commit();

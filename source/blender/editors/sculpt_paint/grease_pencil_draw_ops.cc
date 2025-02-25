@@ -39,6 +39,7 @@
 
 #include "DEG_depsgraph_query.hh"
 
+#include "GEO_curves_remove_and_split.hh"
 #include "GEO_join_geometries.hh"
 #include "GEO_smooth_curves.hh"
 
@@ -1491,8 +1492,7 @@ static bool grease_pencil_fill_init(bContext &C, wmOperator &op)
   BKE_curvemapping_init(brush.gpencil_settings->curve_rand_saturation);
   BKE_curvemapping_init(brush.gpencil_settings->curve_rand_value);
 
-  Material *material = BKE_grease_pencil_object_material_ensure_from_active_input_brush(
-      &bmain, &ob, &brush);
+  Material *material = BKE_grease_pencil_object_material_ensure_from_brush(&bmain, &ob, &brush);
   const int material_index = BKE_object_material_index_get(&ob, material);
 
   const bool invert = RNA_boolean_get(op.ptr, "invert");
@@ -1677,36 +1677,45 @@ static int grease_pencil_fill_modal(bContext *C, wmOperator *op, const wmEvent *
 
   auto &op_data = *static_cast<GreasePencilFillOpData *>(op->customdata);
 
-  int estate = OPERATOR_RUNNING_MODAL;
-  switch (event->type) {
-    case EVT_MODAL_MAP:
-      estate = grease_pencil_fill_event_modal_map(C, op, event);
-      break;
-    case MOUSEMOVE: {
-      if (!op_data.is_extension_drag_active) {
+  int estate = OPERATOR_CANCELLED;
+  if (!op_data.show_extension) {
+    /* Apply fill immediately if "Visual Aids" (aka. extension lines) is disabled. */
+    op_data.fill_mouse_pos = float2(event->mval);
+    estate = (grease_pencil_apply_fill(*C, *op, *event) ? OPERATOR_FINISHED : OPERATOR_CANCELLED);
+  }
+  else {
+    estate = OPERATOR_RUNNING_MODAL;
+    switch (event->type) {
+      case EVT_MODAL_MAP:
+        estate = grease_pencil_fill_event_modal_map(C, op, event);
+        break;
+      case MOUSEMOVE: {
+        if (!op_data.is_extension_drag_active) {
+          break;
+        }
+
+        const Object &ob = *CTX_data_active_object(C);
+        const float pixel_size = ED_view3d_pixel_size(&rv3d, ob.loc);
+        const float2 mouse_pos = float2(event->mval);
+        const float initial_dist = math::distance(op_data.extension_mouse_pos,
+                                                  op_data.fill_mouse_pos);
+        const float current_dist = math::distance(mouse_pos, op_data.fill_mouse_pos);
+
+        float delta = (current_dist - initial_dist) * pixel_size * 0.5f;
+        op_data.extension_length = std::clamp(op_data.extension_length + delta, 0.0f, 10.0f);
+
+        /* Update cursor line and extend lines. */
+        WM_main_add_notifier(NC_GEOM | ND_DATA, nullptr);
+        WM_event_add_notifier(C, NC_GPENCIL | ND_DATA | NA_EDITED, nullptr);
+
+        grease_pencil_update_extend(*C, op_data);
         break;
       }
-
-      const Object &ob = *CTX_data_active_object(C);
-      const float pixel_size = ED_view3d_pixel_size(&rv3d, ob.loc);
-      const float2 mouse_pos = float2(event->mval);
-      const float initial_dist = math::distance(op_data.extension_mouse_pos,
-                                                op_data.fill_mouse_pos);
-      const float current_dist = math::distance(mouse_pos, op_data.fill_mouse_pos);
-
-      float delta = (current_dist - initial_dist) * pixel_size * 0.5f;
-      op_data.extension_length = std::clamp(op_data.extension_length + delta, 0.0f, 10.0f);
-
-      /* Update cursor line and extend lines. */
-      WM_main_add_notifier(NC_GEOM | ND_DATA, nullptr);
-      WM_event_add_notifier(C, NC_GPENCIL | ND_DATA | NA_EDITED, nullptr);
-
-      grease_pencil_update_extend(*C, op_data);
-      break;
+      default:
+        break;
     }
-    default:
-      break;
   }
+
   /* Process last operations before exiting. */
   switch (estate) {
     case OPERATOR_FINISHED:
@@ -1791,8 +1800,8 @@ static bool remove_points_and_split_from_drawings(
     if (Drawing *drawing = get_current_drawing_or_duplicate_for_autokey(
             scene, grease_pencil, info.layer_index))
     {
-      drawing->strokes_for_write() = ed::greasepencil::remove_points_and_split(drawing->strokes(),
-                                                                               points_to_remove);
+      drawing->strokes_for_write() = geometry::remove_points_and_split(drawing->strokes(),
+                                                                       points_to_remove);
       drawing->tag_topology_changed();
       changed = true;
     }

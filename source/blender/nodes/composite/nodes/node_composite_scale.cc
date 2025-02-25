@@ -7,6 +7,7 @@
  */
 
 #include "BLI_assert.h"
+#include "BLI_listbase.h"
 #include "BLI_math_angle_types.hh"
 #include "BLI_math_base.hh"
 #include "BLI_math_matrix.hh"
@@ -36,7 +37,7 @@ static void cmp_node_scale_declare(NodeDeclarationBuilder &b)
 {
   b.add_input<decl::Color>("Image")
       .default_value({1.0f, 1.0f, 1.0f, 1.0f})
-      .compositor_realization_options(CompositorInputRealizationOptions::None)
+      .compositor_realization_mode(CompositorInputRealizationMode::None)
       .compositor_domain_priority(0);
   b.add_input<decl::Float>("X")
       .default_value(1.0f)
@@ -58,7 +59,7 @@ static void node_composite_update_scale(bNodeTree *ntree, bNode *node)
   /* Only show X/Y scale factor inputs for modes using them! */
   LISTBASE_FOREACH (bNodeSocket *, sock, &node->inputs) {
     if (STR_ELEM(sock->name, "X", "Y")) {
-      bke::node_set_socket_availability(ntree, sock, use_xy_scale);
+      bke::node_set_socket_availability(*ntree, *sock, use_xy_scale);
     }
   }
 }
@@ -329,5 +330,5 @@ void register_node_type_cmp_scale()
   ntype.updatefunc = file_ns::node_composite_update_scale;
   ntype.get_compositor_operation = file_ns::get_compositor_operation;
 
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 }

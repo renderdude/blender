@@ -46,7 +46,7 @@ void ScreenSpaceDrawingMode::add_depth_shgroups(::Image *image, ImageUser *image
   float4x4 image_mat = float4x4::identity();
   ResourceHandle handle = instance_.manager->resource_handle(image_mat);
 
-  ImageUser tile_user = {0};
+  ImageUser tile_user = {nullptr};
   if (image_user) {
     tile_user = *image_user;
   }
@@ -256,7 +256,7 @@ void ScreenSpaceDrawingMode::do_full_update_gpu_texture(TextureInfo &info,
   const int texture_width = GPU_texture_width(info.texture);
   const int texture_height = GPU_texture_height(info.texture);
   IMB_initImBuf(&texture_buffer, texture_width, texture_height, 0, IB_rectfloat);
-  ImageUser tile_user = {0};
+  ImageUser tile_user = {nullptr};
   if (image_user) {
     tile_user = *image_user;
   }
@@ -291,7 +291,7 @@ void ScreenSpaceDrawingMode::do_full_update_texture_slot(const TextureInfo &text
   /* IMB_transform works in a non-consistent space. This should be documented or fixed!.
    * Construct a variant of the info_uv_to_texture that adds the texel space
    * transformation. */
-  float4x4 uv_to_texel;
+  float3x3 uv_to_texel;
   rctf texture_area;
   rctf tile_area;
 
@@ -302,7 +302,7 @@ void ScreenSpaceDrawingMode::do_full_update_texture_slot(const TextureInfo &text
       tile_buffer.x * (texture_info.clipping_uv_bounds.xmax - image_tile.get_tile_x_offset()),
       tile_buffer.y * (texture_info.clipping_uv_bounds.ymin - image_tile.get_tile_y_offset()),
       tile_buffer.y * (texture_info.clipping_uv_bounds.ymax - image_tile.get_tile_y_offset()));
-  BLI_rctf_transform_calc_m4_pivot_min(&tile_area, &texture_area, uv_to_texel.ptr());
+  BLI_rctf_transform_calc_m3_pivot_min(&tile_area, &texture_area, uv_to_texel.ptr());
   uv_to_texel = math::invert(uv_to_texel);
 
   rctf crop_rect;
@@ -321,7 +321,7 @@ void ScreenSpaceDrawingMode::do_full_update_texture_slot(const TextureInfo &text
                 &texture_buffer,
                 transform_mode,
                 IMB_FILTER_NEAREST,
-                uv_to_texel.ptr(),
+                uv_to_texel,
                 crop_rect_ptr);
 }
 

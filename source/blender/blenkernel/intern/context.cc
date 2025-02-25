@@ -364,7 +364,7 @@ static eContextResult ctx_data_get(bContext *C, const char *member, bContextData
       done = 1;
     }
     else if (std::optional<int64_t> int_value = CTX_store_int_lookup(C->wm.store, member)) {
-      result->int_value = *int_value;
+      result->int_value = int_value;
       result->type = CTX_DATA_TYPE_INT64;
       done = 1;
     }
@@ -1242,7 +1242,7 @@ enum eContextObjectMode CTX_data_mode_enum_ex(const Object *obedit,
       case OB_GREASE_PENCIL:
         return CTX_MODE_EDIT_GREASE_PENCIL;
       case OB_POINTCLOUD:
-        return CTX_MODE_EDIT_POINT_CLOUD;
+        return CTX_MODE_EDIT_POINTCLOUD;
     }
   }
   else {
@@ -1320,7 +1320,7 @@ static const char *data_mode_strings[] = {
     "lattice_edit",
     "curves_edit",
     "grease_pencil_edit",
-    "point_cloud_edit",
+    "pointcloud_edit",
     "posemode",
     "sculpt_mode",
     "weightpaint",

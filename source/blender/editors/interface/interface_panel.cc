@@ -9,6 +9,7 @@
 /* a full doc with API notes can be found in
  * bf-blender/trunk/blender/doc/guides/interface_API.txt */
 
+#include <algorithm>
 #include <cctype>
 #include <cmath>
 #include <cstdlib>
@@ -16,6 +17,8 @@
 
 #include "MEM_guardedalloc.h"
 
+#include "BLI_listbase.h"
+#include "BLI_math_vector.h"
 #include "BLI_string.h"
 #include "BLI_time.h"
 #include "BLI_utildefines.h"
@@ -242,9 +245,7 @@ static Panel *panel_add_instanced(ListBase *panels, PanelType *panel_type, Point
    * instanced panels, but that would add complexity that isn't needed for now. */
   int max_sortorder = 0;
   LISTBASE_FOREACH (Panel *, existing_panel, panels) {
-    if (existing_panel->sortorder > max_sortorder) {
-      max_sortorder = existing_panel->sortorder;
-    }
+    max_sortorder = std::max(existing_panel->sortorder, max_sortorder);
   }
   panel->sortorder = max_sortorder + 1;
 
@@ -868,7 +869,7 @@ static void ui_offset_panel_block(uiBlock *block)
 
   const int ofsy = block->panel->sizey - style->panelspace;
 
-  LISTBASE_FOREACH (uiBut *, but, &block->buttons) {
+  for (const std::unique_ptr<uiBut> &but : block->buttons) {
     but->rect.ymin += ofsy;
     but->rect.ymax += ofsy;
   }
@@ -949,7 +950,7 @@ static void panel_remove_invisible_layouts_recursive(Panel *panel, const Panel *
   if (parent_panel != nullptr && UI_panel_is_closed(parent_panel)) {
     /* The parent panel is closed, so this panel can be completely removed. */
     UI_block_set_search_only(block, true);
-    LISTBASE_FOREACH (uiBut *, but, &block->buttons) {
+    for (const std::unique_ptr<uiBut> &but : block->buttons) {
       but->flag |= UI_HIDDEN;
     }
   }
@@ -1984,7 +1985,7 @@ static void ui_do_drag(const bContext *C, const wmEvent *event, Panel *panel)
   dy *= BLI_rctf_size_y(&region->v2d.cur) / float(BLI_rcti_size_y(&region->winrct));
 
   /* Add the movement of the view due to edge scrolling while dragging. */
-  dy += (float(region->v2d.cur.ymin) - data->start_cur_ymin);
+  dy += (region->v2d.cur.ymin - data->start_cur_ymin);
 
   panel->ofsy = data->startofsy + round_fl_to_int(dy);
 
@@ -2281,10 +2282,8 @@ static void ui_handle_panel_header(const bContext *C,
         panel_custom_pin_to_last_set(C, panel, false);
         return;
       }
-      else {
-        panel_activate_state(C, panel, PANEL_STATE_DRAG);
-        return;
-      }
+      panel_activate_state(C, panel, PANEL_STATE_DRAG);
+      return;
     }
   }
 

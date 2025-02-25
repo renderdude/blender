@@ -29,7 +29,7 @@
 #  pragma GCC diagnostic error "-Wsign-conversion"
 #endif
 
-#include "BLI_strict_flags.h" /* Keep last. */
+#include "BLI_strict_flags.h" /* IWYU pragma: keep. Keep last. */
 
 /* -------------------------------------------------------------------- */
 /** \name UTF8 Character Decoding (Skip & Mask Lookup)
@@ -300,7 +300,7 @@ int BLI_str_utf8_invalid_strip(char *str, size_t length)
       break;
     }
     /* strip, keep looking */
-    memmove(str, str + 1, length + 1); /* +1 for NULL char! */
+    memmove(str, str + 1, length + 1); /* +1 for nullptr char! */
     tot++;
   }
 
@@ -888,7 +888,7 @@ size_t BLI_str_utf8_from_unicode(uint c, char *dst, const size_t dst_maxncpy)
   UTF8_VARS_FROM_CHAR32(c, first, len);
 
   if (UNLIKELY(dst_maxncpy < len)) {
-    /* NULL terminate instead of writing a partial byte. */
+    /* nullptr terminate instead of writing a partial byte. */
     memset(dst, 0x0, dst_maxncpy);
     return dst_maxncpy;
   }

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
 #include "BLI_math_euler.hh"
-#include "BLI_math_quaternion.hh"
 
 #include "NOD_socket_search_link.hh"
 
@@ -53,10 +52,10 @@ static void node_register()
   ntype.declare = node_declare;
   ntype.initfunc = node_init;
   blender::bke::node_type_storage(
-      &ntype, "NodeInputRotation", node_free_standard_storage, node_copy_standard_storage);
+      ntype, "NodeInputRotation", node_free_standard_storage, node_copy_standard_storage);
   ntype.build_multi_function = node_build_multi_function;
   ntype.draw_buttons = node_layout;
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 }
 NOD_REGISTER_NODE(node_register)
 

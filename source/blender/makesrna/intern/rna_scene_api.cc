@@ -6,26 +6,19 @@
  * \ingroup RNA
  */
 
-#include <cstdio>
 #include <cstdlib>
 
 #include "BLI_kdopbvh.hh"
-#include "BLI_math_matrix.h"
-#include "BLI_math_vector.h"
 #include "BLI_path_utils.hh"
-#include "BLI_utildefines.h"
 
 #include "RNA_define.hh"
 #include "RNA_enum_types.hh"
 
-#include "DNA_anim_types.h"
-#include "DNA_object_types.h"
 #include "DNA_scene_types.h"
 
 #include "rna_internal.hh" /* own include */
 
 #ifdef WITH_ALEMBIC
-#  include "ABC_alembic.h"
 #endif
 
 #ifdef RNA_RUNTIME
@@ -143,25 +136,26 @@ static void rna_Scene_ray_cast(Scene *scene,
 {
   float direction_unit[3];
   normalize_v3_v3(direction_unit, direction);
-  SnapObjectContext *sctx = ED_transform_snap_object_context_create(scene, 0);
+  blender::ed::transform::SnapObjectContext *sctx =
+      blender::ed::transform::snap_object_context_create(scene, 0);
 
-  SnapObjectParams snap_object_params{};
+  blender::ed::transform::SnapObjectParams snap_object_params{};
   snap_object_params.snap_target_select = SCE_SNAP_TARGET_ALL;
 
-  bool ret = ED_transform_snap_object_project_ray_ex(sctx,
-                                                     depsgraph,
-                                                     nullptr,
-                                                     &snap_object_params,
-                                                     origin,
-                                                     direction_unit,
-                                                     &ray_dist,
-                                                     r_location,
-                                                     r_normal,
-                                                     r_index,
-                                                     (const Object **)(r_ob),
-                                                     (float(*)[4])r_obmat);
+  bool ret = blender::ed::transform::snap_object_project_ray_ex(sctx,
+                                                                depsgraph,
+                                                                nullptr,
+                                                                &snap_object_params,
+                                                                origin,
+                                                                direction_unit,
+                                                                &ray_dist,
+                                                                r_location,
+                                                                r_normal,
+                                                                r_index,
+                                                                (const Object **)(r_ob),
+                                                                (float(*)[4])r_obmat);
 
-  ED_transform_snap_object_context_destroy(sctx);
+  blender::ed::transform::snap_object_context_destroy(sctx);
 
   if (r_ob != nullptr && *r_ob != nullptr) {
     *r_ob = DEG_get_original_object(*r_ob);
@@ -283,7 +277,7 @@ void RNA_api_scene(StructRNA *srna)
 
   /* Ray Cast */
   func = RNA_def_function(srna, "ray_cast", "rna_Scene_ray_cast");
-  RNA_def_function_ui_description(func, "Cast a ray onto in object space");
+  RNA_def_function_ui_description(func, "Cast a ray onto evaluated geometry in world-space");
 
   parm = RNA_def_pointer(func, "depsgraph", "Depsgraph", "", "The current dependency graph");
   RNA_def_parameter_flags(parm, PROP_NEVER_NULL, PARM_REQUIRED);

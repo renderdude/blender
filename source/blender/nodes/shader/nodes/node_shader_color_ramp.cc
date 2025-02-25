@@ -53,7 +53,7 @@ static int gpu_shader_valtorgb(GPUMaterial *mat,
   if (coba->tot == 1) {
     return GPU_link(mat, "set_rgba", GPU_uniform(&coba->data[0].r), &out[0].link);
   }
-  else if ((coba->tot == 2) && (coba->color_mode == COLBAND_BLEND_RGB)) {
+  if ((coba->tot == 2) && (coba->color_mode == COLBAND_BLEND_RGB)) {
     float mul_bias[2];
     switch (coba->ipotype) {
       case COLBAND_INTERP_LINEAR:
@@ -169,12 +169,12 @@ void register_node_type_sh_valtorgb()
   ntype.nclass = NODE_CLASS_CONVERTER;
   ntype.declare = file_ns::sh_node_valtorgb_declare;
   ntype.initfunc = file_ns::node_shader_init_valtorgb;
-  blender::bke::node_type_size_preset(&ntype, blender::bke::eNodeSizePreset::Large);
+  blender::bke::node_type_size_preset(ntype, blender::bke::eNodeSizePreset::Large);
   blender::bke::node_type_storage(
-      &ntype, "ColorBand", node_free_standard_storage, node_copy_standard_storage);
+      ntype, "ColorBand", node_free_standard_storage, node_copy_standard_storage);
   ntype.gpu_fn = file_ns::gpu_shader_valtorgb;
   ntype.build_multi_function = file_ns::sh_node_valtorgb_build_multi_function;
   ntype.materialx_fn = file_ns::node_shader_materialx;
 
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 }

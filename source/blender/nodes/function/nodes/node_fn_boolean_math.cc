@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
 #include "BLI_listbase.h"
-#include "BLI_string.h"
 #include "BLI_string_utf8.h"
 
 #include "RNA_enum_types.hh"
@@ -38,7 +37,7 @@ static void node_update(bNodeTree *ntree, bNode *node)
 {
   bNodeSocket *sockB = (bNodeSocket *)BLI_findlink(&node->inputs, 1);
 
-  bke::node_set_socket_availability(ntree, sockB, !ELEM(node->custom1, NODE_BOOLEAN_MATH_NOT));
+  bke::node_set_socket_availability(*ntree, *sockB, !ELEM(node->custom1, NODE_BOOLEAN_MATH_NOT));
 }
 
 static void node_label(const bNodeTree * /*tree*/,
@@ -203,7 +202,7 @@ static void node_register()
   ntype.eval_elem = node_eval_elem;
   ntype.eval_inverse_elem = node_eval_inverse_elem;
   ntype.eval_inverse = node_eval_inverse;
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 
   node_rna(ntype.rna_ext.srna);
 }

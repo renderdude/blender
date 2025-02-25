@@ -16,6 +16,8 @@
 
 #include "MEM_guardedalloc.h"
 
+#include "DNA_windowmanager_types.h"
+
 #include "BLI_listbase.h"
 #include "BLI_string.h"
 #include "BLI_utildefines.h"
@@ -205,6 +207,8 @@ void BKE_blender_globals_init()
 #endif
 
   G.log.level = 1;
+
+  G.profile_gpu = false;
 }
 
 void BKE_blender_globals_clear()

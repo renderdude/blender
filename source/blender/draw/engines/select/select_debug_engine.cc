@@ -11,13 +11,10 @@
 #include "BLT_translation.hh"
 
 #include "DNA_ID.h"
-#include "DNA_vec_types.h"
 
 #include "DRW_engine.hh"
-#include "DRW_select_buffer.hh"
 
 #include "draw_manager.hh"
-#include "draw_manager_c.hh"
 #include "draw_pass.hh"
 
 #include "select_engine.hh"
@@ -30,10 +27,6 @@
 
 struct SELECTIDDEBUG_Data {
   void *engine_type;
-  DRWViewportEmptyList *fbl;
-  DRWViewportEmptyList *txl;
-  DRWViewportEmptyList *psl;
-  DRWViewportEmptyList *stl;
 };
 
 static struct {
@@ -81,14 +74,10 @@ static void select_debug_engine_free()
 /** \name Engine Type
  * \{ */
 
-static const DrawEngineDataSize select_debug_data_size = DRW_VIEWPORT_DATA_SIZE(
-    SELECTIDDEBUG_Data);
-
 DrawEngineType draw_engine_debug_select_type = {
     /*next*/ nullptr,
     /*prev*/ nullptr,
     /*idname*/ N_("Select ID Debug"),
-    /*vedata_size*/ &select_debug_data_size,
     /*engine_init*/ nullptr,
     /*engine_free*/ &select_debug_engine_free,
     /*instance_free*/ nullptr,

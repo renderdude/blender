@@ -6,7 +6,6 @@
  * \ingroup bke
  */
 
-#include <climits>
 #include <cstring>
 
 #include "MEM_guardedalloc.h"
@@ -47,15 +46,9 @@
 #include "BKE_object_types.hh"
 #include "BKE_paint.hh"
 
-#include "BLI_sys_types.h" /* for intptr_t support */
-
 #include "BKE_shrinkwrap.hh"
 #include "DEG_depsgraph.hh"
 #include "DEG_depsgraph_query.hh"
-
-#ifdef WITH_OPENSUBDIV
-// #  include "DNA_userdef_types.h"
-#endif
 
 namespace blender::bke {
 
@@ -699,7 +692,7 @@ static void mesh_calc_modifiers(Depsgraph &depsgraph,
 
   /* Remove temporary data layer only needed for modifier evaluation.
    * Save some memory, and ensure GPU subdivision does not need to deal with this. */
-  CustomData_free_layers(&mesh->vert_data, CD_CLOTH_ORCO, mesh->verts_num);
+  CustomData_free_layers(&mesh->vert_data, CD_CLOTH_ORCO);
 
   /* Compute normals. */
   if (is_own_mesh) {

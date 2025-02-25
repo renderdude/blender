@@ -6,11 +6,11 @@
  * \ingroup edanimation
  */
 
+#include <algorithm>
 #include <cmath>
 #include <cstdlib>
 
-#include "BLI_sys_types.h"
-
+#include "BLI_listbase.h"
 #include "BLI_math_base.h"
 #include "BLI_utildefines.h"
 #include "BLI_vector.hh"
@@ -573,9 +573,7 @@ static int previewrange_define_exec(bContext *C, wmOperator *op)
    */
   FRAMENUMBER_MIN_CLAMP(sfra);
   FRAMENUMBER_MIN_CLAMP(efra);
-  if (efra < sfra) {
-    efra = sfra;
-  }
+  efra = std::max(efra, sfra);
 
   scene->r.flag |= SCER_PRV_RANGE;
   scene->r.psfra = round_fl_to_int(sfra);
@@ -960,6 +958,10 @@ void ED_operatortypes_anim()
 
   WM_operatortype_append(ANIM_OT_convert_legacy_action);
   WM_operatortype_append(ANIM_OT_merge_animation);
+
+  WM_operatortype_append(blender::ed::animrig::POSELIB_OT_create_pose_asset);
+  WM_operatortype_append(blender::ed::animrig::POSELIB_OT_asset_modify);
+  WM_operatortype_append(blender::ed::animrig::POSELIB_OT_asset_delete);
 }
 
 void ED_keymap_anim(wmKeyConfig *keyconf)

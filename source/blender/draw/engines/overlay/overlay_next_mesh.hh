@@ -12,19 +12,23 @@
 
 #include "BKE_customdata.hh"
 #include "BKE_editmesh.hh"
-#include "BKE_global.hh"
 #include "BKE_mask.h"
 #include "BKE_mesh_types.hh"
 #include "BKE_paint.hh"
 #include "BKE_subdiv_modifier.hh"
+
 #include "DEG_depsgraph_query.hh"
+
 #include "DNA_brush_types.h"
 #include "DNA_mask_types.h"
 #include "DNA_mesh_types.h"
-#include "ED_image.hh"
+#include "DNA_userdef_types.h"
+
 #include "ED_view3d.hh"
+
 #include "GPU_capabilities.hh"
 
+#include "draw_cache.hh"
 #include "draw_cache_impl.hh"
 #include "draw_manager_text.hh"
 #include "overlay_next_base.hh"
@@ -46,6 +50,7 @@ class Meshes : Overlay {
   PassSimple::Sub *loop_normals_ = nullptr;
   PassSimple::Sub *loop_normals_subdiv_ = nullptr;
   PassSimple::Sub *vert_normals_ = nullptr;
+  PassSimple::Sub *vert_normals_subdiv_ = nullptr;
 
   PassSimple edit_mesh_analysis_ps_ = {"Mesh Analysis"};
   PassSimple edit_mesh_weight_ps_ = {"Edit Weight"};
@@ -136,6 +141,7 @@ class Meshes : Overlay {
       pass.shader_set(res.shaders.mesh_edit_depth.get());
       pass.push_constant("retopologyOffset", retopology_offset);
       pass.bind_ubo(OVERLAY_GLOBALS_SLOT, &res.globals_buf);
+      pass.bind_ubo(DRW_CLIPPING_UBO_SLOT, &res.clip_planes_buf);
     }
     {
       /* Normals */
@@ -152,6 +158,7 @@ class Meshes : Overlay {
       auto &pass = edit_mesh_normals_ps_;
       pass.init();
       pass.bind_ubo(OVERLAY_GLOBALS_SLOT, &res.globals_buf);
+      pass.bind_ubo(DRW_CLIPPING_UBO_SLOT, &res.clip_planes_buf);
       pass.state_set(pass_state, state.clipping_plane_count);
 
       auto shader_pass = [&](GPUShader *shader, const char *name) {
@@ -178,6 +185,7 @@ class Meshes : Overlay {
         loop_normals_ = shader_pass(res.shaders.mesh_loop_normal.get(), "LoopNor");
       }
       if (show_vert_nor) {
+        vert_normals_subdiv_ = shader_pass(res.shaders.mesh_vert_normal_subdiv.get(), "SubdVNor");
         vert_normals_ = shader_pass(res.shaders.mesh_vert_normal.get(), "VertexNor");
       }
     }
@@ -193,6 +201,7 @@ class Meshes : Overlay {
       pass.shader_set(shadeless ? res.shaders.paint_weight.get() :
                                   res.shaders.paint_weight_fake_shading.get());
       pass.bind_ubo(OVERLAY_GLOBALS_SLOT, &res.globals_buf);
+      pass.bind_ubo(DRW_CLIPPING_UBO_SLOT, &res.clip_planes_buf);
       pass.bind_texture("colorramp", &res.weight_ramp_tx);
       pass.push_constant("drawContours", false);
       pass.push_constant("opacity", state.overlay.weight_paint_mode_opacity);
@@ -222,6 +231,7 @@ class Meshes : Overlay {
       pass.push_constant("ndc_offset", ndc_offset);
       pass.push_constant("dataMask", int4(data_mask));
       pass.bind_ubo(OVERLAY_GLOBALS_SLOT, &res.globals_buf);
+      pass.bind_ubo(DRW_CLIPPING_UBO_SLOT, &res.clip_planes_buf);
     };
 
     {
@@ -280,6 +290,7 @@ class Meshes : Overlay {
       pass.shader_set(res.shaders.mesh_edit_skin_root.get());
       pass.push_constant("retopologyOffset", retopology_offset);
       pass.bind_ubo(OVERLAY_GLOBALS_SLOT, &res.globals_buf);
+      pass.bind_ubo(DRW_CLIPPING_UBO_SLOT, &res.clip_planes_buf);
     }
   }
 
@@ -300,6 +311,7 @@ class Meshes : Overlay {
      * refactored. */
     const bool use_gpu_subdiv = BKE_subsurf_modifier_has_gpu_subdiv(static_cast<Mesh *>(ob->data));
     const bool draw_as_solid = (ob->dt > OB_WIRE) && !state.xray_enabled;
+    const bool has_edit_cage = mesh_has_edit_cage(ob);
 
     if (show_retopology_) {
       gpu::Batch *geom = DRW_mesh_batch_cache_get_edit_triangles(mesh);
@@ -322,17 +334,18 @@ class Meshes : Overlay {
 
     if (face_normals_) {
       gpu::Batch *geom = DRW_mesh_batch_cache_get_edit_facedots(mesh);
-      (use_gpu_subdiv ? face_normals_subdiv_ : face_normals_)
+      (use_gpu_subdiv && !has_edit_cage ? face_normals_subdiv_ : face_normals_)
           ->draw_expand(geom, GPU_PRIM_LINES, 1, 1, res_handle);
     }
     if (loop_normals_) {
       gpu::Batch *geom = DRW_mesh_batch_cache_get_edit_loop_normals(mesh);
-      (use_gpu_subdiv ? loop_normals_subdiv_ : loop_normals_)
+      (use_gpu_subdiv && !has_edit_cage ? loop_normals_subdiv_ : loop_normals_)
           ->draw_expand(geom, GPU_PRIM_LINES, 1, 1, res_handle);
     }
     if (vert_normals_) {
       gpu::Batch *geom = DRW_mesh_batch_cache_get_edit_vert_normals(mesh);
-      vert_normals_->draw_expand(geom, GPU_PRIM_LINES, 1, 1, res_handle);
+      ((use_gpu_subdiv && !has_edit_cage) ? vert_normals_subdiv_ : vert_normals_)
+          ->draw_expand(geom, GPU_PRIM_LINES, 1, 1, res_handle);
     }
 
     {
@@ -341,8 +354,7 @@ class Meshes : Overlay {
     }
     {
       gpu::Batch *geom = DRW_mesh_batch_cache_get_edit_triangles(mesh);
-      (mesh_has_edit_cage(ob) ? &edit_mesh_cages_ps_ : &edit_mesh_faces_ps_)
-          ->draw(geom, res_handle);
+      (has_edit_cage ? &edit_mesh_cages_ps_ : &edit_mesh_faces_ps_)->draw(geom, res_handle);
     }
     if (select_vert_) {
       gpu::Batch *geom = DRW_mesh_batch_cache_get_edit_vertices(mesh);
@@ -526,16 +538,6 @@ class MeshUVs : Overlay {
     const ToolSettings *tool_setting = state.scene->toolsettings;
     const SpaceImage *space_image = reinterpret_cast<const SpaceImage *>(state.space_data);
     ::Image *image = space_image->image;
-    const bool is_tiled_image = image && (image->source == IMA_SRC_TILED);
-    const bool is_viewer = image && ELEM(image->type, IMA_TYPE_R_RESULT, IMA_TYPE_COMPOSITE);
-    /* Only disable UV drawing on top of render results.
-     * Otherwise, show UVs even in the absence of active image. */
-    enabled_ = !is_viewer;
-
-    if (!enabled_) {
-      return;
-    }
-
     const bool space_mode_is_paint = space_image->mode == SI_MODE_PAINT;
     const bool space_mode_is_view = space_image->mode == SI_MODE_VIEW;
     const bool space_mode_is_mask = space_image->mode == SI_MODE_MASK;
@@ -543,6 +545,31 @@ class MeshUVs : Overlay {
 
     const bool object_mode_is_edit = state.object_mode & OB_MODE_EDIT;
     const bool object_mode_is_paint = state.object_mode & OB_MODE_TEXTURE_PAINT;
+
+    const bool is_viewer = image && ELEM(image->type, IMA_TYPE_R_RESULT, IMA_TYPE_COMPOSITE);
+    const bool is_tiled_image = image && (image->source == IMA_SRC_TILED);
+
+    /* The mask overlay is always drawn when enabled, even on top of viewers. */
+    {
+      /* Mask Overlay. */
+      show_mask_ = space_mode_is_mask && space_image->mask_info.mask &&
+                   space_image->mask_info.draw_flag & MASK_DRAWFLAG_OVERLAY;
+      if (show_mask_) {
+        mask_mode_ = eMaskOverlayMode(space_image->mask_info.overlay_mode);
+        mask_id_ = (Mask *)DEG_get_evaluated_id(state.depsgraph, &space_image->mask_info.mask->id);
+      }
+      else {
+        mask_id_ = nullptr;
+      }
+    }
+
+    /* Only disable UV drawing on top of render results.
+     * Otherwise, show UVs even in the absence of active image. */
+    enabled_ = !is_viewer || show_mask_;
+
+    if (!enabled_) {
+      return;
+    }
 
     {
       /* Edit UV Overlay. */
@@ -598,22 +625,11 @@ class MeshUVs : Overlay {
     }
     {
       /* Brush Stencil Overlay. */
-      const Brush *brush = BKE_paint_brush_for_read(&tool_setting->imapaint.paint);
+      const ImagePaintSettings &image_paint_settings = tool_setting->imapaint;
+      const Brush *brush = BKE_paint_brush_for_read(&image_paint_settings.paint);
       show_stencil_ = space_mode_is_paint && brush &&
                       (brush->image_brush_type == IMAGE_PAINT_BRUSH_TYPE_CLONE) &&
-                      brush->clone.image;
-    }
-    {
-      /* Mask Overlay. */
-      show_mask_ = space_mode_is_mask && space_image->mask_info.mask &&
-                   space_image->mask_info.draw_flag & MASK_DRAWFLAG_OVERLAY;
-      if (show_mask_) {
-        mask_mode_ = eMaskOverlayMode(space_image->mask_info.overlay_mode);
-        mask_id_ = (Mask *)DEG_get_evaluated_id(state.depsgraph, &space_image->mask_info.mask->id);
-      }
-      else {
-        mask_id_ = nullptr;
-      }
+                      image_paint_settings.clone;
     }
     {
       /* UDIM Overlay. */
@@ -633,6 +649,7 @@ class MeshUVs : Overlay {
                      DRW_STATE_BLEND_ALPHA);
       pass.shader_set(res.shaders.uv_wireframe.get());
       pass.bind_ubo(OVERLAY_GLOBALS_SLOT, &res.globals_buf);
+      pass.bind_ubo(DRW_CLIPPING_UBO_SLOT, &res.clip_planes_buf);
       pass.push_constant("alpha", space_image->uv_opacity);
       pass.push_constant("doSmoothWire", do_smooth_wire);
     }
@@ -647,6 +664,7 @@ class MeshUVs : Overlay {
       pass.specialize_constant(sh, "use_edge_select", !show_vert_);
       pass.shader_set(sh);
       pass.bind_ubo(OVERLAY_GLOBALS_SLOT, &res.globals_buf);
+      pass.bind_ubo(DRW_CLIPPING_UBO_SLOT, &res.clip_planes_buf);
       pass.push_constant("lineStyle", int(edit_uv_line_style_from_space_image(space_image)));
       pass.push_constant("alpha", space_image->uv_opacity);
       pass.push_constant("dashLength", dash_length);
@@ -665,6 +683,7 @@ class MeshUVs : Overlay {
                      DRW_STATE_BLEND_ALPHA);
       pass.shader_set(res.shaders.uv_edit_vert.get());
       pass.bind_ubo(OVERLAY_GLOBALS_SLOT, &res.globals_buf);
+      pass.bind_ubo(DRW_CLIPPING_UBO_SLOT, &res.clip_planes_buf);
       pass.push_constant("pointSize", (point_size + 1.5f) * float(M_SQRT2));
       pass.push_constant("outlineWidth", 0.75f);
       pass.push_constant("color", theme_color);
@@ -679,6 +698,7 @@ class MeshUVs : Overlay {
                      DRW_STATE_BLEND_ALPHA);
       pass.shader_set(res.shaders.uv_edit_facedot.get());
       pass.bind_ubo(OVERLAY_GLOBALS_SLOT, &res.globals_buf);
+      pass.bind_ubo(DRW_CLIPPING_UBO_SLOT, &res.clip_planes_buf);
       pass.push_constant("pointSize", point_size);
     }
 
@@ -688,6 +708,7 @@ class MeshUVs : Overlay {
       pass.state_set(DRW_STATE_WRITE_COLOR | DRW_STATE_DEPTH_ALWAYS | DRW_STATE_BLEND_ALPHA);
       pass.shader_set(res.shaders.uv_edit_face.get());
       pass.bind_ubo(OVERLAY_GLOBALS_SLOT, &res.globals_buf);
+      pass.bind_ubo(DRW_CLIPPING_UBO_SLOT, &res.clip_planes_buf);
       pass.push_constant("uvOpacity", space_image->uv_opacity);
     }
 
@@ -699,6 +720,7 @@ class MeshUVs : Overlay {
                           res.shaders.uv_analysis_stretch_angle.get() :
                           res.shaders.uv_analysis_stretch_area.get());
       pass.bind_ubo(OVERLAY_GLOBALS_SLOT, &res.globals_buf);
+      pass.bind_ubo(DRW_CLIPPING_UBO_SLOT, &res.clip_planes_buf);
       pass.push_constant("aspect", state.image_uv_aspect);
       pass.push_constant("stretch_opacity", space_image->stretch_opacity);
       pass.push_constant("totalAreaRatio", &total_area_ratio_);
@@ -855,8 +877,8 @@ class MeshUVs : Overlay {
       pass.state_set(DRW_STATE_WRITE_COLOR | DRW_STATE_DEPTH_ALWAYS |
                      DRW_STATE_BLEND_ALPHA_PREMUL);
 
-      const Brush *brush = BKE_paint_brush_for_read(&tool_setting->imapaint.paint);
-      ::Image *stencil_image = brush->clone.image;
+      const ImagePaintSettings &image_paint_settings = tool_setting->imapaint;
+      ::Image *stencil_image = image_paint_settings.clone;
       TextureRef stencil_texture;
       stencil_texture.wrap(BKE_image_get_gpu_texture(stencil_image, nullptr));
 
@@ -868,8 +890,8 @@ class MeshUVs : Overlay {
         pass.bind_texture("imgTexture", stencil_texture);
         pass.push_constant("imgPremultiplied", true);
         pass.push_constant("imgAlphaBlend", true);
-        pass.push_constant("ucolor", float4(1.0f, 1.0f, 1.0f, brush->clone.alpha));
-        pass.push_constant("brush_offset", float2(brush->clone.offset));
+        pass.push_constant("ucolor", float4(1.0f, 1.0f, 1.0f, image_paint_settings.clone_alpha));
+        pass.push_constant("brush_offset", float2(image_paint_settings.clone_offset));
         pass.push_constant("brush_scale", float2(stencil_texture.size().xy()) / size_image);
         pass.draw(res.shapes.quad_solid.get());
       }

@@ -23,8 +23,9 @@
 
 #include "MEM_guardedalloc.h"
 
-#include "BLI_blenlib.h"
+#include "BLI_listbase.h"
 #include "BLI_map.hh"
+#include "BLI_string.h"
 #include "BLI_threads.h"
 #include "BLI_utildefines.h"
 
@@ -32,6 +33,7 @@
 #include "DNA_object_types.h"
 #include "DNA_screen_types.h"
 #include "DNA_space_types.h"
+#include "DNA_userdef_types.h"
 #include "DNA_windowmanager_types.h"
 
 #include "IMB_imbuf.hh"
@@ -1112,7 +1114,7 @@ static ImageUndoStep *image_undo_push_begin(const char *name, PaintMode paint_mo
   UndoStep *us_p = BKE_undosys_step_push_init_with_type(ustack, C, name, BKE_UNDOSYS_TYPE_IMAGE);
   ImageUndoStep *us = reinterpret_cast<ImageUndoStep *>(us_p);
   BLI_assert(ELEM(paint_mode, PaintMode::Texture2D, PaintMode::Texture3D, PaintMode::Sculpt));
-  us->paint_mode = (PaintMode)paint_mode;
+  us->paint_mode = paint_mode;
   return us;
 }
 

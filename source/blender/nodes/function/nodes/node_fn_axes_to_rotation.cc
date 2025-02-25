@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
 #include "BLI_math_matrix.hh"
-#include "BLI_math_rotation.h"
 
 #include "UI_interface.hh"
 #include "UI_resources.hh"
@@ -188,7 +187,7 @@ static void node_register()
   ntype.draw_buttons = node_layout;
   ntype.get_extra_info = node_extra_info;
   node_rna(ntype.rna_ext.srna);
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 }
 NOD_REGISTER_NODE(node_register)
 

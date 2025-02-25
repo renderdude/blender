@@ -492,6 +492,7 @@ typedef struct bNode {
   bool is_group() const;
   bool is_group_input() const;
   bool is_group_output() const;
+  bool is_undefined() const;
 
   /**
    * Check if the node has the given idname.
@@ -1027,7 +1028,7 @@ typedef enum GeometryNodeAssetTraitFlag {
   GEO_NODE_ASSET_SCULPT = (1 << 2),
   GEO_NODE_ASSET_MESH = (1 << 3),
   GEO_NODE_ASSET_CURVE = (1 << 4),
-  GEO_NODE_ASSET_POINT_CLOUD = (1 << 5),
+  GEO_NODE_ASSET_POINTCLOUD = (1 << 5),
   GEO_NODE_ASSET_MODIFIER = (1 << 6),
   GEO_NODE_ASSET_OBJECT = (1 << 7),
   GEO_NODE_ASSET_WAIT_FOR_CURSOR = (1 << 8),
@@ -1832,6 +1833,11 @@ typedef struct NodeGeometryCurvePrimitiveQuad {
 typedef struct NodeGeometryCurveResample {
   /** #GeometryNodeCurveResampleMode. */
   uint8_t mode;
+  /**
+   * If false, curves may be collapsed to a single point. This is unexpected and is only supported
+   * for compatibility reasons (#102598).
+   */
+  uint8_t keep_last_segment;
 } NodeGeometryCurveResample;
 
 typedef struct NodeGeometryCurveFillet {
@@ -2691,13 +2697,12 @@ enum {
   CMP_NODE_BLUR_ASPECT_X = 2,
 };
 
-/* wrapping */
-enum {
-  CMP_NODE_WRAP_NONE = 0,
-  CMP_NODE_WRAP_X = 1,
-  CMP_NODE_WRAP_Y = 2,
-  CMP_NODE_WRAP_XY = 3,
-};
+typedef enum CMPNodeTranslateRepeatAxis {
+  CMP_NODE_TRANSLATE_REPEAT_AXIS_NONE = 0,
+  CMP_NODE_TRANSLATE_REPEAT_AXIS_X = 1,
+  CMP_NODE_TRANSLATE_REPEAT_AXIS_Y = 2,
+  CMP_NODE_TRANSLATE_REPEAT_AXIS_XY = 3,
+} CMPNodeTranslateRepeatAxis;
 
 #define CMP_NODE_MASK_MBLUR_SAMPLES_MAX 64
 

@@ -6,6 +6,7 @@
  * \ingroup bke
  */
 
+#include <algorithm>
 #include <cctype>
 #include <cmath>
 #include <cstdio>
@@ -24,6 +25,7 @@
 
 #include "BLI_array.hh"
 #include "BLI_fileops.h"
+#include "BLI_listbase.h"
 #include "BLI_path_utils.hh"
 #include "BLI_rect.h"
 #include "BLI_string.h"
@@ -48,12 +50,14 @@
 #include "DNA_brush_types.h"
 #include "DNA_camera_types.h"
 #include "DNA_defaults.h"
+#include "DNA_image_types.h"
 #include "DNA_light_types.h"
 #include "DNA_material_types.h"
 #include "DNA_object_types.h"
 #include "DNA_packedFile_types.h"
 #include "DNA_scene_types.h"
 #include "DNA_sequence_types.h"
+#include "DNA_userdef_types.h"
 #include "DNA_world_types.h"
 
 #include "BLI_math_vector.h"
@@ -75,6 +79,7 @@
 #include "BKE_image.hh"
 #include "BKE_image_format.hh"
 #include "BKE_lib_id.hh"
+#include "BKE_library.hh"
 #include "BKE_main.hh"
 #include "BKE_node.hh"
 #include "BKE_node_legacy_types.hh"
@@ -108,7 +113,6 @@
 #include "DNA_node_types.h"
 #include "DNA_screen_types.h"
 #include "DNA_space_types.h"
-#include "DNA_view3d_types.h"
 
 using blender::Array;
 
@@ -154,6 +158,16 @@ static void image_runtime_free_data(Image *image)
     image->runtime.partial_update_user = nullptr;
   }
   BKE_image_partial_update_register_free(image);
+}
+
+static void image_gpu_runtime_reset(Image *ima)
+{
+  ima->lastused = 0;
+  ima->gpuflag = 0;
+  ima->gpuframenr = IMAGE_GPU_FRAME_NONE;
+  ima->gpu_pass = IMAGE_GPU_PASS_NONE;
+  ima->gpu_layer = IMAGE_GPU_LAYER_NONE;
+  ima->gpu_view = IMAGE_GPU_VIEW_NONE;
 }
 
 static void image_init_data(ID *id)
@@ -253,9 +267,9 @@ static void image_foreach_cache(ID *id,
   function_callback(id, &key, (void **)&image->cache, 0, user_data);
 
   key.identifier = offsetof(Image, anims.first);
-  function_callback(id, &key, (void **)&image->anims.first, 0, user_data);
+  function_callback(id, &key, &image->anims.first, 0, user_data);
   key.identifier = offsetof(Image, anims.last);
-  function_callback(id, &key, (void **)&image->anims.last, 0, user_data);
+  function_callback(id, &key, &image->anims.last, 0, user_data);
 
   auto gputexture_offset = [image](int target, int eye) {
     constexpr size_t base_offset = offsetof(Image, gputexture);
@@ -348,9 +362,8 @@ static void image_blend_write(BlendWriter *writer, ID *id, const void *id_addres
 
   /* Clear all data that isn't read to reduce false detection of changed image during memfile undo.
    */
-  ima->lastused = 0;
   ima->cache = nullptr;
-  ima->gpuflag = 0;
+  image_gpu_runtime_reset(ima);
   BLI_listbase_clear(&ima->anims);
   ima->runtime.partial_update_register = nullptr;
   ima->runtime.partial_update_user = nullptr;
@@ -433,9 +446,7 @@ static void image_blend_read_data(BlendDataReader *reader, ID *id)
   BKE_previewimg_blend_read(reader, ima->preview);
   BLO_read_struct(reader, Stereo3dFormat, &ima->stereo3d_format);
 
-  ima->lastused = 0;
-  ima->gpuflag = 0;
-
+  image_gpu_runtime_reset(ima);
   image_runtime_reset(ima);
 }
 
@@ -1048,7 +1059,7 @@ static void image_abs_path(Main *bmain,
 {
   BLI_strncpy(r_filepath_abs, filepath, FILE_MAX);
   if (owner_library) {
-    BLI_path_abs(r_filepath_abs, owner_library->runtime.filepath_abs);
+    BLI_path_abs(r_filepath_abs, owner_library->runtime->filepath_abs);
   }
   else {
     BLI_path_abs(r_filepath_abs, BKE_main_blendfile_path(bmain));
@@ -4198,12 +4209,8 @@ static ImBuf *load_movie_single(Image *ima, ImageUser *iuser, int frame, const i
     int dur = MOV_get_duration_frames(ia->anim, IMB_TC_RECORD_RUN);
     int fra = frame - 1;
 
-    if (fra < 0) {
-      fra = 0;
-    }
-    if (fra > (dur - 1)) {
-      fra = dur - 1;
-    }
+    fra = std::max(fra, 0);
+    fra = std::min(fra, dur - 1);
     ibuf = IMB_makeSingleUser(MOV_decode_frame(ia->anim, fra, IMB_TC_RECORD_RUN, IMB_PROXY_NONE));
 
     if (ibuf) {
@@ -5183,9 +5190,7 @@ int BKE_image_user_frame_get(const ImageUser *iuser, int cfra, bool *r_is_in_ran
 
   /* transform to images space */
   framenr = cfra;
-  if (framenr > iuser->frames) {
-    framenr = iuser->frames;
-  }
+  framenr = std::min(framenr, iuser->frames);
 
   if (iuser->cycl) {
     framenr = ((framenr) % len);
@@ -5230,7 +5235,9 @@ void BKE_image_user_frame_calc(Image *ima, ImageUser *iuser, int cfra)
       /* NOTE: a single texture and refresh doesn't really work when
        * multiple image users may use different frames, this is to
        * be improved with perhaps a GPU texture cache. */
-      BKE_image_partial_update_mark_full_update(ima);
+      if (ima->gpuframenr != IMAGE_GPU_FRAME_NONE) {
+        BKE_image_partial_update_mark_full_update(ima);
+      }
       ima->gpuframenr = iuser->framenr;
     }
 

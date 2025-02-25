@@ -35,7 +35,7 @@ static void shortest_paths(const Mesh &mesh,
   const Span<int2> edges = mesh.edges();
   Array<bool> visited(mesh.verts_num, false);
 
-  std::priority_queue<VertPriority, std::vector<VertPriority>, std::greater<VertPriority>> queue;
+  std::priority_queue<VertPriority, std::vector<VertPriority>, std::greater<>> queue;
 
   end_selection.foreach_index([&](const int start_vert_i) {
     r_cost[start_vert_i] = 0.0f;
@@ -272,7 +272,7 @@ static void node_register()
   ntype.nclass = NODE_CLASS_INPUT;
   ntype.declare = node_declare;
   ntype.geometry_node_execute = node_geo_exec;
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 }
 NOD_REGISTER_NODE(node_register)
 

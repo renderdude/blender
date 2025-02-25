@@ -8,7 +8,7 @@
 
 #include "GEO_realize_instances.hh"
 
-#include "UI_resources.hh"
+#include "FN_multi_function_builder.hh"
 
 namespace blender::nodes::node_geo_realize_instances_cc {
 
@@ -95,7 +95,7 @@ static void node_register()
   ntype.nclass = NODE_CLASS_GEOMETRY;
   ntype.declare = node_declare;
   ntype.geometry_node_execute = node_geo_exec;
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 }
 NOD_REGISTER_NODE(node_register)
 

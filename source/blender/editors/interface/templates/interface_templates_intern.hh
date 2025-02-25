@@ -27,7 +27,7 @@ struct bContext;
 #define TEMPLATE_SEARCH_TEXTBUT_HEIGHT UI_UNIT_Y
 
 struct RNAUpdateCb {
-  PointerRNA ptr;
+  PointerRNA ptr = {};
   PropertyRNA *prop;
 };
 
@@ -55,7 +55,7 @@ void template_add_button_search_menu(const bContext *C,
                                      PropertyRNA *prop,
                                      uiBlockCreateFunc block_func,
                                      void *block_argN,
-                                     const char *const tip,
+                                     std::optional<blender::StringRef> tip,
                                      const bool use_previews,
                                      const bool editable,
                                      const bool live_icon,

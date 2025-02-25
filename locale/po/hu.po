@@ -1,9 +1,9 @@
 
 msgid ""
 msgstr ""
-"Project-Id-Version: Blender 4.4.0 Alpha (b'efff379ea583')\n"
+"Project-Id-Version: Blender 4.4.0 Beta (b'63c460d93d55')\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-27 10:58+0000\n"
+"POT-Creation-Date: 2025-02-24 09:56+0000\n"
 "PO-Revision-Date: 2024-01-11 03:55+0000\n"
 "Last-Translator: Répási Dávid <hu.repasidavid@protonmail.com>\n"
 "Language-Team: Hungarian <https://translate.blender.org/projects/blender-ui/ui/hu/>\n"
@@ -47,10 +47,6 @@ msgstr "F-Görbék"
 
 msgid "Action F-Curves"
 msgstr "Akció F-Görbék"
-
-
-msgid "Collection of action F-Curves"
-msgstr "Akció F-Görbék gyűjteménye"
 
 
 msgid "Action Group"
@@ -179,34 +175,6 @@ msgstr "Kijelölés"
 
 msgid "Action group is selected"
 msgstr "Akció csoport kijelölve"
-
-
-msgid "Influence"
-msgstr "Befolyás"
-
-
-msgid "Mix Mode"
-msgstr "Keverési mód"
-
-
-msgid "Replace"
-msgstr "Lecserél"
-
-
-msgid "Offset"
-msgstr "Eltolás"
-
-
-msgid "Add"
-msgstr "Hozzáadás"
-
-
-msgid "Subtract"
-msgstr "Különbség"
-
-
-msgid "Multiply"
-msgstr "Többszörözés"
 
 
 msgid "Active"
@@ -435,8 +403,24 @@ msgid "Action"
 msgstr "Akció"
 
 
+msgid "Replace"
+msgstr "Lecserél"
+
+
 msgid "Combine"
 msgstr "Kombinálás"
+
+
+msgid "Add"
+msgstr "Hozzáadás"
+
+
+msgid "Subtract"
+msgstr "Különbség"
+
+
+msgid "Multiply"
+msgstr "Többszörözés"
 
 
 msgid "Motion Paths"
@@ -1206,6 +1190,10 @@ msgid "Image"
 msgstr "Kép"
 
 
+msgid "Offset"
+msgstr "Eltolás"
+
+
 msgid "Rotation"
 msgstr "Forgatás"
 
@@ -1421,6 +1409,10 @@ msgstr "Bemenet"
 
 msgid "Error"
 msgstr "Hiba"
+
+
+msgid "Influence"
+msgstr "Befolyás"
 
 
 msgid "Amount of influence constraint will have on the final solution"
@@ -1713,6 +1705,10 @@ msgstr "Minimum"
 
 msgid "Minimum value for target channel range"
 msgstr "A célobjektum csatorna-tartományának minimum értéke"
+
+
+msgid "Mix Mode"
+msgstr "Keverési mód"
 
 
 msgid "Target object"
@@ -5240,10 +5236,6 @@ msgid "Display the object's name"
 msgstr "Az objektum nevének megjelenítése"
 
 
-msgid "Shape Key Lock"
-msgstr "Formakulcs lezárása"
-
-
 msgid "Display the object's texture space"
 msgstr "Az objektum textúraterének megjelenítése"
 
@@ -6614,14 +6606,6 @@ msgid "Mask"
 msgstr "Maszk"
 
 
-msgid "Show/Hide"
-msgstr "Mutat/Rejt"
-
-
-msgid "Clean Up"
-msgstr "Tisztítás"
-
-
 msgid "Mirror"
 msgstr "Tükrözés"
 
@@ -6660,6 +6644,14 @@ msgstr "Elfogadás"
 
 msgid "Track"
 msgstr "Nyom"
+
+
+msgid "Show/Hide"
+msgstr "Mutat/Rejt"
+
+
+msgid "Clean Up"
+msgstr "Tisztítás"
 
 
 msgid "Merge"
@@ -9301,10 +9293,6 @@ msgstr "Forgatás"
 
 msgid "Translate"
 msgstr "Áthelyez"
-
-
-msgid "Wrapping"
-msgstr "Borítás/csomagolás"
 
 
 msgid "X Axis"
@@ -16513,6 +16501,10 @@ msgid "Operation requires an active bone"
 msgstr "A művelet aktív csontot igényel"
 
 
+msgid "Cancel"
+msgstr "Mégsem"
+
+
 msgid "Cannot spin"
 msgstr "Nem lehet forgatni"
 
@@ -16538,10 +16530,6 @@ msgstr "Nem lehet vonást festeni"
 
 msgid "No active frame to delete"
 msgstr "Nincs törölhető aktív képkocka"
-
-
-msgid "Cancel"
-msgstr "Mégsem"
 
 
 msgctxt "Operator"
@@ -17101,10 +17089,6 @@ msgstr "Interpoláció:"
 
 msgid "Value:"
 msgstr "Érték:"
-
-
-msgid "Decimate Keyframes"
-msgstr "Kulcs-képkockák tizedelése"
 
 
 msgid "Select Layer"

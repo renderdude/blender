@@ -33,6 +33,7 @@
 #include "DNA_space_types.h"
 
 #include "BLI_fileops.h"
+#include "BLI_listbase.h"
 #include "BLI_math_vector.h"
 #include "BLI_path_utils.hh"
 #include "BLI_string.h"
@@ -47,6 +48,7 @@
 #include "BKE_image.hh" /* openanim */
 #include "BKE_lib_id.hh"
 #include "BKE_lib_query.hh"
+#include "BKE_library.hh"
 #include "BKE_main.hh"
 #include "BKE_movieclip.h"
 #include "BKE_node_tree_update.hh"
@@ -145,7 +147,7 @@ static void movie_clip_foreach_cache(ID *id,
   function_callback(id, &key, (void **)&movie_clip->cache, 0, user_data);
 
   key.identifier = offsetof(MovieClip, tracking.camera.intrinsics);
-  function_callback(id, &key, (void **)&movie_clip->tracking.camera.intrinsics, 0, user_data);
+  function_callback(id, &key, (&movie_clip->tracking.camera.intrinsics), 0, user_data);
 }
 
 static void movie_clip_foreach_path(ID *id, BPathForeachPathData *bpath_data)

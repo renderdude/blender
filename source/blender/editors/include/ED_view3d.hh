@@ -40,7 +40,6 @@ struct RegionView3D;
 struct RenderEngineType;
 struct Scene;
 struct ScrArea;
-struct SnapObjectContext;
 struct View3D;
 struct ViewContext;
 struct ViewLayer;
@@ -56,6 +55,9 @@ struct wmKeyMapItem;
 struct wmOperator;
 struct wmWindow;
 struct wmWindowManager;
+namespace blender::ed::transform {
+struct SnapObjectContext;
+}
 
 /** For mesh drawing callbacks, for viewport selection, etc. */
 struct ViewContext {
@@ -371,7 +373,7 @@ void ED_view3d_cursor_snap_state_prevpoint_set(V3DSnapCursorState *state,
 void ED_view3d_cursor_snap_data_update(
     V3DSnapCursorState *state, const bContext *C, const ARegion *region, int x, int y);
 V3DSnapCursorData *ED_view3d_cursor_snap_data_get();
-SnapObjectContext *ED_view3d_cursor_snap_context_ensure(Scene *scene);
+blender::ed::transform::SnapObjectContext *ED_view3d_cursor_snap_context_ensure(Scene *scene);
 void ED_view3d_cursor_snap_draw_util(RegionView3D *rv3d,
                                      const float source_loc[3],
                                      const float target_loc[3],
@@ -958,33 +960,33 @@ enum eV3DSelectObjectFilter {
 eV3DSelectObjectFilter ED_view3d_select_filter_from_mode(const Scene *scene, const Object *obact);
 
 /**
- * Optionally cache data for multiple calls to #view3d_opengl_select
+ * Optionally cache data for multiple calls to #view3d_gpu_select
  *
  * just avoid GPU_select headers outside this file
  */
-void view3d_opengl_select_cache_begin();
-void view3d_opengl_select_cache_end();
+void view3d_gpu_select_cache_begin();
+void view3d_gpu_select_cache_end();
 
 /**
  * \note (vc->obedit == NULL) can be set to explicitly skip edit-object selection.
  */
-int view3d_opengl_select_ex(const ViewContext *vc,
-                            GPUSelectBuffer *buffer,
-                            const rcti *input,
-                            eV3DSelectMode select_mode,
-                            eV3DSelectObjectFilter select_filter,
-                            bool do_material_slot_selection);
-int view3d_opengl_select(const ViewContext *vc,
+int view3d_gpu_select_ex(const ViewContext *vc,
                          GPUSelectBuffer *buffer,
                          const rcti *input,
                          eV3DSelectMode select_mode,
-                         eV3DSelectObjectFilter select_filter);
-int view3d_opengl_select_with_id_filter(const ViewContext *vc,
-                                        GPUSelectBuffer *buffer,
-                                        const rcti *input,
-                                        eV3DSelectMode select_mode,
-                                        eV3DSelectObjectFilter select_filter,
-                                        uint select_id);
+                         eV3DSelectObjectFilter select_filter,
+                         bool do_material_slot_selection);
+int view3d_gpu_select(const ViewContext *vc,
+                      GPUSelectBuffer *buffer,
+                      const rcti *input,
+                      eV3DSelectMode select_mode,
+                      eV3DSelectObjectFilter select_filter);
+int view3d_gpu_select_with_id_filter(const ViewContext *vc,
+                                     GPUSelectBuffer *buffer,
+                                     const rcti *input,
+                                     eV3DSelectMode select_mode,
+                                     eV3DSelectObjectFilter select_filter,
+                                     uint select_id);
 
 /* `view3d_select.cc` */
 
@@ -1011,8 +1013,8 @@ void ED_view3d_viewcontext_init_object(ViewContext *vc, Object *obact);
  * Use this call when executing an operator,
  * event system doesn't set for each event the OpenGL drawing context.
  */
-void view3d_operator_needs_opengl(const bContext *C);
-void view3d_region_operator_needs_opengl(wmWindow *win, ARegion *region);
+void view3d_operator_needs_gpu(const bContext *C);
+void view3d_region_operator_needs_gpu(ARegion *region);
 
 /** XXX: should move to BLI_math */
 bool edge_inside_circle(const float cent[2],
@@ -1063,6 +1065,7 @@ void ED_view3d_check_mats_rv3d(RegionView3D *rv3d);
 
 RV3DMatrixStore *ED_view3d_mats_rv3d_backup(RegionView3D *rv3d);
 void ED_view3d_mats_rv3d_restore(RegionView3D *rv3d, RV3DMatrixStore *rv3dmat);
+void ED_view3D_mats_rv3d_free(RV3DMatrixStore *rv3d_mat);
 
 RenderEngineType *ED_view3d_engine_type(const Scene *scene, int drawtype);
 

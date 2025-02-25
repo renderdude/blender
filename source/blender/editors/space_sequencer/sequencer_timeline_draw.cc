@@ -10,8 +10,10 @@
 #include <cmath>
 #include <cstring>
 
-#include "BLI_array.hh"
-#include "BLI_blenlib.h"
+#include "BLI_listbase.h"
+#include "BLI_math_vector.h"
+#include "BLI_path_utils.hh"
+#include "BLI_string.h"
 #include "BLI_string_utils.hh"
 #include "BLI_task.hh"
 #include "BLI_threads.h"
@@ -36,9 +38,9 @@
 #include "ED_space_api.hh"
 #include "ED_time_scrub_ui.hh"
 
+#include "GPU_immediate.hh"
 #include "GPU_matrix.hh"
-
-#include "IMB_imbuf.hh"
+#include "GPU_state.hh"
 
 #include "RNA_prototypes.hh"
 
@@ -64,8 +66,6 @@
 #include "WM_types.hh"
 
 #include "BLF_api.hh"
-
-#include "MEM_guardedalloc.h"
 
 /* Own include. */
 #include "sequencer_intern.hh"
@@ -201,6 +201,11 @@ static void strip_draw_context_set_retiming_overlay_visibility(TimelineDrawConte
   strip_ctx->can_draw_retiming_overlay &= retiming_keys_can_be_displayed(ctx->sseq);
 }
 
+static float strip_header_size_get(TimelineDrawContext *ctx)
+{
+  return min_ff(0.40f, 20 * UI_SCALE_FAC * ctx->pixely);
+}
+
 static StripDrawContext strip_draw_context_get(TimelineDrawContext *ctx, Strip *strip)
 {
   using namespace seq;
@@ -235,7 +240,7 @@ static StripDrawContext strip_draw_context_get(TimelineDrawContext *ctx, Strip *
                                   !strip_ctx.can_draw_strip_content);
   strip_ctx.is_active_strip = strip == SEQ_select_active_get(scene);
   strip_ctx.is_single_image = SEQ_transform_single_image_check(strip);
-  strip_ctx.handle_width = sequence_handle_size_get_clamped(ctx->scene, strip, ctx->pixelx);
+  strip_ctx.handle_width = strip_handle_draw_size_get(ctx->scene, strip, ctx->pixelx);
   strip_ctx.show_strip_color_tag = (ctx->sseq->timeline_overlay.flag &
                                     SEQ_TIMELINE_SHOW_STRIP_COLOR_TAG);
 
@@ -256,7 +261,7 @@ static StripDrawContext strip_draw_context_get(TimelineDrawContext *ctx, Strip *
   }
 
   if (strip_ctx.can_draw_text_overlay) {
-    strip_ctx.strip_content_top = strip_ctx.top - min_ff(0.40f, 20 * UI_SCALE_FAC * ctx->pixely);
+    strip_ctx.strip_content_top = strip_ctx.top - strip_header_size_get(ctx);
   }
   else {
     strip_ctx.strip_content_top = strip_ctx.top;
@@ -364,7 +369,6 @@ static void color3ubv_from_seq(const Scene *curscene,
     case STRIP_TYPE_MUL:
     case STRIP_TYPE_ALPHAOVER:
     case STRIP_TYPE_ALPHAUNDER:
-    case STRIP_TYPE_OVERDROP:
     case STRIP_TYPE_GLOW:
     case STRIP_TYPE_MULTICAM:
     case STRIP_TYPE_ADJUSTMENT:
@@ -387,9 +391,6 @@ static void color3ubv_from_seq(const Scene *curscene,
       }
       else if (strip->type == STRIP_TYPE_ALPHAUNDER) {
         rgb_byte_set_hue_float_offset(r_col, 0.19);
-      }
-      else if (strip->type == STRIP_TYPE_OVERDROP) {
-        rgb_byte_set_hue_float_offset(r_col, 0.22);
       }
       else if (strip->type == STRIP_TYPE_COLORMIX) {
         rgb_byte_set_hue_float_offset(r_col, 0.25);
@@ -773,7 +774,7 @@ static void draw_handle_transform_text(const TimelineDrawContext *timeline_ctx,
   UI_view2d_text_cache_add(timeline_ctx->v2d, text_x, text_y, numstr, numstr_len, col);
 }
 
-float sequence_handle_size_get_clamped(const Scene *scene, Strip *strip, const float pixelx)
+float strip_handle_draw_size_get(const Scene *scene, Strip *strip, const float pixelx)
 {
   const bool use_thin_handle = (U.sequencer_editor_flag & USER_SEQ_ED_SIMPLE_TWEAKING) != 0;
   const float handle_size = use_thin_handle ? 5.0f : 8.0f;
@@ -965,15 +966,13 @@ static void draw_strip_icons(TimelineDrawContext *timeline_ctx,
     }
 
     /* Draw icon in the title bar area. */
-    if ((timeline_ctx->sseq->flag & SEQ_SHOW_OVERLAY) != 0 && !strip.strip_is_too_small &&
-        strip.can_draw_text_overlay)
-    {
+    if ((timeline_ctx->sseq->flag & SEQ_SHOW_OVERLAY) != 0 && !strip.strip_is_too_small) {
       uchar col[4];
       get_strip_text_color(&strip, col);
 
       float icon_indent = 2.0f * strip.handle_width - 4 * timeline_ctx->pixelx * UI_SCALE_FAC;
       rctf rect;
-      rect.ymin = strip.strip_content_top;
+      rect.ymin = strip.top - strip_header_size_get(timeline_ctx);
       rect.ymax = strip.top;
       rect.xmin = max_ff(strip.left_handle, timeline_ctx->v2d->cur.xmin) + icon_indent;
       if (missing_data) {

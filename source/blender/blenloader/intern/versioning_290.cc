@@ -43,6 +43,8 @@
 #include "DNA_space_types.h"
 #include "DNA_text_types.h"
 #include "DNA_tracking_types.h"
+#include "DNA_userdef_types.h"
+#include "DNA_windowmanager_types.h"
 #include "DNA_workspace_types.h"
 
 #undef DNA_GENFILE_VERSIONING_MACROS
@@ -63,7 +65,7 @@
 #include "BKE_node.hh"
 #include "BKE_node_legacy_types.hh"
 
-#include "IMB_imbuf.hh"
+#include "IMB_imbuf_enums.h"
 #include "MEM_guardedalloc.h"
 
 #include "SEQ_proxy.hh"
@@ -396,10 +398,10 @@ static void version_node_socket_duplicate(bNodeTree *ntree,
   LISTBASE_FOREACH_MUTABLE (bNodeLink *, link, &ntree->links) {
     if (link->tonode->type_legacy == node_type) {
       bNode *node = link->tonode;
-      bNodeSocket *dest_socket = blender::bke::node_find_socket(node, SOCK_IN, new_name);
+      bNodeSocket *dest_socket = blender::bke::node_find_socket(*node, SOCK_IN, new_name);
       BLI_assert(dest_socket);
       if (STREQ(link->tosock->name, old_name)) {
-        blender::bke::node_add_link(ntree, link->fromnode, link->fromsock, node, dest_socket);
+        blender::bke::node_add_link(*ntree, *link->fromnode, *link->fromsock, *node, *dest_socket);
       }
     }
   }
@@ -407,8 +409,8 @@ static void version_node_socket_duplicate(bNodeTree *ntree,
   /* Duplicate the default value from the old socket and assign it to the new socket. */
   LISTBASE_FOREACH (bNode *, node, &ntree->nodes) {
     if (node->type_legacy == node_type) {
-      bNodeSocket *source_socket = blender::bke::node_find_socket(node, SOCK_IN, old_name);
-      bNodeSocket *dest_socket = blender::bke::node_find_socket(node, SOCK_IN, new_name);
+      bNodeSocket *source_socket = blender::bke::node_find_socket(*node, SOCK_IN, old_name);
+      bNodeSocket *dest_socket = blender::bke::node_find_socket(*node, SOCK_IN, new_name);
       BLI_assert(source_socket && dest_socket);
       if (dest_socket->default_value) {
         MEM_freeN(dest_socket->default_value);
@@ -806,7 +808,7 @@ static void version_node_join_geometry_for_multi_input_socket(bNodeTree *ntree)
       bNodeSocket *socket = static_cast<bNodeSocket *>(node->inputs.first);
       socket->flag |= SOCK_MULTI_INPUT;
       socket->limit = 4095;
-      blender::bke::node_remove_socket(ntree, node, socket->next);
+      blender::bke::node_remove_socket(*ntree, *node, *socket->next);
     }
   }
 }
@@ -1800,9 +1802,8 @@ void blo_do_versions_290(FileData *fd, Library * /*lib*/, Main *bmain)
       /* Fix old scene with too many samples that were not being used.
        * Now they are properly used and might produce a huge slowdown.
        * So we clamp to what the old max actual was. */
-      if (scene->eevee.volumetric_shadow_samples > 32) {
-        scene->eevee.volumetric_shadow_samples = 32;
-      }
+      scene->eevee.volumetric_shadow_samples = std::min(scene->eevee.volumetric_shadow_samples,
+                                                        32);
     }
   }
 

@@ -33,8 +33,7 @@ void GPENCIL_render_init(GPENCIL_Data *vedata,
   GPENCIL_Instance &inst = *vedata->instance;
 
   Scene *scene = DEG_get_evaluated_scene(depsgraph);
-  const float *viewport_size = DRW_viewport_size_get();
-  const int size[2] = {int(viewport_size[0]), int(viewport_size[1])};
+  const int2 size = int2(DRW_viewport_size_get());
 
   /* Set the perspective & view matrix. */
   float winmat[4][4], viewmat[4][4], viewinv[4][4];
@@ -246,7 +245,7 @@ void GPENCIL_render_to_image(void *ved,
   GPENCIL_render_init(vedata, engine, render_layer, depsgraph, rect);
   GPENCIL_engine_init(vedata);
 
-  vedata->stl->pd->camera = DEG_get_evaluated_object(depsgraph, RE_GetCamera(engine->re));
+  vedata->instance->camera = DEG_get_evaluated_object(depsgraph, RE_GetCamera(engine->re));
 
   /* Loop over all objects and create draw structure. */
   GPENCIL_cache_init(vedata);

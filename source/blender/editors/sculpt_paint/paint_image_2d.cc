@@ -6,6 +6,7 @@
  * \ingroup bke
  */
 
+#include <algorithm>
 #include <cstring>
 
 #include "MEM_guardedalloc.h"
@@ -1014,7 +1015,7 @@ static void paint_2d_lift_soften(ImagePaintState *s,
       }
 
       if (count > 0.0f) {
-        mul_v4_fl(outrgb, 1.0f / float(count));
+        mul_v4_fl(outrgb, 1.0f / count);
 
         if (sharpen) {
           /* subtract blurred image from normal image gives high pass filter */
@@ -1298,13 +1299,14 @@ static int paint_2d_op(void *state,
                        const float pos[2])
 {
   ImagePaintState *s = ((ImagePaintState *)state);
+  const ImagePaintSettings &image_paint_settings = s->scene->toolsettings->imapaint;
   ImBuf *clonebuf = nullptr, *frombuf;
   ImBuf *canvas = tile->canvas;
   ImBuf *ibufb = tile->cache.ibuf;
   ImagePaintRegion region[4];
   short paint_tile = s->symmetry & (PAINT_TILE_X | PAINT_TILE_Y);
   short blend = s->blend;
-  const float *offset = s->brush->clone.offset;
+  const float *offset = image_paint_settings.clone_offset;
   float liftpos[2];
   float mask_max = BKE_brush_alpha_get(s->scene, s->brush);
   int bpos[2], blastpos[2], bliftpos[2];
@@ -1423,7 +1425,8 @@ static int paint_2d_canvas_set(ImagePaintState *s)
 {
   /* set clone canvas */
   if (s->brush_type == IMAGE_PAINT_BRUSH_TYPE_CLONE) {
-    Image *ima = s->brush->clone.image;
+    const ImagePaintSettings &image_paint_settings = s->scene->toolsettings->imapaint;
+    Image *ima = image_paint_settings.clone;
     ImBuf *ibuf = BKE_image_acquire_ibuf(ima, nullptr, nullptr);
 
     if (!ima || !ibuf || !(ibuf->byte_buffer.data || ibuf->float_buffer.data)) {
@@ -1453,7 +1456,8 @@ static void paint_2d_canvas_free(ImagePaintState *s)
   for (int i = 0; i < s->num_tiles; i++) {
     BKE_image_release_ibuf(s->image, s->tiles[i].canvas, nullptr);
   }
-  BKE_image_release_ibuf(s->brush->clone.image, s->clonecanvas, nullptr);
+  const ImagePaintSettings &image_paint_settings = s->scene->toolsettings->imapaint;
+  BKE_image_release_ibuf(image_paint_settings.clone, s->clonecanvas, nullptr);
 
   if (s->blurkernel) {
     paint_delete_blur_kernel(s->blurkernel);
@@ -1879,7 +1883,6 @@ void paint_2d_bucket_fill(const bContext *C,
     BLI_bitmap *touched;
     size_t coordinate;
     int width = ibuf->x;
-    int minx = ibuf->x, miny = ibuf->y, maxx = 0, maxy = 0;
     float pixel_color[4];
     /* We are comparing to sum of three squared values
      * (assumed in range [0,1]), so need to multiply... */
@@ -1942,19 +1945,6 @@ void paint_2d_bucket_fill(const bContext *C,
             x_px + 1, y_px, ibuf, stack, touched, pixel_color, threshold_sq);
         paint_2d_fill_add_pixel_float(
             x_px + 1, y_px + 1, ibuf, stack, touched, pixel_color, threshold_sq);
-
-        if (x_px > maxx) {
-          maxx = x_px;
-        }
-        if (x_px < minx) {
-          minx = x_px;
-        }
-        if (y_px > maxy) {
-          maxy = y_px;
-        }
-        if (x_px > miny) {
-          miny = y_px;
-        }
       }
     }
     else {
@@ -1986,19 +1976,6 @@ void paint_2d_bucket_fill(const bContext *C,
             x_px + 1, y_px, ibuf, stack, touched, pixel_color, threshold_sq);
         paint_2d_fill_add_pixel_byte(
             x_px + 1, y_px + 1, ibuf, stack, touched, pixel_color, threshold_sq);
-
-        if (x_px > maxx) {
-          maxx = x_px;
-        }
-        if (x_px < minx) {
-          minx = x_px;
-        }
-        if (y_px > maxy) {
-          maxy = y_px;
-        }
-        if (x_px > miny) {
-          miny = y_px;
-        }
       }
     }
 

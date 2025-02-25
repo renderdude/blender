@@ -11,18 +11,19 @@
 #include "BKE_linestyle.h"
 #include "BKE_scene.hh"
 
+#include "BLI_listbase.h"
 #include "BLI_string.h"
 
 #include "BLT_translation.hh"
 
 #include "DNA_light_types.h"
 #include "DNA_material_types.h"
+#include "DNA_texture_types.h"
 #include "DNA_world_types.h"
 
 #include "ED_render.hh"
 
 #include "RNA_access.hh"
-#include "RNA_prototypes.hh"
 
 #include "WM_api.hh"
 

@@ -146,7 +146,7 @@ void SEQ_sound_update(Scene *scene, bSound *sound)
 
 float SEQ_sound_pitch_get(const Scene *scene, const Strip *strip)
 {
-  const Strip *meta_parent = SEQ_lookup_meta_by_strip(scene, strip);
+  const Strip *meta_parent = SEQ_lookup_meta_by_strip(scene->ed, strip);
   if (meta_parent != nullptr) {
     return strip->speed_factor * SEQ_sound_pitch_get(scene, meta_parent);
   }
@@ -299,8 +299,9 @@ void *SEQ_sound_equalizermodifier_recreator(Strip *strip, SequenceModifierData *
     for (; i * interval <= maxX && i < SOUND_EQUALIZER_SIZE_DEFINITION; i++) {
       float freq = i * interval;
       float val = BKE_curvemap_evaluateF(eq_mapping, cm, freq);
-      if (fabs(val) > SOUND_EQUALIZER_DEFAULT_MAX_DB)
+      if (fabs(val) > SOUND_EQUALIZER_DEFAULT_MAX_DB) {
         val = (val / fabs(val)) * SOUND_EQUALIZER_DEFAULT_MAX_DB;
+      }
       buf[i] = val;
       /* To soften lower limit, but not the first position which is the constant value */
       if (i == idx && i > 2) {
@@ -308,8 +309,9 @@ void *SEQ_sound_equalizermodifier_recreator(Strip *strip, SequenceModifierData *
       }
     }
     /* To soften higher limit */
-    if (i < SOUND_EQUALIZER_SIZE_DEFINITION)
+    if (i < SOUND_EQUALIZER_SIZE_DEFINITION) {
       buf[i] = 0.5 * (buf[i] + buf[i - 1]);
+    }
   }
 
   AUD_Sound *equ = AUD_Sound_equalize(sound,

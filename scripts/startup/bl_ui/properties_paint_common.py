@@ -360,7 +360,8 @@ class ColorPalettePanel(BrushPanel):
             return False
 
         settings = cls.paint_settings(context)
-        brush = settings.brush
+        if (brush := settings.brush) is None:
+            return False
 
         if context.space_data.type == 'IMAGE_EDITOR' or context.image_paint_object:
             capabilities = brush.image_paint_capabilities
@@ -799,17 +800,24 @@ def brush_settings(layout, context, brush, popover=False):
                 slider=True,
             )
 
-            row = layout.row(heading="Plane Trim")
-            row.prop(brush, "use_plane_trim", text="")
-            sub = row.row()
-            sub.active = brush.use_plane_trim
-            sub.prop(brush, "plane_trim", slider=True, text="")
+            if sculpt_tool != 'PLANE':
+                row = layout.row(heading="Plane Trim")
+                row.prop(brush, "use_plane_trim", text="")
+                sub = row.row()
+                sub.active = brush.use_plane_trim
+                sub.prop(brush, "plane_trim", slider=True, text="")
 
             layout.separator()
 
         # height
         if capabilities.has_height:
             layout.prop(brush, "height", slider=True, text="Height")
+
+        if capabilities.has_plane_height:
+            layout.prop(brush, "plane_height", slider=True, text="Height")
+
+        if capabilities.has_plane_depth:
+            layout.prop(brush, "plane_depth", slider=True, text="Depth")
 
         # use_persistent, set_persistent_base
         if capabilities.has_persistence:
@@ -900,6 +908,16 @@ def brush_settings(layout, context, brush, popover=False):
             row.prop(brush, "use_pressure_area_radius", text="")
             row = layout.row()
             row.prop(brush, "invert_to_scrape_fill", text="Invert to Scrape")
+
+        elif sculpt_tool == 'PLANE':
+            row = layout.row(align=True)
+            row.prop(brush, "area_radius_factor")
+            row.prop(brush, "use_pressure_area_radius", text="")
+            layout.separator()
+            layout.prop(brush, "plane_inversion_mode")
+            layout.separator()
+            layout.prop(brush, "stabilize_normal")
+            layout.prop(brush, "stabilize_plane")
 
         elif sculpt_tool == 'GRAB':
             layout.prop(brush, "use_grab_active_vertex")
@@ -1154,7 +1172,7 @@ def brush_shared_settings(layout, context, brush, popover=False):
         layout.row().prop(brush, "direction", expand=True)
 
 
-def brush_settings_advanced(layout, context, brush, popover=False):
+def brush_settings_advanced(layout, context, settings, brush, popover=False):
     """Draw advanced brush settings for Sculpt, Texture/Vertex/Weight Paint modes."""
 
     mode = UnifiedPaintPanel.get_brush_mode(context)
@@ -1258,9 +1276,10 @@ def brush_settings_advanced(layout, context, brush, popover=False):
         # sculpt plane settings
         if capabilities.has_sculpt_plane:
             layout.prop(brush, "sculpt_plane")
-            col = layout.column(heading="Original", align=True)
-            col.prop(brush, "use_original_normal", text="Normal")
-            col.prop(brush, "use_original_plane", text="Plane")
+            if brush.sculpt_tool != 'PLANE':
+                col = layout.column(heading="Original", align=True)
+                col.prop(brush, "use_original_normal", text="Normal")
+                col.prop(brush, "use_original_plane", text="Plane")
             layout.separator()
 
     elif mode == 'SCULPT_GREASE_PENCIL':
@@ -1299,8 +1318,8 @@ def brush_settings_advanced(layout, context, brush, popover=False):
 
         elif brush.image_tool == 'CLONE':
             if mode == 'PAINT_2D':
-                layout.prop(brush, "clone_image", text="Image")
-                layout.prop(brush, "clone_alpha", text="Alpha")
+                layout.prop(settings, "clone_image", text="Image")
+                layout.prop(settings, "clone_alpha", text="Alpha")
 
     # Vertex Paint #
     elif mode == 'PAINT_VERTEX':

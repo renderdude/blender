@@ -11,6 +11,7 @@
 #include "BKE_node_legacy_types.hh"
 #include "BKE_node_runtime.hh"
 #include "BKE_node_tree_zones.hh"
+#include "BKE_viewer_path.hh"
 #include "BKE_workspace.hh"
 
 #include "BLI_listbase.h"
@@ -108,7 +109,7 @@ static void viewer_path_for_geometry_node(const SpaceNode &snode,
     bNodeTree *tree = tree_path[i]->nodetree;
     /* The tree path contains the name of the node but not its ID. */
     const char *node_name = tree_path[i + 1]->node_name;
-    const bNode *node = bke::node_find_node_by_name(tree, node_name);
+    const bNode *node = bke::node_find_node_by_name(*tree, node_name);
     /* The name in the tree path should match a group node in the tree. Sometimes, the tree-path is
      * out of date though. */
     if (node == nullptr) {

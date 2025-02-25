@@ -275,7 +275,7 @@ static void modify_fill_color(Object &ob,
     if (points.is_empty() || (stroke_weight <= 0.0f)) {
       return 0.0f;
     }
-    else if (use_weight_as_factor) {
+    if (use_weight_as_factor) {
       return stroke_weight;
     }
     return tmd.factor * stroke_weight;
@@ -328,6 +328,9 @@ static void modify_opacity(const GreasePencilTintModifierData &tmd,
   bke::MutableAttributeAccessor attributes = curves.attributes_for_write();
   bke::SpanAttributeWriter<float> opacities = attributes.lookup_or_add_for_write_span<float>(
       "opacity", bke::AttrDomain::Point);
+  if (!opacities) {
+    return;
+  }
 
   curves_mask.foreach_index(GrainSize(512), [&](const int64_t curve_i) {
     const IndexRange points = points_by_curve[curve_i];

@@ -51,7 +51,7 @@ static InputSocketFieldType get_interface_input_field_type(const bNode &node,
     /* Outputs always support fields when the data type is correct. */
     return InputSocketFieldType::IsSupported;
   }
-  if (node.typeinfo == &blender::bke::NodeTypeUndefined) {
+  if (node.is_undefined()) {
     return InputSocketFieldType::None;
   }
   if (node.type_legacy == NODE_CUSTOM) {
@@ -85,7 +85,7 @@ static OutputFieldDependency get_interface_output_field_dependency(const bNode &
     /* Input nodes get special treatment in #determine_group_input_states. */
     return OutputFieldDependency::ForDependentField();
   }
-  if (node.typeinfo == &blender::bke::NodeTypeUndefined) {
+  if (node.is_undefined()) {
     return OutputFieldDependency::ForDataSource();
   }
   if (node.type_legacy == NODE_CUSTOM) {
@@ -128,7 +128,7 @@ static const FieldInferencingInterface &get_node_field_inferencing_interface(con
       static const FieldInferencingInterface empty_interface;
       return empty_interface;
     }
-    if (!bke::node_tree_is_registered(group)) {
+    if (!bke::node_tree_is_registered(*group)) {
       /* This can happen when there is a linked node group that was not found (see #92799). */
       return get_dummy_field_inferencing_interface(node, scope);
     }

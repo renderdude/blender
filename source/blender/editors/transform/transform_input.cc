@@ -12,6 +12,7 @@
 #include "DNA_screen_types.h"
 #include "DNA_sequence_types.h"
 #include "DNA_space_types.h"
+#include "DNA_userdef_types.h"
 
 #include "BKE_context.hh"
 
@@ -30,7 +31,7 @@
 
 #include "MEM_guardedalloc.h"
 
-using namespace blender;
+namespace blender::ed::transform {
 
 /* -------------------------------------------------------------------- */
 /** \name Callbacks for #MouseInput.apply
@@ -160,7 +161,7 @@ static void InputCustomRatioFlip(TransInfo * /*t*/,
 
     distance = (length != 0.0) ? (mdx * dx + mdy * dy) / length : 0.0;
 
-    output[0] = (length != 0.0) ? double(distance / length) : 0.0;
+    output[0] = (length != 0.0) ? (distance / length) : 0.0;
   }
 }
 
@@ -183,9 +184,8 @@ static void InputAngle(TransInfo * /*t*/, MouseInput *mi, const double mval[2], 
   float dir_prev[2], dir_curr[2], mi_center[2];
   copy_v2_v2(mi_center, mi->center);
 
-  sub_v2_v2v2(
-      dir_prev, blender::float2{float(data->mval_prev[0]), float(data->mval_prev[1])}, mi_center);
-  sub_v2_v2v2(dir_curr, blender::float2{float(mval[0]), float(mval[1])}, mi_center);
+  sub_v2_v2v2(dir_prev, float2{float(data->mval_prev[0]), float(data->mval_prev[1])}, mi_center);
+  sub_v2_v2v2(dir_curr, float2{float(mval[0]), float(mval[1])}, mi_center);
 
   if (normalize_v2(dir_prev) && normalize_v2(dir_curr)) {
     float dphi = angle_normalized_v2v2(dir_prev, dir_curr);
@@ -312,7 +312,7 @@ static int transform_seq_slide_cursor_get(TransInfo *t)
   }
 
   const Scene *scene = t->scene;
-  blender::VectorSet<Strip *> strips = ED_sequencer_selected_strips_from_context(t->context);
+  VectorSet<Strip *> strips = ED_sequencer_selected_strips_from_context(t->context);
 
   if (strips.size() == 1) {
     return transform_seq_slide_strip_cursor_get(strips[0]);
@@ -426,6 +426,10 @@ void initMouseInputMode(TransInfo *t, MouseInput *mi, MouseInputMode mode)
       mi->apply = InputCustomRatioFlip;
       t->helpline = HLP_CARROW;
       break;
+    case INPUT_ERROR:
+      mi->apply = nullptr;
+      t->helpline = HLP_ERROR;
+      break;
     case INPUT_NONE:
     default:
       mi->apply = nullptr;
@@ -466,6 +470,10 @@ void initMouseInputMode(TransInfo *t, MouseInput *mi, MouseInputMode mode)
         t->flag |= T_MODAL_CURSOR_SET;
         WM_cursor_modal_set(win, WM_CURSOR_NONE);
       }
+      break;
+    case HLP_ERROR:
+      t->flag |= T_MODAL_CURSOR_SET;
+      WM_cursor_modal_set(win, WM_CURSOR_STOP);
       break;
     default:
       break;
@@ -574,3 +582,5 @@ void transform_input_virtual_mval_reset(TransInfo *t)
 }
 
 /** \} */
+
+}  // namespace blender::ed::transform

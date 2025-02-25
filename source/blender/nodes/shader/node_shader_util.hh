@@ -9,8 +9,9 @@
 #pragma once
 
 #include <cfloat>
-#include <cmath>
 #include <optional>
+
+#include "BLI_listbase.h"  // IWYU pragma: export
 
 #include "BKE_node.hh"
 #include "BKE_node_legacy_types.hh"  // IWYU pragma: export
@@ -19,12 +20,12 @@
 
 #include "GPU_material.hh"
 
-#include "NOD_socket_declarations.hh"
+#include "NOD_socket_declarations.hh"  // IWYU pragma: export
 
-#include "node_shader_register.hh"
+#include "node_shader_register.hh"  // IWYU pragma: export
 
 #ifdef WITH_MATERIALX
-#  include "materialx/node_parser.h"
+#  include "materialx/node_parser.h"  // IWYU pragma: export
 #else
 #  define NODE_SHADER_MATERIALX_BEGIN \
     blender::bke::NodeMaterialXFunction node_shader_materialx = nullptr;
@@ -80,7 +81,7 @@ void ntreeShaderEndExecTree_internal(bNodeTreeExec *exec);
 void ntreeExecGPUNodes(bNodeTreeExec *exec,
                        GPUMaterial *mat,
                        bNode *output_node,
-                       int *depth_level = nullptr);
+                       const int *depth_level = nullptr);
 
 void get_XYZ_to_RGB_for_gpu(XYZ_to_RGB *data);
 

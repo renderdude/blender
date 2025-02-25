@@ -31,7 +31,7 @@
 
 #include "BLO_read_write.hh"
 
-#include "BLI_strict_flags.h" /* Keep last. */
+#include "BLI_strict_flags.h" /* IWYU pragma: keep. Keep last. */
 
 /* IDPropertyTemplate is a union in DNA_ID.h */
 
@@ -915,7 +915,7 @@ bool IDP_EqualsProperties_ex(const IDProperty *prop1,
     {
       float p1 = IDP_Float(prop1);
       float p2 = IDP_Float(prop2);
-      if ((p1 != p2) && ((fabsf(p1 - p2) / max_ff(p1, p2)) < 0.001f)) {
+      if ((p1 != p2) && ((fabsf(p1 - p2) / max_ff(fabsf(p1), fabsf(p2))) < 0.001f)) {
         printf(
             "WARNING: Comparing two float properties that have nearly the same value (%f vs. "
             "%f)\n",
@@ -1468,7 +1468,7 @@ static void read_ui_data(IDProperty *prop, BlendDataReader *reader)
       IDPropertyUIDataInt *ui_data_int = (IDPropertyUIDataInt *)prop->ui_data;
       if (prop->type == IDP_ARRAY) {
         BLO_read_int32_array(
-            reader, ui_data_int->default_array_len, (int **)&ui_data_int->default_array);
+            reader, ui_data_int->default_array_len, (&ui_data_int->default_array));
       }
       else {
         ui_data_int->default_array = nullptr;
@@ -1491,7 +1491,7 @@ static void read_ui_data(IDProperty *prop, BlendDataReader *reader)
       IDPropertyUIDataBool *ui_data_bool = (IDPropertyUIDataBool *)prop->ui_data;
       if (prop->type == IDP_ARRAY) {
         BLO_read_int8_array(
-            reader, ui_data_bool->default_array_len, (int8_t **)&ui_data_bool->default_array);
+            reader, ui_data_bool->default_array_len, (&ui_data_bool->default_array));
       }
       else {
         ui_data_bool->default_array = nullptr;
@@ -1504,7 +1504,7 @@ static void read_ui_data(IDProperty *prop, BlendDataReader *reader)
       IDPropertyUIDataFloat *ui_data_float = (IDPropertyUIDataFloat *)prop->ui_data;
       if (prop->type == IDP_ARRAY) {
         BLO_read_double_array(
-            reader, ui_data_float->default_array_len, (double **)&ui_data_float->default_array);
+            reader, ui_data_float->default_array_len, (&ui_data_float->default_array));
       }
       else {
         ui_data_float->default_array = nullptr;

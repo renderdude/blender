@@ -12,6 +12,8 @@
 
 #include "RNA_enum_types.hh"
 
+#include "FN_multi_function_builder.hh"
+
 #include "node_geometry_util.hh"
 
 namespace blender::nodes::node_geo_tool_set_selection_cc {
@@ -149,14 +151,14 @@ static void node_geo_exec(GeoNodeExecParams params)
       }
     }
     if (geometry.has_curves()) {
-      const Field<float> field = clamp_selection(selection);
+      const GField field = clamp_selection(selection);
       if (ELEM(domain, AttrDomain::Point, AttrDomain::Curve)) {
         bke::try_capture_field_on_geometry(
             geometry.get_component_for_write<CurveComponent>(), ".selection", domain, field);
       }
     }
     if (geometry.has_pointcloud()) {
-      const Field<float> field = clamp_selection(selection);
+      const GField field = clamp_selection(selection);
       if (domain == AttrDomain::Point) {
         bke::try_capture_field_on_geometry(
             geometry.get_component_for_write<PointCloudComponent>(), ".selection", domain, field);
@@ -211,7 +213,7 @@ static void node_register()
   ntype.geometry_node_execute = node_geo_exec;
   ntype.draw_buttons = node_layout;
   ntype.gather_link_search_ops = search_link_ops_for_tool_node;
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 
   node_rna(ntype.rna_ext.srna);
 }

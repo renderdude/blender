@@ -4,7 +4,6 @@
 
 #include "DNA_mesh_types.h"
 
-#include "BKE_attribute_math.hh"
 #include "BKE_bvhutils.hh"
 #include "BKE_mesh_sample.hh"
 
@@ -15,6 +14,8 @@
 #include "UI_resources.hh"
 
 #include "RNA_enum_types.hh"
+
+#include "FN_multi_function_builder.hh"
 
 #include "node_geometry_util.hh"
 
@@ -309,15 +310,15 @@ static void node_register()
       "each hit point";
   ntype.enum_name_legacy = "RAYCAST";
   ntype.nclass = NODE_CLASS_GEOMETRY;
-  bke::node_type_size_preset(&ntype, bke::eNodeSizePreset::Middle);
+  bke::node_type_size_preset(ntype, bke::eNodeSizePreset::Middle);
   ntype.initfunc = node_init;
   blender::bke::node_type_storage(
-      &ntype, "NodeGeometryRaycast", node_free_standard_storage, node_copy_standard_storage);
+      ntype, "NodeGeometryRaycast", node_free_standard_storage, node_copy_standard_storage);
   ntype.declare = node_declare;
   ntype.geometry_node_execute = node_geo_exec;
   ntype.draw_buttons = node_layout;
   ntype.gather_link_search_ops = node_gather_link_searches;
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 
   node_rna(ntype.rna_ext.srna);
 }

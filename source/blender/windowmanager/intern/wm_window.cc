@@ -8,6 +8,7 @@
  * Window management, wrap GHOST.
  */
 
+#include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <cstdio>
@@ -28,7 +29,12 @@
 
 #include "GHOST_C-api.h"
 
-#include "BLI_blenlib.h"
+#include "BLI_listbase.h"
+#include "BLI_math_vector.h"
+#include "BLI_path_utils.hh"
+#include "BLI_rect.h"
+#include "BLI_string.h"
+#include "BLI_string_utf8.h"
 #include "BLI_system.h"
 #include "BLI_time.h"
 #include "BLI_utildefines.h"
@@ -43,12 +49,14 @@
 #include "BKE_main.hh"
 #include "BKE_report.hh"
 #include "BKE_screen.hh"
+#include "BKE_wm_runtime.hh"
 #include "BKE_workspace.hh"
 
 #include "RNA_access.hh"
 #include "RNA_enum_types.hh"
 
 #include "WM_api.hh"
+#include "WM_keymap.hh"
 #include "WM_types.hh"
 #include "wm.hh"
 #include "wm_draw.hh"
@@ -577,7 +585,7 @@ void WM_window_set_dpi(const wmWindow *win)
   U.dpi = auto_dpi * U.ui_scale * (72.0 / 96.0f);
 
   /* Automatically set larger pixel size for high DPI. */
-  int pixelsize = max_ii(1, int(U.dpi / 64));
+  int pixelsize = max_ii(1, (U.dpi / 64));
   /* User adjustment for pixel size. */
   pixelsize = max_ii(1, pixelsize + U.ui_line_width);
 
@@ -590,6 +598,79 @@ void WM_window_set_dpi(const wmWindow *win)
   /* Widget unit is 20 pixels at 1X scale. This consists of 18 user-scaled units plus
    * left and right borders of line-width (pixel-size). */
   U.widget_unit = int(roundf(18.0f * U.scale_factor)) + (2 * pixelsize);
+}
+
+/** \} */
+
+/* -------------------------------------------------------------------- */
+/** \name Window Decoration Style
+ * \{ */
+
+eWM_WindowDecorationStyleFlag WM_window_decoration_style_flags_get(const wmWindow *win)
+{
+  const GHOST_TWindowDecorationStyleFlags ghost_style_flags = GHOST_GetWindowDecorationStyleFlags(
+      static_cast<GHOST_WindowHandle>(win->ghostwin));
+
+  eWM_WindowDecorationStyleFlag wm_style_flags = WM_WINDOW_DECORATION_STYLE_NONE;
+
+  if (ghost_style_flags & GHOST_kDecorationColoredTitleBar) {
+    wm_style_flags |= WM_WINDOW_DECORATION_STYLE_COLORED_TITLEBAR;
+  }
+
+  return wm_style_flags;
+}
+
+void WM_window_decoration_style_flags_set(const wmWindow *win,
+                                          eWM_WindowDecorationStyleFlag style_flags)
+{
+  BLI_assert(WM_capabilities_flag() & WM_CAPABILITY_WINDOW_DECORATION_STYLES);
+  uint ghost_style_flags = GHOST_kDecorationNone;
+
+  if (style_flags & WM_WINDOW_DECORATION_STYLE_COLORED_TITLEBAR) {
+    ghost_style_flags |= GHOST_kDecorationColoredTitleBar;
+  }
+
+  GHOST_SetWindowDecorationStyleFlags(
+      static_cast<GHOST_WindowHandle>(win->ghostwin),
+      static_cast<GHOST_TWindowDecorationStyleFlags>(ghost_style_flags));
+}
+
+static void wm_window_decoration_style_set_from_theme(const wmWindow *win, const bScreen *screen)
+{
+  /* Set the decoration style settings from the current theme colors.
+   * NOTE: screen may be null. In which case, only the window is used as a theme provider. */
+  GHOST_WindowDecorationStyleSettings decoration_settings = {};
+
+  /* Colored TitleBar Decoration. */
+  /* For main windows, use the top-bar color. */
+  if (WM_window_is_main_top_level(win)) {
+    UI_SetTheme(SPACE_TOPBAR, RGN_TYPE_HEADER);
+  }
+  /* For single editor floating windows, use the editor header color. */
+  else if (screen && BLI_listbase_is_single(&screen->areabase)) {
+    const ScrArea *main_area = static_cast<ScrArea *>(screen->areabase.first);
+    UI_SetTheme(main_area->spacetype, RGN_TYPE_HEADER);
+  }
+  /* For floating window with multiple editors/areas, use the default space color. */
+  else {
+    UI_SetTheme(0, RGN_TYPE_WINDOW);
+  }
+
+  float titlebar_bg_color[3], titlebar_fg_color[3];
+  UI_GetThemeColor3fv(TH_BACK, titlebar_bg_color);
+  UI_GetThemeColor3fv(TH_BUTBACK_TEXT, titlebar_fg_color);
+  copy_v3_v3(decoration_settings.colored_titlebar_bg_color, titlebar_bg_color);
+  copy_v3_v3(decoration_settings.colored_titlebar_fg_color, titlebar_fg_color);
+
+  GHOST_SetWindowDecorationStyleSettings(static_cast<GHOST_WindowHandle>(win->ghostwin),
+                                         decoration_settings);
+}
+
+void WM_window_decoration_style_apply(const wmWindow *win, const bScreen *screen)
+{
+  BLI_assert(WM_capabilities_flag() & WM_CAPABILITY_WINDOW_DECORATION_STYLES);
+  wm_window_decoration_style_set_from_theme(win, screen);
+  GHOST_ApplyWindowDecorationStyle(static_cast<GHOST_WindowHandle>(win->ghostwin));
 }
 
 /**
@@ -851,6 +932,12 @@ static void wm_window_ghostwindow_ensure(wmWindowManager *wm, wmWindow *win, boo
     wm_window_ensure_eventstate(win);
 
     WM_window_set_dpi(win);
+
+    if (WM_capabilities_flag() & WM_CAPABILITY_WINDOW_DECORATION_STYLES) {
+      /* Only decoration style we have for now. */
+      WM_window_decoration_style_flags_set(win, WM_WINDOW_DECORATION_STYLE_COLORED_TITLEBAR);
+      WM_window_decoration_style_apply(win);
+    }
   }
 
   /* Add key-map handlers (1 handler for all keys in map!). */
@@ -1760,9 +1847,7 @@ static bool wm_window_timers_process(const bContext *C, int *sleep_us_p)
     if (wt->time_next >= time) {
       if ((has_event == false) && (sleep_us != 0)) {
         /* The timer is not ready to run but may run shortly. */
-        if (wt->time_next < ntime_min) {
-          ntime_min = wt->time_next;
-        }
+        ntime_min = std::min(wt->time_next, ntime_min);
       }
       continue;
     }
@@ -2018,7 +2103,7 @@ static uiBlock *block_create_opengl_usage_warning(bContext *C, ARegion *region, 
   const int dialog_width = std::max(int(400.0f * UI_SCALE_FAC),
                                     text_width + int(style->columnspace * 2.5));
 
-  const short icon_size = 64 * UI_SCALE_FAC;
+  const short icon_size = 40 * UI_SCALE_FAC;
   uiLayout *layout = uiItemsAlertBox(
       block, style, dialog_width + icon_size, ALERT_ICON_ERROR, icon_size);
 
@@ -2028,16 +2113,20 @@ static uiBlock *block_create_opengl_usage_warning(bContext *C, ARegion *region, 
   /* Title and explanation text. */
   uiItemL_ex(col, title, ICON_NONE, true, false);
   uiItemS_ex(col, 0.8f, LayoutSeparatorType::Space);
-  uiItemL(col, message1, ICON_NONE);
-  uiItemL(col, message2, ICON_NONE);
-  uiItemL(col, message3, ICON_NONE);
+
+  uiLayout *messages = uiLayoutColumn(col, false);
+  uiLayoutSetScaleY(messages, 0.8f);
+
+  uiItemL(messages, message1, ICON_NONE);
+  uiItemL(messages, message2, ICON_NONE);
+  uiItemL(messages, message3, ICON_NONE);
   if (G.opengl_deprecation_usage_filename) {
     char location[1024];
     SNPRINTF(
         location, "%s:%d", G.opengl_deprecation_usage_filename, G.opengl_deprecation_usage_lineno);
-    uiItemL(col, location, ICON_NONE);
+    uiItemL(messages, location, ICON_NONE);
   }
-  uiItemL(col, message4, ICON_NONE);
+  uiItemL(messages, message4, ICON_NONE);
 
   uiItemS_ex(col, 0.5f, LayoutSeparatorType::Space);
 
@@ -2094,15 +2183,15 @@ static uiBlock *block_create_gpu_backend_fallback(bContext *C, ARegion *region, 
 
   /* Title and explanation text. */
   uiLayout *col = uiLayoutColumn(layout, false);
+  uiLayoutSetScaleY(col, 0.8f);
   uiItemL_ex(
       col, RPT_("Failed to load using Vulkan, using OpenGL instead."), ICON_NONE, true, false);
-  uiItemL(col, RPT_(""), ICON_NONE);
+  uiItemS_ex(col, 1.3f, LayoutSeparatorType::Space);
+
   uiItemL(col, RPT_("Updating GPU drivers may solve this issue."), ICON_NONE);
   uiItemL(col,
           RPT_("The graphics backend can be changed in the System section of the Preferences."),
           ICON_NONE);
-
-  uiItemS(layout);
 
   UI_block_bounds_set_centered(block, 14 * UI_SCALE_FAC);
 
@@ -2145,6 +2234,15 @@ eWM_CapabilitiesFlag WM_capabilities_flag()
   }
   flag |= WM_CAPABILITY_INITIALIZED;
 
+  /* NOTE(@ideasman42): Regarding tests.
+   * Some callers of this function may run from tests where GHOST's hasn't been initialized.
+   * In such cases it may be necessary to check `!G.background` which is acceptable in most cases.
+   * At time of writing this is the case for `bl_animation_keyframing`.
+   *
+   * While this function *could* early-exit when in background mode, don't do this as GHOST
+   * may be initialized in background mode for GPU rendering and in this case we may want to
+   * query GHOST/GPU related capabilities. */
+
   const GHOST_TCapabilityFlag ghost_flag = GHOST_GetCapabilities();
   if (ghost_flag & GHOST_kCapabilityCursorWarp) {
     flag |= WM_CAPABILITY_CURSOR_WARP;
@@ -2169,6 +2267,9 @@ eWM_CapabilitiesFlag WM_capabilities_flag()
   }
   if (ghost_flag & GHOST_kCapabilityTrackpadPhysicalDirection) {
     flag |= WM_CAPABILITY_TRACKPAD_PHYSICAL_DIRECTION;
+  }
+  if (ghost_flag & GHOST_kCapabilityWindowDecorationStyles) {
+    flag |= WM_CAPABILITY_WINDOW_DECORATION_STYLES;
   }
 
   return flag;
@@ -2802,6 +2903,19 @@ bool WM_window_is_fullscreen(const wmWindow *win)
 bool WM_window_is_maximized(const wmWindow *win)
 {
   return win->windowstate == GHOST_kWindowStateMaximized;
+}
+
+bool WM_window_is_main_top_level(const wmWindow *win)
+{
+  /**
+   * Return whether the window is a main/top-level window. In which case it is expected to contain
+   * global areas (top-bar/status-bar).
+   */
+  const bScreen *screen = BKE_workspace_active_screen_get(win->workspace_hook);
+  if ((win->parent != nullptr) || screen->temp) {
+    return false;
+  }
+  return true;
 }
 
 /** \} */

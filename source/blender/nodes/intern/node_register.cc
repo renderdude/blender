@@ -2,8 +2,6 @@
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
-#include "BLI_string.h"
-
 #include "NOD_geometry.hh"
 #include "NOD_register.hh"
 #include "NOD_socket.hh"
@@ -36,7 +34,7 @@ static void register_undefined_types()
   blender::bke::NodeTreeTypeUndefined.ui_description = N_("Undefined Node Tree Type");
 
   blender::bke::node_type_base_custom(
-      &blender::bke::NodeTypeUndefined, "NodeUndefined", "Undefined", "UNDEFINED", 0);
+      blender::bke::NodeTypeUndefined, "NodeUndefined", "Undefined", "UNDEFINED", 0);
   blender::bke::NodeTypeUndefined.poll = node_undefined_poll;
 
   blender::bke::NodeSocketTypeUndefined.idname = "NodeSocketUndefined";

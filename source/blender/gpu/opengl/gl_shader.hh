@@ -20,6 +20,7 @@
 #include "gpu_shader_private.hh"
 
 #include <functional>
+#include <mutex>
 
 namespace blender::gpu {
 
@@ -148,8 +149,6 @@ class GLShader : public Shader {
   /** True if any shader failed to compile. */
   bool compilation_failed_ = false;
 
-  eGPUShaderTFBType transform_feedback_type_ = GPU_SHADER_TFB_NONE;
-
   std::string debug_source;
 
  public:
@@ -174,12 +173,6 @@ class GLShader : public Shader {
   std::string geometry_interface_declare(const shader::ShaderCreateInfo &info) const override;
   std::string geometry_layout_declare(const shader::ShaderCreateInfo &info) const override;
   std::string compute_layout_declare(const shader::ShaderCreateInfo &info) const override;
-
-  /** Should be called before linking. */
-  void transform_feedback_names_set(Span<const char *> name_list,
-                                    eGPUShaderTFBType geom_type) override;
-  bool transform_feedback_enable(VertBuf *buf) override;
-  void transform_feedback_disable() override;
 
   void bind() override;
   void unbind() override;

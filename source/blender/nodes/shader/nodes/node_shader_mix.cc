@@ -158,16 +158,16 @@ static void sh_node_mix_update(bNodeTree *ntree, bNode *node)
   bool use_vector_factor = data_type == SOCK_VECTOR &&
                            storage.factor_mode != NODE_MIX_MODE_UNIFORM;
 
-  bke::node_set_socket_availability(ntree, sock_factor, !use_vector_factor);
+  bke::node_set_socket_availability(*ntree, *sock_factor, !use_vector_factor);
 
-  bke::node_set_socket_availability(ntree, sock_factor_vec, use_vector_factor);
+  bke::node_set_socket_availability(*ntree, *sock_factor_vec, use_vector_factor);
 
   for (bNodeSocket *socket = sock_factor_vec->next; socket != nullptr; socket = socket->next) {
-    bke::node_set_socket_availability(ntree, socket, socket->type == data_type);
+    bke::node_set_socket_availability(*ntree, *socket, socket->type == data_type);
   }
 
   LISTBASE_FOREACH (bNodeSocket *, socket, &node->outputs) {
-    bke::node_set_socket_availability(ntree, socket, socket->type == data_type);
+    bke::node_set_socket_availability(*ntree, *socket, socket->type == data_type);
   }
 }
 
@@ -469,13 +469,10 @@ static const mf::MultiFunction *get_multi_function(const bNode &node)
             });
         return &fn;
       }
-      else {
-        static auto fn = mf::build::SI3_SO<float, float, float, float>(
-            "Mix Float", [](const float t, const float a, const float b) {
-              return math::interpolate(a, b, t);
-            });
-        return &fn;
-      }
+      static auto fn = mf::build::SI3_SO<float, float, float, float>(
+          "Mix Float",
+          [](const float t, const float a, const float b) { return math::interpolate(a, b, t); });
+      return &fn;
     }
     case SOCK_VECTOR: {
       if (clamp_factor) {
@@ -486,31 +483,25 @@ static const mf::MultiFunction *get_multi_function(const bNode &node)
               });
           return &fn;
         }
-        else {
-          static auto fn = mf::build::SI3_SO<float3, float3, float3, float3>(
-              "Clamp Mix Vector Non Uniform", [](float3 t, const float3 a, const float3 b) {
-                t = math::clamp(t, 0.0f, 1.0f);
-                return a * (float3(1.0f) - t) + b * t;
-              });
-          return &fn;
-        }
+        static auto fn = mf::build::SI3_SO<float3, float3, float3, float3>(
+            "Clamp Mix Vector Non Uniform", [](float3 t, const float3 a, const float3 b) {
+              t = math::clamp(t, 0.0f, 1.0f);
+              return a * (float3(1.0f) - t) + b * t;
+            });
+        return &fn;
       }
-      else {
-        if (uniform_factor) {
-          static auto fn = mf::build::SI3_SO<float, float3, float3, float3>(
-              "Mix Vector", [](const float t, const float3 a, const float3 b) {
-                return math::interpolate(a, b, t);
-              });
-          return &fn;
-        }
-        else {
-          static auto fn = mf::build::SI3_SO<float3, float3, float3, float3>(
-              "Mix Vector Non Uniform", [](const float3 t, const float3 a, const float3 b) {
-                return a * (float3(1.0f) - t) + b * t;
-              });
-          return &fn;
-        }
+      if (uniform_factor) {
+        static auto fn = mf::build::SI3_SO<float, float3, float3, float3>(
+            "Mix Vector", [](const float t, const float3 a, const float3 b) {
+              return math::interpolate(a, b, t);
+            });
+        return &fn;
       }
+      static auto fn = mf::build::SI3_SO<float3, float3, float3, float3>(
+          "Mix Vector Non Uniform", [](const float3 t, const float3 a, const float3 b) {
+            return a * (float3(1.0f) - t) + b * t;
+          });
+      return &fn;
     }
     case SOCK_ROTATION: {
       if (clamp_factor) {
@@ -522,15 +513,13 @@ static const mf::MultiFunction *get_multi_function(const bNode &node)
                 });
         return &fn;
       }
-      else {
-        static auto fn =
-            mf::build::SI3_SO<float, math::Quaternion, math::Quaternion, math::Quaternion>(
-                "Mix Rotation",
-                [](const float t, const math::Quaternion &a, const math::Quaternion &b) {
-                  return math::interpolate(a, b, t);
-                });
-        return &fn;
-      }
+      static auto fn =
+          mf::build::SI3_SO<float, math::Quaternion, math::Quaternion, math::Quaternion>(
+              "Mix Rotation",
+              [](const float t, const math::Quaternion &a, const math::Quaternion &b) {
+                return math::interpolate(a, b, t);
+              });
+      return &fn;
     }
   }
   BLI_assert_unreachable();
@@ -621,12 +610,12 @@ void register_node_type_sh_mix()
   ntype.updatefunc = file_ns::sh_node_mix_update;
   ntype.initfunc = file_ns::node_mix_init;
   blender::bke::node_type_storage(
-      &ntype, "NodeShaderMix", node_free_standard_storage, node_copy_standard_storage);
+      ntype, "NodeShaderMix", node_free_standard_storage, node_copy_standard_storage);
   ntype.build_multi_function = file_ns::sh_node_mix_build_multi_function;
   ntype.draw_buttons = file_ns::sh_node_mix_layout;
   ntype.labelfunc = file_ns::sh_node_mix_label;
   ntype.gather_link_search_ops = file_ns::node_mix_gather_link_searches;
   ntype.materialx_fn = file_ns::node_shader_materialx;
 
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 }

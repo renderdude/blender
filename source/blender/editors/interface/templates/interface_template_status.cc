@@ -11,11 +11,14 @@
 #include "BKE_blender_version.h"
 #include "BKE_context.hh"
 #include "BKE_global.hh"
+#include "BKE_layer.hh"
 #include "BKE_main.hh"
 #include "BKE_report.hh"
 #include "BKE_screen.hh"
 #include "BKE_workspace.hh"
 
+#include "BLI_listbase.h"
+#include "BLI_math_matrix.h"
 #include "BLI_math_vector.h"
 #include "BLI_rect.h"
 #include "BLI_string.h"
@@ -151,25 +154,104 @@ static bool uiTemplateInputStatusAzone(uiLayout *layout, const AZone *az, const 
 {
   if (az->type == AZONE_AREA) {
     uiItemL(layout, nullptr, ICON_MOUSE_LMB_DRAG);
+    uiItemS_ex(layout, -0.2f);
     uiItemL(layout, IFACE_("Split/Dock"), ICON_NONE);
-    uiItemS_ex(layout, 0.7f);
+    uiItemS_ex(layout, 0.6f);
     uiItemL(layout, "", ICON_EVENT_SHIFT);
+    uiItemS_ex(layout, -0.4f);
     uiItemL(layout, nullptr, ICON_MOUSE_LMB_DRAG);
+    uiItemS_ex(layout, -0.2f);
     uiItemL(layout, IFACE_("Duplicate into Window"), ICON_NONE);
-    uiItemS_ex(layout, 0.7f);
+    uiItemS_ex(layout, 0.6f);
     uiItemL(layout, "", ICON_EVENT_CTRL);
-    uiItemS_ex(layout, 1.5f);
+    uiItemS_ex(layout, 1.0f);
     uiItemL(layout, nullptr, ICON_MOUSE_LMB_DRAG);
+    uiItemS_ex(layout, -0.2f);
     uiItemL(layout, IFACE_("Swap Areas"), ICON_NONE);
     return true;
   }
 
   if (az->type == AZONE_REGION) {
     uiItemL(layout, nullptr, ICON_MOUSE_LMB_DRAG);
+    uiItemS_ex(layout, -0.2f);
     uiItemL(layout,
             (region->runtime->visible) ? IFACE_("Resize Region") : IFACE_("Show Hidden Region"),
             ICON_NONE);
     return true;
+  }
+
+  return false;
+}
+
+static bool uiTemplateInputStatusBorder(wmWindow *win, uiLayout *row)
+{
+  /* On a gap between editors. */
+  rcti win_rect;
+  const int pad = int((3.0f * UI_SCALE_FAC) + U.pixelsize);
+  WM_window_screen_rect_calc(win, &win_rect);
+  BLI_rcti_pad(&win_rect, pad * -2, pad);
+  if (BLI_rcti_isect_pt_v(&win_rect, win->eventstate->xy)) {
+    /* Show options but not along left and right edges. */
+    BLI_rcti_pad(&win_rect, 0, pad * -3);
+    if (BLI_rcti_isect_pt_v(&win_rect, win->eventstate->xy)) {
+      /* No resize at top and bottom. */
+      uiItemL(row, nullptr, ICON_MOUSE_LMB_DRAG);
+      uiItemS_ex(row, -0.2f);
+      uiItemL(row, IFACE_("Resize"), ICON_NONE);
+      uiItemS_ex(row, 0.6f);
+    }
+    uiItemL(row, nullptr, ICON_MOUSE_RMB);
+    uiItemS_ex(row, -0.9f);
+    uiItemL(row, IFACE_("Options"), ICON_NONE);
+    return true;
+  }
+  return false;
+}
+
+static bool uiTemplateInputStatusHeader(ARegion *region, uiLayout *row)
+{
+  if (region->regiontype != RGN_TYPE_HEADER) {
+    return false;
+  }
+  /* Over a header region. */
+  uiItemL(row, nullptr, ICON_MOUSE_MMB_DRAG);
+  uiItemS_ex(row, -0.2f);
+  uiItemL(row, IFACE_("Pan"), ICON_NONE);
+  uiItemS_ex(row, 0.6f);
+  uiItemL(row, nullptr, ICON_MOUSE_RMB);
+  uiItemS_ex(row, -0.9f);
+  uiItemL(row, IFACE_("Options"), ICON_NONE);
+  return true;
+}
+
+static bool uiTemplateInputStatus3DView(bContext *C, uiLayout *row)
+{
+  const Object *ob = CTX_data_active_object(C);
+  if (!ob) {
+    return false;
+  }
+
+  if (is_negative_m4(ob->object_to_world().ptr())) {
+    uiItemS_ex(row, 1.0f);
+    uiItemL(row, "", ICON_ERROR);
+    uiItemS_ex(row, -0.2f);
+    uiItemL(row, IFACE_("Active object has negative scale"), ICON_NONE);
+    uiItemS_ex(row, 0.5f, LayoutSeparatorType::Line);
+    uiItemS_ex(row, 0.5f);
+    /* Return false to allow other items to be added after. */
+    return false;
+  }
+
+  if (!(fabsf(ob->scale[0] - ob->scale[1]) < 1e-4f && fabsf(ob->scale[1] - ob->scale[2]) < 1e-4f))
+  {
+    uiItemS_ex(row, 1.0f);
+    uiItemL(row, "", ICON_ERROR);
+    uiItemS_ex(row, -0.2f);
+    uiItemL(row, IFACE_("Active object has non-uniform scale"), ICON_NONE);
+    uiItemS_ex(row, 0.5f, LayoutSeparatorType::Line);
+    uiItemS_ex(row, 0.5f);
+    /* Return false to allow other items to be added after. */
+    return false;
   }
 
   return false;
@@ -240,36 +322,18 @@ void uiTemplateInputStatus(uiLayout *layout, bContext *C)
     return;
   }
 
-  if (!region && win) {
+  if (!region && win && uiTemplateInputStatusBorder(win, row)) {
     /* On a gap between editors. */
-
-    rcti win_rect;
-    const int pad = int((3.0f * UI_SCALE_FAC) + U.pixelsize);
-    WM_window_screen_rect_calc(win, &win_rect);
-    BLI_rcti_pad(&win_rect, pad * -2, pad);
-    if (BLI_rcti_isect_pt_v(&win_rect, win->eventstate->xy)) {
-      /* Show options but not along left and right edges. */
-      BLI_rcti_pad(&win_rect, 0, pad * -3);
-      if (BLI_rcti_isect_pt_v(&win_rect, win->eventstate->xy)) {
-        /* No resize at top and bottom. */
-        uiItemL(row, nullptr, ICON_MOUSE_LMB_DRAG);
-        uiItemL(row, IFACE_("Resize"), ICON_NONE);
-        uiItemS_ex(row, 0.7f);
-      }
-      uiItemL(row, nullptr, ICON_MOUSE_RMB);
-      uiItemS_ex(row, -0.5f);
-      uiItemL(row, IFACE_("Options"), ICON_NONE);
-      return;
-    }
+    return;
   }
 
-  if (region && region->regiontype == RGN_TYPE_HEADER) {
-    uiItemL(row, nullptr, ICON_MOUSE_MMB_DRAG);
-    uiItemL(row, IFACE_("Pan"), ICON_NONE);
-    uiItemS_ex(row, 0.7f);
-    uiItemL(row, nullptr, ICON_MOUSE_RMB);
-    uiItemS_ex(row, -0.5f);
-    uiItemL(row, IFACE_("Options"), ICON_NONE);
+  if (region && uiTemplateInputStatusHeader(region, row)) {
+    /* Over a header region. */
+    return;
+  }
+
+  if (area && area->spacetype == SPACE_VIEW3D && uiTemplateInputStatus3DView(C, row)) {
+    /* Specific to 3DView. */
     return;
   }
 
@@ -289,23 +353,26 @@ void uiTemplateInputStatus(uiLayout *layout, bContext *C)
 
     if (msg) {
       uiItemL(row, "", (ICON_MOUSE_LMB + i));
-      uiItemS_ex(row, -0.5f);
+      uiItemS_ex(row, -0.9f);
       uiItemL(row, msg, ICON_NONE);
-      uiItemS_ex(row, 0.7f);
+      uiItemS_ex(row, 0.6f);
     }
 
     if (msg_drag) {
       uiItemL(row, "", (ICON_MOUSE_LMB_DRAG + i));
+      uiItemS_ex(row, -0.4f);
       uiItemL(row, msg_drag, ICON_NONE);
-      uiItemS_ex(row, 0.7f);
+      uiItemS_ex(row, 0.6f);
     }
   }
 }
 
-static std::string ui_template_status_tooltip(bContext *C, void * /*argN*/, const char * /*tip*/)
+static std::string ui_template_status_tooltip(bContext *C,
+                                              void * /*argN*/,
+                                              const blender::StringRef /*tip*/)
 {
   Main *bmain = CTX_data_main(C);
-  std::string tooltip_message = "";
+  std::string tooltip_message;
 
   if (bmain->has_forward_compatibility_issues) {
     char writer_ver_str[12];
@@ -356,7 +423,7 @@ void uiTemplateStatusInfo(uiLayout *layout, bContext *C)
       uiLayoutSetEmboss(row, UI_EMBOSS_NONE);
       /* This operator also works fine for blocked extensions. */
       uiItemO(row, "", ICON_ERROR, "EXTENSIONS_OT_userpref_show_for_update");
-      uiBut *but = static_cast<uiBut *>(uiLayoutGetBlock(layout)->buttons.last);
+      uiBut *but = uiLayoutGetBlock(layout)->buttons.last().get();
       uchar color[4];
       UI_GetThemeColor4ubv(TH_TEXT, color);
       copy_v4_v4_uchar(but->col, color);
@@ -381,7 +448,7 @@ void uiTemplateStatusInfo(uiLayout *layout, bContext *C)
       else {
         uiLayoutSetEmboss(row, UI_EMBOSS_NONE);
         uiItemO(row, "", ICON_INTERNET_OFFLINE, "EXTENSIONS_OT_userpref_show_online");
-        uiBut *but = static_cast<uiBut *>(uiLayoutGetBlock(layout)->buttons.last);
+        uiBut *but = uiLayoutGetBlock(layout)->buttons.last().get();
         uchar color[4];
         UI_GetThemeColor4ubv(TH_TEXT, color);
         copy_v4_v4_uchar(but->col, color);
@@ -405,7 +472,7 @@ void uiTemplateStatusInfo(uiLayout *layout, bContext *C)
       }
       uiLayoutSetEmboss(row, UI_EMBOSS_NONE);
       uiItemO(row, "", icon, "EXTENSIONS_OT_userpref_show_for_update");
-      uiBut *but = static_cast<uiBut *>(uiLayoutGetBlock(layout)->buttons.last);
+      uiBut *but = uiLayoutGetBlock(layout)->buttons.last().get();
       uchar color[4];
       UI_GetThemeColor4ubv(TH_TEXT, color);
       copy_v4_v4_uchar(but->col, color);
@@ -476,7 +543,7 @@ void uiTemplateStatusInfo(uiLayout *layout, bContext *C)
                         0.0f,
                         "");
   /*# UI_BTYPE_ROUNDBOX's background color is set in `but->col`. */
-  UI_GetThemeColorType4ubv(TH_INFO_WARNING, SPACE_INFO, but->col);
+  UI_GetThemeColor4ubv(TH_WARNING, but->col);
 
   if (!warning_message.is_empty()) {
     /* Background for the rest of the message. */
@@ -494,7 +561,7 @@ void uiTemplateStatusInfo(uiLayout *layout, bContext *C)
                    "");
 
     /* Use icon background at low opacity to highlight, but still contrasting with area TH_TEXT. */
-    UI_GetThemeColorType4ubv(TH_INFO_WARNING, SPACE_INFO, but->col);
+    UI_GetThemeColor4ubv(TH_WARNING, but->col);
     but->col[3] = 64;
   }
 
@@ -513,7 +580,7 @@ void uiTemplateStatusInfo(uiLayout *layout, bContext *C)
                      nullptr,
                      0.0f,
                      0.0f,
-                     nullptr);
+                     std::nullopt);
   UI_but_func_tooltip_set(but, ui_template_status_tooltip, nullptr, nullptr);
   UI_GetThemeColorType4ubv(TH_INFO_WARNING_TEXT, SPACE_INFO, but->col);
   but->col[3] = 255; /* This theme color is RBG only, so have to set alpha here. */
@@ -531,7 +598,7 @@ void uiTemplateStatusInfo(uiLayout *layout, bContext *C)
                    nullptr,
                    0.0f,
                    0.0f,
-                   nullptr);
+                   std::nullopt);
     UI_but_func_tooltip_set(but, ui_template_status_tooltip, nullptr, nullptr);
   }
 

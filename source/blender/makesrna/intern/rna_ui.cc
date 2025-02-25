@@ -9,15 +9,11 @@
 #include <cstdlib>
 
 #include "DNA_screen_types.h"
-#include "DNA_space_types.h"
 
 #include "BLT_translation.hh"
 
 #include "BKE_file_handler.hh"
-#include "BKE_idprop.hh"
 #include "BKE_screen.hh"
-
-#include "BLI_listbase.h"
 
 #include "RNA_define.hh"
 
@@ -56,6 +52,8 @@ const EnumPropertyItem rna_enum_uilist_layout_type_items[] = {
 #ifdef RNA_RUNTIME
 
 #  include "MEM_guardedalloc.h"
+
+#  include "DNA_space_types.h"
 
 #  include "RNA_access.hh"
 
@@ -2075,12 +2073,13 @@ static void rna_def_uilist(BlenderRNA *brna)
                         0,
                         "",
                         "Identifier of property in active_data, for the active element");
+  RNA_def_parameter_flags(parm, PropertyFlag(0), PARM_REQUIRED | PARM_PYFUNC_REGISTER_OPTIONAL);
+  parm = RNA_def_int(
+      func, "index", 0, 0, INT_MAX, "", "Index of the item in the collection", 0, INT_MAX);
   RNA_def_parameter_flags(parm, PropertyFlag(0), PARM_REQUIRED);
-  RNA_def_int(func, "index", 0, 0, INT_MAX, "", "Index of the item in the collection", 0, INT_MAX);
-  RNA_def_parameter_flags(parm, PropertyFlag(0), PARM_REQUIRED | PARM_PYFUNC_OPTIONAL);
-  prop = RNA_def_property(func, "flt_flag", PROP_INT, PROP_UNSIGNED);
-  RNA_def_property_ui_text(prop, "", "The filter-flag result for this item");
-  RNA_def_parameter_flags(parm, PropertyFlag(0), PARM_REQUIRED | PARM_PYFUNC_OPTIONAL);
+  parm = RNA_def_property(func, "flt_flag", PROP_INT, PROP_UNSIGNED);
+  RNA_def_property_ui_text(parm, "", "The filter-flag result for this item");
+  RNA_def_parameter_flags(parm, PropertyFlag(0), PARM_REQUIRED);
 
   /* draw_filter */
   func = RNA_def_function(srna, "draw_filter", nullptr);

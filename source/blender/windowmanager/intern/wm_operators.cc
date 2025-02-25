@@ -39,10 +39,14 @@
 
 #include "BLT_translation.hh"
 
-#include "BLI_blenlib.h"
 #include "BLI_dial_2d.h"
+#include "BLI_listbase.h"
 #include "BLI_math_rotation.h"
+#include "BLI_math_vector.h"
 #include "BLI_math_vector_types.hh"
+#include "BLI_path_utils.hh"
+#include "BLI_string.h"
+#include "BLI_string_utf8.h"
 #include "BLI_time.h"
 #include "BLI_utildefines.h"
 
@@ -56,6 +60,7 @@
 #include "BKE_image_format.hh"
 #include "BKE_lib_id.hh"
 #include "BKE_lib_query.hh"
+#include "BKE_library.hh"
 #include "BKE_main.hh"
 #include "BKE_material.hh"
 #include "BKE_preview_image.hh"
@@ -95,6 +100,7 @@
 #include "UI_resources.hh"
 
 #include "WM_api.hh"
+#include "WM_keymap.hh"
 #include "WM_types.hh"
 
 #include "wm.hh"
@@ -146,7 +152,7 @@ size_t WM_operator_py_idname(char *dst, const char *src)
 
 size_t WM_operator_bl_idname(char *dst, const char *src)
 {
-  const size_t from_len = size_t(strlen(src));
+  const size_t from_len = strlen(src);
 
   const char *sep = strchr(src, OP_PY_SEP_CHAR);
   if (sep && (from_len <= OP_MAX_PY_IDNAME)) {
@@ -1176,7 +1182,7 @@ static uiBlock *wm_enum_search_menu(bContext *C, ARegion *region, void *arg)
            nullptr,
            0,
            0,
-           nullptr);
+           std::nullopt);
 
   /* Move it downwards, mouse over button. */
   UI_block_bounds_set_popup(block, 0.3f * U.widget_unit, blender::int2{0, -UI_UNIT_Y});
@@ -1515,7 +1521,7 @@ static uiBlock *wm_block_dialog_create(bContext *C, ARegion *region, void *user_
   wmOperator *op = data->op;
   const uiStyle *style = UI_style_get_dpi();
   const bool small = data->size == WM_POPUP_SIZE_SMALL;
-  const short icon_size = (small ? 32 : 64) * UI_SCALE_FAC;
+  const short icon_size = (small ? 32 : 40) * UI_SCALE_FAC;
 
   uiBlock *block = UI_block_begin(C, region, __func__, UI_EMBOSS);
   UI_block_flag_disable(block, UI_BLOCK_LOOP);
@@ -1577,8 +1583,13 @@ static uiBlock *wm_block_dialog_create(bContext *C, ARegion *region, void *user_
   }
 
   /* Message lines. */
-  for (auto &st : message_lines) {
-    uiItemL(layout, st, ICON_NONE);
+  if (message_lines.size() > 0) {
+    uiLayout *lines = uiLayoutColumn(layout, false);
+    uiLayoutSetScaleY(lines, 0.65f);
+    uiItemS_ex(lines, 0.1f);
+    for (auto &st : message_lines) {
+      uiItemL(lines, st, ICON_NONE);
+    }
   }
 
   if (data->include_properties) {
@@ -1586,7 +1597,7 @@ static uiBlock *wm_block_dialog_create(bContext *C, ARegion *region, void *user_
     uiTemplateOperatorPropertyButs(C, layout, op, UI_BUT_LABEL_ALIGN_SPLIT_COLUMN, 0);
   }
 
-  uiItemS_ex(layout, small ? 0.1f : 2.0f);
+  uiItemS_ex(layout, small ? 0.1f : 1.8f);
 
   /* Clear so the OK button is left alone. */
   UI_block_func_set(block, nullptr, nullptr, nullptr);
@@ -2021,7 +2032,7 @@ static uiBlock *wm_block_search_menu(bContext *C, ARegion *region, void *userdat
            nullptr,
            0,
            0,
-           nullptr);
+           std::nullopt);
 
   /* Move it downwards, mouse over button. */
   UI_block_bounds_set_popup(block, 0.3f * U.widget_unit, blender::int2{0, -UI_UNIT_Y});
@@ -2474,7 +2485,7 @@ bool WM_paint_cursor_end(wmPaintCursor *handle)
 {
   wmWindowManager *wm = static_cast<wmWindowManager *>(G_MAIN->wm.first);
   LISTBASE_FOREACH (wmPaintCursor *, pc, &wm->paintcursors) {
-    if (pc == (wmPaintCursor *)handle) {
+    if (pc == handle) {
       BLI_remlink(&wm->paintcursors, pc);
       MEM_freeN(pc);
       return true;
@@ -2513,21 +2524,29 @@ struct RadialControl {
   PropertySubType subtype;
   PointerRNA ptr, col_ptr, fill_col_ptr, rot_ptr, zoom_ptr, image_id_ptr;
   PointerRNA fill_col_override_ptr, fill_col_override_test_ptr;
-  PropertyRNA *prop, *col_prop, *fill_col_prop, *rot_prop, *zoom_prop;
-  PropertyRNA *fill_col_override_prop, *fill_col_override_test_prop;
-  StructRNA *image_id_srna;
-  float initial_value, current_value, min_value, max_value;
-  int initial_mouse[2];
-  int initial_co[2];
-  int slow_mouse[2];
-  bool slow_mode;
-  Dial *dial;
-  GPUTexture *texture;
-  ListBase orig_paintcursors;
-  bool use_secondary_tex;
-  void *cursor;
-  NumInput num_input;
-  int init_event;
+  PropertyRNA *prop = nullptr;
+  PropertyRNA *col_prop = nullptr;
+  PropertyRNA *fill_col_prop = nullptr;
+  PropertyRNA *rot_prop = nullptr;
+  PropertyRNA *zoom_prop = nullptr;
+  PropertyRNA *fill_col_override_prop = nullptr;
+  PropertyRNA *fill_col_override_test_prop = nullptr;
+  StructRNA *image_id_srna = nullptr;
+  float initial_value = 0.0f;
+  float current_value = 0.0f;
+  float min_value = 0.0f;
+  float max_value = 0.0f;
+  int initial_mouse[2] = {};
+  int initial_co[2] = {};
+  int slow_mouse[2] = {};
+  bool slow_mode = false;
+  Dial *dial = nullptr;
+  GPUTexture *texture = nullptr;
+  ListBase orig_paintcursors = {};
+  bool use_secondary_tex = false;
+  void *cursor = nullptr;
+  NumInput num_input = {};
+  int init_event = 0;
 };
 
 static void radial_control_update_header(wmOperator *op, bContext *C)
@@ -3085,17 +3104,14 @@ static int radial_control_get_properties(bContext *C, wmOperator *op)
 
 static int radial_control_invoke(bContext *C, wmOperator *op, const wmEvent *event)
 {
-  wmWindowManager *wm;
-  RadialControl *rc;
-
-  if (!(op->customdata = rc = static_cast<RadialControl *>(
-            MEM_callocN(sizeof(RadialControl), "RadialControl"))))
-  {
+  op->customdata = MEM_new<RadialControl>(__func__);
+  if (!op->customdata) {
     return OPERATOR_CANCELLED;
   }
+  RadialControl *rc = static_cast<RadialControl *>(op->customdata);
 
   if (!radial_control_get_properties(C, op)) {
-    MEM_freeN(rc);
+    MEM_delete(rc);
     return OPERATOR_CANCELLED;
   }
 
@@ -3125,7 +3141,7 @@ static int radial_control_invoke(bContext *C, wmOperator *op, const wmEvent *eve
     }
     default:
       BKE_report(op->reports, RPT_ERROR, "Property must be an integer or a float");
-      MEM_freeN(rc);
+      MEM_delete(rc);
       return OPERATOR_CANCELLED;
   }
 
@@ -3149,7 +3165,7 @@ static int radial_control_invoke(bContext *C, wmOperator *op, const wmEvent *eve
     BKE_report(op->reports,
                RPT_ERROR,
                "Property must be a none, distance, factor, percentage, angle, or pixel");
-    MEM_freeN(rc);
+    MEM_delete(rc);
     return OPERATOR_CANCELLED;
   }
 
@@ -3160,7 +3176,7 @@ static int radial_control_invoke(bContext *C, wmOperator *op, const wmEvent *eve
   rc->init_event = WM_userdef_event_type_from_keymap_type(event->type);
 
   /* Temporarily disable other paint cursors. */
-  wm = CTX_wm_manager(C);
+  wmWindowManager *wm = CTX_wm_manager(C);
   rc->orig_paintcursors = wm->paintcursors;
   BLI_listbase_clear(&wm->paintcursors);
 
@@ -3193,7 +3209,10 @@ static void radial_control_cancel(bContext *C, wmOperator *op)
   wmWindowManager *wm = CTX_wm_manager(C);
   ScrArea *area = CTX_wm_area(C);
 
-  MEM_SAFE_FREE(rc->dial);
+  if (rc->dial) {
+    BLI_dial_free(rc->dial);
+    rc->dial = nullptr;
+  }
 
   ED_area_status_text(area, nullptr);
 
@@ -3211,7 +3230,7 @@ static void radial_control_cancel(bContext *C, wmOperator *op)
     GPU_texture_free(rc->texture);
   }
 
-  MEM_freeN(rc);
+  MEM_delete(rc);
 }
 
 static int radial_control_modal(bContext *C, wmOperator *op, const wmEvent *event)
@@ -3386,7 +3405,10 @@ static int radial_control_modal(bContext *C, wmOperator *op, const wmEvent *even
       if (event->val == KM_RELEASE) {
         rc->slow_mode = false;
         handled = true;
-        MEM_SAFE_FREE(rc->dial);
+        if (rc->dial) {
+          BLI_dial_free(rc->dial);
+          rc->dial = nullptr;
+        }
       }
       break;
     }
@@ -3426,7 +3448,7 @@ static int radial_control_modal(bContext *C, wmOperator *op, const wmEvent *even
     wmWindowManager *wm = CTX_wm_manager(C);
     if (wm->op_undo_depth == 0) {
       ID *id = rc->ptr.owner_id;
-      if (ED_undo_is_legacy_compatible_for_property(C, id)) {
+      if (ED_undo_is_legacy_compatible_for_property(C, id, rc->ptr)) {
         ED_undo_push(C, op->type->name);
       }
     }

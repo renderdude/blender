@@ -26,10 +26,6 @@ struct Scene;
 struct StampData;
 struct ViewLayer;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* this include is what is exposed of render to outside world */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -38,9 +34,7 @@ extern "C" {
 #define RE_MAXNAME ((MAX_ID_NAME - 2) + 10)
 
 /* only used as handle */
-typedef struct Render Render;
-
-typedef struct RenderView {
+struct RenderView {
   struct RenderView *next, *prev;
   char name[64]; /* EXR_VIEW_MAXNAME */
 
@@ -48,9 +42,9 @@ typedef struct RenderView {
    * The ibuf is only allocated if it has an actual data in one of its buffers (float, byte, or
    * GPU). */
   struct ImBuf *ibuf;
-} RenderView;
+};
 
-typedef struct RenderPass {
+struct RenderPass {
   struct RenderPass *next, *prev;
   int channels;
   char name[64];   /* amount defined in IMB_openexr.hh */
@@ -72,7 +66,7 @@ typedef struct RenderPass {
   int view_id;       /* quick lookup */
 
   char _pad0[4];
-} RenderPass;
+};
 
 /**
  * - A render-layer is a full image, but with all passes and samples.
@@ -80,7 +74,7 @@ typedef struct RenderPass {
  * - After render, the Combined pass is in combined,
  *   for render-layers read from files it is a real pass.
  */
-typedef struct RenderLayer {
+struct RenderLayer {
   struct RenderLayer *next, *prev;
 
   /** copy of RenderData */
@@ -93,10 +87,9 @@ typedef struct RenderLayer {
   void *exrhandle;
 
   ListBase passes;
+};
 
-} RenderLayer;
-
-typedef struct RenderResult {
+struct RenderResult {
   struct RenderResult *next, *prev;
 
   /* The number of users of this render result. Default value is 0. The result is freed when
@@ -145,16 +138,16 @@ typedef struct RenderResult {
   struct StampData *stamp_data;
 
   bool passes_allocated;
-} RenderResult;
+};
 
-typedef struct RenderStats {
+struct RenderStats {
   int cfra;
   bool localview;
   double starttime, lastframetime;
   const char *infostr, *statstr;
   char scene_name[MAX_ID_NAME - 2];
   float mem_used, mem_peak;
-} RenderStats;
+};
 
 /* *********************** API ******************** */
 
@@ -518,7 +511,3 @@ struct ImBuf *RE_RenderViewEnsureImBuf(const RenderResult *render_result, Render
 
 /* Returns true if the pass is a color (as opposite of data) and needs to be color managed. */
 bool RE_RenderPassIsColor(const RenderPass *render_pass);
-
-#ifdef __cplusplus
-}
-#endif

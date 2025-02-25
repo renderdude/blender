@@ -38,7 +38,7 @@ void ReduceToSingleValueOperation::execute()
     need_to_free_pixel = true;
   }
   else {
-    pixel = input.float_texture();
+    pixel = input.cpu_data().data();
   }
 
   Result &result = get_result();
@@ -47,17 +47,19 @@ void ReduceToSingleValueOperation::execute()
     case ResultType::Color:
       result.set_single_value(float4(static_cast<float *>(pixel)));
       break;
-    case ResultType::Vector:
+    case ResultType::Float3:
+      result.set_single_value(float4(static_cast<float *>(pixel)));
+      break;
+    case ResultType::Float4:
       result.set_single_value(float4(static_cast<float *>(pixel)));
       break;
     case ResultType::Float:
       result.set_single_value(*static_cast<float *>(pixel));
       break;
     case ResultType::Int:
-      result.set_single_value(*static_cast<int *>(pixel));
+      result.set_single_value(*static_cast<int32_t *>(pixel));
       break;
     case ResultType::Float2:
-    case ResultType::Float3:
     case ResultType::Int2:
       /* Those types are internal and needn't be handled by operations. */
       BLI_assert_unreachable();

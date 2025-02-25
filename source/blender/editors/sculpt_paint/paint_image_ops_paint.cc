@@ -8,11 +8,11 @@
  */
 
 #include "DNA_brush_types.h"
-#include "DNA_color_types.h"
 #include "DNA_scene_types.h"
 #include "DNA_space_types.h"
 
 #include "BLI_math_color.h"
+#include "BLI_math_vector.h"
 
 #include "BKE_brush.hh"
 #include "BKE_context.hh"
@@ -230,7 +230,7 @@ struct PaintOperation : public PaintModeData {
   ViewContext vc = {nullptr};
 
   PaintOperation() = default;
-  ~PaintOperation()
+  ~PaintOperation() override
   {
     MEM_delete(mode);
     mode = nullptr;

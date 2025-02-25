@@ -2,26 +2,17 @@
  *
  * SPDX-License-Identifier: GPL-2.0-or-later */
 
-#include "BLI_math_matrix.hh"
 #include "BLI_string.h"
 #include "BLI_string_utf8.h"
-#include "BLI_string_utils.hh"
-#include "BLI_task.hh"
 
 #include "BKE_anonymous_attribute_make.hh"
 #include "BKE_attribute_math.hh"
-#include "BKE_bake_geometry_nodes_modifier.hh"
 #include "BKE_bake_items_socket.hh"
-#include "BKE_compute_contexts.hh"
 #include "BKE_context.hh"
 #include "BKE_curves.hh"
 #include "BKE_instances.hh"
 #include "BKE_modifier.hh"
-#include "BKE_node_socket_value.hh"
-#include "BKE_node_tree_update.hh"
 #include "BKE_node_tree_zones.hh"
-#include "BKE_object.hh"
-#include "BKE_scene.hh"
 #include "BKE_screen.hh"
 
 #include "DEG_depsgraph_query.hh"
@@ -31,25 +22,18 @@
 #include "NOD_common.hh"
 #include "NOD_geo_bake.hh"
 #include "NOD_geo_simulation.hh"
-#include "NOD_geometry.hh"
 #include "NOD_node_extra_info.hh"
 #include "NOD_socket.hh"
 #include "NOD_socket_items_ops.hh"
 #include "NOD_socket_items_ui.hh"
 
-#include "DNA_curves_types.h"
 #include "DNA_mesh_types.h"
-#include "DNA_modifier_types.h"
 #include "DNA_pointcloud_types.h"
-#include "DNA_space_types.h"
 
 #include "ED_node.hh"
 
 #include "RNA_access.hh"
-#include "RNA_define.hh"
 #include "RNA_prototypes.hh"
-
-#include "MOD_nodes.hh"
 
 #include "BLT_translation.hh"
 
@@ -501,11 +485,11 @@ static void node_register()
   ntype.gather_link_search_ops = nullptr;
   ntype.no_muting = true;
   ntype.draw_buttons_ex = node_layout_ex;
-  blender::bke::node_type_storage(&ntype,
+  blender::bke::node_type_storage(ntype,
                                   "NodeGeometrySimulationInput",
                                   node_free_standard_storage,
                                   node_copy_standard_storage);
-  blender::bke::node_register_type(&ntype);
+  blender::bke::node_register_type(ntype);
 }
 NOD_REGISTER_NODE(node_register)
 
@@ -882,8 +866,8 @@ static void node_register()
   ntype.register_operators = node_operators;
   ntype.get_extra_info = node_extra_info;
   blender::bke::node_type_storage(
-      &ntype, "NodeGeometrySimulationOutput", node_free_storage, node_copy_storage);
-  blender::bke::node_register_type(&ntype);
+      ntype, "NodeGeometrySimulationOutput", node_free_storage, node_copy_storage);
+  blender::bke::node_register_type(ntype);
 }
 NOD_REGISTER_NODE(node_register)
 

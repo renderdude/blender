@@ -191,10 +191,10 @@ blender::Array<uchar> BLF_svg_icon_bitmap(
     bool multicolor = false,
     blender::FunctionRef<void(std::string &)> edit_source_cb = nullptr);
 
-typedef bool (*BLF_GlyphBoundsFn)(const char *str,
-                                  size_t str_step_ofs,
-                                  const rcti *bounds,
-                                  void *user_data);
+using BLF_GlyphBoundsFn = bool (*)(const char *str,
+                                   size_t str_step_ofs,
+                                   const rcti *bounds,
+                                   void *user_dataconst);
 
 /**
  * Run \a user_fn for each character, with the bound-box that would be used for drawing.
@@ -319,6 +319,11 @@ void BLF_enable(int fontid, int option);
 void BLF_disable(int fontid, int option);
 
 /**
+ * Is this font part of the default fonts in the fallback stack?
+ */
+bool BLF_is_builtin(int fontid);
+
+/**
  * Note that shadow needs to be enabled with #BLF_enable.
  */
 void BLF_shadow(int fontid, FontShadowType type, const float rgba[4] = nullptr);
@@ -420,6 +425,9 @@ enum {
    * \note Can be checked without checking #BLF_MONOSPACED which can be assumed to be disabled.
    */
   BLF_RENDER_SUBPIXELAA = 1 << 18,
+
+  /* Do not look in other fonts when a glyph is not found in this font. */
+  BLF_NO_FALLBACK = 1 << 19,
 };
 
 #define BLF_DRAW_STR_DUMMY_MAX 1024

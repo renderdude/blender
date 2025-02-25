@@ -9,7 +9,7 @@
 
 #include "GPU_capabilities.hh"
 
-#include "draw_manager_profiling.hh"
+#include "GPU_debug.hh"
 
 #include "eevee_instance.hh"
 
@@ -241,16 +241,14 @@ void VolumeProbeModule::set_view(View & /*view*/)
           if (_a.x != _b.x) {
             return _a.x < _b.x;
           }
-          else if (_a.y != _b.y) {
+          if (_a.y != _b.y) {
             return _a.y < _b.y;
           }
-          else if (_a.z != _b.z) {
+          if (_a.z != _b.z) {
             return _a.z < _b.z;
           }
-          else {
-            /* Fallback to memory address, since there's no good alternative. */
-            return a < b;
-          }
+          /* Fallback to memory address, since there's no good alternative. */
+          return a < b;
         });
 
     /* Insert grids in UBO in sorted order. */
@@ -951,7 +949,7 @@ void IrradianceBake::surfels_create(const Object &probe_object)
   validity_tx_.clear(float4(0.0f));
   virtual_offset_tx_.clear(float4(0.0f));
 
-  DRW_stats_group_start("IrradianceBake.SceneBounds");
+  GPU_debug_group_begin("IrradianceBake.SceneBounds");
 
   {
     draw::Manager &manager = *inst_.manager;
@@ -1008,7 +1006,7 @@ void IrradianceBake::surfels_create(const Object &probe_object)
   scene_max += epsilon;
   surfel_raster_views_sync(scene_min, scene_max, probe_object.object_to_world());
 
-  DRW_stats_group_end();
+  GPU_debug_group_end();
 
   /* WORKAROUND: Sync camera with correct bounds for light culling. */
   inst_.camera.sync();
@@ -1017,7 +1015,7 @@ void IrradianceBake::surfels_create(const Object &probe_object)
   inst_.shadows.end_sync();
   inst_.lights.end_sync();
 
-  DRW_stats_group_start("IrradianceBake.SurfelsCount");
+  GPU_debug_group_begin("IrradianceBake.SurfelsCount");
 
   /* Raster the scene to query the number of surfel needed. */
   capture_info_buf_.do_surfel_count = true;
@@ -1032,7 +1030,7 @@ void IrradianceBake::surfels_create(const Object &probe_object)
   empty_raster_fb_.ensure(math::abs(transform_point(invert(basis_z_), grid_pixel_extent_).xy()));
   inst_.pipelines.capture.render(view_z_);
 
-  DRW_stats_group_end();
+  GPU_debug_group_end();
 
   /* Allocate surfel pool. */
   GPU_memory_barrier(GPU_BARRIER_BUFFER_UPDATE);
@@ -1098,7 +1096,7 @@ void IrradianceBake::surfels_create(const Object &probe_object)
 
   dispatch_per_surfel_.x = divide_ceil_u(surfels_buf_.size(), SURFEL_GROUP_SIZE);
 
-  DRW_stats_group_start("IrradianceBake.SurfelsCreate");
+  GPU_debug_group_begin("IrradianceBake.SurfelsCreate");
 
   /* Raster the scene to generate the surfels. */
   capture_info_buf_.do_surfel_count = true;
@@ -1118,7 +1116,7 @@ void IrradianceBake::surfels_create(const Object &probe_object)
   /* Read back so that following push_update will contain correct surfel count. */
   capture_info_buf_.read();
 
-  DRW_stats_group_end();
+  GPU_debug_group_end();
 }
 
 void IrradianceBake::surfels_lights_eval()
@@ -1166,7 +1164,7 @@ void IrradianceBake::raylists_build()
   using namespace blender::math;
 
   float2 rand_uv = inst_.sampling.rng_2d_get(eSamplingDimension::SAMPLING_LENS_U);
-  const float3 ray_direction = inst_.sampling.sample_sphere(rand_uv);
+  const float3 ray_direction = Sampling::sample_sphere(rand_uv);
   const float3 up = ray_direction;
   const float3 forward = cross(up, normalize(orthogonal(up)));
   const float4x4 viewinv = from_orthonormal_axes<float4x4>(float3(0.0f), forward, up);

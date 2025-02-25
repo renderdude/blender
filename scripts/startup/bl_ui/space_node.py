@@ -230,7 +230,7 @@ class NODE_MT_editor_menus(Menu):
         layout.menu("NODE_MT_node")
 
 
-class NODE_MT_add(bpy.types.Menu):
+class NODE_MT_add(Menu):
     bl_space_type = 'NODE_EDITOR'
     bl_label = "Add"
     bl_translation_context = i18n_contexts.operator_default
@@ -464,8 +464,8 @@ class NODE_PT_geometry_node_tool_object_types(Panel):
             ("is_type_mesh", "Mesh", 'MESH_DATA'),
             ("is_type_curve", "Hair Curves", 'CURVES_DATA'),
         ]
-        if context.preferences.experimental.use_new_point_cloud_type:
-            types.append(("is_type_point_cloud", "Point Cloud", 'POINTCLOUD_DATA'))
+        if context.preferences.experimental.use_new_pointcloud_type:
+            types.append(("is_type_pointcloud", "Point Cloud", 'POINTCLOUD_DATA'))
 
         col = layout.column()
         col.active = group.is_tool
@@ -829,7 +829,7 @@ class NODE_PT_backdrop(Panel):
         col.operator("node.backimage_fit", text="Fit")
 
 
-class NODE_PT_quality(bpy.types.Panel):
+class NODE_PT_quality(Panel):
     bl_space_type = 'NODE_EDITOR'
     bl_region_type = 'UI'
     bl_category = "Options"

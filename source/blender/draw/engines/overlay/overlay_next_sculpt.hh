@@ -50,7 +50,7 @@ class Sculpts : Overlay {
     show_face_set_ = state.show_sculpt_face_sets();
     show_mask_ = state.show_sculpt_mask();
 
-    enabled_ = state.is_space_v3d() && !state.xray_enabled && !res.is_selection() &&
+    enabled_ = state.is_space_v3d() && !state.is_wire() && !res.is_selection() &&
                !state.is_depth_only_drawing &&
                ELEM(state.object_mode, OB_MODE_SCULPT_CURVES, OB_MODE_SCULPT) &&
                (show_curves_cage_ || show_face_set_ || show_mask_);
@@ -69,6 +69,7 @@ class Sculpts : Overlay {
     {
       sculpt_mask_.init();
       sculpt_mask_.bind_ubo(OVERLAY_GLOBALS_SLOT, &res.globals_buf);
+      sculpt_mask_.bind_ubo(DRW_CLIPPING_UBO_SLOT, &res.clip_planes_buf);
       sculpt_mask_.state_set(DRW_STATE_WRITE_COLOR | DRW_STATE_DEPTH_LESS_EQUAL |
                                  DRW_STATE_BLEND_MUL,
                              state.clipping_plane_count);
@@ -93,6 +94,7 @@ class Sculpts : Overlay {
                      state.clipping_plane_count);
       pass.shader_set(res.shaders.sculpt_curves_cage.get());
       pass.bind_ubo(OVERLAY_GLOBALS_SLOT, &res.globals_buf);
+      pass.bind_ubo(DRW_CLIPPING_UBO_SLOT, &res.clip_planes_buf);
       pass.push_constant("opacity", curve_cage_opacity);
     }
   }
