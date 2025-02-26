@@ -646,7 +646,7 @@ static void xml_read_light(XMLReadState &state, const xml_node node)
 {
   Light *light = state.scene->create_node<Light>();
 
-  light->set_shader(state.shader);
+  //light->set_shader(state.shader);
   xml_read_node(state, light, node);
 }
 
