@@ -21,6 +21,7 @@
 #include "app/rib_parser/exporters/geometry.h"
 #include "kernel/types.h"
 #include "scene/camera.h"
+#include "scene/object.h"
 #include "scene/shader.h"
 // Have to include shader.h before background.h so that 'set_shader' uses the correct 'set'
 // overload taking a 'Node *', rather than the one taking a 'bool'
@@ -163,7 +164,15 @@ void Ri::export_to_cycles()
   // Update background depending on presence of a background light
   if (scene->light_manager->need_update()) {
     ccl::Light *background_light = nullptr;
-    for (ccl::Light *light : scene->lights) {
+    bool have_lights = false;
+    for (Object *object : scene->objects) {
+      if (!object->get_geometry()->is_light()) {
+        continue;
+      }
+
+      have_lights = true;
+
+      ccl::Light *light = static_cast<ccl::Light *>(object->get_geometry());
       if (light->get_light_type() == LIGHT_BACKGROUND) {
         background_light = light;
         break;
@@ -179,7 +188,7 @@ void Ri::export_to_cycles()
       for (ShaderNode *node : scene->default_background->graph->nodes) {
         if (node->is_a(BackgroundNode::get_node_type())) {
           BackgroundNode *bgNode = static_cast<BackgroundNode *>(node);
-          bgNode->set_color((scene->lights.empty()) ? make_float3(0.5f) : zero_float3());
+          bgNode->set_color((have_lights) ? zero_float3() : make_float3(0.5f));
         }
       }
     }
@@ -339,7 +348,8 @@ void Ri::add_instance_use(Instance_Scene_Entity instance)
     }
     if (instance_definitions.find(inst->name) != instance_definitions.end()) {
       auto *inst_def = instance_definitions[inst->name];
-      export_lights(session->scene.get(), *inst, inst_def);
+      RIBCyclesLight light(session->scene.get());
+      light.build(inst_def, *inst);
     }
     // it's a shape
     else {
