@@ -1992,6 +1992,15 @@ void Ri::Sphere(float radius,
   int n_slices = 25;
   int n_stacks = 24;
 
+  // Allocate memory
+  top_uvs.reserve(n_slices+1);
+  bot_uvs.reserve(n_slices+1);
+  body_uvs.reserve(n_slices*n_stacks);
+  top_ring.reserve(n_slices);
+  bot_ring.reserve(n_slices);
+  pts.reserve(n_slices*(n_stacks+1)*3);
+  norms.reserve(n_slices*(n_stacks+1)*3);
+
   // Create top vertices
   float phi = start_phi;
   for (int j = 0; j < n_slices; ++j) {
@@ -2045,6 +2054,10 @@ void Ri::Sphere(float radius,
   int poly_count = 0;
   std::vector<int> polys;
   std::vector<int> poly_counts;
+
+  uvs.reserve(n_slices*n_stacks*4);
+  polys.reserve(n_slices*n_stacks*4);
+  poly_counts.reserve((n_slices-1)*n_stacks);
 
   // Create end cap tris/quads
   for (int i = 0; i < n_slices; ++i) {
@@ -2136,19 +2149,19 @@ void Ri::Sphere(float radius,
     }
   }
 
-  Parsed_Parameter *param = new Parsed_Parameter(Parameter_Type::Integer, "vertices", loc);
+  Parsed_Parameter *param = new Parsed_Parameter(Parameter_Type::Integer, "vertices", loc, polys.size());
   for (int i = 0; i < polys.size(); ++i) {
     param->add_int(polys[i]);
   }
   params.push_back(param);
 
-  param = new Parsed_Parameter(Parameter_Type::Integer, "nvertices", loc);
+  param = new Parsed_Parameter(Parameter_Type::Integer, "nvertices", loc, poly_counts.size());
   for (int i = 0; i < poly_counts.size(); ++i) {
     param->add_int(poly_counts[i]);
   }
   params.push_back(param);
 
-  param = new Parsed_Parameter(Parameter_Type::Point3, "P", loc);
+  param = new Parsed_Parameter(Parameter_Type::Point3, "P", loc, pts.size());
   param->storage = Container_Type::Vertex;
   param->elem_per_item = 3;
   for (int i = 0; i < pts.size(); ++i) {
@@ -2156,7 +2169,7 @@ void Ri::Sphere(float radius,
   }
   params.push_back(param);
 
-  param = new Parsed_Parameter(Parameter_Type::Point2, "uv", loc);
+  param = new Parsed_Parameter(Parameter_Type::Point2, "uv", loc, 2*uvs.size());
   param->storage = Container_Type::FaceVarying;
   param->elem_per_item = 2;
   for (int i = 0; i < uvs.size(); ++i) {
@@ -2165,7 +2178,7 @@ void Ri::Sphere(float radius,
   }
   params.push_back(param);
 
-  param = new Parsed_Parameter(Parameter_Type::Integer, "nfaces", loc);
+  param = new Parsed_Parameter(Parameter_Type::Integer, "nfaces", loc); 
   param->add_int(poly_count);
   params.push_back(param);
 
@@ -2173,7 +2186,7 @@ void Ri::Sphere(float radius,
   param->add_bool(true);
   params.push_back(param);
 
-  param = new Parsed_Parameter(Parameter_Type::Normal, "N", loc);
+  param = new Parsed_Parameter(Parameter_Type::Normal, "N", loc, norms.size());
   param->storage = Container_Type::Varying;
   param->elem_per_item = 3;
   for (int i = 0; i < norms.size(); ++i) {
