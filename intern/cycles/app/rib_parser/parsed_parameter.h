@@ -42,34 +42,49 @@ class Parsed_Parameter {
   ///@{
   Parsed_Parameter() = default;
   Parsed_Parameter(File_Loc loc) : loc(loc) {}
-  Parsed_Parameter(Parameter_Type type, std::string name, File_Loc loc)
+  Parsed_Parameter(Parameter_Type type, std::string name, File_Loc loc, size_t reserve_size = 1)
       : type(type), name(name), loc(loc)
   {
     switch (type) {
-      case Parameter_Type::Boolean:
-        payload = vector<uint8_t>();
+      case Parameter_Type::Boolean: {
+        auto result = vector<uint8_t>();
+        result.reserve(reserve_size);
+        payload = result;
         break;
+      }
       case Parameter_Type::Color:
       case Parameter_Type::Vector2:
       case Parameter_Type::Vector3:
       case Parameter_Type::Normal:
       case Parameter_Type::Point2:
       case Parameter_Type::Point3:
-      case Parameter_Type::Real:
-        payload = vector<float>();
+      case Parameter_Type::Real: {
+        auto result = vector<float>();
+        result.reserve(reserve_size);
+        payload = result;
         break;
-      case Parameter_Type::Integer:
-        payload = vector<int>();
+      }
+      case Parameter_Type::Integer: {
+        auto result = vector<int>();
+        result.reserve(reserve_size);
+        payload = result;
         break;
+      }
       case Parameter_Type::Bxdf:
       case Parameter_Type::Parameter:
       case Parameter_Type::String:
-      case Parameter_Type::Texture:
-        payload = vector<std::string>();
+      case Parameter_Type::Texture: {
+        auto result = vector<std::string>();
+        result.reserve(reserve_size);
+        payload = result;
         break;
-      case Parameter_Type::Pointer:
-        payload = vector<void *>();
+      }
+      case Parameter_Type::Pointer: {
+        auto result = vector<void*>();
+        result.reserve(reserve_size);
+        payload = result;
         break;
+      }
       case Parameter_Type::Unknown:
         break;
     }
@@ -111,13 +126,13 @@ class Parsed_Parameter {
   {
     return std::get<vector<uint8_t>>(payload);
   }
-  vector<void*> const &pointers() const
+  vector<void *> const &pointers() const
   {
-    return std::get<vector<void*>>(payload);
+    return std::get<vector<void *>>(payload);
   }
-  vector<void*> &pointers()
+  vector<void *> &pointers()
   {
-    return std::get<vector<void*>>(payload);
+    return std::get<vector<void *>>(payload);
   }
 
   Parameter_Type type = Parameter_Type::Unknown;
@@ -159,12 +174,13 @@ class Parsed_Parameter {
   }
   bool has_pointers() const
   {
-    return std::holds_alternative<vector<void*>>(payload);
+    return std::holds_alternative<vector<void *>>(payload);
   }
   ///@}
   /// @name Measurement
   ///@{
-  size_t size() {
+  size_t size()
+  {
     size_t result = sizeof(Parsed_Parameter);
     if (has_bools()) {
       result += bools().size() * sizeof(bool);
@@ -179,7 +195,7 @@ class Parsed_Parameter {
       result += strings().size() * sizeof(std::string);
     }
     else if (has_pointers()) {
-      result += pointers().size() * sizeof(void*);
+      result += pointers().size() * sizeof(void *);
     }
 
     return result;
@@ -195,7 +211,7 @@ class Parsed_Parameter {
   void add_int(int i);
   void add_string(std::string_view str);
   void add_bool(bool v);
-  void add_pointer(void* v);
+  void add_pointer(void *v);
   ///@}
 };  // end of class Parsed_Parameter
 
