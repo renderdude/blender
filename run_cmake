@@ -1,0 +1,48 @@
+#!/bin/bash
+
+cmake_build_type=Debug
+is_distributed=OFF
+
+while getopts b:d flag
+do
+    case "${flag}" in
+        b) cmake_build_type=${OPTARG};;
+        d) is_distributed=ON;;
+    esac
+done
+
+CXX="clang++"
+if [ $is_distributed == ON ]; then
+  CXX=$(which mpic++)
+  echo "CXX = $CXX"
+  if [ ! -e $CXX ]; then
+    echo "mpicxx not found; aborting."
+    exit
+  fi
+fi
+
+echo "Build Type = ${cmake_build_type}"
+echo "Distributed is ${is_distributed}"
+echo "C++ Compiler is ${CXX}"
+
+cmake -S . -B ../build_makefile \
+  -DCMAKE_BUILD_TYPE=${cmake_build_type} \
+  -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+  -DWITH_CYCLES_STANDALONE=ON \
+  -DWITH_CYCLES_DISTRIBUTED=${is_distributed} \
+  -G "Unix Makefiles"
+
+cmake -S . -B ../build_xcode_cycles \
+  -DCMAKE_BUILD_TYPE=${cmake_build_type} \
+  -DWITH_CYCLES_STANDALONE=ON \
+  -DWITH_CYCLES_DISTRIBUTED=${is_distributed} \
+  -G Xcode
+
+pushd ../blender-fork
+make update
+cmake -S . -B ../build_darwin \
+  -DCMAKE_BUILD_TYPE=${cmake_build_type} \
+  -G Xcode
+popd
+#cmake --build build_xcode
+
