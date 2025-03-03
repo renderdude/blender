@@ -474,8 +474,8 @@ constexpr int TokenOptional = 0;
 constexpr int TokenRequired = 1;
 
 static void resize_parameter(Parsed_Parameter *param,
-                             size_t per_facevarying_size,
-                             size_t per_vertex)
+                             size_t per_vertex,
+                             size_t per_facevarying_size)
 {
   size_t alloc_size = 0;
   if (param->storage == Container_Type::FaceVarying || param->storage == Container_Type::Varying) {
@@ -683,7 +683,7 @@ static Parsed_Parameter_Vector parse_parameters(
     if (per_facevarying_size > 0 || per_vertex > 0) {
       resize_parameter(param, per_facevarying_size, per_vertex);
     }
-    
+
     auto addVal = [&](const Token &t) {
       if (is_quoted_string(t.token)) {
         switch (valType) {
@@ -1546,18 +1546,21 @@ void parse(Ri *target, std::unique_ptr<Tokenizer> t)
           n_vertices.reserve(n_loops.size());
           parse_array_of_int(n_vertices);
 
-          auto result = std::reduce(n_vertices.begin(), n_vertices.end());
+          auto per_facevarying_size = std::reduce(n_vertices.begin(), n_vertices.end());
           std::vector<int> vertices;
-          vertices.reserve(result);
+          vertices.reserve(per_facevarying_size);
           parse_array_of_int(vertices);
 
           Parsed_Parameter_Vector params = parse_parameters(
-              nextToken, unget, [&](const Token &t, const char *msg) {
+              nextToken,
+              unget,
+              [&](const Token &t, const char *msg) {
                 std::string token = to_string_from_view(t.token);
                 std::string str = msg;
                 parse_error(str.c_str(), &t.loc);
               },
-              n_vertices.size(), result);
+              n_vertices.size(),
+              per_facevarying_size);
           target->PointsGeneralPolygons(
               n_loops, n_vertices, vertices, std::move(params), tok->loc);
         }
@@ -1565,18 +1568,23 @@ void parse(Ri *target, std::unique_ptr<Tokenizer> t)
           std::vector<int> n_vertices;
           parse_array_of_int(n_vertices);
 
-          auto result = std::reduce(n_vertices.begin(), n_vertices.end());
+          auto per_facevarying_size = std::reduce(n_vertices.begin(), n_vertices.end());
 
           std::vector<int> vertices;
-          vertices.reserve(result);
+          vertices.reserve(per_facevarying_size);
           parse_array_of_int(vertices);
 
           Parsed_Parameter_Vector params = parse_parameters(
-              nextToken, unget, [&](const Token &t, const char *msg) {
+              nextToken,
+              unget,
+              [&](const Token &t, const char *msg) {
                 std::string token = to_string_from_view(t.token);
                 std::string str = msg;
                 parse_error(str.c_str(), &t.loc);
-              });
+              },
+              n_vertices.size(),
+              per_facevarying_size);
+
           target->PointsPolygons(n_vertices, vertices, std::move(params), tok->loc);
         }
         else if (tok->token == "Polygon") {
