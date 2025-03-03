@@ -248,7 +248,7 @@ static void session_init()
 
   /* load scene */
   scene_init();
-
+  exit(1);
   /* add pass for output. */
   Pass *pass = options.scene->create_node<Pass>();
   pass->set_name(ustring(options.output_pass.c_str()));
