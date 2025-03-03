@@ -814,14 +814,17 @@ Parsed_Parameter *RIBCyclesMesh::compute_triangulated_uniform_primvar(
 Parsed_Parameter *RIBCyclesMesh::compute_triangulated_face_varying_primvar(
     const Parsed_Parameter *param)
 {
+  const vector<int> nvertices = _shape.parameters.get_int_array("nvertices");
+  auto per_facevarying_size = std::reduce(nvertices.begin(), nvertices.end());
+  per_facevarying_size -= nvertices.size() * 2;
+  int elem_per_item = param->elem_per_item;
+
   Parsed_Parameter *result = new Parsed_Parameter(*param);
   vector<float> tmp;
+  tmp.reserve(per_facevarying_size * 3 * elem_per_item);
   result->floats().swap(tmp);
 
-  const vector<int> nvertices = _shape.parameters.get_int_array("nvertices");
-
   int index_offset = 0;
-  int elem_per_item = param->elem_per_item;
 
   for (size_t i = 0; i < nvertices.size(); i++) {
     for (int j = 0; j < nvertices[i] - 2; j++) {
