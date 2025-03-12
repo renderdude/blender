@@ -157,12 +157,8 @@ void BKE_main_clear(Main &bmain)
   }
 
   /* NOTE: `name_map` in libraries are freed together with the library IDs above. */
-  if (bmain.name_map) {
-    BKE_main_namemap_destroy(&bmain.name_map);
-  }
-  if (bmain.name_map_global) {
-    BKE_main_namemap_destroy(&bmain.name_map_global);
-  }
+  BKE_main_namemap_destroy(&bmain.name_map);
+  BKE_main_namemap_destroy(&bmain.name_map_global);
 }
 
 void BKE_main_destroy(Main &bmain)
@@ -448,9 +444,9 @@ void BKE_main_merge(Main *bmain_dst, Main **r_bmain_src, MainMergeReport &report
 
   /* Remapping above may have made some IDs local. So namemap needs to be cleared, and moved IDs
    * need to be re-sorted. */
-  BKE_main_namemap_clear(bmain_dst);
+  BKE_main_namemap_clear(*bmain_dst);
 
-  BLI_assert(BKE_main_namemap_validate(bmain_dst));
+  BLI_assert(BKE_main_namemap_validate(*bmain_dst));
 
   BKE_main_free(bmain_src);
   *r_bmain_src = nullptr;
@@ -779,7 +775,7 @@ void BKE_main_library_weak_reference_add(ID *local_id,
                                          const char *library_id_name)
 {
   if (local_id->library_weak_reference == nullptr) {
-    local_id->library_weak_reference = MEM_cnew<LibraryWeakReference>(__func__);
+    local_id->library_weak_reference = MEM_callocN<LibraryWeakReference>(__func__);
   }
 
   STRNCPY(local_id->library_weak_reference->library_filepath, library_filepath);
@@ -820,7 +816,7 @@ BlendThumbnail *BKE_main_thumbnail_from_imbuf(Main *bmain, ImBuf *img)
     const size_t data_size = BLEN_THUMB_MEMSIZE(img->x, img->y);
     data = static_cast<BlendThumbnail *>(MEM_mallocN(data_size, __func__));
 
-    IMB_rect_from_float(img); /* Just in case... */
+    IMB_byte_from_float(img); /* Just in case... */
     data->width = img->x;
     data->height = img->y;
     memcpy(data->rect, img->byte_buffer.data, data_size - sizeof(*data));

@@ -1,9 +1,9 @@
 
 msgid ""
 msgstr ""
-"Project-Id-Version: Blender 4.4.0 Beta (b'63c460d93d55')\n"
+"Project-Id-Version: Blender 4.4.0 Beta (b'eceb81b21fa3')\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-24 09:56+0000\n"
+"POT-Creation-Date: 2025-03-10 09:31+0000\n"
 "PO-Revision-Date: 2025-01-27 09:56+0000\n"
 "Last-Translator: Sander Spolspoel <sander@sworl.be>\n"
 "Language-Team: Dutch <https://translate.blender.org/projects/blender-ui/ui/nl/>\n"
@@ -2464,11 +2464,6 @@ msgid "Mirror Y"
 msgstr "Spiegel Y"
 
 
-msgctxt "Sequence"
-msgid "Clip"
-msgstr "Clip"
-
-
 msgid "Workspace"
 msgstr "Werkomgeving"
 
@@ -2703,6 +2698,10 @@ msgid "Mask"
 msgstr "Mask"
 
 
+msgid "Show/Hide"
+msgstr "Toon/Verberg"
+
+
 msgid "Mirror"
 msgstr "Spiegel"
 
@@ -2741,10 +2740,6 @@ msgstr "Star Lichaam"
 
 msgid "Quick Effects"
 msgstr "Snelle Effecten"
-
-
-msgid "Show/Hide"
-msgstr "Toon/Verberg"
 
 
 msgid "Convert"
@@ -6935,6 +6930,11 @@ msgstr "Scene"
 msgctxt "Sequence"
 msgid "Movie"
 msgstr "Film"
+
+
+msgctxt "Sequence"
+msgid "Clip"
+msgstr "Clip"
 
 
 msgctxt "Sequence"

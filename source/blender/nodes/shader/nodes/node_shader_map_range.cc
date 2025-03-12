@@ -106,7 +106,7 @@ static void node_shader_update_map_range(bNodeTree *ntree, bNode *node)
 
 static void node_shader_init_map_range(bNodeTree * /*ntree*/, bNode *node)
 {
-  NodeMapRange *data = MEM_cnew<NodeMapRange>(__func__);
+  NodeMapRange *data = MEM_callocN<NodeMapRange>(__func__);
   data->clamp = 1;
   data->data_type = CD_PROP_FLOAT;
   data->interpolation_type = NODE_MAP_RANGE_LINEAR;
@@ -524,7 +524,7 @@ void register_node_type_sh_map_range()
 
   static blender::bke::bNodeType ntype;
 
-  sh_fn_node_type_base(&ntype, "ShaderNodeMapRange", SH_NODE_MAP_RANGE);
+  common_node_type_base(&ntype, "ShaderNodeMapRange", SH_NODE_MAP_RANGE);
   ntype.ui_name = "Map Range";
   ntype.ui_description = "Remap a value from a range to a target range";
   ntype.enum_name_legacy = "MAP_RANGE";

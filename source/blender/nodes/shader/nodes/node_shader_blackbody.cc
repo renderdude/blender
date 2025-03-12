@@ -29,7 +29,7 @@ static int node_shader_gpu_blackbody(GPUMaterial *mat,
                                      GPUNodeStack *out)
 {
   const int size = CM_TABLE + 1;
-  float *data = static_cast<float *>(MEM_mallocN(sizeof(float) * size * 4, "blackbody texture"));
+  float *data = MEM_malloc_arrayN<float>(size * 4, "blackbody texture");
 
   IMB_colormanagement_blackbody_temperature_to_rgb_table(data, size, 800.0f, 12000.0f);
 
@@ -70,7 +70,7 @@ void register_node_type_sh_blackbody()
 
   static blender::bke::bNodeType ntype;
 
-  sh_fn_node_type_base(&ntype, "ShaderNodeBlackbody", SH_NODE_BLACKBODY);
+  common_node_type_base(&ntype, "ShaderNodeBlackbody", SH_NODE_BLACKBODY);
   ntype.ui_name = "Blackbody";
   ntype.ui_description = "Convert a blackbody temperature to an RGB value";
   ntype.enum_name_legacy = "BLACKBODY";

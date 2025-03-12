@@ -34,7 +34,7 @@ static void node_declare(NodeDeclarationBuilder &b)
       .hide_value()
       .description(
           "An index used to group curves together. Filling is done separately for each group");
-  b.add_output<decl::Geometry>("Mesh");
+  b.add_output<decl::Geometry>("Mesh").propagate_all();
 }
 
 static void node_layout(uiLayout *layout, bContext * /*C*/, PointerRNA *ptr)
@@ -44,7 +44,7 @@ static void node_layout(uiLayout *layout, bContext * /*C*/, PointerRNA *ptr)
 
 static void node_init(bNodeTree * /*tree*/, bNode *node)
 {
-  NodeGeometryCurveFill *data = MEM_cnew<NodeGeometryCurveFill>(__func__);
+  NodeGeometryCurveFill *data = MEM_callocN<NodeGeometryCurveFill>(__func__);
 
   data->mode = GEO_NODE_CURVE_FILL_MODE_TRIANGULATED;
   node->storage = data;

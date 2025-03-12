@@ -174,7 +174,7 @@ static BPyPropStore *bpy_prop_py_data_ensure(PropertyRNA *prop)
 {
   BPyPropStore *prop_store = static_cast<BPyPropStore *>(RNA_property_py_data_get(prop));
   if (prop_store == nullptr) {
-    prop_store = static_cast<BPyPropStore *>(MEM_callocN(sizeof(*prop_store), __func__));
+    prop_store = MEM_callocN<BPyPropStore>(__func__);
     RNA_def_py_data(prop, prop_store);
     BLI_addtail(&g_bpy_prop_store_list, prop_store);
   }
@@ -1763,8 +1763,7 @@ static const EnumPropertyItem *enum_items_from_py(PyObject *seq_fast,
   /* blank value */
   *r_default_value = 0;
 
-  items = static_cast<EnumPropertyItem *>(
-      MEM_callocN(sizeof(EnumPropertyItem) * (seq_len + 1), "enum_items_from_py1"));
+  items = MEM_calloc_arrayN<EnumPropertyItem>(size_t(seq_len) + 1, "enum_items_from_py1");
 
   for (i = 0; i < seq_len; i++) {
     EnumPropertyItem tmp = {0, "", 0, "", ""};
@@ -4275,11 +4274,6 @@ PyObject *BPy_PointerProperty(PyObject *self, PyObject *args, PyObject *kw)
     bpy_prop_assign_flag_override(prop, override_enum.value);
   }
 
-  if (RNA_struct_is_a(ptype, &RNA_PropertyGroup)) {
-    /* Set the flag for generated documentation. */
-    RNA_def_property_flag(prop, PROP_NEVER_NULL);
-  }
-
   if (RNA_struct_idprops_contains_datablock(ptype)) {
     if (RNA_struct_is_a(srna, &RNA_PropertyGroup)) {
       RNA_def_struct_flag(srna, STRUCT_CONTAINS_DATABLOCK_IDPROPERTIES);
@@ -4416,9 +4410,6 @@ PyObject *BPy_CollectionProperty(PyObject *self, PyObject *args, PyObject *kw)
   if (override_enum.is_set) {
     bpy_prop_assign_flag_override(prop, override_enum.value);
   }
-
-  /* Set the flag for generated documentation. */
-  RNA_def_property_flag(prop, PROP_NEVER_NULL);
 
   if (RNA_struct_idprops_contains_datablock(ptype)) {
     if (RNA_struct_is_a(srna, &RNA_PropertyGroup)) {

@@ -53,7 +53,7 @@ static void cmp_node_vec_blur_declare(NodeDeclarationBuilder &b)
 /* custom1: iterations, custom2: max_speed (0 = no_limit). */
 static void node_composit_init_vecblur(bNodeTree * /*ntree*/, bNode *node)
 {
-  NodeBlurData *nbd = MEM_cnew<NodeBlurData>(__func__);
+  NodeBlurData *nbd = MEM_callocN<NodeBlurData>(__func__);
   node->storage = nbd;
   nbd->samples = 32;
   nbd->fac = 0.25f;
@@ -519,10 +519,10 @@ class VectorBlurOperation : public NodeOperation {
 
   void execute() override
   {
-    Result &input = get_input("Image");
-    Result &output = get_result("Image");
+    const Result &input = this->get_input("Image");
     if (input.is_single_value()) {
-      input.pass_through(output);
+      Result &output = this->get_result("Image");
+      output.share_data(input);
       return;
     }
 

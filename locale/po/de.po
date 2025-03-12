@@ -1,18 +1,18 @@
 
 msgid ""
 msgstr ""
-"Project-Id-Version: Blender 4.4.0 Beta (b'63c460d93d55')\n"
+"Project-Id-Version: Blender 4.4.0 Beta (b'eceb81b21fa3')\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-24 09:56+0000\n"
-"PO-Revision-Date: 2024-12-08 20:56+0000\n"
-"Last-Translator: Thomas Radeke <rahdick@gmx.de>\n"
+"POT-Creation-Date: 2025-03-10 09:31+0000\n"
+"PO-Revision-Date: 2025-03-03 11:29+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: German <https://translate.blender.org/projects/blender-ui/ui/de/>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.8.3"
+"X-Generator: Weblate 5.10.1"
 
 
 msgid "Shader AOV"
@@ -16293,11 +16293,6 @@ msgid "Grids"
 msgstr "Raster"
 
 
-msgctxt "Sequence"
-msgid "Clip"
-msgstr "Clip"
-
-
 msgid "Velocity X Grid"
 msgstr "Velocity X-Raster"
 
@@ -18876,12 +18871,36 @@ msgid "Material slot name"
 msgstr "Materialsteckplatzname"
 
 
-msgid "Mirror"
-msgstr "Spiegeln"
+msgid "Show/Hide"
+msgstr "Zeigen/Verbergen"
+
+
+msgid "Clean Up"
+msgstr "Aufräumen"
+
+
+msgid "Pivot Point"
+msgstr "Drehpunkt"
 
 
 msgid "Snap"
 msgstr "Einrasten"
+
+
+msgid "Proportional Editing Falloff"
+msgstr "Proportionaler Bearbeitungsabfall"
+
+
+msgid "Mask Edit"
+msgstr "Maskenbearbeitung"
+
+
+msgid "Vertex Group Locks"
+msgstr "Punktgruppen sperren"
+
+
+msgid "Mirror"
+msgstr "Spiegeln"
 
 
 msgid "Local View"
@@ -18968,14 +18987,6 @@ msgid "Quick Effects"
 msgstr "Schnelle Effekte"
 
 
-msgid "Show/Hide"
-msgstr "Zeigen/Verbergen"
-
-
-msgid "Clean Up"
-msgstr "Aufräumen"
-
-
 msgid "Asset"
 msgstr "Asset"
 
@@ -18990,10 +19001,6 @@ msgstr "Konvertieren"
 
 msgid "Hooks"
 msgstr "Haken"
-
-
-msgid "Vertex Group Locks"
-msgstr "Punktgruppen sperren"
 
 
 msgid "Random Mask"
@@ -19046,18 +19053,6 @@ msgstr "Kerning"
 
 msgid "Text"
 msgstr "Text"
-
-
-msgid "Pivot Point"
-msgstr "Drehpunkt"
-
-
-msgid "Proportional Editing Falloff"
-msgstr "Proportionaler Bearbeitungsabfall"
-
-
-msgid "Mask Edit"
-msgstr "Maskenbearbeitung"
 
 
 msgid "Assets"
@@ -47150,6 +47145,11 @@ msgstr "Film"
 
 
 msgctxt "Sequence"
+msgid "Clip"
+msgstr "Clip"
+
+
+msgctxt "Sequence"
 msgid "Mask"
 msgstr "Maske"
 
@@ -47210,10 +47210,6 @@ msgstr "Input 2"
 
 msgid "Animation End Offset"
 msgstr "Animations-Endversatz"
-
-
-msgid "Animation end offset (trim end)"
-msgstr "Simulation:"
 
 
 msgid "Animation Start Offset"
@@ -50712,10 +50708,6 @@ msgstr "Diese Einstellungen haben einen signifikanten"
 
 msgid "performance impact!"
 msgstr "Performancebeeinflussung!"
-
-
-msgid "Built without VR/OpenXR features"
-msgstr "Baue ohne VR/OpenXR Eigenschaften"
 
 
 msgctxt "Operator"
@@ -56320,10 +56312,6 @@ msgid "OS"
 msgstr "OS"
 
 
-msgid "Home"
-msgstr "Home"
-
-
 msgid "Esc"
 msgstr "Esc"
 
@@ -57972,6 +57960,10 @@ msgstr "Asset Kataloge"
 
 msgid "Date Modified"
 msgstr "Datum Modifiziert"
+
+
+msgid "Home"
+msgstr "Home"
 
 
 msgid "Desktop"

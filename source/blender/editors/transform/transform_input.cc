@@ -312,7 +312,7 @@ static int transform_seq_slide_cursor_get(TransInfo *t)
   }
 
   const Scene *scene = t->scene;
-  VectorSet<Strip *> strips = ED_sequencer_selected_strips_from_context(t->context);
+  VectorSet<Strip *> strips = vse::selected_strips_from_context(t->context);
 
   if (strips.size() == 1) {
     return transform_seq_slide_strip_cursor_get(strips[0]);
@@ -321,7 +321,8 @@ static int transform_seq_slide_cursor_get(TransInfo *t)
     Strip *seq1 = strips[0];
     Strip *seq2 = strips[1];
 
-    if (SEQ_time_left_handle_frame_get(scene, seq1) > SEQ_time_left_handle_frame_get(scene, seq2))
+    if (seq::time_left_handle_frame_get(scene, seq1) >
+        seq::time_left_handle_frame_get(scene, seq2))
     {
       SWAP(Strip *, seq1, seq2);
     }
@@ -330,8 +331,8 @@ static int transform_seq_slide_cursor_get(TransInfo *t)
       return WM_CURSOR_NSEW_SCROLL;
     }
 
-    if (SEQ_time_right_handle_frame_get(scene, seq1) !=
-        SEQ_time_left_handle_frame_get(scene, seq2))
+    if (seq::time_right_handle_frame_get(scene, seq1) !=
+        seq::time_left_handle_frame_get(scene, seq2))
     {
       return WM_CURSOR_NSEW_SCROLL;
     }
@@ -430,6 +431,10 @@ void initMouseInputMode(TransInfo *t, MouseInput *mi, MouseInputMode mode)
       mi->apply = nullptr;
       t->helpline = HLP_ERROR;
       break;
+    case INPUT_ERROR_DASH:
+      mi->apply = nullptr;
+      t->helpline = HLP_ERROR_DASH;
+      break;
     case INPUT_NONE:
     default:
       mi->apply = nullptr;
@@ -472,6 +477,7 @@ void initMouseInputMode(TransInfo *t, MouseInput *mi, MouseInputMode mode)
       }
       break;
     case HLP_ERROR:
+    case HLP_ERROR_DASH:
       t->flag |= T_MODAL_CURSOR_SET;
       WM_cursor_modal_set(win, WM_CURSOR_STOP);
       break;

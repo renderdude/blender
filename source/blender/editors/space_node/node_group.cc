@@ -321,10 +321,8 @@ static void node_group_ungroup(Main *bmain, bNodeTree *ntree, bNode *gnode)
                   animation_basepath_change_new(*old_animation_basepath, *new_animation_basepath));
     }
 
-    if (!node->parent) {
-      node->location[0] += gnode->location[0];
-      node->location[1] += gnode->location[1];
-    }
+    node->location[0] += gnode->location[0];
+    node->location[1] += gnode->location[1];
 
     node->flag |= NODE_SELECT;
   }
@@ -466,8 +464,8 @@ static int node_group_ungroup_exec(bContext *C, wmOperator * /*op*/)
 
   ED_preview_kill_jobs(CTX_wm_manager(C), bmain);
 
-  blender::Vector<bNode *> nodes_to_ungroup;
-  LISTBASE_FOREACH (bNode *, node, &snode->edittree->nodes) {
+  Vector<bNode *> nodes_to_ungroup;
+  for (bNode *node : snode->edittree->all_nodes()) {
     if (node->flag & NODE_SELECT) {
       if (node->idname == node_idname) {
         if (node->id != nullptr) {

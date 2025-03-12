@@ -1005,21 +1005,21 @@ static void area_azone_init(const wmWindow *win, const bScreen *screen, ScrArea 
       /* Bottom-left. */
       {area->totrct.xmin - U.pixelsize,
        area->totrct.ymin - U.pixelsize,
-       area->totrct.xmin + AZONESPOTW,
-       area->totrct.ymin + AZONESPOTH},
+       area->totrct.xmin + UI_AZONESPOTW,
+       area->totrct.ymin + UI_AZONESPOTH},
       /* Bottom-right. */
-      {area->totrct.xmax - AZONESPOTW,
+      {area->totrct.xmax - UI_AZONESPOTW,
        area->totrct.ymin - U.pixelsize,
        area->totrct.xmax + U.pixelsize,
-       area->totrct.ymin + AZONESPOTH},
+       area->totrct.ymin + UI_AZONESPOTH},
       /* Top-left. */
       {area->totrct.xmin - U.pixelsize,
-       area->totrct.ymax - AZONESPOTH,
-       area->totrct.xmin + AZONESPOTW,
+       area->totrct.ymax - UI_AZONESPOTH,
+       area->totrct.xmin + UI_AZONESPOTW,
        area->totrct.ymax + U.pixelsize},
       /* Top-right. */
-      {area->totrct.xmax - AZONESPOTW,
-       area->totrct.ymax - AZONESPOTH,
+      {area->totrct.xmax - UI_AZONESPOTW,
+       area->totrct.ymax - UI_AZONESPOTH,
        area->totrct.xmax + U.pixelsize,
        area->totrct.ymax + U.pixelsize},
   };
@@ -1264,12 +1264,10 @@ static void region_azones_scrollbars_init(ScrArea *area, ARegion *region)
 {
   const View2D *v2d = &region->v2d;
 
-  if ((v2d->scroll & V2D_SCROLL_VERTICAL) && ((v2d->scroll & V2D_SCROLL_VERTICAL_HANDLES) == 0)) {
+  if (v2d->scroll & V2D_SCROLL_VERTICAL) {
     region_azone_scrollbar_init(area, region, AZ_SCROLL_VERT);
   }
-  if ((v2d->scroll & V2D_SCROLL_HORIZONTAL) &&
-      ((v2d->scroll & V2D_SCROLL_HORIZONTAL_HANDLES) == 0))
-  {
+  if (v2d->scroll & V2D_SCROLL_HORIZONTAL) {
     region_azone_scrollbar_init(area, region, AZ_SCROLL_HOR);
   }
 }
@@ -2604,9 +2602,6 @@ void ED_area_newspace(bContext *C, ScrArea *area, int type, const bool skip_regi
   wmWindow *win = CTX_wm_window(C);
   SpaceType *st = BKE_spacetype_from_id(type);
 
-  /* Are we reusing a space already stored in this area? */
-  bool is_restored_space = false;
-
   if (area->spacetype != type) {
     SpaceLink *slold = static_cast<SpaceLink *>(area->spacedata.first);
     /* store area->type->exit callback */
@@ -2670,7 +2665,6 @@ void ED_area_newspace(bContext *C, ScrArea *area, int type, const bool skip_regi
 
     if (sl) {
       /* swap regions */
-      is_restored_space = true;
       slold->regionbase = area->regionbase;
       area->regionbase = sl->regionbase;
       BLI_listbase_clear(&sl->regionbase);
@@ -2716,10 +2710,20 @@ void ED_area_newspace(bContext *C, ScrArea *area, int type, const bool skip_regi
     ED_area_tag_refresh(area);
   }
 
-  /* Set area space subtype if applicable and newly created. */
-  if (!is_restored_space && st && st->space_subtype_item_extend != nullptr) {
+  /* Set area space subtype if applicable. */
+  if (st && st->space_subtype_item_extend != nullptr) {
+    if (area->butspacetype_subtype == -1) {
+      /* Indication (probably from space_type_set_or_cycle) to ignore the
+       * area's current subtype and use last-used, as saved in the space. */
+      area->butspacetype_subtype = st->space_subtype_get(area);
+    }
     st->space_subtype_set(area, area->butspacetype_subtype);
   }
+
+  /* Whether setting a subtype or not we need to clear this value. Not just unneeded
+   * but can interfere with the next change. Operations can change the type without
+   * specifying a subtype (assumed zero) and we don't want to use the old subtype. */
+  area->butspacetype_subtype = 0;
 
   if (BLI_listbase_is_single(&CTX_wm_screen(C)->areabase)) {
     /* If there is only one area update the window title. */

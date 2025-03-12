@@ -172,7 +172,7 @@ static void cmp_node_glare_declare(NodeDeclarationBuilder &b)
 
 static void node_composit_init_glare(bNodeTree * /*ntree*/, bNode *node)
 {
-  NodeGlare *ndg = MEM_cnew<NodeGlare>(__func__);
+  NodeGlare *ndg = MEM_callocN<NodeGlare>(__func__);
   ndg->quality = 1;
   ndg->type = CMP_NODE_GLARE_STREAKS;
   ndg->star_45 = true;
@@ -220,14 +220,14 @@ class GlareOperation : public NodeOperation {
 
   void execute() override
   {
-    Result &image_input = this->get_input("Image");
-    Result &image_output = this->get_result("Image");
+    const Result &image_input = this->get_input("Image");
     Result &glare_output = this->get_result("Glare");
     Result &highlights_output = this->get_result("Highlights");
 
     if (image_input.is_single_value()) {
+      Result &image_output = this->get_result("Image");
       if (image_output.should_compute()) {
-        image_input.pass_through(image_output);
+        image_output.share_data(image_input);
       }
       if (glare_output.should_compute()) {
         glare_output.allocate_invalid();

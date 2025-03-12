@@ -146,7 +146,7 @@ bNodeSocket *ntreeCompositOutputFileAddSocket(bNodeTree *ntree,
       *ntree, *node, SOCK_IN, SOCK_RGBA, PROP_NONE, "", name);
 
   /* create format data for the input socket */
-  NodeImageMultiFileSocket *sockdata = MEM_cnew<NodeImageMultiFileSocket>(__func__);
+  NodeImageMultiFileSocket *sockdata = MEM_callocN<NodeImageMultiFileSocket>(__func__);
   sock->storage = sockdata;
 
   STRNCPY_UTF8(sockdata->path, name);
@@ -220,7 +220,7 @@ static void init_output_file(const bContext *C, PointerRNA *ptr)
   Scene *scene = CTX_data_scene(C);
   bNodeTree *ntree = (bNodeTree *)ptr->owner_id;
   bNode *node = (bNode *)ptr->data;
-  NodeImageMultiFile *nimf = MEM_cnew<NodeImageMultiFile>(__func__);
+  NodeImageMultiFile *nimf = MEM_callocN<NodeImageMultiFile>(__func__);
   nimf->save_as_render = true;
   ImageFormatData *format = nullptr;
   node->storage = nimf;
@@ -710,8 +710,8 @@ class FileOutputOperation : public NodeOperation {
 
     switch (result.type()) {
       case ResultType::Float: {
-        float *buffer = static_cast<float *>(MEM_malloc_arrayN(
-            size_t(size.x) * size.y, sizeof(float), "File Output Inflated Buffer."));
+        float *buffer = MEM_malloc_arrayN<float>(size_t(size.x) * size_t(size.y),
+                                                 "File Output Inflated Buffer.");
 
         const float value = result.get_single_value<float>();
         parallel_for(
@@ -719,8 +719,8 @@ class FileOutputOperation : public NodeOperation {
         return buffer;
       }
       case ResultType::Color: {
-        float *buffer = static_cast<float *>(MEM_malloc_arrayN(
-            size_t(size.x) * size.y, sizeof(float[4]), "File Output Inflated Buffer."));
+        float *buffer = MEM_malloc_arrayN<float>(4 * size_t(size.x) * size_t(size.y),
+                                                 "File Output Inflated Buffer.");
 
         const float4 value = result.get_single_value<float4>();
         parallel_for(size, [&](const int2 texel) {
@@ -729,8 +729,8 @@ class FileOutputOperation : public NodeOperation {
         return buffer;
       }
       case ResultType::Float4: {
-        float *buffer = static_cast<float *>(MEM_malloc_arrayN(
-            size_t(size.x) * size.y, sizeof(float[4]), "File Output Inflated Buffer."));
+        float *buffer = MEM_malloc_arrayN<float>(4 * size_t(size.x) * size_t(size.y),
+                                                 "File Output Inflated Buffer.");
 
         const float4 value = result.get_single_value<float4>();
         parallel_for(size, [&](const int2 texel) {
@@ -739,8 +739,8 @@ class FileOutputOperation : public NodeOperation {
         return buffer;
       }
       case ResultType::Float3: {
-        float *buffer = static_cast<float *>(MEM_malloc_arrayN(
-            size_t(size.x) * size.y, sizeof(float[3]), "File Output Inflated Buffer."));
+        float *buffer = MEM_malloc_arrayN<float>(3 * size_t(size.x) * size_t(size.y),
+                                                 "File Output Inflated Buffer.");
 
         const float3 value = result.get_single_value<float3>();
         parallel_for(size, [&](const int2 texel) {
@@ -808,8 +808,8 @@ class FileOutputOperation : public NodeOperation {
    * input image is freed. */
   float *float4_to_float3_image(int2 size, float *float4_image)
   {
-    float *float3_image = static_cast<float *>(MEM_malloc_arrayN(
-        size_t(size.x) * size.y, sizeof(float[3]), "File Output Vector Buffer."));
+    float *float3_image = MEM_malloc_arrayN<float>(3 * size_t(size.x) * size_t(size.y),
+                                                   "File Output Vector Buffer.");
 
     parallel_for(size, [&](const int2 texel) {
       for (int i = 0; i < 3; i++) {

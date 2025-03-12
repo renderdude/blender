@@ -1464,9 +1464,9 @@ class VIEW3D_MT_view(Menu):
         layout.separator()
 
         if context.mode in {'PAINT_TEXTURE', 'PAINT_VERTEX', 'PAINT_WEIGHT', 'SCULPT'}:
-            layout.operator("view3d.view_selected", text="Frame Last Stroke").use_all_regions = False
+            layout.operator("view3d.view_selected", text="Frame Last Stroke")
         else:
-            layout.operator("view3d.view_selected", text="Frame Selected").use_all_regions = False
+            layout.operator("view3d.view_selected", text="Frame Selected")
         if view.region_quadviews:
             layout.operator("view3d.view_selected", text="Frame Selected (Quad View)").use_all_regions = True
 
@@ -3195,6 +3195,7 @@ class VIEW3D_MT_object_apply(Menu):
             text="Visual Geometry to Mesh",
             text_ctxt=i18n_contexts.default,
         ).target = 'MESH'
+        layout.operator("object.visual_geometry_to_objects")
         layout.operator("object.duplicates_make_real")
         layout.operator("object.parent_inverse_apply", text="Parent Inverse", text_ctxt=i18n_contexts.default)
 
@@ -3895,6 +3896,8 @@ class VIEW3D_MT_mask(Menu):
         props = layout.operator("sculpt.mask_from_boundary", text="Mask from Face Sets Boundary")
         props.settings_source = 'OPERATOR'
         props.boundary_mode = 'FACE_SETS'
+
+        props = layout.operator("sculpt.mask_by_color", text="Mask by Color")
 
         layout.separator()
 
@@ -5857,14 +5860,25 @@ class VIEW3D_MT_edit_curves(Menu):
         layout = self.layout
 
         layout.menu("VIEW3D_MT_transform")
+        layout.menu("VIEW3D_MT_mirror")
+        layout.menu("VIEW3D_MT_snap")
+
         layout.separator()
+
         layout.operator("curves.duplicate_move")
+        layout.operator("curves.extrude_move")
+
         layout.separator()
+
         layout.operator("curves.attribute_set")
-        layout.operator("curves.delete")
-        layout.operator("curves.cyclic_toggle")
         layout.operator_menu_enum("curves.curve_type_set", "type")
+        layout.operator("curves.cyclic_toggle")
         layout.template_node_operator_asset_menu_items(catalog_path=self.bl_label)
+
+        layout.separator()
+
+        layout.operator("curves.separate")
+        layout.operator("curves.delete")
 
 
 class VIEW3D_MT_edit_curves_control_points(Menu):
@@ -5895,12 +5909,32 @@ class VIEW3D_MT_edit_curves_context_menu(Menu):
 
         layout.operator_context = 'INVOKE_DEFAULT'
 
+        # Additive Operators
         layout.operator("curves.subdivide")
+
+        layout.separator()
+
         layout.operator("curves.extrude_move")
 
         layout.separator()
 
+        # Deform Operators
+        layout.menu("VIEW3D_MT_mirror")
+        layout.menu("VIEW3D_MT_snap")
+
+        layout.separator()
+
+        # Modify Flags
+        layout.operator_menu_enum("curves.curve_type_set", "type")
         layout.operator_menu_enum("curves.handle_type_set", "type")
+        layout.operator("curves.cyclic_toggle")
+        layout.operator("curves.switch_direction")
+
+        layout.separator()
+
+        # Removal Operators
+        layout.operator("curves.separate")
+        layout.operator("curves.delete")
 
         layout.separator()
 
@@ -6718,14 +6752,14 @@ class VIEW3D_PT_shading_options(Panel):
             row.prop(shading, "use_dof", text="Depth of Field")
 
         if shading.type in {'WIREFRAME', 'SOLID'}:
-            row = layout.split()
+            row = col.split()
             row.prop(shading, "show_object_outline")
             sub = row.row()
             sub.active = shading.show_object_outline
             sub.prop(shading, "object_outline_color", text="")
 
         if shading.type == 'SOLID':
-            col = layout.column()
+            col = col.column()
             if shading.light in {'STUDIO', 'MATCAP'}:
                 studio_light = shading.selected_studio_light
                 col.active = (studio_light is not None) and studio_light.has_specular_highlight_pass

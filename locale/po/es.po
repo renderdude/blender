@@ -1,10 +1,10 @@
 
 msgid ""
 msgstr ""
-"Project-Id-Version: Blender 4.4.0 Beta (b'63c460d93d55')\n"
+"Project-Id-Version: Blender 4.4.0 Beta (b'eceb81b21fa3')\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-24 09:56+0000\n"
-"PO-Revision-Date: 2025-02-21 01:56+0000\n"
+"POT-Creation-Date: 2025-03-10 09:31+0000\n"
+"PO-Revision-Date: 2025-03-08 10:56+0000\n"
 "Last-Translator: Gabriel Gazzán <gabcorreo@gmail.com>\n"
 "Language-Team: Spanish <https://translate.blender.org/projects/blender-ui/ui/es/>\n"
 "Language: es\n"
@@ -12,7 +12,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.9.2"
+"X-Generator: Weblate 5.10.1"
 
 
 msgid "Shader AOV"
@@ -109,6 +109,10 @@ msgstr "Para cada contenedor de una acción, una lista de los canales de animaci
 
 msgid "Action F-Curves"
 msgstr "Curvas-f de la acción"
+
+
+msgid "Collection of action F-Curves. Note that this is a legacy API that is unaware of action slots, and will only consider the F-Curves for this action's first slot"
+msgstr "Colección de curvas-f de la acción. Nótese que se trata de una API antigua que no tiene conocimiento de las nuevas acciones con contenedores y que sólo considerará a las curvas-f del primer contenedor de la acción"
 
 
 msgid "Action Group"
@@ -740,8 +744,8 @@ msgid "HIP RT (Experimental)"
 msgstr "HIP RT (experimental)"
 
 
-msgid "HIP RT enables AMD hardware ray tracing on RDNA2 and above, with shader fallback on older cards. This feature is experimental and some scenes may render incorrectly"
-msgstr "HIP RT habilita el trazado de rayos por hardware en RDNA2 y superior de AMD, con un sombreador alternativo para placas más antiguas. Esta característica es experimental y es posible que algunas escenas sean procesadas de forma incorrecta"
+msgid "HIP RT enables AMD hardware ray tracing on RDNA2 and above. This feature is experimental and some scenes may render incorrectly"
+msgstr "HIP RT habilita el trazado de rayos por hardware en RDNA2 y superior de AMD. Esta característica es experimental y es posible que algunas escenas sean procesadas de forma incorrecta"
 
 
 msgid "Embree on GPU"
@@ -18107,6 +18111,10 @@ msgid "The combined frame range of all F-Curves within this action"
 msgstr "El rango combinado de fotogramas de todas las curvas-f en esta acción"
 
 
+msgid "Legacy API, for backward compatibility with code that does not handle slotted actions yet. This collection contains the F-Curves for the action's first slot"
+msgstr "API antigua, para proporcionar compatibilidad hacia atrás con código que no sea capaz aún de tratar con acciones con contenedores. Esta colección contendrá las curvas-f del primer contenedor de la acción"
+
+
 msgid "The end frame of the manually set intended playback range"
 msgstr "El fotograma final del rango de fotogramas de reproducción deseado, fijado manualmente"
 
@@ -18127,9 +18135,17 @@ msgid "Groups"
 msgstr "Grupos"
 
 
+msgid "Legacy API, for backward compatibility with code that does not handle slotted actions yet. This collection contains the F-Curve groups for the action's first slot"
+msgstr "API antigua, para proporcionar compatibilidad hacia atrás con código que no sea capaz aún de tratar con acciones con contenedores. Esta colección contendrá los grupos de curvas-f del primer contenedor de la acción"
+
+
 msgctxt "ID"
 msgid "ID Root Type"
 msgstr "Tipo de ID base"
+
+
+msgid "Legacy API, for backward compatibility with code that does not handle slotted actions yet. Type of data-block that the action's first slot can be used on. Do not change unless you know what you are doing"
+msgstr "API antigua, para proporcionar compatibilidad hacia atrás con código que no sea capaz aún de tratar con acciones con contenedores. Tipo de bloque de datos en el que podrá ser usado el primer contenedor de la acción. No cambiar a menos que se esté seguro de lo que se está haciendo"
 
 
 msgid "Is Layered Action"
@@ -18142,6 +18158,10 @@ msgstr "Indica si esta es una acción con capas. Una acción vacía será consid
 
 msgid "Is Legacy Action"
 msgstr "Es acción antigua"
+
+
+msgid "Return whether this is a legacy Action. Legacy Actions have no layers or slots. An empty Action considered as both a 'legacy' and a 'layered' Action. Since Blender 4.4 actions are automatically updated to layered actions, and thus this will only return True when the action is empty"
+msgstr "Indica si se trata de una acción antigua o no. Las acciones antiguas no contienen capas ni contenedores. Una acción vacía será considerada tanto una acción 'antigua' como una 'con capas'. A partir de Blender 4.4 las acciones serán actualizadas automáticamente a acciones con capas, por lo tanto esta salida sólo será verdadera cuando la acción se encuentre vacía"
 
 
 msgid "Is Empty"
@@ -27998,7 +28018,7 @@ msgstr "Frecuencia de muestreo del audio, expresada en Hz"
 
 
 msgid "Caching"
-msgstr "Cachear"
+msgstr "En caché"
 
 
 msgid "The sound file is decoded and loaded into RAM"
@@ -29257,7 +29277,7 @@ msgid "Volume render settings for 3D viewport"
 msgstr "Opciones de procesamiento de volúmenes para la vista 3D"
 
 
-msgctxt "Sequence"
+msgctxt "Volume"
 msgid "Sequence Mode"
 msgstr "Modo de secuencia"
 
@@ -29266,16 +29286,16 @@ msgid "Sequence playback mode"
 msgstr "Modo de reproducción de la secuencia"
 
 
-msgctxt "Sequence"
+msgctxt "Volume"
 msgid "Clip"
-msgstr "Clip"
+msgstr "Recortar"
 
 
 msgid "Hide frames outside the specified frame range"
 msgstr "Ocultar fotogramas por fuera del rango de fotogramas seleccionado"
 
 
-msgctxt "Sequence"
+msgctxt "Volume"
 msgid "Extend"
 msgstr "Extender"
 
@@ -29284,7 +29304,7 @@ msgid "Repeat the start frame before, and the end frame after the frame range"
 msgstr "Repetir el fotograma inicial antes, y el final después del rango de fotogramas"
 
 
-msgctxt "Sequence"
+msgctxt "Volume"
 msgid "Repeat"
 msgstr "Repetir"
 
@@ -29293,7 +29313,7 @@ msgid "Cycle the frames in the sequence"
 msgstr "Repetir cíclicamente los fotogramas de la secuencia"
 
 
-msgctxt "Sequence"
+msgctxt "Volume"
 msgid "Ping-Pong"
 msgstr "Ping pong"
 
@@ -33964,6 +33984,42 @@ msgid "Aligned Single"
 msgstr "Alineada única"
 
 
+msgid "Selection status of the control point. (Deprecated: use Select Control Point instead)"
+msgstr "Estado de selección el punto de control. (Obsoleto: usar Seleccionar punto de control)"
+
+
+msgid "Select Control Point"
+msgstr "Seleccionar punto de control"
+
+
+msgid "Selection status of the control point"
+msgstr "Estado de selección del punto de control"
+
+
+msgid "Select Left Handle"
+msgstr "Seleccionar asa izquierda"
+
+
+msgid "Selection status of the left handle"
+msgstr "Estado de selección del asa izquierda"
+
+
+msgid "Select Right Handle"
+msgstr "Seleccionar asa derecha"
+
+
+msgid "Selection status of the right handle"
+msgstr "Estado de selección del asa derecha"
+
+
+msgid "Select Aligned Single Handle"
+msgstr "Seleccionar asa individual alineada"
+
+
+msgid "Selection status of the Aligned Single handle"
+msgstr "Estado de selección del asa individual alineada"
+
+
 msgid "Weight of the point"
 msgstr "Influencia del punto"
 
@@ -34302,12 +34358,44 @@ msgid "Editor menu containing buttons"
 msgstr "Menú del editor que contiene botones"
 
 
-msgid "Mirror"
-msgstr "Simetrizar"
+msgid "Show/Hide"
+msgstr "Mostrar / Ocultar"
+
+
+msgid "Clean Up"
+msgstr "Limpiar"
+
+
+msgid "Pivot Point"
+msgstr "Punto de pivote"
 
 
 msgid "Snap"
 msgstr "Adherir"
+
+
+msgid "Proportional Editing Falloff"
+msgstr "Decaimiento de edición proporcional"
+
+
+msgid "Mask Edit"
+msgstr "Edición de máscara"
+
+
+msgid "Automasking"
+msgstr "Autoenmascarar"
+
+
+msgid "Face Sets Edit"
+msgstr "Edición de conjuntos de caras"
+
+
+msgid "Vertex Group Locks"
+msgstr "Bloqueos de grupo de vértices"
+
+
+msgid "Mirror"
+msgstr "Simetrizar"
 
 
 msgid "UV Mapping"
@@ -34398,14 +34486,6 @@ msgid "Quick Effects"
 msgstr "Efectos rápidos"
 
 
-msgid "Show/Hide"
-msgstr "Mostrar / Ocultar"
-
-
-msgid "Clean Up"
-msgstr "Limpiar"
-
-
 msgid "Asset"
 msgstr "Recurso"
 
@@ -34424,10 +34504,6 @@ msgstr "Vincular / Transferir datos"
 
 msgid "Hooks"
 msgstr "Asignar gancho"
-
-
-msgid "Vertex Group Locks"
-msgstr "Bloqueos de grupo de vértices"
 
 
 msgid "Trim/Add"
@@ -34512,26 +34588,6 @@ msgstr "Texto"
 
 msgid "Bone Roll"
 msgstr "Giro de huesos"
-
-
-msgid "Pivot Point"
-msgstr "Punto de pivote"
-
-
-msgid "Proportional Editing Falloff"
-msgstr "Decaimiento de edición proporcional"
-
-
-msgid "Mask Edit"
-msgstr "Edición de máscara"
-
-
-msgid "Automasking"
-msgstr "Autoenmascarar"
-
-
-msgid "Face Sets Edit"
-msgstr "Edición de conjuntos de caras"
 
 
 msgid "Keyframe Insert Pie"
@@ -42681,7 +42737,7 @@ msgstr "Convertirá la película a una secuencia de imágenes, ignorando fotogra
 
 
 msgid "Scopes for statistical view of a movie clip"
-msgstr "Instrumentos para la visualiazación estadística de un clip de película"
+msgstr "Instrumentos para la visualización estadística de un clip de película"
 
 
 msgid "Movie Clip User"
@@ -45888,7 +45944,7 @@ msgstr "Tolerancia hacia píxeles dentro del núcleo que serán considerados com
 
 
 msgid "Feather Distance"
-msgstr "Esfumado Distancia"
+msgstr "Distancia esfumado"
 
 
 msgid "Distance to grow/shrink the feather"
@@ -45897,7 +45953,7 @@ msgstr "Distancia a expandir o contraer el esfumado"
 
 msgctxt "Curve"
 msgid "Feather Falloff"
-msgstr "Esfumado Decaimiento"
+msgstr "Esfumado"
 
 
 msgid "Screen Balance"
@@ -60069,7 +60125,7 @@ msgstr "Edita una restricción del hueso activo"
 
 
 msgid "Report"
-msgstr "Reportar"
+msgstr "Reporte"
 
 
 msgid "Create a notification after the operation"
@@ -66199,6 +66255,14 @@ msgid "Set all stroke points to same opacity"
 msgstr "Define que todos los puntos del trazo tengan la misma opacidad"
 
 
+msgid "Fill Opacity"
+msgstr "Opacidad del relleno"
+
+
+msgid "Stroke Opacity"
+msgstr "Opacidad del trazo"
+
+
 msgctxt "Operator"
 msgid "Set Uniform Thickness"
 msgstr "Definir grosor uniforme"
@@ -67256,7 +67320,7 @@ msgstr "Definir línea"
 
 
 msgid "Sample a line and show it in Scope panels"
-msgstr "Permite definir una línea para tomarle muestras"
+msgstr "Permite definir una línea para mostrarla en los instrumentos"
 
 
 msgctxt "Operator"
@@ -85274,10 +85338,6 @@ msgid "Exports UVs from the modified mesh"
 msgstr "Exportar las UV de la malla modificada"
 
 
-msgid "Fill Opacity"
-msgstr "Opacidad de relleno"
-
-
 msgid "Set amount of opacity for exported UV layout"
 msgstr "Define la cantidad de opacidad para las UV exportadas"
 
@@ -89626,7 +89686,7 @@ msgstr "El tipo de operadores de transformación a escribir"
 
 
 msgid "Translate, Rotate, Scale"
-msgstr "Posición, Rotación, Escala"
+msgstr "Traslación, Rotación, Escala"
 
 
 msgid "Export with translate, rotate, and scale Xform operators"
@@ -89634,7 +89694,7 @@ msgstr "Exportar con operadores de traslación, rotación y escala"
 
 
 msgid "Translate, Orient, Scale"
-msgstr "Posición, Orientación, Escala"
+msgstr "Traslación, Orientación, Escala"
 
 
 msgid "Export with translate, orient quaternion, and scale Xform operators"
@@ -90917,6 +90977,14 @@ msgid "Curves Edit Mode"
 msgstr "Modo edición de curvas"
 
 
+msgid "glTF Variants"
+msgstr "Variantes glTF"
+
+
+msgid "glTF Material Variants"
+msgstr "Variantes de material glTF"
+
+
 msgid "Snapping"
 msgstr "Adherencia"
 
@@ -90945,20 +91013,20 @@ msgid "Onion Skin"
 msgstr "Piel de cebolla"
 
 
+msgid "glTF"
+msgstr "glTF"
+
+
+msgid "glTF Animations"
+msgstr "Animaciones glTF"
+
+
 msgid "Stereoscopy"
 msgstr "Estereoscopía"
 
 
 msgid "Multi Frame"
 msgstr "Multifotograma"
-
-
-msgid "glTF Variants"
-msgstr "Variantes glTF"
-
-
-msgid "glTF Material Variants"
-msgstr "Variantes de material glTF"
 
 
 msgid "Auto-Masking"
@@ -90979,14 +91047,6 @@ msgstr "Escala expandir/contraer curvas"
 
 msgid "Viewport Debug"
 msgstr "Depurar Vista 3D"
-
-
-msgid "glTF"
-msgstr "glTF"
-
-
-msgid "glTF Animations"
-msgstr "Animaciones glTF"
 
 
 msgid "VR"
@@ -94827,11 +94887,11 @@ msgid ""
 msgstr ""
 "Define el formato específico de los argumentos mediante los cuales el editor de texto abre los archivos. Las expansiones soportadas son las siguientes:\n"
 "\n"
-"$filepath La ruta absoluta al archivo.\n"
-"$line La línea en la cual abrir el archivo (opcional).\n"
-"$column La columna en la cual abrir, desde el comienzo de la línea (opcional).\n"
-"$line0 & column0 comienza en cero.\n"
-"Ejemplo: -f $filepath -l $line -c $column"
+" $filepath La ruta absoluta al archivo.\n"
+" $line La línea en la cual abrir el archivo (opcional).\n"
+" $column La columna en la cual abrir, desde el comienzo de la línea (opcional).\n"
+" $line0 & column0 comienza en cero.\n"
+" Ejemplo: -f $filepath -l $line -c $column"
 
 
 msgid "The default directory to search for textures"
@@ -102474,7 +102534,7 @@ msgstr "Habilita o deshabilita la vista de procesamiento"
 
 
 msgid "Scopes for statistical view of an image"
-msgstr "Instrumentos para la visualiazación estadística de una imagen"
+msgstr "Instrumentos para la visualización estadística de una imagen"
 
 
 msgid "Proportion of original image source pixel lines to sample"
@@ -106761,6 +106821,11 @@ msgstr "Video"
 
 
 msgctxt "Sequence"
+msgid "Clip"
+msgstr "Clip"
+
+
+msgctxt "Sequence"
 msgid "Mask"
 msgstr "Máscara"
 
@@ -109102,7 +109167,7 @@ msgstr "Unir previs - Vértice"
 
 
 msgid "Scope Region Background"
-msgstr "Alcance de fondo de región"
+msgstr "Instrumento - Fondo"
 
 
 msgid "Texture Paint/Modifier UVs"
@@ -117493,8 +117558,12 @@ msgid "Requires AMD GPU with RDNA architecture"
 msgstr "Requiere una GPU de AMD con arquitectura RDNA"
 
 
-msgid "and AMD Radeon Pro %s driver or newer"
-msgstr "y una versión del controlador Radeon Pro de AMD %s o más nueva"
+msgid "and AMD Adrenalin driver %s or newer"
+msgstr "y el controlador Adrenalin %s de AMD o más nuevo"
+
+
+msgid "or AMD Radeon Pro %s driver or newer"
+msgstr "o el controlador Radeon Pro %s de AMD o más nuevo"
 
 
 msgid "Requires Intel GPU with Xe-HPG architecture"
@@ -119130,10 +119199,6 @@ msgid "performance impact!"
 msgstr "impacto significativo en el rendimiento!"
 
 
-msgid "Built without VR/OpenXR features"
-msgstr "Compilado sin características de RV (OpenXR)"
-
-
 msgid "Start VR Session"
 msgstr "Iniciar sesión de RV"
 
@@ -119555,6 +119620,14 @@ msgid "No objects with bound-box selected"
 msgstr "Ningún objeto con volumen delimitador seleccionado"
 
 
+msgid "Smoke Domain"
+msgstr "Humo_dominio"
+
+
+msgid "Liquid Domain"
+msgstr "Líquido_dominio"
+
+
 msgid "Select at least one mesh object"
 msgstr "Seleccionar al menos un objeto poligonal"
 
@@ -119587,6 +119660,14 @@ msgid "Built without Fluid modifier"
 msgstr "Construido sin el modificador Fluido"
 
 
+msgid "Smoke Domain Material"
+msgstr "Material_humo"
+
+
+msgid "Liquid Domain Material"
+msgstr "Material_líquido"
+
+
 msgid "Object {!r} already has a particle system"
 msgstr "El objeto {!r} ya contiene un sistema de partículas"
 
@@ -119599,12 +119680,20 @@ msgid "Interpolate Hair Curves"
 msgstr "Interpolar curvas de pelo"
 
 
+msgid "Explode Fade"
+msgstr "Explosión fundido"
+
+
 msgid "Hair Curves Noise"
 msgstr "Ruido de curvas de pelo"
 
 
 msgid "Frizz Hair Curves"
 msgstr "Encrespar curvas de pelo"
+
+
+msgid "Explode fade"
+msgstr "Explosión_fundido"
 
 
 msgid "New Preset"
@@ -119721,10 +119810,6 @@ msgstr "Advertencia, el archivo ya existe. ¿Sobrescribirlo?"
 
 msgid "Installing keymap failed: {:s}"
 msgstr "Falla al instalar el mapa de teclado: {:s}"
-
-
-msgid "This script was written Blender version {:d}.{:d}.{:d} and might not function (correctly), though it is enabled"
-msgstr "El script fue escrito para la versión {:d}.{:d}.{:d} de Blender y es posible que no funcione correctamente, a pesar de encontrarse habilitado"
 
 
 msgid "File already installed to {!r}"
@@ -126463,6 +126548,11 @@ msgstr "Proyectar desde la vista (hasta límites)"
 
 
 msgctxt "Operator"
+msgid "Frame Last Stroke"
+msgstr "Encuadrar último trazo"
+
+
+msgctxt "Operator"
 msgid "Viewport Render Animation"
 msgstr "Procesar animación"
 
@@ -127048,11 +127138,6 @@ msgstr "Forma de curva"
 msgctxt "View3D"
 msgid "Mix"
 msgstr "varios"
-
-
-msgctxt "Operator"
-msgid "Frame Last Stroke"
-msgstr "Encuadrar último trazo"
 
 
 msgctxt "Operator"
@@ -128465,7 +128550,7 @@ msgstr "Sistema_partículas"
 
 
 msgid "ParticleSettings"
-msgstr "OpcionesPartículas"
+msgstr "Opciones_partículas"
 
 
 msgid "particles"
@@ -129187,6 +129272,10 @@ msgstr "¡El árbol de nodos de composición contiene nodos o conectores no defi
 
 msgid "Error: Too many AOVs"
 msgstr "Error: Demasiadas AOV"
+
+
+msgid "Required render size ({}px) is larger than reported texture size limit ({}px)."
+msgstr "El tamaño de procesamiento requerido ({}px) es mayor que el límite reportado de tamaño de texturas ({}px)."
 
 
 msgid "Errors during render. See the System Console for more info."
@@ -130958,10 +131047,6 @@ msgid "OS"
 msgstr "S.O."
 
 
-msgid "Home"
-msgstr "Carpeta de usuario"
-
-
 msgid "Esc"
 msgstr "Esc"
 
@@ -132587,6 +132672,10 @@ msgid "Image objects can only be added in Object Mode"
 msgstr "Los objetos de tipo imagen sólo pueden ser agregados en modo Objeto"
 
 
+msgid "No editable objects to convert"
+msgstr "No existen objetos editables que convertir"
+
+
 msgid "Converting some non-editable object/object data, enforcing 'Keep Original' option to True"
 msgstr "Convirtiendo algunos objetos o datos de objetos no editables, forzando la activación de la opción \"Mantener originales\""
 
@@ -133100,7 +133189,7 @@ msgstr "No fue posible encontrar un modificador Gancho"
 
 
 msgid "Unable to execute '%s', error changing modes"
-msgstr "No es posible ejecutar '%s', error al cambiar de modo"
+msgstr "No se puede ejecutar '%s', error al cambiar de modo. Es posible que el modo ya esté activo en otra escena"
 
 
 msgid "No target object to transfer the mode to"
@@ -134133,6 +134222,10 @@ msgstr "El objeto %s no contiene ninguna pose, no es posible aplicar la acción 
 
 msgid "Unable to remove material slot in edit mode"
 msgstr "No es posible eliminar un contenedor de material en modo edición"
+
+
+msgid "Can't bake light probe while rendering"
+msgstr "No es posible capturar una sonda de luz mientras se está efectuando el procesamiento"
 
 
 msgid "No active lineset and associated line style to manipulate the modifier"
@@ -135300,6 +135393,10 @@ msgid "Date Modified"
 msgstr "Fecha de modificación"
 
 
+msgid "Home"
+msgstr "Carpeta de usuario"
+
+
 msgid "Desktop"
 msgstr "Escritorio"
 
@@ -135738,7 +135835,7 @@ msgstr "No se ha cambiado ninguna imagen"
 
 
 msgid "Images cannot be copied while rendering"
-msgstr "No es posible copiar imágenes mientras se encuentra en curso el procesamiento"
+msgstr "No es posible copiar imágenes mientras se está efectuando el procesamiento"
 
 
 msgid "Image is not editable"
@@ -135794,7 +135891,7 @@ msgstr "No es posible guardar la imagen, no se especificó una ruta de archivo v
 
 
 msgid "can't save image while rendering"
-msgstr "no es posible guardar la imagen mientras se está procesando"
+msgstr "no es posible guardar una imagen mientras se está efectuando el procesamiento"
 
 
 msgid "No images available"
@@ -139175,6 +139272,10 @@ msgid "Timeline marker '%s' not found in action '%s'"
 msgstr "Marcador de línea de tiempo '%s' no encontrado en la acción '%s'"
 
 
+msgid "Assign action \"%s\" to \"%s\" before calling this function"
+msgstr "Asignar la acción \"%s\" a \"%s\" antes de invocar esta función"
+
+
 msgid "Action slot display names cannot be empty"
 msgstr "Los nombres públicos de contenedores de acción no pueden estar vacíos"
 
@@ -141127,7 +141228,7 @@ msgstr "Tipos de bordes"
 
 
 msgid "Light Reference"
-msgstr "Referencia de luz"
+msgstr "Luz de referencia"
 
 
 msgid "Geometry Processing"
@@ -141579,6 +141680,11 @@ msgstr "Eje U"
 
 msgid "UVWarp"
 msgstr "Deformar_UV"
+
+
+msgctxt "Modifier"
+msgid "To"
+msgstr "Destino"
 
 
 msgid "Sample Radius"
@@ -143817,7 +143923,7 @@ msgstr "Determina el orden de los puntos en cada curva"
 
 
 msgid "Sample Position"
-msgstr "Muestrear posición"
+msgstr "Posición muestreo"
 
 
 msgid "Sample Group ID"

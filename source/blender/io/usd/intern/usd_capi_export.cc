@@ -106,7 +106,7 @@ static bool prim_path_valid(const char *path)
   /* Check path syntax. */
   std::string errMsg;
   if (!pxr::SdfPath::IsValidPathString(path, &errMsg)) {
-    WM_reportf(RPT_ERROR, "USD Export: invalid path string '%s': %s", path, errMsg.c_str());
+    WM_global_reportf(RPT_ERROR, "USD Export: invalid path string '%s': %s", path, errMsg.c_str());
     return false;
   }
 
@@ -115,12 +115,12 @@ static bool prim_path_valid(const char *path)
 
   pxr::SdfPath sdf_path(path);
   if (!sdf_path.IsAbsolutePath()) {
-    WM_reportf(RPT_ERROR, "USD Export: path '%s' is not an absolute path", path);
+    WM_global_reportf(RPT_ERROR, "USD Export: path '%s' is not an absolute path", path);
     return false;
   }
 
   if (!sdf_path.IsPrimPath()) {
-    WM_reportf(RPT_ERROR, "USD Export: path string '%s' is not a prim path", path);
+    WM_global_reportf(RPT_ERROR, "USD Export: path string '%s' is not a prim path", path);
     return false;
   }
 
@@ -370,11 +370,11 @@ std::string cache_image_color(const float color[4])
     return file_path;
   }
 
-  ImBuf *ibuf = IMB_allocImBuf(4, 4, 32, IB_rectfloat);
+  ImBuf *ibuf = IMB_allocImBuf(4, 4, 32, IB_float_data);
   IMB_rectfill(ibuf, color);
   ibuf->ftype = IMB_FTYPE_RADHDR;
 
-  if (IMB_saveiff(ibuf, file_path.c_str(), IB_rectfloat)) {
+  if (IMB_saveiff(ibuf, file_path.c_str(), IB_float_data)) {
     CLOG_INFO(&LOG, 1, "%s", file_path.c_str());
   }
   else {

@@ -38,6 +38,7 @@ set(INC
 
   ../../../intern/ghost
   ../../../intern/mantaflow/extern
+  ../../../intern/opensubdiv
 )
 
 if(WITH_BUILDINFO)
@@ -148,6 +149,7 @@ set(SRC
   intern/gpu_query.hh
   intern/gpu_select_private.hh
   intern/gpu_shader_create_info.hh
+  intern/gpu_shader_create_info_list.hh
   intern/gpu_shader_create_info_private.hh
   intern/gpu_shader_dependency_private.hh
   intern/gpu_shader_interface.hh
@@ -740,6 +742,10 @@ if(WITH_OPENCOLORIO)
   add_definitions(-DWITH_OCIO)
 endif()
 
+if(WITH_OPENSUBDIV)
+  add_definitions(-DWITH_OPENSUBDIV)
+endif()
+
 if(WITH_GPU_BACKEND_TESTS)
   add_definitions(-DWITH_GPU_BACKEND_TESTS)
 endif()
@@ -762,6 +768,10 @@ endif()
 
 if(WITH_OPENCOLORIO)
   target_link_libraries(bf_gpu PUBLIC bf_ocio_shaders)
+endif()
+
+if(WITH_OPENSUBDIV)
+  target_link_libraries(bf_gpu PUBLIC bf_osd_shaders)
 endif()
 
 if(WITH_RENDERDOC)

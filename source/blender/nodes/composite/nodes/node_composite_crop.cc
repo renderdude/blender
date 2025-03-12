@@ -40,7 +40,7 @@ static void cmp_node_crop_declare(NodeDeclarationBuilder &b)
 
 static void node_composit_init_crop(bNodeTree * /*ntree*/, bNode *node)
 {
-  NodeTwoXYs *nxy = MEM_cnew<NodeTwoXYs>(__func__);
+  NodeTwoXYs *nxy = MEM_callocN<NodeTwoXYs>(__func__);
   node->storage = nxy;
   nxy->x1 = 0;
   nxy->x2 = 0;
@@ -78,9 +78,10 @@ class CropOperation : public NodeOperation {
 
   void execute() override
   {
-    /* The operation does nothing, so just pass the input through. */
-    if (is_identity()) {
-      get_input("Image").pass_through(get_result("Image"));
+    if (this->is_identity()) {
+      const Result &input = get_input("Image");
+      Result &output = get_result("Image");
+      output.share_data(input);
       return;
     }
 

@@ -139,7 +139,7 @@ static void buttons_texture_users_find_nodetree(ListBase *users,
                                                 const char *category)
 {
   if (ntree) {
-    LISTBASE_FOREACH (bNode *, node, &ntree->nodes) {
+    for (bNode *node : ntree->all_nodes()) {
       if (node->type_legacy == CMP_NODE_TEXTURE) {
         PointerRNA ptr = RNA_pointer_create_discrete(&ntree->id, &RNA_Node, node);
         PropertyRNA *prop = RNA_struct_find_property(&ptr, "texture");
@@ -359,7 +359,7 @@ void buttons_texture_context_compute(const bContext *C, SpaceProperties *sbuts)
   ID *pinid = sbuts->pinid;
 
   if (!ct) {
-    ct = MEM_cnew<ButsContextTexture>("ButsContextTexture");
+    ct = MEM_callocN<ButsContextTexture>("ButsContextTexture");
     sbuts->texuser = ct;
   }
   else {

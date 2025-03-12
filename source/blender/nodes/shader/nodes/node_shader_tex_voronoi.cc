@@ -92,7 +92,7 @@ static void node_shader_buts_tex_voronoi(uiLayout *layout, bContext * /*C*/, Poi
 
 static void node_shader_init_tex_voronoi(bNodeTree * /*ntree*/, bNode *node)
 {
-  NodeTexVoronoi *tex = MEM_cnew<NodeTexVoronoi>(__func__);
+  NodeTexVoronoi *tex = MEM_callocN<NodeTexVoronoi>(__func__);
   BKE_texture_mapping_default(&tex->base.tex_mapping, TEXMAP_TYPE_POINT);
   BKE_texture_colormapping_default(&tex->base.color_mapping);
   tex->dimensions = 3;
@@ -818,7 +818,7 @@ void register_node_type_sh_tex_voronoi()
 
   static blender::bke::bNodeType ntype;
 
-  sh_fn_node_type_base(&ntype, "ShaderNodeTexVoronoi", SH_NODE_TEX_VORONOI);
+  common_node_type_base(&ntype, "ShaderNodeTexVoronoi", SH_NODE_TEX_VORONOI);
   ntype.ui_name = "Voronoi Texture";
   ntype.ui_description =
       "Generate Worley noise based on the distance to random points. Typically used to generate "

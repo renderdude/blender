@@ -31,7 +31,7 @@ static void node_shader_buts_tex_gradient(uiLayout *layout, bContext * /*C*/, Po
 
 static void node_shader_init_tex_gradient(bNodeTree * /*ntree*/, bNode *node)
 {
-  NodeTexGradient *tex = MEM_cnew<NodeTexGradient>(__func__);
+  NodeTexGradient *tex = MEM_callocN<NodeTexGradient>(__func__);
   BKE_texture_mapping_default(&tex->base.tex_mapping, TEXMAP_TYPE_POINT);
   BKE_texture_colormapping_default(&tex->base.color_mapping);
   tex->gradient_type = SHD_BLEND_LINEAR;
@@ -197,7 +197,7 @@ void register_node_type_sh_tex_gradient()
 
   static blender::bke::bNodeType ntype;
 
-  sh_fn_node_type_base(&ntype, "ShaderNodeTexGradient", SH_NODE_TEX_GRADIENT);
+  common_node_type_base(&ntype, "ShaderNodeTexGradient", SH_NODE_TEX_GRADIENT);
   ntype.ui_name = "Gradient Texture";
   ntype.ui_description =
       "Generate interpolated color and intensity values based on the input vector";

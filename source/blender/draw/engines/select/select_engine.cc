@@ -393,10 +393,10 @@ static ElemIndexRanges select_id_object_sync(SELECTID_Instance &inst,
   return ElemIndexRanges{};
 }
 
-static void select_cache_populate(void *vedata, Object *ob)
+static void select_cache_populate(void *vedata, blender::draw::ObjectRef &ob_ref)
 {
   Manager &manager = *DRW_manager_get();
-  ObjectRef ob_ref = DRW_object_ref_get(ob);
+  Object *ob = ob_ref.object;
   SelectEngineData &e_data = get_engine_data();
   SELECTID_Context &sel_ctx = e_data.context;
   SELECTID_Instance &inst = *reinterpret_cast<SELECTID_Data *>(vedata)->instance;
@@ -429,6 +429,7 @@ static void select_draw_scene(void *vedata)
   SelectEngineData &e_data = get_engine_data();
   SELECTID_Instance &inst = *reinterpret_cast<SELECTID_Data *>(vedata)->instance;
 
+  DRW_submission_start();
   {
     const DRWContextState *draw_ctx = DRW_context_state_get();
     View::OffsetData offset_data(*draw_ctx->rv3d);
@@ -458,6 +459,7 @@ static void select_draw_scene(void *vedata)
   if (e_data.context.select_mode & SCE_SELECT_VERTEX) {
     manager.submit(inst.select_id_vert_ps, inst.view_verts);
   }
+  DRW_submission_end();
 }
 
 static void select_engine_free()

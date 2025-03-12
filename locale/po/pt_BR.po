@@ -1,18 +1,18 @@
 
 msgid ""
 msgstr ""
-"Project-Id-Version: Blender 4.4.0 Beta (b'63c460d93d55')\n"
+"Project-Id-Version: Blender 4.4.0 Beta (b'eceb81b21fa3')\n"
 "Report-Msgid-Bugs-To: Leandro Paganelli <leandrobp@fastmail.com>\n"
-"POT-Creation-Date: 2025-02-24 09:56+0000\n"
-"PO-Revision-Date: 2025-02-14 05:56+0000\n"
-"Last-Translator: Gilberto Rodrigues <gilbertorodrigues@outlook.com>\n"
+"POT-Creation-Date: 2025-03-10 09:31+0000\n"
+"PO-Revision-Date: 2025-03-03 11:30+0000\n"
+"Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: Portuguese (Brazil) <https://translate.blender.org/projects/blender-ui/ui/pt_BR/>\n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 5.9.2\n"
+"X-Generator: Weblate 5.10.1\n"
 "X-Poedit-SourceCharset: utf-8"
 
 
@@ -659,10 +659,6 @@ msgstr "Distribuir a cena na memória de múltiplos dispositivos interconectados
 
 msgid "HIP RT (Experimental)"
 msgstr "HIP RT (experimental)"
-
-
-msgid "HIP RT enables AMD hardware ray tracing on RDNA2 and above, with shader fallback on older cards. This feature is experimental and some scenes may render incorrectly"
-msgstr "O recurso HIP RT permite raytracing por hardware em placas AMD de arquiteturas a partir da RDNA2, com recuo de shader em placas mais antigas. Este recurso é experimental e pode resultar em renderizações incorretas"
 
 
 msgid "Embree on GPU"
@@ -17883,11 +17879,6 @@ msgid "Volume render settings for 3D viewport"
 msgstr "Configurações de renderização de volume para a janela de exibição 3D"
 
 
-msgctxt "Sequence"
-msgid "Clip"
-msgstr "Clipe"
-
-
 msgid "Window Manager"
 msgstr "Gerenciador de janelas"
 
@@ -21501,12 +21492,28 @@ msgid "Material slot name"
 msgstr "Nome do compartimento do material."
 
 
-msgid "Mirror"
-msgstr "Espelhar"
+msgid "Show/Hide"
+msgstr "Mostrar ou ocultar"
+
+
+msgid "Clean Up"
+msgstr "Limpeza"
+
+
+msgid "Pivot Point"
+msgstr "Pontos de pivô"
 
 
 msgid "Snap"
 msgstr "Atrair"
+
+
+msgid "Proportional Editing Falloff"
+msgstr "Tipo de decaimento para edição proporcional"
+
+
+msgid "Mirror"
+msgstr "Espelhar"
 
 
 msgid "UV Mapping"
@@ -21593,14 +21600,6 @@ msgid "Quick Effects"
 msgstr "Efeitos instantâneos"
 
 
-msgid "Show/Hide"
-msgstr "Mostrar ou ocultar"
-
-
-msgid "Clean Up"
-msgstr "Limpeza"
-
-
 msgid "Make Single User"
 msgstr "Tornar usuário único"
 
@@ -21667,14 +21666,6 @@ msgstr "Texto"
 
 msgid "Bone Roll"
 msgstr "Rolagem dos ossos"
-
-
-msgid "Pivot Point"
-msgstr "Pontos de pivô"
-
-
-msgid "Proportional Editing Falloff"
-msgstr "Tipo de decaimento para edição proporcional"
 
 
 msgid "Basic"
@@ -36860,6 +36851,10 @@ msgid "Select Mode"
 msgstr "Modo de seleção"
 
 
+msgid "Fill Opacity"
+msgstr "Preencher opacidade"
+
+
 msgctxt "Operator"
 msgid "Snap Cursor to Selected Points"
 msgstr "Atrair o cursor para os pontos selecionados"
@@ -47759,10 +47754,6 @@ msgid "Exports UVs from the modified mesh"
 msgstr "Exporta as UVs a partir da malha modificada."
 
 
-msgid "Fill Opacity"
-msgstr "Preencher opacidade"
-
-
 msgid "Set amount of opacity for exported UV layout"
 msgstr "Define a quantidade de opacidade para o esquema de UV exportado."
 
@@ -58274,6 +58265,11 @@ msgstr "Filme"
 
 
 msgctxt "Sequence"
+msgid "Clip"
+msgstr "Clipe"
+
+
+msgctxt "Sequence"
 msgid "Mask"
 msgstr "Máscara"
 
@@ -65181,10 +65177,6 @@ msgid "Strand Lengths"
 msgstr "Comprimento do fio"
 
 
-msgid "Path Steps"
-msgstr "Passos de caminho:"
-
-
 msgid "No Brushes currently available"
 msgstr "Não há pincéis disponíveis atualmente."
 
@@ -65288,10 +65280,6 @@ msgstr "Não é possível criar o caminho das preferências de usuário para os 
 
 msgid "File written by newer Blender binary (%d.%d), expect loss of data!"
 msgstr "Arquivo escrito por um executável Blender mais novo: (%d.%d), espere por perda de dados !"
-
-
-msgid "Loading failed: "
-msgstr "Falha durante o carregamento:"
 
 
 msgid "Linking or appending from a very old .blend file format (%d.%d), no animation conversion will be done! You may want to re-save your lib file with current Blender"
@@ -68999,10 +68987,6 @@ msgid "Radius (Parent)"
 msgstr "Raio (parente)"
 
 
-msgid "Size:"
-msgstr "Tamanho"
-
-
 msgid "Displays global values"
 msgstr "Mostra valores globais."
 
@@ -69313,10 +69297,6 @@ msgstr "Encolher ou estufar: %s"
 
 msgid "Shrink/Fatten: %3f"
 msgstr "Encolher ou estufar: %3f"
-
-
-msgid "Edge Slide: "
-msgstr "Deslizar arestas:"
 
 
 msgid "Opacity: %s"

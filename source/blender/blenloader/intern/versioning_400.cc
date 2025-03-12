@@ -862,21 +862,21 @@ static bool versioning_convert_strip_speed_factor(Strip *strip, void *user_data)
   const Scene *scene = static_cast<Scene *>(user_data);
   const float speed_factor = strip->speed_factor;
 
-  if (speed_factor == 1.0f || !SEQ_retiming_is_allowed(strip) ||
-      SEQ_retiming_keys_count(strip) > 0)
+  if (speed_factor == 1.0f || !blender::seq::retiming_is_allowed(strip) ||
+      blender::seq::retiming_keys_count(strip) > 0)
   {
     return true;
   }
 
-  SEQ_retiming_data_ensure(strip);
-  SeqRetimingKey *last_key = &SEQ_retiming_keys_get(strip)[1];
+  blender::seq::retiming_data_ensure(strip);
+  SeqRetimingKey *last_key = &blender::seq::retiming_keys_get(strip)[1];
 
   last_key->strip_frame_index = (strip->len) / speed_factor;
 
   if (strip->type == STRIP_TYPE_SOUND_RAM) {
     const int prev_length = strip->len - strip->startofs - strip->endofs;
-    const float left_handle = SEQ_time_left_handle_frame_get(scene, strip);
-    SEQ_time_right_handle_frame_set(scene, strip, left_handle + prev_length);
+    const float left_handle = blender::seq::time_left_handle_frame_get(scene, strip);
+    blender::seq::time_right_handle_frame_set(scene, strip, left_handle + prev_length);
   }
 
   return true;
@@ -1406,9 +1406,10 @@ void do_versions_after_linking_400(FileData *fd, Main *bmain)
 
   if (!MAIN_VERSION_FILE_ATLEAST(bmain, 400, 27)) {
     LISTBASE_FOREACH (Scene *, scene, &bmain->scenes) {
-      Editing *ed = SEQ_editing_get(scene);
+      Editing *ed = blender::seq::editing_get(scene);
       if (ed != nullptr) {
-        SEQ_for_each_callback(&ed->seqbase, versioning_convert_strip_speed_factor, scene);
+        blender::seq::for_each_callback(
+            &ed->seqbase, versioning_convert_strip_speed_factor, scene);
       }
     }
   }
@@ -2020,7 +2021,7 @@ static void versioning_replace_musgrave_texture_node(bNodeTree *ntree)
 
     STRNCPY(node->idname, "ShaderNodeTexNoise");
     node->type_legacy = SH_NODE_TEX_NOISE;
-    NodeTexNoise *data = MEM_cnew<NodeTexNoise>(__func__);
+    NodeTexNoise *data = MEM_callocN<NodeTexNoise>(__func__);
     data->base = (static_cast<NodeTexMusgrave *>(node->storage))->base;
     data->dimensions = (static_cast<NodeTexMusgrave *>(node->storage))->dimensions;
     data->normalize = false;
@@ -2554,7 +2555,7 @@ static void version_replace_principled_hair_model(bNodeTree *ntree)
     if (node->type_legacy != SH_NODE_BSDF_HAIR_PRINCIPLED) {
       continue;
     }
-    NodeShaderHairPrincipled *data = MEM_cnew<NodeShaderHairPrincipled>(__func__);
+    NodeShaderHairPrincipled *data = MEM_callocN<NodeShaderHairPrincipled>(__func__);
     data->model = SHD_PRINCIPLED_HAIR_CHIANG;
     data->parametrization = node->custom1;
 
@@ -2572,7 +2573,7 @@ static void change_input_socket_to_rotation_type(bNodeTree &ntree,
   socket.type = SOCK_ROTATION;
   STRNCPY(socket.idname, "NodeSocketRotation");
   auto *old_value = static_cast<bNodeSocketValueVector *>(socket.default_value);
-  auto *new_value = MEM_cnew<bNodeSocketValueRotation>(__func__);
+  auto *new_value = MEM_callocN<bNodeSocketValueRotation>(__func__);
   copy_v3_v3(new_value->value_euler, old_value->value);
   socket.default_value = new_value;
   MEM_freeN(old_value);
@@ -2691,7 +2692,7 @@ static blender::StringRef legacy_socket_idname_to_socket_type(blender::StringRef
 static bNodeTreeInterfaceItem *legacy_socket_move_to_interface(bNodeSocket &legacy_socket,
                                                                const eNodeSocketInOut in_out)
 {
-  bNodeTreeInterfaceSocket *new_socket = MEM_cnew<bNodeTreeInterfaceSocket>(__func__);
+  bNodeTreeInterfaceSocket *new_socket = MEM_callocN<bNodeTreeInterfaceSocket>(__func__);
   new_socket->item.item_type = NODE_INTERFACE_SOCKET;
 
   /* Move reusable data. */
@@ -2852,7 +2853,7 @@ static void remove_triangulate_node_min_size_input(bNodeTree *tree)
     }
 
     bNode &greater_or_equal = version_node_add_empty(*tree, "FunctionNodeCompare");
-    auto *compare_storage = MEM_cnew<NodeFunctionCompare>(__func__);
+    auto *compare_storage = MEM_callocN<NodeFunctionCompare>(__func__);
     compare_storage->operation = NODE_COMPARE_GREATER_EQUAL;
     compare_storage->data_type = SOCK_INT;
     greater_or_equal.storage = compare_storage;
@@ -3107,7 +3108,7 @@ static void version_nodes_insert_item(bNodeTreeInterfacePanel &parent,
   blender::MutableSpan<bNodeTreeInterfaceItem *> old_items = {parent.items_array,
                                                               parent.items_num};
   parent.items_num++;
-  parent.items_array = MEM_cnew_array<bNodeTreeInterfaceItem *>(parent.items_num, __func__);
+  parent.items_array = MEM_calloc_arrayN<bNodeTreeInterfaceItem *>(parent.items_num, __func__);
   parent.items().take_front(position).copy_from(old_items.take_front(position));
   parent.items().drop_front(position + 1).copy_from(old_items.drop_front(position));
   parent.items()[position] = &socket.item;
@@ -3197,7 +3198,7 @@ static void enable_geometry_nodes_is_modifier(Main &bmain)
         return true;
       }
       if (!group->geometry_node_asset_traits) {
-        group->geometry_node_asset_traits = MEM_cnew<GeometryNodeAssetTraits>(__func__);
+        group->geometry_node_asset_traits = MEM_callocN<GeometryNodeAssetTraits>(__func__);
       }
       group->geometry_node_asset_traits->flag |= GEO_NODE_ASSET_MODIFIER;
       return false;
@@ -3497,7 +3498,7 @@ static void add_image_editor_asset_shelf(Main &bmain)
         if (ARegion *new_shelf_region = do_versions_add_region_if_not_found(
                 regionbase, RGN_TYPE_ASSET_SHELF, __func__, RGN_TYPE_TOOL_HEADER))
         {
-          new_shelf_region->regiondata = MEM_cnew<RegionAssetShelf>(__func__);
+          new_shelf_region->regiondata = MEM_callocN<RegionAssetShelf>(__func__);
           new_shelf_region->alignment = RGN_ALIGN_BOTTOM;
           new_shelf_region->flag |= RGN_FLAG_HIDDEN;
         }
@@ -3529,7 +3530,7 @@ static void node_reroute_add_storage(bNodeTree &tree)
       STRNCPY(input.identifier, "Input");
       STRNCPY(output.identifier, "Output");
 
-      NodeReroute *data = MEM_cnew<NodeReroute>(__func__);
+      NodeReroute *data = MEM_callocN<NodeReroute>(__func__);
       STRNCPY(data->type_idname, input.idname);
       node->storage = data;
     }
@@ -3611,7 +3612,7 @@ static void hide_simulation_node_skip_socket_value(Main &bmain)
       input_node.locx_legacy = node->locx_legacy - 25;
       input_node.locy_legacy = node->locy_legacy;
 
-      NodeInputBool *input_node_storage = MEM_cnew<NodeInputBool>(__func__);
+      NodeInputBool *input_node_storage = MEM_callocN<NodeInputBool>(__func__);
       input_node.storage = input_node_storage;
       input_node_storage->boolean = true;
 
@@ -3765,6 +3766,83 @@ static void version_geometry_normal_input_node(bNodeTree &ntree)
   }
 }
 
+static void do_version_node_curve_to_mesh_scale_input(bNodeTree *tree)
+{
+  using namespace blender;
+  Set<bNode *> curve_to_mesh_nodes;
+  LISTBASE_FOREACH (bNode *, node, &tree->nodes) {
+    if (STREQ(node->idname, "GeometryNodeCurveToMesh")) {
+      curve_to_mesh_nodes.add(node);
+    }
+  }
+
+  for (bNode *curve_to_mesh : curve_to_mesh_nodes) {
+    if (bke::node_find_socket(*curve_to_mesh, SOCK_IN, "Scale")) {
+      /* Make versioning idempotent. */
+      continue;
+    }
+    version_node_add_socket_if_not_exist(
+        tree, curve_to_mesh, SOCK_IN, SOCK_FLOAT, PROP_NONE, "Scale", "Scale");
+
+    bNode &named_attribute = version_node_add_empty(*tree, "GeometryNodeInputNamedAttribute");
+    NodeGeometryInputNamedAttribute *named_attribute_storage =
+        MEM_callocN<NodeGeometryInputNamedAttribute>(__func__);
+    named_attribute_storage->data_type = CD_PROP_FLOAT;
+    named_attribute.storage = named_attribute_storage;
+    named_attribute.parent = curve_to_mesh->parent;
+    named_attribute.location[0] = curve_to_mesh->location[0] - 25;
+    named_attribute.location[1] = curve_to_mesh->location[1];
+    named_attribute.flag &= ~NODE_SELECT;
+
+    bNodeSocket *name_input = version_node_add_socket_if_not_exist(
+        tree, &named_attribute, SOCK_IN, SOCK_STRING, PROP_NONE, "Name", "Name");
+    STRNCPY(name_input->default_value_typed<bNodeSocketValueString>()->value, "radius");
+
+    version_node_add_socket_if_not_exist(
+        tree, &named_attribute, SOCK_OUT, SOCK_BOOLEAN, PROP_NONE, "Exists", "Exists");
+    version_node_add_socket_if_not_exist(
+        tree, &named_attribute, SOCK_OUT, SOCK_FLOAT, PROP_NONE, "Attribute", "Attribute");
+
+    bNode &switch_node = version_node_add_empty(*tree, "GeometryNodeSwitch");
+    NodeSwitch *switch_storage = MEM_callocN<NodeSwitch>(__func__);
+    switch_storage->input_type = SOCK_FLOAT;
+    switch_node.storage = switch_storage;
+    switch_node.parent = curve_to_mesh->parent;
+    switch_node.location[0] = curve_to_mesh->location[0] - 25;
+    switch_node.location[1] = curve_to_mesh->location[1];
+    switch_node.flag &= ~NODE_SELECT;
+
+    version_node_add_socket_if_not_exist(
+        tree, &switch_node, SOCK_IN, SOCK_BOOLEAN, PROP_NONE, "Switch", "Switch");
+    bNodeSocket *false_input = version_node_add_socket_if_not_exist(
+        tree, &switch_node, SOCK_IN, SOCK_FLOAT, PROP_NONE, "False", "False");
+    false_input->default_value_typed<bNodeSocketValueFloat>()->value = 1.0f;
+
+    version_node_add_socket_if_not_exist(
+        tree, &switch_node, SOCK_IN, SOCK_FLOAT, PROP_NONE, "True", "True");
+
+    version_node_add_link(*tree,
+                          named_attribute,
+                          *bke::node_find_socket(named_attribute, SOCK_OUT, "Exists"),
+                          switch_node,
+                          *bke::node_find_socket(switch_node, SOCK_IN, "Switch"));
+    version_node_add_link(*tree,
+                          named_attribute,
+                          *bke::node_find_socket(named_attribute, SOCK_OUT, "Attribute"),
+                          switch_node,
+                          *bke::node_find_socket(switch_node, SOCK_IN, "True"));
+
+    version_node_add_socket_if_not_exist(
+        tree, &switch_node, SOCK_OUT, SOCK_FLOAT, PROP_NONE, "Output", "Output");
+
+    version_node_add_link(*tree,
+                          switch_node,
+                          *bke::node_find_socket(switch_node, SOCK_OUT, "Output"),
+                          *curve_to_mesh,
+                          *bke::node_find_socket(*curve_to_mesh, SOCK_IN, "Scale"));
+  }
+}
+
 static bool strip_effect_overdrop_to_alphaover(Strip *strip, void * /*user_data*/)
 {
   if (strip->type == STRIP_TYPE_OVERDROP_REMOVED) {
@@ -3780,7 +3858,8 @@ static void version_sequencer_update_overdrop(Main *bmain)
 {
   LISTBASE_FOREACH (Scene *, scene, &bmain->scenes) {
     if (scene->ed != nullptr) {
-      SEQ_for_each_callback(&scene->ed->seqbase, strip_effect_overdrop_to_alphaover, nullptr);
+      blender::seq::for_each_callback(
+          &scene->ed->seqbase, strip_effect_overdrop_to_alphaover, nullptr);
     }
   }
 }
@@ -4002,7 +4081,7 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
         LISTBASE_FOREACH (bNode *, node, &ntree->nodes) {
           if (node->type_legacy == SH_NODE_TEX_NOISE) {
             if (!node->storage) {
-              NodeTexNoise *tex = MEM_cnew<NodeTexNoise>(__func__);
+              NodeTexNoise *tex = MEM_callocN<NodeTexNoise>(__func__);
               BKE_texture_mapping_default(&tex->base.tex_mapping, TEXMAP_TYPE_POINT);
               BKE_texture_colormapping_default(&tex->base.color_mapping);
               tex->dimensions = 3;
@@ -4690,7 +4769,8 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
   if (!MAIN_VERSION_FILE_ATLEAST(bmain, 401, 18)) {
     LISTBASE_FOREACH (Scene *, scene, &bmain->scenes) {
       if (scene->ed != nullptr) {
-        SEQ_for_each_callback(&scene->ed->seqbase, strip_filter_bilinear_to_auto, nullptr);
+        blender::seq::for_each_callback(
+            &scene->ed->seqbase, strip_filter_bilinear_to_auto, nullptr);
       }
     }
   }
@@ -4850,7 +4930,8 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
 
     LISTBASE_FOREACH (Scene *, scene, &bmain->scenes) {
       if (scene->ed != nullptr) {
-        SEQ_for_each_callback(&scene->ed->seqbase, strip_hue_correct_set_wrapping, nullptr);
+        blender::seq::for_each_callback(
+            &scene->ed->seqbase, strip_hue_correct_set_wrapping, nullptr);
       }
     }
   }
@@ -4901,7 +4982,7 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
 
   if (!MAIN_VERSION_FILE_ATLEAST(bmain, 402, 20)) {
     LISTBASE_FOREACH (Scene *, scene, &bmain->scenes) {
-      SequencerToolSettings *sequencer_tool_settings = SEQ_tool_settings_ensure(scene);
+      SequencerToolSettings *sequencer_tool_settings = blender::seq::tool_settings_ensure(scene);
       sequencer_tool_settings->snap_mode |= SEQ_SNAP_TO_MARKERS;
     }
   }
@@ -5009,7 +5090,8 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
   if (!MAIN_VERSION_FILE_ATLEAST(bmain, 402, 28)) {
     LISTBASE_FOREACH (Scene *, scene, &bmain->scenes) {
       if (scene->ed != nullptr) {
-        SEQ_for_each_callback(&scene->ed->seqbase, strip_proxies_timecode_update, nullptr);
+        blender::seq::for_each_callback(
+            &scene->ed->seqbase, strip_proxies_timecode_update, nullptr);
       }
     }
 
@@ -5022,7 +5104,7 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
   if (!MAIN_VERSION_FILE_ATLEAST(bmain, 402, 29)) {
     LISTBASE_FOREACH (Scene *, scene, &bmain->scenes) {
       if (scene->ed) {
-        SEQ_for_each_callback(&scene->ed->seqbase, strip_text_data_update, nullptr);
+        blender::seq::for_each_callback(&scene->ed->seqbase, strip_text_data_update, nullptr);
       }
     }
   }
@@ -5256,7 +5338,7 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
           continue;
         }
         storage->capture_items_num = 1;
-        storage->capture_items = MEM_cnew_array<NodeGeometryAttributeCaptureItem>(
+        storage->capture_items = MEM_calloc_arrayN<NodeGeometryAttributeCaptureItem>(
             storage->capture_items_num, __func__);
         NodeGeometryAttributeCaptureItem &item = storage->capture_items[0];
         item.data_type = storage->data_type_legacy;
@@ -5389,7 +5471,7 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
 
   if (!MAIN_VERSION_FILE_ATLEAST(bmain, 403, 7)) {
     LISTBASE_FOREACH (Scene *, scene, &bmain->scenes) {
-      SequencerToolSettings *sequencer_tool_settings = SEQ_tool_settings_ensure(scene);
+      SequencerToolSettings *sequencer_tool_settings = blender::seq::tool_settings_ensure(scene);
       sequencer_tool_settings->snap_mode |= SEQ_SNAP_TO_PREVIEW_BORDERS |
                                             SEQ_SNAP_TO_PREVIEW_CENTER |
                                             SEQ_SNAP_TO_STRIPS_PREVIEW;
@@ -5661,9 +5743,9 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
 
   if (!MAIN_VERSION_FILE_ATLEAST(bmain, 404, 1)) {
     LISTBASE_FOREACH (Scene *, scene, &bmain->scenes) {
-      Editing *ed = SEQ_editing_get(scene);
+      Editing *ed = blender::seq::editing_get(scene);
       if (ed != nullptr) {
-        SEQ_for_each_callback(&ed->seqbase, versioning_convert_seq_text_anchor, nullptr);
+        blender::seq::for_each_callback(&ed->seqbase, versioning_convert_seq_text_anchor, nullptr);
       }
     }
   }
@@ -5767,9 +5849,9 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
 
   if (!MAIN_VERSION_FILE_ATLEAST(bmain, 404, 15)) {
     LISTBASE_FOREACH (Scene *, scene, &bmain->scenes) {
-      Editing *ed = SEQ_editing_get(scene);
+      Editing *ed = blender::seq::editing_get(scene);
       if (ed != nullptr) {
-        SEQ_for_each_callback(&ed->seqbase, versioning_clear_strip_unused_flag, scene);
+        blender::seq::for_each_callback(&ed->seqbase, versioning_clear_strip_unused_flag, scene);
       }
     }
   }
@@ -5860,7 +5942,7 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
 
   if (!MAIN_VERSION_FILE_ATLEAST(bmain, 404, 28)) {
     LISTBASE_FOREACH (Scene *, scene, &bmain->scenes) {
-      SequencerToolSettings *sequencer_tool_settings = SEQ_tool_settings_ensure(scene);
+      SequencerToolSettings *sequencer_tool_settings = blender::seq::tool_settings_ensure(scene);
       sequencer_tool_settings->snap_mode |= SEQ_SNAP_TO_RETIMING;
     }
   }
@@ -5872,8 +5954,45 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
     }
   }
 
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 404, 30)) {
+    LISTBASE_FOREACH (bScreen *, screen, &bmain->screens) {
+      LISTBASE_FOREACH (ScrArea *, area, &screen->areabase) {
+        LISTBASE_FOREACH (SpaceLink *, sl, &area->spacedata) {
+          if (ELEM(sl->spacetype, SPACE_ACTION, SPACE_INFO, SPACE_CONSOLE)) {
+            ListBase *regionbase = (sl == area->spacedata.first) ? &area->regionbase :
+                                                                   &sl->regionbase;
+            LISTBASE_FOREACH (ARegion *, region, regionbase) {
+              if (region->regiontype == RGN_TYPE_WINDOW) {
+                region->v2d.scroll |= V2D_SCROLL_RIGHT | V2D_SCROLL_VERTICAL_HIDE;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
   if (!MAIN_VERSION_FILE_ATLEAST(bmain, 405, 2)) {
     version_sequencer_update_overdrop(bmain);
+  }
+
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 405, 4)) {
+    FOREACH_NODETREE_BEGIN (bmain, ntree, id) {
+      if (ntree->type == NTREE_GEOMETRY) {
+        do_version_node_curve_to_mesh_scale_input(ntree);
+      }
+    }
+    FOREACH_NODETREE_END;
+  }
+
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 405, 5)) {
+    LISTBASE_FOREACH (Scene *, scene, &bmain->scenes) {
+      ToolSettings *tool_settings = scene->toolsettings;
+      tool_settings->snap_flag_seq |= SCE_SNAP;
+
+      SequencerToolSettings *sequencer_tool_settings = blender::seq::tool_settings_ensure(scene);
+      sequencer_tool_settings->snap_mode |= SEQ_SNAP_TO_FRAME_RANGE;
+    }
   }
 
   /* Always run this versioning; meshes are written with the legacy format which always needs to

@@ -25,8 +25,6 @@
 #define T_ALL_RESTRICTIONS (T_NO_CONSTRAINT | T_NULL_ONE)
 #define T_PROP_EDIT_ALL (T_PROP_EDIT | T_PROP_CONNECTED | T_PROP_PROJECTED)
 
-#define TRANSDATA_THREAD_LIMIT 1024
-
 /* Hard min/max for proportional size. */
 #define T_PROP_SIZE_MIN 1e-6f
 #define T_PROP_SIZE_MAX 1e12f
@@ -260,6 +258,7 @@ enum eTHelpline {
   HLP_CARROW = 5,
   HLP_TRACKBALL = 6,
   HLP_ERROR = 7,
+  HLP_ERROR_DASH = 8,
 };
 
 enum eTOType {
@@ -962,6 +961,7 @@ enum MouseInputMode {
   INPUT_CUSTOM_RATIO,
   INPUT_CUSTOM_RATIO_FLIP,
   INPUT_ERROR,
+  INPUT_ERROR_DASH,
 };
 
 void initMouseInput(

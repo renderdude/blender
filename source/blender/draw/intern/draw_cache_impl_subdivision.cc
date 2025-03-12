@@ -58,33 +58,6 @@ namespace blender::draw {
  * \{ */
 
 #ifdef WITH_OPENSUBDIV
-
-static const GPUVertFormat &get_uvs_format()
-{
-  static const GPUVertFormat format = [&]() {
-    GPUVertFormat format{};
-    GPU_vertformat_attr_add(&format, "uvs", GPU_COMP_F32, 2, GPU_FETCH_FLOAT);
-    return format;
-  }();
-  return format;
-}
-
-/* Vertex format for `OpenSubdiv::Osd::PatchArray`. */
-static const GPUVertFormat &get_patch_array_format()
-{
-  static const GPUVertFormat format = [&]() {
-    GPUVertFormat format{};
-    GPU_vertformat_attr_add(&format, "regDesc", GPU_COMP_I32, 1, GPU_FETCH_INT);
-    GPU_vertformat_attr_add(&format, "desc", GPU_COMP_I32, 1, GPU_FETCH_INT);
-    GPU_vertformat_attr_add(&format, "numPatches", GPU_COMP_I32, 1, GPU_FETCH_INT);
-    GPU_vertformat_attr_add(&format, "indexBase", GPU_COMP_I32, 1, GPU_FETCH_INT);
-    GPU_vertformat_attr_add(&format, "stride", GPU_COMP_I32, 1, GPU_FETCH_INT);
-    GPU_vertformat_attr_add(&format, "primitiveIdBase", GPU_COMP_I32, 1, GPU_FETCH_INT);
-    return format;
-  }();
-  return format;
-}
-
 /* Vertex format used for the `PatchTable::PatchHandle`. */
 static const GPUVertFormat &get_patch_handle_format()
 {
@@ -104,42 +77,6 @@ static const GPUVertFormat &get_quadtree_format()
   static const GPUVertFormat format = [&]() {
     GPUVertFormat format{};
     GPU_vertformat_attr_add(&format, "child", GPU_COMP_U32, 4, GPU_FETCH_INT);
-    return format;
-  }();
-  return format;
-}
-
-/* Vertex format for `OpenSubdiv::Osd::PatchParam`, not really used, it is only for making sure
- * that the #gpu::VertBuf used to wrap the OpenSubdiv patch param buffer is valid. */
-static const GPUVertFormat &get_patch_param_format()
-{
-  static const GPUVertFormat format = [&]() {
-    GPUVertFormat format{};
-    GPU_vertformat_attr_add(&format, "data", GPU_COMP_F32, 3, GPU_FETCH_FLOAT);
-    return format;
-  }();
-  return format;
-}
-
-/* Vertex format for the patches' vertices index buffer. */
-static const GPUVertFormat &get_patch_index_format()
-{
-  static const GPUVertFormat format = [&]() {
-    GPUVertFormat format{};
-    GPU_vertformat_attr_add(&format, "data", GPU_COMP_I32, 1, GPU_FETCH_INT);
-    return format;
-  }();
-  return format;
-}
-
-/* Vertex format for the OpenSubdiv vertex buffer. */
-static const GPUVertFormat &get_subdiv_vertex_format()
-{
-  static const GPUVertFormat format = [&]() {
-    GPUVertFormat format{};
-    /* We use 4 components for the vectors to account for padding in the compute shaders, where
-     * vec3 is promoted to vec4. */
-    GPU_vertformat_attr_add(&format, "pos", GPU_COMP_F32, 4, GPU_FETCH_FLOAT);
     return format;
   }();
   return format;
@@ -199,72 +136,6 @@ const GPUVertFormat &draw_subdiv_get_pos_nor_format()
 
 /** \} */
 
-/* -------------------------------------------------------------------- */
-/** \name Utilities to initialize a OpenSubdiv_Buffer for a gpu::VertBuf.
- * \{ */
-
-#ifdef WITH_OPENSUBDIV
-
-static void vertbuf_bind_gpu(const OpenSubdiv_Buffer *buffer)
-{
-  gpu::VertBuf *verts = (gpu::VertBuf *)(buffer->data);
-  GPU_vertbuf_use(verts);
-}
-
-static void *vertbuf_alloc(const OpenSubdiv_Buffer *interface, const uint len)
-{
-  gpu::VertBuf *verts = (gpu::VertBuf *)(interface->data);
-  GPU_vertbuf_data_alloc(*verts, len);
-  return verts->data<char>().data();
-}
-
-static void vertbuf_device_alloc(const OpenSubdiv_Buffer *interface, const uint len)
-{
-  gpu::VertBuf *verts = (gpu::VertBuf *)(interface->data);
-  /* This assumes that GPU_USAGE_DEVICE_ONLY was used, which won't allocate host memory. */
-  // BLI_assert(GPU_vertbuf_get_usage(verts) == GPU_USAGE_DEVICE_ONLY);
-  GPU_vertbuf_data_alloc(*verts, len);
-}
-
-static void vertbuf_wrap_device_handle(const OpenSubdiv_Buffer *interface, uint64_t handle)
-{
-  gpu::VertBuf *verts = (gpu::VertBuf *)(interface->data);
-  GPU_vertbuf_wrap_handle(verts, handle);
-}
-
-static void vertbuf_update_data(const OpenSubdiv_Buffer *interface,
-                                uint start,
-                                uint len,
-                                const void *data)
-{
-  gpu::VertBuf *verts = (gpu::VertBuf *)(interface->data);
-  GPU_vertbuf_update_sub(verts, start, len, data);
-}
-
-static void opensubdiv_gpu_buffer_init(OpenSubdiv_Buffer *buffer_interface, gpu::VertBuf *vertbuf)
-{
-  buffer_interface->data = vertbuf;
-  buffer_interface->bind_gpu = vertbuf_bind_gpu;
-  buffer_interface->buffer_offset = 0;
-  buffer_interface->wrap_device_handle = vertbuf_wrap_device_handle;
-  buffer_interface->alloc = vertbuf_alloc;
-  buffer_interface->device_alloc = vertbuf_device_alloc;
-  buffer_interface->device_update = vertbuf_update_data;
-}
-
-static gpu::VertBuf *create_buffer_and_interface(OpenSubdiv_Buffer *interface,
-                                                 const GPUVertFormat &format)
-{
-  gpu::VertBuf *buffer = GPU_vertbuf_calloc();
-  GPU_vertbuf_init_with_format_ex(*buffer, format, GPU_USAGE_DEVICE_ONLY);
-  opensubdiv_gpu_buffer_init(interface, buffer);
-  return buffer;
-}
-
-#endif
-
-/** \} */
-
 // --------------------------------------------------------
 
 static uint tris_count_from_number_of_loops(const uint number_of_loops)
@@ -311,20 +182,14 @@ static void draw_patch_map_build(DRWPatchMap *gpu_patch_map, bke::subdiv::Subdiv
   gpu::VertBuf *patch_map_quadtree = GPU_vertbuf_calloc();
   GPU_vertbuf_init_with_format_ex(*patch_map_quadtree, get_quadtree_format(), GPU_USAGE_STATIC);
 
-  OpenSubdiv_Buffer patch_map_handles_interface;
-  opensubdiv_gpu_buffer_init(&patch_map_handles_interface, patch_map_handles);
-
-  OpenSubdiv_Buffer patch_map_quad_tree_interface;
-  opensubdiv_gpu_buffer_init(&patch_map_quad_tree_interface, patch_map_quadtree);
-
   int min_patch_face = 0;
   int max_patch_face = 0;
   int max_depth = 0;
   int patches_are_triangular = 0;
 
   OpenSubdiv_Evaluator *evaluator = subdiv->evaluator;
-  evaluator->eval_output->getPatchMap(&patch_map_handles_interface,
-                                      &patch_map_quad_tree_interface,
+  evaluator->eval_output->getPatchMap(patch_map_handles,
+                                      patch_map_quadtree,
                                       &min_patch_face,
                                       &max_patch_face,
                                       &max_depth,
@@ -1126,57 +991,40 @@ void draw_subdiv_extract_pos_nor(const DRWSubdivCache &cache,
   bke::subdiv::Subdiv *subdiv = cache.subdiv;
   OpenSubdiv_Evaluator *evaluator = subdiv->evaluator;
 
-  OpenSubdiv_Buffer src_buffer_interface;
-  gpu::VertBuf *src_buffer = create_buffer_and_interface(&src_buffer_interface,
-                                                         get_subdiv_vertex_format());
-  evaluator->eval_output->wrapSrcBuffer(&src_buffer_interface);
-
+  gpu::VertBuf *src_buffer = evaluator->eval_output->get_source_buf();
   gpu::VertBuf *src_extra_buffer = nullptr;
   if (orco) {
-    OpenSubdiv_Buffer src_extra_buffer_interface;
-    src_extra_buffer = create_buffer_and_interface(&src_extra_buffer_interface,
-                                                   get_subdiv_vertex_format());
-    evaluator->eval_output->wrapSrcVertexDataBuffer(&src_extra_buffer_interface);
+    src_extra_buffer = evaluator->eval_output->get_source_data_buf();
   }
 
-  OpenSubdiv_Buffer patch_arrays_buffer_interface;
-  gpu::VertBuf *patch_arrays_buffer = create_buffer_and_interface(&patch_arrays_buffer_interface,
-                                                                  get_patch_array_format());
-  evaluator->eval_output->fillPatchArraysBuffer(&patch_arrays_buffer_interface);
-
-  OpenSubdiv_Buffer patch_index_buffer_interface;
-  gpu::VertBuf *patch_index_buffer = create_buffer_and_interface(&patch_index_buffer_interface,
-                                                                 get_patch_index_format());
-  evaluator->eval_output->wrapPatchIndexBuffer(&patch_index_buffer_interface);
-
-  OpenSubdiv_Buffer patch_param_buffer_interface;
-  gpu::VertBuf *patch_param_buffer = create_buffer_and_interface(&patch_param_buffer_interface,
-                                                                 get_patch_param_format());
-  evaluator->eval_output->wrapPatchParamBuffer(&patch_param_buffer_interface);
+  GPUStorageBuf *patch_arrays_buffer = evaluator->eval_output->create_patch_arrays_buf();
+  GPUStorageBuf *patch_index_buffer = evaluator->eval_output->get_patch_index_buf();
+  GPUStorageBuf *patch_param_buffer = evaluator->eval_output->get_patch_param_buf();
 
   GPUShader *shader = DRW_shader_subdiv_get(orco ? SubdivShaderType::PATCH_EVALUATION_ORCO :
                                                    SubdivShaderType::PATCH_EVALUATION);
   GPU_shader_bind(shader);
 
-  int binding_point = 0;
-  GPU_vertbuf_bind_as_ssbo(src_buffer, binding_point++);
-  GPU_vertbuf_bind_as_ssbo(cache.gpu_patch_map.patch_map_handles, binding_point++);
-  GPU_vertbuf_bind_as_ssbo(cache.gpu_patch_map.patch_map_quadtree, binding_point++);
-  GPU_vertbuf_bind_as_ssbo(cache.patch_coords, binding_point++);
-  GPU_vertbuf_bind_as_ssbo(cache.verts_orig_index, binding_point++);
-  GPU_vertbuf_bind_as_ssbo(patch_arrays_buffer, binding_point++);
-  GPU_vertbuf_bind_as_ssbo(patch_index_buffer, binding_point++);
-  GPU_vertbuf_bind_as_ssbo(patch_param_buffer, binding_point++);
+  GPU_vertbuf_bind_as_ssbo(src_buffer, PATCH_EVALUATION_SOURCE_VERTEX_BUFFER_BUF_SLOT);
+  GPU_vertbuf_bind_as_ssbo(cache.gpu_patch_map.patch_map_handles,
+                           PATCH_EVALUATION_INPUT_PATCH_HANDLES_BUF_SLOT);
+  GPU_vertbuf_bind_as_ssbo(cache.gpu_patch_map.patch_map_quadtree,
+                           PATCH_EVALUATION_QUAD_NODES_BUF_SLOT);
+  GPU_vertbuf_bind_as_ssbo(cache.patch_coords, PATCH_EVALUATION_PATCH_COORDS_BUF_SLOT);
+  GPU_vertbuf_bind_as_ssbo(cache.verts_orig_index,
+                           PATCH_EVALUATION_INPUT_VERTEX_ORIG_INDEX_BUF_SLOT);
+  GPU_storagebuf_bind(patch_arrays_buffer, PATCH_EVALUATION_PATCH_ARRAY_BUFFER_BUF_SLOT);
+  GPU_storagebuf_bind(patch_index_buffer, PATCH_EVALUATION_PATCH_INDEX_BUFFER_BUF_SLOT);
+  GPU_storagebuf_bind(patch_param_buffer, PATCH_EVALUATION_PATCH_PARAM_BUFFER_BUF_SLOT);
   if (flags_buffer) {
-    GPU_vertbuf_bind_as_ssbo(flags_buffer, binding_point);
+    GPU_vertbuf_bind_as_ssbo(flags_buffer, PATCH_EVALUATION_FLAGS_BUFFER_BUF_SLOT);
   }
-  binding_point++;
-  GPU_vertbuf_bind_as_ssbo(pos_nor, binding_point++);
+  GPU_vertbuf_bind_as_ssbo(pos_nor, PATCH_EVALUATION_OUTPUT_VERTS_BUF_SLOT);
   if (orco) {
-    GPU_vertbuf_bind_as_ssbo(src_extra_buffer, binding_point++);
-    GPU_vertbuf_bind_as_ssbo(orco, binding_point++);
+    GPU_vertbuf_bind_as_ssbo(src_extra_buffer,
+                             PATCH_EVALUATION_SOURCE_EXTRA_VERTEX_BUFFER_BUF_SLOT);
+    GPU_vertbuf_bind_as_ssbo(orco, PATCH_EVALUATION_OUTPUT_ORCOS_BUF_SLOT);
   }
-  BLI_assert(binding_point <= MAX_GPU_SUBDIV_SSBOS);
 
   drw_subdiv_compute_dispatch(cache, shader, 0, 0, cache.num_subdiv_quads);
 
@@ -1188,11 +1036,7 @@ void draw_subdiv_extract_pos_nor(const DRWSubdivCache &cache,
   /* Cleanup. */
   GPU_shader_unbind();
 
-  GPU_vertbuf_discard(patch_index_buffer);
-  GPU_vertbuf_discard(patch_param_buffer);
-  GPU_vertbuf_discard(patch_arrays_buffer);
-  GPU_vertbuf_discard(src_buffer);
-  GPU_VERTBUF_DISCARD_SAFE(src_extra_buffer);
+  GPU_storagebuf_free(patch_arrays_buffer);
 #else
   UNUSED_VARS(cache, flags_buffer, pos_nor, orco);
 #endif
@@ -1212,47 +1056,38 @@ void draw_subdiv_extract_uvs(const DRWSubdivCache &cache,
   bke::subdiv::Subdiv *subdiv = cache.subdiv;
   OpenSubdiv_Evaluator *evaluator = subdiv->evaluator;
 
-  OpenSubdiv_Buffer src_buffer_interface;
-  gpu::VertBuf *src_buffer = create_buffer_and_interface(&src_buffer_interface, get_uvs_format());
-  evaluator->eval_output->wrapFVarSrcBuffer(face_varying_channel, &src_buffer_interface);
+  gpu::VertBuf *src_buffer = evaluator->eval_output->get_face_varying_source_buf(
+      face_varying_channel);
+  int src_buffer_offset = evaluator->eval_output->get_face_varying_source_offset(
+      face_varying_channel);
 
-  OpenSubdiv_Buffer patch_arrays_buffer_interface;
-  gpu::VertBuf *patch_arrays_buffer = create_buffer_and_interface(&patch_arrays_buffer_interface,
-                                                                  get_patch_array_format());
-  evaluator->eval_output->fillFVarPatchArraysBuffer(face_varying_channel,
-                                                    &patch_arrays_buffer_interface);
-
-  OpenSubdiv_Buffer patch_index_buffer_interface;
-  gpu::VertBuf *patch_index_buffer = create_buffer_and_interface(&patch_index_buffer_interface,
-                                                                 get_patch_index_format());
-  evaluator->eval_output->wrapFVarPatchIndexBuffer(face_varying_channel,
-                                                   &patch_index_buffer_interface);
-
-  OpenSubdiv_Buffer patch_param_buffer_interface;
-  gpu::VertBuf *patch_param_buffer = create_buffer_and_interface(&patch_param_buffer_interface,
-                                                                 get_patch_param_format());
-  evaluator->eval_output->wrapFVarPatchParamBuffer(face_varying_channel,
-                                                   &patch_param_buffer_interface);
+  GPUStorageBuf *patch_arrays_buffer = evaluator->eval_output->create_face_varying_patch_array_buf(
+      face_varying_channel);
+  GPUStorageBuf *patch_index_buffer = evaluator->eval_output->get_face_varying_patch_index_buf(
+      face_varying_channel);
+  GPUStorageBuf *patch_param_buffer = evaluator->eval_output->get_face_varying_patch_param_buf(
+      face_varying_channel);
 
   GPUShader *shader = DRW_shader_subdiv_get(SubdivShaderType::PATCH_EVALUATION_FVAR);
   GPU_shader_bind(shader);
 
-  int binding_point = 0;
-  GPU_vertbuf_bind_as_ssbo(src_buffer, binding_point++);
-  GPU_vertbuf_bind_as_ssbo(cache.gpu_patch_map.patch_map_handles, binding_point++);
-  GPU_vertbuf_bind_as_ssbo(cache.gpu_patch_map.patch_map_quadtree, binding_point++);
-  GPU_vertbuf_bind_as_ssbo(cache.corner_patch_coords, binding_point++);
-  GPU_vertbuf_bind_as_ssbo(cache.verts_orig_index, binding_point++);
-  GPU_vertbuf_bind_as_ssbo(patch_arrays_buffer, binding_point++);
-  GPU_vertbuf_bind_as_ssbo(patch_index_buffer, binding_point++);
-  GPU_vertbuf_bind_as_ssbo(patch_param_buffer, binding_point++);
-  GPU_vertbuf_bind_as_ssbo(uvs, binding_point++);
-  BLI_assert(binding_point <= MAX_GPU_SUBDIV_SSBOS);
+  GPU_vertbuf_bind_as_ssbo(src_buffer, PATCH_EVALUATION_SOURCE_VERTEX_BUFFER_BUF_SLOT);
+  GPU_vertbuf_bind_as_ssbo(cache.gpu_patch_map.patch_map_handles,
+                           PATCH_EVALUATION_INPUT_PATCH_HANDLES_BUF_SLOT);
+  GPU_vertbuf_bind_as_ssbo(cache.gpu_patch_map.patch_map_quadtree,
+                           PATCH_EVALUATION_QUAD_NODES_BUF_SLOT);
+  GPU_vertbuf_bind_as_ssbo(cache.corner_patch_coords, PATCH_EVALUATION_PATCH_COORDS_BUF_SLOT);
+  GPU_vertbuf_bind_as_ssbo(cache.verts_orig_index,
+                           PATCH_EVALUATION_INPUT_VERTEX_ORIG_INDEX_BUF_SLOT);
+  GPU_storagebuf_bind(patch_arrays_buffer, PATCH_EVALUATION_PATCH_ARRAY_BUFFER_BUF_SLOT);
+  GPU_storagebuf_bind(patch_index_buffer, PATCH_EVALUATION_PATCH_INDEX_BUFFER_BUF_SLOT);
+  GPU_storagebuf_bind(patch_param_buffer, PATCH_EVALUATION_PATCH_PARAM_BUFFER_BUF_SLOT);
+  GPU_vertbuf_bind_as_ssbo(uvs, PATCH_EVALUATION_OUTPUT_FVAR_BUF_SLOT);
 
   /* The buffer offset has the stride baked in (which is 2 as we have UVs) so remove the stride by
    * dividing by 2 */
-  const int src_offset = src_buffer_interface.buffer_offset / 2;
-  drw_subdiv_compute_dispatch(cache, shader, src_offset, dst_offset, cache.num_subdiv_quads);
+  drw_subdiv_compute_dispatch(
+      cache, shader, src_buffer_offset / 2, dst_offset, cache.num_subdiv_quads);
 
   /* This generates a vertex buffer, so we need to put a barrier on the vertex attribute array.
    * Since it may also be used for computing UV stretches, we also need a barrier on the shader
@@ -1262,10 +1097,7 @@ void draw_subdiv_extract_uvs(const DRWSubdivCache &cache,
   /* Cleanup. */
   GPU_shader_unbind();
 
-  GPU_vertbuf_discard(patch_index_buffer);
-  GPU_vertbuf_discard(patch_param_buffer);
-  GPU_vertbuf_discard(patch_arrays_buffer);
-  GPU_vertbuf_discard(src_buffer);
+  GPU_storagebuf_free(patch_arrays_buffer);
 #else
   UNUSED_VARS(cache, uvs, face_varying_channel, dst_offset);
 #endif
@@ -1286,15 +1118,14 @@ void draw_subdiv_interp_custom_data(const DRWSubdivCache &cache,
   GPUShader *shader = DRW_shader_subdiv_custom_data_get(comp_type, dimensions);
   GPU_shader_bind(shader);
 
-  int binding_point = 0;
   /* subdiv_face_offset is always at binding point 0 for each shader using it. */
-  GPU_vertbuf_bind_as_ssbo(cache.subdiv_face_offset_buffer, binding_point++);
-  GPU_vertbuf_bind_as_ssbo(&src_data, binding_point++);
-  GPU_vertbuf_bind_as_ssbo(cache.face_ptex_offset_buffer, binding_point++);
-  GPU_vertbuf_bind_as_ssbo(cache.corner_patch_coords, binding_point++);
-  GPU_vertbuf_bind_as_ssbo(cache.extra_coarse_face_data, binding_point++);
-  GPU_vertbuf_bind_as_ssbo(&dst_data, binding_point++);
-  BLI_assert(binding_point <= MAX_GPU_SUBDIV_SSBOS);
+  GPU_vertbuf_bind_as_ssbo(cache.subdiv_face_offset_buffer, SUBDIV_FACE_OFFSET_BUF_SLOT);
+  GPU_vertbuf_bind_as_ssbo(&src_data, CUSTOM_DATA_SOURCE_DATA_BUF_SLOT);
+  GPU_vertbuf_bind_as_ssbo(cache.face_ptex_offset_buffer, CUSTOM_DATA_FACE_PTEX_OFFSET_BUF_SLOT);
+  GPU_vertbuf_bind_as_ssbo(cache.corner_patch_coords, CUSTOM_DATA_PATCH_COORDS_BUF_SLOT);
+  GPU_vertbuf_bind_as_ssbo(cache.extra_coarse_face_data,
+                           CUSTOM_DATA_EXTRA_COARSE_FACE_DATA_BUF_SLOT);
+  GPU_vertbuf_bind_as_ssbo(&dst_data, CUSTOM_DATA_DESTINATION_DATA_BUF_SLOT);
 
   drw_subdiv_compute_dispatch(cache, shader, 0, dst_offset, cache.num_subdiv_quads);
 
@@ -1456,50 +1287,35 @@ void draw_subdiv_build_fdots_buffers(const DRWSubdivCache &cache,
   bke::subdiv::Subdiv *subdiv = cache.subdiv;
   OpenSubdiv_Evaluator *evaluator = subdiv->evaluator;
 
-  OpenSubdiv_Buffer src_buffer_interface;
-  gpu::VertBuf *src_buffer = create_buffer_and_interface(&src_buffer_interface,
-                                                         get_subdiv_vertex_format());
-  evaluator->eval_output->wrapSrcBuffer(&src_buffer_interface);
-
-  OpenSubdiv_Buffer patch_arrays_buffer_interface;
-  gpu::VertBuf *patch_arrays_buffer = create_buffer_and_interface(&patch_arrays_buffer_interface,
-                                                                  get_patch_array_format());
-  opensubdiv_gpu_buffer_init(&patch_arrays_buffer_interface, patch_arrays_buffer);
-  evaluator->eval_output->fillPatchArraysBuffer(&patch_arrays_buffer_interface);
-
-  OpenSubdiv_Buffer patch_index_buffer_interface;
-  gpu::VertBuf *patch_index_buffer = create_buffer_and_interface(&patch_index_buffer_interface,
-                                                                 get_patch_index_format());
-  evaluator->eval_output->wrapPatchIndexBuffer(&patch_index_buffer_interface);
-
-  OpenSubdiv_Buffer patch_param_buffer_interface;
-  gpu::VertBuf *patch_param_buffer = create_buffer_and_interface(&patch_param_buffer_interface,
-                                                                 get_patch_param_format());
-  evaluator->eval_output->wrapPatchParamBuffer(&patch_param_buffer_interface);
+  gpu::VertBuf *src_buffer = evaluator->eval_output->get_source_buf();
+  GPUStorageBuf *patch_arrays_buffer = evaluator->eval_output->create_patch_arrays_buf();
+  GPUStorageBuf *patch_index_buffer = evaluator->eval_output->get_patch_index_buf();
+  GPUStorageBuf *patch_param_buffer = evaluator->eval_output->get_patch_param_buf();
 
   GPUShader *shader = DRW_shader_subdiv_get(
       fdots_nor ? SubdivShaderType::PATCH_EVALUATION_FACE_DOTS_WITH_NORMALS :
                   SubdivShaderType::PATCH_EVALUATION_FACE_DOTS);
   GPU_shader_bind(shader);
 
-  int binding_point = 0;
-  GPU_vertbuf_bind_as_ssbo(src_buffer, binding_point++);
-  GPU_vertbuf_bind_as_ssbo(cache.gpu_patch_map.patch_map_handles, binding_point++);
-  GPU_vertbuf_bind_as_ssbo(cache.gpu_patch_map.patch_map_quadtree, binding_point++);
-  GPU_vertbuf_bind_as_ssbo(cache.fdots_patch_coords, binding_point++);
-  GPU_vertbuf_bind_as_ssbo(cache.verts_orig_index, binding_point++);
-  GPU_vertbuf_bind_as_ssbo(patch_arrays_buffer, binding_point++);
-  GPU_vertbuf_bind_as_ssbo(patch_index_buffer, binding_point++);
-  GPU_vertbuf_bind_as_ssbo(patch_param_buffer, binding_point++);
-  GPU_vertbuf_bind_as_ssbo(fdots_pos, binding_point++);
+  GPU_vertbuf_bind_as_ssbo(src_buffer, PATCH_EVALUATION_SOURCE_VERTEX_BUFFER_BUF_SLOT);
+  GPU_vertbuf_bind_as_ssbo(cache.gpu_patch_map.patch_map_handles,
+                           PATCH_EVALUATION_INPUT_PATCH_HANDLES_BUF_SLOT);
+  GPU_vertbuf_bind_as_ssbo(cache.gpu_patch_map.patch_map_quadtree,
+                           PATCH_EVALUATION_QUAD_NODES_BUF_SLOT);
+  GPU_vertbuf_bind_as_ssbo(cache.fdots_patch_coords, PATCH_EVALUATION_PATCH_COORDS_BUF_SLOT);
+  GPU_vertbuf_bind_as_ssbo(cache.verts_orig_index,
+                           PATCH_EVALUATION_INPUT_VERTEX_ORIG_INDEX_BUF_SLOT);
+  GPU_storagebuf_bind(patch_arrays_buffer, PATCH_EVALUATION_PATCH_ARRAY_BUFFER_BUF_SLOT);
+  GPU_storagebuf_bind(patch_index_buffer, PATCH_EVALUATION_PATCH_INDEX_BUFFER_BUF_SLOT);
+  GPU_storagebuf_bind(patch_param_buffer, PATCH_EVALUATION_PATCH_PARAM_BUFFER_BUF_SLOT);
+  GPU_vertbuf_bind_as_ssbo(fdots_pos, PATCH_EVALUATION_OUTPUT_FDOTS_VERTEX_BUFFER_BUF_SLOT);
   /* F-dots normals may not be requested, still reserve the binding point. */
   if (fdots_nor) {
-    GPU_vertbuf_bind_as_ssbo(fdots_nor, binding_point);
+    GPU_vertbuf_bind_as_ssbo(fdots_nor, PATCH_EVALUATION_OUTPUT_NORMALS_BUF_SLOT);
   }
-  binding_point++;
-  GPU_indexbuf_bind_as_ssbo(fdots_indices, binding_point++);
-  GPU_vertbuf_bind_as_ssbo(cache.extra_coarse_face_data, binding_point++);
-  BLI_assert(binding_point <= MAX_GPU_SUBDIV_SSBOS);
+  GPU_indexbuf_bind_as_ssbo(fdots_indices, PATCH_EVALUATION_OUTPUT_INDICES_BUF_SLOT);
+  GPU_vertbuf_bind_as_ssbo(cache.extra_coarse_face_data,
+                           PATCH_EVALUATION_EXTRA_COARSE_FACE_DATA_BUF_SLOT);
 
   drw_subdiv_compute_dispatch(cache, shader, 0, 0, cache.num_coarse_faces);
 
@@ -1510,10 +1326,7 @@ void draw_subdiv_build_fdots_buffers(const DRWSubdivCache &cache,
   /* Cleanup. */
   GPU_shader_unbind();
 
-  GPU_vertbuf_discard(patch_index_buffer);
-  GPU_vertbuf_discard(patch_param_buffer);
-  GPU_vertbuf_discard(patch_arrays_buffer);
-  GPU_vertbuf_discard(src_buffer);
+  GPU_storagebuf_free(patch_arrays_buffer);
 #else
   UNUSED_VARS(cache, fdots_pos, fdots_nor, fdots_indices);
 #endif
@@ -1769,7 +1582,7 @@ static void draw_subdiv_cache_ensure_mat_offsets(DRWSubdivCache &cache,
  */
 static OpenSubdiv_EvaluatorCache *g_subdiv_evaluator_cache = nullptr;
 static uint64_t g_subdiv_evaluator_users = 0;
-/* The evaluator cache is global, so we cannot allow concurent usage and need synchronization. */
+/* The evaluator cache is global, so we cannot allow concurrent usage and need synchronization. */
 static std::mutex g_subdiv_eval_mutex;
 
 static bool draw_subdiv_create_requested_buffers(Object &ob,
@@ -1809,7 +1622,7 @@ static bool draw_subdiv_create_requested_buffers(Object &ob,
     return false;
   }
 
-  /* Lock the entire evaluation to avoid concurent usage of shader objects in evaluator cache. */
+  /* Lock the entire evaluation to avoid concurrent usage of shader objects in evaluator cache. */
   std::scoped_lock lock(g_subdiv_eval_mutex);
 
   if (g_subdiv_evaluator_cache == nullptr) {
@@ -1935,11 +1748,11 @@ void DRW_subdivide_loose_geom(DRWSubdivCache &subdiv_cache, const MeshBufferCach
 }
 
 /**
- * The `bke::subdiv::Subdiv` data is being owned the modifier.
- * Since the modifier can be freed from any thread (e.g. from depsgraph multithreaded update)
- * which may not have a valid GPUContext active, we move the data to discard to this free list
+ * The #bke::subdiv::Subdiv data is being owned the modifier.
+ * Since the modifier can be freed from any thread (e.g. from depsgraph multi-threaded update)
+ * which may not have a valid #GPUContext active, we move the data to discard to this free list
  * until a code-path with a active GPUContext is hit.
- * This is kindof garbage collection.
+ * This is kind of garbage collection.
  */
 static LinkNode *gpu_subdiv_free_queue = nullptr;
 static ThreadMutex gpu_subdiv_queue_mutex = BLI_MUTEX_INITIALIZER;
@@ -1997,10 +1810,6 @@ void DRW_subdiv_cache_free(bke::subdiv::Subdiv *subdiv)
 
 void DRW_cache_free_old_subdiv()
 {
-  if (gpu_subdiv_free_queue == nullptr) {
-    return;
-  }
-
   BLI_mutex_lock(&gpu_subdiv_queue_mutex);
 
   while (gpu_subdiv_free_queue != nullptr) {

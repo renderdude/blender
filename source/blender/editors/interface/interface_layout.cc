@@ -941,7 +941,7 @@ static void ui_item_enum_expand_tabs(uiLayout *layout,
                                      PropertyRNA *prop,
                                      PointerRNA *ptr_highlight,
                                      PropertyRNA *prop_highlight,
-                                     const char *uiname,
+                                     const std::optional<StringRef> uiname,
                                      const int h,
                                      const bool icon_only)
 {
@@ -3725,8 +3725,16 @@ void uiItemTabsEnumR_prop(uiLayout *layout,
   uiBlock *block = layout->root->block;
 
   UI_block_layout_set_current(block, layout);
-  ui_item_enum_expand_tabs(
-      layout, C, block, ptr, prop, ptr_highlight, prop_highlight, nullptr, UI_UNIT_Y, icon_only);
+  ui_item_enum_expand_tabs(layout,
+                           C,
+                           block,
+                           ptr,
+                           prop,
+                           ptr_highlight,
+                           prop_highlight,
+                           std::nullopt,
+                           UI_UNIT_Y,
+                           icon_only);
 }
 
 /** \} */
@@ -4965,11 +4973,11 @@ uiLayout *uiLayoutRow(uiLayout *layout, bool align)
 PanelLayout uiLayoutPanelProp(const bContext *C,
                               uiLayout *layout,
                               PointerRNA *open_prop_owner,
-                              const char *open_prop_name)
+                              const StringRefNull open_prop_name)
 {
   const ARegion *region = CTX_wm_region(C);
 
-  const bool is_real_open = RNA_boolean_get(open_prop_owner, open_prop_name);
+  const bool is_real_open = RNA_boolean_get(open_prop_owner, open_prop_name.c_str());
   const bool search_filter_active = region->flag & RGN_FLAG_SEARCH_FILTER_ACTIVE;
   const bool is_open = is_real_open || search_filter_active;
 
@@ -4980,7 +4988,7 @@ PanelLayout uiLayoutPanelProp(const bContext *C,
     header_litem->type = ITEM_LAYOUT_PANEL_HEADER;
 
     header_litem->open_prop_owner = *open_prop_owner;
-    STRNCPY(header_litem->open_prop_name, open_prop_name);
+    STRNCPY(header_litem->open_prop_name, open_prop_name.c_str());
 
     uiLayout *row = uiLayoutRow(header_litem, true);
     uiLayoutSetUnitsY(row, 1.2f);
@@ -5008,11 +5016,28 @@ PanelLayout uiLayoutPanelProp(const bContext *C,
   return panel_layout;
 }
 
+PanelLayout uiLayoutPanelPropWithBoolHeader(const bContext *C,
+                                            uiLayout *layout,
+                                            PointerRNA *open_prop_owner,
+                                            const StringRefNull open_prop_name,
+                                            PointerRNA *bool_prop_owner,
+                                            const StringRefNull bool_prop_name,
+                                            const std::optional<StringRefNull> label)
+{
+  PanelLayout panel = uiLayoutPanelProp(C, layout, open_prop_owner, open_prop_name);
+
+  uiLayout *panel_header = panel.header;
+  panel_header->flag &= ~(UI_ITEM_PROP_SEP | UI_ITEM_PROP_DECORATE | UI_ITEM_INSIDE_PROP_SEP);
+  uiItemR(panel_header, bool_prop_owner, bool_prop_name, UI_ITEM_NONE, label, ICON_NONE);
+
+  return panel;
+}
+
 uiLayout *uiLayoutPanelProp(const bContext *C,
                             uiLayout *layout,
                             PointerRNA *open_prop_owner,
-                            const char *open_prop_name,
-                            const char *label)
+                            const StringRefNull open_prop_name,
+                            const StringRef label)
 {
   PanelLayout panel = uiLayoutPanelProp(C, layout, open_prop_owner, open_prop_name);
   uiItemL(panel.header, label, ICON_NONE);
@@ -5020,25 +5045,9 @@ uiLayout *uiLayoutPanelProp(const bContext *C,
   return panel.body;
 }
 
-uiLayout *uiLayoutPanelPropWithBoolHeader(const bContext *C,
-                                          uiLayout *layout,
-                                          PointerRNA *open_prop_owner,
-                                          const StringRefNull open_prop_name,
-                                          const StringRefNull bool_prop_name,
-                                          const std::optional<StringRefNull> label)
-{
-  PanelLayout panel = uiLayoutPanelProp(C, layout, open_prop_owner, open_prop_name.c_str());
-
-  uiLayout *panel_header = panel.header;
-  panel_header->flag &= ~(UI_ITEM_PROP_SEP | UI_ITEM_PROP_DECORATE | UI_ITEM_INSIDE_PROP_SEP);
-  uiItemR(panel_header, open_prop_owner, bool_prop_name, UI_ITEM_NONE, label, ICON_NONE);
-
-  return panel.body;
-}
-
 PanelLayout uiLayoutPanel(const bContext *C,
                           uiLayout *layout,
-                          const char *idname,
+                          const StringRef idname,
                           const bool default_closed)
 {
   Panel *panel = uiLayoutGetRootPanel(layout);
@@ -5052,9 +5061,9 @@ PanelLayout uiLayoutPanel(const bContext *C,
 
 uiLayout *uiLayoutPanel(const bContext *C,
                         uiLayout *layout,
-                        const char *idname,
+                        const StringRef idname,
                         const bool default_closed,
-                        const char *label)
+                        const StringRef label)
 {
   PanelLayout panel = uiLayoutPanel(C, layout, idname, default_closed);
   uiItemL(panel.header, label, ICON_NONE);
@@ -5880,7 +5889,7 @@ uiLayout *UI_block_layout(uiBlock *block,
                           int padding,
                           const uiStyle *style)
 {
-  uiLayoutRoot *root = MEM_cnew<uiLayoutRoot>(__func__);
+  uiLayoutRoot *root = MEM_callocN<uiLayoutRoot>(__func__);
   root->type = type;
   root->style = style;
   root->block = block;

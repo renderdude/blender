@@ -556,8 +556,7 @@ static void rna_userdef_script_directory_name_set(PointerRNA *ptr, const char *v
 
 static bUserScriptDirectory *rna_userdef_script_directory_new()
 {
-  bUserScriptDirectory *script_dir = static_cast<bUserScriptDirectory *>(
-      MEM_callocN(sizeof(*script_dir), __func__));
+  bUserScriptDirectory *script_dir = MEM_callocN<bUserScriptDirectory>(__func__);
   BLI_addtail(&U.script_directories, script_dir);
   USERDEF_TAG_DIRTY;
   return script_dir;
@@ -995,8 +994,7 @@ static void rna_userdef_addon_remove(ReportList *reports, PointerRNA *addon_ptr)
 
 static bPathCompare *rna_userdef_pathcompare_new()
 {
-  bPathCompare *path_cmp = static_cast<bPathCompare *>(
-      MEM_callocN(sizeof(bPathCompare), "bPathCompare"));
+  bPathCompare *path_cmp = MEM_callocN<bPathCompare>("bPathCompare");
   BLI_addtail(&U.autoexec_paths, path_cmp);
   USERDEF_TAG_DIRTY;
   return path_cmp;
@@ -1249,7 +1247,7 @@ static StructRNA *rna_AddonPref_register(Main *bmain,
   }
 
   /* Create a new add-on preference type. */
-  apt = static_cast<bAddonPrefType *>(MEM_mallocN(sizeof(bAddonPrefType), "addonpreftype"));
+  apt = MEM_mallocN<bAddonPrefType>("addonpreftype");
   memcpy(apt, &dummy_apt, sizeof(dummy_apt));
   BKE_addon_pref_type_add(apt);
 
@@ -7544,7 +7542,7 @@ static void rna_def_userdef_experimental(BlenderRNA *brna)
                            "`--disable-liboverride-auto-resync` command line option");
 
   /* The DNA doesn't match the RNA name. This is intentional, and a side-effect of a massive
-   * renaming of point_cloud > pointclout which didn't want to affect people's DNA. */
+   * renaming of `point_cloud` > `pointclout` which didn't want to affect people's DNA. */
   prop = RNA_def_property(srna, "use_new_pointcloud_type", PROP_BOOLEAN, PROP_NONE);
   RNA_def_property_boolean_sdna(prop, nullptr, "use_new_point_cloud_type", 1);
   RNA_def_property_ui_text(

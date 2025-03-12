@@ -67,7 +67,7 @@ static void node_shader_buts_tex_gabor(uiLayout *layout, bContext * /*C*/, Point
 
 static void node_shader_init_tex_gabor(bNodeTree * /*ntree*/, bNode *node)
 {
-  NodeTexGabor *storage = MEM_cnew<NodeTexGabor>(__func__);
+  NodeTexGabor *storage = MEM_callocN<NodeTexGabor>(__func__);
   BKE_texture_mapping_default(&storage->base.tex_mapping, TEXMAP_TYPE_POINT);
   BKE_texture_colormapping_default(&storage->base.color_mapping);
 
@@ -207,7 +207,7 @@ void register_node_type_sh_tex_gabor()
 
   static blender::bke::bNodeType ntype;
 
-  sh_fn_node_type_base(&ntype, "ShaderNodeTexGabor", SH_NODE_TEX_GABOR);
+  common_node_type_base(&ntype, "ShaderNodeTexGabor", SH_NODE_TEX_GABOR);
   ntype.ui_name = "Gabor Texture";
   ntype.ui_description = "Generate Gabor noise";
   ntype.enum_name_legacy = "TEX_GABOR";
