@@ -415,7 +415,6 @@ void RIBCyclesMesh::separate_face_varying_normals()
 
 void RIBCyclesMesh::populate_normals()
 {
-  _geom->attributes.remove(ATTR_STD_FACE_NORMAL);
   _geom->attributes.remove(ATTR_STD_VERTEX_NORMAL);
 
   // Authored normals should only exist on triangle meshes
@@ -705,7 +704,7 @@ void RIBCyclesMesh::populate_topology()
       numCorners += vertCount;
     }
 
-    _geom->reserve_subd_faces(_shape.parameters.get_one_int("nfaces", 0), numNgons, numCorners);
+    _geom->reserve_subd_faces(_shape.parameters.get_one_int("nfaces", 0), numCorners);
 
     // TODO: Handle hole indices
     size_t faceIndex = 0;

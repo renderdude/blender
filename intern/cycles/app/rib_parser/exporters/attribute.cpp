@@ -29,19 +29,22 @@ void apply_primvars(AttributeSet &attributes,
   }
   else if (value->type == Parameter_Type::Point2) {
     attrType = TypeFloat2;
-    for (int i = 0; i < value->floats().size(); i += 2)
+    for (int i = 0; i < value->floats().size(); i += 2) {
       vf2.push_back(make_float2(value->floats()[i], value->floats()[i + 1]));
-    Mesh *mesh = static_cast<Mesh *>(attributes.geometry);
-    for (int i = 0; i < mesh->get_num_ngons(); i++)
-      vf2.push_back(make_float2(0, 0));
+    }
+    // Mesh *mesh = static_cast<Mesh *>(attributes.geometry);
+    // for (int i = 0; i < mesh->get_num_subd_faces() + mesh->num_triangles(); i++) {
+    //   vf2.push_back(make_float2(0, 0));
+    // }
     size = vf2.size() * sizeof(float2);
     data = vf2.data();
   }
   else if (value->type == Parameter_Type::Color) {
     attrType = TypeVector;
-    for (int i = 0; i < value->floats().size(); i += 3)
+    for (int i = 0; i < value->floats().size(); i += 3) {
       vf3.push_back(
           make_float3(value->floats()[i], value->floats()[i + 1], value->floats()[i + 2]));
+    }
     size = vf3.size() * sizeof(float3);
     data = vf3.data();
   }

@@ -42,7 +42,7 @@ bool create_shader_node(std::string const &nodeType,
       shader_name = path_join(path, shader_name);
     }
     scene->mutex.lock();
-    *node = OSLShaderManager::osl_node(graph, scene->shader_manager.get(), shader_name, "");
+    *node = OSLShaderManager::osl_node(graph, scene, shader_name, "");
     scene->mutex.unlock();
     if (!node) {
       fprintf(stderr, "Could not create node '%s'", shader_name.c_str());
