@@ -19,7 +19,7 @@
 #include "draw_cache_impl.hh"
 #include "draw_common.hh"
 #include "draw_common_c.hh"
-#include "draw_manager_c.hh"
+#include "draw_context_private.hh"
 #include "draw_pointcloud_private.hh"
 /* For drw_curves_get_attribute_sampler_name. */
 #include "draw_curves_private.hh"
@@ -71,7 +71,7 @@ gpu::Batch *pointcloud_sub_pass_setup_implementation(PassT &sub_ps,
                                                      GPUMaterial *gpu_material)
 {
   BLI_assert(object->type == OB_POINTCLOUD);
-  PointCloud &pointcloud = *static_cast<PointCloud *>(object->data);
+  PointCloud &pointcloud = DRW_object_get_data_for_drawing<PointCloud>(*object);
 
   PointCloudModule &module = *drw_get().data->pointcloud_module;
   /* Fix issue with certain driver not drawing anything if there is no texture bound to

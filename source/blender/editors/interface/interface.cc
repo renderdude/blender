@@ -314,8 +314,8 @@ static void ui_update_flexible_spacing(const ARegion *region, uiBlock *block)
 
   rcti rect;
   ui_but_to_pixelrect(&rect, region, block, block->buttons.last().get());
-  const float buttons_width = float(rect.xmax) + UI_HEADER_OFFSET;
-  const float region_width = float(region->sizex) * UI_SCALE_FAC;
+  const float buttons_width = std::ceil(float(rect.xmax) + UI_HEADER_OFFSET);
+  const float region_width = float(region->winx);
 
   if (region_width <= buttons_width) {
     return;
@@ -335,7 +335,7 @@ static void ui_update_flexible_spacing(const ARegion *region, uiBlock *block)
   float offset = 0, remaining_space = region_width - buttons_width;
   int i = 0;
   for (const std::unique_ptr<uiBut> &but : block->buttons) {
-    BLI_rctf_translate(&but->rect, offset / view_scale_x, 0);
+    BLI_rctf_translate(&but->rect, std::floor(offset / view_scale_x), 0.0f);
     if (but->type == UI_BTYPE_SEPR_SPACER) {
       /* How much the next block overlap with the current segment */
       int overlap = ((i == sepr_flex_len - 1) ? buttons_width - spacers_pos[i] :
@@ -4487,7 +4487,7 @@ static void ui_def_but_rna__menu(bContext *C, uiLayout *layout, void *but_p)
   /* Calculate the maximum number of rows that can fit in half the height of this window. */
   const float row_height = float(UI_UNIT_Y) / but->block->aspect;
   const float vertical_space = (float(WM_window_native_pixel_y(win)) / 2.0f) - (UI_UNIT_Y * 3.0f);
-  const int max_rows = int(vertical_space / row_height) - 1;
+  const int max_rows = std::max(int(vertical_space / row_height) - 1, 1);
 
   float text_width = 0.0f;
   BLF_size(BLF_default(), UI_style_get()->widget.points * UI_SCALE_FAC);
@@ -5530,6 +5530,31 @@ uiBut *uiDefIconBut(uiBlock *block,
 {
   uiBut *but = ui_def_but(block, type, retval, "", x, y, width, height, poin, min, max, tip);
   ui_but_update_and_icon_set(but, icon);
+  return but;
+}
+uiBut *uiDefIconPreviewBut(uiBlock *block,
+                           int type,
+                           int retval,
+                           int icon,
+                           int x,
+                           int y,
+                           short width,
+                           short height,
+                           void *poin,
+                           float min,
+                           float max,
+                           const std::optional<StringRef> tip)
+{
+  uiBut *but = ui_def_but(block, type, retval, "", x, y, width, height, poin, min, max, tip);
+  if (icon) {
+    ui_def_but_icon(but, icon, UI_HAS_ICON | UI_BUT_ICON_PREVIEW);
+
+    /* Use the exact button size for the preview. Or do we need to let the caller control this? */
+    but->drawflag |= UI_BUT_NO_PREVIEW_PADDING;
+    but->drawflag &= ~UI_BUT_ICON_LEFT;
+  }
+
+  ui_but_update(but);
   return but;
 }
 static uiBut *uiDefIconButBit(uiBlock *block,

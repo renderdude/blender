@@ -440,10 +440,6 @@ static int transform_modal(bContext *C, wmOperator *op, const wmEvent *event)
   /* XXX insert keys are called here, and require context. */
   t->context = C;
 
-  if (t->helpline != HLP_ERROR && t->helpline != HLP_ERROR_DASH) {
-    ED_workspace_status_text(t->context, nullptr);
-  }
-
   exit_code = transformEvent(t, op, event);
   t->context = nullptr;
 
@@ -1489,6 +1485,7 @@ static void TRANSFORM_OT_from_gizmo(wmOperatorType *ot)
   ot->flag = 0;
 
   /* API callbacks. */
+  ot->poll = ED_operator_regionactive;
   ot->invoke = transform_from_gizmo_invoke;
 }
 

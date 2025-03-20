@@ -1861,13 +1861,12 @@ void OBJECT_OT_collection_external_asset_drop(wmOperatorType *ot)
 
   add_generic_props(ot, false);
 
-  /* IMPORTANT: Instancing option. Intentionally remembered across executions (no #PROP_SKIP_SAVE).
-   */
-  RNA_def_boolean(ot->srna,
-                  "use_instance",
-                  true,
-                  "Instance",
-                  "Add the dropped collection as collection instance");
+  prop = RNA_def_boolean(ot->srna,
+                         "use_instance",
+                         true,
+                         "Instance",
+                         "Add the dropped collection as collection instance");
+  RNA_def_property_flag(prop, PROP_SKIP_SAVE);
 
   object_add_drop_xy_props(ot);
 
@@ -4772,10 +4771,10 @@ static int object_join_exec(bContext *C, wmOperator *op)
     ret = ED_armature_join_objects_exec(C, op);
   }
   else if (ob->type == OB_POINTCLOUD) {
-    ret = pointcloud::join_objects(C, op);
+    ret = pointcloud::join_objects_exec(C, op);
   }
   else if (ob->type == OB_CURVES) {
-    ret = curves::join_objects(C, op);
+    ret = curves::join_objects_exec(C, op);
   }
   else if (ob->type == OB_GREASE_PENCIL) {
     ret = ED_grease_pencil_join_objects_exec(C, op);

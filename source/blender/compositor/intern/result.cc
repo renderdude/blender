@@ -9,6 +9,7 @@
 
 #include "BLI_assert.h"
 #include "BLI_cpp_type.hh"
+#include "BLI_generic_pointer.hh"
 #include "BLI_generic_span.hh"
 #include "BLI_math_matrix_types.hh"
 #include "BLI_math_vector_types.hh"
@@ -242,6 +243,29 @@ const CPPType &Result::cpp_type(const ResultType type)
 
   BLI_assert_unreachable();
   return CPPType::get<float>();
+}
+
+const char *Result::type_name(const ResultType type)
+{
+  switch (type) {
+    case ResultType::Float:
+      return "float";
+    case ResultType::Float2:
+      return "float2";
+    case ResultType::Float3:
+      return "float3";
+    case ResultType::Float4:
+      return "float4";
+    case ResultType::Color:
+      return "color";
+    case ResultType::Int2:
+      return "int2";
+    case ResultType::Int:
+      return "int";
+  }
+
+  BLI_assert_unreachable();
+  return "";
 }
 
 Result::operator GPUTexture *() const
@@ -489,11 +513,24 @@ void Result::free()
     return;
   }
 
-  /* Data is still shared with some other result, so decrement data reference count and do not free
-   * anything. */
+  /* Data is still shared with some other result, so decrement data reference count and reset data
+   * members without actually freeing the data itself. */
   BLI_assert(*data_reference_count_ >= 1);
   if (*data_reference_count_ != 1) {
     (*data_reference_count_)--;
+
+    switch (storage_type_) {
+      case ResultStorageType::GPU:
+        gpu_texture_ = nullptr;
+        break;
+      case ResultStorageType::CPU:
+        cpu_data_ = GMutableSpan();
+        break;
+    }
+
+    data_reference_count_ = nullptr;
+    derived_resources_ = nullptr;
+
     return;
   }
 
@@ -577,6 +614,49 @@ bool Result::is_allocated() const
 int Result::reference_count() const
 {
   return reference_count_;
+}
+
+GPointer Result::single_value() const
+{
+  return std::visit([](const auto &value) { return GPointer(&value); }, single_value_);
+}
+
+GMutablePointer Result::single_value()
+{
+  return std::visit([](auto &value) { return GMutablePointer(&value); }, single_value_);
+}
+
+void Result::update_single_value_data()
+{
+  BLI_assert(this->is_single_value());
+  BLI_assert(this->is_allocated());
+
+  switch (storage_type_) {
+    case ResultStorageType::GPU:
+      switch (type_) {
+        case ResultType::Float:
+        case ResultType::Float2:
+        case ResultType::Float4:
+        case ResultType::Color:
+          GPU_texture_update(this->gpu_texture(), GPU_DATA_FLOAT, this->single_value().get());
+          break;
+        case ResultType::Float3: {
+          /* Float3 results are stored in 4-component textures due to hardware limitations. So
+           * pad the value with a zero before updating. */
+          const float4 vector_value = float4(this->get_single_value<float3>(), 0.0f);
+          GPU_texture_update(this->gpu_texture(), GPU_DATA_FLOAT, vector_value);
+          break;
+        }
+        case ResultType::Int:
+        case ResultType::Int2:
+          GPU_texture_update(this->gpu_texture(), GPU_DATA_INT, this->single_value().get());
+          break;
+      }
+      break;
+    case ResultStorageType::CPU:
+      this->get_cpp_type().copy_assign(this->single_value().get(), this->cpu_data().data());
+      break;
+  }
 }
 
 void Result::allocate_data(int2 size, bool from_pool)

@@ -2315,10 +2315,14 @@ static float brush_strength(const Sculpt &sd,
       return alpha * flip * pressure * overlap * feather;
 
     case SCULPT_BRUSH_TYPE_PLANE:
-      if (flip > 0.0f) {
+      if (flip > 0.0f || brush.plane_inversion_mode == BRUSH_PLANE_SWAP_HEIGHT_AND_DEPTH) {
         overlap = (1.0f + overlap) / 2.0f;
         return alpha * pressure * overlap * feather;
       }
+      /* When the brush is inverted with the Invert Displacement mode (i.e. when the brush adds
+       * contrast), use a different formula that results in a lower strength. This is done because,
+       * from an artistic point of view, the contrast would otherwise generally be too strong. Note
+       * that this behavior is coherent with the way Fill, Scrape and Flatten work. See #136211. */
       else {
         return 0.5f * alpha * pressure * overlap * feather;
       }
@@ -3041,6 +3045,7 @@ static IndexMask calc_plane_for_plane_brush(const Depsgraph &depsgraph,
                                             const StrokeCache &cache,
                                             const Brush &brush,
                                             Object &object,
+                                            IndexMaskMemory &memory,
                                             float3 &r_plane_normal,
                                             float3 &r_plane_center)
 {
@@ -3059,7 +3064,6 @@ static IndexMask calc_plane_for_plane_brush(const Depsgraph &depsgraph,
    * location. However, for the Plane brush, its effective center often deviates from the cursor
    * location. Calculating the affected nodes using the cursor location as the center can lead to
    * issues (see, for example, #123768). */
-  IndexMaskMemory memory;
   return bke::pbvh::search_nodes(pbvh, memory, [&](const bke::pbvh::Node &node) {
     if (node_fully_masked_or_hidden(node)) {
       return false;
@@ -3247,7 +3251,7 @@ static void do_brush_action(const Depsgraph &depsgraph,
   }
   else if (brush.sculpt_brush_type == SCULPT_BRUSH_TYPE_PLANE) {
     node_mask = calc_plane_for_plane_brush(
-        depsgraph, *ss.cache, brush, ob, plane_normal, plane_center);
+        depsgraph, *ss.cache, brush, ob, memory, plane_normal, plane_center);
   }
   else if (brush.sculpt_brush_type == SCULPT_BRUSH_TYPE_CLOTH) {
     node_mask = cloth::brush_affected_nodes_gather(ob, brush, memory);
@@ -3519,11 +3523,7 @@ static void do_brush_action(const Depsgraph &depsgraph,
   }
 
   /* The cloth brush adds the gravity as a regular force and it is processed in the solver. */
-  if (ss.cache->supports_gravity && !ELEM(brush.sculpt_brush_type,
-                                          SCULPT_BRUSH_TYPE_CLOTH,
-                                          SCULPT_BRUSH_TYPE_DRAW_FACE_SETS,
-                                          SCULPT_BRUSH_TYPE_BOUNDARY))
-  {
+  if (ss.cache->supports_gravity && brush.sculpt_brush_type != SCULPT_BRUSH_TYPE_CLOTH) {
     do_gravity_brush(depsgraph, sd, ob, node_mask);
   }
 
@@ -4122,13 +4122,8 @@ static void sculpt_update_cache_invariants(
   mul_m3_v3(mat, viewDir);
   normalize_v3_v3(cache->view_normal, viewDir);
 
-  cache->supports_gravity = (!ELEM(brush->sculpt_brush_type,
-                                   SCULPT_BRUSH_TYPE_MASK,
-                                   SCULPT_BRUSH_TYPE_SMOOTH,
-                                   SCULPT_BRUSH_TYPE_SIMPLIFY,
-                                   SCULPT_BRUSH_TYPE_DISPLACEMENT_SMEAR,
-                                   SCULPT_BRUSH_TYPE_DISPLACEMENT_ERASER) &&
-                             (sd.gravity_factor > 0.0f));
+  cache->supports_gravity = brush_type_supports_gravity(brush->sculpt_brush_type) &&
+                            (sd.gravity_factor > 0.0f);
   /* Get gravity vector in world space. */
   if (cache->supports_gravity) {
     if (sd.gravity_object) {

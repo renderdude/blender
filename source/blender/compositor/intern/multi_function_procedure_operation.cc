@@ -54,91 +54,6 @@ MultiFunctionProcedureOperation::MultiFunctionProcedureOperation(Context &contex
   procedure_executor_ = std::make_unique<mf::ProcedureExecutor>(procedure_);
 }
 
-/* Adds the single value input parameter of the given input to the given parameter_builder. */
-static void add_single_value_input_parameter(mf::ParamsBuilder &parameter_builder,
-                                             const Result &input)
-{
-  BLI_assert(input.is_single_value());
-  switch (input.type()) {
-    case ResultType::Float:
-      parameter_builder.add_readonly_single_input_value(input.get_single_value<float>());
-      return;
-    case ResultType::Int:
-      parameter_builder.add_readonly_single_input_value(input.get_single_value<int32_t>());
-      return;
-    case ResultType::Color:
-      parameter_builder.add_readonly_single_input_value(input.get_single_value<float4>());
-      return;
-    case ResultType::Float3:
-      parameter_builder.add_readonly_single_input_value(input.get_single_value<float3>());
-      return;
-    case ResultType::Float4:
-      parameter_builder.add_readonly_single_input_value(input.get_single_value<float4>());
-      return;
-    case ResultType::Float2:
-    case ResultType::Int2:
-      /* Those types are internal and needn't be handled by operations. */
-      BLI_assert_unreachable();
-      break;
-  }
-}
-
-/* Adds the single value output parameter of the given output to the given parameter_builder. */
-static void add_single_value_output_parameter(mf::ParamsBuilder &parameter_builder, Result &output)
-{
-  output.allocate_single_value();
-  switch (output.type()) {
-    case ResultType::Float:
-      parameter_builder.add_uninitialized_single_output(&output.get_single_value<float>());
-      return;
-    case ResultType::Int:
-      parameter_builder.add_uninitialized_single_output(&output.get_single_value<int32_t>());
-      return;
-    case ResultType::Color:
-      parameter_builder.add_uninitialized_single_output(&output.get_single_value<float4>());
-      return;
-    case ResultType::Float3:
-      parameter_builder.add_uninitialized_single_output(&output.get_single_value<float3>());
-      return;
-    case ResultType::Float4:
-      parameter_builder.add_uninitialized_single_output(&output.get_single_value<float4>());
-      return;
-    case ResultType::Float2:
-    case ResultType::Int2:
-      /* Those types are internal and needn't be handled by operations. */
-      BLI_assert_unreachable();
-      break;
-  }
-}
-
-/* Upload the single value output value to the GPU. The set_single_value method already does that,
- * so we can call it on its own value. */
-static void upload_single_value_output_to_gpu(Result &output)
-{
-  switch (output.type()) {
-    case ResultType::Float:
-      output.set_single_value(output.get_single_value<float>());
-      return;
-    case ResultType::Int:
-      output.set_single_value(output.get_single_value<int32_t>());
-      return;
-    case ResultType::Color:
-      output.set_single_value(output.get_single_value<float4>());
-      return;
-    case ResultType::Float3:
-      output.set_single_value(output.get_single_value<float3>());
-      return;
-    case ResultType::Float4:
-      output.set_single_value(output.get_single_value<float4>());
-      return;
-    case ResultType::Float2:
-    case ResultType::Int2:
-      /* Those types are internal and needn't be handled by operations. */
-      BLI_assert_unreachable();
-      break;
-  }
-}
-
 void MultiFunctionProcedureOperation::execute()
 {
   const Domain domain = compute_domain();
@@ -152,9 +67,9 @@ void MultiFunctionProcedureOperation::execute()
    * allocating the outputs when needed. */
   for (int i = 0; i < procedure_.params().size(); i++) {
     if (procedure_.params()[i].type == mf::ParamType::InterfaceType::Input) {
-      Result &input = get_input(parameter_identifiers_[i]);
+      const Result &input = get_input(parameter_identifiers_[i]);
       if (input.is_single_value()) {
-        add_single_value_input_parameter(parameter_builder, input);
+        parameter_builder.add_readonly_single_input(input.single_value());
       }
       else {
         parameter_builder.add_readonly_single_input(input.cpu_data());
@@ -163,7 +78,9 @@ void MultiFunctionProcedureOperation::execute()
     else {
       Result &output = get_result(parameter_identifiers_[i]);
       if (is_single_value) {
-        add_single_value_output_parameter(parameter_builder, output);
+        output.allocate_single_value();
+        parameter_builder.add_uninitialized_single_output(
+            GMutableSpan(output.get_cpp_type(), output.single_value().get(), 1));
       }
       else {
         output.allocate_texture(domain);
@@ -175,12 +92,12 @@ void MultiFunctionProcedureOperation::execute()
   mf::ContextBuilder context_builder;
   procedure_executor_->call_auto(mask, parameter_builder, context_builder);
 
-  /* In case of single value GPU execution, the single values need to be uploaded to the GPU. */
-  if (is_single_value && this->context().use_gpu()) {
+  /* In case of single value execution, update single value data. */
+  if (is_single_value) {
     for (int i = 0; i < procedure_.params().size(); i++) {
       if (procedure_.params()[i].type == mf::ParamType::InterfaceType::Output) {
         Result &output = get_result(parameter_identifiers_[i]);
-        upload_single_value_output_to_gpu(output);
+        output.update_single_value_data();
       }
     }
   }

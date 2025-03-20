@@ -11,6 +11,7 @@
 #include "BKE_paint.hh"
 #include "DNA_volume_types.h"
 
+#include "DRW_render.hh"
 #include "draw_common.hh"
 #include "draw_sculpt.hh"
 
@@ -82,7 +83,7 @@ class Wireframe : Overlay {
       auto shader_pass =
           [&](GPUShader *shader, const char *name, bool use_coloring, float wire_threshold) {
             auto &sub = pass.sub(name);
-            if (res.shaders.wireframe_mesh.get() == shader) {
+            if (res.shaders->wireframe_mesh.get() == shader) {
               sub.specialize_constant(shader, "use_custom_depth_bias", do_smooth_lines);
             }
             sub.shader_set(shader);
@@ -98,7 +99,7 @@ class Wireframe : Overlay {
           };
 
       auto coloring_pass = [&](ColoringPass &ps, bool use_color) {
-        overlay::ShaderModule &sh = res.shaders;
+        overlay::ShaderModule &sh = *res.shaders;
         ps.mesh_ps_ = shader_pass(sh.wireframe_mesh.get(), "Mesh", use_color, wire_threshold);
         ps.mesh_all_edges_ps_ = shader_pass(sh.wireframe_mesh.get(), "Wire", use_color, 1.0f);
         ps.pointcloud_ps_ = shader_pass(sh.wireframe_points.get(), "PtCloud", use_color, 1.0f);
@@ -194,9 +195,9 @@ class Wireframe : Overlay {
 
         /* Draw loose geometry. */
         if (!in_edit_paint_mode || bypass_mode_check) {
-          const Mesh *mesh = static_cast<const Mesh *>(ob_ref.object->data);
+          const Mesh &mesh = DRW_object_get_data_for_drawing<Mesh>(*ob_ref.object);
           gpu::Batch *geom;
-          if ((mesh->edges_num == 0) && (mesh->verts_num > 0)) {
+          if ((mesh.edges_num == 0) && (mesh.verts_num > 0)) {
             geom = DRW_cache_mesh_all_verts_get(ob_ref.object);
             coloring.pointcloud_ps_->draw(
                 geom, manager.unique_handle(ob_ref), res.select_id(ob_ref).get());
@@ -222,7 +223,7 @@ class Wireframe : Overlay {
           if (geom == nullptr) {
             break;
           }
-          if (static_cast<Volume *>(ob_ref.object->data)->display.wireframe_type ==
+          if (DRW_object_get_data_for_drawing<Volume>(*ob_ref.object).display.wireframe_type ==
               VOLUME_WIREFRAME_POINTS)
           {
             coloring.pointcloud_ps_->draw(
@@ -293,7 +294,7 @@ class Wireframe : Overlay {
     if (!in_edit_mode) {
       return false;
     }
-    const Mesh &mesh = *static_cast<const Mesh *>(ob_ref.object->data);
+    const Mesh &mesh = DRW_object_get_data_for_drawing<Mesh>(*ob_ref.object);
     const Mesh *orig_edit_mesh = BKE_object_get_pre_modified_mesh(ob_ref.object);
     const bool edit_mapping_valid = BKE_editmesh_eval_orig_map_available(mesh, orig_edit_mesh);
     if (!edit_mapping_valid) {

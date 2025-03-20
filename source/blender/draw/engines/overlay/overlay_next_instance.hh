@@ -54,20 +54,15 @@ namespace blender::draw::overlay {
  * Selection engine reuse most of the Overlay engine by creating selection IDs for each
  * selectable component and using a special shaders for drawing.
  */
-class Instance {
+class Instance : public DrawEngine {
   const SelectionType selection_type_;
-  const bool clipping_enabled_;
+  bool clipping_enabled_;
 
  public:
-  /* WORKAROUND: Legacy. Move to grid pass. */
-  GPUUniformBuf *grid_ubo = nullptr;
-
   ShapeCache shapes;
 
   /** Global types. */
-  Resources resources = {selection_type_,
-                         overlay::ShaderModule::module_get(selection_type_, clipping_enabled_),
-                         shapes};
+  Resources resources = {selection_type_, shapes};
   State state;
 
   /** Overlay types. */
@@ -117,24 +112,19 @@ class Instance {
   AntiAliasing anti_aliasing;
   XrayFade xray_fade;
 
-  Instance(const SelectionType selection_type, const bool clipping_enabled)
-      : selection_type_(selection_type), clipping_enabled_(clipping_enabled){};
+  Instance() : selection_type_(select::SelectionType::DISABLED){};
+  Instance(const SelectionType selection_type) : selection_type_(selection_type){};
 
-  ~Instance()
+  blender::StringRefNull name_get() final
   {
-    GPU_UBO_FREE_SAFE(grid_ubo);
+    return "Overlay";
   }
 
-  void init();
-  void begin_sync();
-  void object_sync(ObjectRef &ob_ref, Manager &manager);
-  void end_sync();
-  void draw(Manager &manager);
-
-  bool clipping_enabled() const
-  {
-    return clipping_enabled_;
-  }
+  void init() final;
+  void begin_sync() final;
+  void object_sync(ObjectRef &ob_ref, Manager &manager) final;
+  void end_sync() final;
+  void draw(Manager &manager) final;
 
  private:
   bool object_is_selected(const ObjectRef &ob_ref);

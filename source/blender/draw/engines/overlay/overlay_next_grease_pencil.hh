@@ -121,7 +121,7 @@ class GreasePencil : Overlay {
 
       if (show_points_) {
         auto &sub = pass.sub("Points");
-        sub.shader_set(res.shaders.curve_edit_points.get());
+        sub.shader_set(res.shaders->curve_edit_points.get());
         sub.bind_texture("weightTex", &res.weight_ramp_tx);
         sub.push_constant("useWeight", show_weight_);
         sub.push_constant("useGreasePencil", true);
@@ -131,7 +131,7 @@ class GreasePencil : Overlay {
 
       if (show_lines_) {
         auto &sub = pass.sub("Lines");
-        sub.shader_set(res.shaders.curve_edit_line.get());
+        sub.shader_set(res.shaders->curve_edit_line.get());
         sub.bind_texture("weightTex", &res.weight_ramp_tx);
         sub.push_constant("useWeight", show_weight_);
         sub.push_constant("useGreasePencil", true);
@@ -154,7 +154,7 @@ class GreasePencil : Overlay {
       if (show_grid_) {
         const float4 col_grid(float3(state.overlay.gpencil_grid_color),
                               state.overlay.gpencil_grid_opacity);
-        pass.shader_set(res.shaders.grid_grease_pencil.get());
+        pass.shader_set(res.shaders->grid_grease_pencil.get());
         pass.bind_ubo(OVERLAY_GLOBALS_SLOT, &res.globals_buf);
         pass.bind_ubo(DRW_CLIPPING_UBO_SLOT, &res.clip_planes_buf);
         pass.push_constant("color", col_grid);
@@ -288,7 +288,7 @@ class GreasePencil : Overlay {
   {
     using namespace blender;
     using namespace blender::ed::greasepencil;
-    ::GreasePencil &grease_pencil = *static_cast<::GreasePencil *>(ob->data);
+    ::GreasePencil &grease_pencil = DRW_object_get_data_for_drawing<::GreasePencil>(*ob);
 
     const bool is_stroke_order_3d = (grease_pencil.flag & GREASE_PENCIL_STROKE_ORDER_3D) != 0;
 
@@ -412,7 +412,7 @@ class GreasePencil : Overlay {
   {
     const ToolSettings *ts = scene->toolsettings;
 
-    const ::GreasePencil &grease_pencil = *static_cast<::GreasePencil *>(object.data);
+    const ::GreasePencil &grease_pencil = DRW_object_get_data_for_drawing<::GreasePencil>(object);
     const blender::bke::greasepencil::Layer *active_layer = grease_pencil.get_active_layer();
 
     float4x4 mat = object.object_to_world();
@@ -464,7 +464,7 @@ class GreasePencil : Overlay {
     uchar4 color;
     UI_GetThemeColor4ubv(res.object_wire_theme_id(ob_ref, state), color);
 
-    ::GreasePencil &grease_pencil = *static_cast<::GreasePencil *>(object.data);
+    ::GreasePencil &grease_pencil = DRW_object_get_data_for_drawing<::GreasePencil>(object);
 
     Vector<ed::greasepencil::DrawingInfo> drawings = ed::greasepencil::retrieve_visible_drawings(
         *state.scene, grease_pencil, false);

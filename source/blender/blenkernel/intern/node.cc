@@ -218,8 +218,8 @@ static void ntree_copy_data(Main * /*bmain*/,
   }
 
   if (ntree_src->nested_node_refs) {
-    ntree_dst->nested_node_refs = static_cast<bNestedNodeRef *>(
-        MEM_malloc_arrayN(ntree_src->nested_node_refs_num, sizeof(bNestedNodeRef), __func__));
+    ntree_dst->nested_node_refs = MEM_malloc_arrayN<bNestedNodeRef>(
+        size_t(ntree_src->nested_node_refs_num), __func__);
     uninitialized_copy_n(
         ntree_src->nested_node_refs, ntree_src->nested_node_refs_num, ntree_dst->nested_node_refs);
   }
@@ -761,7 +761,7 @@ void node_tree_blend_write(BlendWriter *writer, bNodeTree *ntree)
         writer, bNodePanelState, node->num_panel_states, node->panel_states_array);
 
     if (node->storage) {
-      if (ELEM(ntree->type, NTREE_SHADER, NTREE_GEOMETRY) &&
+      if (ELEM(ntree->type, NTREE_SHADER, NTREE_GEOMETRY, NTREE_COMPOSIT) &&
           ELEM(node->type_legacy, SH_NODE_CURVE_VEC, SH_NODE_CURVE_RGB, SH_NODE_CURVE_FLOAT))
       {
         BKE_curvemapping_blend_write(writer, static_cast<const CurveMapping *>(node->storage));
@@ -1817,6 +1817,15 @@ bNodeSocketType *node_socket_type_find(const StringRef idname)
   return *value;
 }
 
+bNodeSocketType *node_socket_type_find_static(const int type, const int subtype)
+{
+  const std::optional<StringRefNull> idname = node_static_socket_type(type, subtype);
+  if (!idname) {
+    return nullptr;
+  }
+  return node_socket_type_find(*idname);
+}
+
 static void node_free_socket_type(void *socktype_v)
 {
   bNodeSocketType *socktype = static_cast<bNodeSocketType *>(socktype_v);
@@ -2734,7 +2743,7 @@ bNode *node_copy_with_mapping(bNodeTree *dst_tree,
                               const bool use_unique,
                               Map<const bNodeSocket *, bNodeSocket *> &socket_map)
 {
-  bNode *node_dst = static_cast<bNode *>(MEM_mallocN(sizeof(bNode), __func__));
+  bNode *node_dst = MEM_mallocN<bNode>(__func__);
   *node_dst = node_src;
 
   node_dst->runtime = MEM_new<bNodeRuntime>(__func__);
@@ -3599,14 +3608,16 @@ void node_tree_free_local_tree(bNodeTree *ntree)
 void node_tree_set_output(bNodeTree &ntree)
 {
   const bool is_compositor = ntree.type == NTREE_COMPOSIT;
+  const bool is_geometry = ntree.type == NTREE_GEOMETRY;
   /* find the active outputs, might become tree type dependent handler */
   LISTBASE_FOREACH (bNode *, node, &ntree.nodes) {
     if (node->typeinfo->nclass == NODE_CLASS_OUTPUT) {
       /* we need a check for which output node should be tagged like this, below an exception */
-      if (ELEM(node->type_legacy, CMP_NODE_OUTPUT_FILE, GEO_NODE_VIEWER)) {
+      if (node->is_type("CompositorNodeOutputFile")) {
         continue;
       }
-      const bool node_is_output = node->type_legacy == CMP_NODE_VIEWER;
+      const bool node_is_output = node->is_type("CompositorNodeViewer") ||
+                                  node->is_type("GeometryNodeViewer");
 
       int output = 0;
       /* there is more types having output class, each one is checked */
@@ -3617,12 +3628,15 @@ void node_tree_set_output(bNodeTree &ntree)
         }
 
         /* same type, exception for viewer */
-        const bool tnode_is_output = tnode->type_legacy == CMP_NODE_VIEWER;
-        const bool compositor_case = is_compositor && tnode_is_output && node_is_output;
-        const bool has_same_shortcut = compositor_case && node != tnode &&
+        const bool tnode_is_output = tnode->is_type("CompositorNodeViewer") ||
+                                     tnode->is_type("GeometryNodeViewer");
+        const bool viewer_case = (is_compositor || is_geometry) && tnode_is_output &&
+                                 node_is_output;
+        const bool has_same_shortcut = viewer_case && node != tnode &&
                                        tnode->custom1 == node->custom1 &&
                                        tnode->custom1 != NODE_VIEWER_SHORTCUT_NONE;
-        if (tnode->type_legacy == node->type_legacy || compositor_case) {
+
+        if (tnode->type_legacy == node->type_legacy || viewer_case) {
           if (tnode->flag & NODE_DO_OUTPUT) {
             output++;
             if (output > 1) {
@@ -4254,8 +4268,7 @@ std::optional<eNodeSocketDatatype> custom_data_type_to_socket_type(eCustomDataTy
 
 static const CPPType *slow_socket_type_to_geo_nodes_base_cpp_type(const eNodeSocketDatatype type)
 {
-  const StringRefNull socket_idname = *node_static_socket_type(type, 0);
-  const bNodeSocketType *typeinfo = node_socket_type_find(socket_idname);
+  const bNodeSocketType *typeinfo = node_socket_type_find_static(type);
   return typeinfo->base_cpp_type;
 }
 

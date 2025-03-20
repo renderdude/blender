@@ -109,7 +109,10 @@ static void mesh_copy_data(Main *bmain,
 
   mesh_dst->runtime = new blender::bke::MeshRuntime();
   mesh_dst->runtime->deformed_only = mesh_src->runtime->deformed_only;
-  mesh_dst->runtime->wrapper_type = mesh_src->runtime->wrapper_type;
+  /* Subd runtime.mesh_eval is not copied, will need to be reevaluated. */
+  mesh_dst->runtime->wrapper_type = (mesh_src->runtime->wrapper_type == ME_WRAPPER_TYPE_SUBD) ?
+                                        ME_WRAPPER_TYPE_MDATA :
+                                        mesh_src->runtime->wrapper_type;
   mesh_dst->runtime->subsurf_runtime_data = mesh_src->runtime->subsurf_runtime_data;
   mesh_dst->runtime->cd_mask_extra = mesh_src->runtime->cd_mask_extra;
   /* Copy face dot tags and edge tags, since meshes may be duplicated after a subsurf modifier or
@@ -677,8 +680,7 @@ void BKE_mesh_face_offsets_ensure_alloc(Mesh *mesh)
   if (mesh->faces_num == 0) {
     return;
   }
-  mesh->face_offset_indices = static_cast<int *>(
-      MEM_malloc_arrayN(mesh->faces_num + 1, sizeof(int), __func__));
+  mesh->face_offset_indices = MEM_malloc_arrayN<int>(size_t(mesh->faces_num) + 1, __func__);
   mesh->runtime->face_offsets_sharing_info = blender::implicit_sharing::info_for_mem_free(
       mesh->face_offset_indices);
 
@@ -1475,8 +1477,7 @@ void BKE_mesh_mselect_validate(Mesh *mesh)
   }
 
   mselect_src = mesh->mselect;
-  mselect_dst = (MSelect *)MEM_malloc_arrayN(
-      (mesh->totselect), sizeof(MSelect), "Mesh selection history");
+  mselect_dst = MEM_malloc_arrayN<MSelect>(size_t(mesh->totselect), "Mesh selection history");
 
   const AttributeAccessor attributes = mesh->attributes();
   const VArray<bool> select_vert = *attributes.lookup_or_default<bool>(

@@ -20,7 +20,7 @@
 
 #include "WM_api.hh"
 
-#include "draw_manager_c.hh"
+#include "draw_context_private.hh"
 
 #include <atomic>
 #include <condition_variable>
@@ -339,7 +339,7 @@ GPUMaterial *DRW_shader_from_world(World *wo,
                                    GPUCodegenCallbackFn callback,
                                    void *thunk)
 {
-  Scene *scene = (Scene *)DEG_get_original_id(&drw_get().draw_ctx.scene->id);
+  Scene *scene = (Scene *)DEG_get_original_id(&drw_get().scene->id);
   GPUMaterial *mat = GPU_material_from_nodetree(scene,
                                                 nullptr,
                                                 ntree,
@@ -352,7 +352,7 @@ GPUMaterial *DRW_shader_from_world(World *wo,
                                                 callback,
                                                 thunk);
 
-  if (DRW_state_is_image_render()) {
+  if (DRW_context_get()->is_image_render()) {
     /* Do not deferred if doing render. */
     deferred = false;
   }
@@ -372,7 +372,7 @@ GPUMaterial *DRW_shader_from_material(Material *ma,
                                       void *thunk,
                                       GPUMaterialPassReplacementCallbackFn pass_replacement_cb)
 {
-  Scene *scene = (Scene *)DEG_get_original_id(&drw_get().draw_ctx.scene->id);
+  Scene *scene = (Scene *)DEG_get_original_id(&drw_get().scene->id);
   GPUMaterial *mat = GPU_material_from_nodetree(scene,
                                                 ma,
                                                 ntree,
@@ -395,7 +395,7 @@ void DRW_shader_queue_optimize_material(GPUMaterial *mat)
 {
   /* Do not perform deferred optimization if performing render.
    * De-queue any queued optimization jobs. */
-  if (DRW_state_is_image_render()) {
+  if (DRW_context_get()->is_image_render()) {
     if (GPU_material_optimization_status(mat) == GPU_MAT_OPTIMIZATION_QUEUED) {
       /* Remove from pending optimization job queue. */
       DRW_deferred_shader_optimize_remove(mat);
