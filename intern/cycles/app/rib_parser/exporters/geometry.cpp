@@ -393,6 +393,12 @@ void RIBCyclesMesh::separate_face_varying_normals()
                     vp->floats().push_back(vp->floats()[v0 * vp->elem_per_item + i]);
                   }
                 }
+                else if (vp->type == Parameter_Type::Integer)
+                {
+                  for (int i = 0; i < vp->elem_per_item; i++) {
+                    vp->ints().push_back(vp->ints()[v0 * vp->elem_per_item + i]);
+                  }
+                }
                 else {
                   std::cerr << "Missed primvar type for " << vp->name << std::endl;
                 }
