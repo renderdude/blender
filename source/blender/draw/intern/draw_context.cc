@@ -945,7 +945,7 @@ static void drw_callbacks_pre_scene(DRWContext &draw_ctx)
     DRW_submission_end();
   }
 
-  /* State is reset later at the begining of `draw_ctx.engines_draw_scene()`. */
+  /* State is reset later at the beginning of `draw_ctx.engines_draw_scene()`. */
 }
 
 static void drw_callbacks_post_scene(DRWContext &draw_ctx)
@@ -1700,6 +1700,10 @@ void DRW_draw_select_loop(Depsgraph *depsgraph,
   draw_ctx.engines_init_and_sync([&](DupliCacheManager &duplis, ExtractionGraph &extraction) {
     if (use_obedit) {
       FOREACH_OBJECT_IN_MODE_BEGIN (scene, view_layer, v3d, object_type, object_mode, ob_iter) {
+        /* Depsgraph usually does this, but we use a different iterator.
+         * So we have to do it manually. */
+        ob_iter->runtime->select_id = DEG_get_original_object(ob_iter)->runtime->select_id;
+
         blender::draw::ObjectRef ob_ref(ob_iter);
         drw_engines_cache_populate(ob_ref, extraction);
       }
