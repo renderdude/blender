@@ -724,7 +724,7 @@ int main(const int argc, const char **argv)
                 options.session_params.threads :
                 available_cores());
 
-  if (options.session_params.background);
+  if (options.session_params.background)
   {
     session_init();
     options.session->wait();
