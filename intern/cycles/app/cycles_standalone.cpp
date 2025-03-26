@@ -536,7 +536,7 @@ static void options_parse(const int argc, const char **argv)
       .help(
           "This options means that this instance is the rendering side, and should \
              estabilish a connection back to the data server ");
-  ap.arg("--directory", &options.directory)
+  ap.arg("--directory %s", &options.directory)
       .help(
           "If the file to be rendered is not found on the server, look here for it, \
            or, write it in this location if the first time");

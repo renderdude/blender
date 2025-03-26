@@ -27,7 +27,7 @@ struct Options {
 #ifdef WITH_CYCLES_DISTRIBUTED
   bool reverse_connect = false;
   bool is_distributed = false;
-  string directory;
+  string directory = "/tmp";
 #endif
 };
 
