@@ -1924,6 +1924,7 @@ void parse_for_distributed(Ri *target, std::vector<std::string> filenames)
 {
   auto options = target->Option("distributed");
   auto *opt_param = options["class"];
+  auto *remote_dir = options["remote_directory"];
   if (opt_param != nullptr) {
     Distributed *distributed = static_cast<Distributed *>(opt_param->pointers()[0]);
     mpl::tag_t tag_1(10);
@@ -1939,7 +1940,12 @@ void parse_for_distributed(Ri *target, std::vector<std::string> filenames)
         std::cout << "  " << i << " - " << file_name << std::endl;
         size_t chunks;
         distributed->inter_comm_world.recv(chunks, 0);
-        std::ofstream output_file("./example.txt");
+        fs::path path(remote_dir->strings()[0]);
+        fs::path rib_file = path;
+        rib_file /= fs::path(file_name).filename();
+
+        std::cout << "output file: " << rib_file.string() << std::endl;
+        std::ofstream output_file(rib_file.string());
 
         std::vector<char> data;
         data.reserve(chunk_size);

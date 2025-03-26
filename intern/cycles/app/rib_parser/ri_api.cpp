@@ -110,9 +110,16 @@ Ri::Ri(Options &options) : session(options.session.get())
     Parsed_Parameter_Vector params;
     Parsed_Parameter *param;
 
+    // Distributed class pointer
     param = new Parsed_Parameter(Parameter_Type::String, "class", File_Loc());
     param->payload = vector<void *>();
     param->add_pointer(options.session->distributed);
+    params.push_back(param);
+
+    // Remote Directory
+    param = new Parsed_Parameter(Parameter_Type::String, "remote_directory", File_Loc());
+    param->payload = vector<std::string>();
+    param->add_string(options.directory);
     params.push_back(param);
 
     Option("distributed", params, File_Loc());
