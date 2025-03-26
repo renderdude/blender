@@ -102,7 +102,7 @@ static void session_buffer_params()
 #ifdef WITH_CYCLES_DISTRIBUTED
 static void distributed_scene_init()
 {
-  options.scene = options.session->scene;
+  options.scene = options.session->scene.get();
   Ri ri_api(options);
 
   session_buffer_params();
@@ -246,8 +246,16 @@ static void session_init()
   }
 #endif
 
-  /* load scene */
+#ifdef WITH_CYCLES_DISTRIBUTED
+  if (options.is_distributed && options.reverse_connect) {
+    distributed_scene_init();
+  }
+  else {
   scene_init();
+  }
+#else
+  scene_init();
+#endif
 
   /* add pass for output. */
   Pass *pass = options.scene->create_node<Pass>();
