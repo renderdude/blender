@@ -1,3 +1,4 @@
+#include "util/vector.h"
 #ifdef HAVE_MMAP
 #  include <sys/mman.h>
 #  include <sys/stat.h>
@@ -1887,12 +1888,46 @@ void parse_files(Ri *target, std::vector<std::string> filenames)
 }
 
 #ifdef WITH_CYCLES_DISTRIBUTED
+void handle_error(const char *msg)
+{
+  perror(msg);
+  exit(255);
+}
+
+const char *map_file(std::string fname, size_t &length)
+{
+  int fd = open(fname.c_str(), O_RDONLY);
+  if (fd == -1) {
+    handle_error("open");
+  }
+
+  // obtain file size
+  struct stat sb;
+  if (fstat(fd, &sb) == -1) {
+    handle_error("fstat");
+  }
+
+  length = sb.st_size;
+
+  const char *addr = static_cast<const char *>(mmap(NULL, length, PROT_READ, MAP_PRIVATE, fd, 0u));
+  if (addr == MAP_FAILED) {
+    handle_error("mmap");
+  }
+
+  // TODO close fd at some point in time, call munmap(...)
+  return addr;
+}
+
+static constexpr size_t chunk_size = 4 << 20;
+
 void parse_for_distributed(Ri *target, std::vector<std::string> filenames)
 {
   auto options = target->Option("distributed");
   auto *opt_param = options["class"];
   if (opt_param != nullptr) {
     Distributed *distributed = static_cast<Distributed *>(opt_param->pointers()[0]);
+    mpl::tag_t tag_1(10);
+
     if (distributed->is_render_server) {
       std::cout << "Render Server: " << distributed->inter_comm_world.rank() << std::endl;
       size_t num_files;
@@ -1902,13 +1937,50 @@ void parse_for_distributed(Ri *target, std::vector<std::string> filenames)
         std::string file_name;
         distributed->inter_comm_world.recv(file_name, 0);
         std::cout << "  " << i << " - " << file_name << std::endl;
+        size_t chunks;
+        distributed->inter_comm_world.recv(chunks, 0);
+        std::ofstream output_file("./example.txt");
+
+        std::vector<char> data;
+        data.reserve(chunk_size);
+        for (auto i = 0; i < chunks; i++) {
+          mpl::vector_layout<char> vl(chunk_size);
+          distributed->inter_comm_world.recv(data.data(), vl, 0, tag_1);
+          output_file.write(data.data(), chunk_size);
+        }
+        size_t last_chunk;
+        distributed->inter_comm_world.recv(last_chunk, 0);
+        data.resize(last_chunk);
+        mpl::vector_layout<char> vl(last_chunk);
+        distributed->inter_comm_world.recv(data.data(), vl, 0, tag_1);
+        output_file.write(data.data(), last_chunk);
+        output_file.close();
       }
     }
     else {
       // How many files are we sending
       distributed->inter_comm_world.send(filenames.size(), 1);
       for (auto f : filenames) {
+        // Send the filename
         distributed->inter_comm_world.send(f, 1);
+        size_t length;
+        const auto *f_buf = map_file(f, length);
+        size_t chunks = length / chunk_size;
+        // Send the number of pieces
+        distributed->inter_comm_world.send(chunks, 1);
+
+        for (auto i = 0; i < chunks; i++) {
+          std::vector<char> data(&(f_buf[i * chunk_size]), &(f_buf[i * chunk_size]) + chunk_size);
+          mpl::vector_layout<char> vl(chunk_size);
+          // Send `chunk_size` part of the file
+          distributed->inter_comm_world.send(data.data(), vl, 1, tag_1);
+        }
+        size_t last_chunk = length - chunks * chunk_size;
+        std::vector<char> data(&(f_buf[chunks * chunk_size]), &(f_buf[chunks * chunk_size]) + last_chunk);
+        mpl::vector_layout<char> vl(last_chunk);
+        // Send the size of the last chunk followed by the data
+        distributed->inter_comm_world.send(last_chunk, 1);
+        distributed->inter_comm_world.send(data.data(), vl, 1, tag_1);
       }
     }
   }
