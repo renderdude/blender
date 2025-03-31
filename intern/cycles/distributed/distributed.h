@@ -4,6 +4,7 @@
 #include <unistd.h>
 
 #include "mpl/mpl.hpp"
+#include "mpl/tag.hpp"
 
 CCL_NAMESPACE_BEGIN
 
@@ -39,50 +40,24 @@ public:
   ///@{
   mpl::communicator comm_world, inter_comm_world;
   ///@}
-  /// @name Measurement
-  ///@{
-  ///@}
-  /// @name Comparison
-  ///@{
-  ///@}
+
   /// @name Status report
   ///@{
   bool is_render_server;
   ///@}
-  /// @name Status setting
+  /// @name MPI Tags
   ///@{
+  static constexpr int request_checksum = 100;
+  static constexpr int checksum = 101;
+  static constexpr int request_file = 102;
+  static constexpr int requested_file = 103;
   ///@}
-  /// @name Cursor movement
-  ///@{
-  ///@}
-  /// @name Element change
-  ///@{
-  ///@}
-  /// @name Removal
-  ///@{
-  ///@}
-  /// @name Resizing
-  ///@{
-  ///@}
-  /// @name Transformation
-  ///@{
-  ///@}
+
   /// @name Conversion
   ///@{
   std::string to_string() const;
   ///@}
-  /// @name Basic operations
-  ///@{
-  ///@}
-  /// @name Miscellaneous
-  ///@{
-  ///@}
-  /// @name Obsolete
-  ///@{
-  ///@}
-  /// @name Inapplicable
-  ///@{
-  ///@}
+
 
 protected:
   ///@{

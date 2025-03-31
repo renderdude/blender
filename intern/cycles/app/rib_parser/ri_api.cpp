@@ -19,6 +19,7 @@
 
 #include "app/rib_parser/exporters/curves.h"
 #include "app/rib_parser/exporters/geometry.h"
+#include "distributed/distributed.h"
 #include "kernel/types.h"
 #include "scene/camera.h"
 #include "scene/object.h"
@@ -123,6 +124,8 @@ Ri::Ri(Options &options) : session(options.session.get())
     params.push_back(param);
 
     Option("distributed", params, File_Loc());
+
+    init_request_thread();
   }
 #endif
 }
@@ -2000,13 +2003,13 @@ void Ri::Sphere(float radius,
   int n_stacks = 24;
 
   // Allocate memory
-  top_uvs.reserve(n_slices+1);
-  bot_uvs.reserve(n_slices+1);
-  body_uvs.reserve(n_slices*n_stacks);
+  top_uvs.reserve(n_slices + 1);
+  bot_uvs.reserve(n_slices + 1);
+  body_uvs.reserve(n_slices * n_stacks);
   top_ring.reserve(n_slices);
   bot_ring.reserve(n_slices);
-  pts.reserve(n_slices*(n_stacks+1)*3);
-  norms.reserve(n_slices*(n_stacks+1)*3);
+  pts.reserve(n_slices * (n_stacks + 1) * 3);
+  norms.reserve(n_slices * (n_stacks + 1) * 3);
 
   // Create top vertices
   float phi = start_phi;
@@ -2062,9 +2065,9 @@ void Ri::Sphere(float radius,
   std::vector<int> polys;
   std::vector<int> poly_counts;
 
-  uvs.reserve(n_slices*n_stacks*4);
-  polys.reserve(n_slices*n_stacks*4);
-  poly_counts.reserve((n_slices-1)*n_stacks);
+  uvs.reserve(n_slices * n_stacks * 4);
+  polys.reserve(n_slices * n_stacks * 4);
+  poly_counts.reserve((n_slices - 1) * n_stacks);
 
   // Create end cap tris/quads
   for (int i = 0; i < n_slices; ++i) {
@@ -2156,7 +2159,8 @@ void Ri::Sphere(float radius,
     }
   }
 
-  Parsed_Parameter *param = new Parsed_Parameter(Parameter_Type::Integer, "vertices", loc, polys.size());
+  Parsed_Parameter *param = new Parsed_Parameter(
+      Parameter_Type::Integer, "vertices", loc, polys.size());
   for (int i = 0; i < polys.size(); ++i) {
     param->add_int(polys[i]);
   }
@@ -2176,7 +2180,7 @@ void Ri::Sphere(float radius,
   }
   params.push_back(param);
 
-  param = new Parsed_Parameter(Parameter_Type::Point2, "uv", loc, 2*uvs.size());
+  param = new Parsed_Parameter(Parameter_Type::Point2, "uv", loc, 2 * uvs.size());
   param->storage = Container_Type::FaceVarying;
   param->elem_per_item = 2;
   for (int i = 0; i < uvs.size(); ++i) {
@@ -2185,7 +2189,7 @@ void Ri::Sphere(float radius,
   }
   params.push_back(param);
 
-  param = new Parsed_Parameter(Parameter_Type::Integer, "nfaces", loc); 
+  param = new Parsed_Parameter(Parameter_Type::Integer, "nfaces", loc);
   param->add_int(poly_count);
   params.push_back(param);
 
@@ -2526,5 +2530,36 @@ void Ri::Shape(const std::string &name, Parsed_Parameter_Vector params, File_Loc
     shapes.push_back(std::move(entity));
   }
 }
+
+#ifdef WITH_CYCLES_DISTRIBUTED
+void Ri::init_request_thread()
+{
+  auto options = Option("distributed");
+  auto *opt_param = options["class"];
+  if (opt_param != nullptr) {
+    Distributed *distributed = static_cast<Distributed *>(opt_param->pointers()[0]);
+    auto create = [this](Distributed *distributed) {
+      bool done = false;
+      do {
+        auto status = distributed->inter_comm_world.probe(1, mpl::tag_t::any());
+        switch (static_cast<int>(status.tag())) {
+          case Distributed::request_checksum: {
+            break;
+          }
+          case Distributed::request_file: {
+            break;
+          }
+          default: {
+            std::cerr << "Unknown message of type: " << static_cast<int>(status.tag())
+                      << std::endl;
+          }
+        }
+      } while (!done);
+      return true;
+    };
+    _remote_request_job = run_async(create, distributed);
+  }
+}
+#endif
 
 CCL_NAMESPACE_END

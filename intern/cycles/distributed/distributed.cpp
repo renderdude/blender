@@ -9,6 +9,7 @@ CCL_NAMESPACE_BEGIN
 
 Distributed::Distributed(bool reverse_connect)
     : comm_world{mpl::environment::comm_world()}, is_render_server(reverse_connect)
+
 {
   char hostname[256];
   if (gethostname(hostname, 256)) {

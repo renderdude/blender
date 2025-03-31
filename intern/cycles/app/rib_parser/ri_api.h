@@ -396,6 +396,10 @@ class Ri {
   void Shape(const std::string &name, Parsed_Parameter_Vector params, File_Loc loc);
   ///@}
 
+#ifdef WITH_CYCLES_DISTRIBUTED
+  void init_request_thread();
+#endif
+
   RIB_State _rib_state;
   std::string _shader_id;
 
@@ -442,6 +446,7 @@ class Ri {
   std::map<std::string, Async_Job<RIBCyclesMesh*> *> _mesh_definition_jobs;
   std::map<std::string, Async_Job<RIBCyclesCurves*> *> _curve_definition_jobs;
   std::vector<Async_Job<bool> *> _instance_use_jobs;
+  Async_Job<bool>* _remote_request_job;
 };
 
 #define VERIFY_OPTIONS(func) \
