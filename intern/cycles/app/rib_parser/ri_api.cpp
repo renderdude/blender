@@ -19,7 +19,9 @@
 
 #include "app/rib_parser/exporters/curves.h"
 #include "app/rib_parser/exporters/geometry.h"
+#ifdef WITH_CYCLES_DISTRIBUTED
 #include "distributed/distributed.h"
+#endif
 #include "kernel/types.h"
 #include "scene/camera.h"
 #include "scene/object.h"
