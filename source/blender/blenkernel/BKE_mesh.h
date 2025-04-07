@@ -205,10 +205,6 @@ void BKE_mesh_nomain_to_meshkey(Mesh *mesh_src, Mesh *mesh_dst, KeyBlock *kb);
 
 /* Vertex level transformations & checks (no evaluated mesh). */
 
-/* basic vertex data functions */
-void BKE_mesh_transform(Mesh *mesh, const float mat[4][4], bool do_keys);
-void BKE_mesh_translate(Mesh *mesh, const float offset[3], bool do_keys);
-
 void BKE_mesh_tessface_clear(Mesh *mesh);
 
 void BKE_mesh_mselect_clear(Mesh *mesh);
@@ -353,18 +349,6 @@ void BKE_lnor_space_custom_data_to_normal(const MLoopNorSpace *lnor_space,
 void BKE_lnor_space_custom_normal_to_data(const MLoopNorSpace *lnor_space,
                                           const float custom_lnor[3],
                                           short r_clnor_data[2]);
-
-/**
- * Computes average per-vertex normals from given custom loop normals.
- *
- * \param clnors: The computed custom loop normals.
- * \param r_vert_clnors: The (already allocated) array where to store averaged per-vertex normals.
- */
-void BKE_mesh_normals_loop_to_vertex(int numVerts,
-                                     const int *corner_verts,
-                                     int numLoops,
-                                     const float (*clnors)[3],
-                                     float (*r_vert_clnors)[3]);
 
 /**
  * High-level custom normals functions.

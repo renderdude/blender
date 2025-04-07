@@ -736,6 +736,29 @@ typedef struct RenderData {
    */
   float xasp, yasp;
 
+  /**
+   * Pixels per meter (factor of PPM base).
+   * The final calculated PPM is stored as a pair of doubles,
+   * taking the render aspect into support separate X/Y density.
+   * Editing the final PPM directly isn't practical as common DPI
+   * values often result the fractional part having many decimal places.
+   * So expose the factor & base, where the base is used to set the "preset" in the GUI,
+   * (Inch CM, MM... etc).
+   *
+   * Once calculated the final PPM is stored in the #ImBuf & #RenderResult
+   * which are saved/loaded through #ImBuf API's or multi-layer EXR images
+   * in the case of the render-result.
+   *
+   * Note that storing the X/Y density means it's possible know the aspect
+   * used to render the image which may be useful.
+   */
+  float ppm_factor;
+  /**
+   * Pixels per meter base (0.0254 for DPI), a multiplier for `ppm_factor`.
+   * Used to implement "presets".
+   */
+  float ppm_base;
+
   float frs_sec_base;
 
   /**
@@ -830,9 +853,14 @@ typedef struct RenderData {
   /** Precision used by the GPU execution of the compositor tree. */
   int compositor_precision; /* eCompositorPrecision */
 
+  /** Device to use for denoise nodes in the compositor. */
+  int compositor_denoise_device; /* eCompositorDenoiseDevice */
+
   /** Global configuration for denoise compositor nodes. */
   int compositor_denoise_preview_quality; /* eCompositorDenoiseQaulity */
   int compositor_denoise_final_quality;   /* eCompositorDenoiseQaulity */
+
+  char _pad6[4];
 } RenderData;
 
 /** #RenderData::quality_flag */
@@ -864,6 +892,13 @@ typedef enum eCompositorPrecision {
   SCE_COMPOSITOR_PRECISION_AUTO = 0,
   SCE_COMPOSITOR_PRECISION_FULL = 1,
 } eCompositorPrecision;
+
+/** #RenderData::compositor_denoise_device */
+typedef enum eCompositorDenoiseDevice {
+  SCE_COMPOSITOR_DENOISE_DEVICE_AUTO = 0,
+  SCE_COMPOSITOR_DENOISE_DEVICE_CPU = 1,
+  SCE_COMPOSITOR_DENOISE_DEVICE_GPU = 2,
+} eCompositorDenoiseDevice;
 
 /** #RenderData::compositor_denoise_preview_quality */
 /** #RenderData::compositor_denoise_final_quality */
@@ -1966,7 +2001,9 @@ typedef struct SceneEEVEE {
 
 typedef struct SceneGpencil {
   float smaa_threshold;
-  char _pad[4];
+  float smaa_threshold_render;
+  int aa_samples;
+  char _pad0[4];
 } SceneGpencil;
 
 typedef struct SceneHydra {

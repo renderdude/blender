@@ -600,6 +600,7 @@ struct SocketUsageInferencer {
       all_socket_values_.add_new(socket, nullptr);
       return;
     }
+    group->ensure_topology_cache();
     if (group->has_available_link_cycle()) {
       all_socket_values_.add_new(socket, nullptr);
       return;
@@ -1092,7 +1093,7 @@ void infer_group_interface_inputs_usage(const bNodeTree &group,
 }
 
 void infer_group_interface_inputs_usage(const bNodeTree &group,
-                                        const IDProperty *properties,
+                                        const PropertiesVectorSet &properties,
                                         MutableSpan<bool> r_input_usages)
 {
   const int inputs_num = group.interface_inputs().size();

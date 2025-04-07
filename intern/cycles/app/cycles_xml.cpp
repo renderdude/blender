@@ -184,10 +184,10 @@ static void xml_read_camera(XMLReadState &state, const xml_node node)
   xml_read_int(&height, node, "height");
 
   if (width > 0) {
-    cam->set_full_width(width);
+  cam->set_full_width(width);
   }
   if (height > 0) {
-    cam->set_full_height(height);
+  cam->set_full_height(height);
   }
 
   xml_read_node(state, cam, node);
@@ -634,9 +634,21 @@ static void xml_read_mesh(const XMLReadState &state, const xml_node node)
 
 static void xml_read_light(XMLReadState &state, const xml_node node)
 {
-  Light *light = state.scene->create_node<Light>();
+  Scene *scene = state.scene;
 
-  //light->set_shader(state.shader);
+  /* Create light. */
+  Light *light = scene->create_node<Light>();
+
+  array<Node *> used_shaders;
+  used_shaders.push_back_slow(state.shader);
+  light->set_used_shaders(used_shaders);
+
+  /* Create object. */
+  Object *object = scene->create_node<Object>();
+  object->set_tfm(state.tfm);
+  object->set_visibility(PATH_RAY_ALL_VISIBILITY & ~PATH_RAY_CAMERA);
+  object->set_geometry(light);
+
   xml_read_node(state, light, node);
 }
 

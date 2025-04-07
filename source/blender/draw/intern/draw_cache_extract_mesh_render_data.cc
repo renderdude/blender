@@ -451,6 +451,15 @@ static bke::MeshNormalDomain bmesh_normals_domain(BMesh *bm)
     return bke::MeshNormalDomain::Point;
   }
 
+  if (CustomData_has_layer_named(&bm->vdata, CD_PROP_FLOAT3, "custom_normal")) {
+    return bke::MeshNormalDomain::Point;
+  }
+  if (CustomData_has_layer_named(&bm->pdata, CD_PROP_FLOAT3, "custom_normal")) {
+    return bke::MeshNormalDomain::Face;
+  }
+  if (CustomData_has_layer_named(&bm->ldata, CD_PROP_FLOAT3, "custom_normal")) {
+    return bke::MeshNormalDomain::Corner;
+  }
   if (CustomData_has_layer_named(&bm->ldata, CD_PROP_INT16_2D, "custom_normal")) {
     return bke::MeshNormalDomain::Corner;
   }
@@ -486,6 +495,13 @@ void mesh_render_data_update_corner_normals(MeshRenderData &mr)
     mr.corner_normals = mr.mesh->corner_normals();
   }
   else {
+    if (mr.bm_free_normal_offset_vert != -1 || mr.bm_free_normal_offset_face != -1 ||
+        mr.bm_free_normal_offset_corner != -1)
+    {
+      /* If there are free custom normals they should be used directly. */
+      mr.bm_loop_normals = {};
+      return;
+    }
     mr.bm_loop_normals.reinitialize(mr.corners_num);
     const int clnors_offset = CustomData_get_offset_named(
         &mr.bm->ldata, CD_PROP_INT16_2D, "custom_normal");
@@ -522,22 +538,18 @@ static void retrieve_active_attribute_names(MeshRenderData &mr,
   mr.default_color_name = mesh_final.default_color_attribute;
 }
 
-std::unique_ptr<MeshRenderData> mesh_render_data_create(Object &object,
-                                                        Mesh &mesh,
-                                                        const bool is_editmode,
-                                                        const bool is_paint_mode,
-                                                        const float4x4 &object_to_world,
-                                                        const bool do_final,
-                                                        const bool do_uvedit,
-                                                        const bool use_hide,
-                                                        const ToolSettings *ts)
+MeshRenderData mesh_render_data_create(Object &object,
+                                       Mesh &mesh,
+                                       const bool is_editmode,
+                                       const bool is_paint_mode,
+                                       const bool do_final,
+                                       const bool do_uvedit,
+                                       const bool use_hide,
+                                       const ToolSettings *ts)
 {
-  std::unique_ptr<MeshRenderData> mr_ptr = std::make_unique<MeshRenderData>();
-  MeshRenderData &mr = *mr_ptr;
+  MeshRenderData mr{};
   mr.toolsettings = ts;
   mr.materials_num = BKE_object_material_used_with_fallback_eval(object);
-
-  mr.object_to_world = object_to_world;
 
   mr.use_hide = use_hide;
 
@@ -553,11 +565,22 @@ std::unique_ptr<MeshRenderData> mesh_render_data_create(Object &object,
     /* If there is no distinct cage, hide unmapped edges that can't be selected. */
     mr.hide_unmapped_edges = !do_final || &mesh == eval_cage;
 
+    mr.bm_free_normal_offset_vert = CustomData_get_offset_named(
+        &mr.bm->vdata, CD_PROP_FLOAT3, "custom_normal");
+    mr.bm_free_normal_offset_face = CustomData_get_offset_named(
+        &mr.bm->pdata, CD_PROP_FLOAT3, "custom_normal");
+    mr.bm_free_normal_offset_corner = CustomData_get_offset_named(
+        &mr.bm->ldata, CD_PROP_FLOAT3, "custom_normal");
+
     if (bke::EditMeshData *emd = mr.edit_data) {
       if (!emd->vert_positions.is_empty()) {
         mr.bm_vert_coords = mr.edit_data->vert_positions;
-        mr.bm_vert_normals = BKE_editmesh_cache_ensure_vert_normals(*mr.edit_bmesh, *emd);
-        mr.bm_face_normals = BKE_editmesh_cache_ensure_face_normals(*mr.edit_bmesh, *emd);
+        if (mr.bm_free_normal_offset_vert == -1) {
+          mr.bm_vert_normals = BKE_editmesh_cache_ensure_vert_normals(*mr.edit_bmesh, *emd);
+        }
+        if (mr.bm_free_normal_offset_face == -1) {
+          mr.bm_face_normals = BKE_editmesh_cache_ensure_face_normals(*mr.edit_bmesh, *emd);
+        }
       }
     }
 
@@ -683,7 +706,7 @@ std::unique_ptr<MeshRenderData> mesh_render_data_create(Object &object,
 
   retrieve_active_attribute_names(mr, object, *mr.mesh);
 
-  return mr_ptr;
+  return mr;
 }
 
 /** \} */

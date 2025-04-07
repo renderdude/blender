@@ -274,12 +274,16 @@ static void direction_to_equirect(float r[2], const float dir[3])
   r[1] = (acosf(dir[2] / 1.0) - M_PI) / -M_PI;
 }
 
+namespace {
+
 struct MultilayerConvertContext {
   int num_diffuse_channels;
   float *diffuse_pass;
   int num_specular_channels;
   float *specular_pass;
 };
+
+}  // namespace
 
 static void *studiolight_multilayer_addview(void * /*base*/, const char * /*view_name*/)
 {
@@ -346,7 +350,7 @@ static void studiolight_multilayer_addpass(void *base,
 static void studiolight_load_equirect_image(StudioLight *sl)
 {
   if (sl->flag & STUDIOLIGHT_EXTERNAL_FILE) {
-    ImBuf *ibuf = IMB_loadiffname(sl->filepath, IB_multilayer | IB_alphamode_ignore, nullptr);
+    ImBuf *ibuf = IMB_load_image_from_filepath(sl->filepath, IB_multilayer | IB_alphamode_ignore);
     ImBuf *specular_ibuf = nullptr;
     ImBuf *diffuse_ibuf = nullptr;
     const bool failed = (ibuf == nullptr);

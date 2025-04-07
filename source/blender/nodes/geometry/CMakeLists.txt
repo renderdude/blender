@@ -31,7 +31,10 @@ set(SRC
   nodes/node_geo_blur_attribute.cc
   nodes/node_geo_boolean.cc
   nodes/node_geo_bounding_box.cc
+  nodes/node_geo_camera_info.cc
+  nodes/node_geo_closure.cc
   nodes/node_geo_collection_info.cc
+  nodes/node_geo_combine_bundle.cc
   nodes/node_geo_common.cc
   nodes/node_geo_convex_hull.cc
   nodes/node_geo_curve_endpoint_selection.cc
@@ -72,6 +75,7 @@ set(SRC
   nodes/node_geo_edge_split.cc
   nodes/node_geo_edges_to_face_groups.cc
   nodes/node_geo_evaluate_at_index.cc
+  nodes/node_geo_evaluate_closure.cc
   nodes/node_geo_evaluate_on_domain.cc
   nodes/node_geo_extrude_mesh.cc
   nodes/node_geo_flip_faces.cc
@@ -183,6 +187,7 @@ set(SRC
   nodes/node_geo_scale_instances.cc
   nodes/node_geo_sdf_grid_boolean.cc
   nodes/node_geo_self_object.cc
+  nodes/node_geo_separate_bundle.cc
   nodes/node_geo_separate_components.cc
   nodes/node_geo_separate_geometry.cc
   nodes/node_geo_set_curve_handles.cc
@@ -190,10 +195,12 @@ set(SRC
   nodes/node_geo_set_curve_radius.cc
   nodes/node_geo_set_curve_tilt.cc
   nodes/node_geo_set_geometry_name.cc
+  nodes/node_geo_set_grease_pencil_color.cc
   nodes/node_geo_set_id.cc
   nodes/node_geo_set_instance_transform.cc
   nodes/node_geo_set_material.cc
   nodes/node_geo_set_material_index.cc
+  nodes/node_geo_set_mesh_normal.cc
   nodes/node_geo_set_point_radius.cc
   nodes/node_geo_set_position.cc
   nodes/node_geo_set_shade_smooth.cc

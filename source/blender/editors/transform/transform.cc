@@ -1369,6 +1369,9 @@ wmOperatorStatus transformEvent(TransInfo *t, wmOperator *op, const wmEvent *eve
           t->redraw |= TREDRAW_HARD;
         }
         break;
+      default: {
+        break;
+      }
     }
 
     /* Confirm transform if launch key is released after mouse move. */
@@ -1395,7 +1398,7 @@ wmOperatorStatus transformEvent(TransInfo *t, wmOperator *op, const wmEvent *eve
      * the region twice doesn't add any overhead. */
     WM_window_status_area_tag_redraw(CTX_wm_window(t->context));
 
-    if (t->helpline != HLP_ERROR && t->helpline != HLP_ERROR_DASH) {
+    if (!ELEM(t->helpline, HLP_ERROR, HLP_ERROR_DASH)) {
       ED_workspace_status_text(t->context, nullptr);
     }
   }
@@ -1995,7 +1998,8 @@ bool initTransform(bContext *C, TransInfo *t, wmOperator *op, const wmEvent *eve
               (ELEM(kmi->type, EVT_LEFTSHIFTKEY, EVT_RIGHTSHIFTKEY) &&
                (event->modifier & KM_SHIFT)) ||
               (ELEM(kmi->type, EVT_LEFTALTKEY, EVT_RIGHTALTKEY) && (event->modifier & KM_ALT)) ||
-              ((kmi->type == EVT_OSKEY) && (event->modifier & KM_OSKEY)))
+              ((kmi->type == EVT_OSKEY) && (event->modifier & KM_OSKEY)) ||
+              ((kmi->type == EVT_HYPER) && (event->modifier & KM_HYPER)))
           {
             t->modifiers &= ~MOD_NODE_ATTACH;
           }

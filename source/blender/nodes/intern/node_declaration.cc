@@ -6,6 +6,7 @@
 #include "NOD_socket_declarations.hh"
 #include "NOD_socket_declarations_geometry.hh"
 
+#include "BLI_assert.h"
 #include "BLI_utildefines.h"
 
 #include "BKE_geometry_fields.hh"
@@ -37,7 +38,7 @@ void build_node_declaration(const bke::bNodeType &typeinfo,
 void NodeDeclarationBuilder::build_remaining_anonymous_attribute_relations()
 {
   auto is_data_socket_decl = [](const SocketDeclaration *socket_decl) {
-    return dynamic_cast<const decl::Geometry *>(socket_decl);
+    return ELEM(socket_decl->socket_type, SOCK_GEOMETRY, SOCK_BUNDLE, SOCK_CLOSURE);
   };
 
   Vector<int> geometry_inputs;
@@ -352,6 +353,12 @@ static bool socket_type_to_static_decl_type(const eNodeSocketDatatype socket_typ
       return true;
     case SOCK_MENU:
       fn(TypeTag<decl::Menu>());
+      return true;
+    case SOCK_BUNDLE:
+      fn(TypeTag<decl::Bundle>());
+      return true;
+    case SOCK_CLOSURE:
+      fn(TypeTag<decl::Closure>());
       return true;
     default:
       return false;
@@ -723,6 +730,7 @@ BaseSocketDeclarationBuilder &BaseSocketDeclarationBuilder::compositor_realizati
 BaseSocketDeclarationBuilder &BaseSocketDeclarationBuilder::compositor_domain_priority(
     int priority)
 {
+  BLI_assert(priority >= 0);
   decl_base_->compositor_domain_priority_ = priority;
   return *this;
 }

@@ -100,6 +100,8 @@
 
 #include "BLT_translation.hh"
 
+#include "RNA_access.hh"
+
 #include "BLO_read_write.hh"
 #include "BLO_readfile.hh"
 
@@ -131,6 +133,34 @@ static void version_fcurve_noise_modifier(FCurve &fcurve)
     data->lacunarity = 2.0f;
     data->roughness = 0.5f;
     data->legacy_noise = true;
+  }
+}
+
+static void version_fix_fcurve_noise_offset(FCurve &fcurve)
+{
+  LISTBASE_FOREACH (FModifier *, fcurve_modifier, &fcurve.modifiers) {
+    if (fcurve_modifier->type != FMODIFIER_TYPE_NOISE) {
+      continue;
+    }
+    FMod_Noise *data = static_cast<FMod_Noise *>(fcurve_modifier->data);
+    if (data->legacy_noise) {
+      /* We don't want to modify anything if the noise is set to legacy, because the issue only
+       * occurred on the new style noise. */
+      continue;
+    }
+    data->offset *= data->size;
+  }
+}
+
+static void nlastrips_apply_fcurve_versioning(ListBase &strips)
+{
+  LISTBASE_FOREACH (NlaStrip *, strip, &strips) {
+    LISTBASE_FOREACH (FCurve *, fcurve, &strip->fcurves) {
+      version_fix_fcurve_noise_offset(*fcurve);
+    }
+
+    /* Check sub-strips (if meta-strips). */
+    nlastrips_apply_fcurve_versioning(strip->strips);
   }
 }
 
@@ -1292,6 +1322,21 @@ static void do_version_color_to_float_conversion(bNodeTree *node_tree)
   }
 }
 
+static void do_version_bump_filter_width(bNodeTree *node_tree)
+{
+  LISTBASE_FOREACH_MUTABLE (bNode *, node, &node_tree->nodes) {
+    if (node->type_legacy != SH_NODE_BUMP) {
+      continue;
+    }
+
+    bNodeSocket *filter_width_input = blender::bke::node_find_socket(
+        *node, SOCK_IN, "Filter Width");
+    if (filter_width_input) {
+      *version_cycles_node_socket_float_value(filter_width_input) = 1.0f;
+    }
+  }
+}
+
 /* The compositor Value, Color Ramp, Mix Color, Map Range, Map Value, Math, Combine XYZ, Separate
  * XYZ, and Vector Curves nodes are now deprecated and should be replaced by their generic Shader
  * node counterpart. */
@@ -1686,6 +1731,28 @@ static void do_version_convert_to_generic_nodes_after_linking(Main *bmain,
   }
 }
 
+/* A new suppress boolean input was added that either enables suppression or disabled it.
+ * Previously, suppression was disabled when the maximum was zero. So we enable suppression for non
+ * zero or linked maximum input. */
+static void do_version_new_glare_suppress_input(bNodeTree *node_tree)
+{
+  LISTBASE_FOREACH (bNode *, node, &node_tree->nodes) {
+    if (node->type_legacy != CMP_NODE_GLARE) {
+      continue;
+    }
+
+    bNodeSocket *suppress_input = blender::bke::node_find_socket(
+        *node, SOCK_IN, "Suppress Highlights");
+    bNodeSocket *maximum_input = blender::bke::node_find_socket(
+        *node, SOCK_IN, "Maximum Highlights");
+
+    const float maximum = maximum_input->default_value_typed<bNodeSocketValueFloat>()->value;
+    if (version_node_socket_is_used(maximum_input) || maximum != 0.0) {
+      suppress_input->default_value_typed<bNodeSocketValueBoolean>()->value = true;
+    }
+  }
+}
+
 static void do_version_viewer_shortcut(bNodeTree *node_tree)
 {
   LISTBASE_FOREACH_MUTABLE (bNode *, node, &node_tree->nodes) {
@@ -2036,6 +2103,9 @@ void do_versions_after_linking_400(FileData *fd, Main *bmain)
       if (ntree->type == NTREE_COMPOSIT) {
         do_version_color_to_float_conversion(ntree);
       }
+      else if (ntree->type == NTREE_SHADER) {
+        do_version_bump_filter_width(ntree);
+      }
     }
     FOREACH_NODETREE_END;
   }
@@ -2047,6 +2117,68 @@ void do_versions_after_linking_400(FileData *fd, Main *bmain)
       }
     }
     FOREACH_NODETREE_END;
+  }
+
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 405, 12)) {
+    version_node_socket_index_animdata(bmain, NTREE_COMPOSIT, CMP_NODE_GLARE, 3, 1, 14);
+    FOREACH_NODETREE_BEGIN (bmain, ntree, id) {
+      if (ntree->type == NTREE_COMPOSIT) {
+        do_version_new_glare_suppress_input(ntree);
+      }
+    }
+    FOREACH_NODETREE_END;
+  }
+
+  /* For each F-Curve, set the F-Curve flags based on the property type it animates. This is to
+   * correct F-Curves created while the bug (#136347) was in active use. Since this bug did not
+   * appear before 4.4, and this versioning code has a bit of a performance impact (going over all
+   * F-Curves of all Actions, and resolving them all to their RNA properties), it will be skipped
+   * if the blend file is old enough to not be affected. */
+  if (MAIN_VERSION_FILE_ATLEAST(bmain, 404, 0) && !MAIN_VERSION_FILE_ATLEAST(bmain, 405, 13)) {
+    LISTBASE_FOREACH (bAction *, dna_action, &bmain->actions) {
+      blender::animrig::Action &action = dna_action->wrap();
+      for (const blender::animrig::Slot *slot : action.slots()) {
+        blender::Span<ID *> slot_users = slot->users(*bmain);
+        if (slot_users.is_empty()) {
+          /* If nothing is using this slot, the RNA paths cannot be resolved, and so there
+           * is no way to find the animated property type. */
+          continue;
+        }
+        blender::animrig::foreach_fcurve_in_action_slot(action, slot->handle, [&](FCurve &fcurve) {
+          /* Loop over all slot users, because when the slot is shared, not all F-Curves may
+           * resolve on all users. For example, a custom property might only exist on a subset of
+           * the users.*/
+          for (ID *slot_user : slot_users) {
+            PointerRNA slot_user_ptr = RNA_id_pointer_create(slot_user);
+            PointerRNA ptr;
+            PropertyRNA *prop;
+            if (!RNA_path_resolve_property(&slot_user_ptr, fcurve.rna_path, &ptr, &prop)) {
+              continue;
+            }
+
+            blender::animrig::update_autoflags_fcurve_direct(&fcurve, RNA_property_type(prop));
+            break;
+          }
+        });
+      }
+    }
+  }
+
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 405, 14)) {
+    LISTBASE_FOREACH (bAction *, dna_action, &bmain->actions) {
+      blender::animrig::Action &action = dna_action->wrap();
+      blender::animrig::foreach_fcurve_in_action(
+          action, [&](FCurve &fcurve) { version_fix_fcurve_noise_offset(fcurve); });
+    }
+
+    BKE_animdata_main_cb(bmain, [](ID * /* id */, AnimData *adt) {
+      LISTBASE_FOREACH (FCurve *, fcurve, &adt->drivers) {
+        version_fix_fcurve_noise_offset(*fcurve);
+      }
+      LISTBASE_FOREACH (NlaTrack *, track, &adt->nla_tracks) {
+        nlastrips_apply_fcurve_versioning(track->strips);
+      }
+    });
   }
 
   /**
@@ -4299,6 +4431,43 @@ static void asset_browser_add_list_view(Main *bmain)
   }
 }
 
+static void version_show_texpaint_to_show_uv(Main *bmain)
+{
+  LISTBASE_FOREACH (bScreen *, screen, &bmain->screens) {
+    LISTBASE_FOREACH (ScrArea *, area, &screen->areabase) {
+      LISTBASE_FOREACH (SpaceLink *, sl, &area->spacedata) {
+        if (sl->spacetype == SPACE_IMAGE) {
+          SpaceImage *sima = reinterpret_cast<SpaceImage *>(sl);
+          if (sima->flag & SI_NO_DRAW_TEXPAINT) {
+            sima->flag |= SI_NO_DRAW_UV_GUIDE;
+          }
+        }
+      }
+    }
+  }
+}
+
+static void version_set_uv_face_overlay_defaults(Main *bmain)
+{
+  LISTBASE_FOREACH (bScreen *, screen, &bmain->screens) {
+    LISTBASE_FOREACH (ScrArea *, area, &screen->areabase) {
+      LISTBASE_FOREACH (SpaceLink *, sl, &area->spacedata) {
+        if (sl->spacetype == SPACE_IMAGE) {
+          SpaceImage *sima = reinterpret_cast<SpaceImage *>(sl);
+          /* Remove ID Code from screen name */
+          const char *workspace_name = screen->id.name + 2;
+          /* Don't set uv_face_opacity for Texture Paint or Shading since these are workspaces
+           * where it's important to have unobstructed view of the Image Editor to see Image
+           * Textures. UV Editing is the only other default workspace with an Image Editor.*/
+          if (STREQ(workspace_name, "UV Editing")) {
+            sima->uv_face_opacity = 1.0f;
+          }
+        }
+      }
+    }
+  }
+}
+
 void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
 {
   if (!MAIN_VERSION_FILE_ATLEAST(bmain, 400, 1)) {
@@ -6482,6 +6651,39 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
     }
   }
 
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 405, 15)) {
+    FOREACH_NODETREE_BEGIN (bmain, ntree, id) {
+      if (ntree->type != NTREE_COMPOSIT) {
+        continue;
+      }
+      LISTBASE_FOREACH (bNode *, node, &ntree->nodes) {
+        if (node->type_legacy != CMP_NODE_SCALE) {
+          continue;
+        }
+        if (node->storage != nullptr) {
+          continue;
+        }
+        NodeScaleData *data = MEM_callocN<NodeScaleData>(__func__);
+        data->interpolation = CMP_NODE_INTERPOLATION_BILINEAR;
+        node->storage = data;
+      }
+    }
+    FOREACH_NODETREE_END;
+  }
+
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 405, 16)) {
+    LISTBASE_FOREACH (Scene *, scene, &bmain->scenes) {
+      scene->grease_pencil_settings.smaa_threshold_render =
+          scene->grease_pencil_settings.smaa_threshold;
+      scene->grease_pencil_settings.aa_samples = 1;
+    }
+  }
+
+  if (!MAIN_VERSION_FILE_ATLEAST(bmain, 405, 17)) {
+    version_show_texpaint_to_show_uv(bmain);
+    version_set_uv_face_overlay_defaults(bmain);
+  }
+
   /* Always run this versioning; meshes are written with the legacy format which always needs to
    * be converted to the new format on file load. Can be moved to a subversion check in a larger
    * breaking release. */
@@ -6489,6 +6691,16 @@ void blo_do_versions_400(FileData *fd, Library * /*lib*/, Main *bmain)
     blender::bke::mesh_sculpt_mask_to_generic(*mesh);
     blender::bke::mesh_custom_normals_to_generic(*mesh);
     rename_mesh_uv_seam_attribute(*mesh);
+  }
+
+  /* TODO: define version bump. */
+  {
+    LISTBASE_FOREACH (Scene *, scene, &bmain->scenes) {
+      if (scene->r.ppm_factor == 0.0f && scene->r.ppm_base == 0.0f) {
+        scene->r.ppm_factor = 72.0f;
+        scene->r.ppm_base = 0.0254f;
+      }
+    }
   }
 
   /**

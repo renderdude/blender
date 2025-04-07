@@ -2799,9 +2799,7 @@ static void rekey_particle(PEData *data, int pa_index)
   }
 
   /* replace keys */
-  if (pa->hair) {
-    MEM_freeN(pa->hair);
-  }
+  MEM_freeN(pa->hair);
   pa->hair = new_keys;
 
   point->totkey = pa->totkey = data->totrekey;
@@ -3184,9 +3182,7 @@ static void subdivide_particle(PEData *data, int pa_index)
   nekey->co = nkey->co;
   nekey->time = &nkey->time;
 
-  if (pa->hair) {
-    MEM_freeN(pa->hair);
-  }
+  MEM_freeN(pa->hair);
   pa->hair = new_keys;
 
   if (point->keys) {
@@ -5057,6 +5053,9 @@ static wmOperatorStatus brush_edit_modal(bContext *C, wmOperator *op, const wmEv
     case MOUSEMOVE:
       brush_edit_apply_event(C, op, event);
       break;
+    default: {
+      break;
+    }
   }
 
   return OPERATOR_RUNNING_MODAL;

@@ -14,7 +14,7 @@ _StructMetaPropGroup = _types.bpy_struct_meta_idprop
 # Private dummy object use for comparison only.
 _sentinel = object()
 
-# Note that methods extended in C are defined in: `bpy_rna_types_capi.cc`.
+# Note that methods extended in the C-API are defined in: `bpy_rna_types_capi.cc`.
 
 
 class Context(_StructRNA):
@@ -253,6 +253,17 @@ class Object(_types.ID):
         import bpy
         return tuple(scene for scene in bpy.data.scenes
                      if self in scene.objects[:])
+
+    def evaluated_geometry(self):
+        """
+        Get the evaluated geometry set of this evaluated object. This only works for
+        objects that contain geometry data like meshes and curves but not e.g. cameras.
+
+        :return: The evaluated geometry.
+        :rtype: :class:`bpy.types.GeometrySet`
+        """
+        from bpy.types import GeometrySet
+        return GeometrySet.from_evaluated_object(self)
 
 
 class WindowManager(_types.ID):

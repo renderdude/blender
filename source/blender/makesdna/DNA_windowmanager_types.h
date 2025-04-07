@@ -36,6 +36,10 @@ typedef struct WindowManagerRuntimeHandle WindowManagerRuntimeHandle;
 typedef struct WindowRuntimeHandle WindowRuntimeHandle;
 #endif  // __cplusplus
 
+#ifdef hyper /* MSVC defines. */
+#  undef hyper
+#endif
+
 /* Defined here: */
 
 struct wmNotifier;
@@ -378,7 +382,7 @@ typedef struct wmWindow {
 
   /**
    * Input Method Editor data - complex character input (especially for Asian character input)
-   * Currently WIN32 and APPLE, runtime-only data.
+   * Only used when `WITH_INPUT_IME` is defined, runtime-only data.
    */
   const struct wmIMEData *ime_data;
   char ime_data_is_composing;
@@ -459,20 +463,35 @@ typedef struct wmKeyMapItem {
    * Set to #KM_DIRECTION_N, #KM_DIRECTION_S & related values, #KM_NOTHING for any direction.
    */
   int8_t direction;
-  /** `oskey` also known as apple, windows-key or super. */
-  short shift, ctrl, alt, oskey;
+
+  /* Modifier keys:
+   * Valid values:
+   * - #KM_ANY
+   * - #KM_NOTHING
+   * - #KM_MOD_HELD (not #KM_PRESS even though the values match).
+   */
+
+  int8_t shift;
+  int8_t ctrl;
+  int8_t alt;
+  /** Also known as "Apple", "Windows-Key" or "Super. */
+  int8_t oskey;
+  /** See #KM_HYPER for details. */
+  int8_t hyper;
+
+  char _pad0[7];
+
   /** Raw-key modifier. */
   short keymodifier;
 
   /* flag: inactive, expanded */
-  short flag;
+  uint8_t flag;
 
   /* runtime */
   /** Keymap editor. */
-  short maptype;
+  uint8_t maptype;
   /** Unique identifier. Positive for kmi that override builtins, negative otherwise. */
   short id;
-  char _pad[2];
   /**
    * RNA pointer to access properties.
    *
