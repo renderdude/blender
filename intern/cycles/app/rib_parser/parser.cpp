@@ -1,4 +1,5 @@
 #include "util/vector.h"
+#include <numeric>
 #ifdef HAVE_MMAP
 #  include <sys/mman.h>
 #  include <sys/stat.h>

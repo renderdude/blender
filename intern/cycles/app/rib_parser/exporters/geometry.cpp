@@ -15,6 +15,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
+#include <numeric>
 #include <opensubdiv/vtr/types.h>
 #include <string>
 #include <unordered_map>
