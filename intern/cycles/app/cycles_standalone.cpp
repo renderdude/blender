@@ -6,6 +6,7 @@
 #include <filesystem>
 
 #include "app/rib_parser/parallel.h"
+#include "app/rib_parser/ri_api_distributed.h"
 #include "device/device.h"
 #include "scene/camera.h"
 #include "scene/integrator.h"
@@ -103,7 +104,7 @@ static void session_buffer_params()
 static void distributed_scene_init()
 {
   options.scene = options.session->scene.get();
-  Ri ri_api(options);
+  Ri_Distributed ri_api(options);
 
   session_buffer_params();
   ri_api.add_default_search_paths(options.directory);
@@ -251,7 +252,7 @@ static void session_init()
     distributed_scene_init();
   }
   else {
-  scene_init();
+    scene_init();
   }
 #else
   scene_init();
@@ -720,12 +721,10 @@ int main(const int argc, const char **argv)
   path_init();
   options_parse(argc, argv);
 
-  parallel_init(options.session_params.threads != 0 ?
-                options.session_params.threads :
-                available_cores());
+  parallel_init(options.session_params.threads != 0 ? options.session_params.threads :
+                                                      available_cores());
 
-  if (options.session_params.background)
-  {
+  if (options.session_params.background) {
     session_init();
     options.session->wait();
     session_exit();

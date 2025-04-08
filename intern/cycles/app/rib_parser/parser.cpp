@@ -1,3 +1,4 @@
+#include "util/md5.h"
 #include "util/vector.h"
 #include <numeric>
 #ifdef HAVE_MMAP
@@ -1919,6 +1920,25 @@ const char *map_file(std::string fname, size_t &length)
   return addr;
 }
 
+// Returns:
+//   true upon success.
+//   false upon failure, and set the std::error_code & err accordingly.
+bool create_directory_recursive(std::string const & dirName, std::error_code & err)
+{
+    err.clear();
+    if (!std::filesystem::create_directories(dirName, err))
+    {
+        if (std::filesystem::exists(dirName))
+        {
+            // The folder already exists:
+            err.clear();
+            return true;    
+        }
+        return false;
+    }
+    return true;
+}
+
 static constexpr size_t chunk_size = 4 << 20;
 
 void parse_for_distributed(Ri *target, std::vector<std::string> filenames)
@@ -1939,29 +1959,53 @@ void parse_for_distributed(Ri *target, std::vector<std::string> filenames)
         std::string file_name;
         distributed->inter_comm_world.recv(file_name, 0);
         std::cout << "  " << i << " - " << file_name << std::endl;
-        size_t chunks;
-        distributed->inter_comm_world.recv(chunks, 0);
+
         fs::path path(remote_dir->strings()[0]);
         fs::path rib_file = path;
         rib_file /= fs::path(file_name).filename();
-
-        std::cout << "output file: " << rib_file.string() << std::endl;
-        std::ofstream output_file(rib_file.string());
-
-        std::vector<char> data;
-        data.reserve(chunk_size);
-        for (auto i = 0; i < chunks; i++) {
-          mpl::vector_layout<char> vl(chunk_size);
-          distributed->inter_comm_world.recv(data.data(), vl, 0, tag_1);
-          output_file.write(data.data(), chunk_size);
+        bool proceed = true;
+        std::string hash;
+        distributed->inter_comm_world.recv(hash, 0);
+        std::cout << "Remote Hash: " << hash << std::endl;
+        if (fs::exists(rib_file)) {
+          MD5Hash md5;
+          md5.append_file(rib_file.string());
+          std::string md5_hash = md5.get_hex();
+          std::cout << "Remote file exists locally with hash: " << md5_hash << ", " << (hash == md5_hash) << std::endl;
+          if (md5_hash == hash) {
+            proceed = false;
+          }
         }
-        size_t last_chunk;
-        distributed->inter_comm_world.recv(last_chunk, 0);
-        data.resize(last_chunk);
-        mpl::vector_layout<char> vl(last_chunk);
-        distributed->inter_comm_world.recv(data.data(), vl, 0, tag_1);
-        output_file.write(data.data(), last_chunk);
-        output_file.close();
+
+        distributed->inter_comm_world.send(proceed, 0);
+        if (proceed) {
+          size_t chunks;
+          distributed->inter_comm_world.recv(chunks, 0);
+          std::error_code err;
+          std::cout << "output file: " << rib_file.string() << std::endl;
+          if (!create_directory_recursive(path.string(), err)) {
+            std::cout << "Failed creating output directories, error: " << err.message() << std::endl;
+            exit(-1);
+          }
+          std::ofstream output_file(rib_file.string());
+
+          std::cout << output_file.is_open() << std::endl;
+
+          std::vector<char> data;
+          data.reserve(chunk_size);
+          for (auto i = 0; i < chunks; i++) {
+            mpl::vector_layout<char> vl(chunk_size);
+            distributed->inter_comm_world.recv(data.data(), vl, 0, tag_1);
+            output_file.write(data.data(), chunk_size);
+          }
+          size_t last_chunk;
+          distributed->inter_comm_world.recv(last_chunk, 0);
+          data.resize(last_chunk);
+          mpl::vector_layout<char> vl(last_chunk);
+          distributed->inter_comm_world.recv(data.data(), vl, 0, tag_1);
+          output_file.write(data.data(), last_chunk);
+          output_file.close();
+        }
       }
     }
     else {
@@ -1970,24 +2014,33 @@ void parse_for_distributed(Ri *target, std::vector<std::string> filenames)
       for (auto f : filenames) {
         // Send the filename
         distributed->inter_comm_world.send(f, 1);
-        size_t length;
-        const auto *f_buf = map_file(f, length);
-        size_t chunks = length / chunk_size;
-        // Send the number of pieces
-        distributed->inter_comm_world.send(chunks, 1);
+        MD5Hash hash;
+        hash.append_file(f);
+        distributed->inter_comm_world.send(hash.get_hex(), 1);
+        bool proceed;
+        distributed->inter_comm_world.recv(proceed, 1);
+        if (proceed) {
+          size_t length;
+          const auto *f_buf = map_file(f, length);
+          size_t chunks = length / chunk_size;
+          // Send the number of pieces
+          distributed->inter_comm_world.send(chunks, 1);
 
-        for (auto i = 0; i < chunks; i++) {
-          std::vector<char> data(&(f_buf[i * chunk_size]), &(f_buf[i * chunk_size]) + chunk_size);
-          mpl::vector_layout<char> vl(chunk_size);
-          // Send `chunk_size` part of the file
+          for (auto i = 0; i < chunks; i++) {
+            std::vector<char> data(&(f_buf[i * chunk_size]),
+                                   &(f_buf[i * chunk_size]) + chunk_size);
+            mpl::vector_layout<char> vl(chunk_size);
+            // Send `chunk_size` part of the file
+            distributed->inter_comm_world.send(data.data(), vl, 1, tag_1);
+          }
+          size_t last_chunk = length - chunks * chunk_size;
+          std::vector<char> data(&(f_buf[chunks * chunk_size]),
+                                 &(f_buf[chunks * chunk_size]) + last_chunk);
+          mpl::vector_layout<char> vl(last_chunk);
+          // Send the size of the last chunk followed by the data
+          distributed->inter_comm_world.send(last_chunk, 1);
           distributed->inter_comm_world.send(data.data(), vl, 1, tag_1);
         }
-        size_t last_chunk = length - chunks * chunk_size;
-        std::vector<char> data(&(f_buf[chunks * chunk_size]), &(f_buf[chunks * chunk_size]) + last_chunk);
-        mpl::vector_layout<char> vl(last_chunk);
-        // Send the size of the last chunk followed by the data
-        distributed->inter_comm_world.send(last_chunk, 1);
-        distributed->inter_comm_world.send(data.data(), vl, 1, tag_1);
       }
     }
   }
