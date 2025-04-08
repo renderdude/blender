@@ -17,6 +17,12 @@ Distributed::Distributed(bool reverse_connect)
     strcpy(hostname, "UNKNOWN");
   }
 
+  auto threading_mode = mpl::environment::threading_mode();
+  if (threading_mode == mpl::threading_modes::single) {
+    std::cerr << "This application needs an MPI installation that supports threading. Currently, ";
+    std::cerr << "MPI is compiled with MPI_THREAD_SINGLE." << std::endl;
+    exit(-1);
+  }
   std::random_device rd;
   std::mt19937 gen(rd());
   std::uniform_int_distribution<> distrib;
