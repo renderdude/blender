@@ -2000,7 +2000,7 @@ void parse_for_distributed(Ri *target, std::vector<std::string> filenames)
             output_file.write(data.data(), chunk_size);
           }
           size_t last_chunk;
-          distributed->inter_comm_world.recv(last_chunk, 0);
+          distributed->inter_comm_world.recv(last_chunk, 0, dmt::chunk_size);
           data.resize(last_chunk);
           mpl::vector_layout<char> vl(last_chunk);
           distributed->inter_comm_world.recv(data.data(), vl, 0, dmt::chunk_data);
