@@ -1943,21 +1943,22 @@ static constexpr size_t chunk_size = 4 << 20;
 
 void parse_for_distributed(Ri *target, std::vector<std::string> filenames)
 {
+  using dmt = Distributed::message_tags;
+
   auto options = target->Option("distributed");
   auto *opt_param = options["class"];
   auto *remote_dir = options["remote_directory"];
   if (opt_param != nullptr) {
     Distributed *distributed = static_cast<Distributed *>(opt_param->pointers()[0]);
-    mpl::tag_t tag_1(10);
 
     if (distributed->is_render_server) {
       std::cout << "Render Server: " << distributed->inter_comm_world.rank() << std::endl;
       size_t num_files;
-      distributed->inter_comm_world.recv(num_files, 0);
+      distributed->inter_comm_world.recv(num_files, 0, dmt::file_count);
       std::cout << "Receiving " << num_files << " files\n";
       for (int i = 0; i < num_files; i++) {
         std::string file_name;
-        distributed->inter_comm_world.recv(file_name, 0);
+        distributed->inter_comm_world.recv(file_name, 0, dmt::file_name);
         std::cout << "  " << i << " - " << file_name << std::endl;
 
         fs::path path(remote_dir->strings()[0]);
@@ -1965,7 +1966,7 @@ void parse_for_distributed(Ri *target, std::vector<std::string> filenames)
         rib_file /= fs::path(file_name).filename();
         bool proceed = true;
         std::string hash;
-        distributed->inter_comm_world.recv(hash, 0);
+        distributed->inter_comm_world.recv(hash, 0, dmt::rib_checksum);
         std::cout << "Remote Hash: " << hash << std::endl;
         if (fs::exists(rib_file)) {
           MD5Hash md5;
@@ -1977,10 +1978,10 @@ void parse_for_distributed(Ri *target, std::vector<std::string> filenames)
           }
         }
 
-        distributed->inter_comm_world.send(proceed, 0);
+        distributed->inter_comm_world.send(proceed, 0, dmt::request_rib_file);
         if (proceed) {
           size_t chunks;
-          distributed->inter_comm_world.recv(chunks, 0);
+          distributed->inter_comm_world.recv(chunks, 0, dmt::chunk_count);
           std::error_code err;
           std::cout << "output file: " << rib_file.string() << std::endl;
           if (!create_directory_recursive(path.string(), err)) {
@@ -1995,14 +1996,14 @@ void parse_for_distributed(Ri *target, std::vector<std::string> filenames)
           data.reserve(chunk_size);
           for (auto i = 0; i < chunks; i++) {
             mpl::vector_layout<char> vl(chunk_size);
-            distributed->inter_comm_world.recv(data.data(), vl, 0, tag_1);
+            distributed->inter_comm_world.recv(data.data(), vl, 0, dmt::chunk_data);
             output_file.write(data.data(), chunk_size);
           }
           size_t last_chunk;
           distributed->inter_comm_world.recv(last_chunk, 0);
           data.resize(last_chunk);
           mpl::vector_layout<char> vl(last_chunk);
-          distributed->inter_comm_world.recv(data.data(), vl, 0, tag_1);
+          distributed->inter_comm_world.recv(data.data(), vl, 0, dmt::chunk_data);
           output_file.write(data.data(), last_chunk);
           output_file.close();
         }
@@ -2010,36 +2011,36 @@ void parse_for_distributed(Ri *target, std::vector<std::string> filenames)
     }
     else {
       // How many files are we sending
-      distributed->inter_comm_world.send(filenames.size(), 1);
+      distributed->inter_comm_world.send(filenames.size(), 1, dmt::file_count);
       for (auto f : filenames) {
         // Send the filename
-        distributed->inter_comm_world.send(f, 1);
+        distributed->inter_comm_world.send(f, 1, dmt::file_name);
         MD5Hash hash;
         hash.append_file(f);
-        distributed->inter_comm_world.send(hash.get_hex(), 1);
+        distributed->inter_comm_world.send(hash.get_hex(), 1, dmt::rib_checksum);
         bool proceed;
-        distributed->inter_comm_world.recv(proceed, 1);
+        distributed->inter_comm_world.recv(proceed, 1, dmt::request_rib_file);
         if (proceed) {
           size_t length;
           const auto *f_buf = map_file(f, length);
           size_t chunks = length / chunk_size;
           // Send the number of pieces
-          distributed->inter_comm_world.send(chunks, 1);
+          distributed->inter_comm_world.send(chunks, 1, dmt::chunk_count);
 
           for (auto i = 0; i < chunks; i++) {
             std::vector<char> data(&(f_buf[i * chunk_size]),
                                    &(f_buf[i * chunk_size]) + chunk_size);
             mpl::vector_layout<char> vl(chunk_size);
             // Send `chunk_size` part of the file
-            distributed->inter_comm_world.send(data.data(), vl, 1, tag_1);
+            distributed->inter_comm_world.send(data.data(), vl, 1, dmt::chunk_data);
           }
           size_t last_chunk = length - chunks * chunk_size;
           std::vector<char> data(&(f_buf[chunks * chunk_size]),
                                  &(f_buf[chunks * chunk_size]) + last_chunk);
           mpl::vector_layout<char> vl(last_chunk);
           // Send the size of the last chunk followed by the data
-          distributed->inter_comm_world.send(last_chunk, 1);
-          distributed->inter_comm_world.send(data.data(), vl, 1, tag_1);
+          distributed->inter_comm_world.send(last_chunk, 1, dmt::chunk_size);
+          distributed->inter_comm_world.send(data.data(), vl, 1, dmt::chunk_data);
         }
       }
     }

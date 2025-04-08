@@ -2536,6 +2536,7 @@ void Ri::Shape(const std::string &name, Parsed_Parameter_Vector params, File_Loc
 #ifdef WITH_CYCLES_DISTRIBUTED
 void Ri::init_request_thread()
 {
+  using dmt = Distributed::message_tags;
   auto options = Option("distributed");
   auto *opt_param = options["class"];
   if (opt_param != nullptr) {
@@ -2545,10 +2546,15 @@ void Ri::init_request_thread()
       do {
         auto status = distributed->inter_comm_world.probe(1, mpl::tag_t::any());
         switch (static_cast<int>(status.tag())) {
-          case Distributed::request_checksum: {
+          case static_cast<int>(dmt::asset_checksum): {
             break;
           }
-          case Distributed::request_file: {
+          case static_cast<int>(dmt::request_asset_file): {
+            break;
+          }
+          // Messaage tags we can safely ignore
+          case static_cast<int>(dmt::request_rib_file): 
+          case static_cast<int>(dmt::rib_checksum): {
             break;
           }
           default: {

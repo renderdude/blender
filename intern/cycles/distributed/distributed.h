@@ -13,7 +13,7 @@ CCL_NAMESPACE_BEGIN
  */
 
 class Distributed {
-public:
+ public:
   /// @name Initialization
   ///@{
   Distributed(bool reverse_connect);
@@ -47,10 +47,20 @@ public:
   ///@}
   /// @name MPI Tags
   ///@{
-  static constexpr int request_checksum = 100;
-  static constexpr int checksum = 101;
-  static constexpr int request_file = 102;
-  static constexpr int requested_file = 103;
+  enum class message_tags {
+    base_message = 100,
+    asset_checksum,
+    chunk_count,
+    chunk_size,
+    chunk_data,
+    file_count,
+    file_name,
+    request_asset_file,
+    request_asset_checksum,
+    request_rib_file,
+    requested_asset_file,
+    rib_checksum,
+  };
   ///@}
 
   /// @name Conversion
@@ -58,14 +68,13 @@ public:
   std::string to_string() const;
   ///@}
 
-
-protected:
+ protected:
   ///@{
   mpl::inter_communicator *_inter_comm;
   ///@}
 
-private:
+ private:
   /* data */
 
-}; // end of class Distributed
+};  // end of class Distributed
 CCL_NAMESPACE_END
