@@ -292,7 +292,7 @@ template<typename T> class Async_Job : public Parallel_Job {
 
   std::string to_string() const override
   {
-    return string_printf("[ Async_Job started: %s ]", started);
+    return string_printf("[ Async_Job started: %d ]", started);
   }
 
  private:
