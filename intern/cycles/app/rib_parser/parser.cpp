@@ -1923,20 +1923,18 @@ const char *map_file(std::string fname, size_t &length)
 // Returns:
 //   true upon success.
 //   false upon failure, and set the std::error_code & err accordingly.
-bool create_directory_recursive(std::string const & dirName, std::error_code & err)
+bool create_directory_recursive(std::string const &dirName, std::error_code &err)
 {
-    err.clear();
-    if (!std::filesystem::create_directories(dirName, err))
-    {
-        if (std::filesystem::exists(dirName))
-        {
-            // The folder already exists:
-            err.clear();
-            return true;    
-        }
-        return false;
+  err.clear();
+  if (!std::filesystem::create_directories(dirName, err)) {
+    if (std::filesystem::exists(dirName)) {
+      // The folder already exists:
+      err.clear();
+      return true;
     }
-    return true;
+    return false;
+  }
+  return true;
 }
 
 static constexpr size_t chunk_size = 4 << 20;
@@ -1964,6 +1962,8 @@ void parse_for_distributed(Ri *target, std::vector<std::string> filenames)
         fs::path path(remote_dir->strings()[0]);
         fs::path rib_file = path;
         rib_file /= fs::path(file_name).filename();
+        // On the remote side, `filenames' is initially empty
+        filenames.push_back(rib_file.string());
         bool proceed = true;
         std::string hash;
         distributed->inter_comm_world.recv(hash, 0, dmt::rib_checksum);
@@ -1972,7 +1972,8 @@ void parse_for_distributed(Ri *target, std::vector<std::string> filenames)
           MD5Hash md5;
           md5.append_file(rib_file.string());
           std::string md5_hash = md5.get_hex();
-          std::cout << "Remote file exists locally with hash: " << md5_hash << ", " << (hash == md5_hash) << std::endl;
+          std::cout << "Remote file exists locally with hash: " << md5_hash << ", "
+                    << (hash == md5_hash) << std::endl;
           if (md5_hash == hash) {
             proceed = false;
           }
@@ -1985,7 +1986,8 @@ void parse_for_distributed(Ri *target, std::vector<std::string> filenames)
           std::error_code err;
           std::cout << "output file: " << rib_file.string() << std::endl;
           if (!create_directory_recursive(path.string(), err)) {
-            std::cout << "Failed creating output directories, error: " << err.message() << std::endl;
+            std::cout << "Failed creating output directories, error: " << err.message()
+                      << std::endl;
             exit(-1);
           }
           std::ofstream output_file(rib_file.string());
@@ -2044,6 +2046,7 @@ void parse_for_distributed(Ri *target, std::vector<std::string> filenames)
         }
       }
     }
+    parse_files(target, filenames);
   }
 }
 #endif
