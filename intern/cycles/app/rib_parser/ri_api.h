@@ -8,12 +8,12 @@
 #include <vector>
 
 #include "app/cycles_standalone.h"
+#include "error.h"
 #include "exporters/curves.h"
 #include "exporters/geometry.h"
 #include "exporters/materials/materials.h"
-#include "parallel.h"
-#include "error.h"
 #include "intern_cache.h"
+#include "parallel.h"
 #include "param_dict.h"
 #include "parsed_parameter.h"
 #include "scene_entities.h"
@@ -30,9 +30,12 @@ std::vector<std::string> split_string(std::string_view str, char ch);
 // Parser Definition
 class Ri {
  public:
-  Ri(Options& options);
+  Ri(Options &options);
   ~Ri() = default;
   // Ri Interface
+#ifdef WITH_CYCLES_DISTRIBUTED
+  Distributed const* distributed;
+#endif
 
   void adjust_buffer_parameters(BufferParams *buffer);
   void export_to_cycles();
@@ -52,7 +55,8 @@ class Ri {
     return _display_name;
   }
 
-  auto Option(std::string name) {
+  auto Option(std::string name)
+  {
     return _rib_state.options[name];
   }
   /*****************************************************************
@@ -317,7 +321,7 @@ class Ri {
              float thetamax,
              Parsed_Parameter_Vector params,
              File_Loc loc);
-  void transform(float const* transform, File_Loc loc);
+  void transform(float const *transform, File_Loc loc);
   void TransformBegin(File_Loc loc);
   void TransformEnd(File_Loc loc);
   void Translate(float dx, float dy, float dz, File_Loc loc);
@@ -366,7 +370,7 @@ class Ri {
   }
 
   struct Active_Instance_Definition {
-    Active_Instance_Definition(std::string name, File_Loc loc) : entity(name, loc){};
+    Active_Instance_Definition(std::string name, File_Loc loc) : entity(name, loc) {};
 
     std::mutex mutex;
     std::atomic<int> active_imports{1};
@@ -440,13 +444,13 @@ class Ri {
   Parsed_Parameter_Vector *_light_material = nullptr;
   std::vector<float> _crop_window = {0., 1., 0., 1.};
 
-  std::map<std::string, std::map<std::string,RIBCyclesMesh*>> _mesh_elements;
-  std::map<std::string, std::map<std::string,RIBCyclesCurves*>> _curve_elements;
+  std::map<std::string, std::map<std::string, RIBCyclesMesh *>> _mesh_elements;
+  std::map<std::string, std::map<std::string, RIBCyclesCurves *>> _curve_elements;
   std::map<std::string, Async_Job<RIBCyclesMaterials> *> _shader_jobs;
-  std::map<std::string, Async_Job<RIBCyclesMesh*> *> _mesh_definition_jobs;
-  std::map<std::string, Async_Job<RIBCyclesCurves*> *> _curve_definition_jobs;
+  std::map<std::string, Async_Job<RIBCyclesMesh *> *> _mesh_definition_jobs;
+  std::map<std::string, Async_Job<RIBCyclesCurves *> *> _curve_definition_jobs;
   std::vector<Async_Job<bool> *> _instance_use_jobs;
-  Async_Job<bool>* _remote_request_job;
+  Async_Job<bool> *_remote_request_job;
 };
 
 #define VERIFY_OPTIONS(func) \
@@ -456,7 +460,7 @@ class Ri {
     ss << "\" is not allowed"; \
     error_exit(&loc, ss.str()); \
     return; \
-  } 
+  }
 #define VERIFY_WORLD(func) \
   if (current_block == Block_State::Options_Block) { \
     std::stringstream ss; \

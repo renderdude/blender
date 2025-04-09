@@ -119,6 +119,8 @@ Ri::Ri(Options &options) : session(options.session.get())
     param->add_pointer(options.session->distributed);
     params.push_back(param);
 
+    distributed = options.session->distributed;
+
     // Remote Directory
     param = new Parsed_Parameter(Parameter_Type::String, "remote_directory", File_Loc());
     param->payload = vector<std::string>();
