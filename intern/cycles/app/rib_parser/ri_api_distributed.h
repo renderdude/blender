@@ -24,6 +24,10 @@ class Ri_Distributed : public Ri {
 
   /// @name API Overrides
   ///@{
+  void Pattern(const std::string &name,
+               const std::string &handle,
+               Parsed_Parameter_Vector params,
+               File_Loc loc);
   ///@}
 
  protected:

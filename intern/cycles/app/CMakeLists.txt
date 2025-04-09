@@ -116,7 +116,11 @@ cycles_external_libraries_append(LIB)
 
 # Common configuration.
 
-include_directories(${INC} ${CMAKE_SOURCE_DIR}/intern/cycles/distributed/mpl)
+include_directories(${INC})
+if(WITH_CYCLES_DISTRIBUTED)
+  include_directories(${CMAKE_SOURCE_DIR}/intern/cycles/distributed/mpl)
+endif()
+
 include_directories(SYSTEM ${INC_SYS})
 
 # Application build targets
@@ -160,6 +164,10 @@ if(WITH_CYCLES_STANDALONE)
     tev/display_driver.cpp
     tev/display_driver.h
   )
+
+  if(WITH_CYCLES_DISTRIBUTED)
+    list(APPEND SRC rib_parser/ri_api_distributed.cpp rib_parser/ri_api_distributed.h)
+  endif()
 
   if(WITH_CYCLES_STANDALONE_GUI)
     list(APPEND SRC

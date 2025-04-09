@@ -228,10 +228,10 @@ class Ri {
                  const std::string &vwrap,
                  Parsed_Parameter_Vector params,
                  File_Loc loc);
-  void Pattern(const std::string &name,
-               const std::string &handle,
-               Parsed_Parameter_Vector params,
-               File_Loc loc);
+  virtual void Pattern(const std::string &name,
+                       const std::string &handle,
+                       Parsed_Parameter_Vector params,
+                       File_Loc loc);
   void Perspective(float fov, File_Loc loc);
   void PixelFilter(const std::string &name, Parsed_Parameter_Vector params, File_Loc loc);
   void PixelSampleImager(const std::string &name, Parsed_Parameter_Vector params, File_Loc loc);
