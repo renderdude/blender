@@ -4,6 +4,7 @@
 
 #include <cstdio>
 #include <filesystem>
+#include <vector>
 
 #include "app/rib_parser/parallel.h"
 #include "app/rib_parser/ri_api_distributed.h"
@@ -101,22 +102,39 @@ static void session_buffer_params()
 }
 
 #ifdef WITH_CYCLES_DISTRIBUTED
+static std::vector<std::vector<float>> compute_distributed_crop_window(Ri *target)
+{
+  std::vector<float> crop_window = options.crop_window;
+  Distributed const *distributed = target->distributed;
+  int size = distributed->inter_comm_world.size();
+  std::vector<std::vector<float>> result(size);
+  // Partition the window
+  float xwidth = (crop_window[1] - crop_window[0]) / size;
+  for (int i = 0; i < size; ++i) {
+    std::vector<float> cw = {xwidth * i, xwidth * (i + 1), crop_window[2], crop_window[3]};
+    result[i] = cw;
+  }
+
+  return result;
+}
+
 static void distributed_scene_init()
 {
   options.scene = options.session->scene.get();
-  Ri_Distributed ri_api(options);
+  Ri_Distributed *ri_api = new Ri_Distributed(options);
 
   session_buffer_params();
-  ri_api.add_default_search_paths(options.directory);
+  ri_api->add_default_search_paths(options.directory);
 
-  parse_for_distributed(&ri_api, std::vector<std::string>());
+  parse_for_distributed(ri_api, std::vector<std::string>());
 
-  ri_api.CropWindow(options.crop_window[0],
-                    options.crop_window[1],
-                    options.crop_window[2],
-                    options.crop_window[3],
-                    File_Loc());
-  ri_api.export_to_cycles();
+  std::vector<std::vector<float>> crop_window = compute_distributed_crop_window(ri_api);
+
+  for (int i = 0; i < ri_api->distributed->inter_comm_world.size(); ++i) {
+    ri_api->CropWindow(
+        crop_window[i][0], crop_window[i][1], crop_window[i][2], crop_window[i][3], File_Loc());
+  }
+  ri_api->export_to_cycles();
 
   /* Camera width/height override? */
   if (!(options.width == 0 || options.height == 0)) {
@@ -132,7 +150,7 @@ static void distributed_scene_init()
   options.scene->camera->compute_auto_viewplane();
 
   session_buffer_params();
-  ri_api.adjust_buffer_parameters(options.buffer_params);
+  ri_api->adjust_buffer_parameters(options.buffer_params);
 }
 #endif
 
@@ -153,14 +171,18 @@ static void scene_init()
     filenames.push_back(options.filepath);
 #ifdef WITH_CYCLES_DISTRIBUTED
     parse_for_distributed(&ri_api, filenames);
+    std::vector<std::vector<float>> crop_window = compute_distributed_crop_window(&ri_api);
+
+    ri_api.CropWindow(
+        crop_window[0][0], crop_window[0][1], crop_window[0][2], crop_window[0][3], File_Loc());
 #else
     parse_files(&ri_api, filenames);
-#endif
     ri_api.CropWindow(options.crop_window[0],
                       options.crop_window[1],
                       options.crop_window[2],
                       options.crop_window[3],
                       File_Loc());
+#endif
     ri_api.export_to_cycles();
     rib_mode = true;
   }
