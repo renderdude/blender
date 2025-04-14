@@ -130,7 +130,7 @@ static void distributed_scene_init()
 
   std::vector<std::vector<float>> crop_window = compute_distributed_crop_window(ri_api);
 
-  for (int i = 0; i < ri_api->distributed->inter_comm_world.size(); ++i) {
+  for (int i = 1; i < ri_api->distributed->inter_comm_world.size(); ++i) {
     ri_api->CropWindow(
         crop_window[i][0], crop_window[i][1], crop_window[i][2], crop_window[i][3], File_Loc());
   }
