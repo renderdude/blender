@@ -1920,23 +1920,6 @@ const char *map_file(std::string fname, size_t &length)
   return addr;
 }
 
-// Returns:
-//   true upon success.
-//   false upon failure, and set the std::error_code & err accordingly.
-bool create_directory_recursive(std::string const &dirName, std::error_code &err)
-{
-  err.clear();
-  if (!std::filesystem::create_directories(dirName, err)) {
-    if (std::filesystem::exists(dirName)) {
-      // The folder already exists:
-      err.clear();
-      return true;
-    }
-    return false;
-  }
-  return true;
-}
-
 static constexpr size_t chunk_size = 4 << 20;
 
 void parse_for_distributed(Ri *target, std::vector<std::string> filenames)
@@ -1983,13 +1966,8 @@ void parse_for_distributed(Ri *target, std::vector<std::string> filenames)
         if (proceed) {
           size_t chunks;
           distributed->inter_comm_world.recv(chunks, 0, dmt::chunk_count);
-          std::error_code err;
           std::cout << "output file: " << rib_file.string() << std::endl;
-          if (!create_directory_recursive(path.string(), err)) {
-            std::cout << "Failed creating output directories, error: " << err.message()
-                      << std::endl;
-            exit(-1);
-          }
+
           std::ofstream output_file(rib_file.string());
 
           std::cout << output_file.is_open() << std::endl;

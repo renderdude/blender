@@ -118,6 +118,48 @@ static std::vector<std::vector<float>> compute_distributed_crop_window(Ri *targe
   return result;
 }
 
+namespace fs = std::filesystem;
+
+// Returns:
+//   true upon success.
+//   false upon failure, and set the std::error_code & err accordingly.
+static bool create_directory_recursive(std::string const &dirName, std::error_code &err)
+{
+  err.clear();
+  if (!std::filesystem::create_directories(dirName, err)) {
+    if (std::filesystem::exists(dirName)) {
+      // The folder already exists:
+      err.clear();
+      return true;
+    }
+    return false;
+  }
+  return true;
+}
+
+static void create_asset_directories() {
+  std::error_code err;
+  if (!create_directory_recursive(options.directory, err)) {
+    std::cout << "Failed creating output directories, error: " << err.message() << std::endl;
+    exit(-1);
+  }
+
+  for (const auto *dir : {"archive", "display", "procedural", "shader", "texture"}) {
+    fs::path subpath(options.directory);
+    subpath /= dir;
+    err.clear();
+    if (!std::filesystem::create_directories(subpath, err)) {
+      if (std::filesystem::exists(subpath)) {
+        // The folder already exists:
+        err.clear();
+      }
+      std::cerr << "Couldn't create subdirectories in " << options.directory;
+      std::cerr << ", error: " << err.message() << std::endl;
+      exit(-1);
+    }
+  }
+}
+
 static void distributed_scene_init()
 {
   options.scene = options.session->scene.get();
@@ -125,6 +167,8 @@ static void distributed_scene_init()
 
   session_buffer_params();
   ri_api->add_default_search_paths(options.directory);
+
+  create_asset_directories();
 
   parse_for_distributed(ri_api, std::vector<std::string>());
 
