@@ -56,8 +56,8 @@ class Distributed {
     file_count,
     file_name,
     request_asset_file,
-    request_asset_checksum,
     request_rib_file,
+    requested_asset_checksum,
     requested_asset_file,
     rib_checksum,
   };

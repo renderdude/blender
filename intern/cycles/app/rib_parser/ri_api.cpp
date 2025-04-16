@@ -2539,36 +2539,33 @@ void Ri::Shape(const std::string &name, Parsed_Parameter_Vector params, File_Loc
 void Ri::init_request_thread()
 {
   using dmt = Distributed::message_tags;
-  auto options = Option("distributed");
-  auto *opt_param = options["class"];
-  if (opt_param != nullptr) {
-    Distributed *distributed = static_cast<Distributed *>(opt_param->pointers()[0]);
-    auto create = [this](Distributed *distributed) {
-      bool done = false;
-      do {
-        auto status = distributed->inter_comm_world.probe(1, mpl::tag_t::any());
-        switch (static_cast<int>(status.tag())) {
-          case static_cast<int>(dmt::asset_checksum): {
-            break;
-          }
-          case static_cast<int>(dmt::request_asset_file): {
-            break;
-          }
-          // Messaage tags we can safely ignore
-          case static_cast<int>(dmt::request_rib_file): 
-          case static_cast<int>(dmt::rib_checksum): {
-            break;
-          }
-          default: {
-            std::cerr << "Unknown message of type: " << static_cast<int>(status.tag())
-                      << std::endl;
-          }
+
+  auto create = [this]() {
+    bool done = false;
+    do {
+      auto status = distributed->inter_comm_world.probe(1, mpl::tag_t::any());
+      switch (static_cast<int>(status.tag())) {
+        case static_cast<int>(dmt::asset_checksum): {
+          break;
         }
-      } while (!done);
-      return true;
-    };
-    _remote_request_job = run_async(create, distributed);
-  }
+        case static_cast<int>(dmt::request_asset_file): {
+          break;
+        }
+        // Messaage tags we can safely ignore
+        case static_cast<int>(dmt::request_rib_file): 
+        case static_cast<int>(dmt::rib_checksum): {
+          break;
+        }
+        default: {
+          std::cerr << "Unknown message of type: " << static_cast<int>(status.tag())
+                    << std::endl;
+        }
+      }
+    } while (!done);
+    return true;
+  };
+  
+  _remote_request_job = run_async(create);
 }
 #endif
 
